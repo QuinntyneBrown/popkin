@@ -1,0 +1,91 @@
+@startuml
+@@CLASSSKIN@@
+title Class structure — Delete the account
+
+class Person {
+  +Guid Id
+  +string Name
+  +Guid? PhotoId
+  +string? Phone
+  +string? Email
+  +DateTimeOffset? DeletedAt
+  +MarkDeleted(now): void
+  +Erase(): void
+}
+class PopkinSpace {
+  +Guid Id
+  +string Name
+  +string Emoji
+  +Guid HostPersonId
+  +PopkinStatus Status
+  +DateTimeOffset? WrappedUpAt
+  +WrapUp(now): void
+}
+class Membership {
+  +Guid Id
+  +Guid PersonId
+  +string DisplayName
+  +Guid? PhotoId
+  +DateTimeOffset? LeftAt
+  +Anonymise(now): void
+}
+class Session {
+  +DateTimeOffset? RevokedAt
+  +Revoke(now): void
+}
+class Message {
+  +Guid Id
+  +Guid ThreadId
+  +Guid AuthorMembershipId
+}
+class DeletionImpactDto {
+  +PopkinSummaryDto[] HostedActivePopkins
+}
+class PopkinSummaryDto {
+  +Guid PopkinId
+  +string Name
+  +string Emoji
+}
+class GetDeletionImpactQueryHandler {
+  +Handle(query, ct): Task<DeletionImpactDto>
+}
+class DeleteAccountCommand
+class DeleteAccountCommandHandler {
+  +Handle(command, ct): Task
+}
+class PurgeDeletedAccountsJob {
+  +ExecuteAsync(ct): Task
+}
+interface IPhotoStore {
+  +DeleteAsync(key, ct): Task
+}
+interface IPopkinNotifier {
+  +PopkinWrappedUpAsync(popkinId, ct): Task
+  +MemberUpdatedAsync(popkinId, membershipId, ct): Task
+}
+class DeleteAccountDialog {
+  +impact: DeletionImpactView
+  +confirmation: FormControl<string>
+  +canDelete: Signal<boolean>
+  +busy: Signal<boolean>
+  +delete(): void
+}
+
+Person "1" --> "*" Membership
+Person "1" --> "*" Session
+PopkinSpace "1" --> "*" Membership
+Membership "1" --> "*" Message : authored
+DeletionImpactDto "1" *-- "*" PopkinSummaryDto
+GetDeletionImpactQueryHandler ..> DeletionImpactDto
+GetDeletionImpactQueryHandler ..> PopkinSpace : reads hosted Active
+DeleteAccountCommandHandler ..> DeleteAccountCommand
+DeleteAccountCommandHandler --> PopkinSpace : WrapUp
+DeleteAccountCommandHandler --> Membership : Anonymise
+DeleteAccountCommandHandler --> Session : Revoke all
+DeleteAccountCommandHandler --> Person : MarkDeleted
+DeleteAccountCommandHandler ..> IPopkinNotifier
+PurgeDeletedAccountsJob --> Person : Erase
+PurgeDeletedAccountsJob --> Message : deletes direct messages
+PurgeDeletedAccountsJob ..> IPhotoStore
+DeleteAccountDialog ..> DeletionImpactDto : via AccountApi
+@enduml

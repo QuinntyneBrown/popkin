@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Personal data protection
+
+Person(member, "Member", "Sends contact data, messages and photos")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(sms, "SMS provider", "TO SUPPLY")
+System_Ext(email, "Email provider", "TO SUPPLY")
+
+Rel(member, popkin, "Sends personal data to", "HTTPS only")
+Rel(popkin, sms, "Hands codes to", "HTTPS")
+Rel(popkin, email, "Hands codes to", "HTTPS")
+@enduml

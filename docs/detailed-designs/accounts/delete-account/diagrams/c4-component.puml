@@ -1,0 +1,37 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Delete the account
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "AccountPage", "Angular page", "Delete my account")
+  Component(dialog, "DeleteAccountDialog", "CDK dialog", "What goes, what stays, type delete")
+  Component(accountapi, "AccountApi / HttpAccountApi", "api library", "getDeletionImpact(), deleteAccount()")
+  Component(toaster, "Toaster", "app service", "Account deleted message")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AccountController", "ASP.NET Core controller", "deletion-impact, DELETE")
+  Component(impact, "GetDeletionImpactQueryHandler", "MediatR handler", "Active Popkins the person hosts")
+  Component(del, "DeleteAccountCommandHandler", "MediatR handler", "One unit of work")
+  Component(domain, "Person, PopkinSpace, Membership, Session", "Domain entities", "")
+  Component(notifier, "IPopkinNotifier", "Abstraction", "PopkinWrappedUp, MemberUpdated")
+  Component(issuer, "SessionCookieIssuer", "Api service", "Deletes the cookie")
+}
+Container_Boundary(wk, "Popkin Worker") {
+  Component(job, "PurgeDeletedAccountsJob", "Background job", "Erases data within 30 days")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "")
+Rel(page, accountapi, "getDeletionImpact()")
+Rel(page, dialog, "Opens with impact")
+Rel(dialog, accountapi, "deleteAccount()")
+Rel(dialog, toaster, "Shows message on landing")
+Rel(accountapi, ctrl, "HTTPS", "JSON/HTTPS")
+Rel(ctrl, impact, "GetDeletionImpactQuery")
+Rel(ctrl, del, "DeleteAccountCommand")
+Rel(ctrl, issuer, "SignOutAsync")
+Rel(del, domain, "Wraps up, anonymises, revokes")
+Rel(del, notifier, "Notifies members")
+Rel(del, db, "Saves", "EF Core")
+Rel(impact, db, "Reads", "EF Core")
+Rel(job, db, "Erases", "EF Core")
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+title UML sequence behaviour — Erase a deleted account's personal data
+@@SEQSKIN@@
+box "Backend — Popkin Worker" #D1FADF
+  participant "PurgeDeletedAccountsJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Person" as person
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ObjectStoragePhotoStore" as photos
+end box
+job -> job : Wake on schedule (TO SUPPLY; at least daily)
+job -> db : People with DeletedAt set and personal data not yet erased
+db --> job : batch
+loop each person
+  opt profile photo present
+    job -> photos : DeleteAsync(profile photo key)
+  end
+  job -> db : Delete the person's direct messages (L2-049 AC1)
+  job -> db : Delete Sessions and VerificationCodes for the person's destination
+  job -> person : Erase(): Name, Phone, Email and PhotoId cleared
+  job -> db : SaveChangesAsync
+end
+note over job : Every deleted account is erased within 30 days of DeletedAt (L2-049 AC4). Messages and photos in Popkins stay, attributed to the anonymised membership.
+@enduml

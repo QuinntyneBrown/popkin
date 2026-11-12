@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Personal data protection
+
+Person(member, "Member", "Uses Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+", "Served with the same security headers")
+  Container(api, "Popkin API", ".NET 10, ASP.NET Core", "HTTPS, HSTS, CSP, redacted logs")
+  Container(worker, "Popkin Worker", ".NET worker service", "Purges expired codes and deleted accounts")
+  ContainerDb(db, "Popkin database", "SQL Server, TDE", "Encrypted at rest; code hashes only")
+  Container(store, "Photo store", "Object storage, TO SUPPLY", "Server-side encryption")
+}
+System_Ext(logs, "Log sink", "TO SUPPLY")
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core, Encrypt=True")
+Rel(api, store, "Stores and signs URLs", "HTTPS")
+Rel(worker, db, "Purges", "EF Core")
+Rel(api, logs, "Redacted events")
+@enduml

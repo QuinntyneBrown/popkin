@@ -1,0 +1,37 @@
+@startuml
+title UML sequence behaviour — HTTPS and security headers
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Browser" as browser
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "SecurityHeadersMiddleware" as headers
+  participant "HttpsRedirection and HSTS" as https
+  participant "Controller" as controller
+end box
+actor -> browser : Open http:// address
+browser -> headers : GET http://.../api/popkins
+headers -> https : Next
+https --> browser : 308 to https://... (L2-054 AC1)
+browser -> headers : GET https://.../api/popkins
+headers -> https : Next
+https -> controller : Request
+controller --> https : 200 JSON
+https --> headers : Add Strict-Transport-Security
+headers --> browser : CSP without inline script, nosniff, X-Frame-Options DENY, frame-ancestors none
+browser --> actor : Page; inline script and foreign frames refused
+@enduml

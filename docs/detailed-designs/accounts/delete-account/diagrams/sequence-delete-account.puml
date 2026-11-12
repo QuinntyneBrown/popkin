@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — Delete the account
+@@SEQSKIN@@
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "DeleteAccountDialog" as dialog
+  participant "HttpAccountApi" as client
+  participant "SessionStore" as store
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AccountController" as controller
+  participant "SessionCookieIssuer" as issuer
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DeleteAccountCommandHandler" as handler
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : Choose "Delete my account" (enabled)
+dialog -> dialog : Button reads "Deleting..."; both buttons disabled
+dialog -> client : deleteAccount()
+client -> controller : DELETE /api/account
+controller -> handler : DeleteAccountCommand (ICurrentPerson)
+handler -> db : Load Person, active Memberships, hosted Active PopkinSpaces, live Sessions
+loop each hosted active Popkin (L2-049 AC3)
+  handler -> handler : PopkinSpace.WrapUp(now), the rules of L2-043
+end
+loop each active Membership
+  handler -> handler : Membership.Anonymise(now): neutral name, no photo, LeftAt
+end
+handler -> handler : Session.Revoke(now) for every session of the person
+handler -> handler : Person.MarkDeleted(now)
+handler -> db : SaveChangesAsync, one unit of work
+alt saved
+  handler -> notifier : PopkinWrappedUp and MemberUpdated per affected Popkin
+  handler --> controller : done
+  controller -> issuer : SignOutAsync
+  controller --> client : 204
+  client --> dialog : done
+  dialog -> store : clear()
+  dialog --> actor : Dialog closes; landing page opens (L2-049 AC4)
+  dialog -> toaster : Message that the account was deleted (copy TO SUPPLY)
+else database failure
+  handler --> controller : exception, nothing changed
+  controller --> client : 500 ProblemDetails
+  client --> dialog : ApiProblem
+  dialog --> actor : Message (copy TO SUPPLY); buttons enabled; account intact
+end
+@enduml
