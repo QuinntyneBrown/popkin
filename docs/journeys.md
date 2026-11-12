@@ -24,4 +24,4 @@ Ordered by value. Effort is days for an intermediate developer.
 | 18 | Leave a Popkin | Member leaves a Popkin they no longer want. | 1 |
 | 19 | Delete account | Person deletes their account and personal data. | 2 |
 | 20 | Say keen | Member marks an experience the group wants to do as keen. | 1 |
-| | **Total** | | **77** |
+| | **Total** | | **71** |
