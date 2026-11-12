@@ -1,0 +1,856 @@
+{
+  "project": "Popkin",
+  "screens": [
+    {
+      "id": "landing",
+      "kind": "page",
+      "title": "Landing",
+      "route": "/",
+      "requirements": [
+        "L2-001",
+        "L2-002",
+        "L2-058",
+        "L2-061"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "The screen loads no data, so nothing on it can fail to load. A failed action has its own state."
+      }
+    },
+    {
+      "id": "welcome",
+      "kind": "page",
+      "title": "Welcome",
+      "route": "/welcome",
+      "requirements": [
+        "L2-002",
+        "L2-007",
+        "L2-015"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "The screen loads no data, so nothing on it can fail to load. A failed action has its own state."
+      }
+    },
+    {
+      "id": "sign-up",
+      "kind": "page",
+      "title": "Sign up",
+      "route": "/sign-up",
+      "requirements": [
+        "L2-003",
+        "L2-052"
+      ],
+      "states": [
+        "default",
+        "email",
+        "invalid",
+        "submitting",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty."
+      }
+    },
+    {
+      "id": "verify-code",
+      "kind": "page",
+      "title": "Enter your code",
+      "route": "/verify",
+      "requirements": [
+        "L2-004",
+        "L2-005",
+        "L2-053"
+      ],
+      "states": [
+        "default",
+        "invalid",
+        "expired",
+        "submitting"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "A check that fails for any reason shows as the invalid state with its message; the screen loads no data of its own."
+      }
+    },
+    {
+      "id": "sign-in",
+      "kind": "page",
+      "title": "Sign in",
+      "route": "/sign-in",
+      "requirements": [
+        "L2-006",
+        "L2-007"
+      ],
+      "states": [
+        "default",
+        "invalid",
+        "submitting"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "A failed send is the same message as on sign up (sign-up/error)."
+      }
+    },
+    {
+      "id": "name-your-popkin",
+      "kind": "page",
+      "title": "Name your Popkin",
+      "route": "/new",
+      "requirements": [
+        "L2-008"
+      ],
+      "states": [
+        "default",
+        "blank",
+        "edge"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "The screen loads no data, so nothing on it can fail to load. A failed action has its own state."
+      }
+    },
+    {
+      "id": "how-long",
+      "kind": "page",
+      "title": "How long",
+      "route": "/new/length",
+      "requirements": [
+        "L2-009"
+      ],
+      "states": [
+        "default",
+        "custom",
+        "forever",
+        "submitting",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty."
+      }
+    },
+    {
+      "id": "popkin-created",
+      "kind": "page",
+      "title": "Popkin created",
+      "route": "/p/lakeside/created",
+      "requirements": [
+        "L2-010",
+        "L2-060"
+      ],
+      "states": [
+        "default",
+        "copied"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "The screen loads no data, so nothing on it can fail to load. A failed action has its own state."
+      }
+    },
+    {
+      "id": "join-invite",
+      "kind": "page",
+      "title": "Join invite",
+      "route": "/i/:code",
+      "requirements": [
+        "L2-012",
+        "L2-016",
+        "L2-051"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "wrapped",
+        "not-found",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "The screen lists nothing; it has no collection that can be empty."
+      }
+    },
+    {
+      "id": "join-code",
+      "kind": "page",
+      "title": "Join with a code",
+      "route": "/join",
+      "requirements": [
+        "L2-015",
+        "L2-053"
+      ],
+      "states": [
+        "default",
+        "invalid",
+        "submitting"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "A lookup that fails shows as the invalid state with its message; the screen loads no data of its own."
+      }
+    },
+    {
+      "id": "your-profile",
+      "kind": "page",
+      "title": "Your profile",
+      "route": "/i/:code/profile",
+      "requirements": [
+        "L2-013"
+      ],
+      "states": [
+        "default",
+        "with-photo",
+        "invalid",
+        "submitting",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty."
+      }
+    },
+    {
+      "id": "youre-in",
+      "kind": "page",
+      "title": "You’re in",
+      "route": "/i/:code/welcome",
+      "requirements": [
+        "L2-014",
+        "L2-060"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "The screen loads no data, so nothing on it can fail to load. A failed action has its own state."
+      }
+    },
+    {
+      "id": "my-popkins",
+      "kind": "page",
+      "title": "My Popkins",
+      "route": "/popkins",
+      "requirements": [
+        "L2-017",
+        "L2-018",
+        "L2-056"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "active-only",
+        "offline"
+      ]
+    },
+    {
+      "id": "popkin-home",
+      "kind": "page",
+      "title": "Popkin home",
+      "route": "/p/:popkin",
+      "requirements": [
+        "L2-019",
+        "L2-011",
+        "L2-029",
+        "L2-044"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "partial",
+        "ongoing"
+      ]
+    },
+    {
+      "id": "conversations",
+      "kind": "page",
+      "title": "Conversations",
+      "route": "/p/:popkin/chat",
+      "requirements": [
+        "L2-022",
+        "L2-027"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "id": "group-chat",
+      "kind": "page",
+      "title": "Group chat",
+      "route": "/p/:popkin/chat/everyone",
+      "requirements": [
+        "L2-021",
+        "L2-024",
+        "L2-025",
+        "L2-026",
+        "L2-027",
+        "L2-028",
+        "L2-045"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "failed-send",
+        "read-only"
+      ]
+    },
+    {
+      "id": "direct-message",
+      "kind": "page",
+      "title": "Direct message",
+      "route": "/p/:popkin/chat/:member",
+      "requirements": [
+        "L2-023",
+        "L2-024",
+        "L2-026",
+        "L2-051"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "id": "video-call",
+      "kind": "page",
+      "title": "Video call",
+      "route": "/p/:popkin/call",
+      "requirements": [
+        "L2-029",
+        "L2-030",
+        "L2-059"
+      ],
+      "states": [
+        "default",
+        "two",
+        "muted",
+        "camera-off",
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "id": "photo-album",
+      "kind": "page",
+      "title": "Photo album",
+      "route": "/p/:popkin/photos",
+      "requirements": [
+        "L2-032",
+        "L2-031"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "mine",
+        "no-results"
+      ]
+    },
+    {
+      "id": "photo-view",
+      "kind": "page",
+      "title": "Photo view",
+      "route": "/p/:popkin/photos/:photo",
+      "requirements": [
+        "L2-033",
+        "L2-034",
+        "L2-035",
+        "L2-036",
+        "L2-059"
+      ],
+      "states": [
+        "default",
+        "not-reacted",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "The screen shows one photo; there is no collection to be empty."
+      }
+    },
+    {
+      "id": "experiences",
+      "kind": "page",
+      "title": "Experiences",
+      "route": "/p/:popkin/experiences",
+      "requirements": [
+        "L2-037",
+        "L2-040"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "did",
+        "want",
+        "no-results"
+      ]
+    },
+    {
+      "id": "experience-detail",
+      "kind": "page",
+      "title": "Experience detail",
+      "route": "/p/:popkin/experiences/:experience",
+      "requirements": [
+        "L2-038",
+        "L2-039",
+        "L2-041",
+        "L2-042"
+      ],
+      "states": [
+        "default",
+        "rated",
+        "want",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "The screen shows one experience. An experience nobody has rated says so in its score card."
+      }
+    },
+    {
+      "id": "wrap-up",
+      "kind": "page",
+      "title": "Wrap up",
+      "route": "/p/:popkin/wrap-up",
+      "requirements": [
+        "L2-043"
+      ],
+      "states": [
+        "default",
+        "album-off",
+        "submitting",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty."
+      }
+    },
+    {
+      "id": "wrapped-up",
+      "kind": "page",
+      "title": "Wrapped up",
+      "route": "/p/:popkin/recap",
+      "requirements": [
+        "L2-046",
+        "L2-045"
+      ],
+      "states": [
+        "default",
+        "host",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "A wrapped-up Popkin always has its people and dates; the top-rated card is left out when nothing was rated."
+      }
+    },
+    {
+      "id": "account",
+      "kind": "page",
+      "title": "Your account",
+      "route": "/account",
+      "requirements": [
+        "L2-048",
+        "L2-049",
+        "L2-059"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "error",
+        "invalid",
+        "submitting",
+        "success"
+      ],
+      "not_applicable": {
+        "empty": "An account always has a name and a phone number or email."
+      }
+    },
+    {
+      "id": "not-found",
+      "kind": "page",
+      "title": "Not found",
+      "route": "/*",
+      "requirements": [
+        "L2-056"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "This screen is itself the error state."
+      }
+    },
+    {
+      "id": "server-error",
+      "kind": "page",
+      "title": "Something went wrong",
+      "route": "/error",
+      "requirements": [
+        "L2-056",
+        "L2-052"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "This screen is itself the error state."
+      }
+    },
+    {
+      "id": "offline",
+      "kind": "page",
+      "title": "Offline",
+      "route": "/offline",
+      "requirements": [
+        "L2-056"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "This screen is itself the error state."
+      }
+    },
+    {
+      "id": "brand-components",
+      "kind": "page",
+      "title": "Brand & components",
+      "route": "(reference, not a route)",
+      "requirements": [
+        "L2-057",
+        "L2-059"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "The screen loads no data, so nothing on it can fail to load. A failed action has its own state."
+      }
+    },
+    {
+      "id": "invite",
+      "kind": "dialog",
+      "title": "Invite",
+      "opens_from": "popkin-home",
+      "requirements": [
+        "L2-011"
+      ],
+      "states": [
+        "default",
+        "copied"
+      ],
+      "not_applicable": {
+        "busy": "Copying is instant and local; nothing is sent.",
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "scan-to-join",
+      "kind": "dialog",
+      "title": "Scan to join",
+      "opens_from": "my-popkins",
+      "requirements": [
+        "L2-015"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "denied"
+      ]
+    },
+    {
+      "id": "end-date",
+      "kind": "dialog",
+      "title": "End date",
+      "opens_from": "how-long",
+      "requirements": [
+        "L2-009"
+      ],
+      "states": [
+        "default",
+        "invalid"
+      ],
+      "not_applicable": {
+        "busy": "The date is kept on the device until Pop it up is pressed."
+      }
+    },
+    {
+      "id": "popkin-settings",
+      "kind": "dialog",
+      "title": "Popkin settings",
+      "opens_from": "popkin-home",
+      "requirements": [
+        "L2-020",
+        "L2-047"
+      ],
+      "states": [
+        "default",
+        "member"
+      ],
+      "not_applicable": {
+        "busy": "The dialog sends nothing until a choice is made; the screen it leads to has its own busy state.",
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "edit-popkin",
+      "kind": "dialog",
+      "title": "Edit name and look",
+      "opens_from": "popkin-settings",
+      "requirements": [
+        "L2-020",
+        "L2-008"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
+    },
+    {
+      "id": "change-length",
+      "kind": "dialog",
+      "title": "Change how long it lasts",
+      "opens_from": "popkin-settings",
+      "requirements": [
+        "L2-020",
+        "L2-009"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "Every option is valid; a date out of range is caught in the end-date dialog."
+      }
+    },
+    {
+      "id": "leave-popkin",
+      "kind": "dialog",
+      "title": "Leave Popkin",
+      "opens_from": "popkin-settings",
+      "requirements": [
+        "L2-047"
+      ],
+      "states": [
+        "default",
+        "busy"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "new-message",
+      "kind": "dialog",
+      "title": "New message",
+      "opens_from": "conversations",
+      "requirements": [
+        "L2-022"
+      ],
+      "states": [
+        "default",
+        "no-results"
+      ],
+      "not_applicable": {
+        "busy": "Picking a member opens the direct message; nothing is sent.",
+        "invalid": "A search cannot be invalid; no match is shown as no-results."
+      }
+    },
+    {
+      "id": "reactions",
+      "kind": "dialog",
+      "title": "Message actions",
+      "opens_from": "group-chat",
+      "requirements": [
+        "L2-024",
+        "L2-025"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "busy": "A reaction shows at once and is undone with a message if it fails to save.",
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "add-photos",
+      "kind": "dialog",
+      "title": "Add photos",
+      "opens_from": "photo-album",
+      "requirements": [
+        "L2-031",
+        "L2-026",
+        "L2-052"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
+    },
+    {
+      "id": "photo-comments",
+      "kind": "dialog",
+      "title": "Photo comments",
+      "opens_from": "photo-view",
+      "requirements": [
+        "L2-035"
+      ],
+      "states": [
+        "default",
+        "empty",
+        "busy"
+      ],
+      "not_applicable": {
+        "invalid": "Post comment stays disabled until there is text; the 500-character limit stops typing."
+      }
+    },
+    {
+      "id": "share-experience",
+      "kind": "dialog",
+      "title": "Share an experience",
+      "opens_from": "experiences",
+      "requirements": [
+        "L2-040",
+        "L2-052"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
+    },
+    {
+      "id": "add-comment",
+      "kind": "dialog",
+      "title": "Add a comment",
+      "opens_from": "experience-detail",
+      "requirements": [
+        "L2-041"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid"
+      ]
+    },
+    {
+      "id": "sign-out",
+      "kind": "dialog",
+      "title": "Sign out",
+      "opens_from": "account",
+      "requirements": [
+        "L2-048",
+        "L2-050"
+      ],
+      "states": [
+        "default",
+        "busy"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "delete-account",
+      "kind": "dialog",
+      "title": "Delete account",
+      "opens_from": "account",
+      "requirements": [
+        "L2-049"
+      ],
+      "states": [
+        "default",
+        "confirm",
+        "busy"
+      ],
+      "not_applicable": {
+        "invalid": "The button stays disabled until the word matches, so there is nothing to submit wrongly."
+      }
+    },
+    {
+      "id": "toast",
+      "kind": "notification",
+      "title": "Toast",
+      "opens_from": "popkin-home",
+      "requirements": [
+        "L2-056",
+        "L2-053",
+        "L2-014"
+      ],
+      "states": [
+        "info",
+        "success",
+        "warning",
+        "danger",
+        "stacked"
+      ]
+    },
+    {
+      "id": "banner",
+      "kind": "notification",
+      "title": "Banner",
+      "opens_from": "popkin-home",
+      "requirements": [
+        "L2-029",
+        "L2-044",
+        "L2-028",
+        "L2-045"
+      ],
+      "states": [
+        "info",
+        "success",
+        "warning",
+        "danger",
+        "persistent"
+      ]
+    }
+  ]
+}
