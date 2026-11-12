@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Accessible to WCAG 2.2 AA
+
+Person(member, "Member", "Keyboard, touch or assistive technology")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA, Angular CDK", "Landmarks, focus management, names, live regions, tokens")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Plain-language ProblemDetails titles and details")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls", "JSON/HTTPS")
+@enduml

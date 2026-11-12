@@ -1,0 +1,101 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Rate an experience
+
+package "Popkin.Domain" {
+  class Experience {
+    +Guid Id
+    +Guid PopkinId
+    +ExperienceKind Kind
+    +bool IsRateable
+    +Rate(membershipId: Guid, stars: int, at: DateTimeOffset): ExperienceRating
+  }
+  class ExperienceRating {
+    +Guid ExperienceId
+    +Guid MembershipId
+    +int Stars
+    +string? Comment
+    +DateTimeOffset RatedAt
+    +DateTimeOffset? CommentedAt
+    +ChangeStars(stars: int, at: DateTimeOffset): void
+  }
+  class PopkinSpace {
+    +Guid Id
+    +PopkinStatus Status
+    +EnsureActive(): void
+  }
+  class ExperienceScore <<value object>> {
+    +decimal? Average
+    +int Count
+    +IReadOnlyList<int> CountsByStars
+  }
+}
+
+package "Popkin.Application" {
+  class RateExperienceCommand {
+    +Guid PopkinId
+    +Guid ExperienceId
+    +int Stars
+  }
+  class RateExperienceCommandValidator {
+    +Stars between 1 and 5
+  }
+  class RateExperienceCommandHandler {
+    +Handle(command: RateExperienceCommand, ct: CancellationToken): Task<RatingResultDto>
+  }
+  class RatingResultDto {
+    +int MyStars
+    +ExperienceScoreDto Score
+  }
+  interface IMembershipGuard
+  interface IAppDbContext
+}
+
+package "Popkin.Api" {
+  class ExperiencesController {
+    +Rate(popkinId: Guid, experienceId: Guid, body: RateRequest): Task<ActionResult<RatingResultDto>>
+  }
+}
+
+package "frontend" {
+  class ExperienceDetailPage {
+    +myStars: WritableSignal<number | null>
+    +score: WritableSignal<ExperienceScoreView | null>
+    +rate(stars: number): void
+  }
+  interface ExperiencesApi {
+    +rate(popkinId: string, experienceId: string, stars: number): Observable<RatingResultView>
+  }
+  class "RatingInput (pk-rating input)" as RatingInput {
+    +value: InputSignal<number | null>
+    +label: InputSignal<string>
+    +valueChange: OutputEmitterRef<number>
+  }
+  class Toaster {
+    +danger(title: string, text: string, action?: ToastAction): void
+  }
+}
+
+Experience "1" *-- "*" ExperienceRating
+Experience --> PopkinSpace : belongs to
+RateExperienceCommandHandler ..> RateExperienceCommand : handles
+RateExperienceCommandValidator ..> RateExperienceCommand : validates
+RateExperienceCommandHandler ..> IMembershipGuard
+RateExperienceCommandHandler ..> IAppDbContext
+RateExperienceCommandHandler ..> Experience : loads / rates
+RateExperienceCommandHandler ..> ExperienceScore : recomputes
+RateExperienceCommandHandler ..> RatingResultDto : returns
+ExperiencesController ..> RateExperienceCommand : sends
+ExperienceDetailPage ..> ExperiencesApi : injects EXPERIENCES_API
+ExperienceDetailPage --> RatingInput : composes
+ExperienceDetailPage ..> Toaster : uses
+@enduml

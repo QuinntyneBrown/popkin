@@ -1,0 +1,43 @@
+@startuml
+title UML sequence behaviour — Open Popkin settings
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host or Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage" as page
+  participant "PopkinSettingsDialog" as menu
+  participant "Router" as router
+end box
+actor -> page : Choose "Popkin settings" (more icon in header)
+page -> menu : open with home.viewerRole
+alt viewer is Host (L2-020 AC1)
+  menu --> actor : "Edit name and look", "Change how long it lasts", "Invite people", "Wrap up"
+else viewer is Member (L2-020 AC2, L2-047 AC3)
+  menu --> actor : "Invite people", "Leave this Popkin"
+end
+alt "Edit name and look"
+  menu -> menu : close, open EditPopkinDialog
+else "Change how long it lasts"
+  menu -> menu : close, open ChangeLengthDialog
+else "Invite people"
+  menu -> menu : close, open InviteDialog (invitations/invite-people)
+else "Wrap up"
+  menu -> router : navigate /p/(id)/wrap-up (L2-043)
+else "Leave this Popkin"
+  menu -> menu : close, open LeavePopkinDialog (popkins/leave-popkin)
+else Escape, Close or backdrop (L2-057 AC2)
+  menu --> page : close, focus returns to "Popkin settings"
+end
+@enduml

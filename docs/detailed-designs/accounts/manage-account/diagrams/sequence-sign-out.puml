@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Sign out
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AccountPage" as page
+  participant "SignOutDialog" as dialog
+  participant "HttpAuthApi" as client
+  participant "SessionStore" as store
+  participant "PopkinRealtime" as realtime
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as controller
+  participant "SessionCookieIssuer" as issuer
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SignOutCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Sign out"
+page -> dialog : Dialog.open(SignOutDialog); focus on "Stay signed in"
+dialog --> actor : "Sign out of Popkin?" "You'll need a new code to sign back in on this device."
+alt "Stay signed in", close button or Escape
+  dialog --> page : Close; focus returns to "Sign out" (L2-057 AC2)
+else "Sign out" (L2-048 AC5)
+  dialog -> dialog : Button reads "Signing out..." and is disabled
+  dialog -> client : signOut()
+  client -> controller : POST /api/auth/sign-out
+  controller -> handler : SignOutCommand (ICurrentPerson.SessionId)
+  handler -> db : Session.Revoke(now); SaveChangesAsync (L2-050 AC3)
+  handler --> controller : done
+  controller -> issuer : SignOutAsync: delete __Host-popkin
+  controller --> client : 204
+  alt 204, or 401 because the session had already ended
+    client --> dialog : done
+    dialog -> realtime : disconnect()
+    dialog -> store : clear()
+    dialog --> actor : Dialog closes; /welcome opens
+  else network failure or 5xx
+    client --> dialog : ApiProblem
+    dialog --> actor : Message (copy TO SUPPLY); "Sign out" enabled again
+  end
+end
+@enduml

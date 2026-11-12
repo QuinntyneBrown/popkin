@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Abuse limits
+
+Person(person, "Visitor or Member", "Calls Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+", "rateLimitInterceptor, warning toast")
+  Container(api, "Popkin API", ".NET 10, ASP.NET Core", "Rate limiter: codes, messages, invite-codes")
+  ContainerDb(db, "Popkin database", "SQL Server", "Reached only within limits")
+}
+System_Ext(sms, "SMS provider", "TO SUPPLY")
+Rel(person, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, sms, "Sends codes", "HTTPS")
+@enduml

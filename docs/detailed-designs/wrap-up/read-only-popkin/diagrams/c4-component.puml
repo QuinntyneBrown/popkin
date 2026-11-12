@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — A wrapped-up Popkin is read-only
+
+Container(spa, "Popkin web app", "Angular", "activePopkinGuard, wrappedUpInterceptor")
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "Write controllers", "MessagesController, PhotosController, ExperiencesController, CallsController, InvitesController", "Every write endpoint")
+  Component(handlers, "Write command handlers", "MediatR handlers", "Call RequireActiveMemberAsync first")
+  Component(guard, "MembershipGuard", "IMembershipGuard", "404 non-member, then 409 wrapped up")
+  Component(errors, "ProblemDetailsExceptionHandler", "IExceptionHandler", "409 popkin_wrapped_up")
+  ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace, Membership")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "RemovePhotosOfWrappedUpPopkinsJob", "BackgroundService", "Periodic, TO SUPPLY")
+  Component(remove, "RemoveWrappedUpAlbumsCommandHandler", "MediatR handler", "Removes albums 30 days after wrap-up")
+  Component(photostore, "ObjectStoragePhotoStore", "IPhotoStore", "Deletes files")
+}
+Rel(spa, ctrl, "Write request", "JSON/HTTPS")
+Rel(ctrl, handlers, "Sends command")
+Rel(handlers, guard, "RequireActiveMemberAsync")
+Rel(guard, db, "Loads membership and status", "EF Core")
+Rel(guard, errors, "PopkinWrappedUpException")
+Rel(errors, spa, "409 ProblemDetails", "JSON/HTTPS")
+Rel(job, remove, "Sends RemoveWrappedUpAlbumsCommand")
+Rel(remove, photostore, "DeleteAsync(storageKey)")
+Rel(remove, db, "Deletes Photo rows, sets PhotosRemovedAt", "EF Core")
+@enduml

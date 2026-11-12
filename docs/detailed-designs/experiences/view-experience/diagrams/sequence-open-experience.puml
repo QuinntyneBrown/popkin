@@ -1,0 +1,78 @@
+@startuml
+title UML sequence behaviour — Open an experience
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ExperienceDetailPage" as page
+  participant "HttpExperiencesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetExperienceQueryHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "ExperienceScore" as score
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as store
+  database "Popkin database" as db
+end box
+actor -> page : Choose a card, open /p/:popkinId/experiences/:experienceId
+page -> client : get(popkinId, experienceId)
+opt No answer within 300 ms
+  page -> page : Picture and text skeletons, announce "Loading this experience…"
+end
+client -> controller : GET /api/popkins/{popkinId}/experiences/{experienceId}
+controller -> handler : Send GetExperienceQuery
+handler -> guard : RequireMemberAsync(popkinId)
+alt Caller is not a member
+  guard --> handler : Not found
+  controller --> client : 404 ProblemDetails code popkin_not_found (L2-051 AC1)
+  client --> page : Not found
+  page --> actor : Not-found screen
+else Member
+  guard --> handler : Membership
+  handler -> db : Experience by id within the Popkin
+  alt No such experience in this Popkin
+    db --> handler : None
+    controller --> client : 404 ProblemDetails code experience_not_found
+    page --> actor : Not-found screen
+  else Found
+    db --> handler : Experience, sharer, ratings with authors, keen members
+    handler -> score : From(stars) when IsRateable
+    score --> handler : Average, count, count and bar per star (see group score)
+    handler -> store : Picture address when PhotoId is set
+    store --> handler : Expiring address
+    handler -> handler : Comments: ratings with text, newest CommentedAt first, author first name and stars
+    handler -> handler : My stars, my comment, CanRate, CanEdit, CanDelete, CanMarkDone
+    handler --> controller : ExperienceDetailDto
+    controller --> client : 200 JSON
+    client --> page : ExperienceDetailView
+    page --> actor : Picture, kind and when, title, "Shared by", place (L2-038 AC1)
+    alt Has ratings
+      page --> actor : Score card with average, stars, "11 ratings", five bars with text per star (L2-038 AC2, AC3)
+    else No ratings
+      page --> actor : Score card says nobody has rated it yet (L2-038 AC5)
+    end
+    page --> actor : "What people said" with avatar, first name, stars and text (L2-038 AC4)
+  end
+end
+alt Request fails
+  client --> page : Error
+  page --> actor : "We couldn't load this experience", "Try again" and "Back to Experiences" (L2-056 AC2)
+end
+@enduml

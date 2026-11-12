@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Messages arrive as they are sent
+
+Container_Boundary(web, "Popkin web app") {
+  Component(rt, "PopkinRealtime / SignalRPopkinRealtime", "api library service", "One HubConnection per signed-in tab; automatic reconnect")
+  Component(store, "ThreadStore", "api library service", "Applies events; keeps the view still; catch-up")
+  Component(unread, "UnreadTracker", "api library service", "Unread counts for Chat tab, Popkin home, My Popkins")
+  Component(page, "GroupChatPage / DirectMessagePage", "Angular pages", "New messages control; polite live region")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(hub, "PopkinHub", "SignalR hub, [Authorize]", "Adds the connection to popkin:{popkinId} groups")
+  Component(uid, "PersonUserIdProvider", "IUserIdProvider", "User id = PersonId claim")
+  Component(presence, "PresenceTracker", "Singleton", "Connections per Popkin for here now")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Routes events to groups or users")
+  Component(read, "MarkThreadReadCommandHandler", "MediatR handler", "Moves ThreadReadState forward")
+  ComponentDb(db, "Popkin database", "SQL Server", "Message, ThreadReadState")
+}
+Rel(rt, hub, "Connects", "WebSocket, cookie")
+Rel(hub, uid, "Identifies users by")
+Rel(hub, presence, "Tracks connections")
+Rel(notifier, hub, "Sends through IHubContext")
+Rel(rt, store, "Streams events to")
+Rel(rt, unread, "Streams events to")
+Rel(page, store, "Reads")
+Rel(store, read, "PUT read via ChatApi", "JSON/HTTPS")
+Rel(read, db, "Writes", "EF Core")
+@enduml

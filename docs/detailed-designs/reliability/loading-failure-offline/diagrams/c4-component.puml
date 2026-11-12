@@ -1,0 +1,36 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Loading, failure and offline are always explained
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "Page container", "pages/<key>", "Binds skeletons, inline error, offline banner")
+  Component(load, "screenLoad()", "api library", "status, value, showSkeleton after 300 ms, fromCache, reload()")
+  Component(errint, "httpErrorInterceptor", "HttpInterceptorFn", "Maps HttpErrorResponse to ApiError")
+  Component(cacheint, "offlineCacheInterceptor", "HttpInterceptorFn", "Stores 200 GETs; answers from cache when offline")
+  Component(cache, "IndexedDbResponseCache", "RESPONSE_CACHE", "Per person, per URL")
+  Component(conn, "BrowserConnectivity", "CONNECTIVITY", "online signal, cameBack, health probe")
+  Component(screens, "ErrorScreens", "api library", "Opens not-found, server-error, offline without changing the URL")
+  Component(pages, "NotFoundPage, ServerErrorPage, OfflinePage", "pages", "Whole-app failure screens")
+  Component(toaster, "Toaster and ToastHost", "toasts/", "8 s success and info; danger stays; live regions")
+  Component(drafts, "DraftStore", "api library", "sessionStorage drafts")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(handler, "UnexpectedExceptionHandler", "IExceptionHandler", "Logs and writes 500 ProblemDetails")
+  Component(ref, "ReferenceCode", "Value type", "PK-XXXX-XXXX from RandomNumberGenerator")
+  Component(health, "HealthController", "Existing", "GET /api/health")
+}
+
+Rel(page, load, "Reads data with")
+Rel(page, toaster, "Confirms outcomes with")
+Rel(page, drafts, "Keeps typed text in")
+Rel(load, cacheint, "GET through")
+Rel(cacheint, cache, "Puts and gets")
+Rel(cacheint, errint, "Passes errors from")
+Rel(errint, conn, "Reports status 0 to")
+Rel(conn, health, "Probes", "HTTPS")
+Rel(load, screens, "Hands primary failures to")
+Rel(screens, pages, "Navigates to")
+Rel(errint, handler, "Receives 500 from", "JSON/HTTPS")
+Rel(handler, ref, "Creates")
+@enduml

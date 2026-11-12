@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Messages that cannot be sent
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Message outbox kept on the device, drafts, offline banner")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Idempotent message creation by ClientMessageId")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Unique (AuthorMembershipId, ClientMessageId)")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Sends and retries messages", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+@enduml

@@ -1,0 +1,68 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Responsive from 360 px
+
+package "components library" {
+  enum ScreenTemplate {
+    Step
+    TabRoot
+    Home
+    Thread
+    Stage
+    Washed
+  }
+  enum DialogPlacement {
+    Sheet
+    Centred
+  }
+  class Screen <<pk-screen>> {
+    +template: input<ScreenTemplate>
+    +stickyFooter: boolean
+  }
+  class PopkinNav <<pk-popkin-nav>> {
+    +popkinId: input.required<string>()
+    +current: input<string>
+    +unread: input<number>
+  }
+  class DialogOpener {
+    +open<C, D, R>(component: Type<C>, data: D, options?: DialogOptions): DialogRef<R, C>
+    -placement: Signal<DialogPlacement>
+    -position(placement: DialogPlacement): PositionStrategy
+  }
+  class DialogFrame <<pk-dialog>> {
+    +title: input.required<string>()
+    +busy: input<boolean>
+  }
+  class Toast <<pk-toast>> {
+    +variant: input<ToastVariant>
+  }
+}
+
+package "@angular/cdk" {
+  class Dialog
+  class BreakpointObserver {
+    +observe(query: string): Observable<BreakpointState>
+  }
+  class "DialogRef<R, C>" as DialogRef {
+    +updatePosition(): void
+    +close(result?: R): void
+  }
+}
+
+Screen --> ScreenTemplate : has
+Screen o-- PopkinNav : nav slot
+DialogOpener ..> BreakpointObserver : (min-width: 40rem)
+DialogOpener ..> Dialog : open
+DialogOpener --> DialogPlacement : chooses
+DialogOpener ..> DialogRef : updatePosition on change
+Dialog ..> DialogFrame : renders component inside
+@enduml

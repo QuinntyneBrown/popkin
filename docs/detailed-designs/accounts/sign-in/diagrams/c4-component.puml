@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Sign in
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "SignInPage", "Angular page", "Phone number or email, Send my code")
+  Component(contact, "parseContact", "api library helper", "Detects Phone or Email and checks format")
+  Component(pending, "PendingVerificationStore", "api library service", "purpose SignIn, returnUrl")
+  Component(verify, "VerifyCodePage", "Angular page", "Code screen; asks a name on NameRequired")
+  Component(authapi, "AuthApi / HttpAuthApi", "api library", "requestCode(), confirmCode()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AuthController", "ASP.NET Core controller", "codes and confirm, anonymous")
+  Component(request, "RequestCodeCommandHandler", "MediatR handler", "Same response with or without an account")
+  Component(confirm, "ConfirmCodeCommandHandler", "MediatR handler", "NameRequired for a new destination")
+  ComponentDb(db, "Popkin database", "SQL Server", "")
+}
+Rel(page, contact, "Classifies input with")
+Rel(page, authapi, "requestCode(SignIn)")
+Rel(page, pending, "Stores")
+Rel(verify, authapi, "confirmCode(code, name?)")
+Rel(authapi, ctrl, "POST", "JSON/HTTPS")
+Rel(ctrl, request, "Sends RequestCodeCommand")
+Rel(ctrl, confirm, "Sends ConfirmCodeCommand")
+Rel(request, db, "Writes VerificationCode", "EF Core")
+Rel(confirm, db, "Reads Person; creates Person and Session", "EF Core")
+@enduml

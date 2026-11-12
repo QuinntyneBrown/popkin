@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Sign up
+
+Person(visitor, "Visitor", "Someone without a session")
+System(popkin, "Popkin", "Free platform for pop-up communities")
+System_Ext(sms, "SMS provider", "Delivers the six-digit code by text; provider TO SUPPLY")
+System_Ext(email, "Email provider", "Delivers the six-digit code by email; provider TO SUPPLY")
+
+Rel(visitor, popkin, "Gives a name and a phone number or an email to", "HTTPS")
+Rel(popkin, sms, "Sends the code via", "HTTPS API")
+Rel(popkin, email, "Sends the code via", "HTTPS API")
+Rel(sms, visitor, "Texts the code to")
+Rel(email, visitor, "Emails the code to")
+@enduml

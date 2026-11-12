@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — The Host wraps up a Popkin
+
+Container(spa, "Popkin web app", "Angular", "WrapUpPage, PopkinsApi")
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PopkinsController", "ASP.NET Core controller", "POST /api/popkins/{popkinId}/wrap-up")
+  Component(handler, "WrapUpPopkinCommandHandler", "MediatR handler", "Applies the Host's wrap-up")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 for non-members, 403 for non-Hosts")
+  Component(service, "PopkinWrapUpService", "Application service", "Wraps up and ends open calls")
+  Component(entity, "PopkinSpace", "Domain entity", "Owns Status, WrappedUpAt, KeepPhotos")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Sends popkinWrappedUp to popkin:{popkinId}")
+  Component(errors, "ProblemDetailsExceptionHandler", "IExceptionHandler", "Maps refusals to ProblemDetails")
+  ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace, Call")
+}
+Rel(spa, ctrl, "Sends keepPhotos", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends WrapUpPopkinCommand")
+Rel(handler, guard, "RequireHostAsync")
+Rel(handler, service, "WrapUp(popkin, keepPhotos)")
+Rel(service, entity, "Calls WrapUp(at, keepPhotos)")
+Rel(handler, db, "Saves changes", "EF Core")
+Rel(handler, notifier, "PopkinWrappedUpAsync")
+Rel(notifier, spa, "popkinWrappedUp", "SignalR")
+Rel(errors, spa, "403 / 404 / 409 ProblemDetails", "JSON/HTTPS")
+@enduml

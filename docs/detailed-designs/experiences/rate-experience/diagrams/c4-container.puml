@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Rate an experience
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Rating panel on the experience detail page")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "PUT /api/popkins/{popkinId}/experiences/{experienceId}/my-rating")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "ExperienceRating, one per member and experience")
+}
+Rel(member, web, "Chooses a star", "Touch, mouse or arrow keys")
+Rel(web, api, "Saves the rating", "JSON/HTTPS, session cookie")
+Rel(api, db, "Inserts or updates the rating", "EF Core")
+@enduml

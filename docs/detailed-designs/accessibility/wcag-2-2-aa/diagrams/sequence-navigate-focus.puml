@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — Keyboard user moves between screens
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member (keyboard, screen reader)" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-skip-link" as skip
+  participant "PopkinHomePage" as home
+  participant "Router" as router
+  participant "PopkinTitleStrategy" as title
+  participant "RouteFocus" as focus
+  participant "PhotoAlbumPage" as album
+end box
+
+actor -> skip : Tab (first stop on the page)
+skip --> actor : "Skip to content" becomes visible, focus ring shown (L2-057 AC1)
+actor -> skip : Enter
+skip -> home : Focus main#main
+home --> actor : Reads the main content
+actor -> home : Tab through actions in DOM order, then the Popkin tabs
+actor -> home : Enter on "Photos" tab
+home -> router : navigate /p/{popkinId}/photos
+router -> album : Activate lazy page
+router -> title : updateTitle(snapshot)
+title --> actor : document.title "Photos · Popkin"
+router -> focus : NavigationEnd
+focus -> focus : afterNextRender
+focus -> album : Focus h1 (tabindex -1)
+album --> actor : Heading read; one h1, header, main and nav landmarks (L2-057 AC8)
+@enduml

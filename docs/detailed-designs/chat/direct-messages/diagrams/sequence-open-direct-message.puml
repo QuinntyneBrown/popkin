@@ -1,0 +1,70 @@
+@startuml
+title UML sequence behaviour — Open a direct message
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "DirectMessagePage" as page
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ThreadsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "OpenDirectThreadCommandHandler" as handler
+  participant "ChatThread" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /p/:popkinId/chat/:memberId (row, New message or member)
+page -> client : openDirectThread(popkinId, memberId)
+client -> controller : PUT /api/popkins/{popkinId}/threads/direct/{memberId}
+controller -> handler : Send OpenDirectThreadCommand
+handler -> db : Caller membership and target membership in this Popkin
+alt caller not a member
+  controller --> client : 404 code popkin_not_found
+else target is not an active member of the same Popkin (L2-023 AC4)
+  controller --> client : 404 code member_not_found
+  client --> page : Refused
+  page --> actor : Not-found screen
+else target is the caller
+  controller --> client : 400 code cannot_message_self
+else both members
+  handler -> db : Find Direct thread with ordered pair (MemberAId, MemberBId)
+  alt none
+    alt Popkin wrapped up
+      controller --> client : 409 code popkin_wrapped_up
+    else active
+      handler -> entity : ChatThread.Direct(popkinId, caller, target) orders the pair
+      handler -> db : Insert; unique index resolves a concurrent create
+      controller --> client : 201 ThreadDto
+    end
+  else exists
+    controller --> client : 200 ThreadDto
+  end
+  client --> page : ThreadView
+  page -> client : getMessages(popkinId, threadId, latest 50)
+  page --> actor : Header with avatar, name and "From 🏕️ Lakeside Weekend"; "Only you two can see this" (L2-023 AC1)
+  opt thread empty
+    page --> actor : "Say hello to Walt. This is the start of your chat."
+  end
+  opt ThreadDto.ReadOnly (L2-023 AC5)
+    page --> actor : Composer replaced with the wrapped-up line
+  end
+end
+@enduml

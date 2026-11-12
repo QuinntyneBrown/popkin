@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Say you are keen
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ExperienceDetailPage", "Angular page", "Keen panel: who is keen, toggle button, We did this")
+  Component(ui, "pk-button (toggle), pk-avatar (stack), pk-card (tint)", "components library", "Presentation")
+  Component(apiclient, "HttpExperiencesApi", "Angular service behind EXPERIENCES_API", "setKeen, markDone")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ExperiencesController", "ASP.NET Core controller", "PUT/DELETE keen, POST done")
+  Component(keen, "SetKeenCommandHandler", "MediatR handler", "Adds or removes the caller's keen record")
+  Component(done, "MarkExperienceDoneCommandHandler", "MediatR handler", "Want to do becomes Something we did")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 for non-members")
+  Component(entity, "Experience", "Domain entity", "AddKeen, RemoveKeen, MarkDone")
+  ComponentDb(db, "Popkin database", "SQL Server", "ExperienceKeen, Experience")
+}
+Rel(page, ui, "Composes")
+Rel(page, apiclient, "setKeen / markDone")
+Rel(apiclient, ctrl, "HTTPS", "JSON")
+Rel(ctrl, keen, "Sends SetKeenCommand")
+Rel(ctrl, done, "Sends MarkExperienceDoneCommand")
+Rel(keen, guard, "Requires membership")
+Rel(done, guard, "Requires membership")
+Rel(keen, entity, "AddKeen / RemoveKeen")
+Rel(done, entity, "MarkDone")
+Rel(keen, db, "Saves", "EF Core")
+Rel(done, db, "Saves", "EF Core")
+@enduml

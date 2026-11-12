@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — Change a rating with the keyboard
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-rating (input)" as stars
+  participant "ExperienceDetailPage" as page
+  participant "HttpExperiencesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RateExperienceCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> stars : Tab into the radio group
+stars --> actor : Focus on the checked star (5 stars), others tabindex -1
+actor -> stars : Arrow Left
+stars -> stars : Move focus and check "4 stars" (L2-039 AC4)
+stars -> page : valueChange(4)
+page -> client : rate(..., 4), cancelling any earlier request in flight
+actor -> stars : Arrow Left again
+stars -> page : valueChange(3)
+page -> client : rate(..., 3), the request for 4 is cancelled
+client -> controller : PUT my-rating {stars: 3}
+controller -> handler : Send RateExperienceCommand
+handler -> db : Load the caller's existing rating
+db --> handler : ExperienceRating(Stars 5)
+handler -> handler : ChangeStars(3, now); no new rating row
+handler -> db : Save changes
+handler --> controller : RatingResultDto, Count unchanged (L2-039 AC3)
+controller --> client : 200 JSON
+client --> page : RatingResultView
+page --> actor : Stars 1 to 3 filled, average updated, count the same
+note over stars
+  Arrow Right and Arrow Up move up one star,
+  Arrow Left and Arrow Down move down one,
+  each star button is at least 44 px (L2-039 AC1)
+end note
+@enduml

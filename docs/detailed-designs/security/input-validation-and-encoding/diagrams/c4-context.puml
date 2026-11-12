@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Input validation and encoding
+
+Person(member, "Member", "Types text and uploads photos")
+Person(other, "Member", "Sees what others typed")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+Rel(member, popkin, "Sends names, messages, captions, comments, titles, photos")
+Rel(popkin, other, "Shows them as text and checked images")
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — The Host wraps up a Popkin
+
+Person(host, "Host", "Member who started the Popkin")
+Person(member, "Member", "Signed-in person who belongs to the Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+Rel(host, popkin, "Wraps up the Popkin using")
+Rel(popkin, member, "Shows the recap to")
+@enduml

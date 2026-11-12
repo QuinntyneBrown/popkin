@@ -1,0 +1,40 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Start or join a group call
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "VideoCallPage", "Angular page, pk-video-call-page", "Renders the call, its waiting and permission states")
+  Component(session, "CallSession / WebRtcCallSession", "api library service", "Owns local media, peer connections and call state across screens")
+  Component(callsApi, "CallsApi / HttpCallsApi", "api library service", "Calls /api/popkins/{popkinId}/calls")
+  Component(rt, "PopkinRealtime / SignalRPopkinRealtime", "api library service", "SignalR client for PopkinHub")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "CallsController", "ASP.NET Core controller", "GET current, POST join, POST leave")
+  Component(hub, "PopkinHub", "SignalR hub", "Call groups and signal relay")
+  Component(join, "JoinCallCommandHandler", "MediatR handler", "Starts or joins the Popkin's call")
+  Component(leave, "LeaveCallCommandHandler", "MediatR handler", "Leaves the call and ends it when empty")
+  Component(current, "GetCurrentCallQueryHandler", "MediatR handler", "Returns the group call under way")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Loads the caller's membership or 404")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Pushes call events to hub groups")
+  Component(creds, "IMediaRelayCredentials", "Application abstraction", "Short-lived TURN credentials")
+  ComponentDb(db, "Popkin database", "SQL Server", "Call, CallParticipant")
+}
+
+Rel(page, session, "Starts, joins and reads state from")
+Rel(session, callsApi, "Join and leave")
+Rel(session, rt, "Signals and listens")
+Rel(callsApi, ctrl, "HTTPS JSON")
+Rel(rt, hub, "WebSocket")
+Rel(ctrl, join, "Sends JoinCallCommand")
+Rel(ctrl, leave, "Sends LeaveCallCommand")
+Rel(ctrl, current, "Sends GetCurrentCallQuery")
+Rel(hub, leave, "Sends LeaveCallCommand on disconnect")
+Rel(join, guard, "Checks membership")
+Rel(join, creds, "Gets ICE servers")
+Rel(join, notifier, "CallChanged, ParticipantJoined")
+Rel(leave, notifier, "ParticipantLeft, CallChanged, CallEnded")
+Rel(join, db, "Reads and writes", "EF Core")
+Rel(leave, db, "Reads and writes", "EF Core")
+Rel(current, db, "Reads", "EF Core")
+@enduml

@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — Open the recap
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "WrappedUpPage" as page
+  participant "RecapApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "RecapController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetRecapQueryHandler" as handler
+  participant "IMembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : Open /p/{popkinId}/recap
+page --> actor : Skeletons, "Loading the recap…"
+page -> client : getRecap(popkinId)
+client -> controller : GET /api/popkins/{popkinId}/recap
+controller -> handler : Send GetRecapQuery
+handler -> guard : RequireMemberAsync(popkinId)
+alt not a member
+  guard --> controller : PopkinNotFoundException
+  controller --> client : 404 popkin_not_found (L2-051 AC1)
+else member
+  guard --> handler : MemberAccess
+  alt Status = Active
+    handler --> controller : PopkinActiveException
+    controller --> client : 409 popkin_active
+    client --> page : Open Popkin home
+  else Status = WrappedUp
+    handler -> db : Count memberships, member messages, photos
+    handler -> db : Highest average rating, ties by count then SharedAt (L2-046 AC3)
+    handler -> photos : GetReadUrl for three photos
+    handler --> controller : RecapDto
+    controller --> client : 200 OK
+    client --> page : RecapView
+    page --> actor : Name, dates, photos, emoji, counts with separators (L2-046 AC1, AC2)
+  end
+end
+opt request fails
+  page --> actor : "We couldn't load the recap", Try again, My Popkins
+end
+@enduml

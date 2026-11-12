@@ -1,0 +1,86 @@
+@startuml
+title UML sequence behaviour — Share an experience
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ExperiencesPage" as page
+  participant "ShareExperienceDialog" as dialog
+  participant "HttpExperiencesApi" as client
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ShareExperienceCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "Experience" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as store
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Share one"
+page -> dialog : Open with CDK Dialog
+dialog --> actor : Title, Kind, When (optional), Place (optional), Add a picture (optional) (L2-040 AC1)
+actor -> dialog : Fill in, choose "Share it"
+dialog -> dialog : Validate title 1 to 80, place up to 80, picture JPEG, PNG, WebP or HEIC up to 10 MB
+alt Invalid on the device
+  dialog --> actor : Nothing sent; field aria-invalid, message under it, summary "One thing to fix" (L2-040 AC2, AC3)
+else Valid
+  dialog -> dialog : Disable "Share it", read "Sharing…" (L2-056 AC3)
+  dialog -> client : share(popkinId, form)
+  client -> controller : POST /api/popkins/{popkinId}/experiences multipart/form-data
+  controller -> controller : Authenticate, anti-forgery, validate ShareExperienceCommand
+  alt Invalid on the server
+    controller --> client : 400 ProblemDetails code title_required, title_too_long, place_too_long, invalid_kind, picture_type_not_allowed or picture_too_large, naming the field (L2-052 AC1)
+    client --> dialog : Field errors
+    dialog --> actor : Same invalid state as on the device
+  else Valid
+    controller -> handler : Send ShareExperienceCommand
+    handler -> guard : RequireMemberAsync(popkinId)
+    alt Not a member
+      controller --> client : 404 ProblemDetails code popkin_not_found (L2-051 AC1)
+    else Member
+      handler -> db : Load PopkinSpace
+      alt Popkin wrapped up
+        controller --> client : 409 ProblemDetails code popkin_wrapped_up (L2-045 AC2)
+      else Active
+        opt Picture given
+          handler -> store : SaveAsync(picture): check content bytes, strip location and device data, write file and thumbnail
+          store --> handler : StoredPhoto
+          handler -> db : Add Photo
+        end
+        handler -> entity : Share(popkin, member, title, kind, when, place, photoId, now)
+        entity --> handler : New Experience
+        handler -> db : Save changes in one unit of work
+        db --> handler : Committed
+        handler --> controller : ExperienceCardDto
+        controller --> client : 201 Created, Location /experiences/{id}
+        client --> dialog : ExperienceCardView
+        dialog --> page : Close with the new card
+        page -> page : Insert the card first (L2-040 AC4); no picture shows the Popkin emoji on its colour (L2-040 AC5)
+        page -> toaster : success("Experience shared", "Bonfire songs on the beach is first in the list.")
+        toaster --> actor : Toast for 8 seconds (L2-056 AC7)
+      end
+    end
+  end
+end
+alt 409, 404, server error or network failure
+  client --> dialog : Error
+  dialog --> actor : Alert "We couldn't share that. Everything you entered is still here."; "Share it" enabled again
+end
+@enduml

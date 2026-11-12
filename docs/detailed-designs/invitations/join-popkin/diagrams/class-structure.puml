@@ -1,0 +1,107 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Join a Popkin
+
+package "Popkin.Domain" {
+  class PopkinSpace {
+    +Join(person, displayName, photoId, invitedBy, now): Membership
+    +LastActivityAt
+  }
+  class Membership {
+    +string DisplayName
+    +Guid? PhotoId
+    +MemberRole Role
+    +DateTimeOffset JoinedAt
+    +Guid? InvitedByMembershipId
+  }
+  class Message {
+    +MessageKind Kind
+    +string Text
+    +{static} PoppedIn(thread, membership, now): Message
+  }
+  class AvatarAccent <<static>> {
+    +For(personId): PopkinColour
+  }
+}
+package "Popkin.Application" {
+  class JoinPopkinCommand {
+    +string Code
+    +string DisplayName
+    +Stream? Photo
+    +string? PhotoContentType
+    +long? PhotoLength
+  }
+  class JoinPopkinCommandValidator
+  class JoinPopkinCommandHandler {
+    +Handle(command, ct): Task<JoinedDto>
+  }
+  class JoinedDto {
+    +Guid PopkinId
+    +Guid MembershipId
+    +string DisplayName
+    +string PopkinName
+    +string Emoji
+    +PopkinColour Colour
+    +IReadOnlyList<string> NamedMembers (2)
+    +int OthersCount
+  }
+  interface IPhotoStore {
+    +SaveAsync(stream, contentType, ct): Task<StoredPhoto>
+  }
+  interface IPopkinNotifier {
+    +MemberJoined(popkinId, member, ct)
+    +MessageSent(popkinId, threadId, message, ct)
+  }
+  class ImageSniffer <<static>> {
+    +Detect(stream): ImageType?
+  }
+}
+package "Frontend (popkin app + api library)" {
+  class YourProfilePage {
+    +name: Signal<string>
+    +photo: Signal<File | null>
+    +busy: Signal<boolean>
+    +join(): void
+  }
+  class YoureInPage {
+    +sayHi(): void
+    +seePhotos(): void
+  }
+  class MemberJoinedToast
+  class Toaster {
+    +show(toast): void
+  }
+  interface InvitesApi {
+    +join(code, name, photo): Observable<JoinedView>
+  }
+}
+JoinPopkinCommandHandler ..> JoinPopkinCommand : handles
+JoinPopkinCommandValidator ..> JoinPopkinCommand : validates
+JoinPopkinCommandValidator ..> ImageSniffer
+JoinPopkinCommandHandler --> IPhotoStore
+JoinPopkinCommandHandler --> IPopkinNotifier
+JoinPopkinCommandHandler ..> PopkinSpace : Join
+JoinPopkinCommandHandler ..> Message : PoppedIn
+JoinPopkinCommandHandler ..> JoinedDto : returns
+PopkinSpace "1" *-- "*" Membership
+Membership ..> AvatarAccent
+YourProfilePage --> InvitesApi
+YoureInPage ..> JoinedDto : via JoinInviteState
+Toaster ..> MemberJoinedToast : shows
+@enduml

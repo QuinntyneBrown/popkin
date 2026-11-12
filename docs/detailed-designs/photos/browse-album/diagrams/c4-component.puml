@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Browse the album
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "PhotoAlbumPage", "Angular page, pk-photo-album-page", "Counts, filter, days, grid, states")
+  Component(grid, "pk-photo-grid", "components library", "Square cells, feature cell, links to the photo view")
+  Component(chip, "pk-chip", "components library", "Everyone and Mine filter chips")
+  Component(empty, "pk-empty-state", "components library", "Empty, no results and error")
+  Component(photosApi, "PhotosApi / HttpPhotosApi", "api library service", "getAlbum")
+  Component(days, "groupPhotosByDay", "api library helper", "Day groups, latest first")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PhotosController", "ASP.NET Core controller", "GET /api/popkins/{popkinId}/photos")
+  Component(handler, "GetAlbumQueryHandler", "MediatR handler", "Pages photos and counts contributors")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Membership or 404")
+  Component(store, "IPhotoStore", "Application abstraction", "Expiring thumbnail addresses")
+  ComponentDb(db, "Popkin database", "SQL Server", "Photo")
+}
+Rel(page, chip, "Renders")
+Rel(page, grid, "Renders one per day")
+Rel(page, empty, "Renders when empty or failed")
+Rel(page, photosApi, "getAlbum(popkinId, filter, cursor)")
+Rel(page, days, "Groups items")
+Rel(photosApi, ctrl, "HTTPS JSON")
+Rel(ctrl, handler, "Sends GetAlbumQuery")
+Rel(handler, guard, "Checks membership")
+Rel(handler, db, "Reads", "EF Core")
+Rel(handler, store, "GetReadUrlAsync thumbnail")
+@enduml

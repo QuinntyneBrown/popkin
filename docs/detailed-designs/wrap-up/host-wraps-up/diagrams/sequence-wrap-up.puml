@@ -1,0 +1,77 @@
+@startuml
+title UML sequence behaviour — The Host wraps up a Popkin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "WrapUpPage" as page
+  participant "PopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as controller
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "WrapUpPopkinCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "PopkinWrapUpService" as service
+  participant "PopkinSpace" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Wrap it up" (switch on or off)
+page -> page : Disable button, label "Wrapping up…" (L2-043 AC3)
+page -> client : wrapUp(popkinId, keepPhotos)
+client -> controller : POST /api/popkins/{popkinId}/wrap-up
+controller -> controller : Authenticate (fallback policy)
+controller -> handler : Send WrapUpPopkinCommand
+handler -> guard : RequireHostAsync(popkinId)
+guard -> db : Load caller's membership and Popkin
+db --> guard : Membership, PopkinSpace
+alt not a member
+  guard --> controller : PopkinNotFoundException
+  controller --> client : 404 popkin_not_found (L2-051 AC1)
+else member who is not the Host
+  guard --> controller : HostOnlyException
+  controller --> client : 403 host_only (L2-043 AC6)
+else Host
+  guard --> handler : MemberAccess
+  handler -> service : WrapUpAsync(popkin, keepPhotos)
+  service -> entity : WrapUp(now, keepPhotos)
+  entity --> service : Status = WrappedUp
+  service -> db : End open calls
+  handler -> db : Save changes in one unit of work
+  alt saved
+    db --> handler : Committed
+    handler -> notifier : PopkinWrappedUpAsync(popkinId)
+    notifier -> notifier : Send popkinWrappedUp to popkin:{popkinId}
+    handler --> controller : WrapUpResultDto
+    controller --> client : 200 OK
+    client --> page : WrapUpResult
+    page --> actor : Open recap /p/{popkinId}/recap (L2-043 AC3)
+  else concurrency conflict or already wrapped up
+    db --> handler : Conflict
+    handler --> controller : PopkinWrappedUpException
+    controller --> client : 409 popkin_wrapped_up
+    client --> page : Already wrapped up
+    page --> actor : Open recap
+  end
+end
+opt network or server failure
+  client --> page : Error
+  page --> actor : Alert "We couldn't wrap it up.", button enabled (L2-043 AC5)
+end
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Start a Popkin
+
+Person(host, "Host", "Signed-in person who starts a Popkin and becomes its Host")
+Person(guest, "Invited person", "Receives the invite link by message, share sheet or QR code")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(device, "Device messaging and share sheet", "SMS app via sms: link; Web Share API")
+Rel(host, popkin, "Names the Popkin, picks its look and length, receives its invite")
+Rel(host, device, "Sends the invite link with", "sms: / navigator.share")
+Rel(device, guest, "Delivers the invite link to")
+Rel(guest, popkin, "Opens the invite link in")
+@enduml

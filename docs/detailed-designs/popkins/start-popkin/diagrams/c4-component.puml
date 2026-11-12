@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Start a Popkin
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(name, "NameYourPopkinPage", "Angular page", "Name, emoji, colour, live preview")
+  Component(len, "HowLongPage", "Angular page", "Four length options; Pop it up")
+  Component(enddlg, "EndDateDialog", "CDK dialog", "Day and time, 1 hour to 1 year ahead")
+  Component(created, "PopkinCreatedPage", "Angular page", "QR code, link, Copy link, Text it, Share")
+  Component(draft, "NewPopkinDraft", "Signal store, api library", "Holds name, emoji, colour, length across steps")
+  Component(papi, "PopkinsApi / HttpPopkinsApi", "Contract + HTTP client", "POPKINS_API token")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PopkinsController", "ASP.NET Core controller", "POST /api/popkins")
+  Component(handler, "CreatePopkinCommandHandler", "MediatR handler", "Creates PopkinSpace, Host Membership, Everyone ChatThread")
+  Component(val, "CreatePopkinCommandValidator", "Validator", "L2-008 and L2-009 rules")
+  Component(gen, "IInviteCodeGenerator / RandomInviteCodeGenerator", "Abstraction + Infrastructure", "Unguessable invite code")
+  Component(entity, "PopkinSpace", "Domain entity", "The Popkin aggregate")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(name, draft, "Writes name, emoji, colour")
+Rel(len, draft, "Reads look, writes length")
+Rel(len, enddlg, "Opens for Until a date")
+Rel(len, papi, "createPopkin()")
+Rel(created, draft, "Reads the created Popkin")
+Rel(papi, ctrl, "POST /api/popkins", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends CreatePopkinCommand")
+Rel(handler, val, "Validates with")
+Rel(handler, gen, "Asks for an invite code")
+Rel(handler, entity, "Creates")
+Rel(handler, db, "Saves", "EF Core")
+@enduml

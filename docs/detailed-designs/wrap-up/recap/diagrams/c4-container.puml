@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Recap
+
+Person(member, "Member", "Opens the recap")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+", "WrappedUpPage, RecapApi")
+  Container(api, "Popkin API", ".NET 10, ASP.NET Core", "RecapController, crew invites")
+  Container(worker, "Popkin Worker", ".NET worker service", "PrepareAlbumExportsJob")
+  ContainerDb(db, "Popkin database", "SQL Server", "Counts, ratings, AlbumExport")
+  Container(store, "Photo store", "Object storage, TO SUPPLY", "Photos and album zips")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "GET recap, start and poll export", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(worker, db, "Updates export progress", "EF Core")
+Rel(worker, store, "Reads photos, writes zip", "HTTPS")
+Rel(spa, store, "Downloads zip from expiring URL", "HTTPS")
+@enduml

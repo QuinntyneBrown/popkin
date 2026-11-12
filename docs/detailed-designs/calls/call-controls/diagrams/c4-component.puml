@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Call controls
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "VideoCallPage", "Angular page", "Lays out tiles and wires the controls")
+  Component(tile, "pk-call-tile", "components library", "Video or avatar, name, muted icon, speaking ring")
+  Component(controls, "pk-call-controls", "components library", "Mute, Camera and Leave toggles")
+  Component(session, "CallSession / WebRtcCallSession", "api library service", "Local tracks, speaking detection, leave, minimise")
+  Component(callsApi, "CallsApi / HttpCallsApi", "api library service", "setMedia and leave")
+  Component(rt, "PopkinRealtime", "api library service", "Call events")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "CallsController", "ASP.NET Core controller", "PATCH participants/me, POST leave")
+  Component(handler, "SetCallMediaCommandHandler", "MediatR handler", "Records MicOn and CameraOn")
+  Component(leave, "LeaveCallCommandHandler", "MediatR handler", "Leaves, ends an empty call")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Pushes to call:{callId}")
+  ComponentDb(db, "Popkin database", "SQL Server", "CallParticipant")
+}
+Rel(page, tile, "Renders one per shown participant")
+Rel(page, controls, "Renders and listens to")
+Rel(page, session, "Calls toggleMic, toggleCamera, leave, minimise")
+Rel(session, callsApi, "setMedia, leave")
+Rel(rt, session, "ParticipantMediaChanged, ParticipantLeft")
+Rel(callsApi, ctrl, "HTTPS JSON")
+Rel(ctrl, handler, "Sends SetCallMediaCommand")
+Rel(ctrl, leave, "Sends LeaveCallCommand")
+Rel(handler, db, "Writes", "EF Core")
+Rel(leave, db, "Writes", "EF Core")
+Rel(handler, notifier, "ParticipantMediaChanged")
+Rel(leave, notifier, "ParticipantLeft, CallEnded")
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Conversations
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+
+Rel(member, popkin, "Lists threads and starts direct messages using", "HTTPS, WebSocket")
+@enduml

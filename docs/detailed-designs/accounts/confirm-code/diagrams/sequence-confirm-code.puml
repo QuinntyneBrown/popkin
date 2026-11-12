@@ -1,0 +1,83 @@
+@startuml
+title UML sequence behaviour — Confirm the six-digit code
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "VerifyCodePage" as page
+  participant "HttpAuthApi" as client
+  participant "SessionStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as controller
+  participant "SessionCookieIssuer" as issuer
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ConfirmCodeCommandHandler" as handler
+  participant "VerificationCode" as code
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "HmacCodeHasher" as hasher
+  database "Popkin database" as db
+end box
+actor -> page : Type, paste or autofill digits
+page -> page : Drop every non-digit (L2-004 AC6)
+alt six digits present (typed, pasted or one-time-code autofill, L2-004 AC5)
+  page -> page : Button reads "Checking..." and is disabled
+  page -> client : confirmCode(verificationId, code, name)
+  client -> controller : POST /api/auth/codes/{verificationId}/confirm
+  controller -> handler : Send ConfirmCodeCommand
+  handler -> db : Load VerificationCode by id
+  alt unknown id, or ExpiresAt passed (L2-004 AC4)
+    handler --> controller : 400 code_expired
+  else ConsumedAt set: used or superseded (L2-005 AC5, AC2)
+    handler --> controller : 400 code_used
+  else Attempts already 5 (L2-005 AC3)
+    handler --> controller : 400 code_attempts_exhausted, even if correct
+  else live code
+    handler -> hasher : Matches(code, CodeHash)
+    alt no match (L2-004 AC3)
+      handler -> code : RecordFailedAttempt()
+      handler -> db : SaveChangesAsync
+      handler --> controller : 400 code_mismatch, attemptsLeft = 5 - Attempts
+    else match
+      handler -> db : Find Person by Destination where DeletedAt is null
+      alt no Person and no name (sign in, L2-006 AC2)
+        handler --> controller : NameRequired (code left unconsumed)
+      else Person exists, or name given
+        handler -> handler : Create Person when absent (name 1-40)
+        handler -> code : Consume(now)
+        handler -> db : Add Session (ExpiresAt = now + 30 days); SaveChangesAsync
+        handler --> controller : SignedIn, SessionDto, SessionId
+        controller -> issuer : SignInAsync(personId, sessionId, expiresAt)
+      end
+    end
+  end
+  controller --> client : 200 ConfirmCodeResponse (+ Set-Cookie) or 400 ProblemDetails
+  alt SignedIn
+    client --> page : session
+    page -> store : set(session); pending.clear()
+    page --> actor : Open returnUrl, else /new after sign up or /popkins after sign in (L2-004 AC2)
+  else NameRequired
+    page --> actor : Ask for a name (screen TO SUPPLY), then confirm again with the name
+  else code_mismatch
+    page --> actor : Clear field, aria-invalid, announce "That code doesn't match. Try again. N tries left."
+  else code_expired
+    page --> actor : "That code has expired." and "Send a new code" enabled
+  else code_attempts_exhausted or code_used
+    page --> actor : Message (copy TO SUPPLY) and "Send a new code" enabled
+  end
+end
+@enduml

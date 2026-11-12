@@ -1,0 +1,69 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — A wrapped-up Popkin is read-only
+
+enum PopkinStatus {
+  Active
+  WrappedUp
+}
+class PopkinSpace {
+  +Guid Id
+  +PopkinStatus Status
+  +DateTimeOffset? WrappedUpAt
+  +bool KeepPhotos
+  +DateTimeOffset? PhotosRemoveAt
+  +DateTimeOffset? PhotosRemovedAt
+  +MarkPhotosRemoved(at: DateTimeOffset): void
+}
+interface IMembershipGuard {
+  +RequireMemberAsync(popkinId: Guid, ct): Task<MemberAccess>
+  +RequireActiveMemberAsync(popkinId: Guid, ct): Task<MemberAccess>
+  +RequireHostAsync(popkinId: Guid, ct): Task<MemberAccess>
+}
+class MembershipGuard
+class MemberAccess {
+  +PopkinSpace Popkin
+  +Membership Membership
+  +bool IsHost
+}
+class PopkinNotFoundException
+class PopkinWrappedUpException
+class SendMessageCommandHandler {
+  +Handle(command: SendMessageCommand, ct): Task<MessageDto>
+}
+class JoinPopkinCommandHandler {
+  +Handle(command: JoinPopkinCommand, ct): Task<JoinResultDto>
+}
+class RemoveWrappedUpAlbumsCommandHandler {
+  +Handle(command: RemoveWrappedUpAlbumsCommand, ct): Task<int>
+}
+interface IPhotoStore {
+  +DeleteAsync(storageKey: string, ct): Task
+}
+class ProblemDetailsExceptionHandler {
+  +TryHandleAsync(context: HttpContext, exception: Exception, ct): ValueTask<bool>
+}
+
+MembershipGuard ..|> IMembershipGuard
+MembershipGuard ..> MemberAccess : returns
+MembershipGuard ..> PopkinNotFoundException : throws
+MembershipGuard ..> PopkinWrappedUpException : throws
+SendMessageCommandHandler --> IMembershipGuard : RequireActiveMemberAsync
+JoinPopkinCommandHandler ..> PopkinWrappedUpException : throws
+JoinPopkinCommandHandler ..> PopkinSpace : checks Status
+RemoveWrappedUpAlbumsCommandHandler --> IPhotoStore
+RemoveWrappedUpAlbumsCommandHandler ..> PopkinSpace : MarkPhotosRemoved
+MemberAccess --> PopkinSpace
+PopkinSpace --> PopkinStatus
+ProblemDetailsExceptionHandler ..> PopkinWrappedUpException : maps to 409
+ProblemDetailsExceptionHandler ..> PopkinNotFoundException : maps to 404
+@enduml

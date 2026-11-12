@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — Add or remove a reaction on a photo
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-photo-viewer" as viewer
+  participant "PhotoViewPage" as page
+  participant "PhotosApi" as client
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Add or Remove\nPhotoReactionCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+
+actor -> viewer : Press a quick reaction (❤️ 😂 😍 🔥 👏) (L2-034 AC1)
+viewer -> page : react(emoji)
+page -> page : Keep the previous reactions; applyReactionToggle
+alt Not yet given
+  page --> actor : Count + 1, quick reaction aria-pressed true, chip filled (L2-034 AC2)
+  page -> client : addReaction
+  client -> controller : PUT /api/popkins/{popkinId}/photos/{photoId}/reactions/{emoji}
+  controller -> handler : Send AddPhotoReactionCommand
+else Already given
+  page --> actor : Count - 1, aria-pressed false; a chip at zero goes (L2-034 AC3)
+  page -> client : removeReaction
+  client -> controller : DELETE /api/popkins/{popkinId}/photos/{photoId}/reactions/{emoji}
+  controller -> handler : Send RemovePhotoReactionCommand
+end
+handler -> db : Check membership and that the photo is in this Popkin
+alt Not a member or no such photo
+  controller --> client : 404 popkin_not_found or photo_not_found (L2-051 AC1)
+else Popkin wrapped up
+  controller --> client : 409 popkin_wrapped_up (L2-045 AC2)
+else Emoji not allowed
+  controller --> client : 400 emoji_not_allowed (L2-052 AC1)
+else Allowed
+  handler -> db : Insert or delete PhotoReaction (idempotent), save
+  handler -> db : Read counts grouped by emoji
+  controller --> client : 200 OK reactions with counts and mine
+end
+alt Failure of any kind
+  client --> page : Error
+  page --> actor : Restore the previous counts and pressed state (L2-034 AC4)
+  page -> toaster : Danger toast that stays until dismissed, copy TO SUPPLY (L2-056 AC7)
+else Success
+  client --> page : Server counts replace the optimistic ones
+end
+@enduml

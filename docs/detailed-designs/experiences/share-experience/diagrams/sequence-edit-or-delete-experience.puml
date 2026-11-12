@@ -1,0 +1,73 @@
+@startuml
+title UML sequence behaviour — Edit or delete an experience
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member or Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ExperienceDetailPage" as page
+  participant "ShareExperienceDialog" as dialog
+  participant "HttpExperiencesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Edit / DeleteExperienceCommandHandler" as handler
+  participant "Experience" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as store
+  database "Popkin database" as db
+end box
+actor -> page : Open the experience's actions (placement TO SUPPLY)
+page --> actor : Edit and Delete when CanEdit, Delete only when CanDelete (L2-040 AC6)
+alt Edit (the sharer)
+  actor -> page : Choose Edit
+  page -> dialog : Open in edit mode with the current values
+  actor -> dialog : Change fields, choose save
+  dialog -> client : edit(popkinId, id, form)
+  client -> controller : PATCH /api/popkins/{popkinId}/experiences/{experienceId}
+  controller -> handler : Send EditExperienceCommand
+  handler -> db : Membership, PopkinSpace, Experience
+  alt Caller is not the sharer
+    controller --> client : 403 ProblemDetails code not_experience_sharer
+  else Popkin wrapped up
+    controller --> client : 409 ProblemDetails code popkin_wrapped_up
+  else Allowed
+    handler -> entity : Edit(title, kind, when, place, photoId)
+    handler -> db : Save changes
+    controller --> client : 200 ExperienceCardDto
+    client --> page : Updated view
+  end
+else Delete (the sharer or the Host)
+  actor -> page : Choose Delete, confirm (confirmation TO SUPPLY)
+  page -> client : remove(popkinId, id)
+  client -> controller : DELETE /api/popkins/{popkinId}/experiences/{experienceId}
+  controller -> handler : Send DeleteExperienceCommand
+  handler -> db : Membership, PopkinSpace, Experience
+  alt Neither the sharer nor the Host
+    controller --> client : 403 ProblemDetails code not_experience_sharer (L2-051 AC4)
+  else Allowed
+    handler -> entity : CanBeDeletedBy(member)
+    handler -> db : Remove experience, its ratings, comments and keen records
+    opt Experience had a picture
+      handler -> store : DeleteAsync(storageKey)
+    end
+    controller --> client : 204 No Content
+    client --> page : Done
+    page --> actor : Experiences opens without the card, toast confirms
+  end
+end
+@enduml

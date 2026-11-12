@@ -1,0 +1,42 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Manage the account
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "AccountPage", "Angular page", "Photo, name, read-only contact, theme, sign out, delete")
+  Component(dialog, "SignOutDialog", "CDK dialog", "Sign out of Popkin?")
+  Component(accountapi, "AccountApi / HttpAccountApi", "api library", "ACCOUNT_API")
+  Component(authapi, "AuthApi / HttpAuthApi", "api library", "signOut()")
+  Component(theme, "ThemePreferences / LocalStorageThemePreferences", "api library", "THEME_PREFERENCES; data-theme on html")
+  Component(session, "SessionStore", "api library service", "Name and photo of the signed-in person")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(actrl, "AccountController", "ASP.NET Core controller", "/api/account")
+  Component(authctrl, "AuthController", "ASP.NET Core controller", "POST /api/auth/sign-out")
+  Component(get, "GetAccountQueryHandler", "MediatR handler", "AccountDto")
+  Component(name, "UpdateAccountNameCommandHandler", "MediatR handler", "Name 1-40")
+  Component(photo, "ChangeAccountPhotoCommandHandler", "MediatR handler", "Type and size checks, store")
+  Component(signout, "SignOutCommandHandler", "MediatR handler", "Revokes the current Session")
+  Component(notifier, "IPopkinNotifier / SignalRPopkinNotifier", "Abstraction / Api", "MemberUpdated")
+  Component(photos, "IPhotoStore / ObjectStoragePhotoStore", "Abstraction / Infrastructure", "Photo files")
+  ComponentDb(db, "Popkin database", "SQL Server", "")
+}
+Rel(page, accountapi, "Loads and saves")
+Rel(page, theme, "Sets preference")
+Rel(page, dialog, "Opens with CDK Dialog")
+Rel(dialog, authapi, "signOut()")
+Rel(page, session, "Updates name and photo")
+Rel(accountapi, actrl, "HTTPS", "JSON/HTTPS")
+Rel(authapi, authctrl, "HTTPS", "JSON/HTTPS")
+Rel(actrl, get, "GetAccountQuery")
+Rel(actrl, name, "UpdateAccountNameCommand")
+Rel(actrl, photo, "ChangeAccountPhotoCommand")
+Rel(authctrl, signout, "SignOutCommand")
+Rel(name, notifier, "Notifies")
+Rel(photo, notifier, "Notifies")
+Rel(photo, photos, "Saves file")
+Rel(get, db, "Reads", "EF Core")
+Rel(name, db, "Writes", "EF Core")
+Rel(signout, db, "Writes RevokedAt", "EF Core")
+@enduml

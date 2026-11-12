@@ -1,0 +1,112 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Popkin home
+
+package "Popkin.Application" {
+  class GetPopkinHomeQuery {
+    +Guid PopkinId
+  }
+  class GetPopkinHomeQueryHandler
+  class PopkinHomeDto {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +PopkinStatus Status
+    +DateTimeOffset? EndsAt
+    +int MemberCount
+    +IReadOnlyList<AvatarDto> Avatars (max 4)
+    +MemberRole ViewerRole
+    +int UnreadCount
+  }
+  class GetEveryonePreviewQuery
+  class ChatPreviewDto {
+    +IReadOnlyList<PreviewMessageDto> Latest (max 3)
+    +int NewCount
+  }
+  class GetPhotosSummaryQuery
+  class PhotosSummaryDto {
+    +int Count
+    +IReadOnlyList<ThumbnailDto> Latest (max 6)
+  }
+  class GetExperiencesSummaryQuery
+  class ExperiencesSummaryDto {
+    +int Count
+    +TopExperienceDto? TopRated
+  }
+  class GetMembersQuery
+  class MemberDto {
+    +Guid MembershipId
+    +string DisplayName
+    +MemberRole Role
+    +bool IsViewer
+    +AvatarDto Avatar
+  }
+  interface IMembershipGuard {
+    +RequireMemberAsync(popkinId, ct): Task<Membership>
+  }
+  interface IPhotoStore
+}
+package "Frontend (popkin app + api library)" {
+  class PopkinHomePage {
+    +home: Signal<PopkinHomeView>
+    +chat: Signal<SectionState>
+    +photos: Signal<SectionState>
+    +experiences: Signal<SectionState>
+    +members: Signal<SectionState>
+    +retry(section): void
+    +openInvite(): void
+    +openSettings(): void
+  }
+  class SectionState {
+    +status: loading | ready | empty | error
+    +data
+  }
+  interface PopkinsApi {
+    +getHome(id)
+    +getMembers(id)
+  }
+  interface ChatApi {
+    +getEveryonePreview(id)
+  }
+  interface PhotosApi {
+    +getSummary(id)
+  }
+  interface ExperiencesApi {
+    +getSummary(id)
+  }
+  interface PopkinRealtime {
+    +events(popkinId): Observable<PopkinEvent>
+  }
+}
+GetPopkinHomeQueryHandler ..> GetPopkinHomeQuery : handles
+GetPopkinHomeQueryHandler ..> PopkinHomeDto : returns
+GetPopkinHomeQueryHandler --> IMembershipGuard
+GetEveryonePreviewQuery ..> ChatPreviewDto
+GetPhotosSummaryQuery ..> PhotosSummaryDto
+GetPhotosSummaryQuery ..> IPhotoStore : thumbnail URLs
+GetExperiencesSummaryQuery ..> ExperiencesSummaryDto
+GetMembersQuery ..> MemberDto
+PopkinHomePage --> PopkinsApi
+PopkinHomePage --> ChatApi
+PopkinHomePage --> PhotosApi
+PopkinHomePage --> ExperiencesApi
+PopkinHomePage --> PopkinRealtime
+PopkinHomePage "1" *-- "4" SectionState
+@enduml

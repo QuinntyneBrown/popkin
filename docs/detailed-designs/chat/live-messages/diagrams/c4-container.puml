@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Messages arrive as they are sent
+
+Person(member, "Member", "Signed-in person with Popkin open")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "PopkinRealtime connection, unread tracking, thread view")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "PopkinHub at /hubs/popkin; messages and read-state endpoints")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Messages and ThreadReadState")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Opens one hub connection; catches up and marks read", "WebSocket, JSON/HTTPS")
+Rel(api, spa, "Pushes MessageAdded, MessageDeleted, ReactionsChanged, ThreadRead, PresenceChanged", "SignalR")
+Rel(api, db, "Reads and writes", "EF Core")
+@enduml

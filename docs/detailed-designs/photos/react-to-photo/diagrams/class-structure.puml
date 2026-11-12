@@ -1,0 +1,87 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — React to a photo
+
+package "components library" {
+  class PhotoViewer <<pk-photo-viewer>> {
+    +input reactions: PhotoReactionView[]
+    +input quickReactions: string[]
+    +output react: string
+    +output moreReactions: void
+  }
+}
+package "popkin app" {
+  class PhotoViewPage <<pk-photo-view-page>> {
+    +toggleReaction(emoji: string): void
+    +openMoreReactions(): void
+  }
+}
+package "api library" {
+  class PhotoReactionView {
+    +emoji: string
+    +name: string
+    +count: number
+    +mine: boolean
+  }
+  class applyReactionToggle <<helper>> {
+    +apply(list: PhotoReactionView[], emoji: string): PhotoReactionView[]
+  }
+  interface PhotosApi {
+    +addReaction(popkinId, photoId, emoji): Observable<PhotoReactionView[]>
+    +removeReaction(popkinId, photoId, emoji): Observable<PhotoReactionView[]>
+  }
+}
+package "Popkin.Application" {
+  class AddPhotoReactionCommand {
+    +Guid PopkinId
+    +Guid PhotoId
+    +string Emoji
+  }
+  class RemovePhotoReactionCommand {
+    +Guid PopkinId
+    +Guid PhotoId
+    +string Emoji
+  }
+  class AddPhotoReactionCommandHandler {
+    +Handle(c: AddPhotoReactionCommand): Task<IReadOnlyList<PhotoReactionDto>>
+  }
+  class RemovePhotoReactionCommandHandler {
+    +Handle(c: RemovePhotoReactionCommand): Task<IReadOnlyList<PhotoReactionDto>>
+  }
+  class PhotoReactionValidator {
+    +AllowedEmoji: catalogue TO SUPPLY
+  }
+}
+package "Popkin.Domain" {
+  class Photo {
+    +Guid Id
+    +Guid PopkinId
+  }
+  class PhotoReaction {
+    +Guid PhotoId
+    +Guid MembershipId
+    +string Emoji
+  }
+}
+PhotoViewPage --> PhotoViewer : renders
+PhotoViewPage ..> PhotosApi : injects PHOTOS_API
+PhotoViewPage ..> applyReactionToggle
+PhotoViewer --> "*" PhotoReactionView
+AddPhotoReactionCommandHandler ..> AddPhotoReactionCommand : handles
+RemovePhotoReactionCommandHandler ..> RemovePhotoReactionCommand : handles
+PhotoReactionValidator ..> AddPhotoReactionCommand : validates
+AddPhotoReactionCommandHandler --> PhotoReaction : creates
+RemovePhotoReactionCommandHandler --> PhotoReaction : deletes
+Photo "1" *-- "*" PhotoReaction
+@enduml

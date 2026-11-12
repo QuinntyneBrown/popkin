@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Add photos
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(album, "PhotoAlbumPage", "Angular page", "Offers Add and shows new photos")
+  Component(dialog, "AddPhotosDialog", "CDK dialog", "Chosen photos, captions, progress, Try again")
+  Component(photosApi, "PhotosApi / HttpPhotosApi", "api library service", "Uploads one photo per request with progress")
+  Component(rules, "photoFileRules", "api library helper", "Type, size and count checks before upload")
+  Component(rt, "PopkinRealtime", "api library service", "PhotosAdded event")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PhotosController", "ASP.NET Core controller", "POST /api/popkins/{popkinId}/photos")
+  Component(handler, "AddPhotoCommandHandler", "MediatR handler", "Checks, cleans, stores and records one photo")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Membership or 404")
+  Component(processor, "IPhotoProcessor / PhotoProcessor", "Application abstraction, Infrastructure implementation", "Sniffs type, removes metadata, makes thumbnails")
+  Component(store, "IPhotoStore / ObjectStoragePhotoStore", "Application abstraction, Infrastructure implementation", "Writes files")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "PhotosAdded to popkin:{popkinId}")
+  ComponentDb(db, "Popkin database", "SQL Server", "Photo")
+  ComponentDb(files, "Photo store", "Object storage", "Original and thumbnails")
+}
+Rel(album, dialog, "Opens with the chosen files")
+Rel(dialog, rules, "Checks each file")
+Rel(dialog, photosApi, "upload(popkinId, file, caption)")
+Rel(photosApi, ctrl, "multipart/form-data over HTTPS")
+Rel(rt, album, "PhotosAdded")
+Rel(ctrl, handler, "Sends AddPhotoCommand")
+Rel(handler, guard, "Checks membership")
+Rel(handler, processor, "Processes the upload")
+Rel(handler, store, "Puts files")
+Rel(store, files, "Writes")
+Rel(handler, db, "Inserts Photo", "EF Core")
+Rel(handler, notifier, "PhotosAdded")
+@enduml

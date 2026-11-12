@@ -1,0 +1,79 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Leave a Popkin
+
+package "Popkin.Domain" {
+  class Membership {
+    +Guid Id
+    +MemberRole Role
+    +DateTimeOffset? LeftAt
+    +bool IsActive
+    +Leave(now): void
+  }
+  enum MemberRole {
+    Host
+    Member
+  }
+}
+package "Popkin.Application" {
+  class LeavePopkinCommand {
+    +Guid PopkinId
+  }
+  class LeavePopkinCommandHandler {
+    +Handle(command, ct): Task
+  }
+  class HostCannotLeaveException
+  interface IMembershipGuard {
+    +RequireMemberAsync(popkinId, ct): Task<Membership>
+  }
+  interface IPopkinNotifier {
+    +MemberLeft(popkinId, membershipId, memberCount, ct): Task
+  }
+  interface IAppDbContext
+}
+package "Popkin.Api" {
+  class MembersController {
+    +LeaveMe(popkinId, ct): Task<IActionResult>
+  }
+  class SignalRPopkinNotifier
+}
+package "Frontend (popkin app + api library)" {
+  class LeavePopkinDialog {
+    +popkinName: string
+    +busy: Signal<boolean>
+    +leave(): void
+    +stay(): void
+  }
+  interface PopkinsApi {
+    +leave(popkinId): Observable<void>
+  }
+  class Toaster
+}
+Membership --> MemberRole
+MembersController ..> LeavePopkinCommand : sends
+LeavePopkinCommandHandler ..> LeavePopkinCommand : handles
+LeavePopkinCommandHandler --> IMembershipGuard
+LeavePopkinCommandHandler --> IPopkinNotifier
+LeavePopkinCommandHandler --> IAppDbContext
+LeavePopkinCommandHandler ..> Membership : Leave(now)
+LeavePopkinCommandHandler ..> HostCannotLeaveException : throws
+SignalRPopkinNotifier ..|> IPopkinNotifier
+LeavePopkinDialog --> PopkinsApi
+LeavePopkinDialog --> Toaster
+@enduml

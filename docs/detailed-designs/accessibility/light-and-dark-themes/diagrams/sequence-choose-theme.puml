@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — First open in the device theme, then choose Light
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member (device set to dark)" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "provideAppInitializer" as init
+  participant "ThemeService" as theme
+  participant "localStorage" as ls
+  participant "AccountPage" as account
+  participant "PopkinHomePage" as home
+  participant "pk-screen" as screen
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+
+actor -> init : Open Popkin for the first time
+init -> theme : restore()
+theme -> ls : getItem(pk-theme)
+ls --> theme : null
+theme -> theme : preference = device; no data-theme on html
+theme --> actor : prefers-color-scheme dark applies: dark theme (L2-059 AC1)
+actor -> account : Choose "Light" in Theme
+account -> theme : choose(light)
+theme -> ls : setItem(pk-theme, light)
+theme -> theme : html data-theme = light; theme-color meta updated
+theme --> actor : Light at once, no save needed (L2-048 AC4)
+actor -> home : Open Lakeside Weekend
+home -> ctrl : GET /api/popkins/{popkinId}
+ctrl --> home : 200 with colour Teal
+home -> screen : accent = Teal
+screen -> screen : data-accent = teal; tints mixed for light
+screen --> actor : Teal recognisable, text on it at least 4.5:1 (L2-059 AC2)
+actor -> init : Reopen Popkin later
+init -> theme : restore()
+theme -> ls : getItem(pk-theme)
+ls --> theme : light
+theme --> actor : Light, remembered on this device
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — A wrapped-up Popkin is read-only
+
+Person(member, "Member", "Reads the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+", "Closed composer, recap first, no Add")
+  Container(api, "Popkin API", ".NET 10, ASP.NET Core", "Refuses writes with 409 popkin_wrapped_up")
+  Container(worker, "Popkin Worker", ".NET worker service", "RemovePhotosOfWrappedUpPopkinsJob")
+  ContainerDb(db, "Popkin database", "SQL Server", "PopkinSpace.Status, photos")
+  Container(store, "Photo store", "Object storage, TO SUPPLY", "Photo files")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads; write attempts refused", "JSON/HTTPS")
+Rel(api, db, "Reads status", "EF Core")
+Rel(worker, db, "Finds due albums, deletes rows", "EF Core")
+Rel(worker, store, "Deletes photo files", "HTTPS")
+@enduml

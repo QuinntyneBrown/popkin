@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Preview an invite
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "JoinInvitePage", "Angular page", "default, loading, wrapped, not-found, error")
+  Component(state, "JoinInviteState", "Api library service", "Holds the preview for the join flow")
+  Component(iapi, "InvitesApi / HttpInvitesApi", "Contract + HTTP client", "getPreview(code)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "InvitesController", "Controller, AllowAnonymous on GET", "GET /api/invites/(code)")
+  Component(rl, "invite-lookup rate limit policy", "ASP.NET Core rate limiter", "20 per 10 min per address")
+  Component(handler, "GetInvitePreviewQueryHandler", "MediatR handler", "Returns only what L2-012 shows")
+  Component(cur, "ICurrentPerson", "Abstraction", "Optional caller")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(page, iapi, "getPreview()")
+Rel(page, state, "Stores preview")
+Rel(iapi, ctrl, "HTTPS")
+Rel(ctrl, rl, "Guarded by")
+Rel(ctrl, handler, "GetInvitePreviewQuery")
+Rel(handler, cur, "Reads caller when signed in")
+Rel(handler, db, "Reads")
+@enduml

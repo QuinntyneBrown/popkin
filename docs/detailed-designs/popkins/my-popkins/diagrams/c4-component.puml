@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — My Popkins
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "MyPopkinsPage", "Angular page", "Active cards, Wrapped up section, empty, loading, error, offline")
+  Component(papi, "PopkinsApi / HttpPopkinsApi", "Contract + HTTP client", "listMyPopkins()")
+  Component(fmt, "formatTimeLeft / formatBadge", "Pure helpers, api library", "Time left, Ongoing, 99+")
+  Component(snap, "PopkinsSnapshot", "Api library service", "Last good list for offline, mechanism TO SUPPLY")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PopkinsController", "ASP.NET Core controller", "GET /api/popkins")
+  Component(handler, "GetMyPopkinsQueryHandler", "MediatR handler", "Scopes to the caller's memberships")
+  Component(cur, "ICurrentPerson", "Abstraction", "Caller PersonId")
+  Component(photos, "IPhotoStore", "Abstraction", "Signed avatar URLs")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(page, papi, "Loads")
+Rel(page, fmt, "Formats with")
+Rel(page, snap, "Reads when offline")
+Rel(papi, ctrl, "GET /api/popkins", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetMyPopkinsQuery")
+Rel(handler, cur, "Reads caller")
+Rel(handler, db, "Projects summaries", "EF Core")
+Rel(handler, photos, "Builds avatar URLs")
+@enduml

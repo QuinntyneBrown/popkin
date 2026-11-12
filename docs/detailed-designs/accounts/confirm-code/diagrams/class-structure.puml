@@ -1,0 +1,102 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Confirm the six-digit code
+
+class VerificationCode {
+  +Guid Id
+  +ContactChannel Channel
+  +string Destination
+  +string CodeHash
+  +CodePurpose Purpose
+  +DateTimeOffset SentAt
+  +DateTimeOffset ExpiresAt
+  +int Attempts
+  +DateTimeOffset? ConsumedAt
+  +const int MaxAttempts = 5
+  +IsExpired(now): bool
+  +RecordFailedAttempt(): int
+  +Consume(now): void
+}
+class Person {
+  +Guid Id
+  +string Name
+  +Guid? PhotoId
+  +string? Phone
+  +string? Email
+  +DateTimeOffset CreatedAt
+  +DateTimeOffset? DeletedAt
+  +{static} Create(name, channel, destination, now): Person
+}
+class Session {
+  +Guid Id
+  +Guid PersonId
+  +DateTimeOffset CreatedAt
+  +DateTimeOffset ExpiresAt
+  +DateTimeOffset? RevokedAt
+  +{static} Start(personId, now): Session
+}
+enum ConfirmOutcome {
+  SignedIn
+  NameRequired
+}
+class ConfirmCodeCommand {
+  +Guid VerificationId
+  +string Code
+  +string? Name
+}
+class ConfirmCodeResultDto {
+  +ConfirmOutcome Outcome
+  +SessionDto? Session
+  +Guid? SessionId
+  +DateTimeOffset? ExpiresAt
+  +bool IsNewPerson
+}
+class ConfirmCodeCommandHandler {
+  +Handle(command, ct): Task<ConfirmCodeResultDto>
+}
+class ResendCodeCommand {
+  +Guid VerificationId
+}
+class ResendCodeCommandHandler {
+  +Handle(command, ct): Task<CodeSentDto>
+}
+class RequestCodeCommandHandler
+class AuthController {
+  +ConfirmCode(id, request): Task<ActionResult<ConfirmCodeResponse>>
+  +ResendCode(id): Task<ActionResult<CodeSentDto>>
+}
+class SessionCookieIssuer {
+  +SignInAsync(http, personId, sessionId, expiresAt): Task
+}
+class VerifyCodePage {
+  +code: FormControl<string>
+  +state: Signal<'idle' | 'checking' | 'invalid' | 'expired' | 'exhausted'>
+  +secondsUntilResend: Signal<number>
+  +onInput(value: string): void
+  +confirm(): void
+  +resend(): void
+}
+
+ConfirmCodeCommandHandler ..> ConfirmCodeCommand : handles
+ConfirmCodeCommandHandler ..> ConfirmCodeResultDto : returns
+ConfirmCodeCommandHandler --> VerificationCode : checks / consumes
+ConfirmCodeCommandHandler --> Person : finds or creates
+ConfirmCodeCommandHandler --> Session : starts
+ConfirmCodeResultDto --> ConfirmOutcome
+ResendCodeCommandHandler ..> ResendCodeCommand : handles
+ResendCodeCommandHandler ..> RequestCodeCommandHandler : reuses issuing rules
+Session "*" --> "1" Person
+AuthController ..> ConfirmCodeCommand
+AuthController ..> ResendCodeCommand
+AuthController ..> SessionCookieIssuer
+VerifyCodePage ..> AuthController : via AuthApi
+@enduml

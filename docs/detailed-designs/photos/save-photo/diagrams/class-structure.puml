@@ -1,0 +1,84 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Save a photo
+
+package "popkin app" {
+  class PhotoViewPage <<pk-photo-view-page>> {
+    +save(): void
+    +openActions(): void
+    +delete(): Promise<void>
+  }
+}
+package "api library" {
+  interface PhotosApi {
+    +getDownload(popkinId, photoId): Observable<PhotoDownloadView>
+    +deletePhoto(popkinId, photoId): Observable<void>
+  }
+}
+package "Popkin.Application" {
+  class GetPhotoDownloadQuery {
+    +Guid PopkinId
+    +Guid PhotoId
+  }
+  class GetPhotoDownloadQueryHandler {
+    +Handle(q: GetPhotoDownloadQuery): Task<PhotoDownloadDto>
+  }
+  class DeletePhotoCommand {
+    +Guid PopkinId
+    +Guid PhotoId
+  }
+  class DeletePhotoCommandHandler {
+    +Handle(c: DeletePhotoCommand): Task
+  }
+  interface IPhotoStore {
+    +GetDownloadUrlAsync(key: string, fileName: string, ttl: TimeSpan): Task<Uri>
+    +DeleteAsync(key: string): Task
+  }
+  interface IPopkinNotifier {
+    +PhotoDeletedAsync(popkinId: Guid, photoId: Guid): Task
+  }
+}
+package "Popkin.Domain" {
+  class Photo {
+    +Guid Id
+    +Guid PopkinId
+    +Guid UploaderMembershipId
+    +string StorageKey
+    +CanBeDeletedBy(membership: Membership): bool
+  }
+  class Membership {
+    +Guid Id
+    +MemberRole Role
+  }
+  class Message {
+    +Guid Id
+    +Guid? PhotoId
+    +bool PhotoRemoved
+  }
+  class PhotoReaction
+  class PhotoComment
+}
+PhotoViewPage ..> PhotosApi : injects PHOTOS_API
+GetPhotoDownloadQueryHandler ..> GetPhotoDownloadQuery : handles
+GetPhotoDownloadQueryHandler ..> IPhotoStore
+DeletePhotoCommandHandler ..> DeletePhotoCommand : handles
+DeletePhotoCommandHandler --> Photo : deletes
+DeletePhotoCommandHandler --> Message : marks PhotoRemoved
+DeletePhotoCommandHandler ..> IPhotoStore
+DeletePhotoCommandHandler ..> IPopkinNotifier
+Photo ..> Membership : checks uploader or Host
+Photo "1" *-- "*" PhotoReaction
+Photo "1" *-- "*" PhotoComment
+Message "*" o-- "0..1" Photo
+@enduml

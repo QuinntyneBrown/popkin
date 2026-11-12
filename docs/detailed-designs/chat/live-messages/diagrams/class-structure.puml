@@ -1,0 +1,92 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+
+title Class structure — Messages arrive as they are sent
+
+package "Popkin.Api" {
+  class PopkinHub {
+    +OnConnectedAsync(): Task
+    +OnDisconnectedAsync(ex): Task
+  }
+  class PersonUserIdProvider {
+    +GetUserId(connection): string
+  }
+  class PresenceTracker {
+    +Connected(popkinId, personId, connectionId): int
+    +Disconnected(connectionId): (Guid popkinId, int hereNow)[]
+    +HereNow(popkinId): int
+  }
+  class SignalRPopkinNotifier {
+    +MessageAdded(thread, dto): Task
+    +MessageDeleted(thread, messageId): Task
+    +ReactionsChanged(thread, messageId, summary): Task
+    +ThreadRead(personId, threadId): Task
+  }
+}
+package "Popkin.Application" {
+  interface IPopkinNotifier
+  class MarkThreadReadCommand {
+    +Guid PopkinId
+    +Guid ThreadId
+    +Guid LastReadMessageId
+  }
+  class MarkThreadReadCommandHandler
+  class GetMessagesQuery {
+    +Guid? Before
+    +Guid? After
+    +int Limit = 50
+  }
+}
+package "Popkin.Domain" {
+  class ThreadReadState {
+    +Guid ThreadId
+    +Guid MembershipId
+    +Guid? LastReadMessageId
+    +DateTimeOffset LastReadAt
+    +Advance(message, now): void
+  }
+}
+package "web app (popkin, api, components)" {
+  interface PopkinRealtime {
+    +state: Signal<'connected' | 'reconnecting' | 'disconnected'>
+    +messageAdded$: Observable<MessageView>
+    +messageDeleted$: Observable<MessageDeletedEvent>
+    +reactionsChanged$: Observable<ReactionsChangedEvent>
+    +threadRead$: Observable<ThreadReadEvent>
+    +presenceChanged$: Observable<PresenceEvent>
+    +reconnected$: Observable<void>
+  }
+  class SignalRPopkinRealtime
+  class ThreadStore {
+    +atBottom: Signal<boolean>
+    +newMessagesBelow: Signal<number>
+    +loadOlder(): void
+    +catchUp(): void
+    +markReadIfLatestInView(): void
+  }
+  class UnreadTracker {
+    +counts: Signal<Map<threadId, number>>
+    +popkinTotals: Signal<Map<popkinId, number>>
+  }
+}
+SignalRPopkinNotifier ..|> IPopkinNotifier
+SignalRPopkinNotifier ..> PopkinHub : IHubContext
+PopkinHub ..> PresenceTracker
+PopkinHub ..> PersonUserIdProvider
+MarkThreadReadCommandHandler ..> MarkThreadReadCommand : handles
+MarkThreadReadCommandHandler ..> ThreadReadState : Advance
+MarkThreadReadCommandHandler ..> IPopkinNotifier : ThreadRead
+SignalRPopkinRealtime ..|> PopkinRealtime
+ThreadStore ..> PopkinRealtime : POPKIN_REALTIME
+UnreadTracker ..> PopkinRealtime : POPKIN_REALTIME
+@enduml

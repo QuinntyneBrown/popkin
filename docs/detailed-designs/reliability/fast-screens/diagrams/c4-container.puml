@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Screens are fast
+
+Person(member, "Member", "On a mid-range phone over 4G")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA, service worker", "Lazy routes, preloading, skeletons after 300 ms, lazy thumbnails")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Read endpoints, Brotli/Gzip compression, request duration metrics")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Indexed tables for every list query")
+  ContainerDb(photos, "Photo store", "Object storage, provider TO SUPPLY", "Photo files and thumbnail renditions")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads data from", "JSON/HTTPS, compressed")
+Rel(spa, photos, "Loads thumbnails lazily from", "HTTPS")
+Rel(api, db, "Queries with no tracking", "EF Core")
+@enduml

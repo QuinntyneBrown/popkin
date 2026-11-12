@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — A Popkin wraps up when its time is up
+
+Person(member, "Member", "Has the Popkin open")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+", "Time left, warning banner, recap redirect")
+  Container(api, "Popkin API", ".NET 10, ASP.NET Core, SignalR", "GET /api/popkins/{popkinId}, PopkinHub")
+  Container(worker, "Popkin Worker", ".NET worker service", "WrapUpDuePopkinsJob")
+  ContainerDb(db, "Popkin database", "SQL Server", "PopkinSpace.EndsAt, Status")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads the Popkin", "JSON/HTTPS")
+Rel(api, spa, "Pushes popkinWrappedUp", "SignalR/WSS")
+Rel(worker, db, "Finds and wraps up due Popkins", "EF Core")
+Rel(worker, api, "Publishes hub events via backplane", "TO SUPPLY")
+Rel(api, db, "Reads", "EF Core")
+@enduml

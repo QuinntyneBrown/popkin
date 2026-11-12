@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Browse the album
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Photos pages and dialogs")
+  Container(api, "Popkin API", "ASP.NET Core (.NET 10)", "PhotosController and PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Photos, reactions, comments, memberships")
+  ContainerDb(store, "Photo store", "Object storage, provider TO SUPPLY", "Photo files, encrypted at rest")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads album pages", "JSON/HTTPS")
+Rel(api, db, "Reads Photo rows and counts", "EF Core")
+Rel(api, store, "Serves thumbnails through expiring addresses", "TO SUPPLY")
+Rel(spa, store, "Loads image files by expiring address", "HTTPS")
+@enduml

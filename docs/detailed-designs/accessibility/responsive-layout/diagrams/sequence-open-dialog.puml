@@ -1,0 +1,41 @@
+@startuml
+title UML sequence behaviour — Open a dialog on a phone, then rotate it
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member (360 px phone)" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage" as page
+  participant "pk-screen" as screen
+  participant "DialogOpener" as opener
+  participant "BreakpointObserver" as bp
+  participant "CDK Dialog" as cdk
+  participant "InviteDialog in pk-dialog" as dialog
+end box
+
+actor -> page : Open the Popkin home
+page -> screen : Render full-width column, tabs at the bottom (L2-058 AC2)
+screen --> actor : Nothing scrolls sideways (L2-058 AC1)
+actor -> page : Choose "Invite"
+page -> opener : open(InviteDialog, data)
+opener -> bp : observe((min-width: 40rem))
+bp --> opener : matches = false
+opener -> cdk : open with bottom position, full width, dialog--sheet
+cdk -> dialog : Render
+dialog --> actor : Sheet fixed to the bottom edge (L2-058 AC4, L2-011 AC4)
+actor -> actor : Turn the phone to landscape
+bp --> opener : matches = true
+opener -> cdk : DialogRef.updatePosition() to centred, max 28 rem
+dialog --> actor : Centred card; body scrolls within 92dvh (L2-058 AC6)
+@enduml

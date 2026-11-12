@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Motion is optional
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(tokens, "tokens.css", "components/styles", "Durations 150, 200, 280, 1400 ms; 0.01 ms and no press scale under reduced motion")
+  Component(pref, "MotionPreference", "api library", "reduced signal from matchMedia")
+  Component(kit, "pk-button, pk-dialog, pk-toast, pk-switch, pk-skip-link", "components library", "Transitions from tokens only")
+  Component(pop, "pk-popkin-tile pop", "components library", "Springs and bursts; dots only when motion is allowed")
+  Component(loading, "pk-skeleton, pk-progress", "components library", "Shimmer and spinner; static under reduced motion")
+  Component(pages, "PopkinCreatedPage, YoureInPage", "pages", "Show the pop")
+}
+
+Rel(kit, tokens, "Read durations and easing")
+Rel(loading, tokens, "Read --duration-deliberate")
+Rel(pop, tokens, "Reads --duration-slow, --ease-pop")
+Rel(pop, pref, "Reads reduced()")
+Rel(pages, pop, "Compose")
+@enduml

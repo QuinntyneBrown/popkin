@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Open the delete-account dialog
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AccountPage" as page
+  participant "HttpAccountApi" as client
+  participant "DeleteAccountDialog" as dialog
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AccountController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetDeletionImpactQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Delete my account"
+page -> client : getDeletionImpact()
+client -> controller : GET /api/account/deletion-impact
+controller -> handler : GetDeletionImpactQuery (ICurrentPerson)
+handler -> db : PopkinSpaces where HostPersonId = person and Status = Active
+db --> handler : Lakeside Weekend, Thursday Night Group
+handler --> controller : DeletionImpactDto
+controller --> client : 200
+alt 200
+  client --> page : DeletionImpactView
+  page -> dialog : Dialog.open(DeleteAccountDialog, { data: impact })
+  dialog --> actor : "Delete your account?" "This can't be undone." Removed and kept lists (L2-049 AC1)
+  opt hosts at least one active Popkin (L2-049 AC3)
+    dialog --> actor : Alert "You host 2 active Popkins": names, wrapped up when the account goes
+  end
+  dialog --> actor : "Type delete to confirm"; "Delete my account" disabled (L2-049 AC2)
+  loop each keystroke
+    actor -> dialog : Type
+    dialog -> dialog : canDelete = trimmed value equals "delete", ignoring case
+    dialog --> actor : "Delete my account" enabled only when canDelete
+  end
+else failure
+  client --> page : ApiProblem
+  page -> toaster : danger, stays until dismissed (copy TO SUPPLY) (L2-056 AC7)
+end
+@enduml

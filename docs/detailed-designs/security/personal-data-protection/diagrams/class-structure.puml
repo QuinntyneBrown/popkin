@@ -1,0 +1,66 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Personal data protection
+
+class SecurityHeadersMiddleware {
+  -string contentSecurityPolicy
+  +InvokeAsync(context: HttpContext, next: RequestDelegate): Task
+}
+class RequestLoggingMiddleware {
+  -ILogger logger
+  +InvokeAsync(context: HttpContext, next: RequestDelegate): Task
+}
+class "RequestLog" as log <<LoggerMessage>> {
+  +RequestCompleted(method: string, routeTemplate: string, status: int, ms: double, traceId: string)
+}
+class "PersonalDataAttribute" as pd <<DataClassification>>
+class "SecretDataAttribute" as sd <<DataClassification>>
+class MemberDto {
+  +Guid MembershipId
+  +string DisplayName
+  +string? PhotoUrl
+  +bool IsHost
+}
+class AccountDto {
+  +Guid PersonId
+  +string Name
+  +string? PhotoUrl
+  +string? Phone
+  +string? Email
+}
+class Person {
+  +Guid Id
+  +string Name
+  +string? Phone
+  +string? Email
+}
+class Membership {
+  +Guid Id
+  +string DisplayName
+  +MemberRole Role
+}
+class VerificationCode {
+  +string Destination
+  +string CodeHash
+}
+class CodeHasher {
+  +Hash(code: string): string
+  +Matches(code: string, hash: string): bool
+}
+
+RequestLoggingMiddleware --> log
+log ..> pd : person id, address hashed
+log ..> sd : codes, tokens erased
+MemberDto ..> Membership : projected from
+AccountDto ..> Person : caller only
+CodeHasher ..> VerificationCode : HMAC-SHA256
+@enduml

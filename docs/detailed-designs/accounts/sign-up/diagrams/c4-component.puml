@@ -1,0 +1,37 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Sign up
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "SignUpPage", "Angular page", "Name, Phone or Email, Continue")
+  Component(pending, "PendingVerificationStore", "api library service", "Carries the sent code's details to /verify")
+  Component(authapi, "AuthApi / HttpAuthApi", "api library", "requestCode()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AuthController", "ASP.NET Core controller", "POST /api/auth/codes, anonymous")
+  Component(limiter, "CodesPerAddressPolicy", "IRateLimiterPolicy", "10 code requests per address per 10 minutes")
+  Component(problems, "ProblemExceptionHandler", "IExceptionHandler", "ProblemException to ProblemDetails with code")
+  Component(handler, "RequestCodeCommandHandler", "MediatR handler", "Normalises, limits, issues, sends")
+  Component(validator, "RequestCodeCommandValidator", "validator", "Channel and destination rules")
+  Component(entity, "VerificationCode", "Domain entity", "Hashed code with expiry and attempts")
+  Component(hasher, "ICodeHasher / HmacCodeHasher", "Abstraction / Infrastructure", "Keyed hash of the code")
+  Component(gen, "ICodeGenerator / RandomCodeGenerator", "Abstraction / Infrastructure", "Six random digits")
+  Component(phone, "IPhoneNumberParser", "Abstraction / Infrastructure", "Normalises to E.164; library TO SUPPLY")
+  Component(sender, "ICodeSender: SmsCodeSender, EmailCodeSender", "Abstraction / Infrastructure", "Delivers the code")
+  ComponentDb(db, "Popkin database", "SQL Server", "VerificationCodes")
+}
+Rel(page, authapi, "requestCode(SignUp)")
+Rel(page, pending, "Stores CodeSentView and name")
+Rel(authapi, ctrl, "POST /api/auth/codes", "JSON/HTTPS")
+Rel(limiter, ctrl, "Guards")
+Rel(ctrl, handler, "Sends RequestCodeCommand")
+Rel(handler, validator, "Validates with")
+Rel(handler, phone, "Normalises phone with")
+Rel(handler, gen, "Generates code with")
+Rel(handler, hasher, "Hashes code with")
+Rel(handler, entity, "Creates; supersedes earlier")
+Rel(handler, db, "Reads and writes", "EF Core")
+Rel(handler, sender, "Sends code via")
+Rel(handler, problems, "Throws ProblemException to")
+@enduml

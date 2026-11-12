@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Delete the account
+
+Person(member, "Member", "A signed-in person")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Delete-account dialog, landing toast")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Deletion impact, DELETE /api/account")
+  Container(worker, "Popkin Worker", ".NET worker service", "PurgeDeletedAccountsJob")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "People, Memberships, Popkins, Messages, Sessions")
+  Container(store, "Photo store", "Object storage, provider TO SUPPLY", "Profile photo")
+}
+Rel(member, web, "Types delete and confirms", "HTTPS")
+Rel(web, api, "GET /api/account/deletion-impact; DELETE /api/account", "JSON/HTTPS")
+Rel(api, db, "Wraps up hosted Popkins, removes the name, revokes sessions", "EF Core")
+Rel(worker, db, "Erases personal data within 30 days", "EF Core")
+Rel(worker, store, "Deletes the profile photo", "HTTPS")
+@enduml

@@ -1,0 +1,68 @@
+@startuml
+title UML sequence behaviour — Edit name and look
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "EditPopkinDialog" as dlg
+  participant "HttpPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "UpdatePopkinLookCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "PopkinSpace" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dlg : Change name, emoji or colour, choose "Save"
+alt name empty or only spaces (L2-008 AC3)
+  dlg --> actor : Field invalid "Give your Popkin a name."
+else valid
+  dlg --> actor : "Saving…", Save disabled (L2-056 AC3)
+  dlg -> client : updateLook(id, name, emoji, colour)
+  client -> ctrl : PATCH /api/popkins/(id)
+  ctrl -> handler : Send UpdatePopkinLookCommand
+  handler -> guard : RequireMemberAsync(id)
+  alt not a member
+    guard --> handler : PopkinNotFoundException
+    handler --> ctrl : 404 popkin_not_found
+  else member but not Host (L2-020 AC5, L2-051 AC4)
+    handler --> ctrl : HostOnlyException
+    ctrl --> client : 403 ProblemDetails code host_only
+  else Popkin wrapped up
+    handler --> ctrl : 409 popkin_wrapped_up
+  else Host
+    handler -> entity : ChangeLook(name, emoji, colour) under L2-008 rules
+    handler -> db : Save
+    handler -> notifier : PopkinChanged(id, dto)
+    notifier -> notifier : Send to group popkin:(id) (L2-020 AC3)
+    handler --> ctrl : PopkinDto
+    ctrl --> client : 200 PopkinDto
+  end
+end
+alt 200
+  client --> dlg : PopkinView
+  dlg --> actor : Dialog closes; home and every member's screens show the new look
+else 400 field code
+  dlg --> actor : Field invalid with message
+else any other failure (L2-020 AC6)
+  dlg --> actor : Stays open with entries, pk-alert "We couldn't save that. Your changes are still here. Try again."
+end
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — Pop up another with this crew
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "WrappedUpPage" as page
+  participant "NameYourPopkinPage" as name
+  participant "PopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "InviteCrewCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Pop up another with this crew"
+page -> name : Navigate to /new?crew={oldId} (L2-046 AC5)
+actor -> name : Name, emoji, colour, length
+name -> client : createPopkin(...) (Start a Popkin)
+client --> name : newPopkinId
+name -> client : inviteCrew(newPopkinId, oldId)
+client -> controller : POST /api/popkins/{newPopkinId}/crew-invites
+controller -> handler : InviteCrewCommand
+handler -> guard : RequireHostAsync(newPopkinId)
+handler -> guard : RequireHostAsync(oldId)
+alt not Host of both
+  guard --> controller : HostOnlyException
+  controller --> client : 403 host_only (L2-051 AC4)
+else Host of both, old Popkin wrapped up
+  handler -> db : Members of old Popkin, not left, account not deleted
+  handler -> handler : Send new invite to each (channel TO SUPPLY)
+  handler --> controller : Done
+  controller --> client : 202 Accepted
+  client --> name : Continue to Popkin created
+end
+@enduml

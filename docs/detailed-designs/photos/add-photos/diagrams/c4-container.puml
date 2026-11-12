@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Add photos
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Photos pages and dialogs")
+  Container(api, "Popkin API", "ASP.NET Core (.NET 10)", "PhotosController and PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Photos, reactions, comments, memberships")
+  ContainerDb(store, "Photo store", "Object storage, provider TO SUPPLY", "Photo files, encrypted at rest")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Uploads photos and captions", "multipart/form-data over HTTPS")
+Rel(api, db, "Writes Photo rows", "EF Core")
+Rel(api, store, "Writes originals and thumbnails, metadata removed", "TO SUPPLY")
+Rel(spa, store, "Loads image files by expiring address", "HTTPS")
+Rel(api, spa, "Pushes PhotosAdded to members with Photos open", "SignalR/WebSocket")
+@enduml

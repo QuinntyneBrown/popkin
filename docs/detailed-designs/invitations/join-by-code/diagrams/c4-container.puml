@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Join by scanning or typing a code
+
+Person(person, "Member or Visitor", "Has a code, link or QR code")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "scan-to-join dialog, join-code page, QR decoding")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/invites/(code), rate limited")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "PopkinSpace.InviteCode")
+}
+System_Ext(camera, "Device camera", "getUserMedia")
+Rel(person, spa, "Uses", "HTTPS")
+Rel(spa, camera, "Streams video from")
+Rel(spa, api, "Looks up a typed code", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

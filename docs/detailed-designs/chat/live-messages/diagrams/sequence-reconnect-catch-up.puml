@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Reconnect and catch up
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Pages" as page
+  participant "ThreadStore /\nUnreadTracker" as store
+  participant "SignalRPopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+  participant "PresenceTracker" as presence
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Application" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+rt -> rt : Connection lost
+rt --> page : state reconnecting; offline banner when the device is offline (see failed-messages)
+loop withAutomaticReconnect delays 0, 2, 10, 30 s, then every 30 s (TO SUPPLY)
+  rt -> hub : Reconnect (new connection id)
+end
+alt session expired meanwhile
+  hub --> rt : 401; state disconnected
+else reconnected
+  hub -> hub : OnConnectedAsync rejoins popkin groups and presence
+  rt -> store : reconnected$
+  store -> handler : GET .../threads/{threadId}/messages?after={newestId}&limit=50 for the open thread
+  handler --> store : Missed messages; repeat while hasMore
+  store -> handler : GET /api/popkins/{popkinId}/threads for fresh unread counts
+  store --> page : Missed messages appended in order, duplicates dropped by Id
+  store -> store : MessageOutbox flushes waiting messages (see failed-messages)
+end
+@enduml

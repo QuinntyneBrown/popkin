@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Join by scanning or typing a code
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(scan, "ScanToJoinDialog", "CDK dialog", "default, busy, invalid, denied")
+  Component(code, "JoinCodePage", "Angular page", "default, invalid, submitting")
+  Component(scanner, "QrScanner", "Api library service", "Camera + BarcodeDetector or library TO SUPPLY")
+  Component(parse, "parseInviteInput", "Pure helper, api library", "Code from code, link or URL")
+  Component(iapi, "InvitesApi", "Contract + HTTP client", "getPreview(code)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "InvitesController", "Controller", "GET /api/invites/(code)")
+  Component(rl, "invite-lookup rate limit policy", "ASP.NET Core rate limiter", "20 per 10 min per address")
+  Component(handler, "GetInvitePreviewQueryHandler", "MediatR handler", "Shared with preview-invite")
+}
+Rel(scan, scanner, "Starts and stops")
+Rel(scan, parse, "Checks decoded text")
+Rel(code, parse, "Parses input")
+Rel(code, iapi, "getPreview()")
+Rel(code, scan, "Opens via Scan a QR code instead")
+Rel(scan, code, "Navigates via Type the code instead")
+Rel(iapi, ctrl, "HTTPS")
+Rel(ctrl, rl, "Guarded by")
+Rel(ctrl, handler, "GetInvitePreviewQuery")
+@enduml

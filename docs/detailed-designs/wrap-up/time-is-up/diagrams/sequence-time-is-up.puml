@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — The end date arrives
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "CurrentPopkinStore" as store
+  participant "PopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Worker" #D1FADF
+  participant "WrapUpDuePopkinsJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "WrapUpDuePopkinsCommandHandler" as handler
+  participant "PopkinWrapUpService" as service
+  participant "PopkinSpace" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+job -> job : PeriodicTimer tick (every 30 s)
+job -> handler : Send WrapUpDuePopkinsCommand
+handler -> db : Select Status = Active and EndsAt <= now
+db --> handler : Due Popkins (ongoing ones never match, L2-044 AC3)
+loop each due Popkin
+  handler -> service : WrapUpAsync(popkin, keepPhotos: true)
+  service -> entity : WrapUp(now, true) (L2-044 AC1)
+  entity --> service : Status = WrappedUp
+  service -> db : End open calls
+  handler -> db : Save this Popkin
+  alt committed
+    db --> handler : Committed
+    handler -> hub : popkinWrappedUp to popkin:{popkinId} (via backplane)
+    hub -> rt : popkinWrappedUp
+    rt -> store : Event
+    store -> store : Reload Popkin, status = wrappedUp
+    store -> page : Navigate to /p/{popkinId}/recap (replaceUrl)
+    page --> actor : Recap, no reload (L2-044 AC4)
+  else concurrency conflict (Host wrapped it up)
+    db --> handler : Conflict
+    handler -> handler : Skip
+  end
+end
+handler --> job : Count wrapped up
+opt hub event missed while offline
+  store -> store : TimeLeftClock passes endsAt, reload Popkin
+  store -> page : Navigate to recap when status = wrappedUp
+end
+@enduml

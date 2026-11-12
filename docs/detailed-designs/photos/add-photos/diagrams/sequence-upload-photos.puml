@@ -1,0 +1,81 @@
+@startuml
+title UML sequence behaviour — Upload photos to the album
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddPhotosDialog" as dialog
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddPhotoCommandHandler" as handler
+  participant "Photo" as photo
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "PhotoProcessor" as proc
+  participant "ObjectStoragePhotoStore" as store
+  database "Popkin database" as db
+  participant "SignalRPopkinNotifier" as notifier
+end box
+
+actor -> dialog : Choose "Add {n} photos"
+dialog --> actor : Progress bar "Uploading 1 of n", button "Adding…" disabled (L2-031 AC4, L2-056 AC3)
+loop Each valid photo, one request at a time
+  dialog -> client : upload(popkinId, file, caption)
+  client -> controller : POST /api/popkins/{popkinId}/photos multipart (file, caption)
+  controller -> controller : Authenticate, anti-forgery, request size limit (L2-050 AC1, AC2)
+  controller -> handler : Send AddPhotoCommand
+  handler -> db : Load membership and Popkin
+  alt Not a member
+    controller --> client : 404 popkin_not_found (L2-051 AC1)
+  else Wrapped up
+    controller --> client : 409 popkin_wrapped_up (L2-045 AC2)
+  else Caption over 200 characters
+    controller --> client : 400 caption_too_long (L2-052 AC1)
+  else Accepted
+    handler -> proc : ProcessAsync(content)
+    alt Content is not JPEG, PNG, WebP or HEIC, or over 10 MB
+      proc --> handler : Rejected
+      controller --> client : 400 photo_type_not_allowed or photo_too_large (L2-052 AC3)
+    else Image
+      proc -> proc : Remove location and device metadata (L2-031 AC6)
+      proc -> proc : Read size and capture time; make thumbnails, format TO SUPPLY (L2-055 AC4)
+      proc --> handler : ProcessedPhoto
+      handler -> store : PutAsync original and thumbnails under an unguessable key (L2-051 AC2)
+      handler -> photo : new Photo(uploader, caption, TakenAt, AddedAt)
+      handler -> db : Save changes
+      alt Save fails
+        handler -> store : DeleteAsync the files just written
+        controller --> client : 500 ProblemDetails with reference code
+      else Saved
+        handler -> notifier : PhotosAdded to popkin:{popkinId} (L2-031 AC7)
+        controller --> client : 201 Created PhotoDto
+      end
+    end
+  end
+  client --> dialog : Upload progress events, then the result
+  dialog --> actor : Progress advances
+end
+alt Every photo stored
+  dialog --> actor : Dialog closes; photos are in the album
+else Some failed
+  dialog --> actor : "One photo didn't upload. The other two are in the album.", failed rows keep "Try again", "Done" (L2-031 AC5, add-photos/failed)
+  actor -> dialog : Choose "Try again" on a row
+  dialog -> client : upload(popkinId, file, caption) again
+end
+@enduml

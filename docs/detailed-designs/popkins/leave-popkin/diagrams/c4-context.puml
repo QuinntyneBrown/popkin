@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Leave a Popkin
+
+Person(member, "Member", "Belongs to the Popkin and is not its Host")
+Person(others, "Other members", "Stay in the Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+Rel(member, popkin, "Leaves the Popkin")
+Rel(popkin, others, "Shows one member fewer")
+@enduml

@@ -1,0 +1,87 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+
+title Class structure — Messages that cannot be sent
+
+package "web app (api library)" {
+  enum OutboxState {
+    Sending
+    Waiting
+    Failed
+  }
+  class OutboxEntry {
+    +clientMessageId: string
+    +popkinId: string
+    +threadId: string
+    +text: string?
+    +photo: Blob?
+    +photoId: string?
+    +replyToMessageId: string?
+    +state: OutboxState
+    +failure: 'network' | 'rejected' | 'rate_limited'
+    +createdAt: number
+  }
+  class MessageOutbox {
+    +entries(threadId): Signal<OutboxEntry[]>
+    +enqueue(entry): void
+    +retry(clientMessageId): void
+    +discard(clientMessageId): void
+    -flush(threadId): Promise<void>
+  }
+  class OutboxStorage {
+    +load(personId): Promise<OutboxEntry[]>
+    +put(entry): Promise<void>
+    +remove(clientMessageId): Promise<void>
+    +clear(personId): Promise<void>
+  }
+  class DraftStore {
+    +get(threadId): string
+    +set(threadId, text): void
+    +clear(threadId): void
+    +clearAll(): void
+  }
+  interface NetworkStatus {
+    +online: Signal<boolean>
+    +backOnline$: Observable<void>
+  }
+  class BrowserNetworkStatus
+}
+package "Popkin.Application" {
+  class SendMessageCommandHandler {
+    +Handle(cmd): Task<SendMessageResult>
+  }
+  class SendMessageResult {
+    +MessageDto Message
+    +bool Created
+  }
+  class DiscardPendingMessageCommand {
+    +Guid PopkinId
+    +Guid ThreadId
+    +Guid ClientMessageId
+  }
+}
+package "Popkin.Domain" {
+  class Message {
+    +Guid ClientMessageId
+    +Guid AuthorMembershipId
+  }
+}
+MessageOutbox "1" *-- "*" OutboxEntry
+OutboxEntry --> OutboxState
+MessageOutbox ..> OutboxStorage
+MessageOutbox ..> NetworkStatus : NETWORK_STATUS
+BrowserNetworkStatus ..|> NetworkStatus
+SendMessageCommandHandler ..> SendMessageResult : returns
+SendMessageCommandHandler ..> Message : unique by author and ClientMessageId
+DiscardPendingMessageCommand ..> Message : deletes if stored
+@enduml

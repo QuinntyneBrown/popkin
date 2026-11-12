@@ -1,0 +1,71 @@
+@startuml
+title UML sequence behaviour — Open the Everyone thread
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "ThreadStore" as store
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ThreadsController /\nMessagesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Query handlers" as handler
+  participant "IMembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /p/:popkinId/chat/everyone
+page -> store : load(popkinId, everyone)
+store -> page : Skeletons after 300 ms (L2-056 AC1)
+store -> client : getEveryoneThread(popkinId)
+client -> controller : GET /api/popkins/{popkinId}/threads/everyone
+controller -> handler : Send GetEveryoneThreadQuery
+handler -> guard : Load caller membership
+alt caller is not a member (L2-051 AC1)
+  guard --> controller : NotFound
+  controller --> client : 404 ProblemDetails code popkin_not_found
+  client --> page : Not found
+  page --> actor : Navigate to not-found screen
+else member
+  handler -> db : Load PopkinSpace, Everyone ChatThread, member count
+  db --> handler : Thread header data
+  handler --> controller : ThreadDto (emoji, name, memberCount, hereNow, readOnly)
+  controller --> client : 200 ThreadDto
+  client -> controller : GET .../threads/{threadId}/messages?limit=50
+  controller -> handler : Send GetMessagesQuery
+  handler -> db : Latest 50 messages ordered by SentAt, Id
+  db --> handler : Messages, reactions, quotes
+  handler --> controller : MessagePageDto (oldest first)
+  controller --> client : 200 MessagePageDto
+  client --> store : Thread and first page
+  alt thread has no messages (L2-021 AC8)
+    store --> page : Empty
+    page --> actor : "It's quiet in here. For now." and three opener chips
+  else messages
+    store --> page : Messages grouped by day and author (L2-021 AC2, AC4)
+    page --> actor : Thread oldest first, latest in view (L2-021 AC1)
+  end
+end
+alt request fails (network or 5xx)
+  client --> page : Error
+  page --> actor : "We couldn't load the chat" with Try again and Back to Chat
+end
+@enduml

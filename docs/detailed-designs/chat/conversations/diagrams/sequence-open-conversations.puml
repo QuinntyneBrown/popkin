@@ -1,0 +1,63 @@
+@startuml
+title UML sequence behaviour — Open the Chat tab
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ConversationsPage" as page
+  participant "ChatApi" as client
+  participant "UnreadTracker" as unread
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ThreadsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetThreadsQueryHandler" as handler
+  participant "IMembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose Chat in pk-popkin-nav
+page --> actor : Skeletons after 300 ms; "Loading your chats…" status
+page -> client : listThreads(popkinId)
+client -> controller : GET /api/popkins/{popkinId}/threads
+controller -> handler : Send GetThreadsQuery
+handler -> guard : Load caller membership
+alt not a member (L2-051 AC1)
+  controller --> client : 404 code popkin_not_found
+  client --> page : Not found
+  page --> actor : Not-found screen
+else member
+  handler -> db : Everyone thread; Direct threads where caller is MemberA or MemberB and a message exists
+  handler -> db : Latest message and unread count per thread (messages by others after ThreadReadState.LastReadAt)
+  db --> handler : Rows
+  handler --> controller : ThreadListDto (direct sorted by LatestAt descending)
+  controller --> client : 200 ThreadListDto
+  client --> page : ConversationsView
+  page -> unread : Seed counts
+  alt direct messages exist
+    page --> actor : Everyone card first and larger (L2-022 AC1); rows with avatar, name, "You:" prefix, time, unread dot "Unread" (AC2, AC3)
+  else none
+    page --> actor : "No direct messages yet" with New message (L2-022 AC5)
+  end
+end
+alt request fails
+  page --> actor : "We couldn't load your chats" with Try again
+end
+unread -> page : MessageAdded for a thread not open: count + 1, row moves to top (L2-027 AC3)
+@enduml

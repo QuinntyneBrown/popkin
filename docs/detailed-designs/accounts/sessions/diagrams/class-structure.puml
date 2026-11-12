@@ -1,0 +1,89 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Sessions
+
+class Session {
+  +Guid Id
+  +Guid PersonId
+  +DateTimeOffset CreatedAt
+  +DateTimeOffset ExpiresAt
+  +DateTimeOffset? RevokedAt
+  +{static} Lifetime: TimeSpan = 30 days
+  +{static} Start(personId, now): Session
+  +IsLive(now): bool
+  +Revoke(now): void
+}
+class Person {
+  +Guid Id
+  +string Name
+  +DateTimeOffset? DeletedAt
+}
+interface ICurrentPerson {
+  +Guid PersonId
+  +Guid SessionId
+}
+class HttpCurrentPerson
+class SessionCookieIssuer {
+  +SignInAsync(http, personId, sessionId, expiresAt): Task
+  +SignOutAsync(http): Task
+}
+class SessionCookieEvents {
+  +ValidatePrincipal(context): Task
+}
+class CookieAuthenticationEvents
+class ValidateSessionQuery {
+  +Guid SessionId
+  +Guid PersonId
+}
+class ValidateSessionQueryHandler {
+  +Handle(query, ct): Task<bool>
+}
+class GetSessionQuery
+class GetSessionQueryHandler {
+  +Handle(query, ct): Task<SessionDto>
+}
+class SessionDto {
+  +Guid PersonId
+  +string Name
+  +string? PhotoUrl
+}
+class SameSiteRequestMiddleware {
+  +InvokeAsync(context, next): Task
+}
+class AuthController {
+  +GetSession(): Task<ActionResult<SessionDto>>
+}
+class SessionStore {
+  +session: Signal<SessionView | null | undefined>
+  +ensureLoaded(): Promise<SessionView | null>
+  +set(view: SessionView): void
+  +clear(): void
+}
+class "signedInGuard" as signedInGuard <<CanActivateFn>>
+class "unauthorizedInterceptor" as unauthorizedInterceptor <<HttpInterceptorFn>>
+class "safeReturnUrl(url): string | null" as safeReturnUrl <<function>>
+
+Session "*" --> "1" Person
+ICurrentPerson <|.. HttpCurrentPerson
+CookieAuthenticationEvents <|-- SessionCookieEvents
+SessionCookieEvents ..> ValidateSessionQuery : sends
+ValidateSessionQueryHandler ..> ValidateSessionQuery : handles
+ValidateSessionQueryHandler --> Session : reads
+GetSessionQueryHandler ..> GetSessionQuery : handles
+GetSessionQueryHandler ..> ICurrentPerson
+GetSessionQueryHandler ..> SessionDto : returns
+AuthController ..> GetSessionQuery
+SessionCookieIssuer ..> Session : claims for
+signedInGuard ..> SessionStore
+signedInGuard ..> safeReturnUrl
+unauthorizedInterceptor ..> SessionStore
+@enduml

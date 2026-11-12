@@ -1,0 +1,106 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Add photos
+
+package "popkin app" {
+  class AddPhotosDialog <<dialogs/add-photos>> {
+    +items: Signal<PhotoUploadItem[]>
+    +uploadedCount: Signal<number>
+    +busy: Signal<boolean>
+    +addPhotos(): Promise<void>
+    +retry(item: PhotoUploadItem): Promise<void>
+  }
+  class PhotoAlbumPage <<pk-photo-album-page>>
+}
+package "api library" {
+  class PhotoUploadItem {
+    +file: File
+    +previewUrl: string
+    +caption: string
+    +state: 'ready' | 'invalid' | 'uploading' | 'done' | 'failed'
+    +reason?: string
+  }
+  interface PhotosApi {
+    +upload(popkinId, file, caption): Observable<UploadEvent<PhotoThumbView>>
+  }
+  class HttpPhotosApi
+  class photoFileRules <<helper>> {
+    +maxFiles = 20
+    +maxBytes = 10 MB
+    +types = jpeg, png, webp, heic
+    +maxCaption = 200
+    +check(file: File): string?
+  }
+}
+package "Popkin.Application" {
+  class AddPhotoCommand {
+    +Guid PopkinId
+    +Stream Content
+    +string DeclaredContentType
+    +long Length
+    +string? Caption
+  }
+  class AddPhotoCommandValidator
+  class AddPhotoCommandHandler {
+    +Handle(command: AddPhotoCommand): Task<PhotoDto>
+  }
+  interface IPhotoProcessor {
+    +ProcessAsync(content: Stream): Task<ProcessedPhoto>
+  }
+  class ProcessedPhoto {
+    +string ContentType
+    +int Width
+    +int Height
+    +DateTimeOffset? TakenAt
+    +Stream Original
+    +IReadOnlyList<PhotoVariant> Thumbnails
+  }
+  interface IPhotoStore {
+    +PutAsync(key: string, content: Stream, contentType: string): Task
+    +DeleteAsync(key: string): Task
+    +GetReadUrlAsync(key: string, variant: PhotoVariantKind, ttl: TimeSpan): Task<Uri>
+  }
+}
+package "Popkin.Domain" {
+  class Photo {
+    +Guid Id
+    +Guid PopkinId
+    +Guid UploaderMembershipId
+    +string? Caption
+    +DateTimeOffset TakenAt
+    +DateTimeOffset AddedAt
+    +string StorageKey
+    +int Width
+    +int Height
+    +string ContentType
+  }
+}
+package "Popkin.Infrastructure" {
+  class PhotoProcessor
+  class ObjectStoragePhotoStore
+}
+HttpPhotosApi ..|> PhotosApi
+AddPhotosDialog --> "1..20" PhotoUploadItem
+AddPhotosDialog ..> PhotosApi : injects PHOTOS_API
+AddPhotosDialog ..> photoFileRules
+PhotoAlbumPage ..> AddPhotosDialog : opens with CDK Dialog
+AddPhotoCommandHandler ..> AddPhotoCommand : handles
+AddPhotoCommandValidator ..> AddPhotoCommand : validates
+AddPhotoCommandHandler ..> IPhotoProcessor
+AddPhotoCommandHandler ..> IPhotoStore
+AddPhotoCommandHandler --> Photo : creates
+IPhotoProcessor ..> ProcessedPhoto : returns
+PhotoProcessor ..|> IPhotoProcessor
+ObjectStoragePhotoStore ..|> IPhotoStore
+@enduml

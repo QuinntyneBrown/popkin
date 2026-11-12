@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Change how long it lasts
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ChangeLengthDialog" as dlg
+  participant "EndDateDialog" as enddlg
+  participant "HttpPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangePopkinLengthCommandHandler" as handler
+  participant "PopkinSpace" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dlg : Open, current length chosen
+opt "Until a date" (L2-009 AC2, AC3)
+  dlg -> enddlg : open with current end
+  enddlg --> dlg : Chosen end, 1 hour to 1 year ahead
+end
+actor -> dlg : Choose "Save"
+dlg -> dlg : resolveEndsAt in device time zone
+dlg --> actor : "Saving…", Save disabled
+dlg -> client : changeLength(id, length, endsAt)
+client -> ctrl : PUT /api/popkins/(id)/length
+ctrl -> handler : Send ChangePopkinLengthCommand
+handler -> handler : RequireMemberAsync, then Host check (403 host_only), Active check (409 popkin_wrapped_up)
+alt endsAt out of range
+  handler --> ctrl : 400 ends_at_out_of_range
+else valid
+  handler -> entity : ChangeLength(endsAt)
+  handler -> db : Save
+  handler -> notifier : PopkinChanged(id, dto) to popkin:(id) (L2-020 AC4)
+  handler --> ctrl : PopkinDto
+  ctrl --> client : 200
+end
+alt 200
+  dlg --> actor : Dialog closes; time left updates for every member
+else failure (L2-020 AC6)
+  dlg --> actor : Stays open, pk-alert "We couldn't change that. It still wraps up Sunday at 6 pm. Try again."
+end
+@enduml

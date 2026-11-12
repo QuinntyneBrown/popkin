@@ -1,0 +1,57 @@
+@startuml
+title UML sequence behaviour — Deliver a new message to other members
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Pages" as page
+  participant "ThreadStore /\nUnreadTracker" as store
+  participant "SignalRPopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+  participant "PresenceTracker" as presence
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Application" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+handler -> handler : SendMessageCommandHandler saved Message
+handler -> hub : IPopkinNotifier.MessageAdded
+alt Everyone thread
+  hub -> rt : MessageAdded(dto) to group popkin:{popkinId}
+else Direct thread
+  hub -> rt : MessageAdded(dto) to Clients.Users(personA, personB)
+end
+note right of rt : Within 1 s at 100 ms latency, no reload (L2-027 AC1)
+rt -> store : messageAdded$
+store -> store : Drop if Id or ClientMessageId already shown (own echo or retry)
+alt thread open and the latest message is in view
+  store --> page : Append; scroll to keep the latest in view
+  store -> handler : PUT .../threads/{threadId}/read (see sequence-mark-read)
+else thread open, member reading older messages (L2-027 AC2)
+  store --> page : Append without moving the view; "New messages" control appears
+  actor -> page : Choose "New messages"
+  page --> actor : Scroll to the latest
+else thread not open (L2-027 AC3)
+  store -> store : UnreadTracker count + 1 for the thread and its Popkin
+  store --> page : Badge on the Chat tab, Popkin home and My Popkins
+end
+page --> actor : Polite live region "{first name}: {text}" (L2-027 AC6)
+@enduml

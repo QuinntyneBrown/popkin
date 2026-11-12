@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Invite people
+
+Person(member, "Member", "Any member of an active Popkin")
+Person(guest, "Invited person", "Scans the QR code or receives the link")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(camera, "Phone camera", "Native camera app QR scanning")
+Rel(member, popkin, "Shows the QR code, copies the invite link")
+Rel(guest, camera, "Scans the QR code with")
+Rel(camera, popkin, "Opens the invite link in")
+@enduml

@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — Open the Popkin home
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage" as page
+  participant "HttpPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPopkinHomeQueryHandler" as handler
+  participant "IMembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /p/(id) (signedInGuard)
+page --> actor : Skeleton header and sections, tabs shown (L2-056 AC1)
+page -> client : getHome(id)
+client -> ctrl : GET /api/popkins/(id)
+ctrl -> handler : Send GetPopkinHomeQuery
+handler -> guard : RequireMemberAsync(id)
+guard -> db : Membership where PersonId = caller and LeftAt null
+alt no membership (L2-051 AC1)
+  guard --> handler : PopkinNotFoundException
+  handler --> ctrl : not found
+  ctrl --> client : 404 ProblemDetails code popkin_not_found
+  client --> page : NotFound
+  page --> actor : not-found screen
+else member
+  handler -> db : PopkinSpace, member count, 4 avatars Host first, unread count
+  db --> handler : Rows
+  handler --> ctrl : PopkinHomeDto
+  ctrl --> client : 200
+  client --> page : PopkinHomeView
+  alt Status WrappedUp (L2-045 AC5)
+    page --> actor : navigate /p/(id)/recap
+  else Active
+    page --> actor : Header: emoji, name, 4 avatars, "14 members", pk-time-left "1 day 6 hrs left · Wraps up Sun, 6 pm" or none when ongoing (L2-019 AC1)
+    page --> actor : "Group call" in Popkin colour, "Invite" (AC2); tabs Home aria-current, Chat badge (AC7)
+  end
+end
+alt request failed (network, 5xx)
+  page --> actor : "We couldn't open this Popkin" with "Try again" and "My Popkins" (L2-056 AC2)
+end
+@enduml

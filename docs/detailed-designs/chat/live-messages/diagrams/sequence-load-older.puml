@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Load earlier messages while scrolling up
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Pages" as page
+  participant "ThreadStore /\nUnreadTracker" as store
+  participant "SignalRPopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+  participant "PresenceTracker" as presence
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Application" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open a thread with more than 50 messages
+page -> store : load: GET .../messages?limit=50
+store --> page : Latest 50, hasMore = true (L2-027 AC5)
+actor -> page : Scroll near the top
+page -> store : loadOlder()
+store -> handler : GET .../messages?before={oldestId}&limit=50
+handler -> db : 50 messages before the cursor, ordered by SentAt, Id
+db --> handler : Page
+handler --> store : 200 MessagePageDto {items, hasMore}
+store -> page : Record scrollHeight and scrollTop
+store --> page : Prepend page
+page -> page : Restore scrollTop + height difference, so the view does not jump (L2-055 AC5)
+alt request fails
+  store --> page : Inline "Couldn't load earlier messages" with Try again (TO SUPPLY: no mock state)
+end
+@enduml

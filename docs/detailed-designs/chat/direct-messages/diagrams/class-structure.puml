@@ -1,0 +1,89 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+
+title Class structure — Direct messages
+
+package "Popkin.Domain" {
+  class ChatThread {
+    +Guid Id
+    +Guid PopkinId
+    +ThreadKind Kind
+    +Guid? MemberAId
+    +Guid? MemberBId
+    +{static} Direct(popkinId, first, second): ChatThread
+    +CanRead(membershipId: Guid): bool
+    +OtherMember(membershipId: Guid): Guid
+  }
+  class Membership {
+    +Guid Id
+    +Guid PopkinId
+    +Guid PersonId
+    +string DisplayName
+    +Guid? PhotoId
+    +DateTimeOffset? LeftAt
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinStatus Status
+  }
+}
+package "Popkin.Application" {
+  class OpenDirectThreadCommand {
+    +Guid PopkinId
+    +Guid MemberId
+  }
+  class OpenDirectThreadCommandHandler {
+    +Handle(cmd): Task<OpenDirectThreadResult>
+  }
+  class ThreadDto {
+    +Guid Id
+    +ThreadKind Kind
+    +MemberDto? Other
+    +string PopkinEmoji
+    +string PopkinName
+    +PopkinColour Colour
+    +bool ReadOnly
+  }
+  class ThreadNotFoundException
+  class MemberNotFoundException
+}
+package "Popkin.Api" {
+  class ThreadsController {
+    +OpenDirect(popkinId, memberId): ThreadDto
+    +Get(popkinId, threadId): ThreadDto
+  }
+}
+package "web app (popkin, api, components)" {
+  class DirectMessagePage {
+    +thread: Signal<ThreadView>
+    +messages: Signal<MessageView[]>
+    +readOnly: Signal<bool>
+  }
+  interface ChatApi {
+    +openDirectThread(popkinId, memberId): Observable<ThreadView>
+  }
+  class ThreadStore
+}
+ChatThread "1" --> "0..2" Membership : MemberA / MemberB
+ChatThread --> PopkinSpace : belongs to
+OpenDirectThreadCommandHandler ..> OpenDirectThreadCommand : handles
+OpenDirectThreadCommandHandler ..> ChatThread : finds or creates
+OpenDirectThreadCommandHandler ..> MemberNotFoundException : throws
+OpenDirectThreadCommandHandler ..> ThreadDto : returns
+ThreadsController ..> OpenDirectThreadCommandHandler : MediatR
+ThreadsController ..> ThreadNotFoundException : maps to 404
+DirectMessagePage ..> ChatApi : CHAT_API
+DirectMessagePage --> ThreadStore
+@enduml

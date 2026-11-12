@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Confirm the six-digit code
+
+Person(visitor, "Visitor", "Holds a code")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Code screen at /verify")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Checks codes, starts sessions, resends codes")
+  Container(worker, "Popkin Worker", ".NET worker service", "PurgeExpiredCodesJob")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "VerificationCodes, People, Sessions")
+}
+System_Ext(sender, "SMS or Email provider", "TO SUPPLY")
+Rel(visitor, web, "Types or pastes six digits", "HTTPS")
+Rel(web, api, "POST /api/auth/codes/{id}/confirm and /resend", "JSON/HTTPS")
+Rel(api, db, "Reads and updates codes; creates Person and Session", "EF Core")
+Rel(api, sender, "Sends a new code", "HTTPS")
+Rel(worker, db, "Deletes old codes", "EF Core")
+@enduml

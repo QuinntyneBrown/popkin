@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Confirm the six-digit code
+
+Person(visitor, "Visitor", "Holds a code sent to their phone or email")
+System(popkin, "Popkin", "Free platform for pop-up communities")
+System_Ext(sms, "SMS provider", "Delivers a new code by text; provider TO SUPPLY")
+System_Ext(email, "Email provider", "Delivers a new code by email; provider TO SUPPLY")
+
+Rel(visitor, popkin, "Enters the code, or asks for a new one, using", "HTTPS")
+Rel(popkin, sms, "Sends a new code via", "HTTPS API")
+Rel(popkin, email, "Sends a new code via", "HTTPS API")
+@enduml

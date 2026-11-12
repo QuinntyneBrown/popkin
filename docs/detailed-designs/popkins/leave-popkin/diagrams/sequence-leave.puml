@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — Leave a Popkin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "LeavePopkinDialog" as dlg
+  participant "HttpPopkinsApi" as client
+  participant "Router" as router
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MembersController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "LeavePopkinCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "Membership" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dlg : Choose "Leave this Popkin" in Popkin settings
+dlg --> actor : "Leave Lakeside Weekend?" messages and photos stay, new invite needed; "Leave", "Stay" (L2-047 AC1)
+alt "Stay", Escape or backdrop
+  dlg --> actor : Closes, focus returns to "Popkin settings"
+else "Leave"
+  dlg --> actor : "Leaving…", both actions disabled (L2-056 AC3)
+  dlg -> client : leave(id)
+  client -> ctrl : DELETE /api/popkins/(id)/members/me
+  ctrl -> handler : Send LeavePopkinCommand
+  handler -> guard : RequireMemberAsync(id)
+  alt not a member
+    guard --> handler : PopkinNotFoundException
+    handler --> ctrl : 404 popkin_not_found
+  else caller is Host (L2-047 AC3)
+    handler --> ctrl : HostCannotLeaveException
+    ctrl --> client : 403 ProblemDetails code host_cannot_leave
+  else member
+    handler -> entity : Leave(now)
+    handler -> db : Save LeftAt
+    handler -> notifier : MemberLeft(id, membershipId, memberCount)
+    notifier -> notifier : Send to popkin:(id); remove leaver's connections from popkin:(id) and its thread groups
+    handler --> ctrl : done
+    ctrl --> client : 204 No Content
+  end
+  alt 204 (L2-047 AC2)
+    client --> dlg : ok
+    dlg -> router : navigate /popkins
+    router --> actor : My Popkins without that Popkin
+  else failure
+    dlg --> actor : Dialog stays, actions enabled again, danger toast (copy TO SUPPLY)
+  end
+end
+@enduml

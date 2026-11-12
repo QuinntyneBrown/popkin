@@ -1,0 +1,119 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Loading, failure and offline are always explained
+
+package "api library" {
+  enum ApiErrorKind {
+    Offline
+    Unreachable
+    NotFound
+    Validation
+    Conflict
+    RateLimited
+    Unauthorized
+    Server
+  }
+  class ApiError <<view model>> {
+    +kind: ApiErrorKind
+    +status: number
+    +code?: string
+    +reference?: string
+    +retryAfterSeconds?: number
+  }
+  class "ScreenLoad<T>" as ScreenLoad {
+    +status: Signal<"loading" | "loaded" | "failed">
+    +value: Signal<T | undefined>
+    +error: Signal<ApiError | undefined>
+    +showSkeleton: Signal<boolean>
+    +fromCache: Signal<boolean>
+    +loadingText: string
+    +reload(): void
+  }
+  interface Connectivity {
+    +online: Signal<boolean>
+    +cameBack: Observable<void>
+    +reportUnreachable(): void
+  }
+  class BrowserConnectivity
+  interface ResponseCache {
+    +get(key: string): Promise<CachedResponse | undefined>
+    +put(key: string, body: unknown, storedAt: Date): Promise<void>
+    +clear(): Promise<void>
+  }
+  class IndexedDbResponseCache
+  class ErrorScreens {
+    +showNotFound(): void
+    +showServerError(error: ApiError, retryUrl: string): void
+    +showOffline(retryUrl: string): void
+  }
+  class DraftStore {
+    +read(key: string): string | null
+    +write(key: string, text: string): void
+    +clear(key: string): void
+    +clearAll(): void
+  }
+  class httpErrorInterceptor <<HttpInterceptorFn>>
+  class offlineCacheInterceptor <<HttpInterceptorFn>>
+}
+
+package "Popkin web app" {
+  class Toaster {
+    +toasts: Signal<ToastEntry[]>
+    +success(spec: ToastSpec): void
+    +info(spec: ToastSpec): void
+    +warning(spec: ToastSpec): void
+    +danger(spec: ToastSpec): void
+    +dismiss(id: string): void
+    +pause(id: string): void
+    +resume(id: string): void
+  }
+  class ToastSpec {
+    +title: string
+    +text?: string
+    +action?: ToastAction
+  }
+  class ToastHost <<container>>
+  class ServerErrorPage <<page>> {
+    +reference?: string
+    +retryUrl: string
+    +tryAgain(): void
+  }
+  class OfflinePage <<page>>
+  class NotFoundPage <<page>>
+}
+
+package "Popkin API" {
+  class UnexpectedExceptionHandler {
+    +TryHandleAsync(context, exception, ct): ValueTask<bool>
+  }
+  class ReferenceCode <<record struct>> {
+    +Value: string
+    +{static} New(): ReferenceCode
+  }
+}
+
+ApiError --> ApiErrorKind : has
+httpErrorInterceptor ..> ApiError : produces
+httpErrorInterceptor ..> Connectivity : reportUnreachable()
+offlineCacheInterceptor ..> ResponseCache : put / get
+BrowserConnectivity ..|> Connectivity
+IndexedDbResponseCache ..|> ResponseCache
+ScreenLoad ..> Connectivity : reloads on cameBack
+ScreenLoad ..> ErrorScreens : primary failures
+ScreenLoad --> ApiError : error
+ErrorScreens ..> ServerErrorPage : navigates
+ErrorScreens ..> OfflinePage : navigates
+ErrorScreens ..> NotFoundPage : navigates
+ToastHost ..> Toaster : renders toasts of
+Toaster "1" --> "*" ToastSpec : holds
+UnexpectedExceptionHandler ..> ReferenceCode : creates
+@enduml

@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Open the album
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoAlbumPage" as page
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAlbumQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ObjectStoragePhotoStore" as store
+end box
+
+actor -> page : Open Photos (/p/{popkinId}/photos)
+page --> actor : After 300 ms, skeletons hidden from assistive technology, "Loading photos…" (L2-056 AC1, photo-album/loading)
+page -> client : getAlbum(popkinId, everyone)
+client -> controller : GET /api/popkins/{popkinId}/photos?filter=everyone&limit=60
+controller -> handler : Send GetAlbumQuery
+handler -> db : Check membership
+alt Not a member
+  controller --> client : 404 popkin_not_found (L2-051 AC1)
+else Member
+  handler -> db : Count photos and distinct uploaders; read 60 latest by TakenAt, Id
+  handler -> store : GetReadUrlAsync(thumbnail) per photo, expiring (L2-051 AC2)
+  handler --> controller : AlbumPageDto
+  controller --> client : 200 OK
+end
+alt Request failed
+  client --> page : Error
+  page --> actor : "We couldn't load the photos", "Try again", tabs stay (L2-056 AC2, photo-album/error)
+else No photos
+  page --> actor : "No photos yet", explains the album, "Add photos" (L2-032 AC5, photo-album/empty)
+else Photos
+  page -> page : groupPhotosByDay, latest day first
+  page --> actor : "{n} photos from {m} people", days of three-across thumbnails (L2-032 AC1)
+  page --> actor : First photo of the latest day twice the width and height (L2-032 AC2)
+  page --> actor : Each thumbnail named by its caption or "Photo by {first name}" (L2-032 AC7)
+end
+@enduml

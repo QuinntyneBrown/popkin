@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — View a photo
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "PhotoViewPage", "Angular page, pk-photo-view-page", "Loads the photo, handles keys, swipe and close")
+  Component(viewer, "pk-photo-viewer", "components library", "Dark stage, whole photo, info, react bar")
+  Component(topbar, "pk-top-bar", "components library", "Close, uploader, time, Save photo")
+  Component(photosApi, "PhotosApi / HttpPhotosApi", "api library service", "getPhoto")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PhotosController", "ASP.NET Core controller", "GET /api/popkins/{popkinId}/photos/{photoId}")
+  Component(handler, "GetPhotoQueryHandler", "MediatR handler", "Photo, reactions, comment count, neighbours")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Membership or 404")
+  Component(store, "IPhotoStore", "Application abstraction", "Expiring display address")
+  ComponentDb(db, "Popkin database", "SQL Server", "Photo, PhotoReaction, PhotoComment")
+}
+Rel(page, topbar, "Renders")
+Rel(page, viewer, "Renders")
+Rel(page, photosApi, "getPhoto(popkinId, photoId)")
+Rel(photosApi, ctrl, "HTTPS JSON")
+Rel(ctrl, handler, "Sends GetPhotoQuery")
+Rel(handler, guard, "Checks membership")
+Rel(handler, db, "Reads", "EF Core")
+Rel(handler, store, "GetReadUrlAsync display")
+@enduml

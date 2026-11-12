@@ -1,0 +1,166 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Start a Popkin
+
+package "Popkin.Domain" {
+  enum PopkinColour {
+    Coral
+    Teal
+    Sky
+    Berry
+    Leaf
+    Plum
+    Amber
+  }
+  enum PopkinStatus {
+    Active
+    WrappedUp
+  }
+  enum MemberRole {
+    Host
+    Member
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +Guid HostPersonId
+    +DateTimeOffset? EndsAt
+    +PopkinStatus Status
+    +DateTimeOffset? WrappedUpAt
+    +bool KeepPhotos
+    +string InviteCode
+    +DateTimeOffset CreatedAt
+    +DateTimeOffset LastActivityAt
+    +{static} Start(host: Person, name, emoji, colour, endsAt, inviteCode, now): PopkinSpace
+  }
+  class Membership {
+    +Guid Id
+    +Guid PopkinId
+    +Guid PersonId
+    +string DisplayName
+    +Guid? PhotoId
+    +MemberRole Role
+    +DateTimeOffset JoinedAt
+    +DateTimeOffset? LeftAt
+    +Guid? InvitedByMembershipId
+  }
+  class ChatThread {
+    +Guid Id
+    +Guid PopkinId
+    +ThreadKind Kind
+  }
+  class PopkinRules <<static>> {
+    +int NameMaxLength = 40
+    +string[] Emoji (12)
+    +TimeSpan MinimumLead = 1 hour
+    +TimeSpan MaximumLead = 1 year
+  }
+}
+package "Popkin.Application" {
+  enum PopkinLength {
+    JustToday
+    TheWeekend
+    UntilDate
+    KeepItGoing
+  }
+  class CreatePopkinCommand {
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +PopkinLength Length
+    +DateTimeOffset? EndsAt
+  }
+  class CreatePopkinCommandValidator
+  class CreatePopkinCommandHandler {
+    +Handle(command, ct): Task<PopkinCreatedDto>
+  }
+  class PopkinCreatedDto {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +DateTimeOffset? EndsAt
+    +string InviteCode
+    +string InviteUrl
+  }
+  interface IInviteCodeGenerator {
+    +NewCode(): string
+  }
+  interface ICurrentPerson {
+    +Guid PersonId
+  }
+}
+package "Popkin.Infrastructure" {
+  class RandomInviteCodeGenerator
+}
+package "Popkin.Api" {
+  class PopkinsController {
+    +Create(body, ct): Task<ActionResult<PopkinCreatedDto>>
+  }
+}
+package "Frontend (popkin app + api library)" {
+  class NewPopkinDraft {
+    +name: Signal<string>
+    +emoji: Signal<string>
+    +colour: Signal<PopkinColour>
+    +length: Signal<PopkinLength>
+    +customEndsAt: Signal<Date | null>
+    +created: Signal<PopkinCreatedView | null>
+    +reset(): void
+  }
+  class NameYourPopkinPage
+  class HowLongPage {
+    +popItUp(): void
+  }
+  class EndDateDialog
+  class PopkinCreatedPage {
+    +copyLink(): void
+    +share(): void
+  }
+  interface PopkinsApi {
+    +createPopkin(request): Observable<PopkinCreatedView>
+  }
+  class HttpPopkinsApi
+}
+PopkinSpace --> PopkinColour
+PopkinSpace --> PopkinStatus
+PopkinSpace "1" *-- "1..*" Membership : members
+PopkinSpace "1" *-- "1" ChatThread : Everyone
+Membership --> MemberRole
+PopkinSpace ..> PopkinRules : enforces
+PopkinsController ..> CreatePopkinCommand : sends
+CreatePopkinCommandHandler ..> CreatePopkinCommand : handles
+CreatePopkinCommandValidator ..> CreatePopkinCommand : validates
+CreatePopkinCommandValidator ..> PopkinRules
+CreatePopkinCommandHandler --> IInviteCodeGenerator
+CreatePopkinCommandHandler --> ICurrentPerson
+CreatePopkinCommandHandler ..> PopkinSpace : creates
+CreatePopkinCommandHandler ..> PopkinCreatedDto : returns
+CreatePopkinCommand --> PopkinLength
+RandomInviteCodeGenerator ..|> IInviteCodeGenerator
+HttpPopkinsApi ..|> PopkinsApi
+NameYourPopkinPage --> NewPopkinDraft
+HowLongPage --> NewPopkinDraft
+HowLongPage --> PopkinsApi : POPKINS_API
+HowLongPage ..> EndDateDialog : opens
+PopkinCreatedPage --> NewPopkinDraft
+PopkinCreatedPage --> PopkinsApi : getInvite on reload
+@enduml

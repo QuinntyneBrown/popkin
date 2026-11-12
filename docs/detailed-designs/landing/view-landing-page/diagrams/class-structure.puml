@@ -1,0 +1,67 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — View the landing page
+
+interface PkRouteData {
+  +shell: 'app' | 'bare'
+  +page: string
+}
+class LandingPage {
+  -route: ActivatedRoute
+  +ideas: IdeaView[]
+  +comparison: ComparisonRowView[]
+  -focusSection(fragment: string): void
+}
+class WelcomePage
+class IdeaView {
+  +emoji: string
+  +colour: PopkinColour
+  +title: string
+  +sentence: string
+  +length: string
+}
+class ComparisonRowView {
+  +topic: string
+  +groupChat: string
+  +popkin: string
+}
+class signedOutGuard <<CanActivateFn>> {
+  +(route, state): Promise<boolean | UrlTree>
+}
+class SessionStore {
+  +session: Signal<SessionView | null | undefined>
+  +ensureLoaded(): Promise<SessionView | null>
+  +clear(): void
+}
+class SessionView {
+  +personId: string
+  +name: string
+  +photoUrl?: string
+}
+interface AuthApi {
+  +getSession(): Observable<SessionView>
+}
+class HttpAuthApi
+class AuthController {
+  +GetSession(): Task<ActionResult<SessionDto>>
+}
+
+LandingPage ..> PkRouteData : data { shell: bare, page: landing }
+WelcomePage ..> PkRouteData : data { shell: bare, page: welcome }
+LandingPage "1" *-- "4" IdeaView
+LandingPage "1" *-- "5" ComparisonRowView
+signedOutGuard ..> SessionStore : reads
+SessionStore ..> AuthApi : AUTH_API
+SessionStore --> SessionView : holds
+AuthApi <|.. HttpAuthApi
+HttpAuthApi ..> AuthController : GET /api/auth/session
+@enduml

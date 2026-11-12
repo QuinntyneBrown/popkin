@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — Share the new Popkin's invite
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinCreatedPage" as page
+  participant "pk-qr-card" as qr
+  participant "Browser APIs" as browser
+  participant "HttpPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+actor -> page : /p/(id)/created opens
+alt draft holds the created Popkin
+  page -> page : Read draft.created
+else page reloaded
+  page -> client : getInvite(id)
+  client -> ctrl : GET /api/popkins/(id)/invite
+  ctrl --> client : 200 InviteDto
+  client --> page : InviteView
+end
+page -> qr : link and QR modules
+page --> actor : "Pop! (name) is up." tile in colour, QR code, link (L2-010 AC1)
+opt prefers-reduced-motion: no-preference (L2-010 AC7, L2-060)
+  page --> actor : Tile springs in, confetti burst once
+end
+actor -> page : Choose "Copy link"
+page -> browser : navigator.clipboard.writeText(link)
+page --> actor : Action reads "Copied" for 3 s, live region "Invite link copied" (AC2)
+actor -> page : Choose "Text it"
+page -> browser : Follow sms: link with the invite link in the body (AC3)
+alt navigator.share exists (AC4)
+  actor -> page : Choose "Share"
+  page -> browser : navigator.share(url)
+else no share sheet
+  page --> actor : "Share" not rendered
+end
+actor -> page : Choose "Go to (name)"
+page --> actor : navigate /p/(id), Popkin home (AC5)
+@enduml

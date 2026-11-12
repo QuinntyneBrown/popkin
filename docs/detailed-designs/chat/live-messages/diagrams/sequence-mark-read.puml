@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Mark a thread read
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Pages" as page
+  participant "ThreadStore /\nUnreadTracker" as store
+  participant "SignalRPopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+  participant "PresenceTracker" as presence
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Application" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Thread open; latest message scrolls into view
+page -> store : IntersectionObserver reports the last message visible
+store -> handler : PUT /api/popkins/{popkinId}/threads/{threadId}/read {lastReadMessageId}
+handler -> db : Membership, ChatThread.CanRead, ThreadReadState
+alt message newer than LastReadMessageId
+  handler -> db : ThreadReadState.Advance(message, now); SaveChangesAsync
+  handler -> hub : ThreadRead(threadId) to Clients.User(personId)
+  hub -> rt : ThreadRead on every tab and device of the person
+  rt -> store : threadRead$
+  store --> page : Unread count zero everywhere (L2-027 AC4)
+else older or equal
+  handler --> store : 204, no change (never moves backwards)
+end
+alt thread not readable
+  handler --> store : 404 code thread_not_found
+end
+@enduml

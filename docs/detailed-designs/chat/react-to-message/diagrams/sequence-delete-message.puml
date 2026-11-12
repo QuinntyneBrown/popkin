@@ -1,0 +1,55 @@
+@startuml
+title UML sequence behaviour — Delete own message
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "ReactionsDialog" as dialog
+  participant "ThreadStore" as store
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Reaction handlers" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : Choose Delete on own message
+dialog --> page : close("delete")
+page -> store : deleteMessage(messageId)
+store -> client : deleteMessage(popkinId, threadId, messageId)
+client -> controller : DELETE /api/popkins/{popkinId}/threads/{threadId}/messages/{messageId}
+controller -> handler : Send DeleteMessageCommand
+handler -> db : Load Message and caller membership
+alt caller is not the author
+  controller --> client : 403 code not_message_author
+else Popkin wrapped up
+  controller --> client : 409 code popkin_wrapped_up
+else author
+  handler -> handler : Message.Delete: DeletedAt = now; Text and PhotoId cleared
+  handler -> db : SaveChangesAsync
+  handler -> notifier : MessageDeleted(messageId)
+  controller --> client : 204
+  client --> store : Deleted
+  store --> page : Message removed; replies quoting it read "Message deleted" (L2-025 AC4)
+end
+@enduml

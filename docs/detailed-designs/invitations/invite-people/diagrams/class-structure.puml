@@ -1,0 +1,84 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Invite people
+
+package "Popkin.Application" {
+  class GetInviteQuery {
+    +Guid PopkinId
+  }
+  class GetInviteQueryHandler {
+    +Handle(query, ct): Task<InviteDto>
+  }
+  class InviteDto {
+    +string Code
+    +string Url
+    +string PopkinName
+    +string Emoji
+    +PopkinColour Colour
+  }
+  class InviteLinkBuilder {
+    +Build(code): string
+  }
+  class InviteOptions {
+    +string BaseUrl
+  }
+  interface IMembershipGuard
+  interface IInviteCodeGenerator {
+    +NewCode(): string
+  }
+}
+package "Popkin.Domain" {
+  class PopkinSpace {
+    +string InviteCode
+    +PopkinStatus Status
+  }
+}
+package "Popkin.Infrastructure" {
+  class RandomInviteCodeGenerator {
+    -string Alphabet
+    -int Length = 10
+  }
+  class PopkinSpaceConfiguration {
+    unique index InviteCode
+  }
+}
+package "Frontend (popkin app + api library)" {
+  class InviteDialog {
+    +invite: Signal<InviteView>
+    +copied: Signal<boolean>
+    +copyLink(): void
+  }
+  class QrEncoder {
+    +encode(text): boolean[][]
+  }
+  interface PopkinsApi {
+    +getInvite(id): Observable<InviteView>
+  }
+}
+GetInviteQueryHandler ..> GetInviteQuery : handles
+GetInviteQueryHandler --> IMembershipGuard
+GetInviteQueryHandler --> InviteLinkBuilder
+GetInviteQueryHandler ..> PopkinSpace : reads
+GetInviteQueryHandler ..> InviteDto : returns
+InviteLinkBuilder --> InviteOptions
+RandomInviteCodeGenerator ..|> IInviteCodeGenerator
+PopkinSpaceConfiguration ..> PopkinSpace
+InviteDialog --> PopkinsApi
+InviteDialog --> QrEncoder
+@enduml

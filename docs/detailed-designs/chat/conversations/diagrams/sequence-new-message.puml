@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Start a direct message from New message
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ConversationsPage" as page
+  participant "NewMessageDialog" as dialog
+  participant "PopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MembersController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetMembersQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "New message"
+page -> dialog : Dialog.open(NewMessageDialog, {popkinId})
+dialog -> client : getMembers(popkinId)
+client -> controller : GET /api/popkins/{popkinId}/members
+controller -> handler : Send GetMembersQuery
+handler -> db : Active memberships (LeftAt null)
+db --> handler : Members
+handler --> controller : MemberDto[] (names and photos only, L2-054 AC2)
+controller --> client : 200 MemberDto[]
+client --> dialog : MemberView[]
+dialog -> dialog : Exclude the caller (L2-022 AC4)
+dialog --> actor : Member list with "Search members" field, focus in search
+actor -> dialog : Type a name
+dialog -> dialog : Filter by display name, case- and accent-insensitive
+alt no match
+  dialog --> actor : "Nobody by that name" (dialogs/new-message/no-results)
+else matches
+  actor -> dialog : Choose a member
+  dialog --> page : close(memberId)
+  page -> page : router.navigate(/p/:popkinId/chat/:memberId)
+  page --> actor : Direct message opens (see direct-messages)
+end
+alt members fail to load
+  dialog --> actor : Error message with Try again (TO SUPPLY: no mock state)
+end
+@enduml

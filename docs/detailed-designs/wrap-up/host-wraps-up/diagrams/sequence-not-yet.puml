@@ -1,0 +1,35 @@
+@startuml
+title UML sequence behaviour — The Host chooses "Not yet"
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinSettingsDialog" as dialog
+  participant "WrapUpPage" as page
+  participant "Router" as router
+  participant "CurrentPopkinStore" as store
+end box
+actor -> dialog : Choose "Wrap up"
+dialog -> router : Navigate to /p/{popkinId}/wrap-up
+router -> page : Activate
+page -> store : Read name, emoji, member count
+store --> page : Popkin summary (no request)
+page --> actor : "Wrap up {name}?", affects N members (L2-043 AC1)
+actor -> page : Turn "Keep the photo album" off
+page --> actor : Line reads "Photos are removed after 30 days" (L2-043 AC2)
+actor -> page : Choose "Not yet" or Back
+page -> router : Navigate to /p/{popkinId}
+router --> actor : Popkin home, nothing sent, nothing changed (L2-043 AC4)
+@enduml

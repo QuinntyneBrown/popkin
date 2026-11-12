@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Invite people
+
+Person(member, "Member", "Belongs to an active Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "invite dialog over popkin-home, QR encoding")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/popkins/(id)/invite")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "PopkinSpace.InviteCode, unique")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads the invite", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

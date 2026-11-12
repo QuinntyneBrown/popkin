@@ -1,0 +1,37 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Comment on a photo
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "PhotoViewPage", "Angular page", "Opens the dialog, shows the comment count")
+  Component(dialog, "PhotoCommentsDialog", "CDK dialog", "Lists, adds and deletes comments")
+  Component(frame, "pk-dialog", "components library", "Sheet or centred dialog frame")
+  Component(composer, "pk-composer", "components library", "Add a comment field and Post comment")
+  Component(empty, "pk-empty-state", "components library", "No comments yet")
+  Component(photosApi, "PhotosApi / HttpPhotosApi", "api library service", "getComments, addComment, deleteComment")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PhotosController", "ASP.NET Core controller", "/photos/{photoId}/comments")
+  Component(list, "GetPhotoCommentsQueryHandler", "MediatR handler", "Comments oldest first")
+  Component(add, "AddPhotoCommentCommandHandler", "MediatR handler", "Validates and adds")
+  Component(del, "DeletePhotoCommentCommandHandler", "MediatR handler", "Deletes the author's own")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Membership or 404")
+  ComponentDb(db, "Popkin database", "SQL Server", "PhotoComment")
+}
+Rel(page, dialog, "Opens with CDK Dialog")
+Rel(dialog, frame, "Renders inside")
+Rel(dialog, composer, "Renders")
+Rel(dialog, empty, "Renders when empty")
+Rel(dialog, photosApi, "Calls")
+Rel(photosApi, ctrl, "HTTPS JSON")
+Rel(ctrl, list, "GetPhotoCommentsQuery")
+Rel(ctrl, add, "AddPhotoCommentCommand")
+Rel(ctrl, del, "DeletePhotoCommentCommand")
+Rel(list, guard, "Checks membership")
+Rel(add, guard, "Checks membership")
+Rel(del, guard, "Checks membership")
+Rel(list, db, "Reads", "EF Core")
+Rel(add, db, "Inserts", "EF Core")
+Rel(del, db, "Deletes", "EF Core")
+@enduml

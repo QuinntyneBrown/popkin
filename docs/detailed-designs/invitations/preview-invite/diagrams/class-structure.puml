@@ -1,0 +1,95 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Preview an invite
+
+package "Popkin.Application" {
+  class GetInvitePreviewQuery {
+    +string Code
+  }
+  class GetInvitePreviewQueryHandler {
+    +Handle(query, ct): Task<InvitePreviewDto>
+  }
+  enum InviteState {
+    Open
+    WrappedUp
+  }
+  class InvitePreviewDto {
+    +string Code
+    +InviteState State
+    +string PopkinName
+    +string Emoji
+    +PopkinColour Colour
+    +int MemberCount
+    +DateTimeOffset? EndsAt
+    +DateTimeOffset? WrappedUpAt
+    +IReadOnlyList<AvatarDto> Avatars (max 5)
+    +InviterDto InvitedBy
+    +ViewerDto Viewer
+  }
+  class InviterDto {
+    +string FirstName
+    +AvatarDto Avatar
+  }
+  class AvatarDto {
+    +string Initials
+    +PopkinColour Accent
+    +string? PhotoUrl
+  }
+  class ViewerDto {
+    +bool IsMember
+    +Guid? PopkinId
+  }
+  class InviteNotFoundException
+  interface ICurrentPerson {
+    +Guid? PersonId
+  }
+}
+package "Popkin.Api" {
+  class InvitesController {
+    +[AllowAnonymous] GetPreview(code, ct)
+  }
+}
+package "Frontend (popkin app + api library)" {
+  class JoinInvitePage {
+    +state: Signal<loading | open | wrapped | not-found | error>
+    +join(): void
+    +retry(): void
+  }
+  class JoinInviteState {
+    +preview: Signal<InvitePreviewView | null>
+  }
+  interface InvitesApi {
+    +getPreview(code): Observable<InvitePreviewView>
+  }
+  class HttpInvitesApi
+}
+InvitesController ..> GetInvitePreviewQuery : sends
+GetInvitePreviewQueryHandler ..> GetInvitePreviewQuery : handles
+GetInvitePreviewQueryHandler --> ICurrentPerson
+GetInvitePreviewQueryHandler ..> InvitePreviewDto : returns
+GetInvitePreviewQueryHandler ..> InviteNotFoundException : throws
+InvitePreviewDto --> InviteState
+InvitePreviewDto *-- InviterDto
+InvitePreviewDto "1" *-- "0..5" AvatarDto
+InvitePreviewDto *-- ViewerDto
+InviterDto --> AvatarDto
+HttpInvitesApi ..|> InvitesApi
+JoinInvitePage --> InvitesApi : INVITES_API
+JoinInvitePage --> JoinInviteState
+@enduml

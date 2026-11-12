@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Join a Popkin
+
+Person(joiner, "Member (joining)", "Signed-in person who chose Join on an invite")
+Person(others, "Members", "Already in the Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+Rel(joiner, popkin, "Joins with a name and an optional photo")
+Rel(popkin, others, "Tells them the new member popped in")
+@enduml

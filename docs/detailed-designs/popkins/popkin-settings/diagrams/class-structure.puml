@@ -1,0 +1,97 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Popkin settings
+
+package "Popkin.Domain" {
+  class PopkinSpace {
+    +ChangeLook(name, emoji, colour, now): void
+    +ChangeLength(endsAt, now): void
+  }
+  class Membership {
+    +MemberRole Role
+    +bool IsHost
+  }
+  class PopkinRules <<static>>
+}
+package "Popkin.Application" {
+  class UpdatePopkinLookCommand {
+    +Guid PopkinId
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+  }
+  class UpdatePopkinLookCommandValidator
+  class UpdatePopkinLookCommandHandler
+  class ChangePopkinLengthCommand {
+    +Guid PopkinId
+    +PopkinLength Length
+    +DateTimeOffset? EndsAt
+  }
+  class ChangePopkinLengthCommandValidator
+  class ChangePopkinLengthCommandHandler
+  class PopkinDto {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +DateTimeOffset? EndsAt
+  }
+  class HostOnlyException
+  class PopkinWrappedUpException
+  interface IMembershipGuard
+  interface IPopkinNotifier {
+    +PopkinChanged(popkinId, dto, ct): Task
+  }
+}
+package "Frontend (popkin app + api library)" {
+  class PopkinSettingsDialog {
+    +isHost: boolean
+  }
+  class EditPopkinDialog {
+    +save(): void
+  }
+  class ChangeLengthDialog {
+    +save(): void
+  }
+  class EndDateDialog
+  interface PopkinsApi {
+    +updateLook(id, request)
+    +changeLength(id, request)
+  }
+}
+UpdatePopkinLookCommandHandler ..> UpdatePopkinLookCommand : handles
+UpdatePopkinLookCommandValidator ..> PopkinRules
+ChangePopkinLengthCommandHandler ..> ChangePopkinLengthCommand : handles
+ChangePopkinLengthCommandValidator ..> PopkinRules
+UpdatePopkinLookCommandHandler --> IMembershipGuard
+ChangePopkinLengthCommandHandler --> IMembershipGuard
+UpdatePopkinLookCommandHandler --> IPopkinNotifier
+ChangePopkinLengthCommandHandler --> IPopkinNotifier
+UpdatePopkinLookCommandHandler ..> PopkinSpace : ChangeLook
+ChangePopkinLengthCommandHandler ..> PopkinSpace : ChangeLength
+UpdatePopkinLookCommandHandler ..> HostOnlyException : throws
+ChangePopkinLengthCommandHandler ..> PopkinWrappedUpException : throws
+UpdatePopkinLookCommandHandler ..> PopkinDto : returns
+IMembershipGuard ..> Membership
+PopkinSettingsDialog ..> EditPopkinDialog : opens
+PopkinSettingsDialog ..> ChangeLengthDialog : opens
+ChangeLengthDialog ..> EndDateDialog : opens
+EditPopkinDialog --> PopkinsApi
+ChangeLengthDialog --> PopkinsApi
+@enduml

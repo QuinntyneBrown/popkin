@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Send a message to everyone
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "GroupChatPage", "Angular page", "Route /p/:popkinId/chat/everyone; composes pk-top-bar, pk-message, pk-composer")
+  Component(store, "ThreadStore", "api library service", "Merges history, live events and pending sends")
+  Component(chatapi, "ChatApi / HttpChatApi", "api library service", "Typed HTTP client for threads and messages")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(threads, "ThreadsController", "ASP.NET Core controller", "GET /api/popkins/{popkinId}/threads/everyone")
+  Component(messages, "MessagesController", "ASP.NET Core controller", "GET and POST .../threads/{threadId}/messages")
+  Component(send, "SendMessageCommandHandler", "MediatR handler", "Validates, stores, notifies")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Loads the caller's membership or 404")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Sends MessageAdded to popkin group")
+  ComponentDb(db, "Popkin database", "SQL Server", "ChatThread, Message, Membership")
+}
+Rel(page, store, "Reads signals from")
+Rel(store, chatapi, "Loads pages and sends via")
+Rel(chatapi, threads, "GET thread", "JSON/HTTPS")
+Rel(chatapi, messages, "GET and POST messages", "JSON/HTTPS")
+Rel(messages, send, "Sends SendMessageCommand")
+Rel(send, guard, "Checks membership")
+Rel(send, db, "Saves Message", "EF Core")
+Rel(send, notifier, "Publishes MessageAdded")
+@enduml

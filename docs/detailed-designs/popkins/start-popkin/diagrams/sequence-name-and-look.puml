@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — Name a Popkin and pick its look
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "NameYourPopkinPage" as page
+  participant "pk-emoji-picker / pk-colour-picker" as pickers
+  participant "pk-popkin-tile (preview)" as preview
+  participant "NewPopkinDraft" as draft
+  participant "Router" as router
+end box
+actor -> page : Open /new (signedInGuard)
+page -> draft : Read draft
+alt first visit (L2-008 AC6)
+  draft --> page : empty name, first emoji, Coral
+else returning from how-long (L2-008 AC5)
+  draft --> page : name, emoji and colour already chosen
+end
+page --> actor : Name field (placeholder "Thursday Night Crew"), 12 emoji, 7 colours, preview
+actor -> page : Type a name
+alt name reaches 40 characters (L2-008 AC4)
+  page --> actor : Further input refused, count reads "40 of 40"
+end
+page -> draft : name.set(value)
+alt name empty or only spaces (L2-008 AC3)
+  page --> actor : "Looks good" disabled
+end
+actor -> pickers : Pick an emoji or a colour
+pickers -> draft : emoji.set / colour.set
+draft --> preview : New emoji and colour at once (L2-008 AC2)
+pickers --> actor : aria-pressed=true with ring or dot
+actor -> page : Choose "Looks good"
+page -> router : navigate /new/length
+router --> actor : "How long should it last?" opens
+@enduml

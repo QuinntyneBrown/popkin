@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Conversations
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ConversationsPage", "Angular page", "Route /p/:popkinId/chat; pk-card, pk-list-row, pk-badge, pk-empty-state")
+  Component(dialog, "NewMessageDialog", "CDK dialog", "Searchable member list; pk-dialog, pk-text-field, pk-list-row")
+  Component(chatapi, "ChatApi / HttpChatApi", "api library service", "listThreads")
+  Component(popkinsapi, "PopkinsApi / HttpPopkinsApi", "api library service", "getMembers")
+  Component(unread, "UnreadTracker", "api library service", "Applies live events to unread counts")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(threads, "ThreadsController", "ASP.NET Core controller", "GET /api/popkins/{popkinId}/threads")
+  Component(members, "MembersController", "ASP.NET Core controller", "GET /api/popkins/{popkinId}/members")
+  Component(query, "GetThreadsQueryHandler", "MediatR handler", "Everyone first, direct threads by latest message, unread counts")
+  ComponentDb(db, "Popkin database", "SQL Server", "ChatThread, Message, ThreadReadState")
+}
+Rel(page, chatapi, "Loads threads via")
+Rel(page, unread, "Subscribes to")
+Rel(page, dialog, "Opens with CDK Dialog")
+Rel(dialog, popkinsapi, "Loads members via")
+Rel(chatapi, threads, "GET threads", "JSON/HTTPS")
+Rel(popkinsapi, members, "GET members", "JSON/HTTPS")
+Rel(threads, query, "Sends GetThreadsQuery")
+Rel(query, db, "Reads", "EF Core")
+@enduml

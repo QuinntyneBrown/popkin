@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Add photos
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(device, "Device photo library and camera", "Reached through the browser file picker")
+Rel(member, popkin, "Adds photos with captions to the album using", "HTTPS")
+Rel(member, device, "Picks or takes photos with")
+@enduml

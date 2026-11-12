@@ -1,0 +1,75 @@
+@startuml
+title UML sequence behaviour — Request a sign-up code
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "SignUpPage" as page
+  participant "HttpAuthApi" as client
+  participant "PendingVerificationStore" as pending
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "CodesPerAddressPolicy" as limiter
+  participant "AuthController" as controller
+  participant "ProblemExceptionHandler" as problems
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RequestCodeCommandHandler" as handler
+end box
+actor -> page : Enter name, choose Phone or Email, enter contact
+actor -> page : Choose "Continue"
+page -> page : Validate name (1-40) and contact format
+alt name empty (L2-003 AC6), phone a digit short (AC4) or email malformed (AC5)
+  page --> actor : Mark field aria-invalid, show error and form summary (announced); no request
+else form valid
+  page -> page : Button reads "Sending your code..." and is disabled (L2-003 AC3)
+  page -> client : requestCode({ purpose: SignUp, channel, destination })
+  client -> limiter : POST /api/auth/codes
+  alt more than 10 requests from this address in 10 minutes (L2-053 AC1)
+    limiter --> client : 429 code=rate_limited, Retry-After
+  else within the address limit
+    limiter -> controller : Forward
+    controller -> handler : Send RequestCodeCommand
+    note right of handler : See sequence-issue-code
+    alt code issued and sent
+      handler --> controller : CodeSentDto
+      controller --> client : 202 CodeSentDto
+    else invalid destination (L2-052 AC1)
+      handler -> problems : ProblemException 400 phone_invalid or email_invalid (field=destination)
+      problems --> client : 400 ProblemDetails
+    else more than 5 codes for this destination in an hour (L2-005 AC4)
+      handler -> problems : ProblemException 429 code_limit_reached, Retry-After
+      problems --> client : 429 ProblemDetails
+    else provider failure
+      handler -> problems : ProblemException 503 code_not_sent
+      problems --> client : 503 ProblemDetails
+    end
+  end
+  alt 202
+    client --> page : CodeSentView
+    page -> pending : start({ verificationId, purpose: SignUp, channel, displayDestination, resendAvailableAt, name, returnUrl })
+    page --> actor : Navigate to /verify (L2-003 AC3)
+  else 400 phone_invalid or email_invalid
+    client --> page : ApiProblem
+    page --> actor : Same field message as client check; Continue enabled
+  else 429
+    client --> page : ApiProblem with retryAfter
+    page --> actor : Alert says when to try again (L2-053 AC4); Continue enabled
+  else 503, network failure or other error
+    client --> page : ApiProblem
+    page --> actor : Alert "We couldn't send your code..." keeps all input; Continue enabled (L2-003 AC8)
+  end
+end
+@enduml

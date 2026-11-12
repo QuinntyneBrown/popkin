@@ -1,0 +1,91 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Comment on an experience
+
+package "Popkin.Domain" {
+  class ExperienceRating {
+    +Guid ExperienceId
+    +Guid MembershipId
+    +int Stars
+    +string? Comment
+    +DateTimeOffset RatedAt
+    +DateTimeOffset? CommentedAt
+    +SetComment(text: string, at: DateTimeOffset): void
+  }
+  class Experience {
+    +Guid Id
+    +ExperienceKind Kind
+    +bool IsRateable
+  }
+  class PopkinSpace {
+    +PopkinStatus Status
+    +EnsureActive(): void
+  }
+}
+
+package "Popkin.Application" {
+  class CommentOnExperienceCommand {
+    +Guid PopkinId
+    +Guid ExperienceId
+    +string Text
+  }
+  class CommentOnExperienceCommandValidator {
+    +Text required, at most 500 characters
+  }
+  class CommentOnExperienceCommandHandler {
+    +Handle(command: CommentOnExperienceCommand, ct: CancellationToken): Task<ExperienceCommentDto>
+  }
+  class ExperienceCommentDto {
+    +MemberSummaryDto Author
+    +int? Stars
+    +string Text
+    +DateTimeOffset At
+  }
+  interface IMembershipGuard
+  interface IAppDbContext
+}
+
+package "frontend" {
+  class AddCommentDialog {
+    +data: AddCommentData
+    +text: FormControl<string>
+    +busy: Signal<boolean>
+    +submit(): void
+  }
+  class AddCommentData {
+    +popkinId: string
+    +experienceId: string
+    +title: string
+    +myStars: number
+    +existingText: string | null
+  }
+  class ExperienceDetailPage {
+    +addComment(): void
+    +editComment(): void
+  }
+  interface ExperiencesApi {
+    +comment(popkinId: string, experienceId: string, text: string): Observable<ExperienceCommentView>
+  }
+}
+
+Experience "1" *-- "*" ExperienceRating
+Experience --> PopkinSpace
+CommentOnExperienceCommandValidator ..> CommentOnExperienceCommand : validates
+CommentOnExperienceCommandHandler ..> CommentOnExperienceCommand : handles
+CommentOnExperienceCommandHandler ..> IMembershipGuard
+CommentOnExperienceCommandHandler ..> IAppDbContext
+CommentOnExperienceCommandHandler ..> ExperienceRating : sets comment
+CommentOnExperienceCommandHandler ..> ExperienceCommentDto : returns
+ExperienceDetailPage ..> AddCommentDialog : opens
+AddCommentDialog --> AddCommentData
+AddCommentDialog ..> ExperiencesApi : injects EXPERIENCES_API
+@enduml

@@ -1,0 +1,92 @@
+@startuml
+title UML sequence behaviour — Start or join a group call
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "VideoCallPage" as page
+  participant "CallSession" as session
+  participant "Browser media\n(getUserMedia)" as media
+  participant "CallsApi" as client
+  participant "PopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "CallsController" as controller
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "JoinCallCommandHandler" as handler
+  participant "Call" as call
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "SignalRPopkinNotifier" as notifier
+end box
+participant "Media relay" as relay
+
+actor -> page : Choose "Group call" (home) or "Start group call" (Everyone)
+page -> session : start(popkinId)
+session --> page : status Connecting (video-call/loading)
+session -> media : Ask for microphone and camera (L2-029 AC1)
+alt Permission refused or no device
+  media --> session : NotAllowedError / NotFoundError
+  session --> page : status PermissionDenied
+  page --> actor : "We can't reach your camera or microphone", Try again, Back to the Popkin (L2-029 AC4)
+else Allowed
+  media --> session : Local MediaStream
+  session -> client : POST /api/popkins/{popkinId}/calls {}
+  client -> controller : HTTPS request with session cookie
+  controller -> controller : Authenticate (L2-050 AC1)
+  controller -> handler : Send JoinCallCommand
+  handler -> db : Load caller's membership and the Popkin
+  alt Not a member
+    handler --> controller : NotFound
+    controller --> client : 404 ProblemDetails code popkin_not_found (L2-051 AC1)
+    client --> page : Error
+  else Popkin wrapped up
+    handler --> controller : Conflict
+    controller --> client : 409 ProblemDetails code popkin_wrapped_up (L2-045 AC1)
+    client --> page : Error with a way back
+  else Active Popkin
+    handler -> db : Find the Group call with EndedAt null
+    alt No call under way
+      handler -> call : new Call(Kind Group, StartedAt now)
+    end
+    handler -> call : Join(membershipId, MicOn true, CameraOn true)
+    handler -> db : Save changes in one unit of work
+    db --> handler : Commit result
+    handler -> notifier : CallChanged to popkin:{popkinId} (count for the banner, L2-029 AC2)
+    handler --> controller : JoinedCallDto with participants and ICE servers
+    controller --> client : 201 Created (started) or 200 OK (joined)
+    client --> session : JoinedCallView
+    session -> rt : JoinCall(callId)
+    rt -> hub : Add connection to call:{callId}
+    hub -> notifier : ParticipantJoined to call:{callId}
+    loop Each other participant (topology TO SUPPLY)
+      session -> rt : SendSignal(offer)
+      rt -> hub : Relay offer to the participant's connection
+      hub --> rt : Signal(answer, ICE candidates)
+      rt --> session : Apply answer and candidates
+      session <-> relay : Media over STUN/TURN
+    end
+    session --> page : Participants, duration from StartedAt
+    alt Member is alone
+      page --> actor : "Waiting for the others", Invite to call (L2-029 AC3, video-call/empty)
+    else Others present
+      page --> actor : Header with emoji, name, "{n} on the call · {mm:ss}" and tiles, at most 12 (L2-029 AC5, AC7)
+    end
+  end
+end
+@enduml

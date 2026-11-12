@@ -1,0 +1,95 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — The Host wraps up a Popkin
+
+enum PopkinStatus {
+  Active
+  WrappedUp
+}
+
+class PopkinSpace {
+  +Guid Id
+  +string Name
+  +Guid HostPersonId
+  +DateTimeOffset? EndsAt
+  +PopkinStatus Status
+  +DateTimeOffset? WrappedUpAt
+  +bool KeepPhotos
+  +byte[] RowVersion
+  +DateTimeOffset? PhotosRemoveAt
+  +WrapUp(at: DateTimeOffset, keepPhotos: bool): void
+}
+
+class Call {
+  +Guid Id
+  +Guid PopkinId
+  +DateTimeOffset StartedAt
+  +DateTimeOffset? EndedAt
+  +End(at: DateTimeOffset): void
+}
+
+class WrapUpPopkinCommand {
+  +Guid PopkinId
+  +bool KeepPhotos
+}
+
+class WrapUpPopkinCommandValidator
+
+class WrapUpPopkinCommandHandler {
+  +Handle(command: WrapUpPopkinCommand, ct: CancellationToken): Task<WrapUpResultDto>
+}
+
+class PopkinWrapUpService {
+  +WrapUpAsync(popkin: PopkinSpace, keepPhotos: bool, ct: CancellationToken): Task
+}
+
+class WrapUpResultDto {
+  +Guid PopkinId
+  +DateTimeOffset WrappedUpAt
+}
+
+interface IMembershipGuard {
+  +RequireHostAsync(popkinId: Guid, ct: CancellationToken): Task<MemberAccess>
+}
+
+interface IPopkinNotifier {
+  +PopkinWrappedUpAsync(popkinId: Guid, ct: CancellationToken): Task
+}
+
+interface IAppDbContext {
+  +DbSet<PopkinSpace> Popkins
+  +DbSet<Call> Calls
+  +SaveChangesAsync(ct: CancellationToken): Task<int>
+}
+
+class PopkinWrappedUpException
+class HostOnlyException
+
+class PopkinsController {
+  +WrapUp(popkinId: Guid, body: WrapUpPopkinRequest): Task<ActionResult<WrapUpResultDto>>
+}
+
+PopkinsController ..> WrapUpPopkinCommand : sends
+WrapUpPopkinCommandValidator ..> WrapUpPopkinCommand : validates
+WrapUpPopkinCommandHandler ..> WrapUpPopkinCommand : handles
+WrapUpPopkinCommandHandler --> IMembershipGuard
+WrapUpPopkinCommandHandler --> PopkinWrapUpService
+WrapUpPopkinCommandHandler --> IPopkinNotifier
+WrapUpPopkinCommandHandler --> IAppDbContext
+WrapUpPopkinCommandHandler ..> WrapUpResultDto : returns
+PopkinWrapUpService ..> PopkinSpace : wraps up
+PopkinWrapUpService ..> Call : ends open calls
+PopkinSpace --> PopkinStatus : has
+PopkinSpace "1" --> "*" Call : hosts
+PopkinSpace ..> PopkinWrappedUpException : throws
+IMembershipGuard ..> HostOnlyException : throws
+@enduml

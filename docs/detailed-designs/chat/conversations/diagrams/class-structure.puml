@@ -1,0 +1,98 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+
+title Class structure — Conversations
+
+package "Popkin.Domain" {
+  class ChatThread {
+    +Guid Id
+    +Guid PopkinId
+    +ThreadKind Kind
+    +Guid? MemberAId
+    +Guid? MemberBId
+    +OtherMember(membershipId: Guid): Guid
+  }
+  class ThreadReadState {
+    +Guid ThreadId
+    +Guid MembershipId
+    +Guid? LastReadMessageId
+    +DateTimeOffset LastReadAt
+  }
+  class Message {
+    +Guid Id
+    +Guid ThreadId
+    +Guid AuthorMembershipId
+    +string? Text
+    +DateTimeOffset SentAt
+  }
+}
+package "Popkin.Application" {
+  class GetThreadsQuery {
+    +Guid PopkinId
+  }
+  class GetThreadsQueryHandler {
+    +Handle(q: GetThreadsQuery): Task<ThreadListDto>
+  }
+  class ThreadListDto {
+    +ThreadSummaryDto Everyone
+    +ThreadSummaryDto[] Direct
+  }
+  class ThreadSummaryDto {
+    +Guid ThreadId
+    +MemberDto? Other
+    +string? LatestText
+    +bool LatestIsMine
+    +string? LatestAuthorFirstName
+    +DateTimeOffset? LatestAt
+    +int UnreadCount
+  }
+}
+package "Popkin.Api" {
+  class ThreadsController {
+    +List(popkinId): ThreadListDto
+  }
+}
+package "web app (popkin, api, components)" {
+  class ConversationsPage {
+    +view: Signal<ConversationsView>
+    +openNewMessage(): void
+    +retry(): void
+  }
+  class NewMessageDialog {
+    +query: Signal<string>
+    +members: Signal<MemberView[]>
+    +choose(member: MemberView): void
+  }
+  class UnreadTracker {
+    +counts: Signal<Map<threadId, number>>
+    +currentThreadId: Signal<Guid?>
+  }
+  interface ChatApi {
+    +listThreads(popkinId): Observable<ConversationsView>
+  }
+  interface PopkinsApi {
+    +getMembers(popkinId): Observable<MemberView[]>
+  }
+}
+GetThreadsQueryHandler ..> GetThreadsQuery : handles
+GetThreadsQueryHandler ..> ThreadListDto : returns
+ThreadListDto "1" *-- "*" ThreadSummaryDto
+GetThreadsQueryHandler ..> ChatThread : reads
+GetThreadsQueryHandler ..> ThreadReadState : reads
+GetThreadsQueryHandler ..> Message : latest and unread
+ThreadsController ..> GetThreadsQueryHandler : MediatR
+ConversationsPage ..> ChatApi : CHAT_API
+ConversationsPage --> UnreadTracker
+ConversationsPage ..> NewMessageDialog : opens
+NewMessageDialog ..> PopkinsApi : POPKINS_API
+@enduml

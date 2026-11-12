@@ -1,0 +1,63 @@
+@startuml
+title UML sequence behaviour — Authenticate a request
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member or Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "HttpClient" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "SameSiteRequestMiddleware" as samesite
+  participant "Cookie authentication" as cookie
+  participant "SessionCookieEvents" as events
+  participant "Fallback policy" as policy
+  participant "Controller or PopkinHub" as endpoint
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ValidateSessionQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> client : Any screen action
+client -> samesite : Request to /api/... or /hubs/popkin
+alt POST, PUT, PATCH or DELETE whose Origin is not the app origin, or Sec-Fetch-Site is cross-site (L2-050 AC2)
+  samesite --> client : 403 code=cross_site_request
+else same-site or safe method
+  samesite -> cookie : Authenticate
+  alt cookie present and its ticket decrypts
+    cookie -> events : ValidatePrincipal(principal)
+    events -> handler : ValidateSessionQuery(sessionId, personId)
+    handler -> db : Load Session and Person
+    db --> handler : rows
+    alt Session live: RevokedAt null, ExpiresAt in the future, Person.DeletedAt null
+      handler --> events : true
+      events --> cookie : Principal accepted
+    else revoked by sign out (L2-050 AC3), expired or deleted person
+      handler --> events : false
+      events -> cookie : RejectPrincipal(); delete cookie
+    end
+  else no cookie or tampered cookie
+    cookie --> cookie : No principal
+  end
+  cookie -> policy : Authorize
+  alt endpoint is AllowAnonymous (health, codes, confirm, invite preview) or principal present
+    policy -> endpoint : Execute
+    endpoint --> client : 2xx or ProblemDetails
+  else no principal (L2-050 AC1, AC4)
+    policy --> client : 401 (OnRedirectToLogin returns status, never a redirect)
+  end
+end
+@enduml

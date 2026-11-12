@@ -1,0 +1,55 @@
+@startuml
+title UML sequence behaviour — Filter experiences
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ExperiencesPage" as page
+  participant "HttpExperiencesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetExperiencesQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose chip "We did" or "Want to do"
+page -> page : Mark chosen chip aria-pressed=true, others false (L2-037 AC4)
+page -> page : Write ?filter=did|want to the route query
+page -> client : list(popkinId, filter)
+client -> controller : GET /api/popkins/{popkinId}/experiences?filter=did
+controller -> controller : Bind filter
+alt Filter value is not all, did or want
+  controller --> client : 400 ProblemDetails code invalid_filter (L2-052 AC1)
+  client --> page : Error
+  page --> actor : Error state with "Try again"
+else Valid filter
+  controller -> handler : Send GetExperiencesQuery(Filter)
+  handler -> handler : Membership check as in Open Experiences
+  handler -> db : Kind in (Did, Restaurant) for did, Kind = WantToDo for want
+  db --> handler : Rows, newest first
+  handler --> controller : ExperienceCardDto list
+  controller --> client : 200 JSON
+  client --> page : ExperienceCardView list
+  alt Group has experiences
+    page --> actor : Only that group's cards
+  else Group is empty
+    page --> actor : "Nothing on the wish list" with "Share one" and "Show all" (L2-037 AC5)
+  end
+end
+@enduml

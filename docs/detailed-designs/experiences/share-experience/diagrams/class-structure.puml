@@ -1,0 +1,138 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Share an experience
+
+package "Popkin.Domain" {
+  enum ExperienceKind {
+    Did
+    Restaurant
+    WantToDo
+  }
+  class Experience {
+    +Guid Id
+    +Guid PopkinId
+    +ExperienceKind Kind
+    +string Title
+    +string? When
+    +string? Place
+    +Guid? PhotoId
+    +Guid SharedByMembershipId
+    +DateTimeOffset SharedAt
+    +{static} Share(popkin: PopkinSpace, by: Membership, title: string, kind: ExperienceKind, when: string?, place: string?, photoId: Guid?, at: DateTimeOffset): Experience
+    +Edit(title: string, kind: ExperienceKind, when: string?, place: string?, photoId: Guid?): void
+    +CanBeEditedBy(member: Membership): bool
+    +CanBeDeletedBy(member: Membership): bool
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Emoji
+    +PopkinColour Colour
+    +PopkinStatus Status
+    +EnsureActive(): void
+  }
+  class Membership {
+    +Guid Id
+    +MemberRole Role
+  }
+  class Photo {
+    +Guid Id
+    +Guid PopkinId
+    +Guid UploaderMembershipId
+    +string StorageKey
+    +int Width
+    +int Height
+    +string ContentType
+  }
+}
+
+package "Popkin.Application" {
+  class ShareExperienceCommand {
+    +Guid PopkinId
+    +string Title
+    +ExperienceKind Kind
+    +string? When
+    +string? Place
+    +UploadedPicture? Picture
+  }
+  class UploadedPicture {
+    +Stream Content
+    +string FileName
+    +long Length
+  }
+  class ShareExperienceCommandValidator
+  class ShareExperienceCommandHandler {
+    +Handle(command: ShareExperienceCommand, ct: CancellationToken): Task<ExperienceCardDto>
+  }
+  class EditExperienceCommand {
+    +Guid PopkinId
+    +Guid ExperienceId
+    +string Title
+    +ExperienceKind Kind
+    +string? When
+    +string? Place
+    +UploadedPicture? Picture
+    +bool RemovePicture
+  }
+  class EditExperienceCommandHandler
+  class DeleteExperienceCommand {
+    +Guid PopkinId
+    +Guid ExperienceId
+  }
+  class DeleteExperienceCommandHandler
+  interface IPhotoStore {
+    +SaveAsync(popkinId: Guid, picture: UploadedPicture, ct: CancellationToken): Task<StoredPhoto>
+    +DeleteAsync(storageKey: string, ct: CancellationToken): Task
+  }
+  interface IMembershipGuard
+}
+
+package "frontend" {
+  class ShareExperienceDialog {
+    +form: FormGroup
+    +state: Signal<'idle' | 'busy' | 'failed'>
+    +submit(): void
+  }
+  class ShareExperienceForm {
+    +title: string
+    +kind: ExperienceKindKey
+    +when: string
+    +place: string
+    +picture: File | null
+  }
+  class ExperiencesPage {
+    +shareOne(): void
+  }
+  interface ExperiencesApi {
+    +share(popkinId: string, form: ShareExperienceForm): Observable<ExperienceCardView>
+    +edit(popkinId: string, id: string, form: ShareExperienceForm): Observable<ExperienceCardView>
+    +remove(popkinId: string, id: string): Observable<void>
+  }
+}
+
+Experience --> ExperienceKind
+Experience --> PopkinSpace : belongs to
+Experience --> Membership : shared by
+Experience o-- "0..1" Photo : picture
+ShareExperienceCommand *-- "0..1" UploadedPicture
+ShareExperienceCommandValidator ..> ShareExperienceCommand : validates
+ShareExperienceCommandHandler ..> ShareExperienceCommand : handles
+ShareExperienceCommandHandler ..> IPhotoStore
+ShareExperienceCommandHandler ..> IMembershipGuard
+ShareExperienceCommandHandler ..> Experience : creates
+EditExperienceCommandHandler ..> EditExperienceCommand : handles
+DeleteExperienceCommandHandler ..> DeleteExperienceCommand : handles
+EditExperienceCommandHandler ..> Experience : edits
+DeleteExperienceCommandHandler ..> Experience : removes
+ExperiencesPage ..> ShareExperienceDialog : opens
+ShareExperienceDialog --> ShareExperienceForm
+ShareExperienceDialog ..> ExperiencesApi : injects EXPERIENCES_API
+@enduml

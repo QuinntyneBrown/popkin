@@ -1,0 +1,95 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Recap
+
+class RecapDto {
+  +Guid PopkinId
+  +string Name
+  +string Emoji
+  +PopkinColour Colour
+  +DateTimeOffset StartedAt
+  +DateTimeOffset WrappedUpAt
+  +int PeopleCount
+  +int MessageCount
+  +int PhotoCount
+  +IReadOnlyList<RecapPhotoDto> Photos
+  +IReadOnlyList<AvatarDto> Avatars
+  +TopRatedDto? TopRated
+  +bool KeepPhotos
+  +DateTimeOffset? PhotosRemoveAt
+  +bool IsHost
+}
+class TopRatedDto {
+  +Guid ExperienceId
+  +string Title
+  +decimal Score
+  +string SharedByName
+}
+class RecapPhotoDto {
+  +Guid PhotoId
+  +string Url
+}
+enum AlbumExportStatus {
+  Preparing
+  Ready
+  Failed
+}
+class AlbumExport {
+  +Guid Id
+  +Guid PopkinId
+  +Guid RequestedByMembershipId
+  +AlbumExportStatus Status
+  +int PhotosTotal
+  +int PhotosDone
+  +string? StorageKey
+  +DateTimeOffset RequestedAt
+  +DateTimeOffset? ExpiresAt
+  +Advance(): void
+  +MarkReady(key: string, expiresAt: DateTimeOffset): void
+}
+class GetRecapQueryHandler {
+  +Handle(query: GetRecapQuery, ct): Task<RecapDto>
+}
+class StartAlbumExportCommandHandler {
+  +Handle(command: StartAlbumExportCommand, ct): Task<AlbumExportDto>
+}
+class GetAlbumExportQueryHandler {
+  +Handle(query: GetAlbumExportQuery, ct): Task<AlbumExportDto>
+}
+class InviteCrewCommandHandler {
+  +Handle(command: InviteCrewCommand, ct): Task
+}
+class PrepareAlbumExportsJob {
+  +ExecuteAsync(ct): Task
+}
+interface IMembershipGuard
+interface IPhotoStore {
+  +OpenReadAsync(key: string, ct): Task<Stream>
+  +WriteAsync(key: string, content: Stream, ct): Task
+  +GetReadUrl(key: string, lifetime: TimeSpan): Uri
+}
+class PopkinActiveException
+
+GetRecapQueryHandler ..> RecapDto : returns
+RecapDto --> "0..1" TopRatedDto
+RecapDto --> "0..3" RecapPhotoDto
+GetRecapQueryHandler --> IMembershipGuard
+GetRecapQueryHandler --> IPhotoStore
+GetRecapQueryHandler ..> PopkinActiveException : throws
+StartAlbumExportCommandHandler ..> AlbumExport : creates
+GetAlbumExportQueryHandler ..> AlbumExport : reads
+GetAlbumExportQueryHandler --> IPhotoStore : signed URL
+PrepareAlbumExportsJob ..> AlbumExport : advances
+PrepareAlbumExportsJob --> IPhotoStore
+AlbumExport --> AlbumExportStatus
+InviteCrewCommandHandler --> IMembershipGuard
+@enduml

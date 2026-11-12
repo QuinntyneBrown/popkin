@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Call controls
+
+Person(member, "Member", "On a call in a Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(device, "Device camera and microphone", "Reached through the browser media APIs")
+System_Ext(relay, "Media relay", "STUN/TURN for WebRTC, provider TO SUPPLY")
+
+Rel(member, popkin, "Mutes, turns the camera off, leaves or minimises using")
+Rel(popkin, device, "Turns tracks on and off")
+Rel(popkin, relay, "Carries the audio and video the controls govern", "WebRTC")
+@enduml

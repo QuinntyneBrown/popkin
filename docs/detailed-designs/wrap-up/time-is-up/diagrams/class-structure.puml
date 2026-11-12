@@ -1,0 +1,77 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — A Popkin wraps up when its time is up
+
+package "Popkin Worker" {
+  class WrapUpDuePopkinsJob {
+    -PeriodicTimer timer
+    +ExecuteAsync(ct: CancellationToken): Task
+  }
+}
+
+package "Popkin Application and Domain" {
+  class WrapUpDuePopkinsCommand
+  class WrapUpDuePopkinsCommandHandler {
+    +Handle(command: WrapUpDuePopkinsCommand, ct: CancellationToken): Task<int>
+  }
+  class PopkinWrapUpService {
+    +WrapUpAsync(popkin: PopkinSpace, keepPhotos: bool, ct: CancellationToken): Task
+  }
+  class PopkinSpace {
+    +Guid Id
+    +DateTimeOffset? EndsAt
+    +PopkinStatus Status
+    +DateTimeOffset? WrappedUpAt
+    +bool KeepPhotos
+    +WrapUp(at: DateTimeOffset, keepPhotos: bool): void
+  }
+  interface IPopkinNotifier {
+    +PopkinWrappedUpAsync(popkinId: Guid, ct: CancellationToken): Task
+  }
+  interface IAppDbContext {
+    +DbSet<PopkinSpace> Popkins
+    +SaveChangesAsync(ct: CancellationToken): Task<int>
+  }
+  class TimeProvider {
+    +GetUtcNow(): DateTimeOffset
+  }
+}
+
+package "Popkin web app" {
+  class TimeLeftClock {
+    +now: Signal<Date>
+  }
+  class "formatTimeLeft" as fmt {
+    +formatTimeLeft(endsAt: Date, now: Date): string
+  }
+  class CurrentPopkinStore {
+    +popkin: Signal<PopkinView>
+    +timeLeft: Signal<string | null>
+    +wrapUpWarning: Signal<boolean>
+    +reload(): void
+  }
+  interface PopkinRealtime {
+    +popkinWrappedUp(popkinId: string): Observable<void>
+  }
+}
+
+WrapUpDuePopkinsJob ..> WrapUpDuePopkinsCommand : sends every 30 s
+WrapUpDuePopkinsCommandHandler ..> WrapUpDuePopkinsCommand : handles
+WrapUpDuePopkinsCommandHandler --> IAppDbContext
+WrapUpDuePopkinsCommandHandler --> TimeProvider
+WrapUpDuePopkinsCommandHandler --> PopkinWrapUpService
+WrapUpDuePopkinsCommandHandler --> IPopkinNotifier
+PopkinWrapUpService ..> PopkinSpace : wraps up
+CurrentPopkinStore --> TimeLeftClock
+CurrentPopkinStore ..> fmt : formats
+CurrentPopkinStore --> PopkinRealtime : listens
+@enduml

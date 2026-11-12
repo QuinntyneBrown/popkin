@@ -1,0 +1,105 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+
+title Class structure — React to a message
+
+package "Popkin.Domain" {
+  class Message {
+    +Guid Id
+    +Guid AuthorMembershipId
+    +DateTimeOffset? DeletedAt
+    +Delete(by: Guid, now): void
+  }
+  class MessageReaction {
+    +Guid MessageId
+    +Guid MembershipId
+    +string Emoji
+  }
+}
+package "Popkin.Application" {
+  class AddReactionCommand {
+    +Guid PopkinId
+    +Guid ThreadId
+    +Guid MessageId
+    +string Emoji
+  }
+  class RemoveReactionCommand {
+    +Guid PopkinId
+    +Guid ThreadId
+    +Guid MessageId
+    +string Emoji
+  }
+  class ReactionValidator {
+    +single emoji grapheme
+  }
+  class AddReactionCommandHandler
+  class RemoveReactionCommandHandler
+  class DeleteMessageCommand {
+    +Guid PopkinId
+    +Guid ThreadId
+    +Guid MessageId
+  }
+  class DeleteMessageCommandHandler
+  class ReactionDto {
+    +string Emoji
+    +int Count
+    +bool Mine
+  }
+}
+package "Popkin.Api" {
+  class MessagesController {
+    +AddReaction(popkinId, threadId, messageId, emoji): ReactionDto[]
+    +RemoveReaction(popkinId, threadId, messageId, emoji): ReactionDto[]
+    +Delete(popkinId, threadId, messageId): void
+  }
+}
+package "web app (popkin, api, components)" {
+  class ReactionsDialog {
+    +data: ReactionsDialogData
+    +react(emoji): void
+    +moreReactions(): void
+    +reply(): void
+    +copy(): void
+    +delete(): void
+  }
+  class ReactionsDialogData {
+    +MessageView message
+    +bool mine
+  }
+  class ReactionView {
+    +string emoji
+    +string name
+    +number count
+    +boolean mine
+  }
+  class ThreadStore {
+    +toggleReaction(messageId, emoji): void
+    +deleteMessage(messageId): void
+  }
+}
+Message "1" *-- "*" MessageReaction
+AddReactionCommandHandler ..> AddReactionCommand : handles
+RemoveReactionCommandHandler ..> RemoveReactionCommand : handles
+ReactionValidator ..> AddReactionCommand : validates
+AddReactionCommandHandler ..> MessageReaction : inserts
+RemoveReactionCommandHandler ..> MessageReaction : deletes
+DeleteMessageCommandHandler ..> DeleteMessageCommand : handles
+DeleteMessageCommandHandler ..> Message : Delete
+AddReactionCommandHandler ..> ReactionDto : returns
+MessagesController ..> AddReactionCommandHandler : MediatR
+MessagesController ..> RemoveReactionCommandHandler : MediatR
+MessagesController ..> DeleteMessageCommandHandler : MediatR
+ReactionsDialog --> ReactionsDialogData
+ReactionsDialog ..> ThreadStore
+ThreadStore --> ReactionView
+@enduml

@@ -1,0 +1,71 @@
+@startuml
+title UML sequence behaviour — Read comments and add one
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoViewPage" as page
+  participant "PhotoCommentsDialog" as dialog
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Comment handlers" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+
+actor -> page : Choose "Comment" or the comment count
+page -> dialog : CDK Dialog open; focus moves in (L2-057 AC2)
+dialog -> client : getComments(popkinId, photoId)
+client -> controller : GET /api/popkins/{popkinId}/photos/{photoId}/comments
+controller -> handler : Send GetPhotoCommentsQuery
+handler -> db : Check membership; comments by AddedAt ascending
+alt Not a member or no such photo
+  controller --> client : 404 popkin_not_found or photo_not_found (L2-051 AC1)
+  dialog --> actor : Failure message with "Try again", copy TO SUPPLY
+else Found
+  controller --> client : 200 OK comments
+  alt None
+    dialog --> actor : "No comments yet", "Be the first to say something about this one." (L2-035 AC4)
+  else Some
+    dialog --> actor : "{n} comments", oldest first: avatar, first name, time, text (L2-035 AC1)
+  end
+end
+actor -> dialog : Type in "Add a comment"
+dialog --> actor : Stops at 500 characters and shows a count (L2-035 AC3)
+actor -> dialog : Choose "Post comment"
+dialog --> actor : "Post comment" disabled and busy (L2-056 AC3, photo-comments/busy)
+dialog -> client : addComment(popkinId, photoId, text)
+client -> controller : POST /api/popkins/{popkinId}/photos/{photoId}/comments {text}
+controller -> handler : Send AddPhotoCommentCommand
+alt Empty or over 500 characters
+  controller --> client : 400 comment_empty or comment_too_long (L2-052 AC1)
+else Popkin wrapped up
+  controller --> client : 409 popkin_wrapped_up (L2-045 AC2)
+else Valid
+  handler -> db : Insert PhotoComment, save
+  controller --> client : 201 Created comment
+end
+alt Failure
+  dialog --> actor : Text kept, button enabled, message TO SUPPLY
+else Created
+  dialog --> actor : Comment at the end, field cleared (L2-035 AC2)
+  dialog --> page : Comment count + 1 (L2-035 AC2)
+end
+@enduml

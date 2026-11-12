@@ -1,0 +1,9 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Browse the album
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+Rel(member, popkin, "Browses the album by day using", "HTTPS")
+@enduml

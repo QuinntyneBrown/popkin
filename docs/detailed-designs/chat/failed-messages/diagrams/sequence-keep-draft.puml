@@ -1,0 +1,41 @@
+@startuml
+title UML sequence behaviour — Keep the typed text when leaving a thread
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage\n(pk-composer)" as page
+  participant "DraftStore" as drafts
+  participant "Router" as router
+end box
+actor -> page : Type text without sending
+page -> drafts : set(threadId, text) on each change (debounced 300 ms, TO SUPPLY)
+actor -> router : Navigate away (Back, nav tab)
+router -> page : ngOnDestroy
+page -> drafts : set(threadId, latest text)
+actor -> router : Return to the thread in the same session
+router -> page : ngOnInit
+page -> drafts : get(threadId)
+drafts --> page : Saved text
+page --> actor : Message field holds the text (L2-028 AC4)
+opt message sent
+  page -> drafts : clear(threadId)
+end
+opt sign out
+  drafts -> drafts : clearAll(), and OutboxStorage.clear(personId)
+end
+@enduml

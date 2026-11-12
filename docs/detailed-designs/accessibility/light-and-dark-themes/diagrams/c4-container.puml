@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Light and dark themes
+
+Person(member, "Member", "Phone or desktop, light or dark device setting")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "tokens.css, ThemeService, data-theme and data-accent")
+  ContainerDb(ls, "Theme preference", "Browser localStorage, key pk-theme", "device, light or dark, per device")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Serves each Popkin's colour")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "PopkinSpace.Colour")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, ls, "Reads and writes the preference")
+Rel(spa, api, "Reads the Popkin and its colour", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

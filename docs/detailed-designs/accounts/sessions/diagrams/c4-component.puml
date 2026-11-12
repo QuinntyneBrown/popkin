@@ -1,0 +1,39 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Sessions
+
+Container_Boundary(web, "Popkin web app") {
+  Component(guard, "signedInGuard", "CanActivateFn", "Private routes; returnUrl")
+  Component(intercept, "unauthorizedInterceptor", "HttpInterceptorFn", "401 clears session and opens sign in")
+  Component(store, "SessionStore", "api library service", "SessionView | null | undefined")
+  Component(authapi, "AuthApi / HttpAuthApi", "api library", "getSession()")
+  Component(ret, "safeReturnUrl", "api library helper", "Accepts in-app paths only")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(samesite, "SameSiteRequestMiddleware", "ASP.NET Core middleware", "Refuses cross-site state changes")
+  Component(cookie, "Cookie authentication", "ASP.NET Core handler", "__Host-popkin, HttpOnly, Secure, SameSite=Strict, 30 days")
+  Component(events, "SessionCookieEvents", "CookieAuthenticationEvents", "ValidatePrincipal per request")
+  Component(fallback, "Fallback authorization policy", "ASP.NET Core", "Authenticated user unless AllowAnonymous")
+  Component(issuer, "SessionCookieIssuer", "Api service", "SignInAsync / SignOutAsync")
+  Component(current, "HttpCurrentPerson", "ICurrentPerson", "PersonId and SessionId from claims")
+  Component(ctrl, "AuthController", "ASP.NET Core controller", "GET /api/auth/session")
+  Component(validate, "ValidateSessionQueryHandler", "MediatR handler", "Live Session and Person")
+  Component(get, "GetSessionQueryHandler", "MediatR handler", "SessionDto")
+  ComponentDb(db, "Popkin database", "SQL Server", "Sessions")
+}
+Rel(guard, store, "ensureLoaded()")
+Rel(store, authapi, "getSession()")
+Rel(intercept, store, "clear()")
+Rel(guard, ret, "Builds returnUrl")
+Rel(authapi, samesite, "HTTPS request", "JSON/HTTPS")
+Rel(samesite, cookie, "Passes same-site requests")
+Rel(cookie, events, "Raises ValidatePrincipal")
+Rel(events, validate, "Sends ValidateSessionQuery")
+Rel(validate, db, "Reads Session and Person", "EF Core")
+Rel(cookie, fallback, "Principal or none")
+Rel(fallback, ctrl, "Authorised requests")
+Rel(ctrl, get, "Sends GetSessionQuery")
+Rel(get, current, "Reads PersonId")
+Rel(issuer, cookie, "Issues ticket")
+@enduml

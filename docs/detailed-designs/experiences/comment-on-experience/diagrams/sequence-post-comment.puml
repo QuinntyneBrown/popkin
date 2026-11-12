@@ -1,0 +1,76 @@
+@startuml
+title UML sequence behaviour — Post a comment
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ExperienceDetailPage" as page
+  participant "AddCommentDialog" as dialog
+  participant "HttpExperiencesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "CommentOnExperienceCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "ExperienceRating" as rating
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Add a comment" after rating
+page -> dialog : Open with title, my stars, no text
+dialog --> actor : Experience title, stars "5 out of 5" with "Your rating", "Your comment", "Up to 500 characters." (L2-041 AC1)
+actor -> dialog : Type, choose "Post comment"
+alt Empty after trimming
+  dialog --> actor : Nothing sent; aria-invalid, "Write a few words, or close this to keep just your stars." (L2-041 AC2)
+else Text present
+  note right of dialog : maxlength 500 stops typing past the limit
+  dialog -> dialog : Read-only field, "Posting…" disabled (L2-056 AC3)
+  dialog -> client : comment(popkinId, experienceId, text)
+  client -> controller : PUT /api/popkins/{popkinId}/experiences/{experienceId}/my-rating/comment {text}
+  controller -> controller : Authenticate, anti-forgery, validate
+  alt Empty or over 500 characters
+    controller --> client : 400 ProblemDetails code comment_required or comment_too_long, field text (L2-041 AC2)
+  else Valid
+    controller -> handler : Send CommentOnExperienceCommand
+    handler -> guard : RequireMemberAsync(popkinId)
+    alt Not a member
+      controller --> client : 404 ProblemDetails code popkin_not_found (L2-051 AC1)
+    else Member
+      handler -> db : Load PopkinSpace, Experience and the caller's rating
+      alt Popkin wrapped up
+        controller --> client : 409 ProblemDetails code popkin_wrapped_up (L2-045 AC2)
+      else No rating by the caller
+        controller --> client : 409 ProblemDetails code rating_required
+      else Rated
+        handler -> rating : SetComment(text, now)
+        handler -> db : Save changes
+        db --> handler : Committed
+        handler --> controller : ExperienceCommentDto with stars
+        controller --> client : 200 JSON
+        client --> dialog : ExperienceCommentView
+        dialog --> page : Close with the comment
+        page --> actor : Comment first under "What people said" with the member's stars (L2-041 AC3)
+      end
+    end
+  end
+end
+alt Refusal or network failure
+  client --> dialog : Error
+  dialog --> actor : Field error for 400; otherwise a danger alert, text kept, "Post comment" enabled (copy TO SUPPLY)
+end
+@enduml

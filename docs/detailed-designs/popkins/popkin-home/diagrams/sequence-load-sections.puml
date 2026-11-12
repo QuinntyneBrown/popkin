@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Load the home sections
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage" as page
+  participant "Section APIs" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Threads / Photos / Experiences / Members controllers" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Section query handlers" as handler
+  participant "IMembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ObjectStoragePhotoStore" as photos
+end box
+page -> client : In parallel: getEveryonePreview, photos getSummary, experiences getSummary, getMembers
+client -> ctrl : GET .../threads/everyone/preview, .../photos/summary, .../experiences/summary, .../members
+ctrl -> handler : One query per section
+handler -> guard : RequireMemberAsync(id) (L2-051 AC1)
+handler -> db : Read section data
+opt photos summary
+  handler -> photos : Signed thumbnail URLs, 6 latest (L2-055 AC4)
+end
+handler --> ctrl : Section DTO
+ctrl --> client : 200 per section
+loop each section as it returns
+  alt data present
+    client --> page : Section view
+    page --> actor : Chat: 3 latest with sender, time, one line, "3 new" (L2-019 AC3)
+    page --> actor : Photos: "48 photos", 6 thumbnails, "See all" (AC4)
+    page --> actor : Experiences: "4 shared", top rated with "4.8 · 11 ratings", "See all" (AC5)
+    page --> actor : Members: count, Host first labelled "Host" (AC6)
+  else section empty (AC8)
+    page --> actor : pk-empty-state per section: "It's just you so far", "No photos yet", "Nothing shared yet" with first action
+  else section failed (AC9)
+    client --> page : Error for that section only
+    page --> actor : pk-alert "Photos didn't load. The rest of the Popkin is fine." with "Try again"
+    actor -> page : Choose "Try again"
+    page -> client : Reload that section only
+  end
+end
+@enduml

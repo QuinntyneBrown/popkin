@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Messages that cannot be sent
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "GroupChatPage / DirectMessagePage", "Angular pages", "Not sent status, Try again, Delete; pk-banner")
+  Component(outbox, "MessageOutbox", "api library service", "Per-thread ordered send queue with states")
+  Component(storage, "OutboxStorage", "api library service", "IndexedDB copy of queued messages and photos")
+  Component(drafts, "DraftStore", "api library service", "sessionStorage text per thread")
+  Component(net, "NetworkStatus / BrowserNetworkStatus", "api library service", "online and offline events plus hub state")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "MessagesController", "ASP.NET Core controller", "POST messages; DELETE messages/client/{clientMessageId}")
+  Component(send, "SendMessageCommandHandler", "MediatR handler", "Returns the stored message on a repeated ClientMessageId")
+  ComponentDb(db, "Popkin database", "SQL Server", "Message")
+}
+Rel(page, outbox, "enqueue, retry, discard")
+Rel(page, drafts, "Saves and restores text")
+Rel(page, net, "Shows the offline banner from")
+Rel(outbox, storage, "Persists queue in")
+Rel(outbox, net, "Pauses while offline")
+Rel(outbox, ctrl, "Sends via ChatApi", "JSON/HTTPS")
+Rel(ctrl, send, "Sends SendMessageCommand")
+Rel(send, db, "Reads and writes", "EF Core")
+@enduml

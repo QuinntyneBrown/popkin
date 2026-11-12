@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Popkin home
+
+Person(member, "Member", "Belongs to the Popkin")
+Person(host, "Host", "Started the Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+Rel(member, popkin, "Sees the Popkin at a glance and reaches chat, photos, experiences, call, invite")
+Rel(host, popkin, "Does the same and opens Popkin settings")
+@enduml

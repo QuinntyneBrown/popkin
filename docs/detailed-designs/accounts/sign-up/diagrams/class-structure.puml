@@ -1,0 +1,115 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Sign up
+
+enum ContactChannel {
+  Phone
+  Email
+}
+enum CodePurpose {
+  SignUp
+  SignIn
+}
+class VerificationCode {
+  +Guid Id
+  +ContactChannel Channel
+  +string Destination
+  +string CodeHash
+  +CodePurpose Purpose
+  +DateTimeOffset SentAt
+  +DateTimeOffset ExpiresAt
+  +int Attempts
+  +DateTimeOffset? ConsumedAt
+  +{static} Issue(channel, destination, purpose, codeHash, now): VerificationCode
+  +Supersede(now): void
+}
+class RequestCodeCommand {
+  +CodePurpose Purpose
+  +ContactChannel Channel
+  +string Destination
+}
+class CodeSentDto {
+  +Guid VerificationId
+  +ContactChannel Channel
+  +string DisplayDestination
+  +DateTimeOffset ResendAvailableAt
+}
+class RequestCodeCommandHandler {
+  +Handle(command: RequestCodeCommand, ct): Task<CodeSentDto>
+}
+class RequestCodeCommandValidator
+class ProblemException {
+  +int Status
+  +string Code
+  +string? Field
+  +TimeSpan? RetryAfter
+}
+interface IAppDbContext {
+  +DbSet<VerificationCode> VerificationCodes
+  +DbSet<Person> People
+  +SaveChangesAsync(ct): Task<int>
+}
+interface ICodeGenerator {
+  +NewCode(): string
+}
+interface ICodeHasher {
+  +Hash(code: string): string
+  +Matches(code: string, hash: string): bool
+}
+interface IPhoneNumberParser {
+  +TryNormalize(raw: string, out e164: string): bool
+}
+interface ICodeSender {
+  +ContactChannel Channel
+  +SendAsync(destination: string, code: string, ct): Task
+}
+class SmsCodeSender
+class EmailCodeSender
+class HmacCodeHasher
+class RandomCodeGenerator
+class AuthController {
+  +RequestCode(request: RequestCodeRequest): Task<ActionResult<CodeSentDto>>
+}
+class "SignUpPage" as SignUpPage {
+  +form: FormGroup<name, channel, contact>
+  +status: Signal<'idle' | 'sending' | 'failed'>
+  +continue(): void
+}
+interface "AuthApi" as AuthApi {
+  +requestCode(request: RequestCodeRequest): Observable<CodeSentView>
+}
+class PendingVerificationStore {
+  +pending: Signal<PendingVerificationView | null>
+  +start(view: PendingVerificationView): void
+  +clear(): void
+}
+
+VerificationCode --> ContactChannel
+VerificationCode --> CodePurpose
+RequestCodeCommandHandler ..> RequestCodeCommand : handles
+RequestCodeCommandHandler ..> CodeSentDto : returns
+RequestCodeCommandHandler ..> RequestCodeCommandValidator
+RequestCodeCommandHandler ..> IAppDbContext
+RequestCodeCommandHandler ..> ICodeGenerator
+RequestCodeCommandHandler ..> ICodeHasher
+RequestCodeCommandHandler ..> IPhoneNumberParser
+RequestCodeCommandHandler ..> ICodeSender
+RequestCodeCommandHandler ..> ProblemException : throws
+RequestCodeCommandHandler --> VerificationCode : creates
+ICodeSender <|.. SmsCodeSender
+ICodeSender <|.. EmailCodeSender
+ICodeHasher <|.. HmacCodeHasher
+ICodeGenerator <|.. RandomCodeGenerator
+AuthController ..> RequestCodeCommand : sends
+SignUpPage ..> AuthApi : AUTH_API
+SignUpPage ..> PendingVerificationStore
+@enduml

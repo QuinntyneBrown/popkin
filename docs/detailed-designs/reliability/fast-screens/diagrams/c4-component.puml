@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Screens are fast
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(sw, "ngsw-worker.js", "Angular service worker", "Serves the app shell and hashed chunks from cache")
+  Component(router, "Router", "provideRouter, withPreloading(PreloadAllModules)", "Loads each page with loadComponent and preloads the rest")
+  Component(page, "Page container", "pages/<key>/<key>.page.ts, OnPush", "Renders its frame at once, reads data through screenLoad()")
+  Component(load, "screenLoad()", "api library helper", "Tracks a request; flags skeletons after 300 ms")
+  Component(skel, "pk-skeleton", "components library", "Shapes sized like the content")
+  Component(grid, "pk-photo-grid", "components library, NgOptimizedImage", "Sized, lazy, srcset thumbnails")
+  Component(vitals, "WebVitalsReporter", "api library", "LCP, INP, CLS in the field; collector TO SUPPLY")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(compress, "Response compression", "ASP.NET Core middleware", "Brotli and Gzip for JSON")
+  Component(ctrl, "Read controllers", "ASP.NET Core controllers", "GET endpoints under /api")
+  Component(handler, "Get...Query handlers", "MediatR handlers", "AsNoTracking, Select to DTO, one page at a time")
+  Component(metrics, "Request duration metric", "OpenTelemetry", "p95 and p99 per route; backend TO SUPPLY")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "Indexes per query")
+
+Rel(router, sw, "Fetches chunks through")
+Rel(router, page, "Activates")
+Rel(page, load, "Reads data with")
+Rel(page, skel, "Shows while waiting")
+Rel(page, grid, "Composes")
+Rel(load, ctrl, "GET", "JSON/HTTPS")
+Rel(compress, ctrl, "Wraps responses of")
+Rel(ctrl, handler, "Sends Get...Query")
+Rel(handler, db, "Reads", "EF Core")
+Rel(metrics, ctrl, "Measures")
+@enduml
