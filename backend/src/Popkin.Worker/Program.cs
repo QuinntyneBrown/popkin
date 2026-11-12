@@ -1,0 +1,10 @@
+using Popkin.Application;
+using Popkin.Infrastructure;
+
+// Background jobs are registered here as they are designed; the scaffold hosts none.
+var builder = Host.CreateApplicationBuilder(args);
+
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+
+await builder.Build().RunAsync();
