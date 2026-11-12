@@ -6,7 +6,8 @@
   @if (lead()) {
     <p class="screen__lead">{{ lead() }}</p>
   }
-  <ng-content />
+  <div class="screen__content" [class.screen__content--headed]="heading()"><ng-content /></div>
+  <div class="screen__actions"><ng-content select="[slot=actions]" /></div>
 </main>
 @if (footer()) {
   <div class="screen__footer"><ng-content select="[slot=footer]" /></div>

@@ -13,3 +13,8 @@ export * from './lib/screen/screen';
 export * from './lib/skip-link/skip-link';
 export * from './lib/step-dots/step-dots';
 export * from './lib/top-bar/top-bar';
+export * from './lib/form-summary/form-summary';
+export * from './lib/legal/legal';
+export * from './lib/link/link';
+export * from './lib/segmented-control/segmented-control';
+export * from './lib/text-field/text-field';

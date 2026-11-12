@@ -21,6 +21,7 @@ test.describe('an address that matches no screen', () => {
     await pk.open('notFound');
 
     const notFound = new NotFoundPage(page);
+    await expect(notFound.heading).toBeVisible();
     await page.keyboard.press('Tab');
     await expect(notFound.skipLink).toBeFocused();
     await page.keyboard.press('Enter');

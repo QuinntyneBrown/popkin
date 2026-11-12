@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { expect, test } from './pk-test';
+import { BASELINE, expect, test } from './pk-test';
 import type { RouteKey } from './routes';
 
 /**
@@ -14,8 +14,10 @@ export interface ParityCase {
   name?: string;
   /** The component's region, from the screen's page object. */
   region: (page: Page) => Locator;
-  /** Brings the screen into the state, where opening it is not enough (focus, a click). */
+  /** Brings both targets into the state, where opening it is not enough (focus a control). */
   prepare?: (page: Page) => Promise<void>;
+  /** Brings the app into the state the mock draws statically (typed values, a submitted form). */
+  app?: (page: Page) => Promise<void>;
 }
 
 const widths = [360, 1280] as const;
@@ -31,6 +33,11 @@ export function parity(component: string, cases: ParityCase[]): void {
             await page.setViewportSize({ width, height: 900 });
             await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
             await pk.open(parityCase.key);
+            if (!BASELINE && parityCase.app) {
+              await parityCase.app(page);
+              // The mock draws no focus; the app's last interaction leaves one.
+              await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+            }
             await parityCase.prepare?.(page);
             await page.evaluate(() => document.fonts.ready);
             await expect(parityCase.region(page)).toHaveScreenshot(

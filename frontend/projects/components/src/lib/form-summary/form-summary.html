@@ -1,0 +1,10 @@
+<h2>{{ title() }}</h2>
+<ul>
+  @for (problem of problems(); track problem.fieldId) {
+    <li>
+      <a [href]="'#' + problem.fieldId" (click)="goTo($event, problem.fieldId)">{{
+        problem.message
+      }}</a>
+    </li>
+  }
+</ul>

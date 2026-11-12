@@ -1,0 +1,33 @@
+@if (labelLayout() === 'row') {
+  <div class="field__label-row">
+    <label class="field__label" [for]="fieldId()">{{ label() }}</label>
+    <ng-content select="[slot=label-end]" />
+  </div>
+} @else {
+  <label class="field__label" [for]="fieldId()">{{ label() }}</label>
+}
+<input
+  #field
+  class="input"
+  [class.input--code]="variant() === 'code'"
+  [id]="fieldId()"
+  [type]="type()"
+  [value]="value()"
+  [attr.inputmode]="inputmode()"
+  [attr.autocomplete]="autocomplete()"
+  [attr.placeholder]="placeholder()"
+  [attr.maxlength]="maxlength()"
+  [attr.aria-describedby]="describedBy()"
+  [attr.aria-invalid]="error() ? 'true' : null"
+  [readOnly]="readonly()"
+  [disabled]="disabled()"
+  (input)="input($event)"
+  (blur)="blur()"
+/>
+@if (error()) {
+  <span class="field__error" [id]="fieldId() + '-err'"
+    ><svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span></span
+  >
+} @else if (hint()) {
+  <span class="field__hint" [id]="fieldId() + '-hint'">{{ hint() }}</span>
+}

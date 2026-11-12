@@ -1,0 +1,22 @@
+:host {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-fg);
+  font: var(--text-body-sm);
+}
+
+h2 {
+  font: var(--font-weight-bold) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+a {
+  color: inherit;
+  font-weight: var(--font-weight-semibold);
+}
+
+li {
+  margin-top: var(--space-1);
+}

@@ -74,6 +74,8 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .screen__body--flush { padding-inline: 0; }
 .screen__body--center { justify-content: center; align-items: center; text-align: center; }
 .screen__body--hero { padding-top: var(--space-10); align-items: center; text-align: center; } /* a celebration screen: the created screen */
+.screen__content--headed { margin-top: var(--space-8); } /* the content under a screen's h1 and lead */
+.screen__actions { margin-top: auto; padding-top: var(--space-6); } /* the main action at the end of the body (the mocks' .push) */
 .screen__lead { margin-top: var(--space-2); color: var(--color-fg-muted); } /* the line under a screen's h1; same as .sub */
 .screen__footer { position: sticky; bottom: 0; z-index: var(--z-sticky); padding: var(--space-3) var(--space-6) var(--space-8); background: linear-gradient(to top, var(--color-bg-canvas) 70%, transparent); }
 .screen--wash .screen__footer { background: linear-gradient(to top, var(--accent-wash) 70%, transparent); }
