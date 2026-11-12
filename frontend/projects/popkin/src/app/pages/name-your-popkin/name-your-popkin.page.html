@@ -1,0 +1,33 @@
+<div pk-screen heading="Name your Popkin" [accent]="accent()" [footer]="true">
+  <header pk-top-bar slot="header" back="/popkins" [step]="2" [steps]="3"></header>
+  <div
+    pk-name-preview
+    placeholder="Thursday Night Crew"
+    [emoji]="draft().emoji"
+    [maxlength]="40"
+    [formControl]="name"
+  ></div>
+  <div
+    pk-emoji-picker
+    [options]="emoji"
+    [value]="draft().emoji"
+    (valueChange)="chooseEmoji($event)"
+  ></div>
+  <div
+    pk-colour-picker
+    [options]="colours"
+    [value]="draft().colour"
+    (valueChange)="chooseColour($event)"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    variant="popkin"
+    type="button"
+    [block]="true"
+    [disabled]="!ready()"
+    (click)="next()"
+  >
+    Looks good
+  </button>
+</div>

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { signedInGuard } from './guards/signed-in.guard';
 
 /**
  * Route data drives the shell: `shell` picks the chrome (`app` or `bare`) and `page` is stamped
@@ -31,6 +32,21 @@ export const routes: Routes = [
       import('./pages/verify-code/verify-code.page').then((m) => m.VerifyCodePage),
     data: data({ shell: 'bare', page: 'verify-code' }),
     title: 'Enter your code · Popkin',
+  },
+  {
+    path: 'new',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/name-your-popkin/name-your-popkin.page').then((m) => m.NameYourPopkinPage),
+    data: data({ shell: 'bare', page: 'name-your-popkin' }),
+    title: 'Name your Popkin · Popkin',
+  },
+  {
+    path: 'new/length',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/how-long/how-long.page').then((m) => m.HowLongPage),
+    data: data({ shell: 'bare', page: 'how-long' }),
+    title: 'How long should it last? · Popkin',
   },
   {
     path: '**',

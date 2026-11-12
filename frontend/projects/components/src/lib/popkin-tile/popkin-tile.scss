@@ -1,0 +1,47 @@
+:host {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-14);
+  height: var(--space-14);
+  border-radius: var(--radius-tile);
+  background: color-mix(in srgb, var(--accent) 16%, var(--color-bg-surface));
+  box-shadow: inset 0 0 0 var(--border-width-thick) var(--accent-edge);
+  font: var(--font-size-3xl) / 1 var(--font-family-emoji);
+}
+
+:host(.popkin-tile--xs) {
+  width: var(--space-7);
+  height: var(--space-7);
+  font-size: var(--font-size-sm);
+}
+
+:host(.popkin-tile--sm) {
+  width: var(--space-10);
+  height: var(--space-10);
+  font-size: var(--font-size-xl);
+}
+
+:host(.popkin-tile--md) {
+  width: var(--space-13);
+  height: var(--space-13);
+  font-size: var(--font-size-3xl);
+}
+
+:host(.popkin-tile--lg) {
+  width: var(--space-16);
+  height: var(--space-16);
+  font-size: var(--font-size-4xl);
+}
+
+:host(.popkin-tile--xl) {
+  width: var(--space-22);
+  height: var(--space-22);
+  font-size: var(--font-size-6xl);
+}
+
+:host(.popkin-tile--2xl) {
+  width: var(--space-28);
+  height: var(--space-28);
+  font-size: var(--font-size-7xl);
+}

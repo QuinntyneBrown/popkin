@@ -1,0 +1,114 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--color-bg-backdrop);
+  animation: fade-in var(--duration-base) var(--ease-standard);
+}
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.dialog__panel {
+  pointer-events: auto;
+  width: 100%;
+  max-width: var(--layout-dialog-max);
+  max-height: 92dvh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-6) var(--space-8);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: var(--color-bg-surface-raised);
+  box-shadow: var(--shadow-3);
+  animation: sheet-up var(--duration-slow) var(--ease-pop);
+}
+
+.dialog__grip {
+  width: var(--space-10);
+  height: var(--space-1-5);
+  margin: 0 auto var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-border-default);
+}
+
+.dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.dialog__title {
+  font: var(--text-h2);
+}
+
+.dialog__desc {
+  margin-bottom: var(--space-5);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.dialog__header + .dialog__body {
+  margin-top: var(--space-4);
+}
+
+.dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.dialog__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 40rem) {
+  .dialog {
+    align-items: center;
+    padding: var(--space-6);
+  }
+
+  .dialog__panel {
+    border-radius: var(--radius-xl);
+    padding-top: var(--space-6);
+    animation-name: pop-in;
+  }
+
+  .dialog__grip {
+    display: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0;
+    translate: 0 var(--space-10);
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    scale: 0.96;
+  }
+
+  60% {
+    scale: 1.02;
+  }
+}

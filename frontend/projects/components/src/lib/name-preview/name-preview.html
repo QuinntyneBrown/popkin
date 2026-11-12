@@ -1,0 +1,17 @@
+<div class="preview-row">
+  <span pk-popkin-tile size="lg" [emoji]="emoji()"></span>
+  <input
+    class="input input--display"
+    type="text"
+    [attr.aria-label]="label()"
+    [attr.placeholder]="placeholder()"
+    [attr.maxlength]="maxlength()"
+    [attr.aria-describedby]="atLimit() ? 'name-count' : null"
+    [value]="value()"
+    (input)="input($event)"
+    (blur)="blur()"
+  />
+</div>
+@if (atLimit()) {
+  <p class="field__count" id="name-count">{{ maxlength() }} of {{ maxlength() }}</p>
+}

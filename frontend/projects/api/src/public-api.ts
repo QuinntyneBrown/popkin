@@ -9,3 +9,6 @@ export * from './lib/api/problem';
 export * from './lib/models/auth';
 export * from './lib/api/auth/safe-return-url';
 export * from './lib/api/auth/session.store';
+export * from './lib/models/popkin';
+export * from './lib/api/popkins/new-popkin-draft';
+export * from './lib/api/popkins/popkin-length';

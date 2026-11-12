@@ -1,6 +1,7 @@
 import { codeScreenAt24Seconds } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { VerifyCodePage } from '../../pages/verify-code.page';
+import { NameYourPopkinPage } from '../../pages/name-your-popkin.page';
 import { hold } from '../../fixtures/stubs';
 import { NotFoundPage } from '../../pages/not-found.page';
 import { SignUpPage } from '../../pages/sign-up.page';
@@ -33,5 +34,16 @@ parity('button', [
     name: 'confirm',
     region: (page) => new VerifyCodePage(page).primaryButton,
     app: codeScreenAt24Seconds,
+  },
+  {
+    key: 'nameYourPopkin',
+    name: 'popkin-disabled',
+    region: (page) => new NameYourPopkinPage(page).footerButton,
+  },
+  {
+    key: 'nameYourPopkinFilled',
+    name: 'popkin',
+    region: (page) => new NameYourPopkinPage(page).footerButton,
+    app: (page) => new NameYourPopkinPage(page).chooseLakeside(),
   },
 ]);
