@@ -2,10 +2,39 @@
   "POST /api/auth/codes": {
     "status": 202,
     "body": {
-      "verificationId": "541af6e5-db01-46c2-9459-3d9e84f90d39",
+      "verificationId": "9283cf49-0057-4e3c-8655-0358e8c26971",
       "channel": "Phone",
       "displayDestination": "(•••) •••-••48",
-      "resendAvailableAt": "2026-11-12T22:55:12.8544874+00:00"
+      "resendAvailableAt": "2026-11-12T23:08:09.5976687+00:00"
+    }
+  },
+  "POST /api/auth/codes/9283cf49-0057-4e3c-8655-0358e8c26971/confirm": {
+    "status": 200,
+    "body": {
+      "outcome": "SignedIn",
+      "session": {
+        "personId": "91b2bd78-fb95-4a54-bbcc-a29134f3a4e5",
+        "name": "Mara Okafor",
+        "photoUrl": null
+      },
+      "isNewPerson": false
+    }
+  },
+  "GET /api/auth/session": {
+    "status": 200,
+    "body": {
+      "personId": "91b2bd78-fb95-4a54-bbcc-a29134f3a4e5",
+      "name": "Mara Okafor",
+      "photoUrl": null
+    }
+  },
+  "POST /api/auth/codes/9283cf49-0057-4e3c-8655-0358e8c26971/resend": {
+    "status": 202,
+    "body": {
+      "verificationId": "ef32c474-7693-438e-806a-c4301d19622a",
+      "channel": "Phone",
+      "displayDestination": "(•••) •••-••48",
+      "resendAvailableAt": "2026-11-12T23:08:42.116095+00:00"
     }
   }
 }

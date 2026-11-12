@@ -25,7 +25,10 @@
   (blur)="blur()"
 />
 @if (error()) {
-  <span class="field__error" [id]="fieldId() + '-err'"
+  <span
+    class="field__error"
+    [id]="fieldId() + '-err'"
+    [attr.role]="announceError() ? 'alert' : null"
     ><svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span></span
   >
 } @else if (hint()) {

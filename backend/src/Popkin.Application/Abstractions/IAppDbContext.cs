@@ -10,5 +10,7 @@ public interface IAppDbContext
 
     DbSet<VerificationCode> VerificationCodes { get; }
 
+    DbSet<Session> Sessions { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

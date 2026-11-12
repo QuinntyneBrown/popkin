@@ -26,6 +26,13 @@ export const routes: Routes = [
     title: 'Sign up · Popkin',
   },
   {
+    path: 'verify',
+    loadComponent: () =>
+      import('./pages/verify-code/verify-code.page').then((m) => m.VerifyCodePage),
+    data: data({ shell: 'bare', page: 'verify-code' }),
+    title: 'Enter your code · Popkin',
+  },
+  {
     path: '**',
     loadComponent: () => import('./pages/not-found/not-found.page').then((m) => m.NotFoundPage),
     data: data({ shell: 'bare', page: 'not-found' }),

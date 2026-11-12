@@ -41,6 +41,10 @@ export class TextField implements ControlValueAccessor {
   readonly maxlength = input<number>();
   readonly hint = input<string>();
   readonly error = input<string>();
+  /** Announces the error itself, where no form summary does (the code screen). */
+  readonly announceError = input(false);
+  /** Ignores anything typed that is not a digit, as the code field does (L2-004 AC6). */
+  readonly digitsOnly = input(false);
   readonly variant = input<'default' | 'code'>('default');
   readonly readonly = input(false);
 
@@ -78,7 +82,12 @@ export class TextField implements ControlValueAccessor {
   }
 
   protected input(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
+    const element = event.target as HTMLInputElement;
+    if (this.digitsOnly()) {
+      const digits = element.value.replace(/\D/g, '');
+      if (digits !== element.value) element.value = digits;
+    }
+    const value = element.value;
     this.value.set(value);
     this.onChange(value);
     this.changed.emit(value);

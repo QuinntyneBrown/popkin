@@ -8,3 +8,4 @@ export * from './lib/api/auth/pending-verification.store';
 export * from './lib/api/problem';
 export * from './lib/models/auth';
 export * from './lib/api/auth/safe-return-url';
+export * from './lib/api/auth/session.store';

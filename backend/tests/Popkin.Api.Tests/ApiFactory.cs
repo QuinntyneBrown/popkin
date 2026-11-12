@@ -17,8 +17,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     private readonly string _databaseName = $"popkin-tests-{Guid.NewGuid():N}";
 
-    /// <summary>Saturday 12 September 2026, noon UTC: the day the mocks show.</summary>
-    public FakeTimeProvider Clock { get; } = new(new DateTimeOffset(2026, 9, 12, 12, 0, 0, TimeSpan.Zero));
+    /// <summary>
+    /// Starts at the real time, to the second, because the client's cookie jar expires cookies by
+    /// the real clock.
+    /// </summary>
+    public FakeTimeProvider Clock { get; } = new(DateTimeOffset.FromUnixTimeSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
 
     public CapturingCodeSender Codes { get; } = new();
 

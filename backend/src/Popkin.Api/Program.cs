@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Popkin.Api.Auth;
 using Popkin.Api.Problems;
 using Popkin.Api.RateLimiting;
 using Popkin.Application;
@@ -37,24 +37,8 @@ builder.Services.AddPopkinRateLimits();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// The API answers with a status code, never a redirect to a sign-in page.
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Events.OnRedirectToLogin = context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return Task.CompletedTask;
-        };
-        options.Events.OnRedirectToAccessDenied = context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            return Task.CompletedTask;
-        };
-    });
+// The session cookie and the server-side session behind it; 401 and 403, never a redirect.
+builder.Services.AddPopkinSessions();
 
 // Every endpoint requires a signed-in caller unless it opts out with [AllowAnonymous].
 builder.Services.AddAuthorizationBuilder()
@@ -72,6 +56,7 @@ if (!app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<SameSiteRequestMiddleware>();
 app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();

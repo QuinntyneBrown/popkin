@@ -1,4 +1,6 @@
+import { codeScreenAt24Seconds } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
+import { VerifyCodePage } from '../../pages/verify-code.page';
 import { hold } from '../../fixtures/stubs';
 import { NotFoundPage } from '../../pages/not-found.page';
 import { SignUpPage } from '../../pages/sign-up.page';
@@ -25,5 +27,11 @@ parity('button', [
       await signUp.fill('Mara', '(415) 555-0148');
       await signUp.submit();
     },
+  },
+  {
+    key: 'verifyCode',
+    name: 'confirm',
+    region: (page) => new VerifyCodePage(page).primaryButton,
+    app: codeScreenAt24Seconds,
   },
 ]);

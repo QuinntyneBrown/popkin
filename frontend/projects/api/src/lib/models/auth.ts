@@ -15,3 +15,16 @@ export interface CodeSentView {
   displayDestination: string;
   resendAvailableAt: string;
 }
+
+export interface SessionView {
+  personId: string;
+  name: string;
+  photoUrl: string | null;
+}
+
+/** `NameRequired` when no account has the destination and no name was given (L2-006 AC2). */
+export interface ConfirmCodeView {
+  outcome: 'SignedIn' | 'NameRequired';
+  session: SessionView | null;
+  isNewPerson: boolean;
+}

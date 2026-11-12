@@ -34,11 +34,18 @@ async function call(method: string, path: string, body?: unknown, key = `${metho
   return json;
 }
 
-await call('POST', '/api/auth/codes', {
+// Accounts: Mara signs up with the number the mocks show; every local code is 482913.
+const sent = await call('POST', '/api/auth/codes', {
   purpose: 'SignUp',
   channel: 'Phone',
   destination: '(415) 555-0148',
 });
+const verification = sent.verificationId as string;
+await call('POST', `/api/auth/codes/${verification}/confirm`, { code: '482913', name: 'Mara' });
+await call('GET', '/api/auth/session');
+// A new code may be asked for 30 seconds after the first (L2-005 AC1).
+await new Promise((resolve) => setTimeout(resolve, 31_000));
+await call('POST', `/api/auth/codes/${verification}/resend`);
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

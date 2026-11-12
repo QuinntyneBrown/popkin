@@ -63,6 +63,31 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("People", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.Session", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("Sessions", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.VerificationCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -108,6 +133,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasIndex("Destination", "SentAt");
 
                     b.ToTable("VerificationCodes", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.Session", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
