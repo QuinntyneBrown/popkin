@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Popkin.Api.Auth;
 using Popkin.Api.Problems;
 using Popkin.Api.RateLimiting;
+using Popkin.Api.Security;
 using Popkin.Application;
 using Popkin.Infrastructure;
 
@@ -51,6 +52,13 @@ builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
 var app = builder.Build();
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
