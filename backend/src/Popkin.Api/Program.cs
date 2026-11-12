@@ -1,14 +1,39 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Popkin.Api.Problems;
+using Popkin.Api.RateLimiting;
 using Popkin.Application;
 using Popkin.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // A field that breaks its rule (type, length, allowed values) is 400 with a `code` and
+        // the field it names (L2-052 AC1).
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var field = context.ModelState.FirstOrDefault(e => e.Value?.Errors.Count > 0).Key?.TrimStart('$', '.');
+            var details = new ProblemDetails { Status = 400, Title = "A field is not valid." };
+            details.Extensions["code"] = "validation_failed";
+            if (!string.IsNullOrEmpty(field))
+            {
+                details.Extensions["field"] = char.ToLowerInvariant(field[0]) + field[1..];
+            }
+
+            return new ObjectResult(details) { StatusCode = 400, ContentTypes = { "application/problem+json" } };
+        };
+    });
 builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
+builder.Services.AddPopkinRateLimits();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -48,6 +73,7 @@ if (!app.Environment.IsProduction())
 }
 
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

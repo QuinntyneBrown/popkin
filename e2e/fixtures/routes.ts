@@ -12,6 +12,8 @@ export const routes = {
   home: { app: '/' },
   signUp: { app: '/sign-up', mock: 'pages/sign-up/default.html' },
   signUpEmail: { app: '/sign-up', mock: 'pages/sign-up/email.html' },
+  signUpError: { app: '/sign-up', mock: 'pages/sign-up/error.html' },
+  signUpSubmitting: { app: '/sign-up', mock: 'pages/sign-up/submitting.html' },
   signUpInvalid: { app: '/sign-up', mock: 'pages/sign-up/invalid.html' },
   notFound: { app: '/no-such-screen', mock: 'pages/not-found/default.html' },
 } satisfies Record<string, ScreenRoute>;

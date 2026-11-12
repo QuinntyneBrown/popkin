@@ -1,1 +1,11 @@
-{}
+{
+  "POST /api/auth/codes": {
+    "status": 202,
+    "body": {
+      "verificationId": "541af6e5-db01-46c2-9459-3d9e84f90d39",
+      "channel": "Phone",
+      "displayDestination": "(•••) •••-••48",
+      "resendAvailableAt": "2026-11-12T22:55:12.8544874+00:00"
+    }
+  }
+}

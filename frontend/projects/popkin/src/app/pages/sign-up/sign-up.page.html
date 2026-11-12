@@ -4,12 +4,20 @@
     @if (problems().length) {
       <div pk-form-summary [problems]="problems()"></div>
     }
+    @if (status() === 'failed') {
+      <div pk-alert heading="We couldn’t send your code.">
+        Check your connection and try again. Nothing you typed was lost.
+      </div>
+    } @else if (status() === 'limited') {
+      <div pk-alert heading="That’s a lot of codes.">{{ tryAgain() }}</div>
+    }
     <div
       pk-text-field
       fieldId="name"
       label="Your name"
       autocomplete="given-name"
       [formControl]="name"
+      [readonly]="status() === 'sending'"
       [error]="nameError() ?? undefined"
     ></div>
     <div
@@ -22,6 +30,7 @@
       [inputmode]="channel() === 'phone' ? 'tel' : 'email'"
       [autocomplete]="channel() === 'phone' ? 'tel' : 'email'"
       [formControl]="contact"
+      [readonly]="status() === 'sending'"
       [error]="contactError() ?? undefined"
     >
       <div
@@ -35,8 +44,15 @@
     </div>
   </form>
   <ng-container slot="actions">
-    <button pk-button variant="primary" [block]="true" type="submit" form="sign-up">
-      Continue
+    <button
+      pk-button
+      variant="primary"
+      type="submit"
+      form="sign-up"
+      [block]="true"
+      [busy]="status() === 'sending'"
+    >
+      {{ status() === 'sending' ? 'Sending your code…' : 'Continue' }}
     </button>
     <p pk-legal></p>
   </ng-container>

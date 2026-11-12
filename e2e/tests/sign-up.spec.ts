@@ -1,4 +1,5 @@
 import { expect, test } from '../fixtures/pk-test';
+import { answer, failNetwork, hold, problem } from '../fixtures/stubs';
 import { SignUpPage } from '../pages/sign-up.page';
 
 test.describe('signing up', () => {
@@ -113,5 +114,76 @@ test.describe('signing up', () => {
     await expect(signUp.summary).toContainText('2 things to fix');
     await signUp.summary.getByRole('link', { name: /Phone number/ }).click();
     await expect(signUp.phone).toBeFocused();
+  });
+});
+
+test.describe('sending the code', () => {
+  // L2-003 AC3
+  test('Continue reads "Sending your code…" and is disabled until the code screen opens', async ({
+    page,
+    pk,
+  }) => {
+    const release = await hold(page, 'POST /api/auth/codes');
+    await pk.open('signUp');
+    const signUp = new SignUpPage(page);
+    await signUp.fill('Mara', '(415) 555-0148');
+
+    await signUp.submit();
+
+    await expect(signUp.continue).toHaveText('Sending your code…');
+    await expect(signUp.continue).toBeDisabled();
+    await expect(signUp.continue).toHaveAttribute('aria-busy', 'true');
+    release();
+    await expect(page).toHaveURL(/\/verify$/);
+  });
+
+  // L2-003 AC8
+  test('a code that cannot be sent keeps what was typed and enables Continue again', async ({
+    page,
+    pk,
+  }) => {
+    await answer(page, 'POST /api/auth/codes', problem(503, 'code_not_sent'));
+    await pk.open('signUp');
+    const signUp = new SignUpPage(page);
+    await signUp.fill('Mara', '(415) 555-0148');
+
+    await signUp.submit();
+
+    await expect(signUp.alert).toHaveAttribute('role', 'alert');
+    await expect(signUp.alert).toContainText('We couldn’t send your code.');
+    await expect(signUp.alert).toContainText('Nothing you typed was lost.');
+    await expect(signUp.name).toHaveValue('Mara');
+    await expect(signUp.phone).toHaveValue('(415) 555-0148');
+    await expect(signUp.continue).toHaveText('Continue');
+    await expect(signUp.continue).toBeEnabled();
+  });
+
+  test('a network failure is explained the same way', async ({ page, pk }) => {
+    await failNetwork(page, 'POST /api/auth/codes');
+    await pk.open('signUp');
+    const signUp = new SignUpPage(page);
+    await signUp.fill('Mara', '(415) 555-0148');
+
+    await signUp.submit();
+
+    await expect(signUp.alert).toContainText('We couldn’t send your code.');
+    await expect(signUp.continue).toBeEnabled();
+  });
+
+  // L2-005 AC4, L2-053 AC4
+  test('too many codes says when to try again', async ({ page, pk }) => {
+    await answer(
+      page,
+      'POST /api/auth/codes',
+      problem(429, 'code_limit_reached', { retryAfterSeconds: 35 * 60 }),
+    );
+    await pk.open('signUp');
+    const signUp = new SignUpPage(page);
+    await signUp.fill('Mara', '(415) 555-0148');
+
+    await signUp.submit();
+
+    await expect(signUp.alert).toContainText('That’s a lot of codes.');
+    await expect(signUp.alert).toContainText('Try again in 35 minutes.');
   });
 });
