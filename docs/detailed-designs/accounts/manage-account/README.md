@@ -2,7 +2,7 @@
 
 ## Overview
 
-Every Popkin account belongs to one person and holds very little: a name, an optional photo and
+Every Popkin account belongs to one person and holds three things: a name, an optional photo and
 the phone number or email used to sign in. This feature covers the account screen where a
 signed-in person changes how they appear, picks a light or dark theme for their device, and
 signs out. Deleting the account starts from the same screen but has its own design
