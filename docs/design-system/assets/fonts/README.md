@@ -7,4 +7,4 @@ licensed under the SIL Open Font License 1.1, which allows bundling and redistri
 - Inter: Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
 - Rubik: Copyright 2015 The Rubik Project Authors (https://github.com/googlefonts/rubik)
 
-`../tokens.css` declares them with `@font-face`, so the mocks open from disk without a network.
+`../../tokens/tokens.css` declares them with `@font-face`, so the system and the mocks open from disk without a network.

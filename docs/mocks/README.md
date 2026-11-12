@@ -34,13 +34,13 @@ network. Every mock has a bar at the bottom that lists its sibling states and sw
 
 ## Assets
 
-- `assets/tokens.css`: Popkin's tokens, harvested from the designs, with light and dark themes and
-  the seven Popkin colours (`data-accent="teal"` and so on).
-- `assets/ui.css`: the component kit, named as the designs name things (`popkin-tile`,
-  `time-left`, `bubble`, `popkin-nav`, `qr-card`…).
-- `assets/fonts/`: Nunito, Inter and Rubik, bundled under the SIL Open Font License.
+The mocks are built on the design system, so a change there shows here:
+
+- `../design-system/tokens/tokens.css` and `../design-system/assets/components.css`: the tokens (light, dark and the seven
+  Popkin colours) and every component class. The fonts load from `../design-system/assets/fonts/`.
+- `assets/tokens.css`: a one-line forwarder to the design system's tokens, for the gallery that `check_mocks.py` generates.
 - `assets/images/`: the design's photographs, resized for the mocks.
-- `assets/mock.css`, `assets/mock.js`: the mock bar and notes; not product UI.
+- `assets/mock.css`, `assets/mock.js`: the mock bar, the notes and the brand sheet's own layout; not product UI.
 
 ## Where the mocks differ from the designs
 
