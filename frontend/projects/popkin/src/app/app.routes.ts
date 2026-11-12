@@ -19,4 +19,10 @@ export const routes: Routes = [
     data: data({ shell: 'bare', page: 'home' }),
     title: 'Popkin',
   },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/not-found/not-found.page').then((m) => m.NotFoundPage),
+    data: data({ shell: 'bare', page: 'not-found' }),
+    title: 'Page not found · Popkin',
+  },
 ];

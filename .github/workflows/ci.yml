@@ -36,6 +36,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      - run: npm run design:check
       - run: npm run lint
       - run: npm run format:check
       - run: npm run build
@@ -62,6 +63,10 @@ jobs:
       # ADR 0006: behaviour specs only; the sweeps run by hand, never in CI.
       - name: Run the behaviour specs against the app
         run: npm test
+        working-directory: e2e
+      # ADR 0008: the component parity specs, against baselines rendered from docs/mocks.
+      - name: Compare every component with its mock
+        run: npm run parity
         working-directory: e2e
       - uses: actions/upload-artifact@v7
         if: failure()

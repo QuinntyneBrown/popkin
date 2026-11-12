@@ -26,6 +26,7 @@
             ],
             "styles": [
               "@angular/cdk/overlay-prebuilt.css",
+              "projects/components/src/lib/styles/tokens/tokens.css",
               "projects/components/src/lib/styles/ui.css"
             ]
           },

@@ -1,0 +1,21 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+}
+
+span {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+}
+
+[data-step='done'] {
+  background: color-mix(in srgb, var(--color-accent) 50%, var(--color-bg-canvas));
+}
+
+[aria-current='step'] {
+  width: var(--space-6);
+  background: var(--color-accent);
+}

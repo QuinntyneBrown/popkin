@@ -1,0 +1,13 @@
+<ng-content select="[slot=header]" />
+<main id="main" class="screen__body" [class.screen__body--hero]="body() === 'hero'" tabindex="-1">
+  @if (heading()) {
+    <h1 class="screen__heading">{{ heading() }}</h1>
+  }
+  @if (lead()) {
+    <p class="screen__lead">{{ lead() }}</p>
+  }
+  <ng-content />
+</main>
+@if (footer()) {
+  <div class="screen__footer"><ng-content select="[slot=footer]" /></div>
+}

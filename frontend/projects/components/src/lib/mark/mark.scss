@@ -1,0 +1,16 @@
+:host {
+  width: var(--space-8);
+  height: var(--space-8);
+  color: var(--color-accent);
+  flex: none;
+}
+
+:host(.mark--sm) {
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+:host(.mark--lg) {
+  width: var(--space-20);
+  height: var(--space-20);
+}

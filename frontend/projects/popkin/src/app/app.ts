@@ -2,13 +2,14 @@ import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { SkipLink } from 'components';
 import { filter, map } from 'rxjs';
 import { PkRouteData } from './app.routes';
 
-/** AppShell: the routed page in `main`, with the route's `page` stamped on `<body data-page>`. */
+/** AppShell: the skip link and the routed page (which owns `main`), with the route's `page` stamped on `<body data-page>`. */
 @Component({
   selector: 'pk-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, SkipLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './app.html',
 })

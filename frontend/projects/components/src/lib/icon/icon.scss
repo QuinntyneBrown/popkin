@@ -1,0 +1,32 @@
+:host {
+  width: var(--space-6);
+  height: var(--space-6);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:host(.icon--sm) {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+:host(.icon--md) {
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+:host(.icon--lg) {
+  width: var(--space-7);
+  height: var(--space-7);
+  stroke-width: 2.4;
+}
+
+/* The empty state's icon (the design system's .empty__icon .icon). */
+:host(.icon--xl) {
+  width: var(--space-10);
+  height: var(--space-10);
+}
