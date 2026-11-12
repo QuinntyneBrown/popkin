@@ -8,8 +8,8 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { InviteView, POPKINS_API, accentOf, encodeQr } from 'api';
+import { RouterLink, Router } from '@angular/router';
+import { ErrorScreens, InviteView, POPKINS_API, accentOf, encodeQr, toApiProblem } from 'api';
 import { Alert, Button, Link, Pop, QrCard, Screen, ShareAction, ShareActions } from 'components';
 
 /** The created screen: the Host gets the new Popkin's invite straight away (L2-010, L2-011 AC6). */
@@ -24,6 +24,8 @@ export class PopkinCreatedPage {
   readonly popkinId = input.required<string>();
 
   private readonly popkins = inject(POPKINS_API);
+  private readonly errors = inject(ErrorScreens);
+  private readonly router = inject(Router);
   private readonly navigator = inject(DOCUMENT).defaultView?.navigator;
   private copiedTimer?: ReturnType<typeof setTimeout>;
 
@@ -57,7 +59,18 @@ export class PopkinCreatedPage {
     this.failed.set(false);
     this.popkins.getInvite(this.popkinId()).subscribe({
       next: (invite) => this.invite.set(invite),
-      error: () => this.failed.set(true),
+      error: (error: unknown) => {
+        const problem = toApiProblem(error);
+        if (problem.status >= 500) {
+          const reference = problem.extensions['reference'];
+          this.errors.showServerError(
+            typeof reference === 'string' ? reference : undefined,
+            this.router.url,
+          );
+          return;
+        }
+        this.failed.set(true);
+      },
     });
   }
 

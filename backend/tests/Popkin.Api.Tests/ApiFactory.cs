@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
 using Popkin.Application.Abstractions;
 using Popkin.Api.Tests.Support;
+using Popkin.Infrastructure.Persistence;
 
 namespace Popkin.Api.Tests;
 
@@ -27,6 +28,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public FixedCodeGenerator CodeGenerator { get; } = new();
 
+    public DatabaseFaults Faults { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Development");
@@ -40,6 +43,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<TimeProvider>(Clock);
             services.RemoveAll<ICodeGenerator>();
             services.AddSingleton<ICodeGenerator>(CodeGenerator);
+            services.RemoveAll<IAppDbContext>();
+            services.AddScoped<IAppDbContext>(sp => new FaultyDbContext(sp.GetRequiredService<AppDbContext>(), Faults));
             services.RemoveAll<ICodeSender>();
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Email));

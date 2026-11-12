@@ -63,3 +63,13 @@ export async function hold(page: Page, key: ApiKey): Promise<() => void> {
   });
   return release;
 }
+
+/** Answers `key` with `value` the first time only; later requests get the recording. */
+export async function answerOnce(page: Page, key: ApiKey, value: Answer): Promise<void> {
+  let used = false;
+  await page.route('**/api/**', async (route) => {
+    if (used || !matches(route, key)) return route.fallback();
+    used = true;
+    await route.fulfill({ status: value.status, json: value.body, headers: value.headers });
+  });
+}

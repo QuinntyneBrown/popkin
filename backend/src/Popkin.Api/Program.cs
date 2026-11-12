@@ -31,8 +31,14 @@ builder.Services
             return new ObjectResult(details) { StatusCode = 400, ContentTypes = { "application/problem+json" } };
         };
     });
-builder.Services.AddProblemDetails();
+// No exception detail, stack trace or internal name ever reaches a response (L2-052 AC5).
+builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+{
+    context.ProblemDetails.Detail = null;
+    context.ProblemDetails.Extensions.Remove("exception");
+});
 builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
+builder.Services.AddExceptionHandler<UnexpectedExceptionHandler>();
 builder.Services.AddPopkinRateLimits();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -14,3 +14,4 @@ export * from './lib/api/popkins/new-popkin-draft';
 export * from './lib/api/popkins/popkin-length';
 export * from './lib/api/popkins/popkins-api';
 export * from './lib/api/popkins/qr-encoder';
+export * from './lib/api/error-screens';

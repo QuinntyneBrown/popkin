@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 import responses from './api/responses.json';
-import { answer } from './stubs';
+import { answer, answerOnce, problem } from './stubs';
 import { NameYourPopkinPage } from '../pages/name-your-popkin.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
 
@@ -57,4 +57,13 @@ export async function withShareSheet(page: Page): Promise<void> {
   await page.addInitScript(() => {
     navigator.share = async () => undefined;
   });
+}
+
+/** The created screen's invite read fails on the server, with the reference the mock shows. */
+export async function inviteFailsOnTheServer(page: Page): Promise<void> {
+  await answerOnce(
+    page,
+    `GET /api/popkins/${created.id}/invite`,
+    problem(500, 'server_error', { reference: 'PK-7F3A-2C19' }),
+  );
 }

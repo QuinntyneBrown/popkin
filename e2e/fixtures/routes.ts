@@ -39,6 +39,11 @@ export const routes = {
     mock: 'pages/popkin-created/copied.html',
   },
   toastSuccess: { app: '/verify', mock: 'notifications/toast/success.html' },
+  serverError: { app: '/error', mock: 'pages/server-error/default.html' },
+  serverErrorWithReference: {
+    app: `/p/${created.id}/created`,
+    mock: 'pages/server-error/default.html',
+  },
   notFound: { app: '/no-such-screen', mock: 'pages/not-found/default.html' },
 } satisfies Record<string, ScreenRoute>;
 
