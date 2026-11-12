@@ -1,0 +1,551 @@
+/* ==========================================================================
+   Popkin design tokens — the single source of truth for colour, type, space,
+   shape, elevation, motion, layout and z-order. Extracted from docs/mocks
+   (which were built from the Popkin Community Platform designs). Everything
+   else (assets/components.css, the documentation, tokens.json, the mocks and
+   the app) reads from this file.
+
+   Three tiers:
+     1. Primitives  (--palette-*, --font-family-*, --font-size-*)  raw values,
+                    never used directly by components.
+     2. Semantic    (--color-*, --text-*, --space-*, --radius-*, --shadow-*,
+                    --duration-*, --ease-*, --z-*, --layout-*) aliases that
+                    components consume. Themes override these.
+     3. Popkin colour (--accent and what derives from it) set by
+                    [data-accent="…"] on a Popkin's screen, a card or an avatar.
+
+   Themes: light is the default. Dark applies with [data-theme="dark"], or
+   when the OS prefers dark and the page has not forced [data-theme="light"].
+   ========================================================================== */
+
+@font-face {
+  font-family: "Nunito"; font-style: normal; font-weight: 200 1000; font-display: swap;
+  src: url("../assets/fonts/nunito-latin-wght-normal.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "Inter"; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url("../assets/fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+@font-face {
+  font-family: "Rubik"; font-style: normal; font-weight: 300 900; font-display: swap;
+  src: url("../assets/fonts/rubik-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root, [data-theme="light"] {
+  /* Light is the default; [data-theme="light"] restores it inside a dark page. */
+  /* ---------- Primitives: colour --------------------------------------- */
+  --palette-white: #ffffff;
+  --palette-black: #000000;
+
+  /* Warm neutrals, light */
+  --palette-paper: #fff8f1;
+  --palette-sand: #f8ecdf;
+  --palette-line: #eedfcf;
+  --palette-clay: #8f7d6b;        /* control edges, 3:1 on paper */
+  --palette-ink: #231c2e;
+  --palette-ink-soft: #5d5466;
+  --palette-ink-faint: #6e6475;   /* the design's #8a8090 darkened to reach 4.5:1 */
+  --palette-ink-muted: #8a8090;   /* the design's faint text, kept for disabled text only */
+
+  /* Warm neutrals, dark */
+  --palette-night-deep: #140f19;
+  --palette-night: #1a1520;
+  --palette-night-card: #251e2c;
+  --palette-night-sand: #2e2636;
+  --palette-night-line: #3a3142;
+  --palette-night-clay: #857892;
+  --palette-cream: #fbf3ea;
+  --palette-cream-soft: #cbbfcf;
+  --palette-cream-faint: #a69bab;
+  --palette-stage: #1d1724;       /* call and photo view background, both themes */
+  --palette-stage-tile: #2c2434;
+  --palette-veil-light-subtle: rgb(255 255 255 / 0.1);
+  --palette-veil-light: rgb(255 255 255 / 0.15);
+  --palette-veil-light-strong: rgb(255 255 255 / 0.25);
+  --palette-veil-dark-subtle: rgb(0 0 0 / 0.35);
+  --palette-veil-dark: rgb(0 0 0 / 0.45);
+  --palette-veil-dark-strong: rgb(0 0 0 / 0.55);
+  --palette-veil-grey: rgb(128 128 128 / 0.3);
+
+  /* Brand */
+  --palette-coral: #d6401f;
+  --palette-coral-deep: #ad3118;
+  --palette-coral-deeper: #8f2814;
+  --palette-coral-soft: #ffe3d9;
+  --palette-coral-soft-hover: #ffd2c2;
+  --palette-coral-light: #ff9b82; /* coral as text on dark */
+  --palette-coral-night: #4a2a25;
+  --palette-coral-night-hover: #5c332c;
+  --palette-sun: #ffc83d;
+  --palette-sun-soft: #fff1c7;
+  --palette-sun-deep: #7a5200;
+  --palette-sun-night: #43391f;
+  --palette-teal: #0b7f77;
+  --palette-teal-deep: #075f59;
+  --palette-teal-soft: #d4f1ed;
+  --palette-teal-light: #7fd6cd;
+  --palette-teal-night: #1d3c3a;
+
+  /* The seven colours a Popkin can pick. Each carries white text at AA. */
+  --palette-accent-coral: #d6401f;
+  --palette-accent-teal: #0b7f77;
+  --palette-accent-sky: #2f68c9;
+  --palette-accent-berry: #bb2f68;
+  --palette-accent-leaf: #2c7d45;
+  --palette-accent-plum: #7044b8;
+  --palette-accent-amber: #b45f06;
+
+  /* ---------- Primitives: typography ----------------------------------- */
+  --font-family-display: "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-family-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-brand: "Rubik", "Nunito", system-ui, sans-serif;
+  --font-family-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --font-family-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --font-size-xs: 0.75rem;     /* 12px  times, tab labels */
+  --font-size-sm-plus: 0.8125rem; /* 13px  pills, meta text */
+  --font-size-sm: 0.875rem;    /* 14px  secondary text */
+  --font-size-md-minus: 0.9375rem; /* 15px  list previews, labels */
+  --font-size-md: 1rem;        /* 16px  body, messages */
+  --font-size-md-plus: 1.0625rem; /* 17px  inputs, lead text */
+  --font-size-lg: 1.125rem;    /* 18px  buttons, section titles */
+  --font-size-xl: 1.25rem;     /* 20px  card titles */
+  --font-size-2xl: 1.375rem;   /* 22px  dialog titles */
+  --font-size-3xl: 1.625rem;   /* 26px  tab screen titles */
+  --font-size-4xl: 1.875rem;   /* 30px  step titles */
+  --font-size-5xl: 2.25rem;    /* 36px  welcome, invite */
+  --font-size-6xl: 2.75rem;    /* 44px  landing h2, hero on phones */
+  --font-size-7xl: 3.75rem;    /* 60px  hero on tablets */
+  --font-size-8xl: 4.5rem;     /* 72px  hero on desktops */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-brand: 560;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  --line-height-none: 1;
+  --line-height-tight: 1.08;
+  --line-height-snug: 1.25;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+
+  --letter-spacing-tighter: -0.03em;
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.04em;
+  --letter-spacing-code: 0.5em;
+
+  /* ---------- Semantic: colour (light) --------------------------------- */
+  --color-bg-canvas: var(--palette-paper);          /* page background */
+  --color-bg-surface: var(--palette-white);         /* cards, inputs, bubbles */
+  --color-bg-surface-raised: var(--palette-paper);  /* sheets, dialogs */
+  --color-bg-surface-sunken: var(--palette-sand);   /* wells, the composer's reply bar */
+  --color-bg-subtle: var(--palette-sand);           /* quiet fills, chips */
+  --color-bg-subtle-hover: var(--palette-line);
+  --color-bg-inverse: var(--palette-ink);           /* pressed chips, toasts */
+  --color-bg-backdrop: rgb(35 28 46 / 0.4);         /* modal scrim */
+  --color-bg-stage: var(--palette-stage);           /* calls, photo view */
+  --color-bg-stage-tile: var(--palette-stage-tile);
+  --color-bg-stage-control: var(--palette-veil-light);          /* call controls, chips on the stage */
+  --color-bg-stage-control-subtle: var(--palette-veil-light-subtle); /* react bar, icon hover on the stage */
+  --color-bg-stage-control-strong: var(--palette-veil-light-strong); /* a pressed reaction on the stage */
+  --color-bg-stage-label: var(--palette-veil-dark-strong);      /* name label over video */
+  --color-bg-scrim: var(--palette-veil-dark);                   /* a state laid over a photo */
+  --color-bg-scrim-subtle: var(--palette-veil-dark-subtle);     /* the scanner's mask */
+  --color-bg-quote-on-popkin: var(--palette-veil-light);        /* a quote inside your own bubble */
+  --color-bg-inverse-hover: var(--palette-veil-grey);           /* hover inside a toast */
+  --color-constant-light: var(--palette-white);   /* white in both themes: QR ground, switch thumb, polaroid frame */
+  --color-constant-dark: var(--palette-ink);      /* ink in both themes: text on a constant-light control */
+
+  --color-fg-default: var(--palette-ink);
+  --color-fg-muted: var(--palette-ink-soft);
+  --color-fg-subtle: var(--palette-ink-faint);
+  --color-fg-disabled: var(--palette-ink-muted);
+  --color-fg-inverse: var(--palette-paper);
+  --color-fg-on-stage: var(--palette-white);
+  --color-fg-on-stage-muted: rgb(255 255 255 / 0.75);
+  --color-fg-link: var(--palette-coral-deep);
+  --color-fg-link-hover: var(--palette-ink);
+
+  --color-border-default: var(--palette-line);      /* hairlines (decorative) */
+  --color-border-strong: var(--palette-clay);       /* control edges (>= 3:1) */
+  --color-border-inverse: var(--palette-ink-soft);  /* edges on the inverse surface */
+
+  --color-accent: var(--palette-coral);             /* the brand's primary action */
+  --color-accent-hover: var(--palette-coral-deep);
+  --color-accent-active: var(--palette-coral-deeper);
+  --color-accent-subtle: var(--palette-coral-soft);
+  --color-accent-subtle-hover: var(--palette-coral-soft-hover);
+  --color-fg-on-accent: var(--palette-white);
+  --color-fg-accent: var(--palette-coral-deep);     /* coral as text */
+
+  --color-focus-ring: var(--palette-ink);
+  --color-focus-halo: var(--palette-coral-soft);
+
+  --color-star: var(--palette-sun);
+  --color-star-empty: var(--palette-line);
+  --color-confetti-sun: var(--palette-sun);
+  --color-confetti-coral: var(--palette-coral);
+
+  --color-info-bg: var(--palette-sand);
+  --color-info-fg: var(--palette-ink);
+  --color-info-border: var(--palette-line);
+  --color-info-icon: var(--palette-ink-soft);
+  --color-info-solid: var(--palette-ink-soft);
+
+  --color-success-bg: var(--palette-teal-soft);
+  --color-success-fg: var(--palette-teal-deep);
+  --color-success-border: var(--palette-teal);
+  --color-success-icon: var(--palette-teal);
+  --color-success-solid: var(--palette-teal);
+
+  --color-warning-bg: var(--palette-sun-soft);
+  --color-warning-fg: var(--palette-sun-deep);
+  --color-warning-border: var(--palette-sun);
+  --color-warning-icon: var(--palette-sun-deep);
+  --color-warning-solid: var(--palette-sun-deep);
+
+  --color-danger-bg: var(--palette-coral-soft);
+  --color-danger-fg: var(--palette-coral-deep);
+  --color-danger-border: var(--palette-coral);
+  --color-danger-icon: var(--palette-coral-deep);
+  --color-danger-solid: var(--palette-coral-deep);
+  --color-danger-solid-hover: var(--palette-coral-deeper);
+  --color-fg-on-danger: var(--palette-white);
+
+  /* Status icons inside a toast (the toast is the inverse surface). */
+  --color-inverse-success-icon: var(--palette-teal-light);
+  --color-inverse-warning-icon: var(--palette-sun);
+  --color-inverse-danger-icon: var(--palette-coral-light);
+
+  /* ---------- Popkin colour -------------------------------------------- */
+  --accent: var(--palette-accent-coral);
+  --accent-tint-strength: 11%;        /* how much of the colour a tinted surface takes */
+  --accent-wash-strength: 8%;         /* a whole screen washed in the colour */
+  --accent-text-strength: 80%;        /* the colour as text: mixed toward --accent-text-toward */
+  --accent-text-toward: var(--palette-black);
+  --accent-line-strength: 100%;       /* the colour as an edge, ring or icon */
+  --color-fg-on-popkin: var(--palette-white);
+
+  /* ---------- Semantic: typography roles ------------------------------- */
+  --text-hero: var(--font-weight-black) var(--font-size-6xl) / var(--line-height-tight) var(--font-family-display);
+  --text-display: var(--font-weight-black) var(--font-size-5xl) / var(--line-height-tight) var(--font-family-display);
+  --text-h1: var(--font-weight-black) var(--font-size-4xl) / var(--line-height-snug) var(--font-family-display);
+  --text-h1-compact: var(--font-weight-black) var(--font-size-3xl) / var(--line-height-snug) var(--font-family-display);
+  --text-h2: var(--font-weight-black) var(--font-size-2xl) / var(--line-height-snug) var(--font-family-display);
+  --text-h3: var(--font-weight-extrabold) var(--font-size-lg) / var(--line-height-snug) var(--font-family-display);
+  --text-title: var(--font-weight-extrabold) var(--font-size-xl) / var(--line-height-snug) var(--font-family-display);
+  --text-h4: var(--font-weight-extrabold) var(--font-size-md-plus) / var(--line-height-snug) var(--font-family-display);
+  --text-overline: var(--font-weight-bold) var(--font-size-xs) / var(--line-height-normal) var(--font-family-sans);
+  --text-label: var(--font-weight-extrabold) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-display);
+  --text-button: var(--font-weight-extrabold) var(--font-size-lg) / var(--line-height-none) var(--font-family-display);
+  --text-body-lg: var(--font-weight-regular) var(--font-size-md-plus) / var(--line-height-relaxed) var(--font-family-sans);
+  --text-body: var(--font-weight-regular) var(--font-size-md) / var(--line-height-normal) var(--font-family-sans);
+  --text-body-sm: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans);
+  --text-meta: var(--font-weight-semibold) var(--font-size-sm-plus) / var(--line-height-normal) var(--font-family-sans);
+  --text-caption: var(--font-weight-regular) var(--font-size-xs) / var(--line-height-normal) var(--font-family-sans);
+  --text-code: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-normal) var(--font-family-mono);
+
+  /* ---------- Semantic: spacing and sizes (4px base) ------------------- */
+  --space-0: 0;
+  --space-0-5: 0.125rem; /* 2px */
+  --space-1: 0.25rem;    /* 4px */
+  --space-1-5: 0.375rem; /* 6px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-2-5: 0.625rem; /* 10px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-4: 1rem;       /* 16px */
+  --space-5: 1.25rem;    /* 20px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-7: 1.75rem;    /* 28px */
+  --space-8: 2rem;       /* 32px */
+  --space-9: 2.25rem;    /* 36px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-11: 2.75rem;   /* 44px */
+  --space-12: 3rem;      /* 48px */
+  --space-13: 3.25rem;   /* 52px */
+  --space-14: 3.5rem;    /* 56px */
+  --space-16: 4rem;      /* 64px */
+  --space-18: 4.5rem;    /* 72px */
+  --space-20: 5rem;      /* 80px */
+  --space-22: 5.5rem;    /* 88px */
+  --space-24: 6rem;      /* 96px */
+  --space-28: 7rem;      /* 112px */
+  --space-32: 8rem;      /* 128px */
+  --space-36: 9rem;      /* 144px  polaroids */
+  --space-40: 10rem;     /* 160px */
+  --space-55: 13.75rem;  /* 220px  the welcome circle, the big mark */
+
+  /* ---------- Semantic: layout ----------------------------------------- */
+  --layout-breakpoint-sm: 36rem;    /* 576px   app column centres; landing two-up */
+  --layout-breakpoint-sheet: 40rem; /* 640px   dialogs stop being bottom sheets */
+  --layout-breakpoint-md: 48rem;    /* 768px   landing steps three-up */
+  --layout-breakpoint-lg: 62rem;    /* 992px   landing hero side by side, ideas four-up */
+  --layout-breakpoint-xl: 75rem;    /* 1200px  container reaches its maximum */
+  --layout-columns: 4;
+  --layout-gutter: var(--space-4);
+  --layout-app-max: 28rem;         /* the app's single column */
+  --layout-container-max: 72rem;   /* the landing page */
+  --layout-container-narrow: 56rem;
+  --layout-dialog-max: 28rem;
+  --layout-margin: var(--space-5);
+  --layout-topbar-height: var(--space-16);
+  --layout-sidebar-width: 16rem;    /* side navigation on wide screens (the design-system docs) */
+  --layout-nav-height: 4.75rem;     /* the Popkin tabs, safe area excluded */
+  --layout-measure: 34rem;         /* lead paragraphs, landing headings */
+  --layout-measure-lg: 30rem;      /* a paragraph beside an action */
+  --layout-measure-md: 24rem;      /* short paragraphs in a grid */
+  --layout-measure-sm: 20rem;      /* empty-state text */
+  --layout-measure-xs: 18rem;      /* footer blurb, short centred lines */
+  --layout-toast-max: 26rem;
+  --layout-call-min-height: 24rem;
+  --layout-bubble-max: 78%;
+  --layout-qr-card-max: 20rem;
+  --layout-qr-size: 13rem;
+  --layout-qr-size-sm: 6.5rem;
+  --layout-polaroids-width: 17.5rem;
+  --layout-polaroids-height: 12.5rem;
+  --layout-hero-art-max: 27.5rem;
+  --layout-photo-in-chat: 16rem;
+
+  /* ---------- Semantic: shape ------------------------------------------ */
+  --radius-xs: 0.375rem;  /* 6px   the tail corner of a bubble */
+  --radius-sm: 0.75rem;   /* 12px  QR code, small tiles */
+  --radius-md: 1rem;      /* 16px  inputs, thumbnails, alerts */
+  --radius-lg: 1.5rem;    /* 24px  cards, bubbles, option cards */
+  --radius-xl: 2rem;      /* 32px  sheets, dialogs, hero card */
+  --radius-full: 9999px;  /* buttons, pills, avatars */
+  --radius-tile: 32%;     /* the squircle of a Popkin tile and the app icon */
+
+  --border-width-hairline: 1px;
+  --border-width-thick: 2px;
+  --border-width-ring: 3px;
+
+  /* ---------- Semantic: elevation -------------------------------------- */
+  --shadow-color: 35 28 46;
+  --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.04), 0 6px 20px -6px rgb(var(--shadow-color) / 0.12);   /* soft: cards, bubbles */
+  --shadow-2: 0 2px 4px rgb(var(--shadow-color) / 0.05), 0 18px 40px -12px rgb(var(--shadow-color) / 0.22); /* lift: QR card, floating action */
+  --shadow-3: 0 -8px 40px -8px rgb(var(--shadow-color) / 0.3);                                               /* sheets, dialogs */
+  --shadow-focus: 0 0 0 var(--space-1) var(--color-focus-halo);                                             /* the halo around a focused field */
+
+  /* ---------- Semantic: motion ----------------------------------------- */
+  --duration-instant: 0ms;
+  --duration-fast: 150ms;      /* presses, colour changes */
+  --duration-base: 200ms;      /* reveals, the switch */
+  --duration-slow: 280ms;      /* sheets, the pop */
+  --duration-deliberate: 1400ms; /* skeleton shimmer, progress */
+  --ease-pop: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --scale-press: 0.97;
+
+  /* ---------- Semantic: z-order ---------------------------------------- */
+  --z-base: 0;
+  --z-raised: 1;
+  --z-sticky: 100;
+  --z-overlay: 1200;
+  --z-modal: 1300;
+  --z-toast: 1500;
+  --z-tooltip: 1600;
+
+  /* ---------- Semantic: interaction ------------------------------------ */
+  --target-min: 1.5rem;          /* 24px  WCAG 2.2 AA minimum */
+  --target-comfortable: 2.75rem; /* 44px  every tap target in the app */
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+  --control-height-sm: 2.75rem;  /* 44px */
+  --control-height-md: 3rem;     /* 48px */
+  --control-height-lg: 3.5rem;   /* 56px */
+  --opacity-disabled: 0.5;
+
+  color-scheme: light;
+}
+
+/* Responsive layout tokens (the landing page; the app is one column at every width). */
+@media (min-width: 36rem) { :root { --layout-margin: var(--space-8); } }
+@media (min-width: 48rem) { :root { --layout-columns: 8; --layout-gutter: var(--space-6); } }
+@media (min-width: 62rem) { :root { --layout-columns: 12; --layout-gutter: var(--space-8); } }
+
+/* ---------- Popkin colours -------------------------------------------------- */
+[data-accent="coral"] { --accent: var(--palette-accent-coral); }
+[data-accent="teal"]  { --accent: var(--palette-accent-teal); }
+[data-accent="sky"]   { --accent: var(--palette-accent-sky); }
+[data-accent="berry"] { --accent: var(--palette-accent-berry); }
+[data-accent="leaf"]  { --accent: var(--palette-accent-leaf); }
+[data-accent="plum"]  { --accent: var(--palette-accent-plum); }
+[data-accent="amber"] { --accent: var(--palette-accent-amber); }
+
+/* What derives from the Popkin colour is computed wherever the colour is set. */
+:root, [data-accent], [data-theme] {
+  --accent-tint: color-mix(in srgb, var(--accent) var(--accent-tint-strength), var(--color-bg-surface));
+  --accent-wash: color-mix(in srgb, var(--accent) var(--accent-wash-strength), var(--color-bg-canvas));
+  --accent-edge: color-mix(in srgb, var(--accent) 22%, var(--color-bg-surface));
+  --accent-text: color-mix(in srgb, var(--accent) var(--accent-text-strength), var(--accent-text-toward));
+  --accent-line: color-mix(in srgb, var(--accent) var(--accent-line-strength), var(--accent-text-toward));
+}
+
+/* ---------- Dark theme ----------------------------------------------------- */
+[data-theme="dark"] {
+  --color-bg-surface-sunken: var(--palette-night-deep);
+  --color-border-inverse: var(--palette-cream-soft);
+  --color-accent-subtle-hover: var(--palette-coral-night-hover);
+  --color-danger-solid: var(--palette-coral);
+  --color-danger-solid-hover: var(--palette-coral-deep);
+  --color-info-solid: var(--palette-cream-soft);
+  --color-success-solid: var(--palette-teal-light);
+  --color-warning-solid: var(--palette-sun);
+  --color-inverse-success-icon: var(--palette-teal);
+  --color-inverse-warning-icon: var(--palette-sun-deep);
+  --color-inverse-danger-icon: var(--palette-coral-deep);
+  --color-bg-inverse-hover: var(--palette-veil-grey);
+  --color-bg-canvas: var(--palette-night);
+  --color-bg-surface: var(--palette-night-card);
+  --color-bg-surface-raised: var(--palette-night);
+  --color-bg-subtle: var(--palette-night-sand);
+  --color-bg-subtle-hover: var(--palette-night-line);
+  --color-bg-inverse: var(--palette-cream);
+  --color-bg-backdrop: rgb(0 0 0 / 0.6);
+
+  --color-fg-default: var(--palette-cream);
+  --color-fg-muted: var(--palette-cream-soft);
+  --color-fg-subtle: var(--palette-cream-faint);
+  --color-fg-disabled: var(--palette-cream-faint);
+  --color-fg-inverse: var(--palette-ink);
+  --color-fg-link: var(--palette-coral-light);
+  --color-fg-link-hover: var(--palette-cream);
+
+  --color-border-default: var(--palette-night-line);
+  --color-border-strong: var(--palette-night-clay);
+
+  --color-accent-subtle: var(--palette-coral-night);
+  --color-fg-accent: var(--palette-coral-light);
+
+  --color-focus-ring: var(--palette-cream);
+  --color-focus-halo: var(--palette-coral-night);
+  --color-star-empty: var(--palette-night-line);
+
+  --color-info-bg: var(--palette-night-sand);
+  --color-info-fg: var(--palette-cream);
+  --color-info-border: var(--palette-night-line);
+  --color-info-icon: var(--palette-cream-soft);
+  --color-success-bg: var(--palette-teal-night);
+  --color-success-fg: var(--palette-teal-light);
+  --color-success-border: var(--palette-teal);
+  --color-success-icon: var(--palette-teal-light);
+  --color-warning-bg: var(--palette-sun-night);
+  --color-warning-fg: var(--palette-sun);
+  --color-warning-border: var(--palette-sun-deep);
+  --color-warning-icon: var(--palette-sun);
+  --color-danger-bg: var(--palette-coral-night);
+  --color-danger-fg: var(--palette-coral-light);
+  --color-danger-border: var(--palette-coral);
+  --color-danger-icon: var(--palette-coral-light);
+
+  --accent-tint-strength: 22%;
+  --accent-wash-strength: 12%;
+  --accent-text-strength: 45%;
+  --accent-text-toward: var(--palette-white);
+  --accent-line-strength: 65%;
+
+  --shadow-color: 0 0 0;
+  --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.3), 0 6px 20px -6px rgb(var(--shadow-color) / 0.5);
+  --shadow-2: 0 2px 4px rgb(var(--shadow-color) / 0.35), 0 18px 40px -12px rgb(var(--shadow-color) / 0.7);
+  --shadow-3: 0 -8px 40px -8px rgb(var(--shadow-color) / 0.7);
+
+  color-scheme: dark;
+}
+
+/* Follow the OS preference unless the page has explicitly chosen light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg-surface-sunken: var(--palette-night-deep);
+    --color-border-inverse: var(--palette-cream-soft);
+    --color-accent-subtle-hover: var(--palette-coral-night-hover);
+    --color-danger-solid: var(--palette-coral);
+    --color-danger-solid-hover: var(--palette-coral-deep);
+    --color-info-solid: var(--palette-cream-soft);
+    --color-success-solid: var(--palette-teal-light);
+    --color-warning-solid: var(--palette-sun);
+    --color-inverse-success-icon: var(--palette-teal);
+    --color-inverse-warning-icon: var(--palette-sun-deep);
+    --color-inverse-danger-icon: var(--palette-coral-deep);
+    --color-bg-inverse-hover: var(--palette-veil-grey);
+    --color-bg-canvas: var(--palette-night);
+    --color-bg-surface: var(--palette-night-card);
+    --color-bg-surface-raised: var(--palette-night);
+    --color-bg-subtle: var(--palette-night-sand);
+    --color-bg-subtle-hover: var(--palette-night-line);
+    --color-bg-inverse: var(--palette-cream);
+    --color-bg-backdrop: rgb(0 0 0 / 0.6);
+    --color-fg-default: var(--palette-cream);
+    --color-fg-muted: var(--palette-cream-soft);
+    --color-fg-subtle: var(--palette-cream-faint);
+    --color-fg-disabled: var(--palette-cream-faint);
+    --color-fg-inverse: var(--palette-ink);
+    --color-fg-link: var(--palette-coral-light);
+    --color-fg-link-hover: var(--palette-cream);
+    --color-border-default: var(--palette-night-line);
+    --color-border-strong: var(--palette-night-clay);
+    --color-accent-subtle: var(--palette-coral-night);
+    --color-fg-accent: var(--palette-coral-light);
+    --color-focus-ring: var(--palette-cream);
+    --color-focus-halo: var(--palette-coral-night);
+    --color-star-empty: var(--palette-night-line);
+    --color-info-bg: var(--palette-night-sand);
+    --color-info-fg: var(--palette-cream);
+    --color-info-border: var(--palette-night-line);
+    --color-info-icon: var(--palette-cream-soft);
+    --color-success-bg: var(--palette-teal-night);
+    --color-success-fg: var(--palette-teal-light);
+    --color-success-border: var(--palette-teal);
+    --color-success-icon: var(--palette-teal-light);
+    --color-warning-bg: var(--palette-sun-night);
+    --color-warning-fg: var(--palette-sun);
+    --color-warning-border: var(--palette-sun-deep);
+    --color-warning-icon: var(--palette-sun);
+    --color-danger-bg: var(--palette-coral-night);
+    --color-danger-fg: var(--palette-coral-light);
+    --color-danger-border: var(--palette-coral);
+    --color-danger-icon: var(--palette-coral-light);
+    --accent-tint-strength: 22%;
+    --accent-wash-strength: 12%;
+    --accent-text-strength: 45%;
+    --accent-text-toward: var(--palette-white);
+    --accent-line-strength: 65%;
+  --accent-line-strength: 65%;
+    --shadow-color: 0 0 0;
+    --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.3), 0 6px 20px -6px rgb(var(--shadow-color) / 0.5);
+    --shadow-2: 0 2px 4px rgb(var(--shadow-color) / 0.35), 0 18px 40px -12px rgb(var(--shadow-color) / 0.7);
+    --shadow-3: 0 -8px 40px -8px rgb(var(--shadow-color) / 0.7);
+    color-scheme: dark;
+  }
+}
+
+/* ---------- Preference overrides ------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0.01ms;
+    --duration-base: 0.01ms;
+    --duration-slow: 0.01ms;
+    --duration-deliberate: 0.01ms;
+    --scale-press: 1;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-border-default: var(--color-border-strong);
+    --color-fg-muted: var(--color-fg-default);
+    --color-fg-subtle: var(--color-fg-muted);
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --color-focus-ring: Highlight;
+    --color-border-default: CanvasText;
+    --color-border-strong: CanvasText;
+  }
+}

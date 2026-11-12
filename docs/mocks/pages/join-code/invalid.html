@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join with a code · invalid — Popkin mocks</title>
+<meta name="mock:kind" content="page">
+<meta name="mock:screen" content="join-code">
+<meta name="mock:state" content="invalid">
+<meta name="mock:requirements" content="L2-015 L2-053">
+<meta name="description" content="A code that matches no Popkin.">
+<link rel="stylesheet" href="../../../design-system/tokens/tokens.css">
+<link rel="stylesheet" href="../../../design-system/assets/components.css">
+<link rel="stylesheet" href="../../assets/mock.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="screen " data-accent="coral"><header class="topbar "><a class="icon-btn" href="../../pages/welcome/default.html" aria-label="Back" title="Back" ><svg class="icon icon--lg" aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></a><div class="topbar__titles"></div><div class="topbar__end"></div></header>
+<main id="main" class="screen__body"><h1>Got a code?</h1><p class="sub">Type the code or paste the link from your invite.</p>
+<form style="margin-top: var(--space-8);"><div class="field "><label class="field__label" for="code">Invite code or link</label><input class="input" id="code" type="text" value="popk.in/lakesid" aria-describedby="code-err" aria-invalid="true" autocapitalize="none" autocomplete="off" placeholder="popk.in/…" autofocus><span class="field__error" id="code-err"><svg class="icon icon--sm" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/> <line x1="12" x2="12" y1="8" y2="12"/> <line x1="12" x2="12.01" y1="16" y2="16"/></svg><span>We can’t find a Popkin with that code.</span></span></div></form>
+<div class="push stack stack--sm" style="padding-top: var(--space-6);"><a class="btn btn--primary btn--block" href="../../pages/join-invite/default.html" >Find my Popkin</a><a class="btn btn--quiet btn--block" href="../../dialogs/scan-to-join/default.html" ><svg class="icon icon--md" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/> <path d="M17 3h2a2 2 0 0 1 2 2v2"/> <path d="M21 17v2a2 2 0 0 1-2 2h-2"/> <path d="M7 21H5a2 2 0 0 1-2-2v-2"/> <path d="M7 12h10"/></svg>Scan a QR code instead</a></div>
+</main></div>
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
+  <span class="mock-bar__screen">Join with a code</span>
+  <ul class="mock-bar__states"><li><a href="default.html">default</a></li><li><a href="invalid.html" aria-current="page">invalid</a></li><li><a href="submitting.html">submitting</a></li></ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../assets/mock.js"></script>
+</body>
+</html>

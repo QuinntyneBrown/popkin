@@ -1,0 +1,3 @@
+/* The mocks read the design system's tokens. This file forwards to them for the gallery (index.html),
+   which check_mocks.py generates with a fixed link to assets/tokens.css. */
+@import url("../../design-system/tokens/tokens.css");

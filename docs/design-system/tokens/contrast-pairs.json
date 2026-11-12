@@ -1,0 +1,476 @@
+{
+  "$comment": "Foreground/background token pairs checked by check_contrast.py. 4.5:1 is WCAG 2.2 AA for text (1.4.3); 3:1 for large text, UI edges, icons that carry meaning and focus indicators (1.4.11). Pairs that mix a Popkin colour into a surface (tints, colour as text) are computed with color-mix, which this checker cannot resolve; they are computed separately and recorded in the Popkin colour table in README.md.",
+  "pairs": [
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "body text on canvas"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "body text on surface"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-surface-raised",
+      "min": 4.5,
+      "note": "body text on surface-raised"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-surface-sunken",
+      "min": 4.5,
+      "note": "body text on surface-sunken"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-subtle",
+      "min": 4.5,
+      "note": "body text on subtle"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-bg-subtle-hover",
+      "min": 4.5,
+      "note": "body text on subtle-hover"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "secondary text on canvas"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "secondary text on surface"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-bg-surface-raised",
+      "min": 4.5,
+      "note": "secondary text on surface-raised"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-bg-subtle",
+      "min": 4.5,
+      "note": "secondary text on subtle"
+    },
+    {
+      "fg": "--color-fg-subtle",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "placeholders, times and metadata on canvas"
+    },
+    {
+      "fg": "--color-fg-subtle",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "placeholders, times and metadata on surface"
+    },
+    {
+      "fg": "--color-fg-subtle",
+      "bg": "--color-bg-surface-raised",
+      "min": 4.5,
+      "note": "placeholders, times and metadata on surface-raised"
+    },
+    {
+      "fg": "--color-fg-inverse",
+      "bg": "--color-bg-inverse",
+      "min": 4.5,
+      "note": "toast text; a pressed filter chip"
+    },
+    {
+      "fg": "--color-fg-link",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "links and See all on the page"
+    },
+    {
+      "fg": "--color-fg-link",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "links on cards"
+    },
+    {
+      "fg": "--color-fg-link-hover",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "hovered links"
+    },
+    {
+      "fg": "--color-fg-accent",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "coral text: Recap, Sign in, Send a new code"
+    },
+    {
+      "fg": "--color-fg-accent",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "coral text on the page"
+    },
+    {
+      "fg": "--color-fg-accent",
+      "bg": "--color-accent-subtle",
+      "min": 4.5,
+      "note": "your own reaction chip"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-accent-subtle",
+      "min": 4.5,
+      "note": "text on a coral-tinted surface"
+    },
+    {
+      "fg": "--color-fg-on-accent",
+      "bg": "--color-accent",
+      "min": 4.5,
+      "note": "label on a primary (coral) button, accent"
+    },
+    {
+      "fg": "--color-fg-on-accent",
+      "bg": "--color-accent-hover",
+      "min": 4.5,
+      "note": "label on a primary (coral) button, accent-hover"
+    },
+    {
+      "fg": "--color-fg-on-accent",
+      "bg": "--color-accent-active",
+      "min": 4.5,
+      "note": "label on a primary (coral) button, accent-active"
+    },
+    {
+      "fg": "--color-accent",
+      "bg": "--color-bg-canvas",
+      "min": 3,
+      "note": "primary button and send button edge vs page"
+    },
+    {
+      "fg": "--color-accent",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "primary button edge vs card; step dot; unread dot"
+    },
+    {
+      "fg": "--color-border-strong",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "input, switch-off and radio edges (1.4.11)"
+    },
+    {
+      "fg": "--color-border-strong",
+      "bg": "--color-bg-canvas",
+      "min": 3,
+      "note": "input edges on the page"
+    },
+    {
+      "fg": "--color-focus-ring",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "focus ring vs card (2.4.11)"
+    },
+    {
+      "fg": "--color-focus-ring",
+      "bg": "--color-bg-canvas",
+      "min": 3,
+      "note": "focus ring vs page"
+    },
+    {
+      "fg": "--color-focus-ring",
+      "bg": "--color-accent",
+      "min": 3,
+      "note": "focus ring vs a primary button it surrounds"
+    },
+    {
+      "fg": "--color-fg-on-danger",
+      "bg": "--color-danger-solid",
+      "min": 4.5,
+      "note": "destructive button label"
+    },
+    {
+      "fg": "--color-fg-on-danger",
+      "bg": "--color-danger-solid-hover",
+      "min": 4.5,
+      "note": "destructive button label, hover"
+    },
+    {
+      "fg": "--color-danger-solid",
+      "bg": "--color-bg-surface-raised",
+      "min": 3,
+      "note": "destructive button edge inside a dialog"
+    },
+    {
+      "fg": "--color-info-fg",
+      "bg": "--color-info-bg",
+      "min": 4.5,
+      "note": "info alert and banner text"
+    },
+    {
+      "fg": "--color-info-icon",
+      "bg": "--color-info-bg",
+      "min": 3,
+      "note": "info alert icon"
+    },
+    {
+      "fg": "--color-info-solid",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "solid info mark vs card"
+    },
+    {
+      "fg": "--color-success-fg",
+      "bg": "--color-success-bg",
+      "min": 4.5,
+      "note": "success alert and banner text"
+    },
+    {
+      "fg": "--color-success-icon",
+      "bg": "--color-success-bg",
+      "min": 3,
+      "note": "success alert icon"
+    },
+    {
+      "fg": "--color-success-solid",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "solid success mark vs card"
+    },
+    {
+      "fg": "--color-warning-fg",
+      "bg": "--color-warning-bg",
+      "min": 4.5,
+      "note": "warning alert and banner text"
+    },
+    {
+      "fg": "--color-warning-icon",
+      "bg": "--color-warning-bg",
+      "min": 3,
+      "note": "warning alert icon"
+    },
+    {
+      "fg": "--color-warning-solid",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "solid warning mark vs card"
+    },
+    {
+      "fg": "--color-danger-fg",
+      "bg": "--color-danger-bg",
+      "min": 4.5,
+      "note": "danger alert and banner text"
+    },
+    {
+      "fg": "--color-danger-icon",
+      "bg": "--color-danger-bg",
+      "min": 3,
+      "note": "danger alert icon"
+    },
+    {
+      "fg": "--color-danger-solid",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "solid danger mark vs card"
+    },
+    {
+      "fg": "--color-danger-fg",
+      "bg": "--color-bg-surface",
+      "min": 4.5,
+      "note": "field error text in a card or dialog"
+    },
+    {
+      "fg": "--color-danger-fg",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "field error text on the page"
+    },
+    {
+      "fg": "--color-danger-border",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "invalid input edge"
+    },
+    {
+      "fg": "--color-success-fg",
+      "bg": "--color-bg-canvas",
+      "min": 4.5,
+      "note": "Saved just now"
+    },
+    {
+      "fg": "--color-inverse-success-icon",
+      "bg": "--color-bg-inverse",
+      "min": 3,
+      "note": "success icon inside a toast"
+    },
+    {
+      "fg": "--color-inverse-warning-icon",
+      "bg": "--color-bg-inverse",
+      "min": 3,
+      "note": "warning icon inside a toast"
+    },
+    {
+      "fg": "--color-inverse-danger-icon",
+      "bg": "--color-bg-inverse",
+      "min": 3,
+      "note": "danger icon inside a toast"
+    },
+    {
+      "fg": "--color-constant-dark",
+      "bg": "--color-constant-light",
+      "min": 4.5,
+      "note": "label on the white button on coral; pressed chip on the stage"
+    },
+    {
+      "fg": "--color-fg-on-stage",
+      "bg": "--color-bg-stage",
+      "min": 4.5,
+      "note": "text on a call or photo view"
+    },
+    {
+      "fg": "--color-fg-on-stage-muted",
+      "bg": "--color-bg-stage",
+      "min": 4.5,
+      "note": "secondary text on a call or photo view"
+    },
+    {
+      "fg": "--color-fg-on-stage",
+      "bg": "--color-bg-stage-tile",
+      "min": 4.5,
+      "note": "text on a call tile"
+    },
+    {
+      "fg": "--color-fg-on-stage-muted",
+      "bg": "--color-bg-stage-tile",
+      "min": 4.5,
+      "note": "secondary text on a call tile"
+    },
+    {
+      "fg": "--color-fg-on-popkin",
+      "bg": "--palette-accent-coral",
+      "min": 4.5,
+      "note": "white text on a Popkin coloured coral: buttons, own bubbles, badges, avatars"
+    },
+    {
+      "fg": "--palette-accent-coral",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "coral as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "themes": [
+        "light"
+      ]
+    },
+    {
+      "fg": "--color-fg-on-popkin",
+      "bg": "--palette-accent-teal",
+      "min": 4.5,
+      "note": "white text on a Popkin coloured teal: buttons, own bubbles, badges, avatars"
+    },
+    {
+      "fg": "--palette-accent-teal",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "teal as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "themes": [
+        "light"
+      ]
+    },
+    {
+      "fg": "--color-fg-on-popkin",
+      "bg": "--palette-accent-sky",
+      "min": 4.5,
+      "note": "white text on a Popkin coloured sky: buttons, own bubbles, badges, avatars"
+    },
+    {
+      "fg": "--palette-accent-sky",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "sky as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "themes": [
+        "light"
+      ]
+    },
+    {
+      "fg": "--color-fg-on-popkin",
+      "bg": "--palette-accent-berry",
+      "min": 4.5,
+      "note": "white text on a Popkin coloured berry: buttons, own bubbles, badges, avatars"
+    },
+    {
+      "fg": "--palette-accent-berry",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "berry as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "themes": [
+        "light"
+      ]
+    },
+    {
+      "fg": "--color-fg-on-popkin",
+      "bg": "--palette-accent-leaf",
+      "min": 4.5,
+      "note": "white text on a Popkin coloured leaf: buttons, own bubbles, badges, avatars"
+    },
+    {
+      "fg": "--palette-accent-leaf",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "leaf as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "themes": [
+        "light"
+      ]
+    },
+    {
+      "fg": "--color-fg-on-popkin",
+      "bg": "--palette-accent-plum",
+      "min": 4.5,
+      "note": "white text on a Popkin coloured plum: buttons, own bubbles, badges, avatars"
+    },
+    {
+      "fg": "--palette-accent-plum",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "plum as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "themes": [
+        "light"
+      ]
+    },
+    {
+      "fg": "--color-fg-on-popkin",
+      "bg": "--palette-accent-amber",
+      "min": 4.5,
+      "note": "white text on a Popkin coloured amber: buttons, own bubbles, badges, avatars"
+    },
+    {
+      "fg": "--palette-accent-amber",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "amber as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "themes": [
+        "light"
+      ]
+    },
+    {
+      "fg": "--color-star",
+      "bg": "--color-bg-surface",
+      "min": 1,
+      "note": "star fill: decorative; the rating is also given as a number and in the accessible name (1.4.1, 1.4.11 exempt)"
+    },
+    {
+      "fg": "--color-star-empty",
+      "bg": "--color-bg-surface",
+      "min": 1,
+      "note": "empty star: decorative; see above"
+    },
+    {
+      "fg": "--color-border-default",
+      "bg": "--color-bg-surface",
+      "min": 1,
+      "note": "hairline dividers: decorative, never the only edge of a control"
+    }
+  ]
+}

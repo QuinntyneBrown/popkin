@@ -1,0 +1,76 @@
+/* mock.css — chrome around a mock (never part of the product UI).
+   The mock bar shows what you are looking at, links sibling states, toggles
+   the theme and can be hidden with ?chrome=0. Everything uses tokens.css. */
+.mock-bar {
+  position: fixed; left: 50%; bottom: var(--space-3); translate: -50% 0; z-index: calc(var(--z-tooltip) + 10);
+  display: flex; align-items: center; gap: var(--space-2); max-width: calc(100vw - var(--space-6));
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+  background: var(--color-bg-inverse); color: var(--color-fg-inverse);
+  border-radius: var(--radius-full); box-shadow: var(--shadow-3); font: var(--text-caption);
+  opacity: 0.92; transition: opacity var(--duration-fast) var(--ease-standard);
+}
+.mock-bar:hover, .mock-bar:focus-within { opacity: 1; }
+.mock-bar__screen { font-weight: var(--font-weight-semibold); white-space: nowrap; }
+.mock-bar__states { display: flex; gap: var(--space-0-5); list-style: none; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; }
+.mock-bar__states a, .mock-bar__states span {
+  display: inline-flex; align-items: center; min-height: var(--target-min); padding: 0 var(--space-2);
+  border-radius: var(--radius-full); color: inherit; text-decoration: none; white-space: nowrap; opacity: 0.8;
+}
+.mock-bar__states a:hover { opacity: 1; background: color-mix(in srgb, currentColor 12%, transparent); }
+.mock-bar__states [aria-current="page"] { opacity: 1; background: var(--color-accent); color: var(--color-fg-on-accent); }
+.mock-bar button, .mock-bar__home {
+  display: inline-grid; place-items: center; min-width: var(--target-min); min-height: var(--target-min); padding: 0 var(--space-2);
+  border: 0; border-radius: var(--radius-full); background: color-mix(in srgb, currentColor 10%, transparent); color: inherit; font: inherit; cursor: pointer; text-decoration: none;
+}
+.mock-bar button:hover, .mock-bar__home:hover { background: color-mix(in srgb, currentColor 20%, transparent); }
+.mock-bar :focus-visible { outline-color: var(--color-fg-inverse); }
+[data-chrome="off"] .mock-bar { display: none; }
+
+/* Annotations: design intent visible only while the chrome is on. */
+.mock-note {
+  position: absolute; z-index: var(--z-tooltip); max-width: 16rem; padding: var(--space-2) var(--space-3);
+  background: var(--color-warning-bg); color: var(--color-warning-fg); border: 1px dashed var(--color-warning-border);
+  border-radius: var(--radius-md); font: var(--text-caption); box-shadow: var(--shadow-2);
+}
+.mock-note::before { content: "Note"; display: block; font-weight: var(--font-weight-semibold); text-transform: uppercase; letter-spacing: var(--letter-spacing-wide); }
+[data-chrome="off"] .mock-note { display: none; }
+@media (max-width: 39.99rem) { .mock-bar__states { max-width: 40vw; } }
+/* Popkin's app is one centred column: on wide screens the bar moves to the corner so it never covers the tabs. */
+@media (min-width: 64rem) { .mock-bar { left: var(--space-3); translate: 0 0; max-width: calc(50vw - 16rem); } }
+
+/* ---------- Brand sheet (pages/brand-components only; documentation, not product UI) ---------- */
+.sheet-grid { display: grid; gap: var(--space-10); }
+.sheet-grid > * { min-width: 0; }
+.logo-tile .logo .mark { width: var(--space-6); height: var(--space-6); }
+.logo-tile .wordmark { font-size: var(--font-size-lg); }
+.sheet-section { margin-top: var(--space-14); padding-top: var(--space-10); border-top: var(--border-width-hairline) solid var(--color-border-default); }
+.sheet-section > h2 { font: var(--font-weight-black) var(--font-size-4xl) / var(--line-height-snug) var(--font-family-display); }
+.sheet-section > p { margin: var(--space-2) 0 var(--space-7); max-width: 40rem; color: var(--color-fg-muted); }
+.sheet-group > h3 { margin-bottom: var(--space-4); font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-muted); }
+.logo-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+.logo-tile { display: grid; place-items: center; aspect-ratio: 1; border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); }
+.logo-tile--coral { background: var(--palette-coral); color: var(--palette-white); }
+.logo-tile--ink { background: var(--palette-ink); color: var(--palette-paper); }
+.logo-tile--sun { background: var(--palette-sun); color: var(--palette-ink); }
+.logo-tile--teal { background: var(--palette-teal); color: var(--palette-white); }
+.logo-tile--coral .logo, .logo-tile--ink .logo { color: inherit; }
+.logo-tile--coral .mark, .logo-tile--sun .mark, .logo-tile--teal .mark { color: inherit; }
+.logo-tile--coral .wordmark__i::after { background: currentColor; }
+.logo-tile--ink .mark { color: var(--palette-sun); }
+.logo-tile--ink .wordmark__i::after { background: var(--palette-sun); }
+.swatch-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+.swatch-card { overflow: hidden; border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); }
+.swatch-card__chip { height: var(--space-24); }
+.swatch-card__chip--coral { background: var(--palette-coral); } .swatch-card__chip--ink { background: var(--palette-ink); } .swatch-card__chip--paper { background: var(--palette-paper); } .swatch-card__chip--sand { background: var(--palette-sand); } .swatch-card__chip--sun { background: var(--palette-sun); } .swatch-card__chip--teal { background: var(--palette-teal); } .swatch-card__chip--line { background: var(--palette-line); }
+.swatch-card__body { padding: var(--space-3); font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-normal) var(--font-family-sans); color: var(--color-fg-muted); }
+.swatch-card__body strong { display: block; font: var(--font-weight-extrabold) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-display); color: var(--color-fg-default); }
+.accent-dot { width: var(--space-5); height: var(--space-5); border-radius: var(--radius-full); background: var(--accent); }
+.type-display { font: var(--font-weight-black) var(--font-size-6xl) / 1 var(--font-family-display); letter-spacing: var(--letter-spacing-tight); }
+.voice { display: grid; gap: var(--space-3); }
+.voice li { padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); background: var(--color-bg-subtle); font: var(--text-title); }
+.sample { padding: var(--space-4); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--color-bg-subtle) 60%, transparent); display: flex; flex-direction: column; gap: var(--space-3); }
+.sample-nav { max-width: 24rem; margin-inline: auto; overflow: hidden; border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); }
+.sample-nav .popkin-nav { position: static; }
+@media (min-width: 36rem) { .swatch-cards { grid-template-columns: repeat(4, 1fr); } .voice { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 62rem) { .sheet-grid--id { grid-template-columns: 1.4fr 1fr; } .sheet-grid--2 { grid-template-columns: 1fr 1fr; } .swatch-cards { grid-template-columns: repeat(7, 1fr); } .voice { grid-template-columns: repeat(3, 1fr); } }
+
