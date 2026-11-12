@@ -87,7 +87,7 @@ policy, ProblemDetails, `IAppDbContext` and `AppDbContext`.
   The `List` action binds `filter`, refuses an unknown value with `400` `invalid_filter`, and
   sends `GetExperiencesQuery`. The controller holds no business rule.
 - **`GetExperiencesQuery`** and **`GetExperiencesQueryHandler`** (`Popkin.Application`) — the
-  handler calls `IMembershipGuard.RequireMembershipAsync(popkinId)`, which throws not-found for a
+  handler calls `IMembershipGuard.RequireMemberAsync(popkinId)`, which throws not-found for a
   non-member so the API answers `404` `popkin_not_found`. It reads the Popkin's experiences in
   one query through `IAppDbContext`, newest `SharedAt` first. The filter `WeDid` keeps kinds
   `Did` and `Restaurant`; `WantToDo` keeps kind `WantToDo` (L2-037 AC4). For each experience

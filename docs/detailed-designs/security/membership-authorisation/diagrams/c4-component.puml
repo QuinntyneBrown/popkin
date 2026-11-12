@@ -9,7 +9,7 @@ Container_Boundary(api, "Popkin API") {
   Component(ctrls, "Popkin-scoped controllers", "PopkinsController, PhotosController, MessagesController, ...", "Send MediatR requests")
   Component(hub, "PopkinHub", "SignalR hub", "JoinPopkin, JoinThread, JoinCall")
   Component(handlers, "Handlers", "MediatR handlers", "Call the guard first")
-  Component(guard, "MembershipGuard", "IMembershipGuard", "RequireMember, RequireActiveMember, RequireHost")
+  Component(guard, "MembershipGuard", "IMembershipGuard", "RequireMemberAsync, RequireActiveMemberAsync, RequireHostAsync")
   Component(current, "HttpCurrentPerson", "ICurrentPerson", "PersonId from claims")
   Component(errors, "ProblemDetailsExceptionHandler", "IExceptionHandler", "404 popkin_not_found, 403 host_only")
   ComponentDb(db, "Popkin database", "SQL Server", "Membership, PopkinSpace")

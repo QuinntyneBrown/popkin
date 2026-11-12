@@ -97,7 +97,7 @@ package "Popkin.Application" {
     +DateTimeOffset At
   }
   interface IMembershipGuard {
-    +RequireMembershipAsync(popkinId: Guid, ct: CancellationToken): Task<Membership>
+    +RequireMemberAsync(popkinId: Guid, ct: CancellationToken): Task<Membership>
   }
 }
 

@@ -37,7 +37,7 @@ page -> dlg : Dialog.open(InviteDialog), bottom sheet under 640 px, centred from
 dlg -> client : getInvite(id)
 client -> ctrl : GET /api/popkins/(id)/invite
 ctrl -> handler : Send GetInviteQuery
-handler -> guard : RequireMember(id)
+handler -> guard : RequireMemberAsync(id)
 alt not a member (L2-051 AC1)
   handler --> ctrl : 404 popkin_not_found
 else Popkin wrapped up (L2-045 AC2)

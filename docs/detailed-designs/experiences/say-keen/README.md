@@ -75,7 +75,7 @@ L2-042, and marks every detail neither settles as `<TO SUPPLY>`.
 ### Backend (`backend/src/`)
 
 - **`SetKeenCommand`** / **`SetKeenCommandHandler`** —
-  1. calls `IMembershipGuard.RequireMembershipAsync(popkinId)`;
+  1. calls `IMembershipGuard.RequireMemberAsync(popkinId)`;
   2. loads `PopkinSpace`, `Experience` and the caller's `ExperienceKeen`;
   3. refuses a wrapped-up Popkin and a kind other than `WantToDo` with `409`;
   4. calls `Experience.AddKeen(membershipId, now)` or `RemoveKeen(membershipId)`, both of which

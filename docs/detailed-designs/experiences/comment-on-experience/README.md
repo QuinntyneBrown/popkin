@@ -72,7 +72,7 @@ and replaces them. A wrapped-up Popkin accepts no new comment (L2-045).
 - **`CommentOnExperienceCommandValidator`** — `Text` not empty after trimming, at most 500
   characters. The validation library is `<TO SUPPLY>`.
 - **`CommentOnExperienceCommandHandler`** —
-  1. calls `IMembershipGuard.RequireMembershipAsync(popkinId)`;
+  1. calls `IMembershipGuard.RequireMemberAsync(popkinId)`;
   2. loads `PopkinSpace`, `Experience` and the caller's `ExperienceRating`;
   3. refuses a wrapped-up Popkin (`409` `popkin_wrapped_up`) and a caller without a rating
      (`409` `rating_required`);

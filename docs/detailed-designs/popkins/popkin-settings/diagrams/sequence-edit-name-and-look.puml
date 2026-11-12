@@ -39,7 +39,7 @@ else valid
   dlg -> client : updateLook(id, name, emoji, colour)
   client -> ctrl : PATCH /api/popkins/(id)
   ctrl -> handler : Send UpdatePopkinLookCommand
-  handler -> guard : RequireMember(id)
+  handler -> guard : RequireMemberAsync(id)
   alt not a member
     guard --> handler : PopkinNotFoundException
     handler --> ctrl : 404 popkin_not_found

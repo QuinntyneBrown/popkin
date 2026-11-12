@@ -95,7 +95,7 @@ its own page ([View an experience](../view-experience/README.md)). A "Something 
   three values; `Place` at most 80 characters; `Picture` at most 10 MB. The validation library
   is `<TO SUPPLY>`. `EditExperienceCommand` uses the same rules.
 - **`ShareExperienceCommandHandler`** —
-  1. calls `IMembershipGuard.RequireMembershipAsync(popkinId)`;
+  1. calls `IMembershipGuard.RequireMemberAsync(popkinId)`;
   2. loads `PopkinSpace` and calls `EnsureActive()` (`409` `popkin_wrapped_up`);
   3. when a picture is given, calls `IPhotoStore.SaveAsync`, which checks the content bytes
      against the allowed image types whatever the file name says (L2-052 AC3), removes location

@@ -40,7 +40,7 @@ end
 client -> controller : GET /api/popkins/{popkinId}/experiences?filter=all
 controller -> controller : Authenticate session (fallback policy)
 controller -> handler : Send GetExperiencesQuery
-handler -> guard : RequireMembershipAsync(popkinId)
+handler -> guard : RequireMemberAsync(popkinId)
 alt Caller is not a member, or the Popkin does not exist
   guard --> handler : Not found
   handler --> controller : popkin_not_found

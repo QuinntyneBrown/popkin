@@ -41,7 +41,7 @@ else "Leave"
   dlg -> client : leave(id)
   client -> ctrl : DELETE /api/popkins/(id)/members/me
   ctrl -> handler : Send LeavePopkinCommand
-  handler -> guard : RequireMember(id)
+  handler -> guard : RequireMemberAsync(id)
   alt not a member
     guard --> handler : PopkinNotFoundException
     handler --> ctrl : 404 popkin_not_found

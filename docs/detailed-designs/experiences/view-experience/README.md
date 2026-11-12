@@ -70,7 +70,7 @@ page is private to its members (L2-051).
 
 - **`ExperiencesController.Get`** — sends `GetExperienceQuery`.
 - **`GetExperienceQuery`** / **`GetExperienceQueryHandler`** — calls
-  `IMembershipGuard.RequireMembershipAsync`, loads the experience within the Popkin (an id from
+  `IMembershipGuard.RequireMemberAsync`, loads the experience within the Popkin (an id from
   another Popkin answers `404` `experience_not_found`), its sharer, its ratings with their
   authors and, for "Want to do", its keen members. It builds:
   - the group score through `ExperienceScore` when `Experience.IsRateable` (kinds `Did` and

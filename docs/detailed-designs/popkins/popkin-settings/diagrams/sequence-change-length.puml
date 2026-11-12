@@ -42,7 +42,7 @@ dlg --> actor : "Saving…", Save disabled
 dlg -> client : changeLength(id, length, endsAt)
 client -> ctrl : PUT /api/popkins/(id)/length
 ctrl -> handler : Send ChangePopkinLengthCommand
-handler -> handler : RequireMember, then Host check (403 host_only), Active check (409 popkin_wrapped_up)
+handler -> handler : RequireMemberAsync, then Host check (403 host_only), Active check (409 popkin_wrapped_up)
 alt endsAt out of range
   handler --> ctrl : 400 ends_at_out_of_range
 else valid

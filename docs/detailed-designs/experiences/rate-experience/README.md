@@ -77,7 +77,7 @@ The member sees the result at once and never loses track of what was saved.
 - **`RateExperienceCommandValidator`** — `Stars` between 1 and 5. The validation library is
   `<TO SUPPLY>`.
 - **`RateExperienceCommandHandler`** —
-  1. calls `IMembershipGuard.RequireMembershipAsync(popkinId)`;
+  1. calls `IMembershipGuard.RequireMemberAsync(popkinId)`;
   2. loads `PopkinSpace`, `Experience` and the caller's `ExperienceRating`;
   3. refuses a wrapped-up Popkin through `PopkinSpace.EnsureActive()` (`409`
      `popkin_wrapped_up`) and a non-rateable experience (`409` `experience_not_rateable`);

@@ -33,7 +33,7 @@ end box
 page -> client : In parallel: getEveryonePreview, photos getSummary, experiences getSummary, getMembers
 client -> ctrl : GET .../threads/everyone/preview, .../photos/summary, .../experiences/summary, .../members
 ctrl -> handler : One query per section
-handler -> guard : RequireMember(id) (L2-051 AC1)
+handler -> guard : RequireMemberAsync(id) (L2-051 AC1)
 handler -> db : Read section data
 opt photos summary
   handler -> photos : Signed thumbnail URLs, 6 latest (L2-055 AC4)

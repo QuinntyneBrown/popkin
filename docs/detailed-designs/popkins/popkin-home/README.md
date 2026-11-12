@@ -82,7 +82,7 @@ Every endpoint answers `401` without a session.
 
 ### Backend
 
-- **`IMembershipGuard.RequireMember(popkinId)`** — every query below starts with it. It loads
+- **`IMembershipGuard.RequireMemberAsync(popkinId)`** — every query below starts with it. It loads
   the caller's `Membership` with `LeftAt` null or throws `PopkinNotFoundException`, mapped to
   `404` with `code` `popkin_not_found`, so a non-member cannot tell whether the Popkin exists
   (L2-051 AC1).

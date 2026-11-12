@@ -34,7 +34,7 @@ page --> actor : Skeleton header and sections, tabs shown (L2-056 AC1)
 page -> client : getHome(id)
 client -> ctrl : GET /api/popkins/(id)
 ctrl -> handler : Send GetPopkinHomeQuery
-handler -> guard : RequireMember(id)
+handler -> guard : RequireMemberAsync(id)
 guard -> db : Membership where PersonId = caller and LeftAt null
 alt no membership (L2-051 AC1)
   guard --> handler : PopkinNotFoundException

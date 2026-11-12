@@ -67,7 +67,7 @@ Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
 
 - **`UpdatePopkinLookCommand`** / **`UpdatePopkinLookCommandValidator`** /
   **`UpdatePopkinLookCommandHandler`** — the validator applies `PopkinRules` as at creation. The
-  handler calls `IMembershipGuard.RequireMember` (`404` for a non-member), then requires
+  handler calls `IMembershipGuard.RequireMemberAsync` (`404` for a non-member), then requires
   `Membership.Role == Host` or throws `HostOnlyException` (`403` `host_only`, L2-020 AC5,
   L2-051 AC4), then requires `Status == Active` or throws `PopkinWrappedUpException` (`409`
   `popkin_wrapped_up`). It calls `PopkinSpace.ChangeLook`, saves, and calls

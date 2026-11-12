@@ -47,7 +47,7 @@ else Text present
     controller --> client : 400 ProblemDetails code comment_required or comment_too_long, field text (L2-041 AC2)
   else Valid
     controller -> handler : Send CommentOnExperienceCommand
-    handler -> guard : RequireMembershipAsync(popkinId)
+    handler -> guard : RequireMemberAsync(popkinId)
     alt Not a member
       controller --> client : 404 ProblemDetails code popkin_not_found (L2-051 AC1)
     else Member

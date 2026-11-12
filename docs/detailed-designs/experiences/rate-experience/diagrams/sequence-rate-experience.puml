@@ -42,7 +42,7 @@ alt Stars outside 1 to 5
   controller --> client : 400 ProblemDetails code stars_out_of_range, field stars (L2-039 AC6)
 else Valid
   controller -> handler : Send RateExperienceCommand
-  handler -> guard : RequireMembershipAsync(popkinId)
+  handler -> guard : RequireMemberAsync(popkinId)
   alt Not a member
     guard --> handler : Not found
     handler --> controller : popkin_not_found

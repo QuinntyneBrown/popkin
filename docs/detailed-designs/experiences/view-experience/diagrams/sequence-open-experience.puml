@@ -38,7 +38,7 @@ opt No answer within 300 ms
 end
 client -> controller : GET /api/popkins/{popkinId}/experiences/{experienceId}
 controller -> handler : Send GetExperienceQuery
-handler -> guard : RequireMembershipAsync(popkinId)
+handler -> guard : RequireMemberAsync(popkinId)
 alt Caller is not a member
   guard --> handler : Not found
   controller --> client : 404 ProblemDetails code popkin_not_found (L2-051 AC1)

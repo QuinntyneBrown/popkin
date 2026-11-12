@@ -33,7 +33,7 @@ actor -> page : Open /p/(id) or any child route
 page -> client : Request
 client -> ctrl : GET or POST /api/popkins/(id)/...
 ctrl -> handler : Send request
-handler -> guard : RequireMember(id)
+handler -> guard : RequireMemberAsync(id)
 guard -> db : Membership where LeftAt is null
 db --> guard : none
 guard --> handler : PopkinNotFoundException

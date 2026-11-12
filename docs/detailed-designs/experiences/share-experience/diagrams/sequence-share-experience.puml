@@ -51,7 +51,7 @@ else Valid
     dialog --> actor : Same invalid state as on the device
   else Valid
     controller -> handler : Send ShareExperienceCommand
-    handler -> guard : RequireMembershipAsync(popkinId)
+    handler -> guard : RequireMemberAsync(popkinId)
     alt Not a member
       controller --> client : 404 ProblemDetails code popkin_not_found (L2-051 AC1)
     else Member

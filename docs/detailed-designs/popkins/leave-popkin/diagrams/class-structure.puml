@@ -40,7 +40,7 @@ package "Popkin.Application" {
   }
   class HostCannotLeaveException
   interface IMembershipGuard {
-    +RequireMember(popkinId, ct): Task<Membership>
+    +RequireMemberAsync(popkinId, ct): Task<Membership>
   }
   interface IPopkinNotifier {
     +MemberLeft(popkinId, membershipId, memberCount, ct): Task

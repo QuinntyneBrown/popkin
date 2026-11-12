@@ -49,7 +49,7 @@ request the former member makes in that Popkin is answered as if it did not exis
 
 - **`MembersController.LeaveMe`** — `DELETE /api/popkins/{popkinId}/members/me`; sends
   `LeavePopkinCommand`.
-- **`LeavePopkinCommandHandler`** — calls `IMembershipGuard.RequireMember` (`404`
+- **`LeavePopkinCommandHandler`** — calls `IMembershipGuard.RequireMemberAsync` (`404`
   `popkin_not_found` for a non-member). A Host membership throws `HostCannotLeaveException`,
   mapped to `403` `host_cannot_leave`, so the rule holds even for a hand-made request
   (L2-047 AC3). Otherwise it calls `Membership.Leave(now)` with `TimeProvider`, saves, and calls

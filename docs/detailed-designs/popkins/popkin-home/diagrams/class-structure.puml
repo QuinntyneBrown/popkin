@@ -59,7 +59,7 @@ package "Popkin.Application" {
     +AvatarDto Avatar
   }
   interface IMembershipGuard {
-    +RequireMember(popkinId, ct): Task<Membership>
+    +RequireMemberAsync(popkinId, ct): Task<Membership>
   }
   interface IPhotoStore
 }

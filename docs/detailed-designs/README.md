@@ -29,6 +29,34 @@ root namespace `Popkin`. Every other entity carries its spec term: `Person`, `Me
 A person who is not a member of a Popkin receives `404` with code `popkin_not_found` for
 anything in it, so a Popkin's existence is never disclosed (L2-051).
 
+Shared names used across the designs:
+
+- `IMembershipGuard` (`RequireMemberAsync`, `RequireActiveMemberAsync`, `RequireHostAsync`) is
+  defined in [Membership authorisation](security/membership-authorisation/README.md).
+- ProblemDetails codes shared by every write: `404` `popkin_not_found`, `403` `host_only`, `409`
+  `popkin_wrapped_up`, `429` `rate_limited`.
+- Rate-limiter policy names live in `RateLimitPolicyNames`
+  ([Abuse limits](security/abuse-limits/README.md)).
+- The session cookie is `__Host-popkin`, `Secure`, `HttpOnly` and `SameSite=Strict`. The
+  scaffold sets `Lax` today; [Sessions](accounts/sessions/README.md) gives the reason for the
+  change (L2-007 AC4).
+- Routes follow the mock manifest. A direct message is `/p/:popkinId/chat/:memberId` and the
+  welcome screen is `/i/:code/welcome`.
+
+## Conflicts between the mocks and the specs
+
+Each design follows the source named below and marks the conflict in its own README.
+
+- The reactions dialog shows six quick reactions, while L2-024 asks for five
+  ([React to a message](chat/react-to-message/README.md)).
+- The score bars scale to the largest count, while L2-038 AC2 asks for each value's share
+  ([View an experience](experiences/view-experience/README.md)). The design follows the mock.
+- The album thumbnails carry empty `alt` text, while L2-032 AC7 names the text
+  ([Browse the album](photos/browse-album/README.md)). The design follows the requirement.
+- L2-002 AC4 shows "Sign in" from 640 px, while the design system's responsive page says
+  576 px ([Responsive layout](accessibility/responsive-layout/README.md)). The design follows
+  the requirement.
+
 ## Subsystems and features
 
 | Subsystem | Feature | L2 requirements |

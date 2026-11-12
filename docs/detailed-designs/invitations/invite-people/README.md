@@ -57,7 +57,7 @@ to `invitations/preview-invite`.
 
 - **`PopkinsController.GetInvite`** — `GET /api/popkins/{popkinId}/invite`; sends
   `GetInviteQuery`.
-- **`GetInviteQueryHandler`** — calls `IMembershipGuard.RequireMember` (`404`
+- **`GetInviteQueryHandler`** — calls `IMembershipGuard.RequireMemberAsync` (`404`
   `popkin_not_found` for anyone else, L2-051 AC1), refuses a wrapped-up Popkin with
   `PopkinWrappedUpException` (`409` `popkin_wrapped_up`), and returns `InviteDto`: `Code`,
   `Url`, `PopkinName`, `Emoji`, `Colour`. Any member may read it; the invite is not Host-only

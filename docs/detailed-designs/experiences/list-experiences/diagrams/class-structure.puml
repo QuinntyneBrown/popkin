@@ -76,7 +76,7 @@ package "Popkin.Application" {
     +int KeenCount
   }
   interface IMembershipGuard {
-    +RequireMembershipAsync(popkinId: Guid, ct: CancellationToken): Task<Membership>
+    +RequireMemberAsync(popkinId: Guid, ct: CancellationToken): Task<Membership>
   }
   interface IAppDbContext {
     +DbSet<Experience> Experiences
