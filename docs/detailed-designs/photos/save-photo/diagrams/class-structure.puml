@@ -22,7 +22,7 @@ package "popkin app" {
 }
 package "api library" {
   interface PhotosApi {
-    +downloadUrl(popkinId, photoId): string
+    +getDownload(popkinId, photoId): Observable<PhotoDownloadView>
     +deletePhoto(popkinId, photoId): Observable<void>
   }
 }
@@ -32,7 +32,7 @@ package "Popkin.Application" {
     +Guid PhotoId
   }
   class GetPhotoDownloadQueryHandler {
-    +Handle(q: GetPhotoDownloadQuery): Task<Uri>
+    +Handle(q: GetPhotoDownloadQuery): Task<PhotoDownloadDto>
   }
   class DeletePhotoCommand {
     +Guid PopkinId

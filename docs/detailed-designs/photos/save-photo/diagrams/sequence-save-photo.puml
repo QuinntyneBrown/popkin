@@ -17,6 +17,7 @@ skinparam package {
 actor "Member" as actor
 box "Frontend — Popkin web app" #E0F2FE
   participant "PhotoViewPage" as page
+  participant "PhotosApi" as client
   participant "Browser download" as browser
 end box
 box "Backend — Popkin API" #D1FADF
@@ -32,19 +33,21 @@ end box
 participant "Photo store" as files
 
 actor -> page : Choose "Save photo"
-page -> browser : Navigate a hidden link to /api/popkins/{popkinId}/photos/{photoId}/download
-browser -> controller : GET with the session cookie
+page --> actor : "Save photo" busy and disabled (L2-056 AC3)
+page -> client : getDownload(popkinId, photoId)
+client -> controller : GET /api/popkins/{popkinId}/photos/{photoId}/download
 controller -> handler : Send GetPhotoDownloadQuery
 handler -> db : Check membership; load Photo in this Popkin
 alt Not a member or no such photo
-  controller --> browser : 404 popkin_not_found or photo_not_found (L2-051 AC1)
-  page --> actor : Message that the photo did not save, copy TO SUPPLY
-else Album removed after wrap-up
-  controller --> browser : 410 photo_removed (L2-045 AC4)
+  controller --> client : 404 popkin_not_found or photo_not_found (L2-051 AC1)
+  client --> page : Error
+  page --> actor : Danger toast that the photo did not save, copy TO SUPPLY (L2-056 AC7)
 else Found
   handler -> store : GetDownloadUrlAsync(original, file name, short lifetime)
   store --> handler : Signed address with attachment disposition (L2-051 AC2)
-  controller --> browser : 302 Found to the signed address
+  controller --> client : 200 OK {url, expiresAt}
+  client --> page : Download address
+  page -> browser : Activate a temporary link to the address
   browser -> files : GET original
   files --> browser : The file at the size it was added (L2-036 AC1)
   browser --> actor : Saved to the device

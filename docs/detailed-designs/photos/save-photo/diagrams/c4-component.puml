@@ -5,7 +5,7 @@ title Components — Save a photo
 
 Container_Boundary(spa, "Popkin web app") {
   Component(page, "PhotoViewPage", "Angular page", "Save photo, photo actions, delete")
-  Component(photosApi, "PhotosApi / HttpPhotosApi", "api library service", "downloadUrl, deletePhoto")
+  Component(photosApi, "PhotosApi / HttpPhotosApi", "api library service", "getDownload, deletePhoto")
   Component(rt, "PopkinRealtime", "api library service", "PhotoDeleted")
 }
 Container_Boundary(api, "Popkin API") {
