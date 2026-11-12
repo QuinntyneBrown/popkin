@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Messages arrive as they are sent
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+
+Person(other, "Member", "Another member with the same thread open")
+Rel(member, popkin, "Sends messages using", "HTTPS")
+Rel(popkin, other, "Delivers new messages within 1 s to", "WebSocket")
+@enduml

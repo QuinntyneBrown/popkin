@@ -1,0 +1,70 @@
+@startuml
+title UML sequence behaviour — Unexpected server error and action outcomes
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage" as page
+  participant "screenLoad()" as load
+  participant "httpErrorInterceptor" as errint
+  participant "ErrorScreens" as screens
+  participant "ServerErrorPage" as errpage
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+  participant "UnexpectedExceptionHandler" as exh
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPopkinHomeQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "Log sink" as logs
+end box
+
+actor -> page : Open the Popkin home
+page -> load : screenLoad(getHome, primary)
+load -> errint : GET /api/popkins/{popkinId}
+errint -> ctrl : GET /api/popkins/{popkinId}
+ctrl -> handler : Send GetPopkinHomeQuery
+handler -> db : Query
+db --> handler : Exception
+handler --> ctrl : Exception propagates
+ctrl -> exh : TryHandleAsync
+exh -> exh : ReferenceCode.New() = PK-7F3A-2C19
+exh -> logs : Error with reference, route and trace id
+exh --> errint : 500 ProblemDetails code server_error, reference (no stack trace, L2-052)
+errint --> load : ApiError Server, reference PK-7F3A-2C19
+load -> screens : showServerError(error, retryUrl)
+screens -> errpage : navigateByUrl(/error, skipLocationChange, state)
+errpage --> actor : "That one’s on us", Reference PK-7F3A-2C19, Try again (L2-056 AC6)
+actor -> errpage : Try again
+errpage -> page : navigateByUrl(retryUrl)
+
+== Later: an action on the screen ==
+actor -> page : Press an action button
+page --> actor : pk-button busy, disabled, present-tense label (L2-056 AC3)
+actor -> page : Press again
+page -> page : Ignored while busy
+alt Action succeeds with no visible change
+  page -> toaster : success(title, text, Undo)
+  toaster --> actor : Toast for 8 s, paused on hover or focus (L2-056 AC7)
+else Action fails
+  page -> toaster : danger(title, text, Try again)
+  toaster --> actor : Toast in role=alert, stays until dismissed (L2-056 AC7)
+  page --> actor : Button enabled again; typed text kept (L2-028 AC4)
+end
+@enduml

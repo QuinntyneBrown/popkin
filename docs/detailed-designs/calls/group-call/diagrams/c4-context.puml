@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Start or join a group call
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(relay, "Media relay", "STUN/TURN for WebRTC, provider TO SUPPLY")
+System_Ext(device, "Device camera and microphone", "Reached through the browser media APIs")
+
+Rel(member, popkin, "Starts, joins, sees and leaves calls using", "HTTPS, WebSocket")
+Rel(popkin, device, "Asks for camera and microphone through the browser")
+Rel(popkin, relay, "Routes call media through when a direct path fails", "STUN/TURN")
+@enduml

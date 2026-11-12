@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Open the invite dialog
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage" as page
+  participant "InviteDialog" as dlg
+  participant "HttpPopkinsApi" as client
+  participant "QrEncoder" as enc
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetInviteQueryHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "InviteLinkBuilder" as link
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Invite" (or "Invite people" in Popkin settings)
+page -> dlg : Dialog.open(InviteDialog), bottom sheet under 640 px, centred from 640 px (L2-011 AC4)
+dlg -> client : getInvite(id)
+client -> ctrl : GET /api/popkins/(id)/invite
+ctrl -> handler : Send GetInviteQuery
+handler -> guard : RequireMember(id)
+alt not a member (L2-051 AC1)
+  handler --> ctrl : 404 popkin_not_found
+else Popkin wrapped up (L2-045 AC2)
+  handler --> ctrl : 409 popkin_wrapped_up
+else member of active Popkin
+  handler -> db : PopkinSpace name, emoji, colour, InviteCode
+  handler -> link : Build(code)
+  link --> handler : https://popk.in/(code) (base URL TO SUPPLY)
+  handler --> ctrl : InviteDto
+  ctrl --> client : 200
+end
+alt 200
+  client --> dlg : InviteView
+  dlg -> enc : encode(url) (L2-011 AC6)
+  enc --> dlg : QR modules
+  dlg --> actor : "Bring someone in", "They scan, they're in. No numbers needed.", QR, emoji, name, link, "Copy invite link" (L2-011 AC1)
+else failure
+  dlg --> actor : Error message with "Try again" (copy TO SUPPLY)
+end
+@enduml

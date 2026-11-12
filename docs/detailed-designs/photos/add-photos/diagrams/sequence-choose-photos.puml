@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Choose photos and captions
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoAlbumPage" as page
+  participant "Browser file picker" as picker
+  participant "AddPhotosDialog" as dialog
+  participant "photoFileRules" as rules
+end box
+
+actor -> page : Choose "Add" on Photos of an active Popkin
+alt Popkin wrapped up
+  page --> actor : No "Add" is offered (L2-045 AC3)
+else Active
+  page -> picker : input type=file multiple, accept JPEG, PNG, WebP, HEIC
+  picker --> actor : Device library, or the camera to take one
+  actor -> picker : Pick photos
+  picker --> page : FileList
+  page -> dialog : Open with CDK Dialog (sheet under 640 px)
+  alt More than 20 files
+    dialog -> dialog : Keep the first 20; message TO SUPPLY (L2-031 AC1)
+  end
+  loop Each file
+    dialog -> rules : check(file)
+    alt Type not allowed or over 10 MB
+      rules --> dialog : Reason
+      dialog --> actor : Marked aria-invalid with the reason, e.g. "This file is 14 MB. Photos can be up to 10 MB." (L2-031 AC2, add-photos/invalid)
+    else Allowed
+      rules --> dialog : null
+      dialog --> actor : Thumbnail and "Caption for photo n" field
+    end
+  end
+  dialog --> actor : "Add {n} photos" counts only the valid photos (L2-031 AC1)
+  actor -> dialog : Type a caption
+  dialog --> actor : Stops at 200 characters and shows a count (L2-031 AC3)
+end
+@enduml

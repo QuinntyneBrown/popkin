@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — React to a message
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "GroupChatPage / DirectMessagePage", "Angular pages", "Open actions on press-and-hold or Enter")
+  Component(dialog, "ReactionsDialog", "CDK dialog", "Message actions: quick reactions, More reactions, Reply, Copy, Delete")
+  Component(msg, "pk-message", "components library", "Bubble with reaction chips (aria-pressed)")
+  Component(picker, "pk-emoji-picker", "components library", "More reactions")
+  Component(store, "ThreadStore", "api library service", "Optimistic reaction state")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "MessagesController", "ASP.NET Core controller", "PUT and DELETE .../reactions/{emoji}; DELETE .../messages/{messageId}")
+  Component(add, "AddReactionCommandHandler", "MediatR handler", "Idempotent add")
+  Component(remove, "RemoveReactionCommandHandler", "MediatR handler", "Idempotent remove")
+  Component(del, "DeleteMessageCommandHandler", "MediatR handler", "Author-only soft delete")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "ReactionsChanged, MessageDeleted")
+  ComponentDb(db, "Popkin database", "SQL Server", "MessageReaction (MessageId, MembershipId, Emoji)")
+}
+Rel(page, dialog, "Opens with CDK Dialog")
+Rel(dialog, picker, "Shows for More reactions")
+Rel(page, msg, "Renders")
+Rel(page, store, "toggleReaction / deleteMessage")
+Rel(store, ctrl, "Calls via ChatApi", "JSON/HTTPS")
+Rel(ctrl, add, "Sends AddReactionCommand")
+Rel(ctrl, remove, "Sends RemoveReactionCommand")
+Rel(ctrl, del, "Sends DeleteMessageCommand")
+Rel(add, db, "Writes", "EF Core")
+Rel(remove, db, "Writes", "EF Core")
+Rel(del, db, "Writes", "EF Core")
+Rel(add, notifier, "Publishes")
+Rel(remove, notifier, "Publishes")
+Rel(del, notifier, "Publishes")
+@enduml

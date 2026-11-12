@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — Sign in with no account yet
+@@SEQSKIN@@
+actor "Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "VerifyCodePage" as page
+  participant "PendingVerificationStore" as pending
+  participant "HttpAuthApi" as client
+  participant "SessionStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as controller
+  participant "SessionCookieIssuer" as issuer
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ConfirmCodeCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Enter the six correct digits
+page -> client : confirmCode(id, code)
+client -> controller : POST /api/auth/codes/{id}/confirm { code }
+controller -> handler : ConfirmCodeCommand (Name = null)
+handler -> db : Load code; checks pass; hash matches
+handler -> db : Find Person by destination
+db --> handler : none
+handler --> controller : NameRequired (code not consumed; Attempts unchanged)
+controller --> client : 200 { outcome: NameRequired }
+client --> page : NameRequired
+page --> actor : Ask for a name (screen or state TO SUPPLY)
+actor -> page : Enter a name and continue
+alt name empty
+  page --> actor : Name field invalid with message; no request
+else name 1-40 characters
+  page -> pending : setName(name)
+  page -> client : confirmCode(id, code, name)
+  client -> controller : POST /api/auth/codes/{id}/confirm { code, name }
+  controller -> handler : ConfirmCodeCommand (Name set)
+  alt code expired meanwhile (10 minutes, L2-004 AC4)
+    handler --> controller : 400 code_expired
+    controller --> client : 400 ProblemDetails
+    page --> actor : "That code has expired." and "Send a new code"
+  else still valid
+    handler -> db : Add Person(name, channel, destination); consume code; add Session; save
+    handler --> controller : SignedIn, isNewPerson = true
+    controller -> issuer : SignInAsync
+    controller --> client : 200 SignedIn + Set-Cookie
+    client --> page : session
+    page -> store : set(session)
+    page --> actor : Open returnUrl or /popkins (L2-006 AC2)
+  end
+end
+@enduml

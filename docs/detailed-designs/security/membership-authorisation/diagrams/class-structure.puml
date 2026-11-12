@@ -1,0 +1,80 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Membership authorisation
+
+interface ICurrentPerson {
+  +Guid PersonId
+}
+class HttpCurrentPerson
+interface IMembershipGuard {
+  +RequireMemberAsync(popkinId: Guid, ct): Task<MemberAccess>
+  +RequireActiveMemberAsync(popkinId: Guid, ct): Task<MemberAccess>
+  +RequireHostAsync(popkinId: Guid, ct): Task<MemberAccess>
+}
+class MembershipGuard {
+  -MemberAccess? cached
+}
+class MemberAccess {
+  +PopkinSpace Popkin
+  +Membership Membership
+  +bool IsHost
+}
+enum MemberRole {
+  Host
+  Member
+}
+class Membership {
+  +Guid Id
+  +Guid PopkinId
+  +Guid PersonId
+  +MemberRole Role
+  +DateTimeOffset? LeftAt
+}
+class PopkinSpace {
+  +Guid Id
+  +PopkinStatus Status
+}
+abstract class PopkinException {
+  +string Code
+}
+class PopkinNotFoundException
+class ThreadNotFoundException
+class HostOnlyException
+class PopkinWrappedUpException
+interface IAppDbContext {
+  +DbSet<Membership> Memberships
+  +DbSet<PopkinSpace> Popkins
+}
+class ProblemDetailsExceptionHandler {
+  +TryHandleAsync(context, exception, ct): ValueTask<bool>
+}
+interface IPhotoStore {
+  +GetReadUrl(storageKey: string, lifetime: TimeSpan): Uri
+}
+
+HttpCurrentPerson ..|> ICurrentPerson
+MembershipGuard ..|> IMembershipGuard
+MembershipGuard --> ICurrentPerson
+MembershipGuard --> IAppDbContext
+MembershipGuard ..> MemberAccess : returns
+MemberAccess --> PopkinSpace
+MemberAccess --> Membership
+Membership --> MemberRole
+PopkinException <|-- PopkinNotFoundException
+PopkinException <|-- ThreadNotFoundException
+PopkinException <|-- HostOnlyException
+PopkinException <|-- PopkinWrappedUpException
+MembershipGuard ..> PopkinNotFoundException : throws
+MembershipGuard ..> HostOnlyException : throws
+MembershipGuard ..> PopkinWrappedUpException : throws
+ProblemDetailsExceptionHandler ..> PopkinException : maps status and code
+@enduml

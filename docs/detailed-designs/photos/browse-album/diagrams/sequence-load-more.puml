@@ -1,0 +1,47 @@
+@startuml
+title UML sequence behaviour — Load more photos while scrolling
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoAlbumPage" as page
+  participant "IntersectionObserver" as io
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAlbumQueryHandler" as handler
+end box
+
+actor -> page : Scroll toward the end of the loaded photos
+io --> page : Sentinel nears the screen
+alt nextCursor is null
+  page -> page : Nothing more to load
+else More photos
+  page -> client : getAlbum(popkinId, filter, nextCursor)
+  client -> controller : GET /api/popkins/{popkinId}/photos?filter=...&cursor=...&limit=60
+  controller -> handler : Send GetAlbumQuery
+  handler --> controller : Next 60 older photos (L2-032 AC6)
+  controller --> client : 200 OK
+  alt Failure
+    page --> actor : Inline "Try again" below the loaded photos; wording TO SUPPLY
+  else Page
+    page -> page : Append to existing days without moving what is on screen (L2-055 AC5)
+    page --> actor : Thumbnails load as they near the screen (L2-055 AC4)
+  end
+end
+@enduml

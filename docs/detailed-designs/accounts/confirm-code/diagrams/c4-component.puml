@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Confirm the six-digit code
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "VerifyCodePage", "Angular page", "Code field, Confirm, resend countdown")
+  Component(pending, "PendingVerificationStore", "api library service", "verificationId, display destination, name, returnUrl")
+  Component(session, "SessionStore", "api library service", "Signed-in person")
+  Component(authapi, "AuthApi / HttpAuthApi", "api library", "confirmCode(), resendCode()")
+  Component(toaster, "Toaster", "app service", "Confirms a new code was sent")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AuthController", "ASP.NET Core controller", "confirm and resend, anonymous")
+  Component(issuer, "SessionCookieIssuer", "Api service", "Writes the session cookie")
+  Component(confirm, "ConfirmCodeCommandHandler", "MediatR handler", "Attempts, expiry, single use, account, session")
+  Component(resend, "ResendCodeCommandHandler", "MediatR handler", "30 s spacing, then RequestCode rules")
+  Component(entities, "VerificationCode, Person, Session", "Domain entities", "")
+  Component(hasher, "ICodeHasher", "Abstraction", "Constant-time match")
+  ComponentDb(db, "Popkin database", "SQL Server", "")
+}
+Rel(page, authapi, "confirmCode / resendCode")
+Rel(page, pending, "Reads; replaces on resend")
+Rel(page, session, "Sets on SignedIn")
+Rel(page, toaster, "Shows sent message")
+Rel(authapi, ctrl, "POST", "JSON/HTTPS")
+Rel(ctrl, confirm, "Sends ConfirmCodeCommand")
+Rel(ctrl, resend, "Sends ResendCodeCommand")
+Rel(ctrl, issuer, "Signs in on SignedIn")
+Rel(confirm, hasher, "Matches with")
+Rel(confirm, entities, "Consumes code; creates Person and Session")
+Rel(resend, entities, "Supersedes and issues code")
+Rel(confirm, db, "Reads and writes", "EF Core")
+Rel(resend, db, "Reads and writes", "EF Core")
+@enduml

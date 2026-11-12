@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Sessions
+
+Person(member, "Member", "A signed-in person")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "signedInGuard, 401 interceptor, SessionStore")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Cookie authentication, fallback policy, PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Sessions, People")
+}
+Rel(member, web, "Uses", "HTTPS")
+Rel(web, api, "Every /api request and /hubs/popkin carry the HttpOnly cookie", "JSON/HTTPS, WebSocket")
+Rel(api, db, "Validates the Session on each request", "EF Core")
+@enduml

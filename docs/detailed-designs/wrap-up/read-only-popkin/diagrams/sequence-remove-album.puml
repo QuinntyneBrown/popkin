@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — The album of a wrapped-up Popkin is removed
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Worker" #D1FADF
+  participant "RemovePhotosOfWrappedUpPopkinsJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RemoveWrappedUpAlbumsCommandHandler" as handler
+  participant "PopkinSpace" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as photos
+  database "Popkin database" as db
+end box
+job -> handler : Send RemoveWrappedUpAlbumsCommand
+handler -> db : Select WrappedUp, KeepPhotos = false, PhotosRemovedAt = null, WrappedUpAt + 30 days <= now
+db --> handler : Due Popkins
+loop each due Popkin
+  handler -> db : Load Photo storage keys
+  loop each photo
+    handler -> photos : DeleteAsync(storageKey)
+    photos --> handler : Deleted
+  end
+  handler -> db : Delete Photo, PhotoReaction, PhotoComment rows
+  handler -> entity : MarkPhotosRemoved(now) (L2-045 AC4)
+  handler -> db : Save changes
+end
+handler --> job : Count removed
+@enduml

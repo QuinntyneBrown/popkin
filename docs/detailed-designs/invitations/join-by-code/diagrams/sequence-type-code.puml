@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Join with a typed code
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Visitor or Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "JoinCodePage" as page
+  participant "parseInviteInput" as parse
+  participant "HttpInvitesApi" as client
+  participant "Router" as router
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "InvitesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetInvitePreviewQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Join with a code" on welcome, open /join (L2-015 AC5)
+page --> actor : "Got a code?" field "Invite code or link", hint "It looks like popk.in/lakeside."
+actor -> page : Type or paste, choose "Find my Popkin"
+page -> parse : parseInviteInput(text)
+alt nothing usable
+  parse --> page : null
+  page --> actor : Field invalid "We can't find a Popkin with that code." text kept
+else code
+  parse --> page : code
+  page --> actor : "Finding your Popkin…", disabled
+  page -> client : getPreview(code)
+  client -> ctrl : GET /api/invites/(code)
+  ctrl -> ctrl : invite-lookup rate limit (L2-053 AC3)
+  alt over limit
+    ctrl --> client : 429 Retry-After
+    client --> page : RateLimited(retryAfter)
+    page --> actor : Field message says when to try again (L2-053 AC4, copy TO SUPPLY)
+  else
+    ctrl -> handler : GetInvitePreviewQuery
+    handler -> db : PopkinSpace by InviteCode
+    alt none (L2-015 AC6)
+      handler --> ctrl : InviteNotFoundException
+      ctrl --> client : 404 invite_not_found
+      client --> page : NotFound
+      page --> actor : Field aria-invalid, "We can't find a Popkin with that code." text kept
+    else found
+      handler --> ctrl : InvitePreviewDto
+      ctrl --> client : 200
+      client --> page : preview
+      page -> router : navigate /i/(code)
+    end
+  end
+end
+@enduml

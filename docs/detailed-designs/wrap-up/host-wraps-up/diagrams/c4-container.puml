@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — The Host wraps up a Popkin
+
+Person(host, "Host", "Ends the Popkin")
+Person(member, "Member", "Has the Popkin open")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+", "Wrap-up page, recap")
+  Container(api, "Popkin API", ".NET 10, ASP.NET Core, SignalR", "Wrap-up endpoint, PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server", "PopkinSpace, Call")
+}
+Rel(host, spa, "Uses", "HTTPS")
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "POST /api/popkins/{popkinId}/wrap-up", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, spa, "Pushes popkinWrappedUp", "SignalR/WSS")
+@enduml

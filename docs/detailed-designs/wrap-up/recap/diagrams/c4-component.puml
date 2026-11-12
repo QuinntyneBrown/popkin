@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Recap
+
+Container(spa, "Popkin web app", "Angular", "WrappedUpPage")
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "RecapController", "ASP.NET Core controller", "/api/popkins/{popkinId}/recap")
+  Component(pctrl, "PopkinsController", "ASP.NET Core controller", "crew-invites")
+  Component(recap, "GetRecapQueryHandler", "MediatR handler", "Counts, photos, top-rated")
+  Component(start, "StartAlbumExportCommandHandler", "MediatR handler", "Creates AlbumExport")
+  Component(poll, "GetAlbumExportQueryHandler", "MediatR handler", "Progress and download URL")
+  Component(crew, "InviteCrewCommandHandler", "MediatR handler", "Invites the old crew")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Member and Host checks")
+  ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace, Message, Photo, ExperienceRating, AlbumExport")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "PrepareAlbumExportsJob", "BackgroundService", "Zips photos")
+  Component(photostore, "ObjectStoragePhotoStore", "IPhotoStore", "Read, write, signed URLs")
+}
+Rel(spa, ctrl, "Calls", "JSON/HTTPS")
+Rel(spa, pctrl, "POST crew-invites", "JSON/HTTPS")
+Rel(ctrl, recap, "GetRecapQuery")
+Rel(ctrl, start, "StartAlbumExportCommand")
+Rel(ctrl, poll, "GetAlbumExportQuery")
+Rel(pctrl, crew, "InviteCrewCommand")
+Rel(recap, guard, "RequireMemberAsync")
+Rel(crew, guard, "RequireHostAsync")
+Rel(recap, db, "Reads", "EF Core")
+Rel(start, db, "Writes AlbumExport", "EF Core")
+Rel(job, db, "Updates PhotosDone, Status", "EF Core")
+Rel(job, photostore, "Streams photos into a zip")
+@enduml

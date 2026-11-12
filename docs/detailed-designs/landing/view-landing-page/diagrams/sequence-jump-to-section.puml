@@ -1,0 +1,35 @@
+@startuml
+title UML sequence behaviour — Jump to a landing section
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-site-navigation" as nav
+  participant "Router" as router
+  participant "LandingPage" as page
+  participant "Section heading (h2, tabindex -1)" as heading
+end box
+actor -> nav : Choose "How it works" or "Ideas"
+nav -> router : Navigate to fragment #how or #ideas
+router --> page : ActivatedRoute.fragment emits
+page -> page : Resolve the section for the fragment
+alt prefers-reduced-motion (L2-060 AC1)
+  page -> heading : scrollIntoView({ behavior: 'auto' })
+else motion allowed
+  page -> heading : scrollIntoView({ behavior: 'smooth' })
+end
+page -> heading : focus({ preventScroll: true }) (L2-002 AC5)
+heading --> actor : Section heading has focus and is announced
+@enduml

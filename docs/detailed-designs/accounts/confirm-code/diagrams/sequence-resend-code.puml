@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Send a new code
+@@SEQSKIN@@
+actor "Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "VerifyCodePage" as page
+  participant "PendingVerificationStore" as pending
+  participant "HttpAuthApi" as client
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "CodesPerAddressPolicy" as limiter
+  participant "AuthController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ResendCodeCommandHandler" as handler
+  participant "RequestCodeCommandHandler" as issue
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ICodeSender" as sender
+end box
+page -> pending : Read resendAvailableAt
+loop every second until resendAvailableAt
+  page --> actor : "Send a new code in 0:SS", disabled (L2-005 AC1)
+end
+actor -> page : Choose "Send a new code"
+page -> client : resendCode(verificationId)
+client -> limiter : POST /api/auth/codes/{verificationId}/resend
+alt address over 10 requests in 10 minutes (L2-053 AC1)
+  limiter --> client : 429 rate_limited, Retry-After
+else
+  limiter -> controller : Forward
+  controller -> handler : Send ResendCodeCommand
+  handler -> db : Load VerificationCode by id
+  alt unknown id
+    handler --> controller : 400 verification_unknown
+  else SentAt less than 30 s ago
+    handler --> controller : 429 code_resend_too_soon, Retry-After
+  else
+    handler -> issue : Issue for the same channel, destination and purpose
+    issue -> db : Count last hour; supersede earlier codes (L2-005 AC2)
+    alt over 5 codes in an hour (L2-005 AC4)
+      issue --> handler : 429 code_limit_reached, Retry-After
+    else
+      issue -> db : Save new hashed code
+      issue -> sender : SendAsync
+      issue --> handler : CodeSentDto (new VerificationId)
+    end
+    handler --> controller : CodeSentDto or problem
+  end
+  controller --> client : 202 CodeSentDto or ProblemDetails
+end
+alt 202
+  client --> page : CodeSentView
+  page -> pending : Replace verificationId and resendAvailableAt
+  page -> toaster : success "new code sent" (copy TO SUPPLY)
+  page --> actor : Field cleared; countdown restarts at 0:30
+else 429
+  page --> actor : Says when to try again (L2-053 AC4)
+else 400 verification_unknown
+  page --> actor : Return to the screen the flow started on
+end
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — My Popkins
+
+Person(member, "Member", "Belongs to Popkins")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "my-popkins page, offline snapshot")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/popkins")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "PopkinSpace, Membership, Message, ThreadReadState, Photo")
+  Container(store, "Photo store", "Object storage, provider TO SUPPLY", "Member avatar photos")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Lists my Popkins", "JSON/HTTPS")
+Rel(api, db, "Reads memberships and summaries", "EF Core")
+Rel(spa, store, "Loads avatar thumbnails", "expiring signed URLs")
+@enduml

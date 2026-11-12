@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Membership authorisation
+
+Person(member, "Member", "Signed in")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+", "memberGuard, not-found screen")
+  Container(api, "Popkin API", ".NET 10, ASP.NET Core, SignalR", "Authentication, IMembershipGuard")
+  ContainerDb(db, "Popkin database", "SQL Server", "Membership, PopkinSpace")
+  Container(store, "Photo store", "Object storage, TO SUPPLY", "Photo files behind signed URLs")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls with session cookie", "JSON/HTTPS, WSS")
+Rel(api, db, "Reads the caller's membership", "EF Core")
+Rel(api, store, "Signs expiring read URLs")
+Rel(spa, store, "Fetches photos by signed URL", "HTTPS")
+@enduml

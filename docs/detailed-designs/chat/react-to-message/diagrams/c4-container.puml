@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — React to a message
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Message actions dialog and reaction chips")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Reaction and delete endpoints; PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "MessageReaction rows")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Adds and removes reactions, deletes messages", "JSON/HTTPS")
+Rel(api, spa, "Pushes ReactionsChanged and MessageDeleted", "SignalR WebSocket")
+Rel(api, db, "Reads and writes", "EF Core")
+@enduml

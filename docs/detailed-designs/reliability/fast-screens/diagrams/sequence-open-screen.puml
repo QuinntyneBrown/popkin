@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Move to another screen within the budgets
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Router" as router
+  participant "ngsw-worker.js" as sw
+  participant "PhotoAlbumPage" as page
+  participant "screenLoad()" as load
+  participant "pk-photo-grid" as grid
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAlbumQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  database "Photo store" as store
+end box
+
+actor -> router : Choose the Photos tab
+router -> sw : Request lazy chunk
+sw --> router : Chunk already cached by preloading
+router -> page : Activate page
+page --> actor : Frame within 100 ms (L2-055 AC2)
+page -> load : Start album read
+load -> ctrl : GET /api/popkins/{popkinId}/photos
+opt Wait passes 300 ms
+  load --> page : showSkeleton = true
+  page --> actor : Skeletons shaped like the grid (L2-055 AC2)
+end
+ctrl -> handler : Send GetAlbumQuery
+handler -> db : AsNoTracking query, Select to DTO, one page of 60
+db --> handler : Rows from index (PopkinId, TakenAt)
+handler --> ctrl : AlbumDto
+ctrl --> load : 200, Brotli JSON, p95 within 300 ms (L2-055 AC3)
+load --> page : status = loaded
+page -> grid : Render thumbnails with width, height, srcset
+grid --> actor : Boxes reserved; nothing moves (L2-055 AC5)
+actor -> grid : Scroll the album
+grid -> store : Load rendition no larger than 2x shown size, as it nears the screen (L2-055 AC4)
+store --> grid : WebP or AVIF thumbnail
+grid --> actor : Thumbnail fills its reserved box
+@enduml

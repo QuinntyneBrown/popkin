@@ -1,0 +1,95 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+
+title Class structure — Send photos in chat
+
+package "Popkin.Domain" {
+  class Photo {
+    +Guid Id
+    +Guid PopkinId
+    +Guid UploaderMembershipId
+    +string? Caption
+    +DateTimeOffset TakenAt
+    +DateTimeOffset AddedAt
+    +string StorageKey
+    +int Width
+    +int Height
+    +string ContentType
+    +Guid? DirectThreadId
+    +bool InAlbum()
+  }
+  class Message {
+    +Guid? PhotoId
+    +string? Text
+  }
+}
+package "Popkin.Application" {
+  class UploadThreadPhotoCommand {
+    +Guid PopkinId
+    +Guid ThreadId
+    +Stream Content
+    +string FileName
+    +long Length
+  }
+  class UploadThreadPhotoCommandValidator {
+    +MaxBytes = 10 MB
+    +Allowed = JPEG, PNG, WebP, HEIC
+  }
+  class UploadThreadPhotoCommandHandler
+  class PhotoUploadedDto {
+    +Guid PhotoId
+    +int Width
+    +int Height
+  }
+  interface IPhotoStore {
+    +PutAsync(key, stream, contentType): Task
+    +GetReadUrl(key, size, expiresIn): Uri
+  }
+  interface IImageSanitizer {
+    +SanitizeAsync(stream): Task<SanitizedImage>
+  }
+}
+package "Popkin.Infrastructure" {
+  class ObjectStoragePhotoStore
+  class ImageSanitizer
+}
+package "web app (popkin, api, components)" {
+  class AddPhotosDialog {
+    +data: AddPhotosDialogData
+  }
+  class AddPhotosDialogData {
+    +mode: 'album' | 'chat'
+    +max: number
+  }
+  class ComposerPhoto {
+    +file: File
+    +previewUrl: string
+    +remove(): void
+  }
+  class MessageOutbox {
+    +enqueue(threadId, text?, photo?: File, replyTo?): void
+  }
+}
+UploadThreadPhotoCommandHandler ..> UploadThreadPhotoCommand : handles
+UploadThreadPhotoCommandValidator ..> UploadThreadPhotoCommand : validates
+UploadThreadPhotoCommandHandler ..> IImageSanitizer
+UploadThreadPhotoCommandHandler ..> IPhotoStore
+UploadThreadPhotoCommandHandler --> Photo : creates
+UploadThreadPhotoCommandHandler ..> PhotoUploadedDto : returns
+ObjectStoragePhotoStore ..|> IPhotoStore
+ImageSanitizer ..|> IImageSanitizer
+Message "0..*" --> "0..1" Photo
+AddPhotosDialog --> AddPhotosDialogData
+AddPhotosDialog ..> ComposerPhoto : returns File
+MessageOutbox ..> ComposerPhoto
+@enduml

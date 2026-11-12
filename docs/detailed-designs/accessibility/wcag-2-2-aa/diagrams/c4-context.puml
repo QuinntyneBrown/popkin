@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Accessible to WCAG 2.2 AA
+
+Person(visitor, "Visitor", "Someone without a session; touch, keyboard or assistive technology")
+Person(member, "Member", "Signed-in person; touch, keyboard, screen reader, 200% text")
+System(popkin, "Popkin", "Private spaces for pop-up communities, WCAG 2.2 AA in both themes")
+
+Rel(visitor, popkin, "Reads the landing page and invites", "HTTPS")
+Rel(member, popkin, "Uses every screen", "HTTPS")
+@enduml

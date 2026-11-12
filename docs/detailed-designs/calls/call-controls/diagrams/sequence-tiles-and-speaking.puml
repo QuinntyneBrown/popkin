@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Lay out tiles and mark who is speaking
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "VideoCallPage" as page
+  participant "pk-call-tile" as tile
+  participant "CallSession" as session
+  participant "Web Audio\nAnalyserNode" as meter
+  participant "PopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+end box
+
+hub --> rt : ParticipantJoined / ParticipantLeft / ParticipantMediaChanged
+rt --> session : Update participants
+session --> page : participants signal
+page -> page : columns = 1 when two people, else 2 of equal tiles (L2-030 AC1)
+page -> page : Show at most 12, count the rest (L2-029 AC7)
+loop Each shown participant
+  page -> tile : name = first name, or "You" for the member (L2-030 AC2)
+  alt cameraOn false
+    tile --> actor : Avatar instead of video (L2-030 AC2)
+  end
+  alt micOn false
+    tile --> actor : Muted microphone icon and hidden text "Muted," (L2-030 AC3)
+  end
+end
+loop Every audio frame interval TO SUPPLY
+  session -> meter : Read each remote and local audio level
+  meter --> session : Level
+  session -> session : speaking = level above threshold TO SUPPLY
+  session --> page : speaking changed
+  page -> tile : speaking true
+  tile --> actor : Ring of at least 3 px in the Popkin's colour and hidden text ", speaking" (L2-030 AC4, L2-057 AC5)
+end
+@enduml

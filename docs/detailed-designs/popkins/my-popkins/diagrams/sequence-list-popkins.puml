@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — List my Popkins
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "MyPopkinsPage" as page
+  participant "HttpPopkinsApi" as client
+  participant "PopkinsSnapshot" as snap
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetMyPopkinsQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ObjectStoragePhotoStore" as photos
+end box
+actor -> page : Open /popkins (signedInGuard)
+page --> actor : Skeleton cards sized like real cards, aria-busy (L2-017 AC7, L2-056 AC1)
+alt device offline (L2-056 AC4)
+  page -> snap : load()
+  snap --> page : Last saved list
+  page --> actor : Banner "You're offline. Showing what we saved last time." and saved cards
+else online
+  page -> client : listMyPopkins()
+  client -> ctrl : GET /api/popkins
+  ctrl -> handler : Send GetMyPopkinsQuery
+  handler -> db : Memberships of caller with LeftAt null (L2-051 AC3)
+  db --> handler : Popkins, latest Everyone message, member counts, unread counts
+  handler -> photos : Signed URLs for up to 3 avatars per card
+  photos --> handler : URLs
+  handler -> handler : Active by LastActivityAt desc, WrappedUp by WrappedUpAt desc
+  handler --> ctrl : MyPopkinsDto
+  ctrl --> client : 200
+  alt 200 with Popkins
+    client --> page : MyPopkinsView
+    page -> snap : save(view)
+    page --> actor : Active cards: colour, emoji, name, "Mara: ..." line, avatars +N, "1 day 6 hrs left" or "Ongoing", unread badge "3" or "99+" (L2-017 AC1, AC2)
+    opt WrappedUp not empty (L2-018 AC1, AC3)
+      page --> actor : "Wrapped up" section: muted emoji, name, "Wrapped Mar 8 · 48 people · 312 photos", "Recap"
+    end
+  else 200 with no Popkin (L2-017 AC6)
+    page --> actor : "No Popkins yet" with "Start a Popkin" and "Scan to join"
+  else failure
+    client --> page : Error
+    page --> actor : "We couldn't load your Popkins" with "Try again" (L2-056 AC2)
+  end
+end
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — Jump to a quoted message
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "pk-composer" as composer
+  participant "ThreadStore" as store
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Message handlers" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose a quote (button, keyboard or touch)
+alt quote is "Message deleted" (L2-025 AC4)
+  page --> actor : Nothing to jump to; quote not interactive
+else quoted message is loaded
+  page -> page : scrollIntoView(block center), honour prefers-reduced-motion (L2-060)
+  page -> store : highlight(messageId) for 2 s (TO SUPPLY duration)
+  page --> actor : Quoted message marked briefly; focus moves to it (L2-025 AC3)
+else quoted message is older than the loaded pages
+  page -> store : loadUntil(messageId)
+  store -> client : getMessages(popkinId, threadId, around=messageId)
+  client -> controller : GET .../threads/{threadId}/messages?around={messageId}&limit=50
+  controller -> handler : Send GetMessagesQuery
+  handler -> db : 25 before and 25 after the target
+  controller --> client : 200 MessagePageDto
+  client --> store : Page joined to the loaded window; gap filled as the member scrolls
+  page -> page : scrollIntoView and highlight
+end
+@enduml

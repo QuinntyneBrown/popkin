@@ -1,0 +1,23 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — A Popkin wraps up when its time is up
+
+Container(spa, "Popkin web app", "Angular", "CurrentPopkinStore, TimeLeftClock")
+Container(api, "Popkin API", "ASP.NET Core", "PopkinHub at /hubs/popkin")
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "WrapUpDuePopkinsJob", "BackgroundService", "PeriodicTimer every 30 s")
+  Component(handler, "WrapUpDuePopkinsCommandHandler", "MediatR handler", "Wraps up every due Popkin")
+  Component(service, "PopkinWrapUpService", "Application service", "Wraps up and ends open calls")
+  Component(entity, "PopkinSpace", "Domain entity", "WrapUp(at, keepPhotos: true)")
+  Component(notifier, "IPopkinNotifier", "SignalR hub context", "popkinWrappedUp to popkin:{popkinId}")
+  ComponentDb(db, "Popkin database", "SQL Server", "Index on Status, EndsAt")
+}
+Rel(job, handler, "Sends WrapUpDuePopkinsCommand")
+Rel(handler, db, "Selects Active with EndsAt <= now", "EF Core")
+Rel(handler, service, "WrapUpAsync per Popkin")
+Rel(service, entity, "Calls WrapUp")
+Rel(handler, notifier, "PopkinWrappedUpAsync")
+Rel(notifier, api, "Backplane message", "TO SUPPLY")
+Rel(api, spa, "popkinWrappedUp", "SignalR")
+@enduml

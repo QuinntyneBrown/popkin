@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Leave or minimise a call
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "VideoCallPage" as page
+  participant "CallSession" as session
+  participant "Router" as router
+  participant "PopkinHomePage" as home
+  participant "CallsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "CallsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "LeaveCallCommandHandler" as handler
+end box
+
+alt Member chooses "Leave"
+  actor -> page : Press "Leave"
+  page -> session : leave()
+  session -> session : Stop local tracks, close peer connections at once
+  session -> router : navigateByUrl(returnUrl) (L2-030 AC6)
+  router --> actor : The screen the member came from
+  session -> client : POST /api/popkins/{popkinId}/calls/{callId}/leave
+  client -> controller : HTTPS request
+  controller -> handler : Send LeaveCallCommand (ends an empty call, see group call)
+  alt Request fails
+    controller --> client : Error
+    client --> session : Failure; the hub disconnect grace period removes the participant
+  else Left
+    controller --> client : 204 No Content
+  end
+else Member chooses "Minimise call"
+  actor -> page : Press "Minimise call"
+  page -> router : navigate /p/{popkinId}
+  router -> home : Open the Popkin home
+  note right of session : Root-provided; media and peer connections keep running.\nRemote audio plays through detached audio elements.
+  home -> session : Read active call
+  home --> actor : pk-banner to return to the call (L2-030 AC7, notifications/banner/info)
+  actor -> home : Choose the banner action
+  home -> router : navigate /p/{popkinId}/call
+  router -> page : Reattach to the same CallSession
+end
+@enduml

@@ -1,0 +1,63 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Join by scanning or typing a code
+
+package "Frontend (popkin app + api library)" {
+  class ScanToJoinDialog {
+    +state: Signal<starting | scanning | invalid | found | denied>
+    +tryCameraAgain(): void
+    +typeCodeInstead(): void
+  }
+  class JoinCodePage {
+    +input: Signal<string>
+    +state: Signal<idle | submitting | invalid | limited>
+    +find(): void
+    +scanInstead(): void
+  }
+  class QrScanner {
+    +start(video): Observable<string>
+    +stop(): void
+  }
+  class InviteInput <<helper>> {
+    +parseInviteInput(text): string | null
+  }
+  interface InvitesApi {
+    +getPreview(code): Observable<InvitePreviewView>
+  }
+  class HttpInvitesApi
+}
+package "Popkin.Api" {
+  class InvitesController {
+    +[AllowAnonymous] GetPreview(code, ct)
+  }
+}
+package "Popkin.Application" {
+  class GetInvitePreviewQueryHandler
+  class InviteNotFoundException
+}
+ScanToJoinDialog --> QrScanner
+ScanToJoinDialog ..> InviteInput
+JoinCodePage ..> InviteInput
+JoinCodePage --> InvitesApi : INVITES_API
+JoinCodePage ..> ScanToJoinDialog : opens
+HttpInvitesApi ..|> InvitesApi
+HttpInvitesApi ..> InvitesController : GET /api/invites/(code)
+InvitesController ..> GetInvitePreviewQueryHandler
+GetInvitePreviewQueryHandler ..> InviteNotFoundException : throws
+@enduml

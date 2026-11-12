@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Accessible to WCAG 2.2 AA
+
+package "Popkin web app" {
+  class App <<root container>> {
+    -routeFocus: RouteFocus
+    -routeData: Signal<PkRouteData>
+  }
+}
+
+package "api library" {
+  class RouteFocus {
+    +start(): void
+    -focusHeading(fragment?: string): void
+  }
+  class PopkinTitleStrategy {
+    +updateTitle(snapshot: RouterStateSnapshot): void
+  }
+  abstract class TitleStrategy <<@angular/router>>
+}
+
+package "components library" {
+  class SkipLink <<pk-skip-link>> {
+    +target: input<string> = "main"
+  }
+  class Screen <<pk-screen>> {
+    +stage: input<boolean>
+    +accent: input<PopkinColour | undefined>
+    slot header
+    slot body: main#main, tabindex -1
+    slot nav
+  }
+  class DialogOpener {
+    +open<C, D, R>(component: Type<C>, data: D, options?: DialogOptions): DialogRef<R, C>
+    -config(options): DialogConfig
+  }
+  class DialogOptions {
+    +destructive: boolean
+    +labelledBy: string
+  }
+  class IconButton <<pk-icon-button>> {
+    +label: input.required<string>()
+    +pressed: input<boolean | undefined>
+  }
+  class Button <<pk-button>> {
+    +busy: input<boolean>
+    +busyLabel: input<string>
+  }
+}
+
+package "@angular/cdk" {
+  class Dialog
+}
+
+App ..> RouteFocus : starts
+App *-- SkipLink : renders first
+PopkinTitleStrategy --|> TitleStrategy
+RouteFocus ..> Screen : focuses h1 or main of
+DialogOpener ..> Dialog : open(component, config)
+DialogOpener ..> DialogOptions : reads
+
+@enduml

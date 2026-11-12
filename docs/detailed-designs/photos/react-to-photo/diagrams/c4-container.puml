@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — React to a photo
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Photos pages and dialogs")
+  Container(api, "Popkin API", "ASP.NET Core (.NET 10)", "PhotosController and PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Photos, reactions, comments, memberships")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Adds and removes reactions", "JSON/HTTPS")
+Rel(api, db, "Writes PhotoReaction rows", "EF Core")
+@enduml

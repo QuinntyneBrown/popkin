@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Direct messages
+
+Person(member, "Member", "One of the two members of a direct message")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Direct message page")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Threads and messages endpoints; PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "ChatThread with MemberAId and MemberBId")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Opens the thread and posts messages", "JSON/HTTPS")
+Rel(api, spa, "Pushes MessageAdded to the two members only", "SignalR WebSocket")
+Rel(api, db, "Reads and writes", "EF Core")
+@enduml

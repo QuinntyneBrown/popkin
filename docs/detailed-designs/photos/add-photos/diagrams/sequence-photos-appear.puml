@@ -1,0 +1,36 @@
+@startuml
+title UML sequence behaviour — New photos appear for other members
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Other member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoAlbumPage" as page
+  participant "PopkinRealtime" as rt
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+  participant "PhotosController" as controller
+end box
+
+page -> rt : Listen on popkin:{popkinId} while Photos is open
+hub --> rt : PhotosAdded(popkinId, photo ids)
+rt --> page : PhotosAdded
+page -> client : GET /api/popkins/{popkinId}/photos?filter=everyone&limit=60
+client -> controller : HTTPS request
+controller --> client : 200 OK album page
+client --> page : AlbumView
+page --> actor : New photos in their day without a reload (L2-031 AC7)
+@enduml

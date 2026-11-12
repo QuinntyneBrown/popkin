@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — Open the landing page
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Visitor or Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Router" as router
+  participant "signedOutGuard" as guard
+  participant "SessionStore" as store
+  participant "HttpAuthApi" as client
+  participant "LandingPage" as page
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetSessionQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> router : Open /
+router -> guard : canActivate
+guard -> store : ensureLoaded()
+alt session not yet known
+  store -> client : getSession()
+  client -> controller : GET /api/auth/session (cookie if any)
+  alt valid cookie and live Session
+    controller -> handler : Send GetSessionQuery
+    handler -> db : Load Person by ICurrentPerson
+    db --> handler : Person
+    handler --> controller : SessionDto
+    controller --> client : 200 SessionDto
+    client --> store : SessionView
+  else no cookie, revoked or expired Session
+    controller --> client : 401 (fallback policy)
+    client --> store : null (no redirect for this call)
+  end
+end
+store --> guard : SessionView or null
+alt signed in (L2-002 AC3)
+  guard --> router : UrlTree /popkins
+  router --> actor : My Popkins opens
+else visitor
+  guard --> router : true
+  router -> page : Render with data-page="landing"
+  page --> actor : Hero, how it works, ideas, comparison, free, footer (L2-001 AC1-AC4)
+end
+actor -> page : Choose "Start a Popkin" (navigation, hero or closing band)
+page -> router : navigate /sign-up (L2-002 AC1)
+actor -> page : Choose "Sign in"
+page -> router : navigate /sign-in (L2-002 AC2)
+@enduml

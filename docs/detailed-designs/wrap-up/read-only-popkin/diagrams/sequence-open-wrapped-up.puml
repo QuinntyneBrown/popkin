@@ -1,0 +1,46 @@
+@startuml
+title UML sequence behaviour — A member opens a wrapped-up Popkin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Router" as router
+  participant "activePopkinGuard" as rguard
+  participant "CurrentPopkinStore" as store
+  participant "WrappedUpPage" as recap
+  participant "GroupChatPage" as chat
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "MembershipGuard" as guard
+end box
+actor -> router : Open /p/{popkinId}
+router -> rguard : canActivate
+rguard -> store : load(popkinId)
+store -> controller : GET /api/popkins/{popkinId}
+controller -> guard : RequireMemberAsync (reads stay open)
+guard --> controller : MemberAccess
+controller --> store : PopkinDto status = wrappedUp
+store --> rguard : wrappedUp
+rguard --> router : UrlTree /p/{popkinId}/recap
+router -> recap : Activate
+recap --> actor : Recap first (L2-045 AC5)
+actor -> recap : Choose "Read the chat"
+recap -> router : /p/{popkinId}/chat/everyone
+router -> chat : Activate
+chat --> actor : Messages readable, closed composer, no call button (L2-045 AC1)
+@enduml

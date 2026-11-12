@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Open message actions
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "ReactionsDialog" as dialog
+  participant "ThreadStore" as store
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Reaction handlers" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt touch
+  actor -> page : Press and hold a message (L2-024 AC1)
+else keyboard
+  actor -> page : Focus a message and press Enter (L2-024 AC1)
+end
+page -> dialog : Dialog.open(ReactionsDialog, {message, mine})
+dialog --> actor : Quote of the message, quick reactions, More reactions, Reply, Copy; Delete when mine
+alt choose a quick reaction
+  dialog -> store : toggleReaction(messageId, emoji) and close
+else More reactions
+  dialog --> actor : pk-emoji-picker with twelve emoji
+  actor -> dialog : Pick one
+  dialog -> store : toggleReaction(messageId, emoji) and close
+else Reply
+  dialog --> page : close("reply"); see reply-to-message
+else Copy
+  dialog -> dialog : Clipboard.writeText(message text)
+  dialog --> page : close; toast "Copied" (TO SUPPLY copy)
+else Delete (own message)
+  dialog --> page : close("delete"); see sequence-delete-message
+end
+page -> page : Focus returns to the message (CDK restoreFocus)
+@enduml

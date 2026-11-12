@@ -1,0 +1,72 @@
+@startuml
+title UML sequence behaviour — A send fails, then Try again
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "MessageOutbox" as outbox
+  participant "NetworkStatus" as net
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendMessageCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Send "You're on the list, Ruth!"
+page -> outbox : enqueue(entry with ClientMessageId c1)
+outbox -> client : sendMessage(..., c1)
+client -> controller : POST .../messages {clientMessageId: c1}
+alt network error, timeout or 5xx
+  controller --> client : no answer or 5xx
+  client --> outbox : Failed (failure network)
+else 400 or 429
+  controller --> client : ProblemDetails code
+  client --> outbox : Failed (rejected or rate_limited)
+end
+outbox --> page : Bubble bubble--failed with icon and "Not sent"; Try again and Delete (L2-028 AC1)
+alt Try again
+  actor -> page : Try again
+  page -> outbox : retry(c1)
+  outbox -> client : sendMessage(..., same c1)
+  client -> controller : POST .../messages {clientMessageId: c1}
+  controller -> handler : Send SendMessageCommand
+  handler -> db : Find Message by (AuthorMembershipId, c1)
+  alt first attempt never reached the server
+    handler -> db : Insert Message; unique index guards a race
+    controller --> client : 201 MessageDto
+  else first attempt was stored but its answer was lost
+    controller --> client : 200 the stored MessageDto (no duplicate)
+  end
+  client --> outbox : Sent
+  outbox --> page : Failed bubble becomes the sent message in the same place
+else Delete
+  actor -> page : Delete
+  page -> outbox : discard(c1)
+  opt failure was network (the server may hold it)
+    outbox -> client : DELETE .../messages/client/c1
+    client -> controller : DiscardPendingMessageCommand
+    controller --> client : 204 whether or not it was stored
+  end
+  outbox --> page : Bubble removed
+end
+@enduml

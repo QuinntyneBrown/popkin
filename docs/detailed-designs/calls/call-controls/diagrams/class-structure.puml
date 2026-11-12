@@ -1,0 +1,104 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Call controls
+
+package "components library" {
+  class CallTile <<pk-call-tile>> {
+    +input name: string
+    +input stream: MediaStream?
+    +input avatar: AvatarView
+    +input muted: boolean
+    +input cameraOn: boolean
+    +input speaking: boolean
+  }
+  class CallControls <<pk-call-controls>> {
+    +input micOn: boolean
+    +input cameraOn: boolean
+    +output toggleMic: void
+    +output toggleCamera: void
+    +output leave: void
+  }
+}
+
+package "popkin app" {
+  class VideoCallPage <<pk-video-call-page>> {
+    +columns(): 1 | 2
+    +shownParticipants(): CallParticipantView[]
+    +hiddenCount(): number
+    +onLeave(): void
+    +onMinimise(): void
+  }
+}
+
+package "api library" {
+  interface CallSession {
+    +micOn: Signal<boolean>
+    +cameraOn: Signal<boolean>
+    +participants: Signal<CallParticipantView[]>
+    +returnUrl: string
+    +toggleMic(): void
+    +toggleCamera(): void
+    +leave(): Promise<void>
+  }
+  class WebRtcCallSession {
+    -localStream: MediaStream
+    -levelMeters: Map<Guid, AnalyserNode>
+    -detectSpeaking(): void
+  }
+  class CallParticipantView {
+    +membershipId: string
+    +label: string
+    +micOn: boolean
+    +cameraOn: boolean
+    +speaking: boolean
+    +stream: MediaStream?
+  }
+  interface CallsApi {
+    +setMedia(popkinId, callId, micOn, cameraOn): Observable<void>
+    +leave(popkinId, callId): Observable<void>
+  }
+}
+
+package "Popkin.Application" {
+  class SetCallMediaCommand {
+    +Guid PopkinId
+    +Guid CallId
+    +bool? MicOn
+    +bool? CameraOn
+  }
+  class SetCallMediaCommandHandler {
+    +Handle(command: SetCallMediaCommand): Task
+  }
+}
+
+package "Popkin.Domain" {
+  class CallParticipant {
+    +Guid CallId
+    +Guid MembershipId
+    +bool MicOn
+    +bool CameraOn
+    +DateTimeOffset? LeftAt
+    +SetMedia(micOn: bool?, cameraOn: bool?): void
+  }
+}
+
+WebRtcCallSession ..|> CallSession
+VideoCallPage ..> CallSession : injects CALL_SESSION
+VideoCallPage --> CallTile : renders
+VideoCallPage --> CallControls : renders
+CallSession --> "*" CallParticipantView
+CallSession ..> CallsApi
+SetCallMediaCommandHandler ..> SetCallMediaCommand : handles
+SetCallMediaCommandHandler --> CallParticipant : mutates
+@enduml

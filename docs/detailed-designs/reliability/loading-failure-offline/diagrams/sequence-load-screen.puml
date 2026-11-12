@@ -1,0 +1,75 @@
+@startuml
+title UML sequence behaviour — Open a screen that is slow, offline or failed
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "MyPopkinsPage" as page
+  participant "screenLoad()" as load
+  participant "offlineCacheInterceptor" as cacheint
+  participant "httpErrorInterceptor" as errint
+  participant "BrowserConnectivity" as conn
+  participant "IndexedDbResponseCache" as cache
+  participant "ErrorScreens" as screens
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+
+actor -> page : Open My Popkins
+page --> actor : Frame: top bar, heading, New Popkin
+page -> load : screenLoad(listMyPopkins, primary, "Loading your Popkins…")
+load -> cacheint : GET /api/popkins with CACHE_FOR_OFFLINE
+cacheint -> errint : Forward
+alt Online and the API answers
+  errint -> ctrl : GET /api/popkins
+  opt No answer within 300 ms
+    load --> page : showSkeleton = true
+    page --> actor : Skeleton cards aria-hidden, status line "Loading your Popkins…" (L2-056 AC1)
+  end
+  ctrl --> errint : 200 PopkinListDto
+  errint --> cacheint : 200
+  cacheint -> cache : put(personId + URL, body)
+  cacheint --> load : 200
+  load --> page : status = loaded
+  page --> actor : Popkin cards
+else Device offline
+  errint -> errint : Status 0, navigator.onLine false: ApiError Offline
+  errint --> cacheint : ApiError Offline
+  cacheint -> cache : get(personId + URL)
+  alt Saved answer exists
+    cache --> cacheint : Saved body
+    cacheint --> load : 200 marked SERVED_FROM_CACHE
+    load --> page : status = loaded, fromCache = true
+    page --> actor : Saved cards and danger banner "You’re offline. Showing what we saved last time." (L2-056 AC4)
+  else Never loaded
+    cache --> cacheint : None
+    cacheint --> load : ApiError Offline
+    load -> screens : showOffline(retryUrl = /popkins)
+    screens --> actor : Offline page, address unchanged (L2-056 AC4)
+  end
+else Online but the API cannot be reached
+  errint -> ctrl : GET /api/popkins
+  ctrl --> errint : Status 0 or timeout
+  errint -> conn : reportUnreachable()
+  conn -> ctrl : GET /api/health
+  ctrl --> conn : No answer
+  errint --> load : ApiError Unreachable
+  load --> page : status = failed
+  page --> actor : Chrome stays; "We couldn’t load your Popkins", Try again (L2-056 AC2)
+  actor -> page : Try again
+  page -> load : reload()
+end
+@enduml

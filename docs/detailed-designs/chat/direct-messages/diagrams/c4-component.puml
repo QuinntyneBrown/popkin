@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Direct messages
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "DirectMessagePage", "Angular page", "Route /p/:popkinId/chat/:memberId; pk-top-bar, pk-avatar, pk-message, pk-composer")
+  Component(store, "ThreadStore", "api library service", "Shared with GroupChatPage")
+  Component(chatapi, "ChatApi / HttpChatApi", "api library service", "openDirectThread, getMessages, sendMessage")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(threads, "ThreadsController", "ASP.NET Core controller", "PUT /api/popkins/{popkinId}/threads/direct/{memberId}")
+  Component(messages, "MessagesController", "ASP.NET Core controller", "Messages of one thread")
+  Component(open, "OpenDirectThreadCommandHandler", "MediatR handler", "Get-or-create the thread for two members")
+  Component(access, "ChatThread.CanRead", "Domain rule", "Direct: only MemberA and MemberB")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Sends to Clients.Users of the two people")
+  ComponentDb(db, "Popkin database", "SQL Server", "Unique (PopkinId, MemberAId, MemberBId)")
+}
+Rel(page, store, "Reads signals from")
+Rel(store, chatapi, "Calls")
+Rel(chatapi, threads, "PUT direct thread", "JSON/HTTPS")
+Rel(chatapi, messages, "GET and POST messages", "JSON/HTTPS")
+Rel(threads, open, "Sends OpenDirectThreadCommand")
+Rel(messages, access, "Checks every read and write against")
+Rel(open, db, "Reads and inserts", "EF Core")
+Rel(messages, notifier, "Publishes via handlers")
+@enduml

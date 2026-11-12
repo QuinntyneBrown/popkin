@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Responsive from 360 px
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "Page container", "pages/<key>", "Composes pk-screen; no stylesheet")
+  Component(screen, "pk-screen", "components library", "Full width below 36 rem; 28 rem centred column from 36 rem; 100dvh")
+  Component(nav, "pk-popkin-nav", "components library", "Tabs at the bottom of the column, safe area")
+  Component(opener, "DialogOpener", "components library service", "Sheet below 40 rem, centred from 40 rem")
+  Component(dialog, "pk-dialog", "components library", "Panel, grip, scrolling body")
+  Component(bp, "BreakpointObserver", "@angular/cdk/layout", "Watches (min-width: 40rem)")
+  Component(landing, "Landing sections and pk-site-navigation", "components library", "1 to 4 columns in a 72 rem container")
+  Component(tokens, "tokens.css and ui.css", "components/styles", "Breakpoints, columns, gutters, reset, utilities")
+}
+
+Rel(page, screen, "Composes")
+Rel(screen, nav, "Places at the bottom")
+Rel(page, opener, "Opens dialogs with")
+Rel(opener, bp, "Observes")
+Rel(opener, dialog, "Positions")
+Rel(screen, tokens, "Reads")
+Rel(landing, tokens, "Reads")
+Rel(dialog, tokens, "Reads")
+@enduml

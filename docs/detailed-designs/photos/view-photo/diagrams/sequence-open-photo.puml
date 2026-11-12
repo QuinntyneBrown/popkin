@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Open a photo
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoViewPage" as page
+  participant "pk-photo-viewer" as viewer
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPhotoQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ObjectStoragePhotoStore" as store
+end box
+
+actor -> page : Choose a photo (album, home strip or chat)
+page --> actor : Dark stage with a spinner, "Loading photo…" (photo-view/loading, L2-059 AC3)
+page -> client : getPhoto(popkinId, photoId)
+client -> controller : GET /api/popkins/{popkinId}/photos/{photoId}
+controller -> handler : Send GetPhotoQuery
+handler -> db : Check membership
+alt Not a member, or photo not in this Popkin
+  controller --> client : 404 popkin_not_found or photo_not_found (L2-051 AC1)
+  page --> actor : Not found screen
+else Member
+  handler -> db : Photo, uploader, reaction counts with the caller's own, comment count, neighbours by TakenAt, Id
+  handler -> store : GetReadUrlAsync(display), expiring (L2-051 AC2)
+  controller --> client : 200 OK PhotoDetailDto
+  client --> page : PhotoDetailView
+  page -> viewer : src, caption, reactions, commentCount
+  alt Image fails to load
+    viewer --> page : imageError
+    page --> actor : "This photo didn't load", "Try again" (L2-033 AC4, photo-view/error)
+    actor -> page : Try again
+    page -> client : getPhoto again for a fresh address
+  else Loaded
+    viewer --> actor : Uploader and time, whole photo without cropping, caption, reactions with counts, "3 comments" (L2-033 AC1, photo-view/default)
+  end
+end
+@enduml

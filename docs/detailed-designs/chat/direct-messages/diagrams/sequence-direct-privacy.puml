@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — A direct message is readable by its two members only
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Another member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Popkin web app\nor any HTTP client" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetMessagesQueryHandler" as handler
+  participant "ChatThread" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> client : Request a direct thread's messages by id
+client -> controller : GET /api/popkins/{popkinId}/threads/{threadId}/messages
+controller -> handler : Send GetMessagesQuery
+handler -> db : Caller membership; ChatThread by id and PopkinId
+handler -> entity : CanRead(callerMembershipId)
+alt caller is neither MemberA nor MemberB (L2-023 AC2)
+  entity --> handler : false
+  handler --> controller : ThreadNotFoundException
+  controller --> client : 404 code thread_not_found (existence not disclosed, L2-051 AC1)
+else participant
+  handler -> db : Load page of messages
+  controller --> client : 200 MessagePageDto
+end
+note over notifier : A new direct message is pushed with Clients.Users(personA, personB),\nnever to the popkin group, so no other connection receives it.
+@enduml

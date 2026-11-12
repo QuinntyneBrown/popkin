@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Recap
+
+Person(member, "Member", "Opens the recap, saves the album")
+Person(host, "Host", "Pops up another Popkin with the crew")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(sms, "SMS provider", "TO SUPPLY")
+System_Ext(email, "Email provider", "TO SUPPLY")
+
+Rel(member, popkin, "Opens the recap in")
+Rel(host, popkin, "Invites the crew using")
+Rel(popkin, sms, "May send crew invites via", "channel TO SUPPLY")
+Rel(popkin, email, "May send crew invites via", "channel TO SUPPLY")
+@enduml

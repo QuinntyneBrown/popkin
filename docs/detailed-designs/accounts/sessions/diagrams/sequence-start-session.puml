@@ -1,0 +1,34 @@
+@startuml
+title UML sequence behaviour — Start a session
+@@SEQSKIN@@
+actor "Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "VerifyCodePage" as page
+  participant "SessionStore" as store
+  participant "Browser cookie jar" as jar
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as controller
+  participant "SessionCookieIssuer" as issuer
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ConfirmCodeCommandHandler" as handler
+  participant "Session" as session
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Six correct digits
+page -> controller : POST /api/auth/codes/{id}/confirm
+controller -> handler : ConfirmCodeCommand
+handler -> session : Start(personId, now); ExpiresAt = now + 30 days (L2-007 AC1)
+handler -> db : Save Session with consumed code
+handler --> controller : SignedIn(personId, sessionId, expiresAt)
+controller -> issuer : SignInAsync(personId, sessionId, expiresAt)
+issuer -> issuer : ClaimsPrincipal { NameIdentifier = PersonId, pk:sid = SessionId }; IsPersistent; ExpiresUtc
+issuer --> controller : Set-Cookie __Host-popkin; HttpOnly; Secure; SameSite=Strict; Path=/ (L2-007 AC4)
+controller --> page : 200 SignedIn + Set-Cookie
+page -> jar : Browser stores the cookie; scripts cannot read it
+page -> store : set(session)
+page --> actor : Next step opens
+@enduml

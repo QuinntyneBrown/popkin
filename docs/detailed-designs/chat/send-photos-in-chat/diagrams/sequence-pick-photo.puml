@@ -1,0 +1,40 @@
+@startuml
+title UML sequence behaviour — Pick a photo for a message
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage\n(pk-composer)" as page
+  participant "AddPhotosDialog" as dialog
+end box
+actor -> page : Choose Photo in the composer
+page -> dialog : Dialog.open(AddPhotosDialog, {mode: 'chat', max: 1})
+dialog --> actor : "JPEG, PNG, WebP or HEIC, up to 10 MB each. Location data is removed."
+actor -> dialog : Pick from the device or take one with the camera
+dialog -> dialog : Check type by content signature and size (L2-026 AC4, L2-031 AC2)
+alt not an allowed type, or larger than 10 MB
+  dialog --> actor : Photo marked with the reason, e.g. "This file is 14 MB. Photos can be up to 10 MB." (dialogs/add-photos/invalid)
+else allowed
+  actor -> dialog : Confirm (action label in chat mode TO SUPPLY)
+  dialog --> page : close(File)
+  page --> actor : Preview above the message field with "Remove photo"; Send enabled (L2-026 AC1)
+  opt Remove photo
+    actor -> page : Remove photo
+    page --> actor : Preview removed; Send follows the text field again
+  end
+end
+@enduml

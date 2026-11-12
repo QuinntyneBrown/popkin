@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Start a Popkin
+
+Person(host, "Host", "Starts a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "name-your-popkin, how-long, end-date dialog, popkin-created")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "POST /api/popkins; creates the Popkin, Host membership and Everyone thread")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "PopkinSpace, Membership, ChatThread")
+}
+System_Ext(device, "Device messaging and share sheet", "sms: link, Web Share API, clipboard")
+Rel(host, spa, "Uses", "HTTPS")
+Rel(spa, api, "Creates the Popkin", "JSON/HTTPS, session cookie")
+Rel(api, db, "Inserts in one unit of work", "EF Core")
+Rel(spa, device, "Copies, texts or shares the invite link")
+@enduml

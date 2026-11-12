@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — Send a sign-in code
+@@SEQSKIN@@
+actor "Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "SignInPage" as page
+  participant "HttpAuthApi" as client
+  participant "PendingVerificationStore" as pending
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "CodesPerAddressPolicy" as limiter
+  participant "AuthController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RequestCodeCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ICodeSender" as sender
+end box
+actor -> page : Open /sign-in (optionally ?returnUrl=/p/...)
+page --> actor : "Welcome back", field, "Send my code", "New here? Start a Popkin" (L2-006 AC3)
+actor -> page : Enter phone number or email; choose "Send my code"
+page -> page : parseContact: contains "@" means Email, else Phone
+alt format invalid (L2-006 AC4)
+  page --> actor : "That number looks a digit short." or "That email doesn't look quite right."; aria-invalid; no request
+else format valid
+  page -> page : Button busy and disabled
+  page -> client : requestCode({ purpose: SignIn, channel, destination })
+  client -> limiter : POST /api/auth/codes
+  alt over 10 requests from address in 10 minutes
+    limiter --> client : 429 rate_limited, Retry-After (L2-053 AC1)
+  else
+    limiter -> controller : Forward
+    controller -> handler : Send RequestCodeCommand
+    note right of handler : Never reads Person: account or not, same work and same response (L2-006 AC2)
+    handler -> db : Count, supersede, save hashed code
+    handler -> sender : SendAsync(destination, code)
+    handler --> controller : CodeSentDto or ProblemException
+    controller --> client : 202 CodeSentDto, or 400 / 429 / 503 ProblemDetails
+  end
+  alt 202 (L2-006 AC1)
+    client --> page : CodeSentView
+    page -> pending : start({ purpose: SignIn, ..., returnUrl })
+    page --> actor : Navigate to /verify
+  else 400 phone_invalid or email_invalid
+    page --> actor : The L2-003 field message (L2-006 AC4)
+  else 429
+    page --> actor : Says when to try again (L2-053 AC4)
+  else 503 or network failure
+    page --> actor : Alert as on sign-up/error; input kept; button enabled
+  end
+end
+@enduml

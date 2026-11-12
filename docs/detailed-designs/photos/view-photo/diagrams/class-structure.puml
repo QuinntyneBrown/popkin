@@ -1,0 +1,96 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — View a photo
+
+package "popkin app" {
+  class PhotoViewPage <<pk-photo-view-page>> {
+    +photo: Signal<PhotoDetailView?>
+    +state: Signal<'loading' | 'ready' | 'error'>
+    +close(): void
+    +previous(): void
+    +next(): void
+    +retry(): void
+    -onKeydown(event: KeyboardEvent): void
+  }
+}
+package "components library" {
+  class PhotoViewer <<pk-photo-viewer>> {
+    +input src: string
+    +input alt: string
+    +input caption: string?
+    +input reactions: PhotoReactionView[]
+    +input commentCount: number
+    +output swipe: 'previous' | 'next'
+    +output imageError: void
+  }
+}
+package "api library" {
+  class PhotoDetailView {
+    +id: string
+    +uploader: AvatarView
+    +uploaderName: string
+    +addedAtLabel: string
+    +caption: string?
+    +imageUrl: string
+    +width: number
+    +height: number
+    +reactions: PhotoReactionView[]
+    +commentCount: number
+    +previousPhotoId: string?
+    +nextPhotoId: string?
+    +canDelete: boolean
+  }
+  interface PhotosApi {
+    +getPhoto(popkinId, photoId): Observable<PhotoDetailView>
+  }
+}
+package "Popkin.Application" {
+  class GetPhotoQuery {
+    +Guid PopkinId
+    +Guid PhotoId
+  }
+  class GetPhotoQueryHandler {
+    +Handle(query: GetPhotoQuery): Task<PhotoDetailDto>
+  }
+  class PhotoDetailDto {
+    +Guid Id
+    +MemberSummaryDto Uploader
+    +DateTimeOffset AddedAt
+    +string? Caption
+    +Uri ImageUrl
+    +int Width
+    +int Height
+    +IReadOnlyList<PhotoReactionDto> Reactions
+    +int CommentCount
+    +Guid? PreviousPhotoId
+    +Guid? NextPhotoId
+    +bool CanDelete
+  }
+}
+package "Popkin.Domain" {
+  class Photo
+  class PhotoReaction
+  class PhotoComment
+}
+PhotoViewPage --> PhotoViewer : renders
+PhotoViewPage ..> PhotosApi : injects PHOTOS_API
+PhotoViewPage --> PhotoDetailView
+GetPhotoQueryHandler ..> GetPhotoQuery : handles
+GetPhotoQueryHandler ..> PhotoDetailDto : returns
+GetPhotoQueryHandler ..> Photo : reads
+GetPhotoQueryHandler ..> PhotoReaction : counts
+GetPhotoQueryHandler ..> PhotoComment : counts
+Photo "1" *-- "*" PhotoReaction
+Photo "1" *-- "*" PhotoComment
+@enduml

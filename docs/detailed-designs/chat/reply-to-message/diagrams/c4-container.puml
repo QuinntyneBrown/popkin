@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Reply to a message
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Reply bar in the composer, quotes in the thread")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Messages endpoint with ReplyToMessageId")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Message.ReplyToMessageId")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Posts replies and loads quoted pages", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+@enduml

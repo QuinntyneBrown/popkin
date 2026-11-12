@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Membership authorisation
+
+Person(visitor, "Visitor", "No session; sees an invite preview only")
+Person(member, "Member", "Sees the Popkins they belong to")
+Person(host, "Host", "Also changes and wraps up the Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+Rel(visitor, popkin, "Previews an invite in")
+Rel(member, popkin, "Reads and writes own Popkins in")
+Rel(host, popkin, "Performs Host-only actions in")
+@enduml

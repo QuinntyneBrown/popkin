@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — A Popkin-scoped request through the membership guard
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Signed-in person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoAlbumPage" as page
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Authentication" as auth
+  participant "PhotosController" as controller
+  participant "ProblemDetailsExceptionHandler" as errors
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPhotosQueryHandler" as handler
+  participant "MembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : Open /p/{popkinId}/photos
+page -> client : getPhotos(popkinId)
+client -> auth : GET /api/popkins/{popkinId}/photos
+alt no valid session
+  auth --> client : 401 (Sessions, L2-050)
+else session valid
+  auth -> controller : Authenticated request
+  controller -> handler : Send GetPhotosQuery
+  handler -> guard : RequireMemberAsync(popkinId)
+  guard -> db : Membership where PopkinId, PersonId = caller, LeftAt = null
+  alt no row (non-member, former member or no such Popkin)
+    db --> guard : none
+    guard --> errors : PopkinNotFoundException
+    errors --> client : 404 popkin_not_found, same body either way (L2-051 AC1)
+    client --> page : Not found
+    page --> actor : Not-found screen
+  else member
+    db --> guard : Membership with PopkinSpace
+    guard --> handler : MemberAccess
+    handler -> db : Photos where PopkinId = access.Popkin.Id
+    handler -> photos : GetReadUrl(storageKey, lifetime)
+    photos --> handler : Signed, expiring URLs (L2-051 AC2)
+    handler --> controller : PhotoDto list
+    controller --> client : 200 OK
+    page --> actor : Album
+  end
+end
+@enduml

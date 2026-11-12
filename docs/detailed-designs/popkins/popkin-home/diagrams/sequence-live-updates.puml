@@ -1,0 +1,46 @@
+@startuml
+title UML sequence behaviour — Keep the home current
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage" as page
+  participant "SignalRPopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Command handlers (other slices)" as handler
+end box
+page -> rt : events(popkinId)
+rt -> hub : Connect /hubs/popkin with session cookie (L2-050 AC4)
+hub -> hub : Check membership, add to group popkin:(id)
+loop every minute (L2-044 AC5)
+  page --> actor : pk-time-left re-renders from the client clock
+end
+handler -> notifier : PopkinChanged | MemberJoined | MemberLeft | MessageSent
+notifier -> hub : Send to group popkin:(id)
+hub -> rt : Event
+rt --> page : PopkinEvent
+alt PopkinChanged (L2-020 AC3, AC4)
+  page --> actor : New name, emoji, colour or time left without reload
+else MemberJoined or MemberLeft (L2-047 AC2)
+  page -> page : Reload header and Members section
+else MessageSent
+  page -> page : Reload Chat preview and Chat tab count
+end
+@enduml

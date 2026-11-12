@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Reply to a message
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "GroupChatPage / DirectMessagePage", "Angular pages", "Hold replyTo state; scroll to a quoted message")
+  Component(dialog, "ReactionsDialog", "CDK dialog", "Offers Reply")
+  Component(composer, "pk-composer", "components library", "composer__reply bar with Cancel reply")
+  Component(msg, "pk-message", "components library", "bubble__quote, chosen to jump")
+  Component(store, "ThreadStore", "api library service", "loadUntil(messageId) for quotes outside the loaded pages")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "MessagesController", "ASP.NET Core controller", "POST messages; GET messages?around=")
+  Component(send, "SendMessageCommandHandler", "MediatR handler", "Checks the replied-to message is in the same thread")
+  Component(query, "GetMessagesQueryHandler", "MediatR handler", "Projects QuoteDto for each reply")
+  ComponentDb(db, "Popkin database", "SQL Server", "Message")
+}
+Rel(dialog, page, "Returns reply")
+Rel(page, composer, "Binds replyTo")
+Rel(page, msg, "Renders quotes")
+Rel(page, store, "Sends and jumps via")
+Rel(store, ctrl, "Calls via ChatApi", "JSON/HTTPS")
+Rel(ctrl, send, "Sends SendMessageCommand")
+Rel(ctrl, query, "Sends GetMessagesQuery")
+Rel(send, db, "Reads and writes", "EF Core")
+Rel(query, db, "Reads", "EF Core")
+@enduml

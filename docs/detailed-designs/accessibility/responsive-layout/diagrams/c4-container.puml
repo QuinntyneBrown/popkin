@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Responsive from 360 px
+
+Person(member, "Member", "Any viewport from 360 px")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA, Angular CDK", "App column, sheets, landing grid, layout tokens")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Unaffected by layout")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls", "JSON/HTTPS")
+@enduml

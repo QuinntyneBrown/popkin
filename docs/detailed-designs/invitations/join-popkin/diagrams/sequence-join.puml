@@ -1,0 +1,83 @@
+@startuml
+title UML sequence behaviour — Join with a name and an optional photo
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person joining" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "YourProfilePage" as page
+  participant "HttpInvitesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "InvitesController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "JoinPopkinCommandHandler" as handler
+  participant "JoinPopkinCommandValidator" as val
+  participant "PopkinSpace" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : Open /i/(code)/profile (signedInGuard)
+page --> actor : "How should people know you?", "Your name" prefilled with account name, hint "First name is plenty.", optional photo (L2-013 AC1)
+opt add a photo (L2-013 AC2)
+  actor -> page : Choose a file
+  alt JPEG, PNG, WebP or HEIC and at most 10 MB
+    page --> actor : Photo replaces the initial, "Looking good."
+  else other type or larger
+    page --> actor : Refused with message (copy TO SUPPLY)
+  end
+end
+alt name empty (L2-013 AC3)
+  page --> actor : "I'm in" disabled; field message "Enter a name so people know who you are."
+end
+actor -> page : Choose "I'm in"
+page --> actor : "Joining…", disabled (L2-013 AC4)
+page -> client : join(code, name, photo)
+client -> ctrl : POST /api/invites/(code)/join multipart
+ctrl -> handler : Send JoinPopkinCommand
+handler -> val : Name 1 to 40, photo content sniffed (L2-052 AC3)
+alt invalid
+  handler --> ctrl : 400 display_name_required | display_name_too_long | photo_type_not_allowed | photo_too_large
+else valid
+  handler -> db : PopkinSpace by InviteCode, caller's active membership
+  alt no Popkin
+    handler --> ctrl : 404 invite_not_found
+  else wrapped up (L2-045 AC2)
+    handler --> ctrl : 409 popkin_wrapped_up
+  else already an active member
+    handler --> ctrl : 200 JoinedDto for the existing membership
+  else can join
+    opt photo
+      handler -> photos : SaveAsync(photo)
+      photos --> handler : storage key
+    end
+    handler -> entity : Join(person, name, photoId, host membership, now)
+    handler -> handler : Message.PoppedIn: "(name) popped in. Say hi! (wave)" in Everyone (L2-014 AC4)
+    handler -> db : Save membership, message, LastActivityAt
+    handler -> notifier : MemberJoined, MessageSent to popkin:(id)
+    handler --> ctrl : JoinedDto
+    ctrl --> client : 201 Created
+  end
+end
+alt 200 or 201
+  client --> page : JoinedView
+  page --> actor : navigate /i/(code)/welcome
+else failure (L2-013 AC5)
+  page --> actor : pk-alert "We couldn't add you just yet. Your name and photo are still here. Give it another go." "I'm in" enabled
+end
+@enduml

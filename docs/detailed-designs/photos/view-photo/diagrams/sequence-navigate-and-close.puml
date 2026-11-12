@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — Move between photos and close
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-photo-viewer" as viewer
+  participant "PhotoViewPage" as page
+  participant "Router and Location" as router
+  participant "PhotosApi" as client
+end box
+
+alt Swipe sideways, or press Left or Right
+  alt Swipe
+    actor -> viewer : Swipe sideways on the stage
+    viewer -> page : swipe(previous or next)
+  else Arrow key
+    actor -> page : Left or Right (host keydown listener)
+  end
+  alt Neighbour exists
+    page -> router : navigate /p/{popkinId}/photos/{neighbourId} (replaceUrl)
+    page -> client : getPhoto(popkinId, neighbourId)
+    page --> actor : Previous or next photo in album order (L2-033 AC3)
+  else First or last photo
+    page --> actor : Stays on this photo
+  end
+else Choose "Close" or press Escape
+  actor -> page : Close
+  alt Opened from another Popkin screen in this session
+    page -> router : Location.back()
+    router --> actor : The screen it came from, scroll restored (L2-033 AC2)
+  else Opened directly by address
+    page -> router : navigate /p/{popkinId}/photos
+  end
+end
+@enduml

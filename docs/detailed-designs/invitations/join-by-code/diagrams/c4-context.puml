@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Join by scanning or typing a code
+
+Person(member, "Member", "Signed in, on My Popkins")
+Person(visitor, "Visitor", "On the welcome screen")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(camera, "Device camera", "Read through the browser, getUserMedia")
+Rel(member, popkin, "Scans a friend's QR code")
+Rel(visitor, popkin, "Types the invite code or link")
+Rel(popkin, camera, "Reads video frames from")
+@enduml

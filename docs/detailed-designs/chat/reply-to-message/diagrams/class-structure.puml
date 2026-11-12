@@ -1,0 +1,71 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+
+title Class structure — Reply to a message
+
+package "Popkin.Domain" {
+  class Message {
+    +Guid Id
+    +Guid ThreadId
+    +Guid? ReplyToMessageId
+    +DateTimeOffset? DeletedAt
+    +ReplyTo(target: Message): void
+  }
+}
+package "Popkin.Application" {
+  class SendMessageCommand {
+    +Guid? ReplyToMessageId
+  }
+  class SendMessageCommandHandler
+  class GetMessagesQuery {
+    +Guid? Before
+    +Guid? After
+    +Guid? Around
+    +int Limit = 50
+  }
+  class QuoteDto {
+    +Guid MessageId
+    +string? AuthorFirstName
+    +string? Snippet
+    +bool HasPhoto
+    +bool Deleted
+  }
+  class MessageDto {
+    +QuoteDto? Quote
+  }
+}
+package "web app (popkin, api, components)" {
+  class GroupChatPage {
+    +replyTo: Signal<MessageView?>
+    +startReply(m: MessageView): void
+    +cancelReply(): void
+    +jumpTo(messageId): void
+  }
+  class QuoteView {
+    +messageId: string
+    +authorFirstName: string?
+    +snippet: string?
+    +deleted: boolean
+  }
+  class ThreadStore {
+    +loadUntil(messageId): Promise<void>
+    +highlighted: Signal<string?>
+  }
+}
+Message "0..*" --> "0..1" Message : replies to
+SendMessageCommandHandler ..> SendMessageCommand : handles
+SendMessageCommandHandler ..> Message : ReplyTo
+MessageDto --> QuoteDto
+GroupChatPage --> ThreadStore
+GroupChatPage ..> QuoteView
+@enduml

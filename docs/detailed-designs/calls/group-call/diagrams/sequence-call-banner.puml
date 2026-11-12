@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Show the banner for a call under way
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage or\nGroupChatPage" as page
+  participant "CallsApi" as client
+  participant "PopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "CallsController" as controller
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetCurrentCallQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+
+actor -> page : Open the Popkin home or Everyone
+page -> client : GET /api/popkins/{popkinId}/calls/current
+client -> controller : HTTPS request
+controller -> handler : Send GetCurrentCallQuery
+handler -> db : Check membership, load Group call with EndedAt null
+alt Not a member
+  controller --> client : 404 popkin_not_found (L2-051 AC1)
+else No call under way
+  handler --> controller : null
+  controller --> client : 204 No Content
+  client --> page : No banner
+else Call under way
+  handler --> controller : CallDto
+  controller --> client : 200 OK CallDto
+  client --> page : CallBannerView
+  page --> actor : pk-banner "Group call · {n} on the call" with "Join" (L2-029 AC2)
+end
+page -> rt : Listen on popkin:{popkinId}
+loop While the page is open
+  hub --> rt : CallChanged(count)
+  rt --> page : Update the banner count
+  hub --> rt : CallEnded(callId)
+  rt --> page : Remove the banner (L2-029 AC6)
+end
+actor -> page : Choose "Join"
+page --> actor : Navigate to /p/{popkinId}/call (see start or join)
+@enduml

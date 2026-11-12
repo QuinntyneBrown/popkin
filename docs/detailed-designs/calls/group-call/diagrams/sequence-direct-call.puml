@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Call one member from a direct message
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "DirectMessagePage" as dm
+  participant "VideoCallPage" as page
+  participant "CallSession" as session
+  participant "CallsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "CallsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "JoinCallCommandHandler" as handler
+  participant "Call" as call
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+
+actor -> dm : Choose "Call {first name}" (L2-030 AC8)
+dm -> page : Navigate to /p/{popkinId}/call?thread={threadId}
+page -> session : start(popkinId, threadId)
+session -> session : Ask for microphone and camera (as in start or join)
+session -> client : POST /api/popkins/{popkinId}/calls {threadId}
+client -> controller : HTTPS request
+controller -> handler : Send JoinCallCommand(ThreadId)
+handler -> db : Load membership and the Direct thread
+alt Thread missing, not Direct, or caller is neither MemberA nor MemberB
+  controller --> client : 404 ProblemDetails code thread_not_found (L2-023 AC2)
+else Popkin wrapped up
+  controller --> client : 409 ProblemDetails code popkin_wrapped_up (L2-045 AC1)
+else Allowed
+  handler -> db : Find the Direct call for ThreadId with EndedAt null
+  alt None
+    handler -> call : new Call(Kind Direct, ThreadId)
+  end
+  handler -> call : Join(membershipId)
+  handler -> db : Save changes
+  note right of handler : No CallChanged to popkin:{popkinId}; a direct call shows no group banner.\nHow the other member learns of the call is TO SUPPLY.
+  controller --> client : 201 or 200 JoinedCallDto
+  session --> page : Header shows the other member's name, "Just the two of you · {mm:ss}" (video-call/two)
+  page --> actor : Same controls as a group call (L2-030 AC8)
+end
+@enduml

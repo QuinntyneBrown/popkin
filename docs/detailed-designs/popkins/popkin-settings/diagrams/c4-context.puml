@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Popkin settings
+
+Person(host, "Host", "Changes the Popkin's name, emoji, colour and length")
+Person(member, "Member", "Sees the change; may invite or leave from the same menu")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+Rel(host, popkin, "Edits name and look, changes length")
+Rel(popkin, member, "Shows the change without a reload")
+@enduml

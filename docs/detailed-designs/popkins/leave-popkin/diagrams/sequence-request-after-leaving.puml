@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — Request a Popkin after leaving
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Former member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Any Popkin page" as page
+  participant "Any api client" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Any Popkin controller or PopkinHub" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Query or command handler" as handler
+  participant "IMembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /p/(id) or any child route
+page -> client : Request
+client -> ctrl : GET or POST /api/popkins/(id)/...
+ctrl -> handler : Send request
+handler -> guard : RequireMember(id)
+guard -> db : Membership where LeftAt is null
+db --> guard : none
+guard --> handler : PopkinNotFoundException
+handler --> ctrl : not found
+ctrl --> client : 404 ProblemDetails code popkin_not_found (L2-047 AC4, L2-051 AC1)
+client --> page : NotFound
+page --> actor : not-found screen with a way to My Popkins (L2-056 AC5)
+@enduml

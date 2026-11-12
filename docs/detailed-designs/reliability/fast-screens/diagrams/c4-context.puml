@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Screens are fast
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin, on a phone over a mobile network")
+System(popkin, "Popkin", "Private spaces for pop-up communities: chat, calls, photos, experiences")
+
+Rel(member, popkin, "Opens screens and moves between them", "HTTPS")
+@enduml

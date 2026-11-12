@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — Reply to a message
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "pk-composer" as composer
+  participant "ThreadStore" as store
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Message handlers" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose Reply in ReactionsDialog
+page -> composer : replyTo = message
+composer --> actor : "Replying to Ruth", one line of the message, Cancel reply; focus in the field (L2-025 AC1)
+alt Cancel reply
+  actor -> composer : Cancel reply
+  composer -> page : replyTo = null; focus stays in the field
+else send
+  actor -> composer : Type and Send
+  composer -> store : send({text, replyToMessageId}) via MessageOutbox
+  store --> page : Pending message shows its quote at once
+  store -> client : sendMessage(..., replyToMessageId)
+  client -> controller : POST /api/popkins/{popkinId}/threads/{threadId}/messages
+  controller -> handler : Send SendMessageCommand
+  handler -> db : Load the replied-to Message
+  alt not found or in another thread
+    controller --> client : 400 code reply_not_found
+    client --> store : Rejected; message marked Not sent
+  else found (deleted is allowed)
+    handler -> handler : Message.ReplyTo(target)
+    handler -> db : SaveChangesAsync
+    controller --> client : 201 MessageDto with QuoteDto
+    client --> store : Sent
+    store --> page : Reply with quote: first name and one line (L2-025 AC2)
+  end
+  page -> composer : replyTo = null
+end
+@enduml

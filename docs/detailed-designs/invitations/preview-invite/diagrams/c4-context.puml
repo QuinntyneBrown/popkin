@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Preview an invite
+
+Person(visitor, "Visitor", "No session; opened an invite link")
+Person(member, "Member", "Signed in; may already belong to the Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+Rel(visitor, popkin, "Sees who invited them and what they are joining")
+Rel(member, popkin, "Is taken to the Popkin home or recap")
+@enduml

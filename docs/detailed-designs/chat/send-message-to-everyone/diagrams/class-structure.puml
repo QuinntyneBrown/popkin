@@ -1,0 +1,135 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+hide empty members
+
+title Class structure — Send a message to everyone
+
+package "Popkin.Domain" {
+  enum ThreadKind {
+    Everyone
+    Direct
+  }
+  enum MessageKind {
+    Member
+    System
+  }
+  class ChatThread {
+    +Guid Id
+    +Guid PopkinId
+    +ThreadKind Kind
+    +Guid? MemberAId
+    +Guid? MemberBId
+    +CanRead(membershipId: Guid): bool
+  }
+  class Message {
+    +Guid Id
+    +Guid ThreadId
+    +Guid AuthorMembershipId
+    +string? Text
+    +Guid? PhotoId
+    +Guid? ReplyToMessageId
+    +Guid ClientMessageId
+    +DateTimeOffset SentAt
+    +MessageKind Kind
+    +DateTimeOffset? DeletedAt
+    +{static} Create(thread, author, text, clientMessageId, now): Message
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinStatus Status
+    +EnsureActive(): void
+  }
+}
+package "Popkin.Application" {
+  class SendMessageCommand {
+    +Guid PopkinId
+    +Guid ThreadId
+    +Guid ClientMessageId
+    +string? Text
+    +Guid? PhotoId
+    +Guid? ReplyToMessageId
+  }
+  class SendMessageCommandValidator {
+    +MaxTextLength = 2000
+  }
+  class SendMessageCommandHandler {
+    +Handle(cmd: SendMessageCommand): Task<SendMessageResult>
+  }
+  class GetEveryoneThreadQueryHandler {
+    +Handle(q: GetEveryoneThreadQuery): Task<ThreadDto>
+  }
+  class GetMessagesQueryHandler {
+    +Handle(q: GetMessagesQuery): Task<MessagePageDto>
+  }
+  class MessageDto {
+    +Guid Id
+    +Guid ClientMessageId
+    +AuthorDto Author
+    +string? Text
+    +string? PhotoUrl
+    +QuoteDto? Quote
+    +ReactionDto[] Reactions
+    +DateTimeOffset SentAt
+    +bool IsMine
+  }
+  interface IMembershipGuard
+  interface IPopkinNotifier
+  interface IAppDbContext
+}
+package "Popkin.Api" {
+  class MessagesController {
+    +Get(popkinId, threadId, before?, after?, limit): MessagePageDto
+    +Post(popkinId, threadId, body): MessageDto
+  }
+  class ThreadsController {
+    +GetEveryone(popkinId): ThreadDto
+  }
+}
+package "web app (popkin, api, components)" {
+  class GroupChatPage {
+    +thread: Signal<ThreadView>
+    +messages: Signal<MessageView[]>
+    +send(text: string): void
+    +useOpener(text: string): void
+  }
+  class ThreadStore {
+    +items: Signal<MessageView[]>
+    +load(popkinId, threadId): void
+    +loadOlder(): void
+  }
+  interface ChatApi {
+    +getEveryoneThread(popkinId): Observable<ThreadView>
+    +getMessages(popkinId, threadId, cursor): Observable<MessagePageView>
+    +sendMessage(popkinId, threadId, req): Observable<MessageView>
+  }
+  class HttpChatApi
+}
+ChatThread "1" *-- "*" Message : holds
+ChatThread --> ThreadKind
+Message --> MessageKind
+SendMessageCommandHandler ..> SendMessageCommand : handles
+SendMessageCommandValidator ..> SendMessageCommand : validates
+SendMessageCommandHandler ..> IMembershipGuard
+SendMessageCommandHandler ..> IAppDbContext
+SendMessageCommandHandler ..> IPopkinNotifier
+SendMessageCommandHandler ..> PopkinSpace : EnsureActive
+SendMessageCommandHandler --> Message : creates
+SendMessageCommandHandler ..> MessageDto : returns
+MessagesController ..> SendMessageCommandHandler : MediatR
+MessagesController ..> GetMessagesQueryHandler : MediatR
+ThreadsController ..> GetEveryoneThreadQueryHandler : MediatR
+GroupChatPage --> ThreadStore
+ThreadStore ..> ChatApi : CHAT_API
+HttpChatApi ..|> ChatApi
+@enduml

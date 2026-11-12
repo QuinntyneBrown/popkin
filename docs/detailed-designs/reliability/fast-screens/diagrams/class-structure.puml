@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Screens are fast
+
+package "Popkin web app" {
+  class AppConfig <<composition root>> {
+    +providers: Provider[]
+    provideRouter(routes, withPreloading(PreloadAllModules), withComponentInputBinding())
+    provideServiceWorker("ngsw-worker.js")
+    provideHttpClient(withInterceptors(...))
+  }
+  class PkRouteData <<interface>> {
+    +shell: "app" | "bare"
+    +page: string
+  }
+  class PhotoAlbumPage <<page container>> {
+    +popkinId: input<string>
+    -album: ScreenLoad<AlbumView>
+  }
+}
+
+package "api library" {
+  class "ScreenLoad<T>" as ScreenLoad {
+    +status: Signal<LoadStatus>
+    +value: Signal<T | undefined>
+    +showSkeleton: Signal<boolean>
+    +reload(): void
+  }
+  class PhotoThumbnail <<view model>> {
+    +photoId: string
+    +width: number
+    +height: number
+    +src: string
+    +srcset: string
+    +alt: string
+  }
+  class WebVitalsReporter {
+    +start(): void
+    -report(metric: Metric): void
+  }
+}
+
+package "components library" {
+  class PhotoGrid <<pk-photo-grid>> {
+    +photos: input<PhotoThumbnail[]>
+    +sizes: input<string>
+  }
+  class Skeleton <<pk-skeleton>> {
+    +shape: input<SkeletonShape>
+    +width: input<string>
+  }
+}
+
+package "Popkin API" {
+  class GetAlbumQueryHandler {
+    +Handle(query: GetAlbumQuery, ct): Task<AlbumDto>
+  }
+  interface IAppDbContext {
+    +Photos: DbSet<Photo>
+    +SaveChangesAsync(ct): Task<int>
+  }
+}
+
+AppConfig ..> PkRouteData : routes carry
+AppConfig ..> PhotoAlbumPage : loadComponent
+PhotoAlbumPage ..> ScreenLoad : reads data with
+PhotoAlbumPage ..> PhotoGrid : composes
+PhotoAlbumPage ..> Skeleton : composes while waiting
+PhotoGrid "1" --> "*" PhotoThumbnail : renders
+GetAlbumQueryHandler ..> IAppDbContext : AsNoTracking, Select
+ScreenLoad ..> GetAlbumQueryHandler : GET via HTTP
+@enduml

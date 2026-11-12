@@ -1,0 +1,41 @@
+@startuml
+title UML sequence behaviour — Choose how long a Popkin lasts
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "HowLongPage" as page
+  participant "pk-choice-card radio group" as group
+  participant "EndDateDialog" as dlg
+  participant "NewPopkinDraft" as draft
+end box
+actor -> page : Open /new/length
+page -> draft : Read length (default TheWeekend, L2-009 AC1)
+page --> actor : Four options, "You can change this later. When it ends, everyone gets a recap." (AC6)
+actor -> group : Arrow keys or tap
+group -> draft : length.set(option) (AC7)
+opt "Until a date" chosen (AC2)
+  group --> actor : Date control "Ends Sun, 13 Sep · 6:00 pm"
+  actor -> dlg : Open the date control
+  dlg --> actor : "When does it wrap up?" Day and Time fields
+  actor -> dlg : Pick day and time, choose "Set the end"
+  alt less than 1 hour or more than 1 year ahead (AC3)
+    dlg --> actor : "Pick a time at least an hour from now and less than a year away."
+  else within range
+    dlg -> draft : customEndsAt.set(value)
+    dlg --> page : Close, focus returns to the date control
+  end
+end
+@enduml

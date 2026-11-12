@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — A Popkin wraps up when its time is up
+
+Person(member, "Member", "Sees the time left and the warning")
+Person(host, "Host", "May change how long the Popkin lasts")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+Rel(member, popkin, "Follows the time left in")
+Rel(host, popkin, "Changes the length using")
+Rel(popkin, member, "Shows the recap when the end date arrives")
+@enduml

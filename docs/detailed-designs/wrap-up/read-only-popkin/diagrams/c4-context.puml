@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — A wrapped-up Popkin is read-only
+
+Person(member, "Member", "Reads chat, browses photos, opens the recap")
+Person(visitor, "Visitor", "Holds an invite to a wrapped-up Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+Rel(member, popkin, "Reads a wrapped-up Popkin in")
+Rel(visitor, popkin, "Is refused a join by")
+@enduml

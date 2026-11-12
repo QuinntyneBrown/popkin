@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — Filter to my photos
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-chip" as chip
+  participant "PhotoAlbumPage" as page
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAlbumQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+
+actor -> chip : Choose "Mine"
+chip -> page : filter = mine
+page --> actor : "Mine" aria-pressed true, "Everyone" false (L2-032 AC3)
+page -> client : getAlbum(popkinId, mine)
+client -> controller : GET /api/popkins/{popkinId}/photos?filter=mine&limit=60
+controller -> handler : Send GetAlbumQuery(Mine)
+handler -> db : Photos where UploaderMembershipId = caller's membership
+controller --> client : 200 OK
+alt None of the member's photos
+  page --> actor : "You haven't added any yet", "Add photos", "Show everyone's" (L2-032 AC4, photo-album/no-results)
+else Some
+  page --> actor : Only the member's photos, no feature cell (L2-032 AC2, photo-album/mine)
+end
+actor -> chip : Choose "Everyone"
+chip -> page : filter = everyone
+page --> actor : All photos again (L2-032 AC3)
+@enduml

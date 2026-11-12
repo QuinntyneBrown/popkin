@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — View the landing page
+
+Person(visitor, "Visitor", "Someone without a session")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Landing and welcome screens, signedOutGuard")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Answers the session check")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Sessions and people")
+}
+Rel(visitor, web, "Opens / and /welcome", "HTTPS")
+Rel(web, api, "GET /api/auth/session", "JSON/HTTPS")
+Rel(api, db, "Reads the Session behind the cookie", "EF Core")
+@enduml

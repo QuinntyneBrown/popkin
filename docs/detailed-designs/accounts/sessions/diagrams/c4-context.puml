@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Sessions
+
+Person(member, "Member", "A signed-in person")
+Person(visitor, "Visitor", "Someone without a session")
+System(popkin, "Popkin", "Free platform for pop-up communities")
+
+Rel(member, popkin, "Stays signed in for 30 days on a device with", "HTTPS, session cookie")
+Rel(visitor, popkin, "Is sent to sign in for private screens by", "HTTPS")
+@enduml

@@ -1,0 +1,111 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — My Popkins
+
+package "Popkin.Application" {
+  class GetMyPopkinsQuery
+  class GetMyPopkinsQueryHandler {
+    +Handle(query, ct): Task<MyPopkinsDto>
+  }
+  class MyPopkinsDto {
+    +IReadOnlyList<ActivePopkinCardDto> Active
+    +IReadOnlyList<WrappedUpPopkinDto> WrappedUp
+  }
+  class ActivePopkinCardDto {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +DateTimeOffset? EndsAt
+    +LatestMessageDto? LatestMessage
+    +IReadOnlyList<AvatarDto> Avatars (max 3)
+    +int MemberCount
+    +int UnreadCount
+  }
+  class WrappedUpPopkinDto {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +DateTimeOffset WrappedUpAt
+    +int PeopleCount
+    +int PhotoCount
+  }
+  class LatestMessageDto {
+    +string SenderFirstName
+    +string Text
+  }
+  class AvatarDto {
+    +string Initials
+    +PopkinColour Accent
+    +string? PhotoUrl
+  }
+  interface ICurrentPerson
+  interface IPhotoStore {
+    +GetReadUrl(storageKey, size): Uri
+  }
+  interface IAppDbContext
+}
+package "Popkin.Domain" {
+  class PopkinSpace
+  class Membership
+  class ThreadReadState
+  class Message
+}
+package "Popkin.Api" {
+  class PopkinsController {
+    +List(ct): Task<MyPopkinsDto>
+  }
+}
+package "Frontend (popkin app + api library)" {
+  class MyPopkinsPage {
+    +state: Signal<loading | ready | empty | error>
+    +offline: Signal<boolean>
+    +retry(): void
+    +openScanToJoin(): void
+  }
+  interface PopkinsApi {
+    +listMyPopkins(): Observable<MyPopkinsView>
+  }
+  class HttpPopkinsApi
+  class PopkinsSnapshot {
+    +save(view): void
+    +load(): MyPopkinsView | null
+  }
+  class MyPopkinsView
+}
+PopkinsController ..> GetMyPopkinsQuery : sends
+GetMyPopkinsQueryHandler ..> GetMyPopkinsQuery : handles
+GetMyPopkinsQueryHandler --> ICurrentPerson
+GetMyPopkinsQueryHandler --> IAppDbContext
+GetMyPopkinsQueryHandler --> IPhotoStore
+GetMyPopkinsQueryHandler ..> MyPopkinsDto : returns
+MyPopkinsDto "1" *-- "*" ActivePopkinCardDto
+MyPopkinsDto "1" *-- "*" WrappedUpPopkinDto
+ActivePopkinCardDto --> LatestMessageDto
+ActivePopkinCardDto "1" *-- "0..3" AvatarDto
+IAppDbContext ..> PopkinSpace
+IAppDbContext ..> Membership
+IAppDbContext ..> ThreadReadState
+IAppDbContext ..> Message
+HttpPopkinsApi ..|> PopkinsApi
+MyPopkinsPage --> PopkinsApi : POPKINS_API
+MyPopkinsPage --> PopkinsSnapshot
+PopkinsApi ..> MyPopkinsView
+@enduml

@@ -1,0 +1,45 @@
+@startuml
+title UML sequence behaviour — Open a private screen without a session
+@@SEQSKIN@@
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Router" as router
+  participant "signedInGuard" as guard
+  participant "SessionStore" as store
+  participant "HttpAuthApi" as client
+  participant "unauthorizedInterceptor" as intercept
+  participant "SignInPage / VerifyCodePage" as signin
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as controller
+end box
+actor -> router : Open /p/lakeside-id/photos
+router -> guard : canActivate
+guard -> store : ensureLoaded()
+alt session not loaded yet
+  store -> client : getSession()
+  client -> controller : GET /api/auth/session
+  controller --> client : 200 SessionDto or 401
+  client --> store : SessionView or null
+end
+alt signed in
+  guard --> router : true
+  router --> actor : Screen opens
+else no session or session ended (L2-007 AC2, AC3)
+  guard --> router : UrlTree /sign-in?returnUrl=%2Fp%2Flakeside-id%2Fphotos
+  router -> signin : Sign in, then confirm the code
+  signin -> signin : safeReturnUrl(returnUrl) keeps in-app paths only
+  signin --> actor : /p/lakeside-id/photos opens after confirming
+end
+== Later: the session ends while a screen is open ==
+actor -> client : Any action
+client -> controller : Request with the cookie
+controller --> intercept : 401
+alt request is not GET /api/auth/session or an /api/auth/codes call
+  intercept -> store : clear()
+  intercept -> router : navigate /sign-in?returnUrl=current URL
+  router --> actor : Sign-in screen opens
+else session check or sign-in call
+  intercept --> client : Pass the 401 to the caller
+end
+@enduml

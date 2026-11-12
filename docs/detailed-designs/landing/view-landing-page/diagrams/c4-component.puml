@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — View the landing page
+
+Container_Boundary(web, "Popkin web app") {
+  Component(routes, "app.routes.ts", "Angular routes", "/ (landing) and /welcome, shell bare")
+  Component(guard, "signedOutGuard", "CanActivateFn", "Sends a signed-in person to /popkins")
+  Component(landing, "LandingPage", "Angular page", "Composes the six landing sections")
+  Component(welcome, "WelcomePage", "Angular page", "Start a Popkin, join with a code, sign in")
+  Component(store, "SessionStore", "api library service", "Holds the signed-in person or null")
+  Component(authapi, "AuthApi / HttpAuthApi", "api library contract and HTTP client", "AUTH_API token")
+  Component(lib, "pk-site-navigation, pk-button, pk-popkin-tile, pk-logo", "components library", "Presentation")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AuthController", "ASP.NET Core controller", "GET /api/auth/session")
+}
+Rel(routes, guard, "Runs before /")
+Rel(guard, store, "Asks whether a session exists")
+Rel(store, authapi, "Loads the session once")
+Rel(authapi, ctrl, "GET /api/auth/session", "JSON/HTTPS")
+Rel(routes, landing, "Lazy-loads")
+Rel(routes, welcome, "Lazy-loads")
+Rel(landing, lib, "Composes")
+Rel(welcome, lib, "Composes")
+@enduml

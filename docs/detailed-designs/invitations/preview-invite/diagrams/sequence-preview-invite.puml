@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — Preview an invite
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Visitor or signed-in person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "JoinInvitePage" as page
+  participant "HttpInvitesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "InvitesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetInvitePreviewQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /i/(code) (public route)
+page --> actor : "Loading your invite…" skeleton
+page -> client : getPreview(code)
+client -> ctrl : GET /api/invites/(code), cookie if any
+ctrl -> ctrl : invite-lookup rate limit (L2-053 AC3)
+alt more than 20 lookups from this address in 10 min
+  ctrl --> client : 429, Retry-After
+else within limit
+  ctrl -> handler : Send GetInvitePreviewQuery
+  handler -> db : PopkinSpace where InviteCode = code
+  alt no Popkin
+    handler --> ctrl : InviteNotFoundException
+    ctrl --> client : 404 ProblemDetails code invite_not_found
+  else found
+    handler -> db : Host membership, active member count, 5 avatars, caller's active membership
+    handler --> ctrl : InvitePreviewDto with no message, photo, experience or other name (L2-012 AC5, L2-051 AC5)
+    ctrl --> client : 200
+  end
+end
+alt 200 and viewer is member, Popkin active (L2-012 AC4)
+  page --> actor : navigate /p/(popkinId)
+else 200 and viewer is member, Popkin wrapped up (L2-016 AC3)
+  page --> actor : navigate /p/(popkinId)/recap
+else 200, not a member, Open (L2-012 AC1, AC2)
+  page --> actor : "Mara invited you", emoji, colour, name, 5 avatars, "14 people", "Here until Sunday, 6 pm" (none when no end), "Join", "Free, no app to download."
+else 200, not a member, WrappedUp (L2-016 AC1)
+  page --> actor : Muted emoji, name, count, "This Popkin wrapped up on Sunday. What a time. Ask Mara for the next one.", no "Join"
+else 404 (L2-016 AC2)
+  page --> actor : "We can't find that invite" with "Start a Popkin" and "Join with a code"
+else 429 (L2-053 AC4)
+  page --> actor : When to try again (copy TO SUPPLY)
+else network or 5xx
+  page --> actor : "We couldn't open your invite" with "Try again" and "Back to start"
+end
+@enduml

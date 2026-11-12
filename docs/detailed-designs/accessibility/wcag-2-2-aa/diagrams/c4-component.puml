@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Accessible to WCAG 2.2 AA
+
+Person(member, "Member", "Keyboard or screen reader")
+Container_Boundary(spa, "Popkin web app") {
+  Component(app, "App", "Root container (existing, changed)", "pk-skip-link, router-outlet, ToastHost")
+  Component(skip, "pk-skip-link", "components library", "Skip to content, first in the DOM")
+  Component(screen, "pk-screen", "components library", "header, main#main, nav as siblings")
+  Component(focus, "RouteFocus", "api library helper", "Focuses the new h1 after navigation")
+  Component(title, "PopkinTitleStrategy", "TitleStrategy", "Sets the document title per route")
+  Component(dialog, "DialogOpener", "components library service", "CDK Dialog: autoFocus, restoreFocus, ariaLabelledBy")
+  Component(cdk, "Angular CDK Dialog and FocusTrap", "@angular/cdk", "Traps focus, closes on Escape")
+  Component(announcer, "LiveAnnouncer", "@angular/cdk/a11y", "Polite announcements")
+  Component(kit, "pk-* components", "components library", "Names, 44 px targets, focus ring, state not by colour alone")
+  Component(tokens, "tokens.css", "components/styles", "Contrast-checked roles, both themes")
+}
+
+Rel(member, skip, "Tabs to")
+Rel(app, skip, "Renders first")
+Rel(app, focus, "Starts")
+Rel(skip, screen, "Moves focus to main#main of")
+Rel(focus, screen, "Focuses h1 in")
+Rel(title, app, "Titles each route of")
+Rel(kit, dialog, "Open dialogs with")
+Rel(dialog, cdk, "Configures")
+Rel(kit, announcer, "Announce through")
+Rel(kit, tokens, "Read colours and sizes from")
+@enduml

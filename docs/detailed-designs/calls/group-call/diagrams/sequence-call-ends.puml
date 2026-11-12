@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — The last person leaves and the call ends
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "CallSession" as session
+  participant "CallsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "CallsController" as controller
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "LeaveCallCommandHandler" as handler
+  participant "Call" as call
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "SignalRPopkinNotifier" as notifier
+end box
+actor "Other members" as others
+
+alt Member chooses Leave
+  session -> client : POST /api/popkins/{popkinId}/calls/{callId}/leave
+  client -> controller : HTTPS request
+  controller -> handler : Send LeaveCallCommand
+else Connection lost
+  hub -> hub : OnDisconnectedAsync after grace period TO SUPPLY
+  hub -> handler : Send LeaveCallCommand for the connection's participant
+end
+handler -> db : Load call and the caller's participant row
+alt Caller not on the call
+  handler --> controller : NotFound
+  controller --> client : 404 ProblemDetails code call_not_found
+else On the call
+  handler -> call : Leave(membershipId, now) sets LeftAt
+  alt No participant left
+    handler -> call : EndedAt = now
+  end
+  handler -> db : Save changes in one unit of work
+  handler -> notifier : ParticipantLeft to call:{callId}
+  alt Call ended
+    handler -> notifier : CallEnded to popkin:{popkinId}
+    notifier --> others : Banner removed on home and Everyone (L2-029 AC6)
+  else Others remain
+    handler -> notifier : CallChanged(count) to popkin:{popkinId}
+    notifier --> others : Banner and header counts go down
+  end
+  controller --> client : 204 No Content
+end
+@enduml

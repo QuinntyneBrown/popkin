@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Send photos in chat
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+
+System_Ext(camera, "Device camera", "Reached through the browser file input")
+Rel(member, popkin, "Sends a photo with or without text using", "HTTPS")
+Rel(member, camera, "Takes a photo with")
+@enduml

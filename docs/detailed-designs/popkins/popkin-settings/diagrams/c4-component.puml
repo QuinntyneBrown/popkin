@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Popkin settings
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(menu, "PopkinSettingsDialog", "CDK dialog", "Menu by role")
+  Component(edit, "EditPopkinDialog", "CDK dialog", "Name, emoji, colour")
+  Component(len, "ChangeLengthDialog", "CDK dialog", "Four length options")
+  Component(enddlg2, "EndDateDialog", "CDK dialog", "Shared with start-popkin")
+  Component(papi, "PopkinsApi", "Contract + HTTP client", "updateLook, changeLength")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PopkinsController", "Controller", "PATCH and PUT endpoints")
+  Component(h1, "UpdatePopkinLookCommandHandler", "MediatR handler", "Host only")
+  Component(h2, "ChangePopkinLengthCommandHandler", "MediatR handler", "Host only")
+  Component(guard, "IMembershipGuard", "Abstraction", "404 for non-members")
+  Component(notifier, "IPopkinNotifier / SignalRPopkinNotifier", "Abstraction + Api", "PopkinChanged")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(menu, edit, "Opens for Host")
+Rel(menu, len, "Opens for Host")
+Rel(len, enddlg2, "Opens for Until a date")
+Rel(edit, papi, "updateLook()")
+Rel(len, papi, "changeLength()")
+Rel(papi, ctrl, "HTTPS")
+Rel(ctrl, h1, "UpdatePopkinLookCommand")
+Rel(ctrl, h2, "ChangePopkinLengthCommand")
+Rel(h1, guard, "Requires membership")
+Rel(h2, guard, "Requires membership")
+Rel(h1, db, "Saves")
+Rel(h2, db, "Saves")
+Rel(h1, notifier, "Publishes")
+Rel(h2, notifier, "Publishes")
+@enduml

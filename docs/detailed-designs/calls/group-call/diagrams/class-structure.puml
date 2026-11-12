@@ -1,0 +1,134 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Start or join a group call
+
+package "Popkin.Domain" {
+  enum CallKind {
+    Group
+    Direct
+  }
+  class Call {
+    +Guid Id
+    +Guid PopkinId
+    +CallKind Kind
+    +Guid? ThreadId
+    +DateTimeOffset StartedAt
+    +DateTimeOffset? EndedAt
+    +Join(membershipId: Guid, connectionId: string, at: DateTimeOffset): CallParticipant
+    +Leave(membershipId: Guid, at: DateTimeOffset): void
+    +ActiveParticipantCount(): int
+  }
+  class CallParticipant {
+    +Guid CallId
+    +Guid MembershipId
+    +string ConnectionId
+    +DateTimeOffset JoinedAt
+    +DateTimeOffset? LeftAt
+    +bool MicOn
+    +bool CameraOn
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinStatus Status
+  }
+  class ChatThread {
+    +Guid Id
+    +ThreadKind Kind
+    +Guid? MemberAId
+    +Guid? MemberBId
+  }
+}
+
+package "Popkin.Application" {
+  class JoinCallCommand {
+    +Guid PopkinId
+    +Guid? ThreadId
+  }
+  class JoinCallCommandHandler {
+    +Handle(command: JoinCallCommand): Task<JoinedCallDto>
+  }
+  class LeaveCallCommand {
+    +Guid PopkinId
+    +Guid CallId
+  }
+  class LeaveCallCommandHandler {
+    +Handle(command: LeaveCallCommand): Task
+  }
+  class GetCurrentCallQuery {
+    +Guid PopkinId
+  }
+  class GetCurrentCallQueryHandler {
+    +Handle(query: GetCurrentCallQuery): Task<CallDto?>
+  }
+  class CallDto {
+    +Guid Id
+    +CallKind Kind
+    +DateTimeOffset StartedAt
+    +int ParticipantCount
+    +IReadOnlyList<CallParticipantDto> Participants
+  }
+  class JoinedCallDto {
+    +CallDto Call
+    +Guid MyMembershipId
+    +bool Started
+    +IReadOnlyList<IceServerDto> IceServers
+  }
+  interface IMembershipGuard {
+    +RequireMemberAsync(popkinId: Guid): Task<Membership>
+  }
+  interface IPopkinNotifier {
+    +CallChangedAsync(popkinId: Guid, call: CallDto): Task
+    +CallEndedAsync(popkinId: Guid, callId: Guid): Task
+  }
+  interface IMediaRelayCredentials {
+    +IssueAsync(membershipId: Guid): Task<IReadOnlyList<IceServerDto>>
+  }
+}
+
+package "Popkin.Api" {
+  class CallsController {
+    +GetCurrent(popkinId: Guid): Task<IActionResult>
+    +Join(popkinId: Guid, request: JoinCallRequest): Task<IActionResult>
+    +Leave(popkinId: Guid, callId: Guid): Task<IActionResult>
+  }
+  class PopkinHub {
+    +JoinCall(callId: Guid): Task
+    +SendSignal(callId: Guid, toMembershipId: Guid, signal: CallSignalDto): Task
+    +OnDisconnectedAsync(error: Exception?): Task
+  }
+}
+
+Call "1" *-- "*" CallParticipant : participants
+Call --> CallKind : has
+Call --> PopkinSpace : belongs to
+Call --> "0..1" ChatThread : direct thread
+CallsController ..> JoinCallCommand : sends
+CallsController ..> LeaveCallCommand : sends
+CallsController ..> GetCurrentCallQuery : sends
+PopkinHub ..> LeaveCallCommand : sends on disconnect
+JoinCallCommandHandler ..> JoinCallCommand : handles
+JoinCallCommandHandler --> Call : loads / creates
+JoinCallCommandHandler ..> IMembershipGuard
+JoinCallCommandHandler ..> IPopkinNotifier
+JoinCallCommandHandler ..> IMediaRelayCredentials
+JoinCallCommandHandler ..> JoinedCallDto : returns
+LeaveCallCommandHandler ..> LeaveCallCommand : handles
+LeaveCallCommandHandler --> Call : mutates
+LeaveCallCommandHandler ..> IPopkinNotifier
+GetCurrentCallQueryHandler ..> GetCurrentCallQuery : handles
+GetCurrentCallQueryHandler ..> CallDto : returns
+JoinedCallDto --> CallDto
+@enduml

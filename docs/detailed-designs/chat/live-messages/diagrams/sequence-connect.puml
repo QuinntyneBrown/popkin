@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — Open the real-time connection
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Pages" as page
+  participant "ThreadStore /\nUnreadTracker" as store
+  participant "SignalRPopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+  participant "PresenceTracker" as presence
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Application" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Signed-in app starts (shell app)
+page -> rt : start()
+rt -> hub : POST /hubs/popkin/negotiate, then WebSocket upgrade with session cookie
+hub -> hub : [Authorize]; Origin must be the app's own origin
+alt no valid session (L2-050 AC4)
+  hub --> rt : 401
+  rt --> page : state disconnected; app follows the sign-in rules
+else valid session
+  hub -> handler : Active memberships of the PersonId
+  handler -> db : Membership where LeftAt is null
+  db --> handler : Popkin ids
+  hub -> hub : Groups.AddToGroupAsync(connection, "popkin:{popkinId}") per Popkin
+  hub -> presence : Connected(popkinId, personId, connectionId)
+  presence --> hub : hereNow per Popkin
+  hub -> rt : PresenceChanged(popkinId, hereNow) to each popkin group
+  rt --> page : state connected; header "14 members · 5 here now" (L2-021 AC1)
+end
+note over hub : Direct-message events go to Clients.Users(personA, personB) and need no group.\nA member who joins or leaves a Popkin is added to or removed from its group by that feature's handler.
+@enduml

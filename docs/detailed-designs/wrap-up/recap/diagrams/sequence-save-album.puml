@@ -1,0 +1,63 @@
+@startuml
+title UML sequence behaviour — Save the album
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "WrappedUpPage" as page
+  participant "RecapApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "RecapController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "StartAlbumExportCommandHandler" as start
+  participant "GetAlbumExportQueryHandler" as poll
+end box
+box "Backend — Popkin Worker" #D1FADF
+  participant "PrepareAlbumExportsJob" as job
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Save the album"
+page -> client : startAlbumExport(popkinId)
+client -> controller : POST .../recap/album-exports
+controller -> start : StartAlbumExportCommand
+start -> db : Guard, reuse Ready export or insert Preparing
+start --> controller : AlbumExportDto
+controller --> client : 202 Accepted
+job -> db : Pick Preparing export
+loop each photo
+  job -> photos : Read photo, append to zip
+  job -> db : PhotosDone + 1
+end
+job -> photos : Write zip
+job -> db : Status = Ready, ExpiresAt
+loop every second until Ready or Failed
+  page -> client : getAlbumExport(popkinId, exportId)
+  client -> controller : GET .../recap/album-exports/{exportId}
+  controller -> poll : GetAlbumExportQuery
+  poll -> db : Load export
+  poll --> controller : Progress
+  controller --> page : photosDone, photosTotal
+  page --> actor : Progress "Preparing done of total" (L2-046 AC4)
+end
+poll -> photos : GetReadUrl(key, lifetime)
+controller --> page : Ready with expiring downloadUrl (L2-051 AC2)
+page -> photos : Download zip
+page --> actor : Zip saved
+@enduml

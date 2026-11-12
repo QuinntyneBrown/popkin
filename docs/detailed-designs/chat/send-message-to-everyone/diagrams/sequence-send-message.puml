@@ -1,0 +1,77 @@
+@startuml
+title UML sequence behaviour — Send a message to everyone
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage\n(pk-composer)" as page
+  participant "MessageOutbox" as outbox
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendMessageCommandHandler" as handler
+  participant "PopkinSpace / Message" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Type text; Send or Enter (Shift+Enter adds a line)
+page -> page : Field capped at 2,000 characters with a count (L2-021 AC7); Send disabled when empty (AC6)
+page -> outbox : enqueue(threadId, text, new ClientMessageId)
+outbox --> page : Pending MessageView appended, field emptied (L2-021 AC5)
+outbox -> client : sendMessage(popkinId, threadId, {clientMessageId, text})
+client -> controller : POST /api/popkins/{popkinId}/threads/{threadId}/messages
+controller -> controller : Authenticate, rate limiter policy "messages" (L2-053 AC2)
+alt more than 60 messages in a minute
+  controller --> client : 429 code rate_limited, Retry-After
+  client --> outbox : Rate limited
+  outbox --> page : Message marked Not sent; toast "Slow down a little"
+else within limit
+  controller -> handler : Send SendMessageCommand
+  handler -> handler : Validator: text or photo present, text at most 2,000 (L2-052 AC1)
+  alt invalid
+    handler --> controller : ValidationException
+    controller --> client : 400 code message_empty or message_too_long
+    client --> outbox : Rejected
+    outbox --> page : Message marked Not sent (see failed-messages)
+  else valid
+    handler -> db : Load membership, PopkinSpace, ChatThread
+    handler -> entity : EnsureActive()
+    alt Popkin wrapped up (L2-045 AC2)
+      entity --> handler : PopkinWrappedUpException
+      controller --> client : 409 code popkin_wrapped_up
+      client --> page : Replace composer with the wrapped-up line
+    else active
+      handler -> db : Find Message by AuthorMembershipId and ClientMessageId
+      alt not stored yet
+        handler -> entity : Message.Create(thread, author, text, clientMessageId, TimeProvider)
+        handler -> db : SaveChangesAsync
+        handler -> notifier : MessageAdded to group popkin:{popkinId}
+        controller --> client : 201 MessageDto
+      else already stored (retry)
+        controller --> client : 200 existing MessageDto
+      end
+      client --> outbox : Sent
+      outbox --> page : Pending entry replaced by the stored message, on the right with its time (L2-021 AC3)
+    end
+  end
+end
+@enduml

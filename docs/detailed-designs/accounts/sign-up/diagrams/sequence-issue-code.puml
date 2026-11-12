@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Issue a verification code
+@@SEQSKIN@@
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RequestCodeCommandHandler" as handler
+  participant "RequestCodeCommandValidator" as validator
+  participant "VerificationCode" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhoneNumberParser" as phone
+  participant "RandomCodeGenerator" as gen
+  participant "HmacCodeHasher" as hasher
+  participant "SmsCodeSender or EmailCodeSender" as sender
+  database "Popkin database" as db
+end box
+controller -> handler : RequestCodeCommand(purpose, channel, destination)
+handler -> validator : Validate channel, purpose and destination length
+alt channel Phone
+  handler -> phone : TryNormalize(destination)
+  phone --> handler : E.164 number or failure (400 phone_invalid)
+else channel Email
+  handler -> handler : Trim, lower-case, check address shape (400 email_invalid)
+end
+handler -> db : Count VerificationCodes for destination with SentAt in the last hour
+db --> handler : count
+alt count >= 5 (L2-005 AC4)
+  handler --> controller : ProblemException 429 code_limit_reached, Retry-After = oldest SentAt + 1 h - now
+else under the limit
+  handler -> db : Load unconsumed codes for destination and purpose
+  db --> handler : earlier codes
+  handler -> entity : Supersede(now) on each earlier code (L2-005 AC2)
+  handler -> gen : NewCode()
+  gen --> handler : six digits
+  handler -> hasher : Hash(code) (L2-054 AC4)
+  hasher --> handler : CodeHash
+  handler -> entity : Issue(channel, destination, purpose, CodeHash, now); ExpiresAt = now + 10 min (L2-004 AC4)
+  handler -> db : SaveChangesAsync
+  handler -> sender : SendAsync(destination, code)
+  alt provider accepts
+    sender --> handler : done
+    handler --> controller : CodeSentDto (DisplayDestination masked for a phone, ResendAvailableAt = now + 30 s)
+  else provider fails
+    sender --> handler : exception
+    handler -> db : Mark the new code consumed; SaveChangesAsync
+    handler --> controller : ProblemException 503 code_not_sent
+  end
+end
+@enduml

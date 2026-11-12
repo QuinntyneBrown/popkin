@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Conversations
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Conversations page and New message dialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Threads and members endpoints; PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Threads, messages, read states, memberships")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Lists threads and members", "JSON/HTTPS")
+Rel(api, spa, "Pushes MessageAdded and ThreadRead", "SignalR WebSocket")
+Rel(api, db, "Reads", "EF Core")
+@enduml

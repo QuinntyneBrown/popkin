@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Scan to join
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "MyPopkinsPage" as page
+  participant "ScanToJoinDialog" as dlg
+  participant "QrScanner" as scanner
+  participant "parseInviteInput" as parse
+  participant "Router" as router
+end box
+participant "Device camera" as camera
+actor -> page : Choose "Scan to join" (L2-015 AC1)
+page -> dlg : Dialog.open(ScanToJoinDialog)
+dlg -> scanner : start(video)
+scanner -> camera : getUserMedia(video, facingMode environment)
+alt permission refused (L2-015 AC4)
+  camera --> scanner : NotAllowedError
+  dlg --> actor : "Popkin can't use your camera" how to allow it, "Type the code instead", "Try the camera again"
+  alt "Try the camera again"
+    actor -> dlg : Choose
+    dlg -> scanner : start(video) again
+  else "Type the code instead"
+    dlg -> router : close, navigate /join
+  end
+else allowed
+  dlg --> actor : Camera with frame, "Hold the QR code inside the frame"
+  loop each decoded QR code
+    scanner --> dlg : text
+    dlg -> parse : parseInviteInput(text)
+    alt not a Popkin invite (L2-015 AC3)
+      parse --> dlg : null
+      dlg --> actor : "That's not a Popkin code" "Keep scanning, or type the code instead."
+    else Popkin invite (L2-015 AC2)
+      parse --> dlg : code
+      dlg --> actor : "Found it. Opening your invite…"
+      dlg -> scanner : stop() releases the camera
+      dlg -> router : close, navigate /i/(code)
+      router --> actor : join-invite (preview-invite design)
+    end
+  end
+end
+opt Escape, Close or backdrop
+  dlg -> scanner : stop()
+  dlg --> page : Focus returns to "Scan to join"
+end
+@enduml

@@ -1,0 +1,74 @@
+@startuml
+title UML sequence behaviour — Send a message with a photo
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "MessageOutbox" as outbox
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ThreadsController /\nMessagesController" as controller
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "UploadThreadPhotoCommandHandler" as handler
+  participant "SendMessageCommandHandler" as send
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : Send (photo with or without text)
+page -> outbox : enqueue(threadId, text?, photo, clientMessageId)
+outbox --> page : Pending message with the local preview
+outbox -> client : uploadThreadPhoto(popkinId, threadId, file)
+client -> controller : POST /api/popkins/{popkinId}/threads/{threadId}/photos (multipart)
+controller -> controller : Request size limit 10 MB plus form overhead
+controller -> handler : Send UploadThreadPhotoCommand
+handler -> handler : Membership, ChatThread.CanRead, Popkin active
+handler -> handler : Content signature is JPEG, PNG, WebP or HEIC (L2-052 AC3)
+alt type or size not allowed
+  controller --> client : 400 code photo_type_not_allowed or photo_too_large
+  client --> outbox : Rejected; message marked Not sent
+else allowed
+  handler -> handler : IImageSanitizer removes location and device data (L2-031 AC6)
+  handler -> photos : PutAsync(StorageKey, cleaned stream)
+  alt thread kind Everyone (L2-026 AC3)
+    handler -> db : Insert Photo with DirectThreadId null (in the album, under the sender)
+    handler -> notifier : PhotoAdded to popkin:{popkinId}
+  else Direct
+    handler -> db : Insert Photo with DirectThreadId = threadId (not in the album)
+  end
+  controller --> client : 201 PhotoUploadedDto
+  client --> outbox : photoId kept on the pending entry
+  outbox -> client : sendMessage(..., {clientMessageId, text?, photoId})
+  client -> controller : POST .../threads/{threadId}/messages
+  controller -> send : Send SendMessageCommand
+  send -> db : Photo belongs to this Popkin and uploader; save Message
+  send -> notifier : MessageAdded
+  controller --> client : 201 MessageDto with PhotoUrl (expiring address, L2-051 AC2)
+  client --> outbox : Sent
+  outbox --> page : Photo at most 16 rem wide at 4:3, text under it (L2-026 AC2)
+end
+alt upload or send fails (network or 5xx)
+  outbox --> page : Not sent; Try again reuses photoId when the upload had succeeded
+end
+actor -> page : Choose the photo in a message
+page --> actor : pk-photo-viewer full screen (L2-026 AC2)
+@enduml

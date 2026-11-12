@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Welcome a new member
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "New member" as actor
+actor "Other member" as other
+box "Frontend — Popkin web app" #E0F2FE
+  participant "YoureInPage" as page
+  participant "JoinInviteState" as state
+  participant "Router" as router
+  participant "SignalRPopkinRealtime" as rt
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+end box
+actor -> page : /i/(code)/welcome opens
+page -> state : Read JoinedView
+alt view present
+  page --> actor : "Welcome in, Joel!", "You're now part of Lakeside Weekend, with Mara, Walt and 12 others." (L2-014 AC1)
+  opt no reduced-motion preference (L2-014 AC5)
+    page --> actor : Confetti burst once
+  end
+else page reloaded, no view
+  page -> router : navigate /i/(code); member is sent to the home (L2-012 AC4)
+end
+alt "Say hi to everyone" (AC2)
+  actor -> page : Choose
+  page -> router : navigate /p/(id)/chat/everyone with focus=composer
+  router --> actor : Everyone thread, focus in the message field
+else "See the photos" (AC3)
+  actor -> page : Choose
+  page -> router : navigate /p/(id)/photos
+end
+hub -> rt : MemberJoined to popkin:(id)
+rt -> toaster : show(MemberJoinedToast) unless the joiner is the viewer
+toaster --> other : Info toast "Joel popped in" / "Say hi in the chat." / "Say hi", 8 s (L2-056 AC7)
+@enduml

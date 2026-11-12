@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Leave a Popkin
+
+Person(member, "Member", "Not the Host")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "leave-popkin dialog, my-popkins")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "DELETE /api/popkins/(id)/members/me, PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Membership.LeftAt")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Leaves", "JSON/HTTPS")
+Rel(api, db, "Sets LeftAt", "EF Core")
+Rel(api, spa, "Pushes MemberLeft to remaining members", "SignalR")
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Call controls
+
+Person(member, "Member", "On a call")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Call tiles, controls, speaking detection")
+  Container(api, "Popkin API", "ASP.NET Core (.NET 10)", "CallsController and PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "CallParticipant.MicOn and CameraOn")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Records microphone and camera state; leaves", "JSON/HTTPS")
+Rel(api, spa, "Pushes ParticipantMediaChanged and ParticipantLeft", "SignalR/WebSocket")
+Rel(api, db, "Reads and writes", "EF Core")
+@enduml

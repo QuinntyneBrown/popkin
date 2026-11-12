@@ -1,0 +1,57 @@
+@startuml
+title UML sequence behaviour — A write request to a wrapped-up Popkin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "ChatApi" as client
+  participant "wrappedUpInterceptor" as icpt
+  participant "CurrentPopkinStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+  participant "ProblemDetailsExceptionHandler" as errors
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendMessageCommandHandler" as handler
+  participant "MembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Send (page opened before the wrap-up)
+page -> client : sendMessage(popkinId, threadId, text)
+client -> controller : POST /api/popkins/{popkinId}/threads/{threadId}/messages
+controller -> handler : Send SendMessageCommand
+handler -> guard : RequireActiveMemberAsync(popkinId)
+guard -> db : Load caller's membership with PopkinSpace.Status
+db --> guard : Membership, Status
+alt not a member
+  guard --> errors : PopkinNotFoundException
+  errors --> client : 404 popkin_not_found (L2-051 AC1)
+else member, Status = WrappedUp
+  guard --> errors : PopkinWrappedUpException
+  errors --> icpt : 409 popkin_wrapped_up (L2-045 AC2)
+  icpt -> store : reload()
+  store --> page : status = wrappedUp, navigate to recap
+  page --> actor : Recap
+else member, Status = Active
+  guard --> handler : MemberAccess
+  handler -> db : Save message
+  handler --> controller : MessageDto
+  controller --> client : 201 Created
+end
+@enduml

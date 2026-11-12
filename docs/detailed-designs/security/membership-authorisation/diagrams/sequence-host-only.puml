@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — A Host-only action refused to a member
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member (not the Host)" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Forged client" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as controller
+  participant "ProblemDetailsExceptionHandler" as errors
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "UpdatePopkinCommandHandler" as handler
+  participant "MembershipGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+note over actor, client : The member's settings menu offers no Host-only entry (L2-020 AC2)
+actor -> client : Send a crafted request
+client -> controller : PATCH /api/popkins/{popkinId} { endsAt }
+controller -> handler : Send UpdatePopkinCommand
+handler -> guard : RequireHostAsync(popkinId)
+guard -> db : Load caller's membership
+db --> guard : Membership, Role = Member
+guard --> errors : HostOnlyException
+errors --> client : 403 host_only (L2-051 AC4)
+note over handler, db : Nothing is read or written beyond the membership
+@enduml

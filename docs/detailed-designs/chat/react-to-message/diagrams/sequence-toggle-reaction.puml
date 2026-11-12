@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Add or remove a reaction
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam maxMessageSize 260
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "ReactionsDialog" as dialog
+  participant "ThreadStore" as store
+  participant "ChatApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as controller
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Reaction handlers" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Pick an emoji, or choose a reaction chip
+page -> store : toggleReaction(messageId, emoji)
+alt member has not reacted with this emoji
+  store --> page : Chip count + 1, aria-pressed=true, outlined and tinted (L2-024 AC2, AC4)
+  store -> client : addReaction(...)
+  client -> controller : PUT /api/popkins/{popkinId}/threads/{threadId}/messages/{messageId}/reactions/{emoji}
+  controller -> handler : Send AddReactionCommand
+  handler -> handler : Validator: one emoji (L2-052 AC1); membership; ChatThread.CanRead; Popkin active
+  handler -> db : Insert MessageReaction unless (MessageId, MembershipId, Emoji) exists
+else member already reacted (L2-024 AC3)
+  store --> page : Chip count - 1; chip removed at zero
+  store -> client : removeReaction(...)
+  client -> controller : DELETE .../messages/{messageId}/reactions/{emoji}
+  controller -> handler : Send RemoveReactionCommand
+  handler -> db : Delete the row if present
+end
+alt saved
+  handler -> notifier : ReactionsChanged(messageId, summary) to the thread's audience
+  controller --> client : 200 ReactionDto[]
+  client --> store : Replace chips with the server summary
+else 400 reaction_invalid, 404 message_not_found, 409 popkin_wrapped_up or network failure
+  controller --> client : ProblemDetails
+  client --> store : Failed
+  store --> page : Undo the optimistic change; danger toast "Your reaction didn't save" with Try again (TO SUPPLY copy)
+end
+page --> actor : Chip label read as "{emoji name}, {count}" plus "you reacted" when mine (L2-024 AC5)
+@enduml

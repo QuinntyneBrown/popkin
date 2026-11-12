@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Loading, failure and offline are always explained
+
+Person(visitor, "Visitor", "Someone without a session; may follow a broken link")
+Person(member, "Member", "Signed-in person on a phone whose connection comes and goes")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+
+Rel(member, popkin, "Uses, online and offline", "HTTPS")
+Rel(visitor, popkin, "Opens links and invites", "HTTPS")
+@enduml

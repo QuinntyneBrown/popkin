@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Send photos in chat
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "GroupChatPage / DirectMessagePage", "Angular pages", "Photo action in pk-composer")
+  Component(dialog, "AddPhotosDialog", "CDK dialog", "Shared with photos/add-photos; chat mode allows one photo")
+  Component(outbox, "MessageOutbox", "api library service", "Uploads the photo, then sends the message")
+  Component(viewer, "pk-photo-viewer", "components library", "Full-screen photo")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(threads, "ThreadsController", "ASP.NET Core controller", "POST /api/popkins/{popkinId}/threads/{threadId}/photos")
+  Component(upload, "UploadThreadPhotoCommandHandler", "MediatR handler", "Checks type and size, strips metadata, stores")
+  Component(messages, "MessagesController", "ASP.NET Core controller", "POST messages with PhotoId")
+  Component(photostore, "IPhotoStore / ObjectStoragePhotoStore", "Infrastructure", "Put, read address, delete")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "MessageAdded; PhotoAdded for Everyone only")
+  ComponentDb(db, "Popkin database", "SQL Server", "Photo.DirectThreadId")
+}
+Rel(page, dialog, "Opens in chat mode")
+Rel(page, outbox, "Sends via")
+Rel(page, viewer, "Opens a chosen photo in")
+Rel(outbox, threads, "Uploads", "multipart/form-data")
+Rel(outbox, messages, "Posts message", "JSON/HTTPS")
+Rel(threads, upload, "Sends UploadThreadPhotoCommand")
+Rel(upload, photostore, "Writes the cleaned file")
+Rel(upload, db, "Inserts Photo", "EF Core")
+Rel(upload, notifier, "PhotoAdded when Everyone")
+@enduml

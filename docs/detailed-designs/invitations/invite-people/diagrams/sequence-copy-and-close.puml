@@ -1,0 +1,35 @@
+@startuml
+title UML sequence behaviour — Copy the invite link and close
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "InviteDialog" as dlg
+  participant "Clipboard API" as clip
+  participant "CDK Dialog" as cdk
+  participant "PopkinHomePage" as page
+end box
+actor -> dlg : Choose "Copy invite link"
+dlg -> clip : navigator.clipboard.writeText(url)
+alt written
+  dlg --> actor : Action reads "Copied" for 3 s, live region "Invite link copied" (L2-011 AC2)
+  dlg -> dlg : After 3 s, action reads "Copy invite link"
+else clipboard refused
+  dlg --> actor : Link text stays selectable; message copy TO SUPPLY
+end
+actor -> cdk : Escape, "Close" or backdrop
+cdk -> cdk : Close dialog, restoreFocus
+cdk --> page : Focus returns to "Invite" (L2-011 AC3, L2-057 AC2)
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Sign in
+
+Person(visitor, "Visitor", "Someone with or without an account")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Sign-in screen, code screen")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Issues and confirms codes")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "VerificationCodes, People, Sessions")
+}
+System_Ext(sender, "SMS or Email provider", "TO SUPPLY")
+Rel(visitor, web, "Enters phone number or email", "HTTPS")
+Rel(web, api, "POST /api/auth/codes (purpose SignIn), then confirm", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, sender, "Sends code", "HTTPS")
+@enduml

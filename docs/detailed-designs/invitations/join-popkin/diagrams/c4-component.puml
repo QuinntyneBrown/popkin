@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Join a Popkin
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(profile, "YourProfilePage", "Angular page", "Name, optional photo, I'm in")
+  Component(welcome, "YoureInPage", "Angular page", "Welcome in, (name)!")
+  Component(toast, "MemberJoinedToast via Toaster", "App toast + pk-toast", "(name) popped in")
+  Component(iapi, "InvitesApi", "Contract + HTTP client", "join(code, name, photo)")
+  Component(rt, "PopkinRealtime", "SignalR client", "MemberJoined")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "InvitesController", "Controller", "POST /api/invites/(code)/join")
+  Component(handler, "JoinPopkinCommandHandler", "MediatR handler", "Membership, system message, notify")
+  Component(val, "JoinPopkinCommandValidator", "Validator", "Name, photo type and size")
+  Component(photos, "IPhotoStore / ObjectStoragePhotoStore", "Abstraction + Infrastructure", "Stores the profile photo")
+  Component(notifier, "IPopkinNotifier / SignalRPopkinNotifier", "Abstraction + Api", "MemberJoined, MessageSent")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(profile, iapi, "join()")
+Rel(profile, welcome, "Navigates to")
+Rel(rt, toast, "Triggers for other members")
+Rel(iapi, ctrl, "HTTPS")
+Rel(ctrl, handler, "JoinPopkinCommand")
+Rel(handler, val, "Validates")
+Rel(handler, photos, "Saves photo")
+Rel(handler, db, "Saves")
+Rel(handler, notifier, "Publishes")
+@enduml

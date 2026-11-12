@@ -1,0 +1,65 @@
+@startuml
+@@CLASSSKIN@@
+title Class structure — Sign in
+
+class SignInPage {
+  +contact: FormControl<string>
+  +status: Signal<'idle' | 'sending' | 'failed'>
+  +returnUrl: string | null
+  +sendCode(): void
+}
+class ContactInput {
+  +channel: 'phone' | 'email'
+  +destination: string
+  +error: 'phone_invalid' | 'email_invalid' | null
+}
+class "parseContact(raw: string): ContactInput" as parseContact <<function>>
+class PendingVerificationView {
+  +verificationId: string
+  +purpose: 'SignUp' | 'SignIn'
+  +channel: 'Phone' | 'Email'
+  +displayDestination: string
+  +resendAvailableAt: string
+  +name?: string
+  +returnUrl?: string
+}
+class PendingVerificationStore {
+  +pending: Signal<PendingVerificationView | null>
+  +start(view): void
+  +setName(name: string): void
+  +clear(): void
+}
+interface AuthApi {
+  +requestCode(request): Observable<CodeSentView>
+  +confirmCode(id, code, name?): Observable<ConfirmCodeView>
+}
+class VerifyCodePage {
+  +nameStep: Signal<boolean>
+  +submitName(name: string): void
+}
+class RequestCodeCommand {
+  +CodePurpose Purpose = SignIn
+  +ContactChannel Channel
+  +string Destination
+}
+class ConfirmCodeCommand {
+  +Guid VerificationId
+  +string Code
+  +string? Name
+}
+enum ConfirmOutcome {
+  SignedIn
+  NameRequired
+}
+
+SignInPage ..> parseContact
+parseContact ..> ContactInput : returns
+SignInPage ..> AuthApi : AUTH_API
+SignInPage ..> PendingVerificationStore
+PendingVerificationStore --> PendingVerificationView
+VerifyCodePage ..> PendingVerificationStore
+VerifyCodePage ..> AuthApi
+AuthApi ..> RequestCodeCommand : POST /api/auth/codes
+AuthApi ..> ConfirmCodeCommand : POST /api/auth/codes/{id}/confirm
+ConfirmCodeCommand ..> ConfirmOutcome : yields
+@enduml

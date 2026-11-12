@@ -1,0 +1,22 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Loading, failure and offline are always explained
+
+Person(member, "Member", "On a phone")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Skeletons, error pages, offline banner, toasts, busy buttons")
+  ContainerDb(idb, "Response cache", "Browser IndexedDB", "Last answer of each screen read, per person; cleared on sign-out")
+  ContainerDb(drafts, "Draft store", "Browser sessionStorage", "Unsent text for the session")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "ProblemDetails with code and reference; GET /api/health")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Popkin data")
+}
+System_Ext(logs, "Log sink", "Provider TO SUPPLY")
+
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, idb, "Saves and reads screen answers")
+Rel(spa, drafts, "Saves and restores drafts")
+Rel(spa, api, "Reads and writes; probes health", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, logs, "Writes exceptions with reference codes")
+@enduml

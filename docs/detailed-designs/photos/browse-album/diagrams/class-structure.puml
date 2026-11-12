@@ -1,0 +1,94 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Browse the album
+
+package "popkin app" {
+  class PhotoAlbumPage <<pk-photo-album-page>> {
+    +filter: Signal<'everyone' | 'mine'>
+    +album: Signal<AlbumView>
+    +state: Signal<'loading' | 'ready' | 'empty' | 'no-results' | 'error'>
+    +choose(filter): void
+    +loadMore(): void
+    +retry(): void
+  }
+}
+package "api library" {
+  class AlbumView {
+    +photoCount: number
+    +contributorCount: number
+    +contributors: AvatarView[]
+    +days: AlbumDayView[]
+    +nextCursor: string?
+    +canAdd: boolean
+  }
+  class AlbumDayView {
+    +date: string
+    +label: string
+    +photos: PhotoThumbView[]
+    +featured: boolean
+  }
+  class PhotoThumbView {
+    +id: string
+    +thumbnailUrl: string
+    +accessibleName: string
+    +takenAt: string
+  }
+  interface PhotosApi {
+    +getAlbum(popkinId, filter, cursor?): Observable<AlbumPage>
+  }
+  class groupPhotosByDay <<helper>>
+}
+package "Popkin.Application" {
+  class GetAlbumQuery {
+    +Guid PopkinId
+    +AlbumFilter Filter
+    +string? Cursor
+    +int Limit = 60
+  }
+  enum AlbumFilter {
+    Everyone
+    Mine
+  }
+  class GetAlbumQueryHandler {
+    +Handle(query: GetAlbumQuery): Task<AlbumPageDto>
+  }
+  class AlbumPageDto {
+    +int PhotoCount
+    +int ContributorCount
+    +IReadOnlyList<MemberSummaryDto> Contributors
+    +IReadOnlyList<PhotoSummaryDto> Items
+    +string? NextCursor
+  }
+  class PhotoSummaryDto {
+    +Guid Id
+    +string? Caption
+    +string UploaderFirstName
+    +DateTimeOffset TakenAt
+    +Uri ThumbnailUrl
+  }
+}
+package "Popkin.Domain" {
+  class Photo
+}
+PhotoAlbumPage --> AlbumView
+AlbumView *-- "*" AlbumDayView
+AlbumDayView *-- "*" PhotoThumbView
+PhotoAlbumPage ..> PhotosApi : injects PHOTOS_API
+PhotoAlbumPage ..> groupPhotosByDay
+GetAlbumQueryHandler ..> GetAlbumQuery : handles
+GetAlbumQuery --> AlbumFilter
+GetAlbumQueryHandler ..> AlbumPageDto : returns
+AlbumPageDto *-- "*" PhotoSummaryDto
+GetAlbumQueryHandler ..> Photo : reads
+@enduml
