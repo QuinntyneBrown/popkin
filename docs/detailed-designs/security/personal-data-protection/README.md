@@ -85,7 +85,7 @@ The mechanism adds no endpoint. It constrains every response:
 - **`MemberDto`** — the single projection of another person: `MembershipId`, `DisplayName`,
   `PhotoUrl`, `IsHost`. Queries that list members project straight into it from `Membership`,
   so `Person.Phone` and `Person.Email` are never read for another person (L2-054 AC2).
-- **Code hashing** — `VerificationCode.CodeHash` is the HMAC-SHA256 of the code under a server
+- **Code hashing** — `CodeHasher` computes `VerificationCode.CodeHash`, which is the HMAC-SHA256 of the code under a server
   key, compared in constant time (L2-054 AC4). A plain hash of a six-digit code is reversed by
   trying one million values; the key prevents that. The key's store and rotation are
   `<TO SUPPLY>`. Detail lives in [Confirm the code](../../accounts/confirm-code/README.md).

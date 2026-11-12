@@ -75,7 +75,7 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
     across the boundary of two fixed windows.
   - `invite-codes` — `FixedWindowRateLimiter`, `PermitLimit = 20`, `Window = 10 min`,
     `QueueLimit = 0`, partitioned by client address (L2-053 AC3).
-  Values live in configuration under `RateLimits:*` with these defaults, so operations can tune
+  Values bind from configuration section `RateLimits` to `RateLimitOptions`, with these defaults, so operations can tune
   them without a build.
 - **`OnRejected`** — sets status `429`, reads `MetadataName.RetryAfter` from the lease, writes the
   `Retry-After` header in whole seconds rounded up, and writes the ProblemDetails above through
