@@ -1,6 +1,19 @@
 @startuml
 title UML sequence behaviour — Open a private screen without a session
-@@SEQSKIN@@
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
 actor "Person" as actor
 box "Frontend — Popkin web app" #E0F2FE
   participant "Router" as router
