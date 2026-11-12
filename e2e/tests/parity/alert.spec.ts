@@ -1,3 +1,5 @@
+import { HowLongPage } from '../../pages/how-long.page';
+import { howLongForLakeside } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { answer, problem } from '../../fixtures/stubs';
 import { SignUpPage } from '../../pages/sign-up.page';
@@ -13,6 +15,18 @@ parity('alert', [
       await signUp.fill('Mara', '(415) 555-0148');
       await signUp.submit();
       await signUp.alert.waitFor();
+    },
+  },
+  {
+    key: 'howLongError',
+    name: 'danger-popkin',
+    region: (page) => new HowLongPage(page).alert,
+    app: async (page) => {
+      await answer(page, 'POST /api/popkins', problem(500, 'unexpected'));
+      await howLongForLakeside(page);
+      const step = new HowLongPage(page);
+      await step.popItUp.click();
+      await step.alert.waitFor();
     },
   },
 ]);

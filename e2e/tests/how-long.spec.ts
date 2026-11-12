@@ -1,3 +1,5 @@
+import responses from '../fixtures/api/responses.json';
+import { answer, hold, problem } from '../fixtures/stubs';
 import { howLongForLakeside } from '../fixtures/journeys';
 import { expect, test } from '../fixtures/pk-test';
 import { EndDateDialog } from '../pages/end-date.dialog';
@@ -138,5 +140,78 @@ test.describe('choosing how long a Popkin lasts', () => {
     await page.getByRole('button', { name: 'Looks good' }).click();
 
     await expect(step.option('Keep it going')).toHaveAttribute('aria-checked', 'true');
+  });
+});
+
+test.describe('popping it up', () => {
+  const created = responses['POST /api/popkins'].body;
+
+  // L2-009 AC4
+  test('Pop it up reads "Popping it up…" and is disabled until the created screen opens', async ({
+    page,
+  }) => {
+    const release = await hold(page, 'POST /api/popkins');
+    await howLongForLakeside(page);
+    const step = new HowLongPage(page);
+
+    await step.popItUp.click();
+
+    await expect(step.popItUp).toHaveText('Popping it up…');
+    await expect(step.popItUp).toBeDisabled();
+    release();
+    await expect(page).toHaveURL(new RegExp(`/p/${created.id}/created$`));
+  });
+
+  test('sends the choices with The weekend resolved to Sunday at 6 pm on the device', async ({
+    page,
+  }) => {
+    await howLongForLakeside(page);
+    const step = new HowLongPage(page);
+
+    const [request] = await Promise.all([
+      page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/api/popkins')),
+      step.popItUp.click(),
+    ]);
+
+    expect(request.postDataJSON()).toEqual({
+      name: 'Lakeside Weekend',
+      emoji: '🏕️',
+      colour: 'Teal',
+      length: 'TheWeekend',
+      endsAt: new Date(2026, 8, 13, 18, 0).toISOString(),
+    });
+  });
+
+  test('Keep it going sends no end', async ({ page }) => {
+    await howLongForLakeside(page);
+    const step = new HowLongPage(page);
+    await step.option('Keep it going').click();
+
+    const [request] = await Promise.all([
+      page.waitForRequest((r) => r.method() === 'POST' && r.url().endsWith('/api/popkins')),
+      step.popItUp.click(),
+    ]);
+
+    expect(request.postDataJSON().endsAt).toBeNull();
+  });
+
+  // L2-009 AC5
+  test('a Popkin that cannot be created keeps the choices and enables Pop it up again', async ({
+    page,
+  }) => {
+    await answer(page, 'POST /api/popkins', problem(500, 'unexpected'));
+    await howLongForLakeside(page);
+    const step = new HowLongPage(page);
+    await step.option('Keep it going').click();
+
+    await step.popItUp.click();
+
+    await expect(step.alert).toHaveAttribute('role', 'alert');
+    await expect(step.alert).toContainText('We couldn’t pop it up.');
+    await expect(step.alert).toContainText('Your choices are still here.');
+    await expect(step.option('Keep it going')).toHaveAttribute('aria-checked', 'true');
+    await expect(step.popItUp).toHaveText('Pop it up');
+    await expect(step.popItUp).toBeEnabled();
+    await expect(page).toHaveURL(/\/new\/length$/);
   });
 });

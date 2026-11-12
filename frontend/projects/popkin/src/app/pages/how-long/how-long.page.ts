@@ -1,19 +1,32 @@
 import { Dialog } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { NewPopkinDraft, PopkinLength, accentOf, comingSundayEvening, formatEnd } from 'api';
-import { Button, ChoiceCard, ChoiceOption, DateButton, Screen, TopBar } from 'components';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import {
+  NewPopkinDraft,
+  POPKINS_API,
+  PopkinLength,
+  accentOf,
+  comingSundayEvening,
+  formatEnd,
+  resolveEndsAt,
+} from 'api';
+import { Alert, Button, ChoiceCard, ChoiceOption, DateButton, Screen, TopBar } from 'components';
 import { EndDateData, EndDateDialog } from '../../dialogs/end-date/end-date.dialog';
 
 /** The second step of starting a Popkin: when it wraps up (L2-009). */
 @Component({
   selector: 'pk-how-long-page',
-  imports: [Button, ChoiceCard, DateButton, Screen, TopBar],
+  imports: [Alert, Button, ChoiceCard, DateButton, Screen, TopBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './how-long.page.html',
 })
 export class HowLongPage {
   private readonly store = inject(NewPopkinDraft);
   private readonly dialog = inject(Dialog);
+  private readonly popkins = inject(POPKINS_API);
+  private readonly router = inject(Router);
+
+  protected readonly status = signal<'idle' | 'popping' | 'failed'>('idle');
 
   protected readonly draft = this.store.draft;
   protected readonly accent = computed(() => accentOf(this.draft().colour));
@@ -53,5 +66,27 @@ export class HowLongPage {
     ref.closed.subscribe((end) => {
       if (end) this.store.update({ customEndsAt: end.toISOString() });
     });
+  }
+
+  /** Creates the Popkin; a failure keeps every choice (L2-009 AC4, AC5). */
+  protected popItUp(): void {
+    if (this.status() === 'popping') return;
+    const draft = this.draft();
+    const endsAt = resolveEndsAt(draft.length, new Date(), this.customEnd());
+    this.status.set('popping');
+    this.popkins
+      .createPopkin({
+        name: draft.name.trim(),
+        emoji: draft.emoji,
+        colour: draft.colour,
+        length: draft.length,
+        endsAt: endsAt?.toISOString() ?? null,
+      })
+      .subscribe({
+        next: (created) => {
+          void this.router.navigateByUrl(`/p/${created.id}/created`).then(() => this.store.reset());
+        },
+        error: () => this.status.set('failed'),
+      });
   }
 }

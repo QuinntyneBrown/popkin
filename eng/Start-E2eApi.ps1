@@ -35,6 +35,7 @@ $env:Database__Provider = 'Sqlite'
 $env:ConnectionStrings__Popkin = "DataSource=$database"
 $env:Auth__DevelopmentCode = '482913'
 $env:App__Origin = 'http://localhost:4200'
+$env:Invites__BaseUrl = 'https://popk.in/'
 
 dotnet run --project $cli -c Release -- reset
 if ($LASTEXITCODE -ne 0) {

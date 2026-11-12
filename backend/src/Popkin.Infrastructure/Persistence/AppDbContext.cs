@@ -13,6 +13,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Session> Sessions => Set<Session>();
 
+    public DbSet<PopkinSpace> Popkins => Set<PopkinSpace>();
+
+    public DbSet<Membership> Memberships => Set<Membership>();
+
+    public DbSet<ChatThread> ChatThreads => Set<ChatThread>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 

@@ -42,6 +42,7 @@ public static class DependencyInjection
 
         var key = SHA256.HashData(Encoding.UTF8.GetBytes(hashKey ?? "popkin-development-only-key"));
         services.AddSingleton<ICodeHasher>(new HmacCodeHasher(key));
+        services.AddSingleton<IInviteCodeGenerator, RandomInviteCodeGenerator>();
 
         foreach (var channel in Enum.GetValues<ContactChannel>())
         {

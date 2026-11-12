@@ -47,6 +47,19 @@ await call('GET', '/api/auth/session');
 await new Promise((resolve) => setTimeout(resolve, 31_000));
 await call('POST', `/api/auth/codes/${verification}/resend`);
 
+// Popkins: Mara starts Lakeside Weekend, Teal, for the weekend (Sunday at 6 pm).
+const sunday = new Date();
+sunday.setDate(sunday.getDate() + ((7 - sunday.getDay()) % 7 || 7));
+sunday.setHours(18, 0, 0, 0);
+const created = await call('POST', '/api/popkins', {
+  name: 'Lakeside Weekend',
+  emoji: '🏕️',
+  colour: 'Teal',
+  length: 'TheWeekend',
+  endsAt: sunday.toISOString(),
+});
+await call('GET', `/api/popkins/${created.id}/invite`);
+
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);
 console.log(`Recorded ${Object.keys(recorded).length} answers into ${file}`);

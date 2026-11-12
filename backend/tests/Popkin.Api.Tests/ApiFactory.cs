@@ -33,6 +33,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Database:Provider", "InMemory");
         builder.UseSetting("Database:Name", _databaseName);
         builder.UseSetting("App:Origin", "https://localhost");
+        builder.UseSetting("Invites:BaseUrl", "https://popk.in/");
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<TimeProvider>();

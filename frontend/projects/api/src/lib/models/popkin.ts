@@ -27,3 +27,31 @@ export type PopkinLength = 'JustToday' | 'TheWeekend' | 'UntilDate' | 'KeepItGoi
 export function accentOf(colour: PopkinColour): string {
   return colour.toLowerCase();
 }
+
+export interface CreatePopkinRequest {
+  name: string;
+  emoji: string;
+  colour: PopkinColour;
+  length: PopkinLength;
+  /** ISO date-time; null when it keeps going. */
+  endsAt: string | null;
+}
+
+export interface PopkinCreatedView {
+  id: string;
+  name: string;
+  emoji: string;
+  colour: PopkinColour;
+  endsAt: string | null;
+  inviteCode: string;
+  inviteUrl: string;
+}
+
+/** A Popkin's invite: the code, the link the QR code encodes, and the Popkin's look (L2-011). */
+export interface InviteView {
+  code: string;
+  url: string;
+  popkinName: string;
+  emoji: string;
+  colour: PopkinColour;
+}

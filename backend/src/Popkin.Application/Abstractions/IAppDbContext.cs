@@ -12,5 +12,11 @@ public interface IAppDbContext
 
     DbSet<Session> Sessions { get; }
 
+    DbSet<PopkinSpace> Popkins { get; }
+
+    DbSet<Membership> Memberships { get; }
+
+    DbSet<ChatThread> ChatThreads { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

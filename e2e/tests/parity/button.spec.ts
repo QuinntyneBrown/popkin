@@ -1,3 +1,5 @@
+import { HowLongPage } from '../../pages/how-long.page';
+import { howLongForLakeside } from '../../fixtures/journeys';
 import { codeScreenAt24Seconds } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { VerifyCodePage } from '../../pages/verify-code.page';
@@ -45,5 +47,15 @@ parity('button', [
     name: 'popkin',
     region: (page) => new NameYourPopkinPage(page).footerButton,
     app: (page) => new NameYourPopkinPage(page).chooseLakeside(),
+  },
+  {
+    key: 'howLongSubmitting',
+    name: 'popkin-busy',
+    region: (page) => new HowLongPage(page).footerButton,
+    app: async (page) => {
+      await hold(page, 'POST /api/popkins');
+      await howLongForLakeside(page);
+      await new HowLongPage(page).popItUp.click();
+    },
   },
 ]);
