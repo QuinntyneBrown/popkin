@@ -1,0 +1,50 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Motion is optional
+
+package "api library" {
+  class MotionPreference {
+    +reduced: Signal<boolean>
+    -query: MediaQueryList
+  }
+}
+
+package "Popkin web app" {
+  class PopkinCreatedPage <<page>> {
+    +popkin: Signal<PopkinView>
+  }
+  class YoureInPage <<page>>
+}
+
+package "components library" {
+  class PopkinTile <<pk-popkin-tile>> {
+    +emoji: input.required<string>()
+    +accent: input<PopkinColour>
+    +size: input<"sm" | "md" | "lg">
+    +pop: input<boolean>
+    #showDots: Signal<boolean>
+  }
+  class Skeleton <<pk-skeleton>> {
+    +shape: input<SkeletonShape>
+  }
+  class Progress <<pk-progress>> {
+    +value: input<number | undefined>
+    +label: input.required<string>()
+  }
+  class Dialog <<pk-dialog>>
+  class Toast <<pk-toast>>
+}
+
+PopkinCreatedPage ..> PopkinTile : composes with pop
+YoureInPage ..> PopkinTile : composes with pop
+PopkinTile ..> MotionPreference : showDots = pop and not reduced
+@enduml

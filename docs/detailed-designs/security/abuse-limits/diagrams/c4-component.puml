@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Abuse limits
+
+Container(spa, "Popkin web app", "Angular", "rateLimitInterceptor, Toaster")
+Container_Boundary(api, "Popkin API") {
+  Component(fwd, "ForwardedHeaders middleware", "ASP.NET Core", "Client address from known proxy only")
+  Component(auth, "Authentication middleware", "Cookie", "Identifies the person")
+  Component(limiter, "Rate limiter middleware", "UseRateLimiter", "codes, messages, invite-codes")
+  Component(setup, "RateLimitingSetup", "AddRateLimiter", "Policies, OnRejected 429")
+  Component(ctrls, "AuthController, MessagesController, InvitesController", "ASP.NET Core controllers", "EnableRateLimiting attributes")
+}
+Rel(spa, fwd, "Request", "JSON/HTTPS")
+Rel(fwd, auth, "Next")
+Rel(auth, limiter, "Next")
+Rel(setup, limiter, "Configures")
+Rel(limiter, ctrls, "Permitted request")
+Rel(limiter, spa, "429 rate_limited, Retry-After", "JSON/HTTPS")
+@enduml

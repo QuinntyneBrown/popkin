@@ -1,0 +1,58 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Input validation and encoding
+
+interface "IValidator<TRequest>" as IValidator {
+  +ValidateAsync(request: TRequest, ct): Task<ValidationResult>
+}
+class ShareExperienceCommandValidator
+class SendMessageCommandValidator
+class "ValidationBehavior<TRequest, TResponse>" as ValidationBehavior {
+  -IEnumerable<IValidator<TRequest>> validators
+  +Handle(request, next, ct): Task<TResponse>
+}
+class RequestValidationException {
+  +IReadOnlyDictionary<string, string[]> Errors
+}
+class FieldFailure {
+  +string Field
+  +string RuleCode
+}
+enum ImageType {
+  Jpeg
+  Png
+  WebP
+  Heic
+}
+interface IImageInspector {
+  +InspectAsync(content: Stream, ct): Task<ImageType?>
+}
+class ImageInspector
+class UnsupportedImageException
+class ProblemDetailsExceptionHandler {
+  +TryHandleAsync(context, exception, ct): ValueTask<bool>
+}
+class ErrorReference {
+  +FromTraceId(traceId: string): string
+}
+
+ShareExperienceCommandValidator ..|> IValidator
+SendMessageCommandValidator ..|> IValidator
+ValidationBehavior --> "*" IValidator : runs
+ValidationBehavior ..> RequestValidationException : throws
+RequestValidationException --> "*" FieldFailure
+ImageInspector ..|> IImageInspector
+IImageInspector ..> ImageType : detects
+ProblemDetailsExceptionHandler ..> RequestValidationException : 400 validation_failed
+ProblemDetailsExceptionHandler ..> UnsupportedImageException : 400 unsupported_image
+ProblemDetailsExceptionHandler --> ErrorReference : 500 reference
+@enduml

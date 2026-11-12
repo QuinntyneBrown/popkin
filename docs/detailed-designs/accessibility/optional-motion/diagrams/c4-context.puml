@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Motion is optional
+
+Person(visitor, "Visitor", "May prefer reduced motion on their device")
+Person(member, "Member", "May prefer reduced motion on their device")
+System(popkin, "Popkin", "Short motion that explains; none that springs or bursts under reduced motion")
+
+Rel(visitor, popkin, "Reads the landing page", "HTTPS")
+Rel(member, popkin, "Creates, joins and uses Popkins", "HTTPS")
+@enduml

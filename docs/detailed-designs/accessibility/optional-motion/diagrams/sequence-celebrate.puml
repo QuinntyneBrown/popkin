@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — The pop with and without reduced motion
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Browser" as browser
+  participant "PopkinCreatedPage" as page
+  participant "pk-popkin-tile (pop)" as tile
+  participant "MotionPreference" as pref
+  participant "tokens.css" as tokens
+end box
+
+actor -> page : "Pop it up" completes; created screen opens
+page -> tile : Render emoji in the Popkin colour, pop = true
+tile -> pref : reduced()
+pref -> browser : matchMedia(prefers-reduced-motion: reduce)
+alt Person prefers reduced motion
+  browser --> pref : matches = true
+  pref --> tile : true
+  tile -> tokens : --duration-slow resolves to 0.01 ms
+  tile --> actor : Tile appears at once; no confetti dots in the DOM (L2-060 AC1, L2-010 AC7)
+else No preference
+  browser --> pref : matches = false
+  pref --> tile : false
+  tile -> tokens : --duration-slow 280 ms, --ease-pop
+  tile --> actor : Tile springs from 96 %; twelve dots burst once, 280 ms (L2-060 AC2)
+end
+page --> actor : "Pop! Lakeside Weekend is up." and the QR card; nothing flashes (L2-060 AC3)
+@enduml

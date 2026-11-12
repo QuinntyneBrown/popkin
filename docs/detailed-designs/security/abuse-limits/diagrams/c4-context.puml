@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Abuse limits
+
+Person(visitor, "Visitor", "Requests codes, tries invite codes")
+Person(member, "Member", "Sends messages")
+System(popkin, "Popkin", "Private spaces for pop-up communities")
+System_Ext(sms, "SMS provider", "TO SUPPLY")
+System_Ext(email, "Email provider", "TO SUPPLY")
+
+Rel(visitor, popkin, "Requests codes and tries invite codes in")
+Rel(member, popkin, "Sends messages in")
+Rel(popkin, sms, "Sends codes within limits via")
+Rel(popkin, email, "Sends codes within limits via")
+@enduml

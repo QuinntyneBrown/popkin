@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Input validation and encoding
+
+Person(member, "Member", "Sends input")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+", "Field limits, escaped bindings, Trusted Types")
+  Container(api, "Popkin API", ".NET 10, ASP.NET Core", "Validators, image inspection, ProblemDetails")
+  ContainerDb(db, "Popkin database", "SQL Server", "Parameterised queries only")
+  Container(store, "Photo store", "Object storage, TO SUPPLY", "Only inspected images")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Sends input", "JSON or multipart/HTTPS")
+Rel(api, db, "Parameterised queries", "EF Core")
+Rel(api, store, "Stores inspected images", "HTTPS")
+@enduml

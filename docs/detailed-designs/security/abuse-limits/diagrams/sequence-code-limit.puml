@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — The 11th code request from one address
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Visitor" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "SignUpPage" as page
+  participant "AuthApi" as client
+  participant "rateLimitInterceptor" as icpt
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ForwardedHeaders" as fwd
+  participant "Rate limiter (codes)" as limiter
+  participant "AuthController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Send code handler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "SmsCodeSender" as sms
+end box
+actor -> page : Continue
+page -> client : signUp(name, phone)
+client -> fwd : POST /api/auth/... (code request)
+fwd -> fwd : Client address from trusted proxy only
+fwd -> limiter : Request
+limiter -> limiter : Partition client address, fixed 10 per 10 min
+alt within limit
+  limiter -> controller : Permitted
+  controller -> handler : Send command (L2-005 per-destination limits apply)
+  handler -> sms : Send code
+  controller --> client : 202 Accepted
+else 11th in the window
+  limiter --> icpt : 429 rate_limited, Retry-After: 412 (L2-053 AC1)
+  icpt --> page : RateLimitedError(412)
+  page -> toaster : warning(..., "in 7 minutes")
+  toaster --> actor : Says when to try again (L2-053 AC4)
+end
+note over limiter : Invite codes use the invite-codes policy, 20 per 10 min per address (L2-053 AC3)
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+title UML sequence behaviour — Choose a theme
+@@SEQSKIN@@
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AccountPage" as page
+  participant "LocalStorageThemePreferences" as prefs
+  participant "localStorage" as ls
+  participant "document.documentElement" as html
+end box
+== App start ==
+prefs -> ls : getItem("popkin.theme") inside try/catch
+alt light or dark stored
+  prefs -> html : setAttribute("data-theme", value)
+else nothing stored, unreadable, or device
+  prefs -> html : removeAttribute("data-theme"); tokens follow prefers-color-scheme (L2-059 AC1)
+end
+== On the account ==
+actor -> page : Choose "Match my device", "Light" or "Dark"
+page -> prefs : set(value)
+prefs -> html : Apply at once, no reload (L2-048 AC4)
+prefs -> ls : setItem("popkin.theme", value) inside try/catch
+page --> actor : Chosen option has aria-checked="true"
+note over page : No request: the theme belongs to the device, not the account
+@enduml

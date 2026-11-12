@@ -1,0 +1,68 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Light and dark themes
+
+package "api library" {
+  enum ThemePreference {
+    device
+    light
+    dark
+  }
+  enum PopkinColour {
+    Coral
+    Teal
+    Sky
+    Berry
+    Leaf
+    Plum
+    Amber
+  }
+  class ThemeService {
+    +preference: Signal<ThemePreference>
+    +effective: Signal<"light" | "dark">
+    +restore(): void
+    +choose(preference: ThemePreference): void
+    -apply(preference: ThemePreference): void
+    -deviceQuery: MediaQueryList
+  }
+}
+
+package "Popkin web app" {
+  class AccountPage <<page>> {
+    +themeOptions: SegmentOption[]
+    +onThemeChange(value: ThemePreference): void
+  }
+}
+
+package "components library" {
+  class Screen <<pk-screen>> {
+    +accent: input<PopkinColour | undefined>
+    +stage: input<boolean>
+    -dataAccent: string
+  }
+  class SegmentedControl <<pk-segmented-control>> {
+    +label: input.required<string>()
+    +options: input<SegmentOption[]>
+    +value: model<string>
+  }
+  class QrCard <<pk-qr-card>> {
+    +link: input.required<string>()
+    +name: input<string>
+  }
+}
+
+ThemeService --> ThemePreference : holds
+AccountPage ..> ThemeService : choose()
+AccountPage ..> SegmentedControl : composes
+Screen --> PopkinColour : maps to data-accent
+QrCard ..> Screen : inside a screen; ignores theme for modules
+@enduml

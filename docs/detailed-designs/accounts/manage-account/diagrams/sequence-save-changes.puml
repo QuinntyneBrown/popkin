@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Save a new name or photo
+@@SEQSKIN@@
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AccountPage" as page
+  participant "HttpAccountApi" as client
+  participant "SessionStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AccountController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangeAccountPhotoCommandHandler" as photo
+  participant "UpdateAccountNameCommandHandler" as name
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : Pick a photo (preview replaces initials) and/or edit the name
+actor -> page : Choose "Save changes"
+alt name empty after trimming (L2-048 AC3)
+  page --> actor : Field invalid, "Enter a name so people know who you are.", form summary; nothing saved
+else valid
+  page -> page : Button reads "Saving..." and is disabled
+  opt a photo was picked
+    page -> client : changePhoto(file)
+    client -> controller : PUT /api/account/photo (multipart)
+    controller -> photo : ChangeAccountPhotoCommand
+    alt content is not JPEG, PNG, WebP or HEIC by its bytes (L2-052 AC3)
+      photo --> controller : 400 photo_type_not_allowed
+    else larger than 10 MB
+      photo --> controller : 400 photo_too_large
+    else allowed
+      photo -> photos : SaveAsync(people/{personId}/{id}, metadata removed)
+      photo -> db : Person.ChangePhoto; SaveChangesAsync
+      photo -> notifier : MemberUpdated for each Popkin of the person
+      photo --> controller : AccountDto
+    end
+    controller --> client : 200 AccountDto or 400 ProblemDetails
+  end
+  opt the name changed and no photo error
+    page -> client : updateName(name)
+    client -> controller : PATCH /api/account { name }
+    controller -> name : UpdateAccountNameCommand
+    alt longer than 40 characters (L2-052 AC1)
+      name --> controller : 400 name_invalid, field=name
+    else 1 to 40 characters
+      name -> db : Person.Rename; SaveChangesAsync
+      name -> notifier : MemberUpdated for each Popkin of the person
+      name --> controller : AccountDto
+    end
+    controller --> client : 200 AccountDto or 400 ProblemDetails
+  end
+  alt every request succeeded (L2-048 AC2)
+    page -> store : Update name and photo
+    page --> actor : "Saved just now" in a status region; button enabled
+  else 400
+    page --> actor : Field or photo marked with the reason; input kept
+  else network failure or 5xx
+    page --> actor : Alert (copy TO SUPPLY); input kept; button enabled
+  end
+end
+@enduml

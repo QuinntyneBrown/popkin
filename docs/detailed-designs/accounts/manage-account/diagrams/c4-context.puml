@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Manage the account
+
+Person(member, "Member", "A signed-in person")
+System(popkin, "Popkin", "Free platform for pop-up communities")
+
+Rel(member, popkin, "Changes name and photo, picks a theme, signs out using", "HTTPS")
+@enduml

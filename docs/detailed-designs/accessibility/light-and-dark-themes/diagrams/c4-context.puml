@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Light and dark themes
+
+Person(visitor, "Visitor", "Sees the theme the device prefers")
+Person(member, "Member", "Follows the device or chooses Light or Dark for this device")
+System(popkin, "Popkin", "Private spaces for pop-up communities, light and dark")
+
+Rel(visitor, popkin, "Views in the device theme", "HTTPS")
+Rel(member, popkin, "Views and chooses a theme in", "HTTPS")
+@enduml

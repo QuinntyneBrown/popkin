@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — React to a photo
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "PhotoViewPage", "Angular page", "Applies reactions optimistically")
+  Component(viewer, "pk-photo-viewer", "components library", "React bar and reaction chips")
+  Component(picker, "pk-emoji-picker", "components library", "More reactions")
+  Component(toaster, "Toaster", "app service", "Shows pk-toast on failure")
+  Component(photosApi, "PhotosApi / HttpPhotosApi", "api library service", "addReaction, removeReaction")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PhotosController", "ASP.NET Core controller", "PUT and DELETE reactions/{emoji}")
+  Component(add, "AddPhotoReactionCommandHandler", "MediatR handler", "Adds the caller's reaction")
+  Component(remove, "RemovePhotoReactionCommandHandler", "MediatR handler", "Removes the caller's reaction")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Membership or 404")
+  ComponentDb(db, "Popkin database", "SQL Server", "PhotoReaction")
+}
+Rel(page, viewer, "Renders, listens to react")
+Rel(page, picker, "Opens in a CDK dialog")
+Rel(page, photosApi, "Saves the reaction")
+Rel(page, toaster, "Reports failure")
+Rel(photosApi, ctrl, "HTTPS JSON")
+Rel(ctrl, add, "Sends AddPhotoReactionCommand")
+Rel(ctrl, remove, "Sends RemovePhotoReactionCommand")
+Rel(add, guard, "Checks membership")
+Rel(remove, guard, "Checks membership")
+Rel(add, db, "Inserts", "EF Core")
+Rel(remove, db, "Deletes", "EF Core")
+@enduml

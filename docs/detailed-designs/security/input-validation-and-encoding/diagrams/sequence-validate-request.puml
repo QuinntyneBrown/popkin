@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — A request that breaks a field rule
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ShareExperienceDialog" as dialog
+  participant "ExperiencesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+  participant "ProblemDetailsExceptionHandler" as errors
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ValidationBehavior" as behavior
+  participant "ShareExperienceCommandValidator" as validator
+  participant "ShareExperienceCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : Choose "Share it"
+dialog -> client : shareExperience(popkinId, title, ...)
+client -> controller : POST /api/popkins/{popkinId}/experiences
+controller -> behavior : Send ShareExperienceCommand
+behavior -> validator : ValidateAsync
+alt title is 81 characters
+  validator --> behavior : title: too_long
+  behavior --> errors : RequestValidationException
+  errors --> client : 400 validation_failed, errors.title = [too_long] (L2-052 AC1)
+  client --> dialog : ProblemDetailsError
+  dialog --> actor : Title marked invalid, message under it
+else valid, title contains "<script>"
+  validator --> behavior : Valid
+  behavior -> handler : Handle
+  handler -> db : INSERT with parameters (L2-052 AC4)
+  handler --> controller : ExperienceDto
+  controller --> client : 201 Created
+  dialog --> actor : Title shown as text by interpolation, nothing runs (L2-052 AC2)
+end
+@enduml

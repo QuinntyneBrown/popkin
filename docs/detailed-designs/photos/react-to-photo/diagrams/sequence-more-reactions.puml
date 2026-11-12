@@ -1,0 +1,37 @@
+@startuml
+title UML sequence behaviour — Pick a reaction from More reactions
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-photo-viewer" as viewer
+  participant "PhotoViewPage" as page
+  participant "CDK Dialog" as dialog
+  participant "pk-emoji-picker" as picker
+end box
+
+actor -> viewer : Choose "More reactions"
+viewer -> page : moreReactions
+page -> dialog : open(emoji picker sheet)
+dialog -> picker : Render with focus inside (L2-057 AC2)
+actor -> picker : Pick an emoji
+picker --> dialog : close(emoji)
+dialog --> page : emoji
+page -> page : toggleReaction(emoji) (same flow as a quick reaction)
+alt Escape or dismiss
+  dialog --> page : undefined
+  page --> actor : Focus returns to "More reactions"
+end
+@enduml

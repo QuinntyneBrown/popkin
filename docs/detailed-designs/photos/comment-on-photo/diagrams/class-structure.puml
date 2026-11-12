@@ -1,0 +1,91 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Comment on a photo
+
+package "popkin app" {
+  class PhotoCommentsDialog <<dialogs/photo-comments>> {
+    +comments: Signal<PhotoCommentView[]>
+    +draft: Signal<string>
+    +posting: Signal<boolean>
+    +post(): Promise<void>
+    +delete(comment: PhotoCommentView): Promise<void>
+  }
+  class PhotoViewPage <<pk-photo-view-page>> {
+    +openComments(): void
+  }
+}
+package "api library" {
+  class PhotoCommentView {
+    +id: string
+    +author: AvatarView
+    +firstName: string
+    +timeLabel: string
+    +text: string
+    +mine: boolean
+  }
+  interface PhotosApi {
+    +getComments(popkinId, photoId): Observable<PhotoCommentView[]>
+    +addComment(popkinId, photoId, text): Observable<PhotoCommentView>
+    +deleteComment(popkinId, photoId, commentId): Observable<void>
+  }
+}
+package "Popkin.Application" {
+  class AddPhotoCommentCommand {
+    +Guid PopkinId
+    +Guid PhotoId
+    +string Text
+  }
+  class AddPhotoCommentCommandValidator {
+    +Text 1..500 characters
+  }
+  class AddPhotoCommentCommandHandler {
+    +Handle(c: AddPhotoCommentCommand): Task<PhotoCommentDto>
+  }
+  class DeletePhotoCommentCommand {
+    +Guid PopkinId
+    +Guid PhotoId
+    +Guid CommentId
+  }
+  class DeletePhotoCommentCommandHandler {
+    +Handle(c: DeletePhotoCommentCommand): Task
+  }
+  class GetPhotoCommentsQuery {
+    +Guid PopkinId
+    +Guid PhotoId
+  }
+  class GetPhotoCommentsQueryHandler {
+    +Handle(q: GetPhotoCommentsQuery): Task<IReadOnlyList<PhotoCommentDto>>
+  }
+}
+package "Popkin.Domain" {
+  class Photo
+  class PhotoComment {
+    +Guid Id
+    +Guid PhotoId
+    +Guid AuthorMembershipId
+    +string Text
+    +DateTimeOffset AddedAt
+  }
+}
+PhotoViewPage ..> PhotoCommentsDialog : opens, receives new count
+PhotoCommentsDialog ..> PhotosApi : injects PHOTOS_API
+PhotoCommentsDialog --> "*" PhotoCommentView
+AddPhotoCommentCommandHandler ..> AddPhotoCommentCommand : handles
+AddPhotoCommentCommandValidator ..> AddPhotoCommentCommand : validates
+DeletePhotoCommentCommandHandler ..> DeletePhotoCommentCommand : handles
+GetPhotoCommentsQueryHandler ..> GetPhotoCommentsQuery : handles
+AddPhotoCommentCommandHandler --> PhotoComment : creates
+DeletePhotoCommentCommandHandler --> PhotoComment : deletes
+Photo "1" *-- "*" PhotoComment
+@enduml

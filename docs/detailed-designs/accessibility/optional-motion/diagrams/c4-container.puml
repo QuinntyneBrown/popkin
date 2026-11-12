@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Motion is optional
+
+Person(member, "Member", "Device reports prefers-reduced-motion")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular 20+ SPA", "Duration tokens, CSS motion, MotionPreference")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "No part in motion")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Calls", "JSON/HTTPS")
+@enduml

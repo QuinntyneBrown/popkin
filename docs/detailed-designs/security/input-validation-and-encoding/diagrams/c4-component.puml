@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Input validation and encoding
+
+Container(spa, "Popkin web app", "Angular", "pk-text-field, ProblemDetailsError")
+Container_Boundary(api, "Popkin API") {
+  Component(binding, "Model binding", "ApiController", "invalid_type for malformed bodies")
+  Component(ctrl, "Controllers", "ASP.NET Core", "Send MediatR requests")
+  Component(behavior, "ValidationBehavior", "MediatR pipeline behaviour", "Runs every validator first")
+  Component(validators, "Validators", "Validator library TO SUPPLY", "Field rules from L2")
+  Component(handler, "Handlers", "MediatR handlers", "Run only on valid requests")
+  Component(inspector, "ImageInspector", "IImageInspector", "Detects JPEG, PNG, WebP, HEIC by bytes")
+  Component(errors, "ProblemDetailsExceptionHandler", "IExceptionHandler", "400 / 500 without internals")
+  ComponentDb(db, "Popkin database", "SQL Server", "EF Core LINQ, parameters")
+}
+Rel(spa, binding, "Request", "JSON/HTTPS")
+Rel(binding, ctrl, "Bound request")
+Rel(binding, errors, "Binding failure")
+Rel(ctrl, behavior, "Send")
+Rel(behavior, validators, "Validate")
+Rel(behavior, handler, "Valid request")
+Rel(behavior, errors, "RequestValidationException")
+Rel(handler, inspector, "InspectAsync(stream)")
+Rel(handler, db, "Parameterised queries", "EF Core")
+Rel(errors, spa, "ProblemDetails with code", "JSON/HTTPS")
+@enduml

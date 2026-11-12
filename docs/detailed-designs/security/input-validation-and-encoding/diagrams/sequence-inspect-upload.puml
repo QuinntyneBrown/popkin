@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — An upload whose content is not an image
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddPhotosDialog" as dialog
+  participant "PhotosApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+  participant "ProblemDetailsExceptionHandler" as errors
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddPhotoCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ImageInspector" as inspector
+  participant "ObjectStoragePhotoStore" as photos
+end box
+actor -> dialog : Choose "photo.jpg" (an executable renamed)
+dialog -> client : addPhoto(popkinId, file, caption)
+client -> controller : POST /api/popkins/{popkinId}/photos (multipart)
+controller -> handler : Send AddPhotoCommand (after ValidationBehavior: size, caption)
+handler -> inspector : InspectAsync(stream)
+inspector -> inspector : Read leading bytes, parse header
+alt bytes match no allowed type
+  inspector --> handler : null
+  handler --> errors : UnsupportedImageException
+  errors --> client : 400 unsupported_image, errors.file (L2-052 AC3)
+  dialog --> actor : File marked with its reason, others continue
+else JPEG, PNG, WebP or HEIC
+  inspector --> handler : ImageType
+  handler -> photos : Store with detected content type
+  handler --> controller : PhotoDto
+  controller --> client : 201 Created
+end
+@enduml

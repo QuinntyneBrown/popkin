@@ -1,0 +1,40 @@
+@startuml
+title UML sequence behaviour — Open the account
+@@SEQSKIN@@
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AccountPage" as page
+  participant "HttpAccountApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AccountController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAccountQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ObjectStoragePhotoStore" as photos
+end box
+actor -> page : Open /account (signedInGuard passed)
+page -> client : getAccount()
+opt no answer within 300 ms (L2-056 AC1)
+  page --> actor : Skeletons, hidden from assistive technology; "Loading your account..." for screen readers
+end
+client -> controller : GET /api/account
+controller -> handler : GetAccountQuery (ICurrentPerson.PersonId)
+handler -> db : Load Person
+db --> handler : Person
+opt Person has a photo
+  handler -> photos : GetReadUrl(key, expiring)
+  photos --> handler : URL
+end
+handler --> controller : AccountDto
+controller --> client : 200 AccountDto
+alt 200
+  client --> page : AccountView
+  page --> actor : Photo or initials, name, read-only phone or email, theme (L2-048 AC1)
+else network failure or 5xx (L2-056 AC2)
+  page --> actor : "We couldn't load your account", "Try again" and "My Popkins"
+end
+@enduml

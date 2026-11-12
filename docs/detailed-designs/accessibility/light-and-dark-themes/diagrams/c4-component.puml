@@ -1,0 +1,24 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Light and dark themes
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(init, "provideAppInitializer", "app.config.ts", "Calls ThemeService.restore() before first render")
+  Component(theme, "ThemeService", "api library", "preference, effective; sets data-theme on html; theme-color meta")
+  Component(account, "AccountPage", "pages/account", "pk-segmented-control: Match my device, Light, Dark")
+  Component(screen, "pk-screen", "components library", "Sets data-accent from the Popkin's colour")
+  Component(tokens, "tokens.css", "components/styles", "Light, dark, prefers-color-scheme, tints by color-mix")
+  Component(kit, "pk-* components", "components library", "Read colour roles and tints only")
+  Component(stage, "pk-photo-viewer, pk-call-tile, pk-qr-card", "components library", "Stage and constant colours in both themes")
+}
+ComponentDb(ls, "localStorage", "Browser", "pk-theme")
+
+Rel(init, theme, "Restores")
+Rel(theme, ls, "Reads and writes")
+Rel(account, theme, "choose(preference)")
+Rel(theme, tokens, "Selects theme block via data-theme")
+Rel(screen, tokens, "Selects accent via data-accent")
+Rel(kit, tokens, "Reads roles and tints")
+Rel(stage, tokens, "Reads stage and constant tokens")
+@enduml

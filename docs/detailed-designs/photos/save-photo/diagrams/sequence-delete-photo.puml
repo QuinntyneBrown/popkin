@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Delete a photo
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Uploader or Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoViewPage" as page
+  participant "PhotosApi" as client
+  participant "PopkinRealtime" as rt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DeletePhotoCommandHandler" as handler
+  participant "Photo" as photo
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ObjectStoragePhotoStore" as store
+  participant "SignalRPopkinNotifier" as notifier
+end box
+actor "Other members" as others
+
+actor -> page : Open the photo's actions (offered when CanDelete, mock TO SUPPLY)
+actor -> page : Choose delete, then confirm (L2-036 AC2)
+page -> client : deletePhoto(popkinId, photoId)
+client -> controller : DELETE /api/popkins/{popkinId}/photos/{photoId}
+controller -> handler : Send DeletePhotoCommand
+handler -> db : Load membership and Photo in this Popkin
+alt Not a member or no such photo
+  controller --> client : 404 popkin_not_found or photo_not_found (L2-051 AC1)
+else Neither uploader nor Host
+  handler -> photo : CanBeDeletedBy(membership)
+  controller --> client : 403 photo_not_yours (L2-036 AC2, L2-051 AC4)
+else Allowed
+  handler -> db : Delete PhotoReaction and PhotoComment rows (L2-036 AC3)
+  handler -> db : Set Message.PhotoRemoved for every message that carried it
+  handler -> db : Delete Photo; save in one unit of work
+  handler -> store : DeleteAsync original and thumbnails
+  alt File removal fails
+    store --> handler : Error; logged for cleanup TO SUPPLY
+  end
+  handler -> notifier : PhotoDeleted to popkin:{popkinId}
+  controller --> client : 204 No Content
+  notifier --> others : Leaves the album; chat messages read "Photo removed" (L2-036 AC3)
+  page --> actor : Opens the album without the photo
+end
+alt Failure
+  page --> actor : Photo stays; message TO SUPPLY
+end
+@enduml

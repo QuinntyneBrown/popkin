@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Manage the account
+
+Person(member, "Member", "A signed-in person")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Account screen, sign-out dialog, theme on the device")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Account endpoints, sign out, PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "People, Memberships, Sessions")
+  Container(store, "Photo store", "Object storage, provider TO SUPPLY", "Profile photo files")
+}
+Rel(member, web, "Uses", "HTTPS")
+Rel(web, api, "GET, PATCH /api/account; PUT /api/account/photo; POST /api/auth/sign-out", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, store, "Writes photo; issues expiring read URL", "HTTPS")
+Rel(api, web, "Pushes MemberUpdated to Popkins the person belongs to", "SignalR")
+@enduml

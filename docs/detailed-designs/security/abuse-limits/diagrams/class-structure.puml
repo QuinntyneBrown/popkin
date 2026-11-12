@@ -1,0 +1,55 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Abuse limits
+
+package "Popkin API" {
+  class RateLimitPolicyNames <<static>> {
+    +Codes: string = "codes"
+    +Messages: string = "messages"
+    +InviteCodes: string = "invite-codes"
+  }
+  class RateLimitingSetup <<static>> {
+    +AddPopkinRateLimiting(services: IServiceCollection, config: IConfiguration): IServiceCollection
+    -OnRejected(context: OnRejectedContext, ct): ValueTask
+  }
+  class RateLimitOptions {
+    +int CodesPermitLimit = 10
+    +TimeSpan CodesWindow = 10 min
+    +int MessagesPermitLimit = 60
+    +TimeSpan MessagesWindow = 1 min
+    +int InviteCodesPermitLimit = 20
+    +TimeSpan InviteCodesWindow = 10 min
+  }
+  class FixedWindowRateLimiter
+  class SlidingWindowRateLimiter
+}
+package "Popkin web app" {
+  class RateLimitedError {
+    +retryAfterSeconds: number
+  }
+  class "rateLimitInterceptor" as icpt {
+    +intercept(req, next): Observable<HttpEvent>
+  }
+  class "formatRetryAfter" as fmt {
+    +formatRetryAfter(seconds: number): string
+  }
+  class Toaster {
+    +warning(title: string, text: string): void
+  }
+}
+RateLimitingSetup --> RateLimitOptions : reads
+RateLimitingSetup ..> RateLimitPolicyNames : registers
+RateLimitingSetup ..> FixedWindowRateLimiter : codes, invite-codes
+RateLimitingSetup ..> SlidingWindowRateLimiter : messages
+icpt ..> RateLimitedError : produces
+Toaster ..> fmt : words the delay
+@enduml

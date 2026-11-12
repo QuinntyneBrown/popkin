@@ -1,0 +1,41 @@
+@startuml
+title UML sequence behaviour — An unexpected error
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Page" as page
+  participant "serverErrorInterceptor" as icpt
+  participant "ServerErrorPage" as errpage
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Controller" as controller
+  participant "ProblemDetailsExceptionHandler" as errors
+  participant "ILogger" as log
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Handler" as handler
+end box
+actor -> page : Action
+page -> controller : Request
+controller -> handler : Send
+handler --> controller : Unexpected exception
+controller -> errors : TryHandleAsync
+errors -> errors : reference = PK-XXXX-XXXX from trace id
+errors -> log : Log exception with reference (redacted, see L2-054)
+errors --> icpt : 500 server_error, title, reference only (L2-052 AC5)
+icpt -> errpage : Open /error with reference
+errpage --> actor : "That one's on us", Reference PK-7F3A-2C19, Try again
+@enduml

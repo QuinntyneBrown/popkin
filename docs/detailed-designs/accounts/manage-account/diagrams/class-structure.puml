@@ -1,0 +1,120 @@
+@startuml
+@@CLASSSKIN@@
+title Class structure — Manage the account
+
+class Person {
+  +Guid Id
+  +string Name
+  +Guid? PhotoId
+  +string? Phone
+  +string? Email
+  +Rename(name: string): void
+  +ChangePhoto(photoId: Guid): void
+}
+class Membership {
+  +Guid Id
+  +Guid PopkinId
+  +Guid PersonId
+  +string DisplayName
+  +Guid? PhotoId
+  +DateTimeOffset? LeftAt
+}
+class Session {
+  +Guid Id
+  +DateTimeOffset? RevokedAt
+  +Revoke(now): void
+}
+class AccountDto {
+  +Guid PersonId
+  +string Name
+  +string? PhotoUrl
+  +ContactChannel Channel
+  +string Destination
+}
+class GetAccountQueryHandler {
+  +Handle(query, ct): Task<AccountDto>
+}
+class UpdateAccountNameCommand {
+  +string Name
+}
+class UpdateAccountNameCommandHandler {
+  +Handle(command, ct): Task<AccountDto>
+}
+class ChangeAccountPhotoCommand {
+  +Stream Content
+  +string DeclaredContentType
+  +long Length
+}
+class ChangeAccountPhotoCommandHandler {
+  +Handle(command, ct): Task<AccountDto>
+}
+class SignOutCommand
+class SignOutCommandHandler {
+  +Handle(command, ct): Task
+}
+interface ICurrentPerson {
+  +Guid PersonId
+  +Guid SessionId
+}
+interface IPhotoStore {
+  +SaveAsync(key, content, contentType, ct): Task
+  +GetReadUrl(key, lifetime): Uri
+}
+interface IPopkinNotifier {
+  +MemberUpdatedAsync(popkinId, membershipId, ct): Task
+}
+class AccountController {
+  +Get(): Task<ActionResult<AccountDto>>
+  +UpdateName(request): Task<ActionResult<AccountDto>>
+  +ChangePhoto(file: IFormFile): Task<ActionResult<AccountDto>>
+}
+class AuthController {
+  +SignOut(): Task<IActionResult>
+}
+class AccountPage {
+  +account: Signal<AccountView | null>
+  +state: Signal<'loading' | 'ready' | 'error' | 'saving' | 'saved'>
+  +form: FormGroup<name>
+  +pickedPhoto: Signal<File | null>
+  +theme: Signal<ThemePreference>
+  +save(): void
+  +chooseTheme(value: ThemePreference): void
+  +openSignOut(): void
+  +openDeleteAccount(): void
+}
+class SignOutDialog {
+  +busy: Signal<boolean>
+  +signOut(): void
+}
+enum ThemePreference {
+  device
+  light
+  dark
+}
+interface ThemePreferences {
+  +current: Signal<ThemePreference>
+  +set(value: ThemePreference): void
+}
+class LocalStorageThemePreferences
+
+Person "1" --> "*" Membership : appears as
+Person "1" --> "*" Session
+GetAccountQueryHandler ..> ICurrentPerson
+GetAccountQueryHandler ..> AccountDto
+UpdateAccountNameCommandHandler ..> UpdateAccountNameCommand
+UpdateAccountNameCommandHandler --> Person : Rename
+UpdateAccountNameCommandHandler ..> IPopkinNotifier
+ChangeAccountPhotoCommandHandler ..> ChangeAccountPhotoCommand
+ChangeAccountPhotoCommandHandler ..> IPhotoStore
+ChangeAccountPhotoCommandHandler --> Person : ChangePhoto
+SignOutCommandHandler ..> SignOutCommand
+SignOutCommandHandler --> Session : Revoke
+AccountController ..> GetAccountQueryHandler
+AccountController ..> UpdateAccountNameCommandHandler
+AccountController ..> ChangeAccountPhotoCommandHandler
+AuthController ..> SignOutCommandHandler
+AccountPage ..> SignOutDialog : opens
+AccountPage ..> ThemePreferences : THEME_PREFERENCES
+ThemePreferences <|.. LocalStorageThemePreferences
+ThemePreferences --> ThemePreference
+@enduml

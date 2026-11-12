@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — Save a photo to the device
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PhotoViewPage" as page
+  participant "Browser download" as browser
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PhotosController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPhotoDownloadQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "ObjectStoragePhotoStore" as store
+end box
+participant "Photo store" as files
+
+actor -> page : Choose "Save photo"
+page -> browser : Navigate a hidden link to /api/popkins/{popkinId}/photos/{photoId}/download
+browser -> controller : GET with the session cookie
+controller -> handler : Send GetPhotoDownloadQuery
+handler -> db : Check membership; load Photo in this Popkin
+alt Not a member or no such photo
+  controller --> browser : 404 popkin_not_found or photo_not_found (L2-051 AC1)
+  page --> actor : Message that the photo did not save, copy TO SUPPLY
+else Album removed after wrap-up
+  controller --> browser : 410 photo_removed (L2-045 AC4)
+else Found
+  handler -> store : GetDownloadUrlAsync(original, file name, short lifetime)
+  store --> handler : Signed address with attachment disposition (L2-051 AC2)
+  controller --> browser : 302 Found to the signed address
+  browser -> files : GET original
+  files --> browser : The file at the size it was added (L2-036 AC1)
+  browser --> actor : Saved to the device
+end
+@enduml

@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Save a photo
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "PhotoViewPage", "Angular page", "Save photo, photo actions, delete")
+  Component(photosApi, "PhotosApi / HttpPhotosApi", "api library service", "downloadUrl, deletePhoto")
+  Component(rt, "PopkinRealtime", "api library service", "PhotoDeleted")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PhotosController", "ASP.NET Core controller", "GET download, DELETE photo")
+  Component(dl, "GetPhotoDownloadQueryHandler", "MediatR handler", "Attachment address for the original")
+  Component(del, "DeletePhotoCommandHandler", "MediatR handler", "Uploader or Host deletes a photo")
+  Component(guard, "IMembershipGuard", "Application abstraction", "Membership or 404")
+  Component(store, "IPhotoStore / ObjectStoragePhotoStore", "Application abstraction, Infrastructure implementation", "Signed addresses, file removal")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "PhotoDeleted to popkin:{popkinId}")
+  ComponentDb(db, "Popkin database", "SQL Server", "Photo, PhotoReaction, PhotoComment, Message")
+  ComponentDb(files, "Photo store", "Object storage", "Original and thumbnails")
+}
+Rel(page, photosApi, "Calls")
+Rel(rt, page, "PhotoDeleted")
+Rel(photosApi, ctrl, "HTTPS")
+Rel(ctrl, dl, "GetPhotoDownloadQuery")
+Rel(ctrl, del, "DeletePhotoCommand")
+Rel(dl, guard, "Checks membership")
+Rel(del, guard, "Checks membership and role")
+Rel(dl, store, "GetDownloadUrlAsync")
+Rel(del, db, "Deletes and marks messages", "EF Core")
+Rel(del, store, "DeleteAsync")
+Rel(store, files, "Reads and deletes")
+Rel(del, notifier, "PhotoDeleted")
+@enduml

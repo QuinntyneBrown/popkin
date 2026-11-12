@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — The 61st message in a minute
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "ChatApi" as client
+  participant "rateLimitInterceptor" as icpt
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Authentication" as auth
+  participant "Rate limiter (messages)" as limiter
+  participant "MessagesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendMessageCommandHandler" as handler
+end box
+actor -> page : Send
+page -> client : sendMessage(popkinId, threadId, text)
+client -> auth : POST /api/popkins/{popkinId}/threads/{threadId}/messages
+auth -> limiter : Person identified
+limiter -> limiter : Partition personId:popkinId, sliding 60 per minute
+alt within limit
+  limiter -> controller : Permitted
+  controller -> handler : Send SendMessageCommand
+  handler --> controller : MessageDto
+  controller --> client : 201 Created
+else 61st in the window
+  limiter --> icpt : 429 rate_limited, Retry-After: 30 (L2-053 AC2)
+  icpt --> page : RateLimitedError(30)
+  page -> page : Keep text in composer, disable Send for 30 s
+  page -> toaster : warning("Slow down a little", "You can send again in 30 seconds.")
+  toaster --> actor : Warning toast (L2-053 AC4)
+end
+@enduml
