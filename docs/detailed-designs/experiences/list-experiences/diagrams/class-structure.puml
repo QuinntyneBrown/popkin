@@ -1,0 +1,140 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — List experiences
+
+package "Popkin.Domain" {
+  enum ExperienceKind {
+    Did
+    Restaurant
+    WantToDo
+  }
+  class Experience {
+    +Guid Id
+    +Guid PopkinId
+    +ExperienceKind Kind
+    +string Title
+    +string? When
+    +string? Place
+    +Guid? PhotoId
+    +Guid SharedByMembershipId
+    +DateTimeOffset SharedAt
+  }
+  class ExperienceRating {
+    +Guid ExperienceId
+    +Guid MembershipId
+    +int Stars
+    +string? Comment
+    +DateTimeOffset RatedAt
+  }
+  class ExperienceKeen {
+    +Guid ExperienceId
+    +Guid MembershipId
+    +DateTimeOffset At
+  }
+  class ExperienceScore <<value object>> {
+    +decimal? Average
+    +int Count
+    +{static} From(stars: IEnumerable<int>): ExperienceScore
+  }
+}
+
+package "Popkin.Application" {
+  enum ExperienceFilter {
+    All
+    WeDid
+    WantToDo
+  }
+  class GetExperiencesQuery {
+    +Guid PopkinId
+    +ExperienceFilter Filter
+  }
+  class GetExperiencesQueryHandler {
+    +Handle(query: GetExperiencesQuery, ct: CancellationToken): Task<IReadOnlyList<ExperienceCardDto>>
+  }
+  class ExperienceCardDto {
+    +Guid Id
+    +ExperienceKind Kind
+    +string Title
+    +string? PictureUrl
+    +string PopkinEmoji
+    +PopkinColour PopkinColour
+    +string SharedByFirstName
+    +Guid? SharedByPhotoId
+    +string? When
+    +DateTimeOffset SharedAt
+    +decimal? Average
+    +int RatingCount
+    +int KeenCount
+  }
+  interface IMembershipGuard {
+    +RequireMembershipAsync(popkinId: Guid, ct: CancellationToken): Task<Membership>
+  }
+  interface IAppDbContext {
+    +DbSet<Experience> Experiences
+    +DbSet<ExperienceRating> ExperienceRatings
+    +DbSet<ExperienceKeen> ExperienceKeens
+  }
+  interface IPhotoStore {
+    +CreateReadUrl(photoId: Guid, size: PhotoSize): Uri
+  }
+}
+
+package "Popkin.Api" {
+  class ExperiencesController {
+    +List(popkinId: Guid, filter: string): Task<ActionResult<IReadOnlyList<ExperienceCardDto>>>
+  }
+}
+
+package "frontend api library" {
+  interface ExperiencesApi {
+    +list(popkinId: string, filter: ExperienceFilterKey): Observable<ExperienceCardView[]>
+  }
+  class HttpExperiencesApi
+  class ExperienceCardView {
+    +id: string
+    +kindLabel: string
+    +title: string
+    +pictureUrl: string | null
+    +byline: string
+    +averageText: string | null
+    +ratingCount: number
+    +keenCount: number | null
+  }
+}
+
+package "frontend popkin app" {
+  class ExperiencesPage {
+    +filter: Signal<ExperienceFilterKey>
+    +state: Signal<ListState>
+    +choose(filter: ExperienceFilterKey): void
+    +shareOne(): void
+    +retry(): void
+  }
+}
+
+Experience "1" *-- "*" ExperienceRating : rated by
+Experience "1" *-- "*" ExperienceKeen : keen members
+Experience --> ExperienceKind : has
+ExperienceScore ..> ExperienceRating : computed from
+ExperiencesController ..> GetExperiencesQuery : sends
+GetExperiencesQueryHandler ..> GetExperiencesQuery : handles
+GetExperiencesQuery --> ExperienceFilter : has
+GetExperiencesQueryHandler ..> IMembershipGuard : uses
+GetExperiencesQueryHandler ..> IAppDbContext : queries
+GetExperiencesQueryHandler ..> IPhotoStore : uses
+GetExperiencesQueryHandler ..> ExperienceScore : builds
+GetExperiencesQueryHandler ..> ExperienceCardDto : returns
+HttpExperiencesApi ..|> ExperiencesApi
+HttpExperiencesApi ..> ExperiencesController : HTTPS
+ExperiencesPage ..> ExperiencesApi : injects EXPERIENCES_API
+ExperiencesPage --> ExperienceCardView : renders
+@enduml

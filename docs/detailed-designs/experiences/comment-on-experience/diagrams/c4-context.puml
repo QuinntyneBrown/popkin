@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Comment on an experience
+
+Person(member, "Member", "Has rated an experience")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos and experiences")
+
+Rel(member, popkin, "Adds or edits a comment on their rating in")
+@enduml

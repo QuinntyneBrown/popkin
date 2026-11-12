@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Share an experience
+
+Person(member, "Member", "Shares, edits and deletes their own experiences")
+Person(host, "Host", "Member who started the Popkin; may delete any experience")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos and experiences")
+System_Ext(store, "Photo store", "Object storage for experience pictures, provider TO SUPPLY")
+
+Rel(member, popkin, "Shares an experience with a title, kind, when, place and picture in")
+Rel(host, popkin, "Deletes any experience in")
+Rel(popkin, store, "Stores the picture in")
+@enduml

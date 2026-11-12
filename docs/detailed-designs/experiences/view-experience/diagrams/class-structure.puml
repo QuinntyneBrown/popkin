@@ -1,0 +1,137 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — View an experience
+
+package "Popkin.Domain" {
+  enum ExperienceKind {
+    Did
+    Restaurant
+    WantToDo
+  }
+  class Experience {
+    +Guid Id
+    +Guid PopkinId
+    +ExperienceKind Kind
+    +string Title
+    +string? When
+    +string? Place
+    +Guid? PhotoId
+    +Guid SharedByMembershipId
+    +DateTimeOffset SharedAt
+    +bool IsRateable
+  }
+  class ExperienceRating {
+    +Guid ExperienceId
+    +Guid MembershipId
+    +int Stars
+    +string? Comment
+    +DateTimeOffset RatedAt
+    +DateTimeOffset? CommentedAt
+  }
+  class ExperienceScore <<value object>> {
+    +decimal? Average
+    +int Count
+    +IReadOnlyList<int> CountsByStars
+    +{static} From(stars: IEnumerable<int>): ExperienceScore
+    +CountFor(stars: int): int
+    +BarPercent(stars: int): int
+  }
+  class Membership {
+    +Guid Id
+    +string DisplayName
+    +Guid? PhotoId
+    +MemberRole Role
+    +string FirstName
+  }
+}
+
+package "Popkin.Application" {
+  class GetExperienceQuery {
+    +Guid PopkinId
+    +Guid ExperienceId
+  }
+  class GetExperienceQueryHandler {
+    +Handle(query: GetExperienceQuery, ct: CancellationToken): Task<ExperienceDetailDto>
+  }
+  class ExperienceDetailDto {
+    +Guid Id
+    +ExperienceKind Kind
+    +string Title
+    +string? When
+    +string? Place
+    +string? PictureUrl
+    +MemberSummaryDto SharedBy
+    +ExperienceScoreDto? Score
+    +int? MyStars
+    +string? MyComment
+    +KeenDto? Keen
+    +IReadOnlyList<ExperienceCommentDto> Comments
+    +bool CanRate
+    +bool CanEdit
+    +bool CanDelete
+    +bool CanMarkDone
+  }
+  class ExperienceScoreDto {
+    +decimal? Average
+    +int Count
+    +IReadOnlyList<StarBarDto> Bars
+  }
+  class StarBarDto {
+    +int Stars
+    +int Count
+    +int Percent
+  }
+  class ExperienceCommentDto {
+    +MemberSummaryDto Author
+    +int? Stars
+    +string Text
+    +DateTimeOffset At
+  }
+  interface IMembershipGuard {
+    +RequireMembershipAsync(popkinId: Guid, ct: CancellationToken): Task<Membership>
+  }
+}
+
+package "frontend" {
+  class ExperienceDetailPage {
+    +state: Signal<DetailState>
+    +retry(): void
+  }
+  class ExperienceDetailView {
+    +kindAndWhen: string
+    +title: string
+    +sharedBy: string
+    +place: string | null
+    +score: ExperienceScoreView | null
+    +comments: ExperienceCommentView[]
+  }
+  class ExperienceScoreView {
+    +averageText: string
+    +countText: string
+    +bars: StarBarView[]
+  }
+}
+
+Experience "1" *-- "*" ExperienceRating
+Experience --> ExperienceKind
+ExperienceRating --> Membership : by
+ExperienceScore ..> ExperienceRating : computed from
+GetExperienceQueryHandler ..> GetExperienceQuery : handles
+GetExperienceQueryHandler ..> IMembershipGuard : uses
+GetExperienceQueryHandler ..> ExperienceScore : builds
+GetExperienceQueryHandler ..> ExperienceDetailDto : returns
+ExperienceDetailDto *-- ExperienceScoreDto
+ExperienceScoreDto *-- "5" StarBarDto
+ExperienceDetailDto *-- "*" ExperienceCommentDto
+ExperienceDetailPage --> ExperienceDetailView : renders
+ExperienceDetailView *-- ExperienceScoreView
+@enduml

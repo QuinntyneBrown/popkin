@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — We did this
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Sharer or Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ExperienceDetailPage" as page
+  participant "HttpExperiencesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "MarkExperienceDoneCommandHandler" as handler
+  participant "Experience" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "We did this" (shown only when CanMarkDone; placement TO SUPPLY)
+page -> client : markDone(popkinId, experienceId)
+client -> controller : POST /api/popkins/{popkinId}/experiences/{experienceId}/done
+controller -> handler : Send MarkExperienceDoneCommand
+handler -> db : Membership, PopkinSpace, Experience
+alt Not a member
+  controller --> client : 404 ProblemDetails code popkin_not_found
+else Neither the sharer nor the Host
+  controller --> client : 403 ProblemDetails code not_experience_sharer (L2-051 AC4)
+else Popkin wrapped up
+  controller --> client : 409 ProblemDetails code popkin_wrapped_up
+else Kind is not Want to do
+  controller --> client : 409 ProblemDetails code experience_not_wanted
+else Allowed
+  handler -> entity : MarkDone(member): Kind becomes Did (L2-042 AC4)
+  handler -> db : Save changes
+  handler --> controller : ExperienceDetailDto with CanRate true and an empty score
+  controller --> client : 200 JSON
+  client --> page : ExperienceDetailView
+  page --> actor : "Something we did", score card with no ratings, "How was it for you?"
+end
+@enduml

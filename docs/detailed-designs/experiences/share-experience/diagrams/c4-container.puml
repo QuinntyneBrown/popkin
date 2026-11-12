@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Share an experience
+
+Person(member, "Member", "Belongs to an active Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Share an experience dialog, Experiences list, toast")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "POST, PATCH and DELETE /api/popkins/{popkinId}/experiences")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Experience, Photo")
+  Container(store, "Photo store", "Object storage, provider TO SUPPLY", "Picture file and thumbnail")
+}
+Rel(member, web, "Fills in the dialog", "HTTPS")
+Rel(web, api, "Sends the experience", "multipart/form-data, session cookie")
+Rel(api, store, "Writes the cleaned picture")
+Rel(api, db, "Inserts the experience", "EF Core")
+@enduml

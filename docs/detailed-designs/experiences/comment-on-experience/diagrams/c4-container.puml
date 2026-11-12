@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Comment on an experience
+
+Person(member, "Member", "Has rated the experience")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Add a comment dialog, What people said")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "PUT /api/popkins/{popkinId}/experiences/{experienceId}/my-rating/comment")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "ExperienceRating.Comment and CommentedAt")
+}
+Rel(member, web, "Writes a comment", "HTTPS")
+Rel(web, api, "Saves the comment", "JSON/HTTPS, session cookie")
+Rel(api, db, "Updates the member's rating row", "EF Core")
+@enduml

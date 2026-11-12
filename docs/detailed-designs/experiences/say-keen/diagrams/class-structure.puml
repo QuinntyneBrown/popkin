@@ -1,0 +1,98 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Say you are keen
+
+package "Popkin.Domain" {
+  enum ExperienceKind {
+    Did
+    Restaurant
+    WantToDo
+  }
+  class Experience {
+    +Guid Id
+    +ExperienceKind Kind
+    +Guid SharedByMembershipId
+    +AddKeen(membershipId: Guid, at: DateTimeOffset): void
+    +RemoveKeen(membershipId: Guid): void
+    +MarkDone(by: Membership): void
+    +CanBeMarkedDoneBy(member: Membership): bool
+  }
+  class ExperienceKeen {
+    +Guid ExperienceId
+    +Guid MembershipId
+    +DateTimeOffset At
+  }
+  class Membership {
+    +Guid Id
+    +string DisplayName
+    +Guid? PhotoId
+    +MemberRole Role
+  }
+}
+
+package "Popkin.Application" {
+  class SetKeenCommand {
+    +Guid PopkinId
+    +Guid ExperienceId
+    +bool Keen
+  }
+  class SetKeenCommandHandler {
+    +Handle(command: SetKeenCommand, ct: CancellationToken): Task<KeenDto>
+  }
+  class MarkExperienceDoneCommand {
+    +Guid PopkinId
+    +Guid ExperienceId
+  }
+  class MarkExperienceDoneCommandHandler {
+    +Handle(command: MarkExperienceDoneCommand, ct: CancellationToken): Task<ExperienceDetailDto>
+  }
+  class KeenDto {
+    +int Count
+    +bool IAmKeen
+    +IReadOnlyList<MemberSummaryDto> FirstMembers
+  }
+  interface IMembershipGuard
+}
+
+package "frontend" {
+  class ExperienceDetailPage {
+    +keen: WritableSignal<KeenView | null>
+    +toggleKeen(): void
+    +markDone(): void
+  }
+  class KeenView {
+    +count: number
+    +countText: string
+    +iAmKeen: boolean
+    +buttonLabel: string
+    +avatars: AvatarView[]
+    +more: number
+  }
+  interface ExperiencesApi {
+    +setKeen(popkinId: string, experienceId: string, keen: boolean): Observable<KeenView>
+    +markDone(popkinId: string, experienceId: string): Observable<ExperienceDetailView>
+  }
+}
+
+Experience "1" *-- "*" ExperienceKeen
+ExperienceKeen --> Membership
+Experience --> ExperienceKind
+SetKeenCommandHandler ..> SetKeenCommand : handles
+SetKeenCommandHandler ..> Experience : AddKeen / RemoveKeen
+SetKeenCommandHandler ..> KeenDto : returns
+SetKeenCommandHandler ..> IMembershipGuard
+MarkExperienceDoneCommandHandler ..> MarkExperienceDoneCommand : handles
+MarkExperienceDoneCommandHandler ..> Experience : MarkDone
+MarkExperienceDoneCommandHandler ..> IMembershipGuard
+ExperienceDetailPage --> KeenView
+ExperienceDetailPage ..> ExperiencesApi : injects EXPERIENCES_API
+@enduml

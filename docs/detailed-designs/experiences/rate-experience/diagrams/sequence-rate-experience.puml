@@ -1,0 +1,78 @@
+@startuml
+title UML sequence behaviour — Rate an experience
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-rating (input)" as stars
+  participant "ExperienceDetailPage" as page
+  participant "HttpExperiencesApi" as client
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RateExperienceCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "Experience" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> stars : Choose "4 stars" on "How was it for you?" (L2-039 AC1)
+stars -> page : valueChange(4)
+page -> page : Keep previous stars and score, show stars 1 to 4 filled
+page -> client : rate(popkinId, experienceId, 4)
+client -> controller : PUT /api/popkins/{popkinId}/experiences/{experienceId}/my-rating {stars: 4}
+controller -> controller : Authenticate, validate RateExperienceCommand
+alt Stars outside 1 to 5
+  controller --> client : 400 ProblemDetails code stars_out_of_range, field stars (L2-039 AC6)
+else Valid
+  controller -> handler : Send RateExperienceCommand
+  handler -> guard : RequireMembershipAsync(popkinId)
+  alt Not a member
+    guard --> handler : Not found
+    handler --> controller : popkin_not_found
+    controller --> client : 404 ProblemDetails (L2-039 AC6, L2-051 AC1)
+  else Member
+    guard --> handler : Membership
+    handler -> db : Load PopkinSpace, Experience and the caller's rating
+    db --> handler : Entities
+    alt Popkin wrapped up
+      handler --> controller : 409 ProblemDetails code popkin_wrapped_up (L2-045 AC2)
+    else Kind is Want to do
+      handler --> controller : 409 ProblemDetails code experience_not_rateable
+    else Rateable
+      handler -> entity : Rate(membershipId, 4, now) or ChangeStars(4, now)
+      entity --> handler : One rating per member and experience
+      handler -> db : Save changes in one unit of work
+      db --> handler : Committed
+      handler -> db : Count per star value
+      db --> handler : Counts
+      handler --> controller : RatingResultDto(MyStars, Score)
+      controller --> client : 200 JSON
+      client --> page : RatingResultView
+      page --> actor : "Thanks! Your rating", new average and count, "Add a comment" (L2-039 AC2)
+    end
+  end
+end
+alt Any refusal, network failure or timeout
+  client --> page : Error
+  page -> page : Restore previous stars and score (L2-039 AC5)
+  page -> toaster : danger("Your rating didn't save", "Your stars are back to how they were.", "Try again")
+  toaster --> actor : Toast stays until dismissed (L2-056 AC7)
+end
+@enduml

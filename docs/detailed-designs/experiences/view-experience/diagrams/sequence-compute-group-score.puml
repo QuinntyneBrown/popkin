@@ -1,0 +1,43 @@
+@startuml
+title UML sequence behaviour — Compute the group score
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetExperienceQueryHandler" as handler
+  participant "ExperienceScore" as score
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ExperienceDetailPage" as page
+end box
+handler -> db : SELECT Stars, COUNT(*) FROM ExperienceRatings WHERE ExperienceId = @id GROUP BY Stars
+db --> handler : Count per star value, for example 5:9, 4:1, 3:1
+handler -> score : From(counts per star)
+score -> score : Count = sum of counts (11)
+alt Count = 0
+  score --> handler : Average null, Count 0, every bar 0
+else Count > 0
+  score -> score : Average = sum(stars x count) / Count, rounded to one decimal away from zero (4.8)
+  score -> score : Largest = highest count among the five values (9)
+  score -> score : BarPercent(s) = round(count(s) / Largest x 100): 100, 11, 11, 0, 0
+  score --> handler : Average, Count, CountsByStars, bars
+end
+handler --> page : ExperienceScoreDto inside ExperienceDetailDto
+page -> page : Stars filled to match the average, role img "4.8 out of 5"
+page -> page : One bar per value 5 to 1, hidden from assistive technology
+page -> page : Visually hidden text per value, "5 stars: 9 ratings" (L2-038 AC3)
+@enduml

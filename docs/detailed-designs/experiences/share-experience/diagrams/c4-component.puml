@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Share an experience
+
+Container_Boundary(web, "Popkin web app") {
+  Component(list, "ExperiencesPage", "Angular page", "Opens the dialog, puts the new card first")
+  Component(dialog, "ShareExperienceDialog", "CDK dialog", "Title, kind, when, place, picture; invalid, busy, failed")
+  Component(toaster, "Toaster", "Angular service", "Experience shared")
+  Component(apiclient, "HttpExperiencesApi", "Angular service behind EXPERIENCES_API", "share, edit, remove")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ExperiencesController", "ASP.NET Core controller", "POST, PATCH, DELETE")
+  Component(validator, "ShareExperienceCommandValidator", "Validator", "Title 1 to 80, kind, place up to 80, picture type and size")
+  Component(handler, "ShareExperienceCommandHandler", "MediatR handler", "Creates the experience")
+  Component(edit, "EditExperienceCommandHandler, DeleteExperienceCommandHandler", "MediatR handlers", "Sharer edits; sharer or Host deletes")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 for non-members")
+  Component(photos, "IPhotoStore", "Application abstraction", "Strips metadata, stores picture and thumbnail")
+  ComponentDb(db, "Popkin database", "SQL Server", "Experience, Photo")
+}
+Rel(list, dialog, "Opens with CDK Dialog")
+Rel(dialog, apiclient, "share(popkinId, form)")
+Rel(list, toaster, "Confirms")
+Rel(apiclient, ctrl, "POST multipart", "HTTPS")
+Rel(ctrl, validator, "Validates")
+Rel(ctrl, handler, "Sends ShareExperienceCommand")
+Rel(ctrl, edit, "Sends Edit or Delete command")
+Rel(handler, guard, "Requires membership")
+Rel(handler, photos, "Saves picture")
+Rel(handler, db, "Inserts", "EF Core")
+Rel(edit, db, "Updates or deletes", "EF Core")
+@enduml

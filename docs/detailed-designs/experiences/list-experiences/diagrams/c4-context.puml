@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — List experiences
+
+Person(member, "Member", "Signed-in person who belongs to a Popkin")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos and experiences")
+System_Ext(store, "Photo store", "Object storage for experience pictures, provider TO SUPPLY")
+
+Rel(member, popkin, "Browses and filters the Popkin's experiences in")
+Rel(popkin, store, "Serves picture thumbnails from", "Expiring addresses")
+@enduml

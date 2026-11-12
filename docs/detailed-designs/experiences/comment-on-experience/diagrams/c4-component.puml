@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Comment on an experience
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ExperienceDetailPage", "Angular page", "Add a comment / Edit your comment; puts the comment first")
+  Component(dialog, "AddCommentDialog", "CDK dialog", "Your stars, Your comment; invalid, busy")
+  Component(apiclient, "HttpExperiencesApi", "Angular service behind EXPERIENCES_API", "comment(popkinId, experienceId, text)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ExperiencesController", "ASP.NET Core controller", "PUT my-rating/comment")
+  Component(validator, "CommentOnExperienceCommandValidator", "Validator", "Text 1 to 500 after trimming")
+  Component(handler, "CommentOnExperienceCommandHandler", "MediatR handler", "Sets or replaces the comment")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 for non-members")
+  Component(entity, "ExperienceRating", "Domain entity", "SetComment(text, at)")
+  ComponentDb(db, "Popkin database", "SQL Server", "ExperienceRating")
+}
+Rel(page, dialog, "Opens with CDK Dialog")
+Rel(dialog, apiclient, "comment")
+Rel(apiclient, ctrl, "PUT {text}", "JSON/HTTPS")
+Rel(ctrl, validator, "Validates")
+Rel(ctrl, handler, "Sends CommentOnExperienceCommand")
+Rel(handler, guard, "Requires membership")
+Rel(handler, entity, "Sets comment")
+Rel(handler, db, "Saves", "EF Core")
+@enduml

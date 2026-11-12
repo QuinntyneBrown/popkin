@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — List experiences
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ExperiencesPage", "Angular page", "pk-experiences-page; filter chips, cards, empty, no-results, loading, error")
+  Component(apiclient, "HttpExperiencesApi", "Angular service behind EXPERIENCES_API", "Typed HTTP client for /experiences")
+  Component(ui, "pk-card, pk-chip, pk-rating, pk-empty-state, pk-skeleton, pk-button", "components library", "Presentation")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ExperiencesController", "ASP.NET Core controller", "GET /api/popkins/{popkinId}/experiences")
+  Component(handler, "GetExperiencesQueryHandler", "MediatR handler", "Filters, orders newest first, projects cards")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 popkin_not_found for non-members")
+  Component(score, "ExperienceScore", "Domain value object", "Average to one decimal and rating count")
+  Component(photos, "IPhotoStore", "Application abstraction", "Expiring thumbnail addresses")
+  ComponentDb(db, "Popkin database", "SQL Server", "Experience, ExperienceRating, ExperienceKeen")
+}
+Rel(page, apiclient, "list(popkinId, filter)")
+Rel(page, ui, "Composes")
+Rel(apiclient, ctrl, "GET ?filter=all|did|want", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetExperiencesQuery")
+Rel(handler, guard, "Requires membership")
+Rel(handler, db, "Queries", "EF Core")
+Rel(handler, score, "Builds per card")
+Rel(handler, photos, "Requests thumbnail addresses")
+@enduml

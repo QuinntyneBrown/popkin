@@ -1,0 +1,73 @@
+@startuml
+title UML sequence behaviour — Open Experiences
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ExperiencesPage" as page
+  participant "HttpExperiencesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ExperiencesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetExperiencesQueryHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "ExperienceScore" as score
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ObjectStoragePhotoStore" as store
+  database "Popkin database" as db
+end box
+actor -> page : Open /p/:popkinId/experiences
+page -> page : Show heading and filter "All" pressed
+page -> client : list(popkinId, 'all')
+opt No answer within 300 ms
+  page -> page : Show card skeletons, announce "Loading experiences…" (L2-056 AC1)
+end
+client -> controller : GET /api/popkins/{popkinId}/experiences?filter=all
+controller -> controller : Authenticate session (fallback policy)
+controller -> handler : Send GetExperiencesQuery
+handler -> guard : RequireMembershipAsync(popkinId)
+alt Caller is not a member, or the Popkin does not exist
+  guard --> handler : Not found
+  handler --> controller : popkin_not_found
+  controller --> client : 404 ProblemDetails code popkin_not_found (L2-051 AC1)
+  client --> page : Not found
+  page --> actor : Not-found screen
+else Caller is a member
+  guard --> handler : Membership
+  handler -> db : Experiences of the Popkin, newest SharedAt first, with stars and keen counts
+  db --> handler : Rows
+  loop Each experience
+    handler -> score : From(stars) for Did and Restaurant
+    score --> handler : Average to one decimal, count (L2-037 AC2)
+    handler -> store : Thumbnail address when a picture exists
+    store --> handler : Expiring address
+  end
+  handler --> controller : ExperienceCardDto list
+  controller --> client : 200 JSON
+  client --> page : ExperienceCardView list
+  alt List has experiences
+    page --> actor : Cards with picture or Popkin emoji, kind, title, who and when, score "4.8 (11)" or "7 keen" (L2-037 AC1-AC3)
+  else Popkin has no experiences
+    page --> actor : "Nothing shared yet" with "Share one" (L2-037 AC6)
+  end
+end
+alt Request fails or the device is offline
+  client --> page : Error
+  page --> actor : "We couldn't load the experiences" with "Try again", tabs stay (L2-056 AC2)
+end
+@enduml

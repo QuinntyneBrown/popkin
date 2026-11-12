@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Say you are keen
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Keen panel on the experience detail page")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "PUT and DELETE .../keen, POST .../done")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "ExperienceKeen, Experience.Kind")
+}
+Rel(member, web, "Chooses I'm keen, You're keen or We did this", "HTTPS")
+Rel(web, api, "Sets keen or marks done", "JSON/HTTPS, session cookie")
+Rel(api, db, "Inserts or deletes keen rows, changes the kind", "EF Core")
+@enduml

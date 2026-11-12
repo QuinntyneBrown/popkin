@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — List experiences
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular 20+ SPA", "Experiences page with filter chips, cards, empty and error states")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/popkins/{popkinId}/experiences")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Experiences, ratings and keen members")
+  Container(store, "Photo store", "Object storage, provider TO SUPPLY", "Experience pictures")
+}
+Rel(member, web, "Uses", "HTTPS")
+Rel(web, api, "Requests the list with a filter", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads experiences with score and keen counts", "EF Core")
+Rel(api, store, "Creates expiring picture addresses")
+Rel(web, store, "Loads thumbnails lazily", "HTTPS")
+@enduml

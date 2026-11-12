@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Say you are keen
+
+Person(member, "Member", "Shows interest in something the group wants to do")
+Person(host, "Host", "May mark any Want to do experience as done")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos and experiences")
+
+Rel(member, popkin, "Says they are keen, or no longer keen, in")
+Rel(host, popkin, "Marks a Want to do experience as Something we did in")
+@enduml

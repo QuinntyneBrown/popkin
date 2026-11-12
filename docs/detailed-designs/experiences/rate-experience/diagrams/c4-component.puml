@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Rate an experience
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ExperienceDetailPage", "Angular page", "Optimistic rating, rollback on failure")
+  Component(stars, "pk-rating (input)", "components library", "Radio group of five star buttons, roving focus")
+  Component(toaster, "Toaster", "Angular service", "Danger toast: Your rating didn't save")
+  Component(apiclient, "HttpExperiencesApi", "Angular service behind EXPERIENCES_API", "rate(popkinId, experienceId, stars)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ExperiencesController", "ASP.NET Core controller", "PUT my-rating")
+  Component(validator, "RateExperienceCommandValidator", "Validator", "Stars 1 to 5")
+  Component(handler, "RateExperienceCommandHandler", "MediatR handler", "Upserts the caller's rating")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 for non-members")
+  Component(entity, "Experience / ExperienceRating", "Domain entities", "IsRateable, Rate, ChangeStars")
+  Component(score, "ExperienceScore", "Domain value object", "New average and count")
+  ComponentDb(db, "Popkin database", "SQL Server", "ExperienceRating")
+}
+Rel(stars, page, "starChosen(n)")
+Rel(page, apiclient, "rate")
+Rel(page, toaster, "Shows failure")
+Rel(apiclient, ctrl, "PUT {stars}", "JSON/HTTPS")
+Rel(ctrl, validator, "Validates RateExperienceCommand")
+Rel(ctrl, handler, "Sends RateExperienceCommand")
+Rel(handler, guard, "Requires membership")
+Rel(handler, entity, "Applies the rating")
+Rel(handler, db, "Saves", "EF Core")
+Rel(handler, score, "Recomputes")
+@enduml
