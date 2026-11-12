@@ -1,3 +1,5 @@
+import { PopkinCreatedPage } from '../../pages/popkin-created.page';
+import { lakesideInvite } from '../../fixtures/journeys';
 import { HowLongPage } from '../../pages/how-long.page';
 import { howLongForLakeside } from '../../fixtures/journeys';
 import { codeScreenAt24Seconds } from '../../fixtures/journeys';
@@ -57,5 +59,11 @@ parity('button', [
       await howLongForLakeside(page);
       await new HowLongPage(page).popItUp.click();
     },
+  },
+  {
+    key: 'popkinCreated',
+    name: 'popkin-link',
+    region: (page) => new PopkinCreatedPage(page).footerButton,
+    before: lakesideInvite,
   },
 ]);

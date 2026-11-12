@@ -1,0 +1,12 @@
+<div class="pop">
+  <span aria-hidden="true">
+    @for (dot of dots; track $index) {
+      <span class="pop__dot" [style.--pk-pop-to]="dot"></span>
+    }
+  </span>
+  <span pk-popkin-tile size="xl" class="pop__tile" [emoji]="emoji()"></span>
+</div>
+<h1 class="pop__heading">{{ heading() }}</h1>
+@if (lead()) {
+  <p class="pop__lead">{{ lead() }}</p>
+}

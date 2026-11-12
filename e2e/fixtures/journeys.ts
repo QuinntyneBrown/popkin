@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import responses from './api/responses.json';
+import { answer } from './stubs';
 import { NameYourPopkinPage } from '../pages/name-your-popkin.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
 
@@ -30,4 +31,30 @@ export async function howLongForLakeside(page: Page, today = mockToday): Promise
   await step.chooseLakeside();
   await step.looksGood.click();
   await page.locator('body[data-page="how-long"]').waitFor();
+}
+
+const created = responses['POST /api/popkins'].body;
+
+/**
+ * The created screen with the invite the mocks show (`popk.in/lakeside`), so parity compares the
+ * same text. A slug a Host chooses has no screen yet; the code is otherwise random.
+ */
+export async function lakesideInvite(page: Page): Promise<void> {
+  await answer(page, `GET /api/popkins/${created.id}/invite`, {
+    status: 200,
+    body: {
+      code: 'lakeside',
+      url: 'https://popk.in/lakeside',
+      popkinName: 'Lakeside Weekend',
+      emoji: '🏕️',
+      colour: 'Teal',
+    },
+  });
+}
+
+/** A share sheet, as a phone has. */
+export async function withShareSheet(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    navigator.share = async () => undefined;
+  });
 }

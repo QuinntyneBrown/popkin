@@ -16,6 +16,8 @@ export interface ParityCase {
   region: (page: Page) => Locator;
   /** Brings both targets into the state, where opening it is not enough (focus a control). */
   prepare?: (page: Page) => Promise<void>;
+  /** Prepares the app's page before it opens (stubs, init scripts). */
+  before?: (page: Page) => Promise<void>;
   /** Brings the app into the state the mock draws statically (typed values, a submitted form). */
   app?: (page: Page) => Promise<void>;
 }
@@ -30,8 +32,10 @@ export function parity(component: string, cases: ParityCase[]): void {
         for (const theme of themes) {
           const name = `${parityCase.name ?? parityCase.key}-${width}-${theme}`;
           test(name, async ({ page, pk }) => {
-            await page.setViewportSize({ width, height: 900 });
+            // Tall enough that no sticky footer covers a region the screenshot scrolls to.
+            await page.setViewportSize({ width, height: 1400 });
             await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
+            if (!BASELINE) await parityCase.before?.(page);
             await pk.open(parityCase.key);
             if (!BASELINE && parityCase.app) {
               await parityCase.app(page);

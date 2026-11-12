@@ -28,3 +28,7 @@ export * from './lib/popkin-tile/popkin-tile';
 export * from './lib/choice-card/choice-card';
 export * from './lib/date-button/date-button';
 export * from './lib/dialog/dialog';
+export * from './lib/pop/pop';
+export * from './lib/qr-card/qr-card';
+export * from './lib/share-action/share-action';
+export * from './lib/share-actions/share-actions';

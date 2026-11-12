@@ -49,6 +49,14 @@ export const routes: Routes = [
     title: 'How long should it last? · Popkin',
   },
   {
+    path: 'p/:popkinId/created',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/popkin-created/popkin-created.page').then((m) => m.PopkinCreatedPage),
+    data: data({ shell: 'bare', page: 'popkin-created' }),
+    title: 'Your Popkin is up · Popkin',
+  },
+  {
     path: '**',
     loadComponent: () => import('./pages/not-found/not-found.page').then((m) => m.NotFoundPage),
     data: data({ shell: 'bare', page: 'not-found' }),

@@ -1,3 +1,5 @@
+import responses from './api/responses.json';
+
 /**
  * Every screen state the suite opens, keyed once so one spec serves both targets: the Angular
  * app (`app` path) and the design reference (`mock` file under docs/mocks, opened when
@@ -7,6 +9,8 @@ export interface ScreenRoute {
   app: string;
   mock?: string;
 }
+
+const created = responses['POST /api/popkins'].body;
 
 export const routes = {
   home: { app: '/' },
@@ -29,6 +33,11 @@ export const routes = {
   howLongError: { app: '/new/length', mock: 'pages/how-long/error.html' },
   endDate: { app: '/new/length', mock: 'dialogs/end-date/default.html' },
   endDateInvalid: { app: '/new/length', mock: 'dialogs/end-date/invalid.html' },
+  popkinCreated: { app: `/p/${created.id}/created`, mock: 'pages/popkin-created/default.html' },
+  popkinCreatedCopied: {
+    app: `/p/${created.id}/created`,
+    mock: 'pages/popkin-created/copied.html',
+  },
   toastSuccess: { app: '/verify', mock: 'notifications/toast/success.html' },
   notFound: { app: '/no-such-screen', mock: 'pages/not-found/default.html' },
 } satisfies Record<string, ScreenRoute>;

@@ -374,18 +374,19 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .qr-card__frame { display: grid; place-items: center; padding: var(--space-4); border-radius: var(--radius-lg); background: var(--accent-tint); }
 .qr-card__name { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-top: var(--space-4); font: var(--font-weight-extrabold) var(--font-size-md-plus) / var(--line-height-snug) var(--font-family-display); }
 .qr-card__link { margin-top: var(--space-1); font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans); color: var(--color-fg-muted); }
-.qr { width: var(--layout-qr-size); height: auto; aspect-ratio: 1; border-radius: var(--radius-sm); background: var(--color-constant-light); }
+.qr { width: var(--layout-qr-size); height: auto; aspect-ratio: 1; padding: var(--space-2); border-radius: var(--radius-sm); background: var(--color-constant-light); overflow: visible; } /* the padding is the quiet zone a camera needs (L2-059 AC4) */
 .qr--sm { width: var(--layout-qr-size-sm); }
 .qr__cells { fill: var(--color-constant-dark); }
 .qr__hole { fill: var(--color-constant-light); }
 .qr__logo { fill: var(--color-accent); }
 .qr__mark { color: var(--color-fg-on-accent); }
-.share-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); max-width: var(--layout-qr-card-max); margin: var(--space-5) auto 0; }
+.share-actions { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; /* two columns where the device has no share sheet */ gap: var(--space-2); max-width: var(--layout-qr-card-max); margin: var(--space-5) auto 0; }
 .share-action { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1); height: var(--space-18); border: 0; border-radius: var(--radius-md); background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: var(--shadow-1); font: var(--text-meta); text-decoration: none; }
 .pop { position: relative; display: grid; place-items: center; }
 .pop__dot { position: absolute; width: var(--space-2-5); height: var(--space-2-5); border-radius: var(--radius-full); background: var(--accent); opacity: 0.9; }
 .pop__dot:nth-child(3n) { background: var(--color-confetti-sun); width: var(--space-3); height: var(--space-3); }
 .pop__dot:nth-child(3n + 1) { background: var(--color-confetti-coral); }
+@media (prefers-reduced-motion: reduce) { .pop__dot { display: none; } } /* L2-010 AC7: no confetti burst */
 .circle { position: relative; width: var(--space-55); height: var(--space-55); }
 .circle > .avatar { position: absolute; translate: -50% -50%; }
 .circle__centre { position: absolute; inset: 0; display: grid; place-items: center; }
