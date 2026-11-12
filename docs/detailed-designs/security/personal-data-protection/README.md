@@ -126,6 +126,15 @@ The mechanism adds no endpoint. It constrains every response:
   the only persisted value (L2-048 AC4). Unsent message drafts stay in memory for the session
   (L2-028 AC4).
 
+### Built in journey 1
+
+- `SecurityHeadersMiddleware`: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: no-referrer`, and on `/api` a content security policy of `default-src 'none';
+  frame-ancestors 'none'` and `Cache-Control: no-store`. HSTS and HTTPS redirection run outside
+  Development. The web app's own content security policy belongs with its hosting, `<TO SUPPLY>`.
+- Codes are stored as HMAC-SHA-256 hashes; logs carry no code (outside the Development sender),
+  destination, name or cookie.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

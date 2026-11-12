@@ -23,9 +23,9 @@
 Popkin is a free platform for pop-up communities. Spin up a private space in seconds, invite
 people by QR code, then chat, video call, share photos and rate experiences together.
 
-> **Status: scaffold.** The repository holds the layout, the conventions, a backend that answers
-> `GET /api/health`, and an app with one placeholder screen. The requirements, mocks and design
-> system come next; no feature is built yet.
+> **Status: in progress.** Journey 1, Start a Popkin, is built: sign up with a code, name a
+> Popkin, choose how long it lasts and get its QR invite. The journeys still to build are in
+> [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents
 
@@ -79,7 +79,9 @@ The quick start runs on SQLite, and the tests need no database at all
    ```
 
 2. Start the API. It listens on `http://localhost:5080`, uses SQLite and needs no database
-   server.
+   server. The script makes and seeds a fresh database with `popkin reset` first. Every code it
+   issues is `482913` and is written to the log, not sent: the SMS and email providers are not
+   chosen yet.
 
    ```shell
    pwsh eng/Start-E2eApi.ps1
@@ -92,6 +94,22 @@ The quick start runs on SQLite, and the tests need no database at all
    npm start --prefix frontend
    ```
 
+### The database and the `popkin` tool
+
+The API never changes the database schema on startup. The `popkin` tool
+(`backend/src/Popkin.Cli`) does, against the database that `Database:Provider` and
+`ConnectionStrings:Popkin` name (from `appsettings.json`, environment variables such as
+`Database__Provider`, or `--Key=value` arguments):
+
+| Command | What it does |
+|---|---|
+| `dotnet run --project backend/src/Popkin.Cli -- migrate` | Applies the migrations (SQL Server) or builds the schema from the model (SQLite) |
+| `dotnet run --project backend/src/Popkin.Cli -- seed` | Adds the starting data; safe to re-run |
+| `dotnet run --project backend/src/Popkin.Cli -- reset` | Deletes the database, then migrates and seeds it |
+
+A deployed API also needs `Auth:CodeHashKey` (the key codes are hashed with) and
+`Invites:BaseUrl` (the address invite links start with).
+
 ## Building and testing
 
 | What | Command | Where |
@@ -102,7 +120,9 @@ The quick start runs on SQLite, and the tests need no database at all
 | Frontend format check | `npm run format:check` | `frontend/` |
 | End-to-end type check | `npm run typecheck` | `e2e/` |
 | End-to-end behaviour tests | `npm test` | `e2e/` |
-| Component parity with the mocks | `npm run parity` | `e2e/` (from the first component on) |
+| Component parity with the mocks | `npm run parity` | `e2e/` |
+| Refresh the recorded API answers | `npm run record-api` | `e2e/`, with `pwsh eng/Start-E2eApi.ps1` running |
+| Check the token copy against the design system | `npm run design:check` | `frontend/` |
 | Visual, responsive and accessibility sweeps | `npm run sweeps` | `e2e/` (repository owner, by hand only) |
 
 - The backend tests run on EF Core InMemory and need no database.
@@ -119,8 +139,9 @@ The quick start runs on SQLite, and the tests need no database at all
   ([ADR 0008](docs/adr/0008-component-parity-specs.md)): one spec per component of the
   `components` library, compared with the mocks at 360 px and 1280 px in both themes.
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the backend tests, the frontend lint,
-format check and build, and the behaviour specs on every push to `main` and every pull request.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the backend tests, the token check, the frontend lint,
+format check and build, the behaviour specs and the component parity specs on every push to
+`main` and every pull request.
 
 ## Repository structure
 

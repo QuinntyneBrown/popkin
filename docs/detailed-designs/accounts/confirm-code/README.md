@@ -69,6 +69,20 @@ L2-053).
 - API integration tests on InMemory, with the fixed `ICodeGenerator` and the capturing `ICodeSender`, cover each outcome and problem code: match, mismatch with `attemptsLeft`, a sixth attempt that is correct but refused, expiry after 10 minutes (with `TimeProvider` advanced), single use, superseding after resend, resend inside 30 seconds and the sixth code in an hour.
 - Playwright specs drive `e2e/pages/verify-code.page.ts` for typing, pasting, non-digit input, each error state and the countdown, with time controlled by the Playwright clock.
 
+### Open questions settled in journey 1
+
+- **Email wording** — "We emailed 6 digits to {email}." and "Use a different email".
+- **Copy with no mock** — `code_attempts_exhausted`: "Too many tries. Send a new code to try
+  again."; `code_used`: "That code has been used. Send a new code."; a failed check: "We couldn’t
+  check your code. Try again."; the resend toast: "New code sent" / "Check your messages for the
+  6 digits."
+- **Error announcement** — the code field's error is its own `role="alert"`, because the code
+  screen has no form summary.
+- **Digits only** — the field drops anything that is not a digit as it is typed, before the page
+  sees the value, so fast typing cannot race the filter.
+- **`NameRequired`** — sign up always sends the name, so journey 1 never meets it; the sign-in
+  journey builds the screen that asks for it.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

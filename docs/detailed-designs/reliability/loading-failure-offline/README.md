@@ -230,6 +230,12 @@ success toast leaves after 8 seconds and a danger toast stays. Backend integrati
 InMemory provider cover `UnexpectedExceptionHandler` by injecting a fault through
 `IAppDbContext` (ADR 0005).
 
+### Built in journey 1
+
+- `UnexpectedExceptionHandler` and `ReferenceCode`, `ErrorScreens.showServerError()` and the
+  server-error page. The created screen is the first screen to hand a 5xx read to it. The rest of
+  this design (offline cache, `screenLoad()`, drafts) arrives with the screens that need it.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

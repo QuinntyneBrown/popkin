@@ -56,6 +56,16 @@ front-end guard and interceptor.
 - API integration tests on InMemory sign in through the code endpoints, then assert: the `Set-Cookie` attributes (`HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/`, expiry 30 days ahead); 401 on a private endpoint without a cookie; 401 after the session is revoked or expires (with `TimeProvider` advanced); 403 `cross_site_request` for a `POST` with a foreign `Origin`; 200 for each anonymous endpoint without a cookie.
 - Playwright specs open a private route with `GET /api/auth/session` stubbed to 401 and assert the sign-in screen opens and, after confirming, the requested screen opens.
 
+### Open questions settled in journey 1
+
+- **Expiry** — absolute: 30 days from sign in, no sliding (`SlidingExpiration = false`).
+- **SameSite** — changed from `Lax` to `Strict`, with `__Host-popkin`, `Secure`, `HttpOnly` and
+  `Path=/`.
+- **Same-site proof** — `SameSiteRequestMiddleware` as designed; a request with neither
+  `Sec-Fetch-Site` nor `Origin` (a non-browser client) is accepted, because only a browser carries
+  the cookie into a cross-site request, and browsers send one of the two.
+- **`/join`** — decided by the join-by-code journey.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |
