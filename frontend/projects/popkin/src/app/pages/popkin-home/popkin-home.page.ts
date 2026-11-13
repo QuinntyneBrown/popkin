@@ -8,7 +8,7 @@ import {
   input,
   untracked,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   AvatarView,
   CallBannerStore,
@@ -91,6 +91,7 @@ export class PopkinHomePage {
   private readonly unread = inject(UnreadTracker);
   private readonly errors = inject(ErrorScreens);
   private readonly dialog = inject(Dialog);
+  private readonly router = inject(Router);
 
   protected readonly popkin = this.store.popkin;
   protected readonly accent = computed(() => {
@@ -170,6 +171,13 @@ export class PopkinHomePage {
     // L2-051 AC1: someone who is not a member cannot tell the Popkin exists.
     effect(() => {
       if (this.store.state() === 'not-found') untracked(() => this.errors.showNotFound());
+    });
+    // L2-045 AC5: a wrapped-up Popkin shows its recap first.
+    effect(() => {
+      if (this.store.state() !== 'wrapped-up') return;
+      untracked(
+        () => void this.router.navigate(['/p', this.popkinId(), 'recap'], { replaceUrl: true }),
+      );
     });
   }
 

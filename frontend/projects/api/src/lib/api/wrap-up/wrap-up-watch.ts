@@ -10,8 +10,7 @@ const TICK_MS = 30_000;
  * Tells the app that a Popkin wrapped up while it was open (L2-044 AC4). The hub says so when
  * its Host wraps it up. Nothing says so when its time runs out, since the Worker holds no
  * connection (ADR 0015): once the end of the Popkin being looked at has passed, the Popkin
- * is read every 30 seconds until it has wrapped up. A screen whose request was refused
- * because the Popkin had wrapped up reports it here too.
+ * is read every 30 seconds until it has wrapped up.
  */
 @Injectable({ providedIn: 'root' })
 export class WrapUpWatch {

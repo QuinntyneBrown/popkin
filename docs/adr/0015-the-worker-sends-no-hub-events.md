@@ -28,8 +28,8 @@ every client already knows.
   a minute and a half of the end, with no reload.
 - **A wrap-up by the Host is still sent over the hub** (`PopkinWrappedUp`), by the API, and
   moves every open screen at once.
-- **A request refused with `409 popkin_wrapped_up`** tells the same watch, so a member who acts
-  in the gap is moved to the recap too.
+- **A member who acts in the gap** is refused with `409 popkin_wrapped_up`, and the screen they
+  are on says so as it did before; the watch moves them at its next reading.
 - The album's zip is followed by asking for its progress each second, not by an event.
 
 ## Consequences
