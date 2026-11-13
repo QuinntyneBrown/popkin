@@ -50,7 +50,8 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > call for the whole Popkin with one tap, the others join from a banner on the home and in the
 > chat, and each mutes, turns the camera off, leaves, or minimises the call and returns to it;
 > whoever is speaking has a ring round their tile.
-> <!-- Watch it: the video of journey 7 goes here when it exists. -->
+> [Watch it](docs/videos/07-journey-07-group-call/07-journey-07-group-call.mp4)
+> (2 min 16 s, with sound).
 > The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 

@@ -250,6 +250,7 @@ or design that settled it.
 | 32 | No media relay was exercised by any test. Calls were checked by hand between two browsers on one machine, which connect directly; the credentials are proved by their signature only ([ADR 0014](../adr/0014-calls-are-a-mesh.md), [`docs/deployment.md`](../deployment.md)) | First deployment with calls on the public internet | |
 | 33 | Calls have no instrument on the `Popkin` meter, and a refused signal is not counted by `popkin.rate_limit.rejections`, which is not built ([ADR 0012](../adr/0012-opentelemetry.md), [Abuse limits](security/abuse-limits/README.md)) | None | |
 | 34 | The diagrams of [Group call](calls/group-call/README.md) and [Call controls](calls/call-controls/README.md) were not redrawn after journey 7. They show `CALL_SESSION` and `WebRtcCallSession`, a `threadId` and a `Kind`, and events without the Popkin's id; each design says so above its diagrams | None | |
+| 35 | Alone on a call on a phone shorter than about 980 px, "Invite to call" under "Waiting for the others" starts beneath the controls and shows only after scrolling. The mock (`video-call/empty.html`) draws it so: the tile and the message each keep the call's minimum height. "Invite to call" in the top bar is always in view ([Group call](calls/group-call/README.md)); found in journey 7 | None | |
 
 Settled so far:
 
