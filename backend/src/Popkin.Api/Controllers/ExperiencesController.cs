@@ -98,6 +98,21 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
         return Ok(await sender.Send(new RateExperienceCommand(popkinId, experienceId, stars), cancellationToken));
     }
 
+    /// <summary>
+    /// Says the caller is keen on something the group wants to do (L2-042 AC2) and answers who is
+    /// keen. Repeating it changes nothing. Counted with rating.
+    /// </summary>
+    [HttpPut("{experienceId:guid}/keen")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<KeenDto>> Keen(Guid popkinId, Guid experienceId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SetKeenCommand(popkinId, experienceId, Keen: true), cancellationToken));
+
+    /// <summary>Takes back the caller's keen (L2-042 AC3) and answers who is keen. Counted with rating.</summary>
+    [HttpDelete("{experienceId:guid}/keen")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<KeenDto>> NotKeen(Guid popkinId, Guid experienceId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SetKeenCommand(popkinId, experienceId, Keen: false), cancellationToken));
+
     /// <summary>Adds a few words to the caller's rating, or replaces the ones they had (L2-041), counted with rating.</summary>
     [HttpPut("{experienceId:guid}/my-rating/comment")]
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]

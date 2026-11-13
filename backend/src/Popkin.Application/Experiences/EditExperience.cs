@@ -58,7 +58,8 @@ public sealed class EditExperienceCommandHandler(
         // Only now does the picture it had belong to nothing.
         await ExperiencePictures.DeleteAsync(store, replaced);
         var score = await ExperienceScores.OfAsync(db, experience, cancellationToken);
-        return ExperienceCardDto.Of(experience, popkin, membership, score, store);
+        var keenOf = await KeenOf.CountsAsync(db, [experience], cancellationToken);
+        return ExperienceCardDto.Of(experience, popkin, membership, score, keenOf(experience), store);
     }
 
     public static ProblemException NotSharer() => new(403, "not_experience_sharer", "Only the member who shared this can do that.");

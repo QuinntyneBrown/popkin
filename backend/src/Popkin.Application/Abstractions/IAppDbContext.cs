@@ -28,6 +28,8 @@ public interface IAppDbContext
 
     DbSet<ExperienceRating> ExperienceRatings { get; }
 
+    DbSet<ExperienceKeen> ExperienceKeens { get; }
+
     DbSet<Call> Calls { get; }
 
     DbSet<CallParticipant> CallParticipants { get; }

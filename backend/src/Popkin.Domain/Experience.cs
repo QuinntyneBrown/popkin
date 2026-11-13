@@ -59,6 +59,9 @@ public sealed class Experience
     /// <summary>Something the group did and a restaurant are rated; something it wants to do is not.</summary>
     public bool IsRateable => Kind != ExperienceKind.Want;
 
+    /// <summary>Members say they are keen on something the group wants to do, and on nothing else (L2-042).</summary>
+    public bool IsWanted => Kind == ExperienceKind.Want;
+
     /// <summary>Only its sharer edits an experience (L2-040 AC6).</summary>
     public bool CanBeEditedBy(Membership member) => member.Id == SharerMembershipId;
 
@@ -86,6 +89,12 @@ public sealed class Experience
         IsRateable
             ? ExperienceRating.Give(Id, membershipId, stars, now)
             : throw new InvalidOperationException("Something the group wants to do is not rated.");
+
+    /// <summary>A member says they are keen on this idea (L2-042 AC2).</summary>
+    public ExperienceKeen AddKeen(Guid membershipId, DateTimeOffset now) =>
+        IsWanted
+            ? ExperienceKeen.Say(Id, membershipId, now)
+            : throw new InvalidOperationException("Only something the group wants to do takes keen.");
 
     public static Experience Share(
         Guid popkinId,

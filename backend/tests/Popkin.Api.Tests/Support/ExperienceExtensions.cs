@@ -85,6 +85,20 @@ public static class ExperienceExtensions
         return await response.Content.ReadFromJsonAsync<JsonElement>();
     }
 
+    public static Task<HttpResponseMessage> KeenAsync(this HttpClient member, Guid popkinId, Guid experienceId) =>
+        member.PutAsync($"/api/popkins/{popkinId}/experiences/{experienceId}/keen", null);
+
+    public static Task<HttpResponseMessage> NotKeenAsync(this HttpClient member, Guid popkinId, Guid experienceId) =>
+        member.DeleteAsync($"/api/popkins/{popkinId}/experiences/{experienceId}/keen");
+
+    /// <summary>Says the member is keen, which must be saved, and returns the answer.</summary>
+    public static async Task<JsonElement> KeenedAsync(this HttpClient member, Guid popkinId, Guid experienceId)
+    {
+        var response = await member.KeenAsync(popkinId, experienceId);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<JsonElement>();
+    }
+
     public static Guid Id(this JsonElement element) => element.GetProperty("id").GetGuid();
 
     public static List<string?> Titles(this JsonElement cards) =>

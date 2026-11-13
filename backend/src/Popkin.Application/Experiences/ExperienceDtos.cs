@@ -25,8 +25,8 @@ public sealed record ExperienceCommentDto(Guid MembershipId, string FirstName, A
 /// <summary>
 /// An experience as its card shows it (L2-037): the Popkin's emoji and colour stand in the
 /// picture's place when it has none (L2-040 AC5), and a picture is its thumbnail at an expiring
-/// address (L2-051 AC2); the average is null until someone rates it.
-/// Nobody can say they are keen until journey 20, so the keen count is 0.
+/// address (L2-051 AC2); the average is null until someone rates it, and the keen count is that
+/// of an idea (L2-037 AC3).
 /// </summary>
 public sealed record ExperienceCardDto(
     Guid Id,
@@ -42,7 +42,7 @@ public sealed record ExperienceCardDto(
     int RatingCount,
     int KeenCount)
 {
-    public static ExperienceCardDto Of(Experience experience, PopkinSpace popkin, Membership sharer, ExperienceScore score, IPhotoStore store) =>
+    public static ExperienceCardDto Of(Experience experience, PopkinSpace popkin, Membership sharer, ExperienceScore score, int keenCount, IPhotoStore store) =>
         new(
             experience.Id,
             experience.Kind,
@@ -55,5 +55,5 @@ public sealed record ExperienceCardDto(
             experience.SharedAt,
             score.Average,
             score.Count,
-            KeenCount: 0);
+            keenCount);
 }

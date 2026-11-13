@@ -50,7 +50,7 @@ public sealed class ViewExperienceTests
         Assert.Equal(0, detail.GetProperty("comments").GetArrayLength());
         Assert.Equal(
             [
-                "average", "canDelete", "canEdit", "canRate", "colour", "comments", "emoji", "id", "keenCount", "kind", "myRating", "pictureUrl",
+                "average", "canDelete", "canEdit", "canKeen", "canRate", "colour", "comments", "emoji", "id", "keen", "keenCount", "kind", "myRating", "pictureUrl",
                 "place", "ratingCount", "score", "sharedAt", "sharedBy", "title", "when",
             ],
             detail.EnumerateObject().Select(p => p.Name).Order());

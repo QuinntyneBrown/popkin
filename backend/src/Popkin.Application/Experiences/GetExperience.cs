@@ -27,7 +27,8 @@ public sealed record MyRatingDto(int Stars, string? Comment);
 /// <summary>
 /// An experience as its page shows it (L2-038): the card's fields with the picture at display
 /// size, its place, the group's score, the reader's own rating, what people said, the newest
-/// first, and what the reader can do. Nothing can be done once the Popkin has wrapped up (L2-045).
+/// first, who is keen on an idea (L2-042 AC1), and what the reader can do. Nothing can be done
+/// once the Popkin has wrapped up (L2-045).
 /// </summary>
 public sealed record ExperienceDetailDto(
     Guid Id,
@@ -46,7 +47,9 @@ public sealed record ExperienceDetailDto(
     ExperienceScoreDto Score,
     MyRatingDto? MyRating,
     IReadOnlyList<ExperienceCommentDto> Comments,
+    KeenDto? Keen,
     bool CanRate,
+    bool CanKeen,
     bool CanEdit,
     bool CanDelete);
 
@@ -77,6 +80,7 @@ public sealed class GetExperienceQueryHandler(IAppDbContext db, IMembershipGuard
             : [];
         // A member who has left still said what they said.
         var authorIds = said.Select(r => r.MembershipId).ToList();
+        var keen = await KeenOf.OfAsync(db, store, experience, membership, cancellationToken);
         var authors = await db.Memberships.AsNoTracking().Where(m => authorIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, cancellationToken);
 
         return new ExperienceDetailDto(
@@ -92,11 +96,13 @@ public sealed class GetExperienceQueryHandler(IAppDbContext db, IMembershipGuard
             experience.SharedAt,
             score.Average,
             score.Count,
-            KeenCount: 0,
+            keen?.Count ?? 0,
             ExperienceScoreDto.Of(score),
             mine is null || !experience.IsRateable ? null : new MyRatingDto(mine.Stars, mine.Comment),
             [.. said.Select(r => ExperienceCommentDto.Of(r, authors[r.MembershipId], store))],
+            keen,
             CanRate: active && experience.IsRateable,
+            CanKeen: active && experience.IsWanted,
             CanEdit: active && experience.CanBeEditedBy(membership),
             CanDelete: active && experience.CanBeDeletedBy(membership));
     }
