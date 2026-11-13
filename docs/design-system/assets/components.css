@@ -1127,7 +1127,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .who-chip { display: inline-flex; align-items: center; gap: var(--space-2); height: var(--control-height-md); padding: 0 var(--space-4) 0 var(--space-1); border: 0; border-radius: var(--radius-full); background: var(--color-bg-subtle); color: var(--color-fg-muted); font: var(--font-weight-semibold) var(--font-size-sm-plus) / 1 var(--font-family-sans); }
 .who-chip[aria-pressed="true"] { background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: 0 0 0 var(--border-width-thick) var(--color-border-focus); }
 .chip .story-tag__dot { margin-right: var(--space-2); }
-.chip[aria-checked="true"] { background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: 0 0 0 var(--border-width-thick) var(--color-border-focus); }
+.dialog--panel .chip[aria-checked="true"] { background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: 0 0 0 var(--border-width-thick) var(--color-border-focus); }
 .dialog__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 @media (min-width: 40rem) {
   .plan-header__row { flex-direction: row; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3) var(--space-6); }
