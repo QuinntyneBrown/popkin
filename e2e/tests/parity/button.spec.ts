@@ -1,3 +1,4 @@
+import { asVisitor } from '../../fixtures/journeys';
 import { experienceStates } from '../../fixtures/experience-states';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { theMockHome } from '../../fixtures/home';
@@ -90,9 +91,24 @@ parity('button', [
     name: 'sharing',
     region: (page) => new ShareExperienceDialog(page).action,
   },
-  { key: 'landing', name: 'primary-sm-link', region: (page) => new LandingPage(page).navStart },
-  { key: 'landing', name: 'primary-link', region: (page) => new LandingPage(page).heroStart },
-  { key: 'landing', name: 'on-accent-link', region: (page) => new LandingPage(page).freeStart },
+  {
+    key: 'landing',
+    before: asVisitor,
+    name: 'primary-sm-link',
+    region: (page) => new LandingPage(page).navStart,
+  },
+  {
+    key: 'landing',
+    before: asVisitor,
+    name: 'primary-link',
+    region: (page) => new LandingPage(page).heroStart,
+  },
+  {
+    key: 'landing',
+    before: asVisitor,
+    name: 'on-accent-link',
+    region: (page) => new LandingPage(page).freeStart,
+  },
   {
     key: 'welcome',
     name: 'secondary-block-link',

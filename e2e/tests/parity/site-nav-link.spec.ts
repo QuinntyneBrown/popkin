@@ -1,3 +1,4 @@
+import { asVisitor } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { LandingPage } from '../../pages/landing.page';
 
@@ -5,12 +6,14 @@ import { LandingPage } from '../../pages/landing.page';
 parity('site-nav-link', [
   {
     key: 'landing',
+    before: asVisitor,
     name: 'from-m',
     region: (page) => new LandingPage(page).navHowItWorks,
     widths: [1280],
   },
   {
     key: 'landing',
+    before: asVisitor,
     name: 'from-s',
     region: (page) => new LandingPage(page).navSignIn,
     widths: [1280],
