@@ -205,7 +205,6 @@ export const routes: Routes = [
       },
     ],
   },
-  // Until the list of conversations is built (journey 11), Chat is the Everyone thread.
   {
     path: 'popkins',
     canActivate: [signedInGuard],

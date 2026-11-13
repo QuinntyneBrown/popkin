@@ -458,6 +458,18 @@ test.describe('a section of the Popkin home that fails', () => {
 });
 
 test.describe('the tabs and the layout of the Popkin home', () => {
+  // L2-027 AC3, L2-019 AC7
+  test('counts the member’s unread direct messages on the Chat tab, not on the Chat card', async ({
+    page,
+  }) => {
+    await maraAtHome(page, (home) => (home.chat.direct(people.walt).unreadCount = 2));
+    await page.goto(homeUrl);
+    const home = new PopkinHomePage(page);
+
+    await expect(home.newCount).toHaveText('3 new');
+    await expect(home.unreadCount).toHaveText('5');
+  });
+
   // L2-019 AC7
   test('shows the four tabs with Home current and the unread count on Chat', async ({ page }) => {
     await maraAtHome(page);

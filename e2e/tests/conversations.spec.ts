@@ -78,7 +78,7 @@ test.describe('the Chat tab', () => {
   test('marks an unread direct message with a bold name and a dot named "Unread"', async ({
     page,
   }) => {
-    await maraAtHome(page);
+    await maraAtHome(page, (home) => (home.chat.direct(people.walt).unreadCount = 1));
     await page.goto(conversationsUrl);
     const chat = new ConversationsPage(page);
 

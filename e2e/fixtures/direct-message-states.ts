@@ -25,6 +25,7 @@ interface DirectMessageState {
  */
 function theMockList(chat: Chat): void {
   chat.thread.unreadCount = 3;
+  chat.direct(people.walt).unreadCount = 1;
   chat.messages = [
     ...theMockThread().slice(0, 4),
     message(people.mara, 'last call for the canoe sign-up 🛶', saturday(9, 24)),

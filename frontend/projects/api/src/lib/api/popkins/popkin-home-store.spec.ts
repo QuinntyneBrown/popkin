@@ -15,6 +15,7 @@ import { CHAT_API } from '../chat/chat-api';
 import { EXPERIENCES_API } from '../experiences/experiences-api';
 import { PHOTOS_API } from '../photos/photos-api';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
+import { UnreadTracker } from '../chat/unread-tracker';
 import { PopkinHomeStore } from './popkin-home-store';
 import { POPKINS_API } from './popkins-api';
 
@@ -75,6 +76,20 @@ class Fake {
   getHome = () => this.answer('home', this.home);
   getMembers = () => this.answer('members', this.members);
   getEveryonePreview = () => this.answer('preview', this.preview);
+  /** Two unread in Walt's direct message, beside the three of Everyone. */
+  listThreads = () =>
+    of({
+      viewerMembershipId: 'm-mara',
+      everyone: { threadId: 't', latest: null, unreadCount: 3 },
+      direct: [
+        {
+          threadId: 't-walt',
+          other: {} as never,
+          latest: { text: 'hi', isMine: false, sentAt: '2026-09-12T09:00:00Z' },
+          unreadCount: 2,
+        },
+      ],
+    });
   getSummary = () => this.answer('photos', this.photos);
 }
 
@@ -275,6 +290,15 @@ describe('PopkinHomeStore', () => {
     it('leaves the chat alone for a message of another thread', () => {
       realtime.messageAdded$.next(added('elsewhere'));
       expect(api.asked.preview).toBe(1);
+    });
+
+    it('counts the member’s direct messages on the Chat tab, not on the Chat card', () => {
+      const unread = TestBed.inject(UnreadTracker);
+      expect(unread.forPopkin('p')).toBe(5);
+      expect(store.newCount()).toBe(3);
+
+      realtime.threadRead$.next('t-walt');
+      expect(unread.forPopkin('p')).toBe(3);
     });
 
     it('is zero once the thread is read, here or on another device', () => {

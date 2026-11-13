@@ -173,6 +173,28 @@ export class PopkinHomeStore {
       });
       return preview.messages.length === 0;
     });
+    this.readDirect();
+  }
+
+  /**
+   * The member's direct messages, so the Chat tab counts them as well (L2-027 AC3): each
+   * thread's count goes to the unread tracker, which follows them from here. A list that
+   * cannot be read leaves the count to Everyone.
+   */
+  private readDirect(): void {
+    this.chatApi.listThreads(this.popkinId).subscribe({
+      next: (threads) => {
+        for (const thread of threads.direct) {
+          this.unread.set({
+            popkinId: this.popkinId,
+            threadId: thread.threadId,
+            viewerMembershipId: threads.viewerMembershipId,
+            count: thread.unreadCount,
+          });
+        }
+      },
+      error: () => undefined,
+    });
   }
 
   private readPhotos(quietly: boolean): void {
