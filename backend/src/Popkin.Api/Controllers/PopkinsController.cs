@@ -31,6 +31,11 @@ public sealed class PopkinsController(ISender sender) : ControllerBase
     public async Task<ActionResult<PopkinHomeDto>> GetHome(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetPopkinHomeQuery(popkinId), cancellationToken));
 
+    /// <summary>What the wrap-up screen tells the Host the recap will count (L2-043 AC1).</summary>
+    [HttpGet("{popkinId:guid}/wrap-up")]
+    public async Task<ActionResult<WrapUpPreviewDto>> GetWrapUpPreview(Guid popkinId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetWrapUpPreviewQuery(popkinId), cancellationToken));
+
     public sealed record WrapUpPopkinRequest(bool? KeepPhotos);
 
     /// <summary>The Host wraps the Popkin up, keeping its photo album or not (L2-043).</summary>
