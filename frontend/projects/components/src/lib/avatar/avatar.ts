@@ -1,5 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 
+/** What draws a person's avatar where a component is given the person: a message, a list. */
+export interface PersonAvatar {
+  initials: string;
+  /** The `data-accent` of the person's colour. */
+  accent: string;
+  photoUrl: string | null;
+}
+
 /**
  * Avatar (docs/design-system/components/avatar.html): a person's photograph, or their initials
  * on their colour. Decoration: the name beside it names the person. Set `data-accent` on it or

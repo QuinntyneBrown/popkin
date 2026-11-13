@@ -1,0 +1,118 @@
+:host {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+:host(.msg--mine) {
+  justify-content: flex-end;
+}
+
+/* The room of the avatar, under the first message of a run. */
+.msg__gap {
+  width: var(--space-8);
+  flex: none;
+}
+
+.msg__col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: var(--layout-bubble-max);
+  min-width: 0;
+}
+
+:host(.msg--mine) .msg__col {
+  align-items: flex-end;
+}
+
+.msg__name {
+  margin: 0 0 var(--space-1) var(--space-3);
+  font: var(--text-meta);
+  color: var(--color-fg-muted);
+}
+
+.bubble {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-xs);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  box-shadow: var(--shadow-1);
+  font: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+:host(.msg--mine) .bubble {
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-xs);
+  background: var(--accent);
+  color: var(--color-fg-on-popkin);
+  box-shadow: none;
+}
+
+/* The text as it was written: its line breaks kept, nothing in it read as markup (L2-052). */
+.bubble__text {
+  padding: var(--space-2-5) var(--space-4);
+  white-space: pre-wrap;
+}
+
+/* Not sent: a dashed edge, and the status line under it says so in words. */
+.bubble--failed {
+  outline: var(--border-width-thick) dashed var(--color-danger-border);
+  opacity: 0.85;
+}
+
+/* On its way: a little fainter until it is sent. */
+:host([data-state='sending']) .bubble {
+  opacity: 0.7;
+}
+
+.msg__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: calc(-1 * var(--space-2)) 0 0 var(--space-2);
+}
+
+:host(.msg--mine) .msg__meta {
+  flex-direction: row-reverse;
+  margin: calc(-1 * var(--space-2)) var(--space-2) 0 0;
+}
+
+.msg__time {
+  margin-top: var(--space-2);
+  padding: 0 var(--space-1);
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+}
+
+.msg__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  font: var(--text-meta);
+  color: var(--color-danger-fg);
+}
+
+/* Kept until the connection is back: nothing went wrong, so it is not in the danger colour. */
+.msg__status--waiting {
+  color: var(--color-fg-muted);
+}
+
+.msg__action {
+  border: 0;
+  background: none;
+  padding: var(--space-2);
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+}
+
+/* From M a bubble never grows wider than a comfortable line. */
+@media (min-width: 48rem) {
+  .msg__col {
+    max-width: min(var(--layout-bubble-max), var(--layout-bubble-max-wide));
+  }
+}
