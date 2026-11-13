@@ -1,0 +1,33 @@
+<div
+  pk-dialog
+  heading="Sign out of Popkin?"
+  description="You’ll need a new code to sign back in on this device."
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t sign you out.">You’re still signed in. Try again.</div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="signOut()"
+  >
+    {{ busy() ? 'Signing out…' : 'Sign out' }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="quiet"
+    cdkFocusInitial
+    [block]="true"
+    [disabled]="busy()"
+    (click)="stay()"
+  >
+    Stay signed in
+  </button>
+</div>

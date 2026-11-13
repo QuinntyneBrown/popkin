@@ -13,7 +13,11 @@ export const unauthorizedInterceptor: HttpInterceptorFn = (request, next) => {
   const router = inject(Router);
   const sessions = inject(SessionStore);
   const snapshot = inject(POPKINS_SNAPSHOT);
-  const exempt = request.url === '/api/auth/session' || request.url.startsWith('/api/auth/codes');
+  // Signing out answers 401 when the session had already ended: the dialog signs out all the same.
+  const exempt =
+    request.url === '/api/auth/session' ||
+    request.url === '/api/auth/sign-out' ||
+    request.url.startsWith('/api/auth/codes');
   return next(request).pipe(
     catchError((error: unknown) => {
       if (!exempt && error instanceof HttpErrorResponse && error.status === 401) {

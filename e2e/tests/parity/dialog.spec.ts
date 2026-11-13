@@ -12,7 +12,9 @@ import { copyTheInvite, openTheInvite, theMockHome } from '../../fixtures/home';
 import { InviteDialog } from '../../pages/invite.dialog';
 import type { Page } from '@playwright/test';
 import { howLongForLakeside } from '../../fixtures/journeys';
+import { accountStates } from '../../fixtures/account-states';
 import { parity } from '../../fixtures/parity';
+import { SignOutDialog } from '../../pages/sign-out.dialog';
 import { EndDateDialog } from '../../pages/end-date.dialog';
 import { HowLongPage } from '../../pages/how-long.page';
 import { PopkinSettingsDialog } from '../../pages/popkin-settings.dialog';
@@ -206,5 +208,16 @@ parity('dialog', [
     ...wrapUpStates.popkinSettings,
     name: 'popkin-settings',
     region: (page) => new PopkinSettingsDialog(page).panel,
+  },
+  // Sign out: the focus starts on "Stay signed in".
+  {
+    key: 'signOut',
+    ...accountStates.signOut,
+    name: 'sign-out',
+    region: (page) => new SignOutDialog(page).panel,
+    prepare: async (page) => {
+      await page.keyboard.press('Shift');
+      await new SignOutDialog(page).stay.focus();
+    },
   },
 ]);

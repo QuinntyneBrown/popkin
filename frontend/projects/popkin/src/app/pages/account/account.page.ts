@@ -9,9 +9,11 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { Dialog } from '@angular/cdk/dialog';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { SignOutDialog } from '../../dialogs/sign-out/sign-out.dialog';
 import {
   AccountStore,
   PHOTO_ACCEPT,
@@ -72,6 +74,7 @@ const NAME_MESSAGE = 'Enter a name so people know who you are.';
 export class AccountPage {
   protected readonly store = inject(AccountStore);
   protected readonly theme = inject(THEME_PREFERENCES);
+  private readonly dialog = inject(Dialog);
 
   protected readonly accept = PHOTO_ACCEPT;
   protected readonly nameMessage = NAME_MESSAGE;
@@ -158,6 +161,16 @@ export class AccountPage {
 
   protected chooseTheme(choice: string): void {
     this.theme.set(choice as ThemeChoice);
+  }
+
+  /** "Sign out" asks first (L2-048 AC5); focus comes back here when it closes (L2-057 AC2). */
+  protected signOut(): void {
+    this.dialog.open(SignOutDialog, {
+      ariaLabelledBy: 'dlg-title',
+      // pk-dialog draws its own backdrop, as the mocks do.
+      hasBackdrop: false,
+      ariaModal: true,
+    });
   }
 
   private releasePreview(): void {

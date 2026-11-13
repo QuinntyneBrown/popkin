@@ -92,7 +92,7 @@
           }
         </form>
         <div pk-menu-list [separated]="true">
-          <button pk-menu-item type="button" icon="sign-out">Sign out</button>
+          <button pk-menu-item type="button" icon="sign-out" (click)="signOut()">Sign out</button>
           <button pk-menu-item type="button" icon="trash" [danger]="true">Delete my account</button>
         </div>
       }

@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import { AccountPage } from '../pages/account.page';
+import { SignOutDialog } from '../pages/sign-out.dialog';
 import { theMockAccount } from './account';
 import { hold } from './stubs';
 import type { RouteKey } from './routes';
@@ -44,6 +45,13 @@ export const accountStates = {
       await account.name.fill('Mara O.');
       await account.save.click();
       await account.saved.waitFor();
+    },
+  },
+  signOut: {
+    before: theMockAccount,
+    app: async (page: Page) => {
+      await new AccountPage(page).signOut.click();
+      await new SignOutDialog(page).panel.waitFor();
     },
   },
 } satisfies Partial<Record<RouteKey, AccountState>>;
