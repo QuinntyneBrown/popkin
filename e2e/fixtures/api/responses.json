@@ -141,7 +141,10 @@
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
-      "namedMembers": ["Mara", "Walt"],
+      "namedMembers": [
+        "Mara",
+        "Walt"
+      ],
       "othersCount": 1
     }
   },
@@ -959,6 +962,54 @@
     }
   },
   "DELETE /api/popkins/dc8d73e9-ff1d-4b1e-89c0-0d06ddc3a2f3/members/me": {
+    "status": 204
+  },
+  "GET /api/account/deletion-impact": {
+    "status": 200,
+    "body": {
+      "hostedActivePopkins": [
+        {
+          "popkinId": "3257a302-af63-4078-b01c-77d977d115c1",
+          "name": "Lakeside Weekend",
+          "emoji": "🏕️"
+        }
+      ]
+    }
+  },
+  "PATCH /api/account": {
+    "status": 200,
+    "body": {
+      "personId": "9632264e-690f-402b-9f21-eb2062f2da94",
+      "name": "Mara Okafor",
+      "photoUrl": null,
+      "channel": "Phone",
+      "destination": "(415) 555-0148"
+    }
+  },
+  "GET /api/account": {
+    "status": 200,
+    "body": {
+      "personId": "9632264e-690f-402b-9f21-eb2062f2da94",
+      "name": "Mara Okafor",
+      "photoUrl": null,
+      "channel": "Phone",
+      "destination": "(415) 555-0148"
+    }
+  },
+  "PUT /api/account/photo": {
+    "status": 200,
+    "body": {
+      "personId": "9632264e-690f-402b-9f21-eb2062f2da94",
+      "name": "Mara Okafor",
+      "photoUrl": "/api/files/avatars/bee9c293052b4e769841a27490bd601a.jpg?expires=1794612694&signature=dReGL22tf6WTC8jqBo1eSnPc741SOXQGcRjvtiK2nws",
+      "channel": "Phone",
+      "destination": "(415) 555-0148"
+    }
+  },
+  "POST /api/auth/sign-out": {
+    "status": 204
+  },
+  "DELETE /api/account": {
     "status": 204
   }
 }
