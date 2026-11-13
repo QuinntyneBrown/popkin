@@ -1,5 +1,6 @@
 import { parity } from '../../fixtures/parity';
-import { maraWithPhoto } from '../../fixtures/journeys';
+import { howLongForLakeside, maraWithPhoto } from '../../fixtures/journeys';
+import { HowLongPage } from '../../pages/how-long.page';
 import { NameYourPopkinPage } from '../../pages/name-your-popkin.page';
 import { SignUpPage } from '../../pages/sign-up.page';
 
@@ -17,6 +18,16 @@ parity('split-aside', [
     region: (page) => new NameYourPopkinPage(page).picture,
     before: maraWithPhoto,
     app: (page) => new NameYourPopkinPage(page).chooseLakeside(),
+    widths: [1280],
+  },
+  {
+    key: 'howLongForever',
+    name: 'tint-icon',
+    region: (page) => new HowLongPage(page).picture,
+    app: async (page) => {
+      await howLongForLakeside(page);
+      await new HowLongPage(page).option('Keep it going').click();
+    },
     widths: [1280],
   },
 ]);

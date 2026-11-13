@@ -1,0 +1,13 @@
+<div
+  class="timeline__bar"
+  aria-hidden="true"
+  [class.timeline__bar--day]="span() === 'day'"
+  [class.timeline__bar--weekend]="span() === 'weekend'"
+  [class.timeline__bar--custom]="span() === 'custom'"
+  [class.timeline__bar--forever]="span() === 'forever'"
+>
+  <span class="timeline__fill"></span>
+</div>
+<div class="timeline__ends">
+  <span>{{ start() }}</span><span>{{ end() }}</span>
+</div>
