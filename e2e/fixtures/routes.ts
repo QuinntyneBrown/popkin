@@ -14,6 +14,7 @@ const created = responses['POST /api/popkins'].body;
 const invite = `/i/${created.inviteCode}`;
 const chat = `/p/${created.id}/chat/everyone`;
 const home = `/p/${created.id}`;
+const call = `${home}/call`;
 const photos = `${home}/photos`;
 // The photo the mocks open: the first of the album fixture.
 const photo = `${photos}/00000000-0000-4000-a000-000000000018`;
@@ -75,6 +76,14 @@ export const routes = {
   popkinHomeEmpty: { app: home, mock: 'pages/popkin-home/empty.html' },
   popkinHomeError: { app: home, mock: 'pages/popkin-home/error.html' },
   popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
+  bannerInfo: { app: home, mock: 'notifications/banner/info.html' },
+  videoCall: { app: call, mock: 'pages/video-call/default.html' },
+  videoCallTwo: { app: call, mock: 'pages/video-call/two.html' },
+  videoCallMuted: { app: call, mock: 'pages/video-call/muted.html' },
+  videoCallCameraOff: { app: call, mock: 'pages/video-call/camera-off.html' },
+  videoCallLoading: { app: call, mock: 'pages/video-call/loading.html' },
+  videoCallEmpty: { app: call, mock: 'pages/video-call/empty.html' },
+  videoCallError: { app: call, mock: 'pages/video-call/error.html' },
   inviteDialog: { app: home, mock: 'dialogs/invite/default.html' },
   inviteDialogCopied: { app: home, mock: 'dialogs/invite/copied.html' },
   photoAlbum: { app: photos, mock: 'pages/photo-album/default.html' },

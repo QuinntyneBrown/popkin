@@ -47,6 +47,19 @@
   color: var(--color-fg-muted);
 }
 
+/* On the dark stage the title is a little smaller and the line under it reads on black. */
+.topbar__emoji {
+  font-family: var(--font-family-emoji);
+}
+
+:host-context(.screen--stage) .topbar__title {
+  font-size: var(--font-size-md-plus);
+}
+
+:host-context(.screen--stage) .topbar__sub {
+  color: var(--color-fg-on-stage-muted);
+}
+
 .topbar__end {
   display: flex;
   align-items: center;
@@ -68,6 +81,14 @@
   /* The head of a pane beside the thread keeps the padding of a padded bar. */
   :host(.topbar--pad) {
     padding-inline: var(--space-5);
+  }
+}
+
+/* From S the bar of a call with others on it is taller and sits further in. */
+@media (min-width: 40rem) {
+  :host-context(.screen--call) {
+    height: var(--space-20);
+    padding-inline: var(--space-4);
   }
 }
 

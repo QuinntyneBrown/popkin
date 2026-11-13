@@ -1,0 +1,33 @@
+<h2 class="call-aside__heading">{{ heading() }}</h2>
+<ul class="call-aside__list">
+  @for (person of people(); track person.id) {
+    <li class="row row--short">
+      <span
+        pk-avatar
+        size="36"
+        [initials]="person.avatar?.initials ?? ''"
+        [photo]="person.avatar?.photoUrl"
+        [blank]="!person.avatar"
+        [attr.data-accent]="person.avatar?.accent"
+      ></span>
+      <span class="row__main row__title truncate">{{ person.name }}</span>
+      @switch (person.microphone) {
+        @case ('speaking') {
+          <svg pk-icon class="call-aside__microphone" name="mic" size="md" data-speaking></svg>
+          <span class="visually-hidden">{{ speakingLabel() }}</span>
+        }
+        @case ('muted') {
+          <svg pk-icon class="call-aside__microphone" name="mic-off" size="md"></svg>
+          <span class="visually-hidden">{{ mutedLabel() }}</span>
+        }
+        @default {
+          <svg pk-icon class="call-aside__microphone" name="mic" size="md"></svg>
+          <span class="visually-hidden">{{ onLabel() }}</span>
+        }
+      }
+    </li>
+  }
+</ul>
+@if (note()) {
+  <p class="call-aside__note">{{ note() }}</p>
+}

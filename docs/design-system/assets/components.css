@@ -478,6 +478,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .call-tile--speaking { border-color: color-mix(in srgb, var(--accent) 60%, var(--color-fg-on-stage)); }
 .call-tile__name { position: absolute; left: var(--space-2); bottom: var(--space-2); display: inline-flex; align-items: center; gap: var(--space-1-5); padding: var(--space-1) var(--space-2-5); border-radius: var(--radius-full); background: var(--color-bg-stage-label); font: var(--text-meta); }
 .call-tile__name .icon { width: var(--space-3); height: var(--space-3); }
+.call-tile__rest { padding: var(--space-4); font: var(--text-h3); text-align: center; } /* in .call-tile--rest, the tile that counts the people who are not shown */
 .call-controls { position: sticky; bottom: 0; flex: none; display: flex; align-items: flex-start; justify-content: center; gap: var(--space-5); padding: var(--space-5) var(--space-6) var(--space-8); background: var(--color-bg-stage); }
 .call-control { display: flex; flex-direction: column; align-items: center; gap: var(--space-1-5); font: var(--text-meta); color: var(--color-fg-on-stage-muted); }
 .call-control button, .call-control a { display: grid; place-items: center; width: var(--space-16); height: var(--space-16); border: 0; border-radius: var(--radius-full); background: var(--color-bg-stage-control); color: var(--color-fg-on-stage); }

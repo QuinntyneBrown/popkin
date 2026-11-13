@@ -5,6 +5,13 @@
     {{ text() }}
   }
 </div>
+@if (action(); as words) {
+  @if (actionLink(); as route) {
+    <a class="banner__action" [routerLink]="route">{{ words }}</a>
+  } @else {
+    <button class="banner__action" type="button" (click)="acted.emit()">{{ words }}</button>
+  }
+}
 <ng-content />
 @if (dismissible()) {
   <button
