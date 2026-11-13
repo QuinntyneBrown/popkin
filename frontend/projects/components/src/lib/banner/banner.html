@@ -1,0 +1,19 @@
+<svg pk-icon class="banner__icon" size="md" [name]="shownIcon()"></svg>
+<div class="banner__text">
+  <strong>{{ heading() }}</strong>
+  @if (text()) {
+    {{ text() }}
+  }
+</div>
+<ng-content />
+@if (dismissible()) {
+  <button
+    pk-icon-button
+    class="banner__dismiss"
+    type="button"
+    icon="close"
+    size="md"
+    label="Dismiss"
+    (click)="dismissed.emit()"
+  ></button>
+}
