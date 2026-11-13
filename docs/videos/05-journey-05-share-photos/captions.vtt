@@ -1,0 +1,97 @@
+WEBVTT
+
+00:00:02.000 --> 00:00:05.128
+A Popkin has one album, and everyone adds to it.
+
+00:00:08.000 --> 00:00:12.779
+Photos shows how many there are, and from how many people: forty-eight photos from
+
+00:00:12.779 --> 00:00:13.895
+eleven people.
+
+00:00:14.095 --> 00:00:16.801
+They are grouped by day, the latest day first.
+
+00:00:17.001 --> 00:00:21.386
+The first photo of the latest day is twice the width and height of the others.
+
+00:00:22.000 --> 00:00:23.945
+Everyone shows all the photos.
+
+00:00:24.145 --> 00:00:27.763
+Mine shows only yours, and the filter is marked as pressed.
+
+00:00:27.963 --> 00:00:32.585
+With no photos yet, Photos explains the album and offers Add photos.
+
+00:00:34.000 --> 00:00:37.372
+Choose Add, and pick up to twenty photos from your device.
+
+00:00:37.572 --> 00:00:40.455
+A dialog shows each one, with a caption field.
+
+00:00:40.655 --> 00:00:43.492
+The action counts them: Add three photos.
+
+00:00:44.000 --> 00:00:48.881
+A photo can be up to ten megabytes. This file is fourteen: it is marked with the
+
+00:00:48.881 --> 00:00:51.622
+reason and not uploaded. The others are.
+
+00:00:52.000 --> 00:00:57.063
+While photos upload, a progress bar shows how far, and the action reads Adding.
+
+00:00:57.263 --> 00:01:02.154
+If one fails, it stays in the dialog with Try again. The ones that succeeded are in
+
+00:01:02.154 --> 00:01:03.043
+the album.
+
+00:01:04.000 --> 00:01:08.037
+When someone else adds a photo, it appears in your album without a reload.
+
+00:01:12.000 --> 00:01:16.526
+Choose a photo, and it opens full screen on a dark background: who added it and
+
+00:01:16.526 --> 00:01:20.035
+when, the whole photo without cropping, and its caption.
+
+00:01:20.235 --> 00:01:23.521
+Swipe sideways, or press an arrow key, for the next one.
+
+00:01:23.721 --> 00:01:26.872
+Close, or Escape, returns you to the place you left.
+
+00:01:28.000 --> 00:01:32.399
+On a phone, the album is three photos across, and Add floats over it.
+
+00:01:34.000 --> 00:01:37.353
+From a tablet, four across, with Add photos in the header.
+
+00:01:39.000 --> 00:01:41.584
+On a laptop, five, beside the sidebar.
+
+00:01:43.500 --> 00:01:45.052
+Wider still, six.
+
+00:01:46.000 --> 00:01:50.684
+The photo grows too. On a laptop, who added it and the caption move to a panel
+
+00:01:50.684 --> 00:01:52.005
+beside the photo.
+
+00:01:54.000 --> 00:01:58.938
+What no screen shows, the tests prove: location and device data are removed from
+
+00:01:58.938 --> 00:02:00.349
+every stored file.
+
+00:02:00.549 --> 00:02:05.384
+Reactions, comments, saving and deleting come in journey fourteen. And a deployed
+
+00:02:05.384 --> 00:02:07.654
+system still needs a photo store.
+
+00:02:08.000 --> 00:02:12.521
+That is journey five. Popkin is a free platform for pop-up communities.
