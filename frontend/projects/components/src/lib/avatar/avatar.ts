@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 
 /**
  * Avatar (docs/design-system/components/avatar.html): a person's photograph, or their initials
@@ -17,18 +17,39 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
     '[class.avatar--sm]': "size() === 'sm'",
     '[class.avatar--lg]': "size() === 'lg'",
     '[class.avatar--xl]': "size() === 'xl'",
+    '[class.avatar--2xl]': "size() === '2xl'",
+    '[class.avatar--ring]': 'ring()',
+    '[class.avatar--blank]': 'blank()',
     'aria-hidden': 'true',
   },
 })
 export class Avatar {
   /** The person's name; the initials of its first and last word show when there is no photo. */
-  readonly name = input.required<string>();
+  readonly name = input('');
+  /** The initials as the API gives them, where the name itself is not known (an invite). */
+  readonly initials = input<string>();
   readonly photo = input<string | null>();
-  readonly size = input<'2xs' | 'xs' | 'sm' | 'base' | 'lg' | 'xl'>('base');
+  readonly size = input<'2xs' | 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl'>('base');
+  /** A ring in the canvas colour, for avatars that overlap or sit on a picture. */
+  readonly ring = input(false);
+  /** No colour yet: the person has not joined, as in the photo picker. */
+  readonly blank = input(false);
 
-  protected readonly initials = computed(() => {
+  /** A photo the browser cannot show gives way to the initials. */
+  protected readonly failed = signal(false);
+
+  protected readonly letters = computed(() => {
+    const given = this.initials();
+    if (given !== undefined) return given;
     const words = this.name().trim().split(/\s+/).filter(Boolean);
     const letters = words.length > 1 ? [words[0], words[words.length - 1]] : words;
     return letters.map((word) => Array.from(word)[0].toUpperCase()).join('');
   });
+
+  constructor() {
+    effect(() => {
+      this.photo();
+      this.failed.set(false);
+    });
+  }
 }

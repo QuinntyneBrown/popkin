@@ -1,5 +1,5 @@
 import responses from '../fixtures/api/responses.json';
-import { codeSentAt } from '../fixtures/journeys';
+import { codeSentAt, inviteCode } from '../fixtures/journeys';
 import { expect, test } from '../fixtures/pk-test';
 import { answer, hold, problem } from '../fixtures/stubs';
 import { SignUpPage } from '../pages/sign-up.page';
@@ -35,11 +35,11 @@ test.describe('confirming the code', () => {
 
   test('a return URL from the invite journey is the next step', async ({ page }) => {
     const verify = new VerifyCodePage(page);
-    await verify.reach('/i/lakeside');
+    await verify.reach(`/i/${inviteCode}`);
 
     await verify.type('482913');
 
-    await expect(page).toHaveURL(/\/i\/lakeside$/);
+    await expect(page).toHaveURL(`/i/${inviteCode}`);
   });
 
   test('a return URL to another site is ignored', async ({ page }) => {

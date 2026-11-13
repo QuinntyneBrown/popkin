@@ -1,11 +1,13 @@
 @if (photo()) {
   <img class="split-aside__photo" alt="" [src]="photo()" />
-  <p class="split-aside__caption">
-    <strong class="split-aside__caption-title">{{ heading() }}</strong>
-    @if (text()) {
-      <span class="split-aside__caption-text">{{ text() }}</span>
-    }
-  </p>
+  @if (heading()) {
+    <p class="split-aside__caption">
+      <strong class="split-aside__caption-title">{{ heading() }}</strong>
+      @if (text()) {
+        <span class="split-aside__caption-text">{{ text() }}</span>
+      }
+    </p>
+  }
 } @else {
   <div class="split-aside__body" [class.split-aside__body--center]="justify() === 'center'">
     @if (icon()) {

@@ -18,10 +18,13 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[class.popkin-tile--lg]': "size() === 'lg'",
     '[class.popkin-tile--xl]': "size() === 'xl'",
     '[class.popkin-tile--2xl]': "size() === '2xl'",
+    '[class.popkin-tile--muted]': 'muted()',
     'aria-hidden': 'true',
   },
 })
 export class PopkinTile {
   readonly emoji = input.required<string>();
   readonly size = input<'xs' | 'sm' | 'md' | 'base' | 'lg' | 'xl' | '2xl'>('base');
+  /** A wrapped-up Popkin: greyed. The words beside it say it has wrapped up. */
+  readonly muted = input(false);
 }

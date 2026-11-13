@@ -12,7 +12,7 @@ import { IconName } from '../icon/icons';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './empty-state.html',
   styleUrl: './empty-state.scss',
-  host: { class: 'empty' },
+  host: { class: 'empty', '[attr.role]': "alert() ? 'alert' : null" },
 })
 export class EmptyState {
   readonly icon = input.required<IconName>();
@@ -20,6 +20,8 @@ export class EmptyState {
   /** `1` when the state is the whole screen, else `2`. */
   readonly level = input<1 | 2>(2);
   readonly text = input<string>();
+  /** Announces the state when it replaces content that failed to load (L2-056 AC2). */
+  readonly alert = input(false);
   /** A reference code shown under the actions, as the server-error screen does. */
   readonly code = input<string>();
 }

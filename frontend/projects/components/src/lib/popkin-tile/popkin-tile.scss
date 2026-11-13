@@ -45,3 +45,9 @@
   height: var(--space-28);
   font-size: var(--font-size-7xl);
 }
+
+:host(.popkin-tile--muted) {
+  background: var(--color-bg-subtle);
+  box-shadow: none;
+  filter: grayscale(0.6);
+}

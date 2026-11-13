@@ -1,8 +1,8 @@
-import { maraWithPhoto } from '../../fixtures/journeys';
+import { maraWithPhoto, theMockInvite } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
+import { JoinInvitePage } from '../../pages/join-invite.page';
 import { NameYourPopkinPage } from '../../pages/name-your-popkin.page';
 
-// Journey 1 shows one avatar: the Host's, on the preview card, from 768 px.
 parity('avatar', [
   {
     key: 'nameYourPopkinFilled',
@@ -11,5 +11,11 @@ parity('avatar', [
     before: maraWithPhoto,
     app: (page) => new NameYourPopkinPage(page).chooseLakeside(),
     widths: [1280],
+  },
+  {
+    key: 'joinInvite',
+    name: 'initials-sm-ring',
+    region: (page) => new JoinInvitePage(page).avatars.last(),
+    before: theMockInvite,
   },
 ]);

@@ -1,0 +1,21 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+}
+
+:host > * + * {
+  margin-left: calc(-1 * var(--space-2));
+}
+
+.avatar-stack__more {
+  display: inline-grid;
+  place-items: center;
+  height: var(--space-8);
+  min-width: var(--space-8);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+  font: var(--font-weight-extrabold) var(--font-size-xs) / 1 var(--font-family-display);
+  box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-canvas);
+}

@@ -57,6 +57,13 @@ export const routes: Routes = [
     title: 'Your Popkin is up · Popkin',
   },
   {
+    path: 'i/:code',
+    loadComponent: () =>
+      import('./pages/join-invite/join-invite.page').then((m) => m.JoinInvitePage),
+    data: data({ shell: 'bare', page: 'join-invite' }),
+    title: 'Your invite · Popkin',
+  },
+  {
     path: 'error',
     loadComponent: () =>
       import('./pages/server-error/server-error.page').then((m) => m.ServerErrorPage),

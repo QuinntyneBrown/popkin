@@ -1,0 +1,16 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-4) var(--space-1) var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-muted);
+  font: var(--text-body-sm);
+  box-shadow: var(--shadow-1);
+}
+
+.pill__lead {
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-semibold);
+}

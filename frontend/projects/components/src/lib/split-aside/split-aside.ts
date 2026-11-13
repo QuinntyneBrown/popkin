@@ -18,6 +18,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   host: {
     class: 'split-aside',
     '[class.split-aside--tint]': "surface() === 'tint'",
+    '[class.split-aside--muted]': 'muted()',
     '[attr.aria-label]': 'label()',
   },
 })
@@ -28,6 +29,8 @@ export class SplitAside {
   readonly surface = input<'subtle' | 'tint'>('subtle');
   /** A photograph that fills the aside. It is decoration: the caption says what matters. */
   readonly photo = input<string>();
+  /** Greys the photograph: the Popkin has wrapped up. The screen says so in words. */
+  readonly muted = input(false);
   /** An emoji above the heading. */
   readonly icon = input<string>();
   /** A quiet line above the picture. */

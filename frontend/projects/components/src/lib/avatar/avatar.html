@@ -1,5 +1,5 @@
-@if (photo()) {
-  <img class="avatar__photo" alt="" [src]="photo()" />
+@if (photo() && !failed()) {
+  <img class="avatar__photo" alt="" [src]="photo()" (error)="failed.set(true)" />
 } @else {
-  {{ initials() }}
+  {{ letters() }}
 }

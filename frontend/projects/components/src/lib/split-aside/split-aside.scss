@@ -37,6 +37,10 @@
     height: 100%;
   }
 
+  :host(.split-aside--muted) .split-aside__photo {
+    filter: grayscale(1);
+  }
+
   .split-aside__caption {
     position: absolute;
     inset: auto 0 0 0;

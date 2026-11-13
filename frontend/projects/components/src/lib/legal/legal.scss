@@ -10,3 +10,7 @@ a {
   color: var(--color-fg-default);
   font-weight: var(--font-weight-semibold);
 }
+
+:host(.legal--note) {
+  font-size: var(--font-size-sm);
+}

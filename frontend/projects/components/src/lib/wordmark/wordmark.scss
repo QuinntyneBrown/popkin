@@ -1,0 +1,25 @@
+:host {
+  font: var(--font-weight-brand) var(--font-size-2xl) / 1 var(--font-family-brand);
+  letter-spacing: var(--letter-spacing-tighter);
+  white-space: nowrap;
+}
+
+:host(.wordmark--coral) {
+  color: var(--color-accent);
+}
+
+.wordmark__i {
+  position: relative;
+}
+
+.wordmark__i::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(1ex + 0.08em);
+  translate: -50% 0;
+  width: 0.175em;
+  height: 0.175em;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+}

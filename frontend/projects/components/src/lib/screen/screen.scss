@@ -30,6 +30,15 @@
   text-align: center;
 }
 
+.screen__body--invite {
+  padding-top: var(--space-8);
+}
+
+/* An invite sits in the middle of the room its actions leave, so they add none of their own. */
+.screen__body--invite .screen__actions {
+  padding-top: 0;
+}
+
 .screen__lead {
   margin-top: var(--space-2);
   color: var(--color-fg-muted);
@@ -110,6 +119,12 @@
   :host(.screen--split) .screen__body,
   :host(.screen--split) .screen__footer {
     padding-inline: var(--space-10);
+  }
+
+  :host(.screen--split) .screen__lone-action {
+    width: 100%;
+    max-width: var(--layout-action-max);
+    margin-inline: auto;
   }
 
   /* A short form sits in the middle of its part, its action right under it. */

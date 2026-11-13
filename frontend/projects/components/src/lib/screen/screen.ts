@@ -34,9 +34,11 @@ export class Screen {
   readonly lead = input<string>();
   /**
    * `hero` centres the content of a celebration screen under a tall top; `middle` sets a short
-   * form in the middle of its part from 768 px.
+   * form in the middle of its part from 768 px; `invite` leaves room above an invite.
    */
-  readonly body = input<'default' | 'hero' | 'middle'>('default');
+  readonly body = input<'default' | 'hero' | 'middle' | 'invite'>('default');
+  /** From 768 px, keeps the one action of a centred split screen no wider than a button. */
+  readonly loneAction = input(false);
   /** Renders the sticky footer around the `[slot=footer]` content. */
   readonly footer = input(false);
 }

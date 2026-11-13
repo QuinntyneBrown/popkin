@@ -1,6 +1,7 @@
 import { parity } from '../../fixtures/parity';
-import { howLongForLakeside, maraWithPhoto } from '../../fixtures/journeys';
+import { howLongForLakeside, maraWithPhoto, theMockWrappedInvite } from '../../fixtures/journeys';
 import { HowLongPage } from '../../pages/how-long.page';
+import { JoinInvitePage } from '../../pages/join-invite.page';
 import { NameYourPopkinPage } from '../../pages/name-your-popkin.page';
 import { SignUpPage } from '../../pages/sign-up.page';
 
@@ -28,6 +29,13 @@ parity('split-aside', [
       await howLongForLakeside(page);
       await new HowLongPage(page).option('Keep it going').click();
     },
+    widths: [1280],
+  },
+  {
+    key: 'joinInviteWrapped',
+    name: 'photo-muted',
+    region: (page) => new JoinInvitePage(page).picture,
+    before: theMockWrappedInvite,
     widths: [1280],
   },
 ]);

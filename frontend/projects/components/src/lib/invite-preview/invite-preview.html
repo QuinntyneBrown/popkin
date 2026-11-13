@@ -1,0 +1,39 @@
+@if (loading()) {
+  <p class="visually-hidden" role="status">{{ loadingLabel() }}</p>
+  <div class="invite-preview__skeleton" aria-hidden="true">
+    <span pk-skeleton shape="pill"></span>
+    <span pk-skeleton shape="tile-2xl"></span>
+    <span pk-skeleton shape="title"></span>
+    <span pk-skeleton shape="pill"></span>
+  </div>
+} @else {
+  <div pk-pill text="invited you" [lead]="inviter()">
+    @if (inviterAvatar(); as avatar) {
+      <span
+        pk-avatar
+        slot="start"
+        size="xs"
+        [initials]="avatar.initials"
+        [photo]="avatar.photo"
+        [attr.data-accent]="avatar.accent"
+      ></span>
+    }
+  </div>
+  <span
+    pk-popkin-tile
+    class="invite-preview__tile"
+    size="2xl"
+    [emoji]="emoji()"
+    [muted]="muted()"
+  ></span>
+  <h1 class="invite-preview__name">{{ name() }}</h1>
+  <div class="invite-preview__people">
+    <span pk-avatar-stack [avatars]="avatars()" [more]="more()"></span>
+    <span class="invite-preview__count">{{ people() }}</span>
+  </div>
+  @if (note()) {
+    <p class="invite-preview__note lead">{{ note() }}</p>
+  } @else {
+    <div class="invite-preview__when"><ng-content /></div>
+  }
+}
