@@ -321,7 +321,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .home-header__bar { display: flex; align-items: center; justify-content: space-between; }
 .home-header__body { padding: 0 var(--space-4); }
 .home-header__id { display: flex; align-items: center; gap: var(--space-4); }
-.home-header h1 { font: var(--text-h1-compact); letter-spacing: var(--letter-spacing-tight); }
+.home-header h1, .home-header__name { font: var(--text-h1-compact); letter-spacing: var(--letter-spacing-tight); } /* __name: the name where it is not the page's h1 */
 .home-header__members { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-1); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-muted); }
 .home-header__actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-4); }
 .chat-preview { display: flex; align-items: flex-start; gap: var(--space-3); }
@@ -751,8 +751,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .home-header__bar { display: none; }
   .home-header__body { padding: 0 var(--space-2); }
   .home-header__actions { display: flex; align-items: center; }
+  .home-header__actions > .skeleton--btn { width: var(--space-32); } /* in a row a shape has no width of its own */
   .home-header__more { display: inline-grid; }
-  .home-header h1 { font: var(--text-h1); }
+  .home-header h1, .home-header__name { font: var(--text-h1); }
   .home { padding: var(--space-2) var(--space-2) var(--space-4); }
   .home__side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
   .hscroll--grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); overflow: visible; }
@@ -769,7 +770,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 @media (min-width: 64rem) and (max-width: 79.99rem) { .hscroll--grid > :nth-child(n+7) { display: none; } }
 @media (min-width: 80rem) {
   .home-header { padding-inline: var(--space-10); }
-  .home-header h1 { font-size: var(--font-size-5xl); }
+  .home-header h1, .home-header__name { font-size: var(--font-size-5xl); }
   .home { column-gap: var(--space-2); padding-inline: var(--space-6); }
   .hscroll--grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
