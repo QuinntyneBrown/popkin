@@ -1,7 +1,7 @@
 # Estimates
 
 - Overall effort: 185 days
-- Complete: 62%
+- Complete: 64%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
@@ -16,13 +16,13 @@
 | [calls](calls.md) | 13 days | 85% |
 | [experiences](experiences.md) | 17 days | 83% |
 | [wrap-up](wrap-up.md) | 14 days | 92% |
-| [landing](landing.md) | 4 days | 0% |
+| [landing](landing.md) | 4 days | 100% |
 
 ## Roadmap
 
-1. Landing: the page a visitor reads before starting a Popkin or signing in (journey 10).
-2. Chat and calls: direct messages and the direct call (journey 11), reactions, replies and photos in chat (journeys 12 and 13).
-3. Photos: react, comment, save and delete (journey 14), and the photo store of a deployed system, which the album's zip needs too.
+1. Chat and calls: direct messages and the direct call (journey 11), reactions, replies and photos in chat (journeys 12 and 13).
+2. Photos: react, comment, save and delete (journey 14), and the photo store of a deployed system, which the album's zip needs too.
+3. Join with a code, which the welcome screen now links to (journey 15).
 4. Popkin settings: edit name and look and change how long it lasts, which the banner of the last hour offers the Host (journey 16), and leave a Popkin (journey 18).
-5. Join with a code, account management and keen (the rest of journeys 15 to 20), and the SMS and email providers, which the crew invites need too.
+5. Account management and keen (the rest of journeys 17 to 20), and the SMS and email providers, which the crew invites need too.
 6. Reliability: a saved answer for every screen and an app that opens without a connection.
