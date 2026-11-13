@@ -1,0 +1,14 @@
+@for (member of members(); track $index) {
+  <li class="row row--short">
+    <span
+      pk-avatar
+      [initials]="member.initials"
+      [photo]="member.photo"
+      [attr.data-accent]="member.accent"
+    ></span>
+    <span class="row__main row__title">{{ member.name }}</span>
+    @if (member.role) {
+      <span class="row__role">{{ member.role }}</span>
+    }
+  </li>
+}
