@@ -21,9 +21,8 @@ The keen panel takes the place of the rating panel of
 [List experiences](../list-experiences/README.md) show the keen count ("7 keen") instead of a
 score.
 
-The designs show only the count. How a member says they are keen is open question 4 of
-`docs/mocks/README.md` and an assumption of `docs/specs/L1.md`. This design follows the mock and
-L2-042, and marks every detail neither settles as `<TO SUPPLY>`.
+Journey 20 builds it. Where the mock and L2-042 left a detail open, the decisions are listed
+under "Decisions" below, and the mocks now draw every state.
 
 ## Description
 
@@ -31,72 +30,113 @@ L2-042, and marks every detail neither settles as `<TO SUPPLY>`.
 
 - `docs/mocks/pages/experience-detail/want.html` — "Beach day next summer?", "Want to do ·
   Idea", "Shared by Ellie"; the keen panel with "Keen to do this?", a stack of four avatars
-  ending "+3", "7 keen" and "I'm keen" with `aria-pressed="false"`; "What people said" with two
-  comments without stars.
+  ending "+3", "7 keen" and "I'm keen" with `aria-pressed="false"`. Joel, a member who neither
+  shared it nor is the Host, is reading.
+- `docs/mocks/pages/experience-detail/want-keen.html` — Joel has chosen "I'm keen": the toggle
+  has `aria-pressed="true"` and reads "You're keen", and the count reads "8 keen" ("+4").
+- `docs/mocks/pages/experience-detail/want-own.html` — Ellie, who shared it and is keen, reads
+  it: "Experience actions" over the picture, and "We did this" (secondary, with a tick) beside
+  "You're keen" in the panel. The Host sees the same.
 - `docs/mocks/pages/experiences/default.html` and `want.html` — the card foot reads "7 keen".
-- No mock shows:
-  - the pressed state "You're keen";
-  - the "We did this" control and where it sits;
-  - the failure message;
-  - the page after an experience becomes "Something we did".
-  Each is `<TO SUPPLY>`. The text of the pressed state comes from L2-042 AC2.
+- After "We did this" the page is the page of something the group did
+  (`experience-detail/default.html`): "Something we did", the score card with no ratings and
+  "How was it for you?".
+- A change that does not save is a danger toast with "Try again", drawn by
+  `docs/mocks/notifications/toast/danger.html`; its words are under "Decisions".
+- "What people said" on an idea: the mock shows two comments without stars, but a comment
+  belongs to a rating ([Comment on an experience](../comment-on-experience/README.md)) and an
+  idea has none, so the page shows no comments there. See "Open points".
+
+### Form factors
+
+The panel takes the rating panel's place in `.detail__cards`, so it follows the page's layout
+(L2-058 AC2, AC3, AC11): one column below 1024 px, under the picture; from 1024 px it is in the
+right-hand column beside the picture. The keen count sits in the card foot of the list in every
+column count, one to four (AC7). Nothing in the panel reads the viewport width.
 
 ### API
 
-- `PUT /api/popkins/{popkinId}/experiences/{experienceId}/keen` → `200` with `KeenDto` (count,
-  whether the caller is keen, the first four keen members). Repeating it changes nothing.
+- `GET /api/popkins/{popkinId}/experiences/{experienceId}` — `ExperienceDetailDto` gains
+  `keen` (`KeenDto`, null unless the kind is "Want to do"), `canKeen` (an idea in an active
+  Popkin) and `canMarkDone` (an idea in an active Popkin, for its sharer or the Host).
+  `keenCount` and the list's `keenCount` are the real count.
+- `PUT /api/popkins/{popkinId}/experiences/{experienceId}/keen` → `200` with `KeenDto`
+  (`count`, `mine`, `members`: the first four keen members, the earliest first, each a
+  membership id, a first name and an avatar). Repeating it changes nothing.
 - `DELETE /api/popkins/{popkinId}/experiences/{experienceId}/keen` → `200` with `KeenDto`.
+  Repeating it changes nothing.
 - `POST /api/popkins/{popkinId}/experiences/{experienceId}/done` → `200` with
   `ExperienceDetailDto`.
 - Refusals: `401` without a session; `404` `popkin_not_found` (L2-051) or
   `experience_not_found`; `409` `experience_not_wanted` when the kind is not "Want to do"; `409`
   `popkin_wrapped_up` (L2-045 AC2); for `done`, `403` `not_experience_sharer` when the caller is
-  neither the sharer nor the Host (L2-051 AC4).
+  neither the sharer nor the Host (L2-051 AC4), the code editing and deleting use. Keen and
+  done are counted with messages and ratings (60 a minute per person).
 
 ### Frontend (`frontend/projects/`)
 
-- **`ExperienceDetailPage`** — for kind "Want to do", renders the keen panel in place of the
-  rating panel and the score card (L2-042 AC1). Its `keen` signal holds a `KeenView`.
-  - `toggleKeen()` disables the button while the request runs, calls
-    `ExperiencesApi.setKeen(..., !iAmKeen)` and replaces the `KeenView` with the answer.
-  - The button is a toggle button. `aria-pressed="true"` and the label "You're keen" when the
-    member is keen; `aria-pressed="false"` and "I'm keen" otherwise (L2-042 AC2, AC3). The
-    pressed state is carried by text as well as styling.
-  - On failure the previous state stays and a danger toast says so (copy `<TO SUPPLY>`).
-  - `markDone()` is offered when `CanMarkDone` is true. It replaces the whole detail with the
-    answer, so the rating panel and an empty score card appear (L2-042 AC4).
-- **`KeenView`** — count text ("7 keen"), whether the member is keen, the button label, up to
-  four avatars and the "+N" remainder.
+- **`ExperienceDetailPage`** — for kind "Want to do", renders `pk-keen-panel` in place of the
+  rating panel and the score card (L2-042 AC1).
+- **`ExperienceStore`** (`api`) — its `view` has `keen` (a `KeenPanel`) for an idea.
+  - `toggleKeen()` disables the toggle while the request runs, calls
+    `ExperiencesApi.setKeen(..., !mine)` and replaces the keen state with the answer.
+  - On failure the previous state stays and `keenFailed$` tells the page, which shows the danger
+    toast.
+  - `markDone()` disables "We did this" while it runs and replaces the whole experience with the
+    answer, so the rating panel and an empty score card appear (L2-042 AC4); on failure
+    `doneFailed$` tells the page.
+- **`KeenPanel`** — the count in words ("7 keen"), whether the member is keen, the toggle's
+  label ("I'm keen" or "You're keen"), up to four faces and the "+N" remainder, whether the
+  toggle is offered and whether "We did this" is.
 - **`ExperiencesApi.setKeen`, `.markDone`**.
-- **Components**: `pk-card` (tinted panel), `pk-avatar` in its stack variant (`avatar-stack`,
-  `avatar--ring`, `avatar-stack__more`), `pk-button` (Popkin) with `aria-pressed`. The avatar
-  stack is hidden from assistive technology; the count text carries the information.
+- **Components**: `pk-keen-panel` (`docs/design-system/components/rating.html#keen-panel`), a
+  tinted centred card like `pk-rating-panel`, composing `pk-avatar-stack` and a `pk-button`
+  (Popkin) toggle with `aria-pressed`; its default slot holds "We did this" (`pk-button`,
+  secondary). The avatar stack is hidden from assistive technology; the count text carries the
+  information. The pressed Popkin button is outlined in the Popkin's colour on the surface
+  (`docs/design-system/components/button.html#toggle`), and its words change too.
 
 ### Backend (`backend/src/`)
 
 - **`SetKeenCommand`** / **`SetKeenCommandHandler`** —
-  1. calls `IMembershipGuard.RequireMemberAsync(popkinId)`;
-  2. loads `PopkinSpace`, `Experience` and the caller's `ExperienceKeen`;
-  3. refuses a wrapped-up Popkin and a kind other than `WantToDo` with `409`;
-  4. calls `Experience.AddKeen(membershipId, now)` or `RemoveKeen(membershipId)`, both of which
-     do nothing when the member is already in the requested state, so a repeated request is
-     safe;
-  5. saves and returns the count and the first four keen members, oldest `At` first.
+  1. calls `IMembershipGuard.RequireActiveMemberAsync(popkinId)`, which refuses a wrapped-up
+     Popkin with `409`;
+  2. loads the `Experience` and the caller's `ExperienceKeen`;
+  3. refuses a kind other than `Want` with `409` `experience_not_wanted`;
+  4. adds the record (`Experience.AddKeen(membershipId, now)`) or removes it; nothing happens
+     when the member is already in the requested state, so a repeated request is safe;
+  5. saves and returns the count and the first four keen members, earliest `At` first.
 - **`ExperienceKeen`** — primary key `(ExperienceId, MembershipId)`, which keeps one keen record
-  per member and experience.
-- **`MarkExperienceDoneCommand`** / **`MarkExperienceDoneCommandHandler`** — allows the sharer
-  or a member with `MemberRole.Host` (`Experience.CanBeMarkedDoneBy`), refuses a wrapped-up
-  Popkin, and calls `Experience.MarkDone`, which sets `Kind` to `Did`.
-- Whether sharing a "Want to do" experience makes the sharer keen is `<TO SUPPLY>`. The mock's
-  stack starts with Ellie, the sharer. Whether keen records stay or are removed when the
-  experience is marked done is also `<TO SUPPLY>`; the design keeps them.
+  per member and experience, even when two requests race; it goes with its experience.
+- **`MarkExperienceDoneCommand`** / **`MarkExperienceDoneCommandHandler`** — refuses a
+  wrapped-up Popkin, allows the sharer or the Host (`Experience.CanBeMarkedDoneBy`, the same rule
+  as deleting), refuses a kind other than `Want`, calls `Experience.MarkDone`, which sets `Kind`
+  to `Did`, and answers the experience as `GetExperienceQuery` does.
+- **`KeenOf`** — reads the keen count and first four members of one or many experiences in one
+  query each, for the list, the detail and the answers above.
+
+### Decisions
+
+These were `<TO SUPPLY>`; journey 20 settled each with the simplest option that fits.
+
+- "We did this" sits in the keen panel beside the toggle, for the sharer and the Host only
+  (`want-own`). Anyone else is refused with `403` `not_experience_sharer`, the code editing and
+  deleting already use.
+- Sharing a "Want to do" experience does not make the sharer keen; they say so like anyone else.
+- Keen records stay when the experience is marked done; the page of something the group did
+  shows no keen. They go when the experience is deleted.
+- The failure toasts: "Your keen didn't save" / "It's back to how it was." with "Try again", and
+  "That didn't save" / "It's still something you want to do." with "Try again".
+- In a wrapped-up Popkin an idea's panel keeps who is keen and the count, and offers neither
+  button (L2-045).
 
 ### Open points
 
 - How a member comments on a "Want to do" experience is `<TO SUPPLY>`. The mock shows comments
   without stars there, and a comment otherwise belongs to a rating
   ([Comment on an experience](../comment-on-experience/README.md)).
-- Whether the keen count updates live for other members is `<TO SUPPLY>`.
+- Whether the keen count updates live for other members is `<TO SUPPLY>`; they see it the next
+  time the experience or the list is read.
 
 ## Requirements
 

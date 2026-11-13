@@ -449,6 +449,8 @@
         "own",
         "rated",
         "want",
+        "want-keen",
+        "want-own",
         "loading",
         "error",
         "wrapped"
