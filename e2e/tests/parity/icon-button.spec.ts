@@ -19,4 +19,9 @@ parity('icon-button', [
     name: 'on-picture',
     region: (page) => new ExperienceDetailPage(page).back,
   },
+  {
+    key: 'experienceDetailOwn',
+    name: 'actions-on-picture',
+    region: (page) => new ExperienceDetailPage(page).actions,
+  },
 ]);
