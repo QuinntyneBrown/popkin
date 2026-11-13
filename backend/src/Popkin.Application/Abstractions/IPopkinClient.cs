@@ -64,4 +64,10 @@ public interface IPopkinClient
     /// not above the one held for that participant is dropped.
     /// </summary>
     Task ParticipantMediaChanged(Guid callId, Guid membershipId, long mediaVersion, bool micOn, bool cameraOn);
+
+    /// <summary>
+    /// Another participant's offer, answer or candidate, for this participant alone. An edge:
+    /// each one sent arrives once and none stands for another.
+    /// </summary>
+    Task Signal(Guid callId, Guid fromMembershipId, CallSignalDto signal);
 }

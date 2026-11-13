@@ -52,6 +52,9 @@ builder.Services
     .AddSignalR(options =>
     {
         options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+        // A session description of 32 KB and its envelope pass the default of 32 KB; nothing
+        // larger than 64 KB is read.
+        options.MaximumReceiveMessageSize = 64 * 1024;
         options.AddFilter<ProblemHubFilter>();
     })
     .AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));

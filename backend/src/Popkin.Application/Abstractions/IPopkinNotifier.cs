@@ -43,4 +43,7 @@ public interface IPopkinNotifier
 
     /// <summary>A participant's microphone or camera changed. To the connections on the call.</summary>
     Task ParticipantMediaChanged(Guid callId, Guid membershipId, long mediaVersion, bool micOn, bool cameraOn);
+
+    /// <summary>A participant's signal. To the one connection the participant it is for is on the call with.</summary>
+    Task Signal(string connectionId, Guid callId, Guid fromMembershipId, CallSignalDto signal);
 }

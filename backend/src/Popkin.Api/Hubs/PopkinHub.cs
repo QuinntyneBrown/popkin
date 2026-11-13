@@ -47,6 +47,13 @@ public sealed class PopkinHub(ISender sender) : Hub<IPopkinClient>
     /// </summary>
     public Task JoinCall(Guid callId) =>
         sender.Send(new JoinCallGroupCommand(PersonId, callId, Context.ConnectionId), Context.ConnectionAborted);
+
+    /// <summary>
+    /// Relays the caller's offer, answer or candidate to one other participant of the call. It
+    /// arrives or the call fails; the hub never reads the payload.
+    /// </summary>
+    public Task SendSignal(Guid callId, Guid toMembershipId, CallSignalDto? signal) =>
+        sender.Send(new RelaySignalCommand(PersonId, callId, toMembershipId, signal), Context.ConnectionAborted);
 }
 
 /// <summary>Names a connection's user by the person of its session, so one person's every tab and device is reached together.</summary>

@@ -34,6 +34,10 @@ public static class CallExtensions
     /// <summary>Invokes the hub's `JoinCall`, so the connection is sent the call's events and its participant's signals.</summary>
     public static Task JoinCallAsync(this HubEvents hub, Guid callId) => hub.Connection.InvokeAsync("JoinCall", callId);
 
+    /// <summary>Invokes the hub's `SendSignal`, so a refusal comes back to the test.</summary>
+    public static Task SendSignalAsync(this HubEvents hub, Guid callId, Guid toMembershipId, string? type, string? payload) =>
+        hub.Connection.InvokeAsync("SendSignal", callId, toMembershipId, new { type, payload });
+
     /// <summary>Asserts that a hub call was refused with that `code`, as the client reads it.</summary>
     public static async Task AssertRefusedAsync(Func<Task> invoke, string code)
     {
