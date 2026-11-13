@@ -54,4 +54,13 @@ public sealed class AuthController(ISender sender) : ControllerBase
     [HttpGet("session")]
     public async Task<ActionResult<SessionDto>> GetSession(CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetSessionQuery(), cancellationToken));
+
+    /// <summary>Ends the session on this device and deletes its cookie (L2-048 AC5, L2-050 AC3).</summary>
+    [HttpPost("sign-out")]
+    public async Task<IActionResult> SignOut(CancellationToken cancellationToken)
+    {
+        await sender.Send(new SignOutCommand(), cancellationToken);
+        await SessionCookie.SignOutAsync(HttpContext);
+        return NoContent();
+    }
 }
