@@ -77,3 +77,4 @@ export * from './lib/upload-item/upload-item';
 export * from './lib/photo-viewer/photo-viewer';
 export * from './lib/files-input/files-input';
 export * from './lib/page-screen/page-screen';
+export * from './lib/popkin-grid/popkin-grid';
