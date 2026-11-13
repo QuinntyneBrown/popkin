@@ -1,0 +1,18 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Sometimes you are done. Here is how you leave Popkin."] },
+    { "id": "open", "bars": 4, "lines": ["At the foot of your account: Delete my account."] },
+    { "id": "what", "bars": 8, "lines": ["First it says what goes: your name, photo, phone number and direct messages.", "What stays: your messages and photos in Popkins, without your name.", "And the Popkins you host. Those two wrap up when your account goes."] },
+    { "id": "confirm", "bars": 5, "lines": ["Delete my account stays disabled until you type the word delete."] },
+    { "id": "done", "bars": 6, "lines": ["Then it says Deleting. Your session ends, and the landing page opens with a message: your account is deleted."] },
+    { "id": "grow", "bars": 4, "lines": ["On a phone it is a sheet from the bottom. On a desktop, a panel in the middle."] },
+    { "id": "erase", "bars": 6, "lines": ["What the tests prove: within thirty days, the Worker erases your name, number and photo. Your messages stay, from a Former member."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey nineteen. Popkin is a free platform for pop-up communities."] }
+  ]
+}
