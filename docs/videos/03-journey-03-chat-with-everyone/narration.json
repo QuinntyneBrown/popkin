@@ -1,0 +1,28 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["The Everyone thread is the heart of a Popkin."] },
+    { "id": "thread", "bars": 6, "lines": ["At the top: the Popkin's emoji and name, fourteen members, five here now.", "Below, messages run oldest first, by day, with a note when someone pops in."] },
+    { "id": "bubbles", "bars": 4, "lines": ["Someone else's message carries their avatar and first name.", "Yours sits on the right, in the Popkin's colour, with its time."] },
+    { "id": "send", "bars": 4, "lines": ["Type a message and press Enter.", "It appears in the thread at once, and the field empties."] },
+    { "id": "lines", "bars": 4, "lines": ["Shift and Enter adds a line.", "A message holds up to two thousand characters, and a count shows."] },
+    { "id": "live", "bars": 5, "lines": ["Chat is live. When Walt sends a message, you see it within a second, without reloading.", "Assistive technology announces it politely, with its sender."] },
+    { "id": "newer", "bars": 4, "lines": ["Reading older messages when one arrives? The view does not move.", "New messages takes you to the latest."] },
+    { "id": "failed", "bars": 6, "lines": ["A message is never lost silently.", "If a send fails, it stays in the thread, marked Not sent, with Try again and Delete.", "Try again, and it is sent."] },
+    { "id": "offline", "bars": 6, "lines": ["Go offline, and a banner says so.", "What you send is kept on the device, marked Waiting to send.", "When the connection returns, it is sent in order: back online, two messages sent."] },
+    { "id": "grow", "bars": 9, "lines": [
+      { "text": "On a phone the thread stands alone, with no tabs.", "at": 0 },
+      { "text": "From a tablet, a rail.", "at": 10 },
+      { "text": "On a laptop, the sidebar and the list of conversations sit beside it.", "at": 16 },
+      { "text": "Wider still, a third pane names who is here now.", "at": 28 }
+    ] },
+    { "id": "panes", "bars": 4, "lines": ["The list shows the latest message.", "And every screen works in light and in dark."] },
+    { "id": "proof", "bars": 5, "lines": ["What no screen shows, the tests prove.", "A message tried again is stored once, and only a member reads the thread."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey three. Popkin is a free platform for pop-up communities."] }
+  ]
+}
