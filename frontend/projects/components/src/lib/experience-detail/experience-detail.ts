@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Avatar, PersonAvatar } from '../avatar/avatar';
 import { Icon } from '../icon/icon';
@@ -8,7 +8,8 @@ import { Skeleton } from '../skeleton/skeleton';
 /**
  * An experience (docs/design-system/components/card.html, `detail`): the body of the screen of
  * one experience, inside a `flush` body of the app screen. Its lead is the picture with Back
- * over it, or the Popkin's `emoji` on its colour where there is no picture, and under it the
+ * over it (and, for its sharer and the Host, its `actions` at the other end, L2-040 AC6), or
+ * the Popkin's `emoji` on its colour where there is no picture, and under it the
  * kind and when, the title (the screen's `h1`), who shared it and the place. The rest is the
  * cards (the score, the member's rating) and what people said.
  *
@@ -54,6 +55,14 @@ export class ExperienceDetail {
   readonly avatar = input<PersonAvatar | null>(null);
   /** Where it was: "Heron Point, Lake Ossia". None without it. */
   readonly place = input<string>();
+
+  /**
+   * The name of the button that opens the experience's actions: "Experience actions". Without
+   * it the button is absent, as it is for a member who neither shared it nor hosts the Popkin.
+   */
+  readonly actions = input<string>();
+  /** The actions button was chosen. */
+  readonly actionsOpened = output<void>();
 
   /** The line above the title: "Something we did · Sat morning". */
   protected readonly kicker = computed(() =>
