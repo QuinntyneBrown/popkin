@@ -18,6 +18,12 @@ public interface IMembershipGuard
 
     /// <summary>The Host; another member is 403 `host_only`.</summary>
     Task<(PopkinSpace Popkin, Membership Membership)> RequireHostAsync(Guid popkinId, CancellationToken cancellationToken);
+
+    /// <summary>A member of a wrapped-up Popkin, for what only a recap has; an active one is 409 `popkin_active`.</summary>
+    Task<(PopkinSpace Popkin, Membership Membership)> RequireWrappedUpMemberAsync(Guid popkinId, CancellationToken cancellationToken);
+
+    /// <summary>The Host of a wrapped-up Popkin; another member is 403 `host_only`, and an active Popkin is 409 `popkin_active`.</summary>
+    Task<(PopkinSpace Popkin, Membership Membership)> RequireWrappedUpHostAsync(Guid popkinId, CancellationToken cancellationToken);
 }
 
 public sealed class MembershipGuard(IAppDbContext db, ICurrentPerson current) : IMembershipGuard
@@ -46,14 +52,29 @@ public sealed class MembershipGuard(IAppDbContext db, ICurrentPerson current) : 
         return found;
     }
 
-    public async Task<(PopkinSpace Popkin, Membership Membership)> RequireHostAsync(Guid popkinId, CancellationToken cancellationToken)
+    public async Task<(PopkinSpace Popkin, Membership Membership)> RequireHostAsync(Guid popkinId, CancellationToken cancellationToken) =>
+        HostOnly(await RequireActiveMemberAsync(popkinId, cancellationToken));
+
+    public async Task<(PopkinSpace Popkin, Membership Membership)> RequireWrappedUpMemberAsync(Guid popkinId, CancellationToken cancellationToken)
     {
-        var found = await RequireActiveMemberAsync(popkinId, cancellationToken);
-        if (found.Membership.Role != MembershipRole.Host)
+        var found = await RequireMemberAsync(popkinId, cancellationToken);
+        if (found.Popkin.Status == PopkinStatus.Active)
         {
-            throw new ProblemException(403, "host_only", "Only the Host can do that.");
+            throw new ProblemException(409, "popkin_active", "This Popkin hasn't wrapped up.");
         }
 
         return found;
     }
+
+    public async Task<(PopkinSpace Popkin, Membership Membership)> RequireWrappedUpHostAsync(Guid popkinId, CancellationToken cancellationToken)
+    {
+        // Who may ask comes before what state the Popkin is in.
+        var found = HostOnly(await RequireMemberAsync(popkinId, cancellationToken));
+        return found.Popkin.Status == PopkinStatus.Active
+            ? throw new ProblemException(409, "popkin_active", "This Popkin hasn't wrapped up.")
+            : found;
+    }
+
+    private static (PopkinSpace Popkin, Membership Membership) HostOnly((PopkinSpace Popkin, Membership Membership) found) =>
+        found.Membership.Role == MembershipRole.Host ? found : throw new ProblemException(403, "host_only", "Only the Host can do that.");
 }
