@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { MarkPicture, MarkPictureView } from '../mark-picture/mark-picture';
 import { PopkinTile } from '../popkin-tile/popkin-tile';
 
 /**
@@ -11,17 +12,19 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
  * With `photo` it is a photograph under a caption (`heading` and `text`). Without one it is a
  * body: an `icon`, a `kicker`, a `heading`, the projected picture, then `text`. With `photos`
  * the body is a mosaic of them, the first one large, over the Popkin it is about (`tile`,
- * `name`, `line`): the recap that wrapping up will make.
+ * `name`, `line`): the recap that wrapping up will make. With `mark` the body is the mark as a
+ * picture, on Popkin's own colour when the surface is `brand`: the welcome screen.
  */
 @Component({
   selector: 'aside[pk-split-aside]',
-  imports: [PopkinTile],
+  imports: [MarkPicture, PopkinTile],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './split-aside.html',
   styleUrl: './split-aside.scss',
   host: {
     class: 'split-aside',
     '[class.split-aside--tint]': "surface() === 'tint'",
+    '[class.split-aside--brand]': "surface() === 'brand'",
     '[class.split-aside--muted]': 'muted()',
     '[attr.aria-label]': 'label()',
   },
@@ -29,8 +32,10 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
 export class SplitAside {
   /** Names the region for assistive technology, such as "Preview". */
   readonly label = input.required<string>();
-  /** `tint` washes the aside in the Popkin's colour. */
-  readonly surface = input<'subtle' | 'tint'>('subtle');
+  /** `tint` washes the aside in the Popkin's colour; `brand` in Popkin's own. */
+  readonly surface = input<'subtle' | 'tint' | 'brand'>('subtle');
+  /** The mark as a picture, as wide as the aside lets it be: the welcome screen. */
+  readonly mark = input<MarkPictureView>();
   /** A photograph that fills the aside. It is decoration: the caption says what matters. */
   readonly photo = input<string>();
   /** Greys the photograph: the Popkin has wrapped up. The screen says so in words. */
