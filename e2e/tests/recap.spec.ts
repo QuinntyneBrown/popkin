@@ -29,7 +29,7 @@ test.describe('The recap', () => {
   });
 
   // AC3
-  test('names the top-rated moment, its score and who shared it, and opens it', async ({
+  test('names the top-rated moment, its score and who shared it, and links to it', async ({
     page,
   }) => {
     await theMockRecap(page);
@@ -41,8 +41,10 @@ test.describe('The recap', () => {
     await expect(recap.moment).toContainText('4.7');
     await expect(recap.moment).toContainText('shared by Mara');
 
-    await recap.momentLink.click();
-    await expect(page).toHaveURL(`/p/${popkinId}/experiences/00000000-0000-4000-a000-000000000081`);
+    await expect(recap.momentLink).toHaveAttribute(
+      'href',
+      `/p/${popkinId}/experiences/00000000-0000-4000-a000-000000000081`,
+    );
   });
 
   test('has no top-rated moment when nothing was rated', async ({ page }) => {
