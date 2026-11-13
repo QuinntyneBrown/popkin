@@ -11,10 +11,12 @@ public sealed record MessageAuthorDto(Guid MembershipId, string FirstName, Avata
 
 /// <summary>
 /// A message as every member reads it. The same value travels the hub to everyone, so it says
-/// nothing about who is reading. `ClientMessageId` is null for a system message.
+/// nothing about who is reading, and it names its Popkin and its thread, so a client that holds
+/// several knows where it belongs. `ClientMessageId` is null for a system message.
 /// </summary>
 public sealed record MessageDto(
     Guid Id,
+    Guid PopkinId,
     Guid ThreadId,
     Guid? ClientMessageId,
     MessageKind Kind,
@@ -22,9 +24,11 @@ public sealed record MessageDto(
     string Text,
     DateTimeOffset SentAt)
 {
+    /// <summary>A message of a thread of that Popkin; the author is a member of the same Popkin.</summary>
     public static MessageDto Of(Message message, Membership author, IPhotoStore photos) =>
         new(
             message.Id,
+            author.PopkinId,
             message.ThreadId,
             message.ClientMessageId,
             message.Kind,

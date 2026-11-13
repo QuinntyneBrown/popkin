@@ -28,6 +28,7 @@ public sealed class SendMessageTests
         var message = await response.Content.ReadFromJsonAsync<JsonElement>();
         Assert.NotEqual(Guid.Empty, message.GetProperty("id").GetGuid());
         Assert.Equal(threadId, message.GetProperty("threadId").GetGuid());
+        Assert.Equal(lakeside.Id, message.GetProperty("popkinId").GetGuid());
         Assert.Equal(clientMessageId, message.GetProperty("clientMessageId").GetGuid());
         Assert.Equal("Member", message.GetProperty("kind").GetString());
         Assert.Equal("Who's bringing the firewood?", message.GetProperty("text").GetString());
@@ -37,11 +38,11 @@ public sealed class SendMessageTests
         Assert.Equal("Mara", author.GetProperty("firstName").GetString());
         Assert.Equal("MO", author.GetProperty("avatar").GetProperty("initials").GetString());
         Assert.Equal(
-            ["author", "clientMessageId", "id", "kind", "sentAt", "text", "threadId"],
+            ["author", "clientMessageId", "id", "kind", "popkinId", "sentAt", "text", "threadId"],
             message.EnumerateObject().Select(p => p.Name).Order());
 
         var page = await lakeside.Host.MessagesAsync(lakeside.Id, threadId);
-        Assert.Equal(message.GetProperty("id").GetGuid(), page.GetProperty("items")[0].GetProperty("id").GetGuid());
+        Assert.Equal(message.GetRawText(), page.GetProperty("items")[0].GetRawText());
         Assert.Equal(["Who's bringing the firewood?"], page.Texts());
         Assert.False(page.GetProperty("hasMore").GetBoolean());
     }

@@ -30,6 +30,7 @@ public sealed class LiveMessagesTests
         Assert.Equal(sent.GetRawText(), received.Arguments[0].GetRawText());
         Assert.Equal(sent.GetProperty("id").GetGuid(), received.Arguments[0].GetProperty("id").GetGuid());
         Assert.Equal("Member", received.Arguments[0].GetProperty("kind").GetString());
+        Assert.Equal(lakeside.Id, received.Arguments[0].GetProperty("popkinId").GetGuid());
         await maraHub.WaitForAsync("MessageAdded", e => e.Arguments[0].GetProperty("id").GetGuid() == sent.GetProperty("id").GetGuid());
     }
 
