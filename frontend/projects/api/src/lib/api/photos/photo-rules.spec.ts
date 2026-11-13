@@ -5,14 +5,14 @@ import {
   addLabel,
   captionCount,
   choosePhotos,
-  photoProblem,
+  albumPhotoProblem,
   uploadOutcome,
 } from './photo-rules';
 
 const MB = 1024 * 1024;
 const file = (name: string, type: string, size = MB) => ({ name, type, size });
 
-describe('photoProblem', () => {
+describe('albumPhotoProblem', () => {
   it.each([
     ['dock.jpg', 'image/jpeg'],
     ['dock.png', 'image/png'],
@@ -22,7 +22,7 @@ describe('photoProblem', () => {
     // Some browsers give a HEIC file no type at all; its name says what it is.
     ['IMG_0042.HEIC', ''],
   ])('accepts %s (%s)', (name, type) => {
-    expect(photoProblem(file(name, type))).toBeNull();
+    expect(albumPhotoProblem(file(name, type))).toBeNull();
   });
 
   it.each([
@@ -31,7 +31,7 @@ describe('photoProblem', () => {
     ['anim.gif', 'image/gif'],
     ['mystery', ''],
   ])('refuses %s (%s)', (name, type) => {
-    expect(photoProblem(file(name, type))).toBe(
+    expect(albumPhotoProblem(file(name, type))).toBe(
       'This isn’t a JPEG, PNG, WebP or HEIC photo, so it won’t be added.',
     );
   });
@@ -42,7 +42,7 @@ describe('photoProblem', () => {
     [14 * MB, 'This file is 14 MB. Photos can be up to 10 MB.'],
     [13.4 * MB, 'This file is 14 MB. Photos can be up to 10 MB.'],
   ])('a file of %d bytes: %s', (size, problem) => {
-    expect(photoProblem(file('dock.jpg', 'image/jpeg', size))).toBe(problem);
+    expect(albumPhotoProblem(file('dock.jpg', 'image/jpeg', size))).toBe(problem);
   });
 });
 

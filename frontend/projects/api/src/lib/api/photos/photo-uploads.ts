@@ -6,7 +6,7 @@ import {
   addLabel,
   captionCount,
   choosePhotos,
-  photoProblem,
+  albumPhotoProblem,
   uploadOutcome,
 } from './photo-rules';
 import { PHOTOS_API } from './photos-api';
@@ -101,7 +101,7 @@ export class PhotoUploads {
     this.notice.set(message);
     this.list.set(
       taken.map((file, id) => {
-        const problem = photoProblem(file);
+        const problem = albumPhotoProblem(file);
         return { id, file, caption: '', state: problem ? 'invalid' : 'ready', problem };
       }),
     );
