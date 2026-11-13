@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { theMockPopkins, thePopkinsGoOffline } from '../../fixtures/my-popkins';
 import { MyPopkinsPage } from '../../pages/my-popkins.page';
 import { comeBackWithTwo, theMockChat, writeTwoOffline } from '../../fixtures/chat';
@@ -41,6 +42,7 @@ parity('banner', [
   // One hour left: the Host's has "Change" before Dismiss.
   {
     key: 'popkinHomeLastHour',
+    ...wrapUpStates.popkinHomeLastHour,
     name: 'last-hour',
     region: (page) => new WrapUpBanner(page).root,
     snap: true,
@@ -48,11 +50,22 @@ parity('banner', [
   // Under an hour, a member's: the time left, and Dismiss alone.
   {
     key: 'popkinHomeLastHourMember',
+    ...wrapUpStates.popkinHomeLastHourMember,
     name: 'last-hour-member',
     region: (page) => new WrapUpBanner(page).root,
     snap: true,
   },
   // The album was not kept: it stays until the photos go.
-  { key: 'photoAlbumGoing', name: 'photos-go', region: (page) => new WrapUpBanner(page).root },
-  { key: 'recapGoing', name: 'photos-go-recap', region: (page) => new WrapUpBanner(page).root },
+  {
+    key: 'photoAlbumGoing',
+    ...wrapUpStates.photoAlbumGoing,
+    name: 'photos-go',
+    region: (page) => new WrapUpBanner(page).root,
+  },
+  {
+    key: 'recapGoing',
+    ...wrapUpStates.recapGoing,
+    name: 'photos-go-recap',
+    region: (page) => new WrapUpBanner(page).root,
+  },
 ]);

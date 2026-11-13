@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { AddCommentDialog } from '../../pages/add-comment.dialog';
 import { DeleteExperienceDialog } from '../../pages/delete-experience.dialog';
@@ -174,6 +175,7 @@ parity('dialog', [
   },
   {
     key: 'popkinSettings',
+    ...wrapUpStates.popkinSettings,
     name: 'popkin-settings',
     region: (page) => new PopkinSettingsDialog(page).panel,
   },

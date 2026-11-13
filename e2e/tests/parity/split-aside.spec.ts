@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { parity } from '../../fixtures/parity';
 import { howLongForLakeside, maraWithPhoto, theMockWrappedInvite } from '../../fixtures/journeys';
 import { HowLongPage } from '../../pages/how-long.page';
@@ -40,5 +41,11 @@ parity('split-aside', [
     widths: [1280],
   },
   // The recap that wrapping up will make: a mosaic of its photos over the Popkin.
-  { key: 'wrapUp', name: 'recap', region: (page) => new WrapUpPage(page).picture, widths: [1280] },
+  {
+    key: 'wrapUp',
+    ...wrapUpStates.wrapUp,
+    name: 'recap',
+    region: (page) => new WrapUpPage(page).picture,
+    widths: [1280],
+  },
 ]);

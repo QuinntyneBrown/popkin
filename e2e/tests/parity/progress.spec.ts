@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { parity } from '../../fixtures/parity';
 import { addTheThreeSlowly, theMockPhotos } from '../../fixtures/photos';
 import { AddPhotosDialog } from '../../pages/add-photos.dialog';
@@ -14,6 +15,16 @@ parity('progress', [
     app: (page) => addTheThreeSlowly(page, 1),
   },
   // The album being prepared on the recap: a quarter of the way.
-  { key: 'recapExporting', name: 'album', region: (page) => new RecapPage(page).progress },
-  { key: 'recapExporting', name: 'album-text', region: (page) => new RecapPage(page).progressText },
+  {
+    key: 'recapExporting',
+    ...wrapUpStates.recapExporting,
+    name: 'album',
+    region: (page) => new RecapPage(page).progress,
+  },
+  {
+    key: 'recapExporting',
+    ...wrapUpStates.recapExporting,
+    name: 'album-text',
+    region: (page) => new RecapPage(page).progressText,
+  },
 ]);

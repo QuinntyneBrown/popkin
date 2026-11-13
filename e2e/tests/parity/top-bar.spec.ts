@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { SignInPage } from '../../pages/sign-in.page';
@@ -40,6 +41,16 @@ parity('top-bar', [
     region: (page) => new ExperienceDetailPage(page).bar,
   },
   // A wrapped-up Popkin's thread: the tile greyed, and when it wrapped up.
-  { key: 'groupChatReadOnly', name: 'read-only', region: (page) => new GroupChatPage(page).topBar },
-  { key: 'wrapUp', name: 'wrap-up', region: (page) => new WrapUpPage(page).topBar },
+  {
+    key: 'groupChatReadOnly',
+    ...wrapUpStates.groupChatReadOnly,
+    name: 'read-only',
+    region: (page) => new GroupChatPage(page).topBar,
+  },
+  {
+    key: 'wrapUp',
+    ...wrapUpStates.wrapUp,
+    name: 'wrap-up',
+    region: (page) => new WrapUpPage(page).topBar,
+  },
 ]);

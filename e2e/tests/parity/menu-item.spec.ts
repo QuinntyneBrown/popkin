@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { parity } from '../../fixtures/parity';
 import { ExperienceActionsDialog } from '../../pages/experience-actions.dialog';
@@ -18,5 +19,10 @@ parity('menu-item', [
     region: (page) => new ExperienceActionsDialog(page).delete,
   },
   // A row with a line under its words.
-  { key: 'popkinSettings', name: 'hint', region: (page) => new PopkinSettingsDialog(page).wrapUp },
+  {
+    key: 'popkinSettings',
+    ...wrapUpStates.popkinSettings,
+    name: 'hint',
+    region: (page) => new PopkinSettingsDialog(page).wrapUp,
+  },
 ]);

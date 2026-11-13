@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { theMockChat } from '../../fixtures/chat';
 import { parity } from '../../fixtures/parity';
 import { GroupChatPage } from '../../pages/group-chat.page';
@@ -12,5 +13,10 @@ parity('composer', [
     before: theMockChat,
   },
   // The Popkin has wrapped up: the line that says so, in place of the field.
-  { key: 'groupChatReadOnly', name: 'closed', region: (page) => new GroupChatPage(page).composer },
+  {
+    key: 'groupChatReadOnly',
+    ...wrapUpStates.groupChatReadOnly,
+    name: 'closed',
+    region: (page) => new GroupChatPage(page).composer,
+  },
 ]);

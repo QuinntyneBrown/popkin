@@ -1,3 +1,8 @@
+import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
+import { RecapPage } from '../pages/recap.page';
+import { WrapUpPage } from '../pages/wrap-up.page';
+import { WrapUpBanner } from '../pages/wrap-up-banner';
+import { wrapUpStates } from './wrap-up-states';
 import path from 'node:path';
 import type { Locator, Page } from '@playwright/test';
 import { callStates } from './call-states';
@@ -143,6 +148,12 @@ const detailRegions = (page: Page) => ({ detail: new ExperienceDetailPage(page).
 const commentRegions = (page: Page) => ({ dialog: new AddCommentDialog(page).panel });
 const actionsRegions = (page: Page) => ({ dialog: new ExperienceActionsDialog(page).panel });
 const deleteRegions = (page: Page) => ({ dialog: new DeleteExperienceDialog(page).panel });
+const wrapUpRegions = (page: Page) => {
+  const wrapUp = new WrapUpPage(page);
+  return { main: wrapUp.main, picture: wrapUp.picture };
+};
+const recapRegions = (page: Page) => ({ recap: new RecapPage(page).recap });
+const warningRegions = (page: Page) => ({ banner: new WrapUpBanner(page).root });
 
 export const screenStates: ScreenState[] = [
   {
@@ -912,5 +923,73 @@ export const screenStates: ScreenState[] = [
     key: 'experienceDetailError',
     ...experienceStates.experienceDetailError,
     regions: (page) => ({ error: new ExperienceDetailPage(page).error }),
+  },
+  // Wrap up (journey 9).
+  {
+    key: 'popkinSettings',
+    ...wrapUpStates.popkinSettings,
+    regions: (page) => ({ dialog: new PopkinSettingsDialog(page).panel }),
+  },
+  {
+    key: 'popkinSettingsMember',
+    ...wrapUpStates.popkinSettingsMember,
+    regions: (page) => ({ dialog: new PopkinSettingsDialog(page).panel }),
+  },
+  { key: 'wrapUp', ...wrapUpStates.wrapUp, regions: wrapUpRegions },
+  { key: 'wrapUpAlbumOff', ...wrapUpStates.wrapUpAlbumOff, regions: wrapUpRegions },
+  { key: 'wrapUpSubmitting', ...wrapUpStates.wrapUpSubmitting, regions: wrapUpRegions },
+  {
+    key: 'wrapUpError',
+    ...wrapUpStates.wrapUpError,
+    regions: (page) => ({ ...wrapUpRegions(page), alert: new WrapUpPage(page).alert }),
+  },
+  { key: 'recap', ...wrapUpStates.recap, regions: recapRegions },
+  { key: 'recapHost', ...wrapUpStates.recapHost, regions: recapRegions },
+  { key: 'recapPlain', ...wrapUpStates.recapPlain, regions: recapRegions },
+  { key: 'recapExporting', ...wrapUpStates.recapExporting, regions: recapRegions },
+  {
+    key: 'recapLoading',
+    ...wrapUpStates.recapLoading,
+    regions: (page) => ({ skeletons: new RecapPage(page).skeletons }),
+  },
+  {
+    key: 'recapError',
+    ...wrapUpStates.recapError,
+    regions: (page) => ({ error: new RecapPage(page).error }),
+  },
+  { key: 'recapGoing', ...wrapUpStates.recapGoing, regions: warningRegions },
+  { key: 'popkinHomeLastHour', ...wrapUpStates.popkinHomeLastHour, regions: warningRegions },
+  {
+    key: 'popkinHomeLastHourMember',
+    ...wrapUpStates.popkinHomeLastHourMember,
+    regions: warningRegions,
+  },
+  {
+    key: 'groupChatReadOnly',
+    ...wrapUpStates.groupChatReadOnly,
+    regions: (page) => {
+      const chat = new GroupChatPage(page);
+      return { topBar: chat.topBar, composer: chat.composer };
+    },
+  },
+  {
+    key: 'photoAlbumWrapped',
+    ...wrapUpStates.photoAlbumWrapped,
+    regions: (page) => ({ header: new PhotoAlbumPage(page).header }),
+  },
+  { key: 'photoAlbumGoing', ...wrapUpStates.photoAlbumGoing, regions: warningRegions },
+  {
+    key: 'photoAlbumRemoved',
+    ...wrapUpStates.photoAlbumRemoved,
+    regions: (page) => {
+      const album = new PhotoAlbumPage(page);
+      return { header: album.header, empty: album.empty };
+    },
+  },
+  { key: 'experiencesWrapped', ...wrapUpStates.experiencesWrapped, regions: experiencesRegions },
+  {
+    key: 'experienceDetailWrapped',
+    ...wrapUpStates.experienceDetailWrapped,
+    regions: detailRegions,
   },
 ];

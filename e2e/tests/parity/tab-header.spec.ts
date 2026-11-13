@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { ExperiencesPage } from '../../pages/experiences.page';
 import { parity } from '../../fixtures/parity';
@@ -57,16 +58,19 @@ parity('tab-header', [
   // A wrapped-up Popkin: nothing to add, so no action beside the filters.
   {
     key: 'photoAlbumWrapped',
+    ...wrapUpStates.photoAlbumWrapped,
     name: 'photos-wrapped',
     region: (page) => new PhotoAlbumPage(page).header,
   },
   {
     key: 'photoAlbumRemoved',
+    ...wrapUpStates.photoAlbumRemoved,
     name: 'photos-removed',
     region: (page) => new PhotoAlbumPage(page).header,
   },
   {
     key: 'experiencesWrapped',
+    ...wrapUpStates.experiencesWrapped,
     name: 'experiences-wrapped',
     region: (page) => new ExperiencesPage(page).header,
   },

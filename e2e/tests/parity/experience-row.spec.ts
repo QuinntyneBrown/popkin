@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { theMockHome } from '../../fixtures/home';
 import { parity } from '../../fixtures/parity';
 import { PopkinHomePage } from '../../pages/popkin-home.page';
@@ -11,5 +12,10 @@ parity('experience-row', [
     before: theMockHome,
   },
   // The recap's top-rated moment: a label above the title, which wraps, and no chevron.
-  { key: 'recap', name: 'moment', region: (page) => new RecapPage(page).moment },
+  {
+    key: 'recap',
+    ...wrapUpStates.recap,
+    name: 'moment',
+    region: (page) => new RecapPage(page).moment,
+  },
 ]);

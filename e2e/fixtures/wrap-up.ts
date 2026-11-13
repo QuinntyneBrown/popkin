@@ -76,9 +76,9 @@ export class WrapUp {
     messageCount: 1286,
     photoCount: 48,
     photos: [
-      { id: '00000000-0000-4000-a000-000000000001', thumbnailUrl: '/photos/lake.jpg' },
-      { id: '00000000-0000-4000-a000-000000000002', thumbnailUrl: '/photos/bonfire.jpg' },
       { id: '00000000-0000-4000-a000-000000000003', thumbnailUrl: '/photos/hike.jpg' },
+      { id: '00000000-0000-4000-a000-000000000002', thumbnailUrl: '/photos/bonfire.jpg' },
+      { id: '00000000-0000-4000-a000-000000000001', thumbnailUrl: '/photos/lake.jpg' },
     ],
     avatars: [people.mara, people.walt, people.dev, people.ellie, people.ruth].map(
       (person) => person.avatar,

@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { thePopkinsEmpty, thePopkinsFailing } from '../../fixtures/my-popkins';
@@ -80,6 +81,7 @@ parity('empty-state', [
   // The album was not kept and its 30 days are over.
   {
     key: 'photoAlbumRemoved',
+    ...wrapUpStates.photoAlbumRemoved,
     name: 'photos-removed',
     region: (page) => new PhotoAlbumPage(page).empty,
   },

@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { theMockChat } from '../../fixtures/chat';
 import { parity } from '../../fixtures/parity';
 import { GroupChatPage } from '../../pages/group-chat.page';
@@ -13,5 +14,10 @@ parity('popkin-nav', [
     widths: [1280],
   },
   // A wrapped-up Popkin: no time left and nothing unread.
-  { key: 'photoAlbumWrapped', name: 'wrapped', region: (page) => new PhotoAlbumPage(page).nav },
+  {
+    key: 'photoAlbumWrapped',
+    ...wrapUpStates.photoAlbumWrapped,
+    name: 'wrapped',
+    region: (page) => new PhotoAlbumPage(page).nav,
+  },
 ]);
