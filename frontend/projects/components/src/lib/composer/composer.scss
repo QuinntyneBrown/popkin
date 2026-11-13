@@ -38,9 +38,7 @@
 
 /* One line fills the pill exactly; five lines are the most it shows before it scrolls. */
 .composer__input {
-  --pk-composer-pad: calc(
-    (var(--control-height-md) - 2 * var(--border-width-thick) - 1lh) / 2
-  );
+  --pk-composer-pad: calc((var(--control-height-md) - 2 * var(--border-width-thick) - 1lh) / 2);
 
   flex: 1;
   min-width: 0;
