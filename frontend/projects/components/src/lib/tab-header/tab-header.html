@@ -1,14 +1,18 @@
 <h1 class="tab-header__title">{{ heading() }}</h1>
-<div class="tab-header__summary">
-  @if (loading()) {
-    <span pk-skeleton shape="text" [width]="50"></span>
-  } @else {
-    @if (avatars().length) {
-      <span pk-avatar-stack size="2xs" [avatars]="avatars()" [more]="more()"></span>
+@if (lead()) {
+  <p class="tab-header__lead">{{ lead() }}</p>
+} @else {
+  <div class="tab-header__summary">
+    @if (loading()) {
+      <span pk-skeleton shape="text" [width]="50"></span>
+    } @else {
+      @if (avatars().length) {
+        <span pk-avatar-stack size="2xs" [avatars]="avatars()" [more]="more()"></span>
+      }
+      <span>{{ summary() }}</span>
     }
-    <span>{{ summary() }}</span>
-  }
-</div>
+  </div>
+}
 @if (filter() || action()) {
   <div class="tab-header__tools">
     @if (filter(); as label) {

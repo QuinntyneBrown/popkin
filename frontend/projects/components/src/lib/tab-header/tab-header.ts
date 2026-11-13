@@ -8,7 +8,8 @@ import { Skeleton } from '../skeleton/skeleton';
 /**
  * Tab header (docs/design-system/components/top-bar.html, `tab-header`): the head of one of a
  * Popkin's tabs. It names the tab (the screen's `h1`), sums it up in a line with a few faces
- * ("48 photos from 11 people"), and holds the chips that filter the tab. From 768 px the chips
+ * ("48 photos from 11 people") or says what it is for in a `lead`, and holds the chips that
+ * filter the tab. From 768 px the chips
  * sit beside the name and the tab's main action joins them as a button; on a phone that action
  * is the floating one (`pk-fab` in the app screen), so the button here is absent (L2-058 AC9).
  *
@@ -30,6 +31,11 @@ export class TabHeader {
   readonly heading = input.required<string>();
   /** The line under the name: "48 photos from 11 people", "No photos yet". */
   readonly summary = input('');
+  /**
+   * A sentence under the name in place of the summary, where the tab says what it is for
+   * rather than what it holds: "What we did, and what we want to do next."
+   */
+  readonly lead = input<string>();
   /** A few of the people the line counts, before its words. */
   readonly avatars = input<readonly StackAvatar[]>([]);
   /** How many people the avatars leave out; 0 shows no "+N". */
