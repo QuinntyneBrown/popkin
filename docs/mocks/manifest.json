@@ -333,13 +333,17 @@
         "L2-023",
         "L2-024",
         "L2-026",
+        "L2-030",
+        "L2-045",
         "L2-051"
       ],
       "states": [
         "default",
         "loading",
         "empty",
-        "error"
+        "error",
+        "read-only",
+        "call"
       ]
     },
     {
