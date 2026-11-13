@@ -94,3 +94,4 @@ export * from './lib/experience-card/experience-card';
 export * from './lib/experience-detail/experience-detail';
 export * from './lib/score-card/score-card';
 export * from './lib/rating-panel/rating-panel';
+export * from './lib/comments/comments';

@@ -1,0 +1,20 @@
+:host {
+  display: block;
+  margin-top: var(--space-8);
+}
+
+.comments__heading {
+  font: var(--text-h3);
+}
+
+.divided {
+  margin-top: var(--space-2);
+}
+
+.comments__empty {
+  margin-top: var(--space-2);
+  padding: var(--space-4) 0;
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
