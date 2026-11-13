@@ -25,6 +25,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Photo> Photos => Set<Photo>();
 
+    public DbSet<Call> Calls => Set<Call>();
+
+    public DbSet<CallParticipant> CallParticipants => Set<CallParticipant>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 

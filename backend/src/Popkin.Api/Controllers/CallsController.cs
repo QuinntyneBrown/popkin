@@ -1,0 +1,25 @@
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Popkin.Application.Calls;
+
+namespace Popkin.Api.Controllers;
+
+/// <summary>A Popkin's group call. Every action needs a session and a membership (L2-050, L2-051).</summary>
+[ApiController]
+[Route("api/popkins/{popkinId:guid}/calls")]
+public sealed class CallsController(ISender sender) : ControllerBase
+{
+    /// <summary>The microphone and the camera are on unless the member arrives with one off.</summary>
+    public sealed record JoinCallRequest(bool? MicOn, bool? CameraOn);
+
+    /// <summary>
+    /// Puts the member on the Popkin's group call (L2-029 AC1): 201 when this starts it, 200
+    /// when they join the one under way or are on it already.
+    /// </summary>
+    [HttpPost]
+    public async Task<ActionResult<JoinedCallDto>> Join(Guid popkinId, JoinCallRequest? request, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new JoinCallCommand(popkinId, request?.MicOn ?? true, request?.CameraOn ?? true), cancellationToken);
+        return result.Started ? Created($"/api/popkins/{popkinId}/calls/current", result.Joined) : Ok(result.Joined);
+    }
+}

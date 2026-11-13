@@ -68,6 +68,8 @@ public static class DependencyInjection
             services.AddSingleton<IPhotoStore, UnconfiguredPhotoStore>();
         }
 
+        services.AddSingleton<IMediaRelayCredentials, TurnCredentialIssuer>();
+
         foreach (var channel in Enum.GetValues<ContactChannel>())
         {
             if (development)
