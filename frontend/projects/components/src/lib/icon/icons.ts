@@ -143,6 +143,11 @@ export const ICONS = {
     },
     { path: 'm15 5 4 4' },
   ],
+  'sign-out': [
+    { path: 'm16 17 5-5-5-5' },
+    { path: 'M21 12H9' },
+    { path: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' },
+  ],
   trash: [
     { path: 'M10 11v6' },
     { path: 'M14 11v6' },

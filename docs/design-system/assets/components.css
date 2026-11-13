@@ -45,6 +45,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .text-caption { font: var(--text-caption); color: var(--color-fg-subtle); }
 .text-center { text-align: center; }
 .text-accent { color: var(--accent-text); font-weight: var(--font-weight-semibold); }
+.status-note { display: flex; align-items: center; gap: var(--space-2); margin: 0; color: var(--color-success-fg); font: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans); }
 .emoji { font-family: var(--font-family-emoji); font-style: normal; }
 .lead { font: var(--text-body-lg); color: var(--color-fg-muted); }
 .sub { margin-top: var(--space-2); color: var(--color-fg-muted); }

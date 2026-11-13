@@ -75,3 +75,8 @@ export * from './lib/api/wrap-up/recap-api';
 export * from './lib/api/wrap-up/wrap-up-text';
 export * from './lib/api/wrap-up/wrap-up-watch';
 export * from './lib/api/wrap-up/recap-store';
+export * from './lib/models/account';
+export * from './lib/api/account/account-api';
+export * from './lib/api/theme/theme-preferences';
+export * from './lib/api/account/account-store';
+export * from './lib/api/account/account-text';

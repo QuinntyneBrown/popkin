@@ -1,0 +1,101 @@
+<div pk-screen layout="column" heading="Your account">
+  <header pk-top-bar slot="header" back="/popkins" backLabel="My Popkins"></header>
+  @switch (store.state()) {
+    @case ('loading') {
+      <p class="visually-hidden" role="status">Loading your account…</p>
+      <div class="stack" aria-hidden="true">
+        <span pk-skeleton shape="tile-2xl"></span>
+        <span pk-skeleton shape="text" [width]="30"></span>
+        <span pk-skeleton shape="btn" width="full"></span>
+        <span pk-skeleton shape="text" [width]="30"></span>
+        <span pk-skeleton shape="btn" width="full"></span>
+      </div>
+    }
+    @case ('error') {
+      <div
+        pk-empty-state
+        icon="offline"
+        heading="We couldn’t load your account"
+        text="Nothing has changed. Check your connection and try again."
+        [alert]="true"
+      >
+        <button pk-button variant="primary" size="md" type="button" (click)="load()">
+          <svg pk-icon name="retry" size="md"></svg>Try again
+        </button>
+        <a pk-button variant="secondary" size="md" routerLink="/popkins">My Popkins</a>
+      </div>
+    }
+    @case ('ready') {
+      @if (store.account(); as account) {
+        <div
+          pk-photo-picker
+          label="Change your photo"
+          [initial]="initials()"
+          [photo]="photoUrl()"
+          [error]="photoError()"
+          [accept]="accept"
+          [disabled]="saving()"
+          (picked)="pick($event)"
+        ></div>
+        <form id="account" class="stack stack--lg" novalidate (submit)="save($event)">
+          @if (problems().length) {
+            <div pk-form-summary [problems]="problems()"></div>
+          }
+          @if (store.saveState() === 'failed') {
+            <div pk-alert heading="We couldn’t save that.">
+              Your changes are still here. Give it another go.
+            </div>
+          }
+          <div
+            pk-text-field
+            fieldId="name"
+            label="Your name"
+            autocomplete="name"
+            hint="This is how you appear in every Popkin."
+            [maxlength]="40"
+            [formControl]="name"
+            [readonly]="saving()"
+            [error]="store.nameInvalid() ? nameMessage : undefined"
+          ></div>
+          <div
+            pk-text-field
+            fieldId="contact"
+            [label]="account.channel === 'Phone' ? 'Phone number' : 'Email'"
+            [type]="account.channel === 'Phone' ? 'tel' : 'email'"
+            hint="You sign in with this. It’s never shown to other members."
+            [formControl]="contact"
+            [readonly]="true"
+          ></div>
+          <div>
+            <span pk-field-label aria-hidden="true">Theme</span>
+            <div
+              pk-segmented-control
+              kind="radio"
+              label="Theme"
+              [options]="themes"
+              [value]="theme.current()"
+              (valueChange)="chooseTheme($event)"
+            ></div>
+          </div>
+          <button
+            pk-button
+            variant="primary"
+            type="submit"
+            [block]="true"
+            [busy]="saving()"
+            [disabled]="saving()"
+          >
+            {{ saving() ? 'Saving…' : 'Save changes' }}
+          </button>
+          @if (store.saveState() === 'saved') {
+            <p pk-status-note>Saved just now</p>
+          }
+        </form>
+        <div pk-menu-list [separated]="true">
+          <button pk-menu-item type="button" icon="sign-out">Sign out</button>
+          <button pk-menu-item type="button" icon="trash" [danger]="true">Delete my account</button>
+        </div>
+      }
+    }
+  }
+</div>

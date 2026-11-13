@@ -2,3 +2,8 @@
   display: flex;
   flex-direction: column;
 }
+
+:host(.menu-list--separated) {
+  margin-top: var(--space-8);
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}

@@ -308,7 +308,7 @@
       "fg": "--color-success-fg",
       "bg": "--color-bg-canvas",
       "min": 4.5,
-      "note": "Saved just now"
+      "note": "status note text on the page (Saved just now)"
     },
     {
       "fg": "--color-inverse-success-icon",

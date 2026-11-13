@@ -8,7 +8,9 @@ import {
   theMockInvite,
   theMockWrappedInvite,
 } from '../../fixtures/journeys';
+import { accountStates } from '../../fixtures/account-states';
 import { parity } from '../../fixtures/parity';
+import { AccountPage } from '../../pages/account.page';
 import { JoinInvitePage } from '../../pages/join-invite.page';
 import { NotFoundPage } from '../../pages/not-found.page';
 import { YourProfilePage } from '../../pages/your-profile.page';
@@ -108,5 +110,12 @@ parity('screen', [
     ...wrapUpStates.recapError,
     name: 'recap-error',
     region: (page) => new RecapPage(page).main,
+  },
+  // One centred column at every width.
+  {
+    key: 'account',
+    ...accountStates.account,
+    name: 'account',
+    region: (page) => new AccountPage(page).screen,
   },
 ]);

@@ -1,6 +1,8 @@
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
+import { accountStates } from '../../fixtures/account-states';
 import { parity } from '../../fixtures/parity';
+import { AccountPage } from '../../pages/account.page';
 import { ExperienceActionsDialog } from '../../pages/experience-actions.dialog';
 import { PopkinSettingsDialog } from '../../pages/popkin-settings.dialog';
 
@@ -31,5 +33,12 @@ parity('menu-list', [
     ...wrapUpStates.popkinSettingsMember,
     name: 'settings-member',
     region: (page) => new PopkinSettingsDialog(page).menu,
+  },
+  // Set off from the account above it by a rule: Sign out and Delete my account.
+  {
+    key: 'account',
+    ...accountStates.account,
+    name: 'account',
+    region: (page) => new AccountPage(page).menu,
   },
 ]);

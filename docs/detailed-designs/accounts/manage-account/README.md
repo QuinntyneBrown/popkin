@@ -96,6 +96,13 @@ the question so its history reads.
   icons under an inline rule, unlike every other `menu-list`. They now use the design system's
   rows, an icon on a tile (`pk-menu-item`), and the new `menu-list--separated` modifier for the
   rule and the space above (`docs/design-system/components/list-row.html`).
+- **The mock's spacing, aligned** — the account mocks moved the photo picker up with an inline
+  `margin-top`, closer to the heading than the design system's `photo-picker` puts it on every
+  other screen. The override is gone, so the mock and the app both follow the design system.
+- **New components** — `pk-status-note` ("Saved just now", `docs/design-system/components/status-note.html`)
+  replaces the mock's inline-styled line; `pk-field-label` is the text field's label standing
+  alone above the theme's `pk-segmented-control`, which gains its radio form (`kind="radio"`).
+  `pk-screen` gains `layout="column"` and `pk-menu-list` the `separated` input.
 - **The theme at start** — `provideAppInitializer` applies the stored choice before the first
   screen draws.
 
