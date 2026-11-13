@@ -40,4 +40,7 @@ public interface IPopkinNotifier
 
     /// <summary>Someone left the call. To the connections on the call.</summary>
     Task ParticipantLeft(Guid callId, Guid membershipId);
+
+    /// <summary>A participant's microphone or camera changed. To the connections on the call.</summary>
+    Task ParticipantMediaChanged(Guid callId, Guid membershipId, long mediaVersion, bool micOn, bool cameraOn);
 }

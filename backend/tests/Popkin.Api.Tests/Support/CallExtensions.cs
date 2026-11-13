@@ -24,6 +24,10 @@ public static class CallExtensions
     public static Task<HttpResponseMessage> LeaveCallAsync(this HttpClient member, Guid popkinId, Guid callId) =>
         member.PostAsync($"/api/popkins/{popkinId}/calls/{callId}/leave", null);
 
+    /// <summary>Records the member's microphone and camera on the call; `body` is `{ micOn?, cameraOn? }`.</summary>
+    public static Task<HttpResponseMessage> SetCallMediaAsync(this HttpClient member, Guid popkinId, Guid callId, object body) =>
+        member.PatchAsJsonAsync($"/api/popkins/{popkinId}/calls/{callId}/participants/me", body);
+
     public static Task<HttpResponseMessage> CurrentCallAsync(this HttpClient member, Guid popkinId) =>
         member.GetAsync($"/api/popkins/{popkinId}/calls/current");
 

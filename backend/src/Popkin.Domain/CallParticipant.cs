@@ -43,5 +43,24 @@ public sealed class CallParticipant
     /// <summary>The connection the participant is on the call with from now on.</summary>
     public void Connect(string connectionId) => ConnectionId = connectionId;
 
+    /// <summary>
+    /// Records the microphone and the camera, each only when given. Returns whether anything
+    /// changed; a state that is held already changes nothing and raises no version.
+    /// </summary>
+    public bool SetMedia(bool? micOn, bool? cameraOn)
+    {
+        var mic = micOn ?? MicOn;
+        var camera = cameraOn ?? CameraOn;
+        if (mic == MicOn && camera == CameraOn)
+        {
+            return false;
+        }
+
+        MicOn = mic;
+        CameraOn = camera;
+        MediaVersion++;
+        return true;
+    }
+
     internal void Leave(DateTimeOffset now) => LeftAt = now;
 }

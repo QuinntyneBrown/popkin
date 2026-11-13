@@ -57,4 +57,11 @@ public interface IPopkinClient
 
     /// <summary>Someone left the call. A fact: applying it twice, or for someone not held, ends the same.</summary>
     Task ParticipantLeft(Guid callId, Guid membershipId);
+
+    /// <summary>
+    /// A participant's microphone or camera changed. A state: it carries both values in full
+    /// and the participant's media version, which only rises, and an event whose version is
+    /// not above the one held for that participant is dropped.
+    /// </summary>
+    Task ParticipantMediaChanged(Guid callId, Guid membershipId, long mediaVersion, bool micOn, bool cameraOn);
 }

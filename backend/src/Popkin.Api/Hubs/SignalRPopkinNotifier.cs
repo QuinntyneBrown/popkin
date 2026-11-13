@@ -47,6 +47,11 @@ public sealed class SignalRPopkinNotifier(
     public Task ParticipantLeft(Guid callId, Guid membershipId) =>
         SendAsync(nameof(IPopkinClient.ParticipantLeft), () => Call(callId).ParticipantLeft(callId, membershipId));
 
+    public Task ParticipantMediaChanged(Guid callId, Guid membershipId, long mediaVersion, bool micOn, bool cameraOn) =>
+        SendAsync(
+            nameof(IPopkinClient.ParticipantMediaChanged),
+            () => Call(callId).ParticipantMediaChanged(callId, membershipId, mediaVersion, micOn, cameraOn));
+
     private IPopkinClient Call(Guid callId) => hub.Clients.Group(PopkinHub.CallGroupOf(callId));
 
     private IPopkinClient Group(Guid popkinId) => hub.Clients.Group(PopkinHub.GroupOf(popkinId));
