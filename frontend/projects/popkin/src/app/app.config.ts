@@ -3,11 +3,19 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import {
   AUTH_API,
+  BrowserNetworkStatus,
+  CHAT_API,
   HttpAuthApi,
+  HttpChatApi,
   HttpInvitesApi,
   HttpPopkinsApi,
   INVITES_API,
+  LocalOutboxStorage,
+  NETWORK_STATUS,
+  OUTBOX_STORAGE,
   POPKINS_API,
+  POPKIN_REALTIME,
+  SignalRPopkinRealtime,
 } from 'api';
 import { routes } from './app.routes';
 import { unauthorizedInterceptor } from './guards/unauthorized.interceptor';
@@ -21,5 +29,9 @@ export const appConfig: ApplicationConfig = {
     { provide: AUTH_API, useClass: HttpAuthApi },
     { provide: POPKINS_API, useClass: HttpPopkinsApi },
     { provide: INVITES_API, useClass: HttpInvitesApi },
+    { provide: CHAT_API, useClass: HttpChatApi },
+    { provide: POPKIN_REALTIME, useClass: SignalRPopkinRealtime },
+    { provide: NETWORK_STATUS, useClass: BrowserNetworkStatus },
+    { provide: OUTBOX_STORAGE, useClass: LocalOutboxStorage },
   ],
 };

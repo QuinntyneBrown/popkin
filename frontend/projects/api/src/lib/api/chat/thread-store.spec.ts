@@ -1,0 +1,368 @@
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { Observable, Subject, of, throwError } from 'rxjs';
+import { beforeEach, describe, expect, it } from 'vitest';
+import {
+  MemberJoinedView,
+  MessagePageView,
+  MessageView,
+  PresenceView,
+  ThreadView,
+} from '../../models/chat';
+import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
+import { CHAT_API, ChatApi, MessagesCursor } from './chat-api';
+import { OUTBOX_STORAGE } from './message-outbox';
+import { NETWORK_STATUS } from './network-status';
+import { ThreadStore } from './thread-store';
+import { UnreadTracker } from './unread-tracker';
+
+const me = 'm-mara';
+
+function message(n: number, author = 'Walt', extra: Partial<MessageView> = {}): MessageView {
+  return {
+    id: `id-${String(n).padStart(4, '0')}`,
+    threadId: 't',
+    clientMessageId: `c-${n}`,
+    kind: 'Member',
+    author: {
+      membershipId: `m-${author.toLowerCase()}`,
+      firstName: author,
+      avatar: { initials: 'XX', accent: 'Teal', photoUrl: null },
+    },
+    text: `message ${n}`,
+    sentAt: new Date(2026, 8, 12, 9, 0, n).toISOString(),
+    ...extra,
+  };
+}
+
+const thread: ThreadView = {
+  id: 't',
+  popkinId: 'p',
+  kind: 'Everyone',
+  popkinName: 'Lakeside Weekend',
+  emoji: '🏕️',
+  colour: 'Teal',
+  endsAt: null,
+  memberCount: 14,
+  hereNow: 5,
+  presenceVersion: 7,
+  readOnly: false,
+  unreadCount: 3,
+  lastReadMessageId: null,
+  viewer: { membershipId: me, firstName: 'Mara' },
+};
+
+class FakeChat implements ChatApi {
+  thread: ThreadView | null = thread;
+  /** Everything the server holds for the thread, oldest first. */
+  stored: MessageView[] = [];
+  presence: PresenceView = { version: 7, hereNow: 5, members: [] };
+  readonly asked: MessagesCursor[] = [];
+  readonly read: string[] = [];
+  readonly sends: string[] = [];
+  failMessages = false;
+
+  getEveryone(): Observable<ThreadView> {
+    return this.thread ? of(this.thread) : throwError(() => new Error('down'));
+  }
+
+  getMessages(_p: string, _t: string, cursor?: MessagesCursor): Observable<MessagePageView> {
+    this.asked.push(cursor);
+    if (this.failMessages) return throwError(() => new Error('down'));
+    const all = this.stored;
+    const at = (id: string) => all.findIndex((m) => m.id === id);
+    if (!cursor) return of({ items: all.slice(-50), hasMore: all.length > 50 });
+    if ('before' in cursor) {
+      const end = at(cursor.before);
+      return of({ items: all.slice(Math.max(0, end - 50), end), hasMore: end > 50 });
+    }
+    if ('after' in cursor) {
+      const start = at(cursor.after) + 1;
+      return of({ items: all.slice(start, start + 50), hasMore: all.length > start + 50 });
+    }
+    return of({ items: all.slice(at(cursor.from), at(cursor.to) + 1), hasMore: false });
+  }
+
+  send(_p: string, _t: string, clientMessageId: string, text: string): Observable<MessageView> {
+    this.sends.push(text);
+    return of(message(900 + this.sends.length, 'Mara', { clientMessageId, text }));
+  }
+
+  discard(): Observable<void> {
+    return of(undefined);
+  }
+
+  markRead(_p: string, _t: string, lastReadMessageId: string): Observable<void> {
+    this.read.push(lastReadMessageId);
+    return of(undefined);
+  }
+
+  getPresence(): Observable<PresenceView> {
+    return of(this.presence);
+  }
+}
+
+describe('ThreadStore', () => {
+  let chat: FakeChat;
+  let store: ThreadStore;
+  let unread: UnreadTracker;
+  const realtime = {
+    state: signal('connected'),
+    messageAdded$: new Subject<MessageView>(),
+    messageDeleted$: new Subject<{ threadId: string; messageId: string }>(),
+    threadRead$: new Subject<string>(),
+    presenceChanged$: new Subject<{ popkinId: string; version: number; hereNow: number }>(),
+    memberJoined$: new Subject<{ popkinId: string; member: MemberJoinedView }>(),
+    reconnected$: new Subject<void>(),
+    started: 0,
+    start() {
+      this.started++;
+    },
+    stop: () => undefined,
+  };
+
+  const shown = () => store.rows().flatMap((row) => (row.kind === 'message' ? [row.text] : []));
+  const range = (from: number, to: number) =>
+    Array.from({ length: to - from + 1 }, (_, i) => message(from + i));
+
+  beforeEach(() => {
+    chat = new FakeChat();
+    chat.stored = range(1, 3);
+    TestBed.configureTestingModule({
+      providers: [
+        ThreadStore,
+        { provide: CHAT_API, useValue: chat },
+        { provide: POPKIN_REALTIME, useValue: realtime },
+        { provide: NETWORK_STATUS, useValue: { online: signal(true), backOnline$: new Subject() } },
+        { provide: OUTBOX_STORAGE, useValue: { load: () => [], save: () => undefined } },
+      ],
+    });
+    store = TestBed.inject(ThreadStore);
+    unread = TestBed.inject(UnreadTracker);
+  });
+
+  describe('opening', () => {
+    it('is loading until the thread and its latest messages are read', () => {
+      expect(store.state()).toBe('loading');
+      store.open('p');
+      expect(store.state()).toBe('ready');
+      expect(store.thread()?.popkinName).toBe('Lakeside Weekend');
+      expect(shown()).toEqual(['message 1', 'message 2', 'message 3']);
+      expect(realtime.started).toBeGreaterThan(0);
+    });
+
+    it('is empty when the Popkin has no messages (L2-021 AC8)', () => {
+      chat.stored = [];
+      store.open('p');
+      expect(store.state()).toBe('empty');
+    });
+
+    it.each(['thread', 'messages'])('is an error when the %s cannot be read', (what) => {
+      if (what === 'thread') chat.thread = null;
+      else chat.failMessages = true;
+      store.open('p');
+      expect(store.state()).toBe('error');
+    });
+
+    it('opens again after an error', () => {
+      chat.failMessages = true;
+      store.open('p');
+      chat.failMessages = false;
+      store.open('p');
+      expect(store.state()).toBe('ready');
+    });
+
+    it('tells the unread count the API gave, while the latest is not in view', () => {
+      store.setLatestInView(false);
+      store.open('p');
+      expect(unread.forThread('t')).toBe(3);
+    });
+  });
+
+  describe('live messages (L2-027)', () => {
+    beforeEach(() => store.open('p'));
+
+    it('adds a message as it arrives and says a message was added', () => {
+      const added: string[] = [];
+      store.added$.subscribe((whose) => added.push(whose));
+
+      realtime.messageAdded$.next(message(4));
+
+      expect(shown().at(-1)).toBe('message 4');
+      expect(added).toEqual(['theirs']);
+    });
+
+    it('ignores another thread’s message', () => {
+      realtime.messageAdded$.next(message(4, 'Walt', { threadId: 'other' }));
+      expect(shown()).toHaveLength(3);
+    });
+
+    it('drops an event for a message it already shows', () => {
+      realtime.messageAdded$.next(message(3));
+      expect(shown()).toHaveLength(3);
+    });
+
+    it('announces a message from someone else with its sender, and not the member’s own', () => {
+      realtime.messageAdded$.next(message(4, 'Walt'));
+      expect(store.announcement()).toBe('Walt: message 4');
+
+      realtime.messageAdded$.next(message(5, 'Mara'));
+      expect(store.announcement()).toBe('Walt: message 4');
+    });
+
+    it('raises "New messages" when one arrives while older messages are being read', () => {
+      store.setLatestInView(false);
+      realtime.messageAdded$.next(message(4));
+      expect(store.newMessagesBelow()).toBe(true);
+
+      store.setLatestInView(true);
+      expect(store.newMessagesBelow()).toBe(false);
+    });
+
+    it('does not raise "New messages" with the latest in view', () => {
+      realtime.messageAdded$.next(message(4));
+      expect(store.newMessagesBelow()).toBe(false);
+    });
+
+    it('removes a message that was deleted', () => {
+      realtime.messageDeleted$.next({ threadId: 't', messageId: message(2).id });
+      expect(shown()).toEqual(['message 1', 'message 3']);
+    });
+
+    it('counts a member who joins', () => {
+      realtime.memberJoined$.next({ popkinId: 'p', member: {} as MemberJoinedView });
+      realtime.memberJoined$.next({ popkinId: 'elsewhere', member: {} as MemberJoinedView });
+      expect(store.thread()?.memberCount).toBe(15);
+    });
+  });
+
+  describe('reading (L2-027 AC4)', () => {
+    it('moves the read point to the latest message once it is in view, and zeroes the count', () => {
+      store.open('p');
+      expect(chat.read).toEqual([message(3).id]);
+      expect(unread.forThread('t')).toBe(0);
+    });
+
+    it('does not move the read point while older messages are being read', () => {
+      store.setLatestInView(false);
+      store.open('p');
+      realtime.messageAdded$.next(message(4));
+      expect(chat.read).toEqual([]);
+      expect(unread.forThread('t')).toBe(4);
+
+      store.setLatestInView(true);
+      expect(chat.read).toEqual([message(4).id]);
+      expect(unread.forThread('t')).toBe(0);
+    });
+
+    it('does not report the same message twice', () => {
+      store.open('p');
+      store.setLatestInView(false);
+      store.setLatestInView(true);
+      expect(chat.read).toHaveLength(1);
+    });
+  });
+
+  describe('paging (L2-027 AC5)', () => {
+    beforeEach(() => {
+      chat.stored = range(1, 120);
+      store.open('p');
+    });
+
+    it('opens on the latest 50 and knows there are earlier ones', () => {
+      expect(shown()).toHaveLength(50);
+      expect(shown()[0]).toBe('message 71');
+      expect(store.hasEarlier()).toBe(true);
+    });
+
+    it('loads the page before the oldest shown, until there are none', async () => {
+      await store.loadEarlier();
+      expect(shown()).toHaveLength(100);
+      expect(shown()[0]).toBe('message 21');
+      expect(chat.asked.at(-1)).toEqual({ before: message(71).id });
+
+      await store.loadEarlier();
+      expect(shown()).toHaveLength(120);
+      expect(store.hasEarlier()).toBe(false);
+
+      await store.loadEarlier();
+      expect(chat.asked).toHaveLength(3);
+    });
+  });
+
+  describe('catching up after a reconnect', () => {
+    beforeEach(() => store.open('p'));
+
+    it('reads what was missed, page after page', () => {
+      chat.stored = range(1, 130);
+      realtime.reconnected$.next();
+      expect(shown()).toHaveLength(130);
+      expect(shown().at(-1)).toBe('message 130');
+    });
+
+    it('replaces what it shows with the server’s, so a message deleted meanwhile goes', () => {
+      chat.stored = [message(1), message(3), message(4)];
+      realtime.reconnected$.next();
+      expect(shown()).toEqual(['message 1', 'message 3', 'message 4']);
+    });
+
+    it('raises "New messages" for what was missed while older messages were being read', () => {
+      store.setLatestInView(false);
+      chat.stored = range(1, 5);
+      realtime.reconnected$.next();
+      expect(store.newMessagesBelow()).toBe(true);
+    });
+  });
+
+  describe('presence', () => {
+    beforeEach(() => store.open('p'));
+
+    it('takes a newer count and reads who is here', () => {
+      chat.presence = {
+        version: 8,
+        hereNow: 6,
+        members: [
+          { membershipId: 'm-walt', displayName: 'Walt Brennan', avatar: message(1).author.avatar },
+        ],
+      };
+      realtime.presenceChanged$.next({ popkinId: 'p', version: 8, hereNow: 6 });
+      expect(store.thread()?.hereNow).toBe(6);
+      expect(store.hereNow().map((member) => member.displayName)).toEqual(['Walt Brennan']);
+    });
+
+    it('ignores a count older than the one it shows, and another Popkin’s', () => {
+      realtime.presenceChanged$.next({ popkinId: 'p', version: 6, hereNow: 1 });
+      realtime.presenceChanged$.next({ popkinId: 'elsewhere', version: 99, hereNow: 1 });
+      expect(store.thread()?.hereNow).toBe(5);
+    });
+  });
+
+  describe('sending (L2-021 AC5)', () => {
+    beforeEach(() => store.open('p'));
+
+    it('shows the message at once, as the member’s own, and once only after its echo', () => {
+      const added: string[] = [];
+      store.added$.subscribe((whose) => added.push(whose));
+
+      store.send('  On it!  ');
+
+      expect(chat.sends).toEqual(['On it!']);
+      expect(shown().filter((text) => text === 'On it!')).toHaveLength(1);
+      expect(added).toContain('mine');
+
+      const stored = store.rows().at(-1);
+      realtime.messageAdded$.next(
+        message(901, 'Mara', {
+          text: 'On it!',
+          clientMessageId: stored?.kind === 'message' ? stored.clientMessageId : '',
+        }),
+      );
+      expect(shown().filter((text) => text === 'On it!')).toHaveLength(1);
+    });
+
+    it('sends nothing for white space', () => {
+      store.send('   ');
+      expect(chat.sends).toEqual([]);
+    });
+  });
+});
