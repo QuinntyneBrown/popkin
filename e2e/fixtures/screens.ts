@@ -105,6 +105,11 @@ import { AddPhotosDialog } from '../pages/add-photos.dialog';
 import { PhotoAlbumPage } from '../pages/photo-album.page';
 import { PhotoViewPage } from '../pages/photo-view.page';
 import responses from './api/responses.json';
+import { theAccountFailing, theAccountLoading } from './account';
+import { accountStates } from './account-states';
+import { AccountPage } from '../pages/account.page';
+import { DeleteAccountDialog } from '../pages/delete-account.dialog';
+import { SignOutDialog } from '../pages/sign-out.dialog';
 
 /**
  * Every screen state the sweeps cover (ADR 0006): how to bring the app into it, and the regions
@@ -160,7 +165,48 @@ const wrapUpRegions = (page: Page) => {
 const recapRegions = (page: Page) => ({ recap: new RecapPage(page).recap });
 const warningRegions = (page: Page) => ({ banner: new WrapUpBanner(page).root });
 
+const accountRegions = (page: Page) => {
+  const account = new AccountPage(page);
+  return { topBar: account.topBar, main: account.screen.getByRole('main') };
+};
+
 export const screenStates: ScreenState[] = [
+  // The account (journey 17) and deleting it (journey 19).
+  { key: 'account', ...accountStates.account, regions: accountRegions },
+  {
+    key: 'accountLoading',
+    before: async (page) => void (await theAccountLoading(page)),
+    regions: accountRegions,
+  },
+  { key: 'accountError', before: theAccountFailing, regions: accountRegions },
+  { key: 'accountInvalid', ...accountStates.accountInvalid, regions: accountRegions },
+  { key: 'accountSubmitting', ...accountStates.accountSubmitting, regions: accountRegions },
+  { key: 'accountSuccess', ...accountStates.accountSuccess, regions: accountRegions },
+  {
+    key: 'signOut',
+    ...accountStates.signOut,
+    regions: (page) => ({ dialog: new SignOutDialog(page).panel }),
+  },
+  {
+    key: 'signOutBusy',
+    ...accountStates.signOutBusy,
+    regions: (page) => ({ dialog: new SignOutDialog(page).panel }),
+  },
+  {
+    key: 'deleteAccount',
+    ...accountStates.deleteAccount,
+    regions: (page) => ({ dialog: new DeleteAccountDialog(page).panel }),
+  },
+  {
+    key: 'deleteAccountConfirm',
+    ...accountStates.deleteAccountConfirm,
+    regions: (page) => ({ dialog: new DeleteAccountDialog(page).panel }),
+  },
+  {
+    key: 'deleteAccountBusy',
+    ...accountStates.deleteAccountBusy,
+    regions: (page) => ({ dialog: new DeleteAccountDialog(page).panel }),
+  },
   {
     key: 'notFound',
     regions: (page) => {

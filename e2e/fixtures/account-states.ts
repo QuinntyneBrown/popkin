@@ -60,6 +60,18 @@ export const accountStates = {
       await new SignOutDialog(page).panel.waitFor();
     },
   },
+  signOutBusy: {
+    before: async (page: Page) => {
+      await theMockAccount(page);
+      await hold(page, 'POST /api/auth/sign-out');
+    },
+    app: async (page: Page) => {
+      await new AccountPage(page).signOut.click();
+      const dialog = new SignOutDialog(page);
+      await dialog.signOut.click();
+      await dialog.root.getByText('Signing out…').waitFor();
+    },
+  },
   deleteAccount: {
     before: async (page: Page) => {
       await theMockAccount(page);
