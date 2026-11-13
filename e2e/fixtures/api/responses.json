@@ -141,10 +141,7 @@
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
-      "namedMembers": [
-        "Mara",
-        "Walt"
-      ],
+      "namedMembers": ["Mara", "Walt"],
       "othersCount": 1
     }
   },

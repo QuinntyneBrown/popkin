@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { thePopkinsEmpty, thePopkinsFailing } from '../../fixtures/my-popkins';
 import { MyPopkinsPage } from '../../pages/my-popkins.page';
@@ -71,6 +72,7 @@ parity('empty-state', [
   { key: 'offline', name: 'offline', region: (page) => new OfflinePage(page).emptyState },
   {
     key: 'experienceDetailError',
+    ...experienceStates.experienceDetailError,
     name: 'experience-error',
     region: (page) => new ExperienceDetailPage(page).error,
   },

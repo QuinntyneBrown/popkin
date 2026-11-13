@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { openTheScanner, scanSomethingElse, withACamera } from '../../fixtures/my-popkins';
 import { ScanToJoinDialog } from '../../pages/scan-to-join.dialog';
@@ -65,6 +66,7 @@ parity('alert', [
   },
   {
     key: 'shareExperienceFailed',
+    ...experienceStates.shareExperienceFailed,
     name: 'share-experience-failed',
     region: (page) => new ShareExperienceDialog(page).failed,
   },

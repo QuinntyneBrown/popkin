@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { parity } from '../../fixtures/parity';
 import { ExperiencesPage } from '../../pages/experiences.page';
 
@@ -6,13 +7,25 @@ import { ExperiencesPage } from '../../pages/experiences.page';
 parity('experiences', [
   {
     key: 'experiencesLoading',
+    ...experienceStates.experiencesLoading,
     name: 'loading',
     region: (page) => new ExperiencesPage(page).listSkeleton,
   },
-  { key: 'experiencesEmpty', name: 'empty', region: (page) => new ExperiencesPage(page).empty },
-  { key: 'experiencesError', name: 'error', region: (page) => new ExperiencesPage(page).empty },
+  {
+    key: 'experiencesEmpty',
+    ...experienceStates.experiencesEmpty,
+    name: 'empty',
+    region: (page) => new ExperiencesPage(page).empty,
+  },
+  {
+    key: 'experiencesError',
+    ...experienceStates.experiencesError,
+    name: 'error',
+    region: (page) => new ExperiencesPage(page).empty,
+  },
   {
     key: 'experiencesNoResults',
+    ...experienceStates.experiencesNoResults,
     name: 'no-results',
     region: (page) => new ExperiencesPage(page).empty,
   },

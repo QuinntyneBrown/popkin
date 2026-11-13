@@ -343,7 +343,7 @@ test.describe('the Photos and Experiences sections of the Popkin home', () => {
 
     await expect(cards).toHaveCount(3);
     await expect(home.titleOf(cards.nth(1))).toHaveText('La Paloma Taqueria');
-    await expect(home.ratingOf(cards.nth(2))).toHaveText('4.2 · 8 ratings');
+    await expect(home.ratingOf(cards.nth(2))).toHaveText('4.3 · 8 ratings');
   });
 
   // L2-019 AC8

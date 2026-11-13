@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { howLongForLakeside } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
@@ -15,6 +16,7 @@ parity('date-button', [
   // With another icon and other words: "Add a picture".
   {
     key: 'shareExperience',
+    ...experienceStates.shareExperience,
     name: 'picture',
     region: (page) => new ShareExperienceDialog(page).addPicture,
   },

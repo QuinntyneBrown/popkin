@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { parity } from '../../fixtures/parity';
 import { SignUpPage } from '../../pages/sign-up.page';
@@ -15,6 +16,7 @@ parity('form-summary', [
   },
   {
     key: 'shareExperienceInvalid',
+    ...experienceStates.shareExperienceInvalid,
     name: 'share-experience',
     region: (page) => new ShareExperienceDialog(page).summary,
   },

@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { ExperiencesPage } from '../../pages/experiences.page';
 import { theInviteLoading } from '../../fixtures/journeys';
@@ -13,12 +14,14 @@ parity('skeleton', [
   },
   {
     key: 'experiencesLoading',
+    ...experienceStates.experiencesLoading,
     name: 'media',
     region: (page) => new ExperiencesPage(page).skeletons.first(),
   },
   // The picture of an experience that is loading, with Back over it.
   {
     key: 'experienceDetailLoading',
+    ...experienceStates.experienceDetailLoading,
     name: 'picture',
     region: (page) => new ExperienceDetailPage(page).picture,
   },

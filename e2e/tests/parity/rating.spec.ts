@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { ExperiencesPage } from '../../pages/experiences.page';
 import { theMockHome } from '../../fixtures/home';
@@ -14,12 +15,14 @@ parity('rating', [
   // On an experience card: the number of ratings in brackets.
   {
     key: 'experiences',
+    ...experienceStates.experiences,
     name: 'counted',
     region: (page) => new ExperiencesPage(page).ratingOf('Sunrise canoe to Heron Point'),
   },
   // On a comment: the stars one member gave.
   {
     key: 'experienceDetail',
+    ...experienceStates.experienceDetail,
     name: 'of-a-comment',
     region: (page) => new ExperienceDetailPage(page).firstComment.locator('.rating'),
   },

@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ExperiencesPage } from '../../pages/experiences.page';
 import { parity } from '../../fixtures/parity';
 import {
@@ -29,19 +30,27 @@ parity('tab-header', [
   { key: 'photoAlbumEmpty', name: 'empty', region: header, before: theAlbumEmpty },
   { key: 'photoAlbumLoading', name: 'loading', region: header, before: theAlbumLoading },
   // Experiences: three filters and "Share one", which is in the header from 768 px.
-  { key: 'experiences', name: 'experiences', region: (page) => new ExperiencesPage(page).header },
+  {
+    key: 'experiences',
+    ...experienceStates.experiences,
+    name: 'experiences',
+    region: (page) => new ExperiencesPage(page).header,
+  },
   {
     key: 'experiencesDid',
+    ...experienceStates.experiencesDid,
     name: 'experiences-did',
     region: (page) => new ExperiencesPage(page).header,
   },
   {
     key: 'experiencesNoResults',
+    ...experienceStates.experiencesNoResults,
     name: 'experiences-no-results',
     region: (page) => new ExperiencesPage(page).header,
   },
   {
     key: 'experiencesEmpty',
+    ...experienceStates.experiencesEmpty,
     name: 'experiences-empty',
     region: (page) => new ExperiencesPage(page).header,
   },

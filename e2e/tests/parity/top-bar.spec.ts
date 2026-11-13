@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { SignInPage } from '../../pages/sign-in.page';
 import { theMockChat } from '../../fixtures/chat';
@@ -33,6 +34,7 @@ parity('top-bar', [
   },
   {
     key: 'experienceDetailError',
+    ...experienceStates.experienceDetailError,
     name: 'experience-error',
     region: (page) => new ExperienceDetailPage(page).bar,
   },

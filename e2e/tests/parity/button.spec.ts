@@ -1,3 +1,4 @@
+import { experienceStates } from '../../fixtures/experience-states';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { theMockHome } from '../../fixtures/home';
 import { PopkinHomePage } from '../../pages/popkin-home.page';
@@ -83,6 +84,7 @@ parity('button', [
   },
   {
     key: 'shareExperienceBusy',
+    ...experienceStates.shareExperienceBusy,
     name: 'sharing',
     region: (page) => new ShareExperienceDialog(page).action,
   },
