@@ -63,6 +63,21 @@
   font-weight: var(--font-weight-bold);
 }
 
+/* The one action: a pill in the colour of a surface, on whatever the banner's colour is. */
+.banner__action {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--space-9);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-family-sans);
+  text-decoration: none;
+}
+
 /* The dismiss button is the 36 px icon button of the design system's banner. */
 .banner__dismiss {
   width: var(--space-9);
