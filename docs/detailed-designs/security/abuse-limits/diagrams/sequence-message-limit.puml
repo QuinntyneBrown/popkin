@@ -18,7 +18,7 @@ actor "Member" as actor
 box "Frontend — Popkin web app" #E0F2FE
   participant "GroupChatPage" as page
   participant "ChatApi" as client
-  participant "rateLimitInterceptor" as icpt
+  participant "MessageOutbox" as icpt
   participant "Toaster" as toaster
 end box
 box "Backend — Popkin API" #D1FADF
@@ -30,10 +30,10 @@ box "Backend — Popkin Application and Domain" #ECFDF3
   participant "SendMessageCommandHandler" as handler
 end box
 actor -> page : Send
-page -> client : sendMessage(popkinId, threadId, text)
+page -> client : MessageOutbox sends: send(popkinId, threadId, clientMessageId, text)
 client -> auth : POST /api/popkins/{popkinId}/threads/{threadId}/messages
 auth -> limiter : Person identified
-limiter -> limiter : Partition personId:popkinId, sliding 60 per minute
+limiter -> limiter : Partition person id, SlidingLogRateLimiter: 60 in any minute
 alt within limit
   limiter -> controller : Permitted
   controller -> handler : Send SendMessageCommand
@@ -41,9 +41,9 @@ alt within limit
   controller --> client : 201 Created
 else 61st in the window
   limiter --> icpt : 429 rate_limited, Retry-After: 30 (L2-053 AC2)
-  icpt --> page : RateLimitedError(30)
-  page -> page : Keep text in composer, disable Send for 30 s
-  page -> toaster : warning("Slow down a little", "You can send again in 30 seconds.")
+  icpt --> page : Entry Failed (rate_limited), its thread's queue held; rateLimited$(30)
+  page -> page : The message stays in the thread as "Not sent" with Try again and Delete
+  page -> toaster : show(warning, "Slow down a little", "You can send again in 30 seconds.")
   toaster --> actor : Warning toast (L2-053 AC4)
 end
 @enduml

@@ -30,7 +30,11 @@ package "Popkin API" {
     +TimeSpan InviteCodesWindow = 10 min
   }
   class FixedWindowRateLimiter
-  class SlidingWindowRateLimiter
+  class SlidingLogRateLimiter {
+    +permitLimit: int
+    +window: TimeSpan
+    +clock: TimeProvider
+  }
 }
 package "Popkin web app" {
   class RateLimitedError {
@@ -49,7 +53,7 @@ package "Popkin web app" {
 RateLimitingSetup --> RateLimitOptions : reads
 RateLimitingSetup ..> RateLimitPolicyNames : registers
 RateLimitingSetup ..> FixedWindowRateLimiter : codes, invite-codes
-RateLimitingSetup ..> SlidingWindowRateLimiter : messages
+RateLimitingSetup ..> SlidingLogRateLimiter : messages, per person
 icpt ..> RateLimitedError : produces
 Toaster ..> fmt : words the delay
 @enduml

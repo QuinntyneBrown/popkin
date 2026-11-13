@@ -69,7 +69,8 @@ else valid
     handler -> entity : Join(person, name, photoId, host membership, now)
     handler -> handler : Message.PoppedIn: "(name) popped in. Say hi! (wave)" in Everyone (L2-014 AC4)
     handler -> db : Save membership, message, LastActivityAt
-    handler -> notifier : MemberJoined, MessageSent to popkin:(id)
+    handler -> notifier : MemberJoined to popkin:(id), before the joiner's connections are in the group
+    handler -> notifier : The joiner's connections join the group; MessageAdded (the note) to popkin:(id)
     handler --> ctrl : JoinedDto
     ctrl --> client : 201 Created
   end

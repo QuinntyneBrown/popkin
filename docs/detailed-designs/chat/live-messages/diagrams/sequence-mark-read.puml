@@ -33,11 +33,11 @@ box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
 actor -> page : Thread open; latest message scrolls into view
-page -> store : IntersectionObserver reports the last message visible
+page -> store : pk-thread latestInView; setLatestInView(true) on a visible page
 store -> handler : PUT /api/popkins/{popkinId}/threads/{threadId}/read {lastReadMessageId}
-handler -> db : Membership, ChatThread.CanRead, ThreadReadState
-alt message newer than LastReadMessageId
-  handler -> db : ThreadReadState.Advance(message, now); SaveChangesAsync
+handler -> db : Membership (guard), the thread of this Popkin, the message of this thread, ThreadReadState
+alt no read point yet, or the message is later by (SentAt, Id)
+  handler -> db : ThreadReadState.At or Advance(message, now); SaveChangesAsync
   handler -> hub : ThreadRead(threadId) to Clients.User(personId)
   hub -> rt : ThreadRead on every tab and device of the person
   rt -> store : threadRead$
@@ -45,7 +45,9 @@ alt message newer than LastReadMessageId
 else older or equal
   handler --> store : 204, no change (never moves backwards)
 end
-alt thread not readable
+alt thread not in this Popkin
   handler --> store : 404 code thread_not_found
+else message not in this thread
+  handler --> store : 400 code message_not_found, field lastReadMessageId
 end
 @enduml

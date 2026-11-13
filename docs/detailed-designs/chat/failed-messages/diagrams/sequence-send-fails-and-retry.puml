@@ -34,12 +34,12 @@ box "Backend — Popkin Infrastructure" #FFF4E5
 end box
 actor -> page : Send "You're on the list, Ruth!"
 page -> outbox : enqueue(entry with ClientMessageId c1)
-outbox -> client : sendMessage(..., c1)
+outbox -> client : send(..., c1)
 client -> controller : POST .../messages {clientMessageId: c1}
-alt network error, timeout or 5xx
+alt network error, no answer within 15 s, or 5xx
   controller --> client : no answer or 5xx
   client --> outbox : Failed (failure network)
-else 400 or 429
+else another 4xx, or 429
   controller --> client : ProblemDetails code
   client --> outbox : Failed (rejected or rate_limited)
 end
@@ -47,7 +47,7 @@ outbox --> page : Bubble bubble--failed with icon and "Not sent"; Try again and 
 alt Try again
   actor -> page : Try again
   page -> outbox : retry(c1)
-  outbox -> client : sendMessage(..., same c1)
+  outbox -> client : send(..., same c1)
   client -> controller : POST .../messages {clientMessageId: c1}
   controller -> handler : Send SendMessageCommand
   handler -> db : Find Message by (AuthorMembershipId, c1)

@@ -33,26 +33,26 @@ box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
 actor -> page : Open /p/:popkinId/chat/everyone
-page -> store : load(popkinId, everyone)
-store -> page : Skeletons after 300 ms (L2-056 AC1)
-store -> client : getEveryoneThread(popkinId)
+page -> store : open(popkinId)
+store -> page : state loading: skeleton bubbles and "Loading messages…" (L2-056 AC1)
+store -> client : getEveryone(popkinId)
 client -> controller : GET /api/popkins/{popkinId}/threads/everyone
 controller -> handler : Send GetEveryoneThreadQuery
 handler -> guard : Load caller membership
 alt caller is not a member (L2-051 AC1)
   guard --> controller : NotFound
   controller --> client : 404 ProblemDetails code popkin_not_found
-  client --> page : Not found
-  page --> actor : Navigate to not-found screen
+  client --> store : state not-found
+  page --> actor : The not-found screen opens in place
 else member
-  handler -> db : Load PopkinSpace, Everyone ChatThread, member count
+  handler -> db : Load PopkinSpace, Everyone ChatThread, member count, read point and unread count
   db --> handler : Thread header data
-  handler --> controller : ThreadDto (emoji, name, memberCount, hereNow, readOnly)
+  handler --> controller : ThreadDto (emoji, name, memberCount, hereNow, readOnly, unreadCount, viewer)
   controller --> client : 200 ThreadDto
-  client -> controller : GET .../threads/{threadId}/messages?limit=50
+  client -> controller : GET .../threads/{threadId}/messages
   controller -> handler : Send GetMessagesQuery
   handler -> db : Latest 50 messages ordered by SentAt, Id
-  db --> handler : Messages, reactions, quotes
+  db --> handler : Messages and their authors
   handler --> controller : MessagePageDto (oldest first)
   controller --> client : 200 MessagePageDto
   client --> store : Thread and first page
@@ -60,12 +60,12 @@ else member
     store --> page : Empty
     page --> actor : "It's quiet in here. For now." and three opener chips
   else messages
-    store --> page : Messages grouped by day and author (L2-021 AC2, AC4)
+    store --> page : rows: day dividers, notes and runs by author (L2-021 AC2, AC4)
     page --> actor : Thread oldest first, latest in view (L2-021 AC1)
   end
 end
 alt request fails (network or 5xx)
-  client --> page : Error
+  client --> store : state error
   page --> actor : "We couldn't load the chat" with Try again and Back to Chat
 end
 @enduml

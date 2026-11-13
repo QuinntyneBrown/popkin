@@ -28,7 +28,7 @@ queued message. The offline banner tells the member the connection is gone and s
 - `docs/mocks/notifications/banner/danger.html` — "You're offline. Messages will send when you're back." over a thread (L2-028 AC3).
 - `docs/mocks/notifications/banner/success.html` — "Back online. 2 messages sent."
 - `docs/mocks/notifications/toast/warning.html` — "Slow down a little" with "You can send again in 30 seconds." for a rate-limited send (L2-053 AC2, AC4).
-- No mock draws the "Waiting to send" state (L2-028 AC2) or a restored draft; the first is a `<TO SUPPLY>` mock state.
+- `docs/mocks/pages/group-chat/offline.html` — the offline banner over the thread and an own message marked "Waiting to send" with a clock icon (L2-028 AC2, AC3). No mock draws a restored draft.
 
 **API:**
 
@@ -37,27 +37,48 @@ queued message. The offline banner tells the member the connection is gone and s
 
 **Frontend (Popkin web app, `api` library unless stated):**
 
-- **`MessageOutbox`** — root service. `enqueue` assigns a `ClientMessageId` (`crypto.randomUUID()`), adds an `OutboxEntry` and writes it to `OutboxStorage` before the first attempt. Each thread has its own queue, sent one entry at a time, oldest first, so server times keep the order the member wrote (L2-028 AC2).
-- **`OutboxEntry`** — `clientMessageId`, `popkinId`, `threadId`, `text`, `photo` (blob), `photoId`, `replyToMessageId`, `state` (`OutboxState` `Sending` | `Waiting` | `Failed`), `failure` (`network` | `rejected` | `rate_limited`) and `createdAt`.
+- **`MessageOutbox`** — root service. `enqueue(popkinId, threadId, text)` assigns a `ClientMessageId` (`crypto.randomUUID()`), adds an `OutboxEntry` and writes it to `OutboxStorage` before the first attempt. Each thread has its own queue, sent one entry at a time, oldest first, so server times keep the order the member wrote (L2-028 AC2). It exposes `entries` and tells what happened through `sent$`, `rateLimited$` and `wrappedUp$`.
+- **`OutboxEntry`** — `clientMessageId`, `popkinId`, `threadId`, `text`, `state` (`Sending` | `Waiting` | `Failed`), `failure` (`network` | `rejected` | `rate_limited`) and `createdAt`. `photo` (blob), `photoId` and `replyToMessageId` are added by send-photos-in-chat and reply-to-message.
 - **Failure handling** —
-  - A network error, a timeout or a 5xx response while online marks the entry `Failed` with failure `network`. The queue for that thread pauses behind it, so later messages cannot overtake it.
-  - A 400 marks it `Failed` with failure `rejected`, and the queue continues.
-  - A 429 marks it `Failed` with failure `rate_limited` and shows the warning toast with the `Retry-After` time (L2-053 AC4).
-  - A 409 `popkin_wrapped_up` drops the queue for that Popkin and the page swaps in the read-only line (L2-045 AC1). How the dropped text is offered back to the member is `<TO SUPPLY>`.
-  - The send timeout is `<TO SUPPLY>`.
-- **Offline** — while `NetworkStatus.online` is false, `enqueue` sets `Waiting` and makes no request. On `backOnline$`, after catch-up (live-messages), the outbox sends each thread's `Waiting` entries in order. When it sends any, the page shows the success banner with the count; the banner's lifetime is `<TO SUPPLY>`.
-- **Try again** — `retry(clientMessageId)` sends the same entry with the same `ClientMessageId`, reusing `photoId` when its upload completed (send-photos-in-chat).
+  - A network error, a 5xx response or no answer within 15 seconds (`SEND_TIMEOUT_MS`) marks the entry `Failed` with failure `network`. The queue for that thread holds behind it, so later messages cannot overtake it.
+  - Any other 4xx than the two below marks it `Failed` with failure `rejected`, and the queue continues.
+  - A 429 marks it `Failed` with failure `rate_limited` and the queue holds. The page shows the warning toast "Slow down a little" with "You can send again in 30 seconds.", worded from `retryAfterSeconds` (L2-053 AC4). The message stays in the thread as "Not sent", and "Try again" sends it.
+  - A 409 `popkin_wrapped_up` drops the queue for that Popkin and marks the open thread read-only, which disables the message field; the read-only line (L2-045 AC1) is drawn by read-only-popkin. How the dropped text is offered back to the member is `<TO SUPPLY>`.
+- **Offline** — while `NetworkStatus.online` is false, `enqueue` sets `Waiting` and makes no request. On `backOnline$` the page calls `sendWaiting()`, which sends each thread's `Waiting` entries in order and answers how many. When it sends any, the page shows the success banner "Back online. N messages sent."; the banner stays 5 seconds, or until dismissed. The outbox does not wait for the catch-up of live-messages: the browser's connection and the hub's return separately, and the echo of a message sent meanwhile is recognised by its client message id.
+- **Try again** — `retry(clientMessageId)` sends the same entry with the same `ClientMessageId`; it will reuse `photoId` when its upload completed (send-photos-in-chat).
 - **Delete** — `discard(clientMessageId)` removes the entry. When its failure was `network`, the server may have stored it with the answer lost, so the outbox also calls the client-id `DELETE`, which is safe whatever the server holds.
-- **`OutboxStorage`** — IndexedDB store keyed by person and client message id; it holds photo blobs too. Entries reload when the app starts, so a queued message survives a reload. Storage is cleared at sign-out and at account deletion. Encryption of this store on the device is `<TO SUPPLY>`.
-- **`DraftStore`** — `sessionStorage` map of thread id to text, written as the member types and when the page is destroyed, read when the thread opens, cleared on send and at sign-out (L2-028 AC4). `sessionStorage` lasts for the browser tab's session, which matches "in the same session"; whether drafts should outlive a closed tab is `<TO SUPPLY>`.
-- **`NetworkStatus` / `NETWORK_STATUS` / `BrowserNetworkStatus`** — `online` signal combining `navigator.onLine`, the `online` and `offline` events and the `PopkinRealtime` state; `backOnline$` emits on recovery. The offline screens of L2-056 AC4 should use the same service; its ownership across subsystems is `<TO SUPPLY>`.
-- **`GroupChatPage`** / **`DirectMessagePage`** — render outbox entries through `ThreadStore` in the position they were written. A failed entry uses the `bubble--failed` part of `pk-message` with an icon and the words "Not sent", so colour is not the only carrier (L2-057 AC5), plus `pk-button` actions "Try again" and "Delete". The danger `pk-banner` with `role="alert"` stays under the header while offline (L2-028 AC3).
+- **`OutboxStorage` / `OUTBOX_STORAGE` / `LocalOutboxStorage`** — contract, injection token and, for now, an implementation on `localStorage`: the entries as JSON under the key `popkin.outbox`, text only, so a queued message survives a reload. An entry a reload finds as `Sending` is not known to be stored, so it waits and is sent when a thread next opens. An IndexedDB store, which also holds photo blobs, replaces it with send-photos-in-chat. The store is not keyed by person and is not yet cleared at sign-out or at account deletion; both arrive with those features. Encryption of this store on the device is `<TO SUPPLY>`.
+- **`DraftStore`** — `sessionStorage` map of thread id to text under the key `popkin.drafts`, written as the member types, read when the thread opens and removed when the message is sent (L2-028 AC4). It is not yet cleared at sign-out. `sessionStorage` lasts for the browser tab's session, which matches "in the same session"; whether drafts should outlive a closed tab is `<TO SUPPLY>`.
+- **`NetworkStatus` / `NETWORK_STATUS` / `BrowserNetworkStatus`** — `online` signal from `navigator.onLine` and the browser's `online` and `offline` events; `backOnline$` emits on recovery. It does not fold in the `PopkinRealtime` state, so a dropped hub connection alone shows no offline banner. The offline screens of L2-056 AC4 should use the same service; its ownership across subsystems is `<TO SUPPLY>`.
+- **`GroupChatPage`** — renders outbox entries through `ThreadStore`, after the messages the server holds and in the order they were written. A failed entry uses the `bubble--failed` part of `pk-message` with an icon and the words "Not sent", so colour is not the only carrier (L2-057 AC5), plus the actions "Try again" and "Delete". A waiting entry reads "Waiting to send" beside a clock icon. The danger `pk-banner` with `role="alert"` stays under the header while offline (L2-028 AC3). `DirectMessagePage` does the same with direct-messages.
 
 **Backend:**
 
 - **`SendMessageCommandHandler`** — before inserting, looks up `(AuthorMembershipId, ClientMessageId)`; a hit returns `SendMessageResult { Message, Created = false }`, which the controller answers with 200 and no new event. A concurrent duplicate loses on the unique index; the handler catches the violation and returns the winner. A repeat whose content differs from the stored message still returns the stored message.
 - **`DiscardPendingMessageCommand`** — soft-deletes the caller's message with that client id if one exists, and notifies `MessageDeleted`; otherwise it does nothing. In a wrapped-up Popkin it changes nothing and answers 204 (L2-045 AC2).
-- **Rate limit** — retries count toward the limit of 60 messages per minute (L2-053 AC2); whether an idempotent repeat should count is `<TO SUPPLY>`.
+- **Rate limit** — retries count toward the limit of 60 messages per minute (L2-053 AC2): the limiter runs before the handler, so every `POST` counts, an idempotent repeat included. Whether a repeat should count is `<TO SUPPLY>`.
+
+### Built in steps
+
+Journey 3, Chat with everyone, built this design for messages of text in the Everyone thread.
+What waits:
+
+- the IndexedDB store, photo blobs in the outbox and the reuse of an uploaded `photoId` on
+  "Try again": journey 13, Photos in chat;
+- `replyToMessageId` on an entry: journey 12, React and reply;
+- the same states in a direct message: journey 11;
+- the read-only line when a send finds the Popkin wrapped up: journey 9. Today the message
+  field is disabled;
+- clearing the outbox and the drafts at sign-out (journey 17) and at account deletion
+  (journey 19).
+
+Not built, and not yet given to a journey: `NetworkStatus` taking the hub's state into account,
+and Send being disabled until a retry delay has passed (abuse-limits).
+
+The mock `group-chat/offline` was added for "Waiting to send". Tests: `RepeatedSendTests` and
+`DiscardMessageTests` in `Popkin.Api.Tests/Chat/`; unit tests of `MessageOutbox` and `DraftStore`
+in the `api` library; the "a message that cannot be sent" and "chatting offline" specs of
+`e2e/tests/group-chat.spec.ts`.
 
 ## Requirements
 
