@@ -56,6 +56,7 @@ builder.Services
         // larger than 64 KB is read.
         options.MaximumReceiveMessageSize = 64 * 1024;
         options.AddFilter<ProblemHubFilter>();
+        options.AddFilter<SignalRateLimitFilter>();
     })
     .AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddSingleton<IUserIdProvider, PersonUserIdProvider>();
