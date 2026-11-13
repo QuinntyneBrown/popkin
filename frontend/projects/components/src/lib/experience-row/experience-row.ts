@@ -7,6 +7,9 @@ import { Rating } from '../rating/rating';
  * `card--link card--row`): its picture, or its emoji where it has none, its title, its rating
  * and a chevron that says it opens. The whole row is one link: set `routerLink` on it. It is set
  * in from the sides of its section. Set `data-accent` on an ancestor.
+ *
+ * With a `kicker` it is the recap's top-rated moment: the label above the title, which wraps,
+ * no chevron and no margin of its own.
  */
 @Component({
   selector: 'a[pk-experience-row]',
@@ -14,16 +17,18 @@ import { Rating } from '../rating/rating';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './experience-row.html',
   styleUrl: './experience-row.scss',
-  host: { class: 'card card--link card--row' },
+  host: { class: 'card card--link card--row', '[class.card--moment]': '!!kicker()' },
 })
 export class ExperienceRow {
   readonly title = input.required<string>();
+  /** A label above the title, in the Popkin's colour: "Top-rated moment". */
+  readonly kicker = input<string>();
   /** The experience's picture. Decoration: the title names the experience. */
   readonly photo = input<string | null>(null);
   /** The experience's emoji, shown on the Popkin's tint when it has no picture. */
   readonly emoji = input<string>();
   /** The average of its ratings, as it reads: "4.8". None when nobody has rated it. */
   readonly rating = input<string | null>(null);
-  /** How many ratings there are, in words: "11 ratings". */
+  /** What follows the average: how many ratings there are ("11 ratings"), or who shared it. */
   readonly ratings = input('');
 }
