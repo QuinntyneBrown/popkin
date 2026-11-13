@@ -8,7 +8,9 @@ import { theHomeWithoutPhotos } from '../../fixtures/home';
 import { PopkinHomePage } from '../../pages/popkin-home.page';
 import { HowLongPage } from '../../pages/how-long.page';
 import { howLongForLakeside } from '../../fixtures/journeys';
+import { accountStates } from '../../fixtures/account-states';
 import { parity } from '../../fixtures/parity';
+import { DeleteAccountDialog } from '../../pages/delete-account.dialog';
 import { answer, problem } from '../../fixtures/stubs';
 import { SignUpPage } from '../../pages/sign-up.page';
 
@@ -69,5 +71,12 @@ parity('alert', [
     ...experienceStates.shareExperienceFailed,
     name: 'share-experience-failed',
     region: (page) => new ShareExperienceDialog(page).failed,
+  },
+  // The warning of the delete-account dialog: the Popkins that wrap up (L2-049 AC3).
+  {
+    key: 'deleteAccount',
+    ...accountStates.deleteAccount,
+    name: 'delete-account-hosted',
+    region: (page) => new DeleteAccountDialog(page).hosted,
   },
 ]);

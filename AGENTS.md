@@ -228,7 +228,7 @@ design system). A further application is added by its own ADR (ADR 0002).
   no presentation component, no hand-written button, field, alert or dialog frame, no inline
   `style` and no stylesheet. The only classes an application template writes are the layout and
   text utilities (`stack`, `cluster`, `split`, `form-grid`, `container`, `visually-hidden`,
-  `truncate`, `text-muted`, `text-caption`, `only-*`).
+  `truncate`, `text-muted`, `text-sm`, `text-caption`, `only-*`).
 - **File per type, no single-file components** (ADR 0004, ADR 0007). A library component is
   `name.ts` + `name.html` + `name.scss` using `templateUrl`/`styleUrl`; never an inline `template`
   or `styles`, however short. A page or dialog in an application project is `name.ts` +

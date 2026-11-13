@@ -146,6 +146,10 @@ button {
   color: var(--color-fg-muted);
 }
 
+.text-sm {
+  font: var(--text-body-sm);
+}
+
 .text-caption {
   font: var(--text-caption);
   color: var(--color-fg-subtle);

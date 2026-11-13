@@ -14,6 +14,7 @@ import type { Page } from '@playwright/test';
 import { howLongForLakeside } from '../../fixtures/journeys';
 import { accountStates } from '../../fixtures/account-states';
 import { parity } from '../../fixtures/parity';
+import { DeleteAccountDialog } from '../../pages/delete-account.dialog';
 import { SignOutDialog } from '../../pages/sign-out.dialog';
 import { EndDateDialog } from '../../pages/end-date.dialog';
 import { HowLongPage } from '../../pages/how-long.page';
@@ -219,5 +220,23 @@ parity('dialog', [
       await page.keyboard.press('Shift');
       await new SignOutDialog(page).stay.focus();
     },
+  },
+  {
+    key: 'deleteAccount',
+    ...accountStates.deleteAccount,
+    name: 'delete-account',
+    region: (page) => new DeleteAccountDialog(page).panel,
+  },
+  {
+    key: 'deleteAccountConfirm',
+    ...accountStates.deleteAccountConfirm,
+    name: 'delete-account-confirm',
+    region: (page) => new DeleteAccountDialog(page).panel,
+  },
+  {
+    key: 'deleteAccountBusy',
+    ...accountStates.deleteAccountBusy,
+    name: 'delete-account-busy',
+    region: (page) => new DeleteAccountDialog(page).panel,
   },
 ]);

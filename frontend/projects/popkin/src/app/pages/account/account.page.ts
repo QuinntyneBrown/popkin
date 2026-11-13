@@ -13,9 +13,13 @@ import { Dialog } from '@angular/cdk/dialog';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { DeleteAccountDialog } from '../../dialogs/delete-account/delete-account.dialog';
 import { SignOutDialog } from '../../dialogs/sign-out/sign-out.dialog';
+import { Toaster } from '../../toasts/toaster';
 import {
+  ACCOUNT_API,
   AccountStore,
+  DeletionImpactView,
   PHOTO_ACCEPT,
   THEME_PREFERENCES,
   ThemeChoice,
@@ -75,6 +79,8 @@ export class AccountPage {
   protected readonly store = inject(AccountStore);
   protected readonly theme = inject(THEME_PREFERENCES);
   private readonly dialog = inject(Dialog);
+  private readonly accounts = inject(ACCOUNT_API);
+  private readonly toaster = inject(Toaster);
 
   protected readonly accept = PHOTO_ACCEPT;
   protected readonly nameMessage = NAME_MESSAGE;
@@ -170,6 +176,30 @@ export class AccountPage {
       // pk-dialog draws its own backdrop, as the mocks do.
       hasBackdrop: false,
       ariaModal: true,
+    });
+  }
+
+  /**
+   * "Delete my account" reads what the deletion would wrap up first, so the dialog opens
+   * complete (L2-049 AC3).
+   */
+  protected deleteAccount(): void {
+    this.accounts.getDeletionImpact().subscribe({
+      next: (impact) =>
+        this.dialog.open<void, DeletionImpactView>(DeleteAccountDialog, {
+          data: impact,
+          ariaLabelledBy: 'dlg-title',
+          autoFocus: '#confirm',
+          hasBackdrop: false,
+          ariaModal: true,
+        }),
+      // A failure stays until it is dismissed (L2-056 AC7).
+      error: () =>
+        this.toaster.show(
+          'danger',
+          'We couldn’t open that.',
+          'Check your connection and try again.',
+        ),
     });
   }
 

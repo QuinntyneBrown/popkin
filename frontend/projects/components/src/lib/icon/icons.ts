@@ -12,6 +12,11 @@ export const ICONS = {
   back: [{ path: 'm15 18-6-6 6-6' }],
   close: [{ path: 'M18 6 6 18' }, { path: 'm6 6 12 12' }],
   alert: [{ circle: [12, 12, 10] }, { line: [12, 12, 8, 12] }, { line: [12, 12.01, 16, 16] }],
+  warning: [
+    { path: 'm21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3' },
+    { path: 'M12 9v4' },
+    { path: 'M12 17h.01' },
+  ],
   'not-found': [
     { path: 'm13.5 8.5-5 5' },
     { path: 'm8.5 8.5 5 5' },

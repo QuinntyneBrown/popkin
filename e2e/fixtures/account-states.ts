@@ -1,7 +1,8 @@
 import type { Page } from '@playwright/test';
 import { AccountPage } from '../pages/account.page';
+import { DeleteAccountDialog } from '../pages/delete-account.dialog';
 import { SignOutDialog } from '../pages/sign-out.dialog';
-import { theMockAccount } from './account';
+import { hostingTwoPopkins, theMockAccount } from './account';
 import { hold } from './stubs';
 import type { RouteKey } from './routes';
 
@@ -13,6 +14,11 @@ import type { RouteKey } from './routes';
 interface AccountState {
   before: (page: Page) => Promise<void>;
   app?: (page: Page) => Promise<void>;
+}
+
+async function openDeleteAccount(page: Page): Promise<void> {
+  await new AccountPage(page).deleteAccount.click();
+  await new DeleteAccountDialog(page).panel.waitFor();
 }
 
 export const accountStates = {
@@ -52,6 +58,37 @@ export const accountStates = {
     app: async (page: Page) => {
       await new AccountPage(page).signOut.click();
       await new SignOutDialog(page).panel.waitFor();
+    },
+  },
+  deleteAccount: {
+    before: async (page: Page) => {
+      await theMockAccount(page);
+      await hostingTwoPopkins(page);
+    },
+    app: openDeleteAccount,
+  },
+  deleteAccountConfirm: {
+    before: async (page: Page) => {
+      await theMockAccount(page);
+      await hostingTwoPopkins(page);
+    },
+    app: async (page: Page) => {
+      await openDeleteAccount(page);
+      await new DeleteAccountDialog(page).confirm.fill('delete');
+    },
+  },
+  deleteAccountBusy: {
+    before: async (page: Page) => {
+      await theMockAccount(page);
+      await hostingTwoPopkins(page);
+      await hold(page, 'DELETE /api/account');
+    },
+    app: async (page: Page) => {
+      await openDeleteAccount(page);
+      const dialog = new DeleteAccountDialog(page);
+      await dialog.confirm.fill('delete');
+      await dialog.delete.click();
+      await dialog.root.getByText('Deleting…').waitFor();
     },
   },
 } satisfies Partial<Record<RouteKey, AccountState>>;

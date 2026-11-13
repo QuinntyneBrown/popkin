@@ -56,3 +56,30 @@ export async function savedWithAPhoto(page: Page): Promise<void> {
   });
   await page.route('**/photos/mara.jpg', (route) => route.fulfill({ path: call1 }));
 }
+
+/** Mara hosts the two active Popkins the mocks name (L2-049 AC3). */
+export async function hostingTwoPopkins(page: Page): Promise<void> {
+  const impact = responses['GET /api/account/deletion-impact'].body;
+  const lakeside = impact.hostedActivePopkins[0];
+  await answer(page, 'GET /api/account/deletion-impact', {
+    status: 200,
+    body: {
+      hostedActivePopkins: [
+        lakeside,
+        {
+          popkinId: '00000000-0000-4000-c000-000000000001',
+          name: 'Thursday Night Group',
+          emoji: '🎉',
+        },
+      ],
+    },
+  });
+}
+
+/** Mara hosts no active Popkin. */
+export async function hostingNothing(page: Page): Promise<void> {
+  await answer(page, 'GET /api/account/deletion-impact', {
+    status: 200,
+    body: { hostedActivePopkins: [] },
+  });
+}
