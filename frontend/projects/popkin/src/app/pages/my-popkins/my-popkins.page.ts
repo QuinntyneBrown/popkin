@@ -1,3 +1,4 @@
+import { Dialog } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MyPopkinsStore, SessionStore, accentOf, accountLabel } from 'api';
@@ -18,6 +19,7 @@ import {
   WrappedList,
   WrappedPopkin,
 } from 'components';
+import { ScanToJoinDialog } from '../../dialogs/scan-to-join/scan-to-join.dialog';
 
 /**
  * My Popkins (L2-017, L2-018): the Popkins a person belongs to, the active ones as cards and
@@ -48,6 +50,7 @@ import {
 export class MyPopkinsPage {
   protected readonly store = inject(MyPopkinsStore);
   private readonly session = inject(SessionStore).session;
+  private readonly dialog = inject(Dialog);
 
   protected readonly name = computed(() => this.session()?.name ?? '');
   protected readonly photo = computed(() => this.session()?.photoUrl ?? null);
@@ -95,6 +98,12 @@ export class MyPopkinsPage {
 
   /** Opens "Scan to join" (L2-015 AC1). */
   protected scan(): void {
-    // The dialog arrives with its own slice.
+    this.dialog.open(ScanToJoinDialog, {
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      // pk-dialog draws its own backdrop, as the mocks do.
+      hasBackdrop: false,
+      ariaModal: true,
+    });
   }
 }

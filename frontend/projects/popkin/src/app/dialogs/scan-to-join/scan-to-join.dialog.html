@@ -1,0 +1,45 @@
+<div
+  pk-dialog
+  heading="Scan to join"
+  accent="teal"
+  [description]="denied() ? undefined : 'Point your camera at the code on a friend’s phone.'"
+>
+  @if (denied()) {
+    <div pk-alert variant="warning" icon="camera-off" heading="Popkin can’t use your camera">
+      Allow the camera for Popkin in your browser’s site settings, or type the code instead.
+    </div>
+  } @else {
+    <div
+      pk-scanner
+      [busy]="found()"
+      [hint]="found() ? 'Found it. Opening your invite…' : 'Hold the QR code inside the frame'"
+      (videoReady)="scan.start($event)"
+    ></div>
+  }
+  @if (scan.state() === 'invalid') {
+    <div pk-alert variant="warning" icon="scan" heading="That’s not a Popkin code">
+      Keep scanning, or type the code instead.
+    </div>
+  }
+  <a
+    pk-button
+    slot="footer"
+    routerLink="/join"
+    [variant]="denied() ? 'primary' : 'quiet'"
+    [block]="true"
+    (click)="ref.close()"
+    >Type the code instead</a
+  >
+  @if (denied()) {
+    <button
+      pk-button
+      slot="footer"
+      type="button"
+      variant="quiet"
+      [block]="true"
+      (click)="scan.retry()"
+    >
+      Try the camera again
+    </button>
+  }
+</div>
