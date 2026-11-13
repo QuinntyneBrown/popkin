@@ -15,6 +15,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import {
+  CallBannerStore,
   DraftStore,
   ErrorScreens,
   MessageOutbox,
@@ -29,16 +30,17 @@ import {
   timeLeft,
 } from 'api';
 import {
+  AppScreen,
   Banner,
   Button,
   Chip,
   Composer,
   ConversationCard,
   DayDivider,
-  AppScreen,
   DetailPane,
   EmptyState,
   Icon,
+  IconButton,
   ListPane,
   Message,
   PersonAvatar,
@@ -61,6 +63,7 @@ const BACK_ONLINE_MS = 5_000;
 @Component({
   selector: 'pk-group-chat-page',
   imports: [
+    IconButton,
     AppScreen,
     Banner,
     Button,
@@ -80,7 +83,7 @@ const BACK_ONLINE_MS = 5_000;
     Thread,
     TopBar,
   ],
-  providers: [ThreadStore],
+  providers: [ThreadStore, CallBannerStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './group-chat.page.html',
 })
@@ -89,6 +92,9 @@ export class GroupChatPage {
   readonly popkinId = input.required<string>();
 
   protected readonly store = inject(ThreadStore);
+  /** The group call under way, if there is one (L2-029 AC2). */
+  protected readonly call = inject(CallBannerStore).banner;
+  private readonly calls = inject(CallBannerStore);
   private readonly drafts = inject(DraftStore);
   private readonly outbox = inject(MessageOutbox);
   private readonly unread = inject(UnreadTracker);
@@ -178,7 +184,10 @@ export class GroupChatPage {
 
     effect(() => {
       const popkinId = this.popkinId();
-      untracked(() => this.store.open(popkinId));
+      untracked(() => {
+        this.store.open(popkinId);
+        this.calls.open(popkinId);
+      });
     });
 
     effect(() => {

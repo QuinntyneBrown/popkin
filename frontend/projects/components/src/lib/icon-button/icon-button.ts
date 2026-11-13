@@ -18,6 +18,7 @@ import { IconName } from '../icon/icons';
     class: 'icon-btn',
     '[class.icon-btn--card]': "variant() === 'card'",
     '[class.icon-btn--send]': "variant() === 'send'",
+    '[class.icon-btn--popkin]': "variant() === 'popkin'",
     '[class.icon-btn--labelled]': '!!text()',
     '[attr.aria-label]': 'label()',
     '[attr.title]': 'label()',
@@ -28,9 +29,10 @@ export class IconButton {
   readonly label = input.required<string>();
   /**
    * `card` is a button on a tinted surface, such as the home header: a white disc with a shadow.
-   * `send` is the coral button that sends a message.
+   * `send` is the coral button that sends a message. `popkin` draws the icon in the Popkin's
+   * colour: "Start group call".
    */
-  readonly variant = input<'plain' | 'card' | 'send'>('plain');
+  readonly variant = input<'plain' | 'card' | 'send' | 'popkin'>('plain');
   readonly size = input<'sm' | 'md' | 'lg' | 'base'>('base');
   /** The word shown beside the icon from 640 px: "Invite". */
   readonly text = input<string>();

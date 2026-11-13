@@ -29,6 +29,7 @@ export class GroupChatPage {
   readonly newMessages: Locator;
   readonly announcements: Locator;
   readonly banner: Locator;
+  readonly startGroupCall: Locator;
   readonly nav: Locator;
   readonly tabs: Locator;
   readonly currentTab: Locator;
@@ -76,6 +77,7 @@ export class GroupChatPage {
       '[aria-live="polite"].visually-hidden, .visually-hidden[aria-live="polite"]',
     );
     this.banner = page.locator('.banner');
+    this.startGroupCall = page.locator('.topbar').getByRole('link', { name: 'Start group call' });
     this.nav = page.getByRole('navigation', { name: 'Popkin' });
     this.tabs = this.nav.locator('ul a');
     this.currentTab = this.nav.locator('ul a[aria-current="page"]');

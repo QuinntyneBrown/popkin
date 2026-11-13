@@ -68,3 +68,8 @@
     display: inline;
   }
 }
+
+/* An action of the Popkin itself, in its colour. */
+:host(.icon-btn--popkin) {
+  color: var(--accent-text);
+}
