@@ -1,0 +1,129 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+/* One Popkin: a link on a tint of the Popkin's colour. */
+.popkin-card {
+  display: block;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--accent-tint);
+  color: inherit;
+  text-decoration: none;
+  transition: scale var(--duration-fast) var(--ease-pop);
+}
+
+.popkin-card:hover {
+  color: inherit;
+}
+
+.popkin-card:active {
+  scale: var(--scale-press);
+}
+
+.popkin-card__top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.popkin-card__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.popkin-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.popkin-card__name {
+  font: var(--text-title);
+}
+
+.popkin-card__last {
+  margin-top: var(--space-0-5);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.popkin-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font: var(--text-meta);
+  color: var(--color-fg-muted);
+}
+
+.popkin-card__people {
+  display: flex;
+  align-items: center;
+}
+
+/*
+ * S: two across. The cards of a row are as tall as each other, the message may take two lines
+ * and the foot sits at the end of its card.
+ */
+@media (min-width: 40rem) {
+  :host {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .popkin-grid__item {
+    display: flex;
+  }
+
+  .popkin-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .popkin-card__last {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+  }
+
+  .popkin-card__foot {
+    margin-top: auto;
+    padding-top: var(--space-5);
+  }
+}
+
+@media (min-width: 48rem) {
+  :host {
+    gap: var(--space-4);
+  }
+
+  .popkin-card {
+    padding: var(--space-5);
+  }
+}
+
+/* L: three across. */
+@media (min-width: 64rem) {
+  :host {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  :host {
+    gap: var(--space-5);
+  }
+
+  .popkin-card {
+    padding: var(--space-6);
+  }
+}

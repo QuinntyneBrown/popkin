@@ -1,0 +1,18 @@
+<p class="visually-hidden" role="status">{{ label() }}</p>
+<div class="popkin-skeleton__cards" aria-hidden="true">
+  @for (card of cards(); track card) {
+    <div class="card popkin-skeleton__card">
+      <div class="popkin-skeleton__top">
+        <span pk-skeleton shape="tile"></span>
+        <div class="popkin-skeleton__lines">
+          <span pk-skeleton shape="text" [width]="60"></span>
+          <span pk-skeleton shape="text" [width]="80"></span>
+        </div>
+      </div>
+      <div class="popkin-skeleton__foot">
+        <span pk-skeleton shape="text" [width]="20"></span>
+        <span pk-skeleton shape="text" [width]="30"></span>
+      </div>
+    </div>
+  }
+</div>

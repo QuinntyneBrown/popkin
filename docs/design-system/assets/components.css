@@ -399,7 +399,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .circle > .avatar { position: absolute; translate: -50% -50%; }
 .circle__centre { position: absolute; inset: 0; display: grid; place-items: center; }
 .scanner { position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: var(--radius-lg); background: var(--color-bg-stage); color: var(--color-fg-on-stage); overflow: hidden; }
-.scanner__frame { width: 62%; aspect-ratio: 1; border: var(--border-width-ring) solid var(--color-fg-on-stage); border-radius: var(--radius-lg); box-shadow: 0 0 0 100vmax var(--color-bg-scrim-subtle); }
+.scanner__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; } /* what the camera sees, under the frame; no mock draws it */
+.scanner--busy .scanner__video { display: none; } /* the code is found: the stage alone, with the spinner */
+.scanner__frame { position: relative; width: 62%; aspect-ratio: 1; border: var(--border-width-ring) solid var(--color-fg-on-stage); border-radius: var(--radius-lg); box-shadow: 0 0 0 100vmax var(--color-bg-scrim-subtle); }
 .scanner__hint { position: absolute; bottom: var(--space-4); left: 0; right: 0; text-align: center; font: var(--text-meta); }
 
 /* ---------- Photos --------------------------------------------------------------- */

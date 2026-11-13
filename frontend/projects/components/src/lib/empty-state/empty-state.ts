@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Icon } from '../icon/icon';
 import { IconName } from '../icon/icons';
+import { Mark } from '../mark/mark';
 import { PopkinTile } from '../popkin-tile/popkin-tile';
 
 /**
@@ -10,7 +11,7 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
  */
 @Component({
   selector: 'div[pk-empty-state]',
-  imports: [Icon, PopkinTile],
+  imports: [Icon, Mark, PopkinTile],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './empty-state.html',
   styleUrl: './empty-state.scss',
@@ -24,6 +25,8 @@ export class EmptyState {
   readonly icon = input<IconName>();
   /** The emoji of a Popkin, on its tile, in place of the icon: an empty thread. */
   readonly tile = input<string>();
+  /** The Popkin mark in place of the icon: a person with no Popkins yet. */
+  readonly mark = input(false);
   readonly heading = input.required<string>();
   /** `1` when the state is the whole screen, `3` under a section's `h2`, else `2`. */
   readonly level = input<1 | 2 | 3>(2);

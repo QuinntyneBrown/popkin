@@ -1,0 +1,30 @@
+<h2 class="wrapped-list__heading">{{ heading() }}</h2>
+<ul class="divided divided--grid">
+  @for (popkin of popkins(); track $index) {
+    <li class="divided__item">
+      @if (popkin.href) {
+        <a class="row" [href]="popkin.href">
+          <ng-container *ngTemplateOutlet="row; context: { $implicit: popkin }" />
+        </a>
+      } @else {
+        <a class="row" [routerLink]="popkin.link">
+          <ng-container *ngTemplateOutlet="row; context: { $implicit: popkin }" />
+        </a>
+      }
+    </li>
+  }
+</ul>
+<ng-template #row let-popkin>
+  <span
+    pk-popkin-tile
+    size="sm"
+    [muted]="true"
+    [emoji]="popkin.emoji"
+    [attr.data-accent]="popkin.accent"
+  ></span>
+  <div class="row__main">
+    <div class="row__title row__title--display truncate">{{ popkin.name }}</div>
+    <div class="row__text truncate">{{ popkin.summary }}</div>
+  </div>
+  <span class="row__action">{{ action() }}</span>
+</ng-template>
