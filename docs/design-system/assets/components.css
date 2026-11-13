@@ -180,6 +180,10 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .legal { margin-top: var(--space-4); text-align: center; font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
 .legal a { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
 
+/* The one picture of something shared: a wide button until there is one, then the picture with Remove over its corner. */
+.picture-field__chosen { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-md); background: var(--color-bg-subtle); }
+.picture-field__chosen img { width: 100%; height: 100%; }
+.picture-field__remove { position: absolute; right: var(--space-2); top: var(--space-2); }
 /* Emoji and colour pickers, option cards */
 .emoji-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-2); }
 .emoji-btn { display: grid; place-items: center; aspect-ratio: 1; min-height: var(--target-comfortable); border: 0; border-radius: var(--radius-md); background: var(--color-bg-subtle); font: var(--font-size-3xl) / 1 var(--font-family-emoji); transition: scale var(--duration-fast) var(--ease-pop); }
@@ -245,7 +249,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .pill strong { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
 .tag { display: inline-flex; align-items: center; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); background: var(--color-bg-surface); color: var(--color-fg-default); font: var(--text-meta); }
 .chip { display: inline-flex; align-items: center; height: var(--space-10); min-width: var(--target-comfortable); padding: 0 var(--space-4); border: 0; border-radius: var(--radius-full); background: var(--color-bg-subtle); color: var(--color-fg-muted); font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans); white-space: nowrap; text-decoration: none; }
-.chip[aria-pressed="true"] { background: var(--color-bg-inverse); color: var(--color-fg-inverse); }
+.chip[aria-pressed="true"], .chip[aria-checked="true"] { background: var(--color-bg-inverse); color: var(--color-fg-inverse); }
 .chip--outline { height: var(--target-comfortable); border: var(--border-width-thick) solid var(--color-border-default); background: var(--color-bg-surface); color: var(--color-fg-default); }
 .chips { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 
@@ -265,6 +269,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .step-dots [aria-current="step"] { width: var(--space-6); background: var(--color-accent); }
 .tab-header { flex: none; padding: var(--space-4) var(--space-5) 0; }
 .tab-header h1 { font: var(--text-h1-compact); letter-spacing: var(--letter-spacing-tight); }
+.tab-header__lead { margin-top: var(--space-1); font-size: var(--font-size-md-minus); color: var(--color-fg-muted); } /* a sentence in place of the summary */
 .tab-header .chips { margin-top: var(--space-4); }
 .popkin-nav { position: sticky; bottom: 0; z-index: var(--z-sticky); flex: none; padding: var(--space-1-5) var(--space-2) var(--space-5); border-top: var(--border-width-hairline) solid var(--color-border-default); background: var(--color-bg-surface); }
 .popkin-nav ul { display: grid; grid-template-columns: repeat(4, 1fr); }
@@ -440,6 +445,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .exp-card__media img { width: 100%; height: 100%; }
 .exp-card__media .tag { position: absolute; left: var(--space-3); top: var(--space-3); }
 .exp-card__emoji { display: grid; place-items: center; height: 100%; font: var(--font-size-7xl) / 1 var(--font-family-emoji); }
+.exp-card__keen { display: flex; flex: none; align-items: center; gap: var(--space-2); font-weight: var(--font-weight-semibold); } /* who is keen, where a rating would be */
 .exp-card__body { padding: var(--space-4); }
 .exp-card__title { font: var(--text-title); }
 .exp-card__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); font: var(--text-body-sm); color: var(--color-fg-muted); }
@@ -456,10 +462,14 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .star-btn[aria-checked="true"] .icon { fill: var(--color-star); }
 .hero-media { position: relative; aspect-ratio: 4 / 3; background: var(--accent-tint); }
 .hero-media img { width: 100%; height: 100%; }
+.hero-media__emoji { display: grid; place-items: center; height: 100%; font: var(--font-size-7xl) / 1 var(--font-family-emoji); } /* no picture: the Popkin's emoji on its colour */
 .hero-media .icon-btn { position: absolute; left: var(--space-3); top: var(--space-3); }
 .score-card { display: flex; align-items: center; gap: var(--space-5); }
 .score-card__value { font: var(--font-weight-black) var(--font-size-6xl) / 1 var(--font-family-display); }
 .score-card__count { margin-top: var(--space-1); font: var(--font-weight-regular) var(--font-size-sm-plus) / 1 var(--font-family-sans); color: var(--color-fg-muted); }
+/* Nobody has rated it: empty stars and the words, in the middle. */
+.score-card--empty { justify-content: center; }
+.score-card--empty .score-card__count { margin-top: var(--space-2); line-height: var(--line-height-normal); }
 .score-bars { flex: 1; display: flex; flex-direction: column; gap: var(--space-1-5); }
 .score-bars li { display: flex; align-items: center; gap: var(--space-2); font: var(--text-caption); color: var(--color-fg-muted); }
 .meter { flex: 1; height: var(--space-2); overflow: hidden; border-radius: var(--radius-full); background: var(--color-bg-subtle); }
