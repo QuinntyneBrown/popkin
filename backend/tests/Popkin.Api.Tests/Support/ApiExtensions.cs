@@ -91,6 +91,19 @@ public static class ApiExtensions
         await db.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// Marks a member as having left now, straight in the store: leaving a Popkin is journey 16,
+    /// and until then the domain has no way to do it.
+    /// </summary>
+    public static async Task LeaveAsync(this ApiFactory api, Guid popkinId, string displayName)
+    {
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var membership = db.Memberships.Single(m => m.PopkinId == popkinId && m.DisplayName == displayName);
+        db.Entry(membership).Property(m => m.LeftAt).CurrentValue = api.Clock.GetUtcNow();
+        await db.SaveChangesAsync();
+    }
+
     public static int MembershipCount(this ApiFactory api)
     {
         using var scope = api.Services.CreateScope();
