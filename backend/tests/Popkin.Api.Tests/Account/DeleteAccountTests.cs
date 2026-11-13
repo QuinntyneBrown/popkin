@@ -56,6 +56,28 @@ public sealed class DeleteAccountTests
         Assert.Equal(files - 1, api.Photos.Files.Count);
     }
 
+    // Given Mara, a member of Walt's Popkin, which Walt has open on the hub,
+    // when she deletes her account,
+    // then Walt hears that her membership left, as when a member leaves (L2-047), and the
+    // Popkin counts one member fewer.
+    [Fact]
+    public async Task The_others_hear_that_the_member_left()
+    {
+        using var api = new ApiFactory();
+        var walt = await api.SignedUpAsync("Walt Brennan", "(415) 555-0177");
+        var walts = await walt.StartedAsync("Walt’s Popkin", "⚽");
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+        var joined = await (await mara.JoinAsync(walts.Code, "Mara")).Content.ReadFromJsonAsync<JsonElement>();
+        await using var waltHub = await api.CreateHubConnectionAsync(walt);
+
+        (await mara.DeleteAsync("/api/account")).EnsureSuccessStatusCode();
+
+        var left = await waltHub.WaitForAsync("MemberLeft");
+        Assert.Equal(walts.Id, left.Arguments[0].GetGuid());
+        Assert.Equal(joined.GetProperty("membershipId").GetGuid(), left.Arguments[1].GetGuid());
+        Assert.Equal(1, (await walt.HomeAsync(walts.Id)).GetProperty("memberCount").GetInt32());
+    }
+
     // Given Mara, who deleted her account, when someone signs up with her phone number,
     // then they are a new person with a new name.
     [Fact]

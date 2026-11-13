@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Members;
 using Popkin.Application.WrapUp;
 using Popkin.Domain;
 
@@ -21,6 +22,7 @@ public sealed class DeleteAccountCommandHandler(
     ICurrentPerson current,
     TimeProvider clock,
     PopkinWrapUpService wrapUp,
+    MemberDepartures departures,
     IPhotoStore photos,
     ILogger<DeleteAccountCommandHandler> logger)
     : IRequestHandler<DeleteAccountCommand>
@@ -71,6 +73,14 @@ public sealed class DeleteAccountCommandHandler(
         foreach (var (popkin, prepared) in wrapUps)
         {
             await wrapUp.AnnounceAsync(popkin, prepared.Calls);
+        }
+
+        // In every other Popkin the person was in, they left: the others are told, as when a
+        // member leaves (L2-047).
+        var wrapped = hosted.Select(p => p.Id).ToHashSet();
+        foreach (var membership in memberships.Where(m => !wrapped.Contains(m.PopkinId)))
+        {
+            await departures.AnnounceAsync(membership.PopkinId, membership, CancellationToken.None);
         }
     }
 }

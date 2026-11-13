@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<CodeIssuer>();
         services.AddScoped<IMembershipGuard, MembershipGuard>();
         services.AddScoped<CallLeaver>();
+        services.AddScoped<Members.MemberDepartures>();
         services.AddScoped<PopkinWrapUpService>();
         services.AddSingleton<CallDisconnectGrace>();
         services.AddSingleton<PopkinMetrics>();

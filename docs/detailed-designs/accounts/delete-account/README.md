@@ -103,6 +103,10 @@ Each `<TO SUPPLY>` above is settled here; the bullets above keep the question.
 - **Direct messages of the other member** — not deleted: L2-049 AC1 names only the person's own.
 - **Backups** — whether backups keep erased data, and how long, stays open (known gap 59 of
   `docs/detailed-designs/README.md`).
+- **Leaving the other Popkins** — in every Popkin the person was in and did not host, the
+  deletion is a member leaving (L2-047): after the save they are taken off the call under way, out
+  of presence and out of the Popkin's group, and the others hear `MemberLeft`
+  (`MemberDepartures`, shared with leaving a Popkin).
 - **Live updates** — no `MemberUpdated` event: the other members see "Former member" on their next
   read (manage-account open point, known gap 60).
 
