@@ -60,7 +60,8 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > from Popkin settings, or its time runs out, with a banner in its last hour; it turns
 > read-only, and everyone gets a recap with the people, the messages, the photos and the
 > top-rated moment, saves the album as a zip, and the Host pops up another with the same crew.
-> <!-- video of journey 9 -->
+> [Watch it](docs/videos/09-journey-09-wrap-up/09-journey-09-wrap-up.mp4)
+> (2 min 20 s, with sound).
 > The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
