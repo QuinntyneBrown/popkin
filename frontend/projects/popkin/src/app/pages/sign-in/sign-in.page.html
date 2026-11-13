@@ -1,0 +1,56 @@
+<div
+  pk-screen
+  layout="split"
+  body="middle"
+  heading="Welcome back"
+  lead="Tell us where to send your code. Still no passwords."
+>
+  <aside
+    pk-split-aside
+    slot="aside"
+    label="Popkin"
+    photo="/images/bonfire.jpg"
+    heading="Everyone around the same fire."
+    text="One link, one QR code, and your whole group is in."
+  ></aside>
+  <header pk-top-bar slot="header" back="/welcome"></header>
+  <form id="sign-in" class="stack stack--lg" novalidate (submit)="submit($event)">
+    @if (status() === 'failed') {
+      <div pk-alert heading="We couldn’t send your code.">
+        Check your connection and try again. Nothing you typed was lost.
+      </div>
+    } @else if (status() === 'limited') {
+      <div pk-alert heading="That’s a lot of codes.">{{ tryAgain() }}</div>
+    }
+    <div
+      pk-text-field
+      fieldId="contact"
+      label="Phone number or email"
+      hint="The one you signed up with."
+      autocomplete="username"
+      [formControl]="contact"
+      [readonly]="status() === 'sending'"
+      [error]="contactError() ?? undefined"
+    ></div>
+  </form>
+  <div slot="actions" class="stack stack--sm">
+    <button
+      pk-button
+      variant="primary"
+      type="submit"
+      form="sign-in"
+      [block]="true"
+      [busy]="status() === 'sending'"
+    >
+      {{ status() === 'sending' ? 'Sending your code…' : 'Send my code' }}
+    </button>
+    <a
+      pk-link
+      variant="text"
+      action="Start a Popkin"
+      routerLink="/sign-up"
+      [queryParams]="{ returnUrl }"
+      >New here?</a
+    >
+  </div>
+</div>

@@ -20,6 +20,12 @@ export class ErrorScreens {
     void this.router.navigateByUrl('/error', { skipLocationChange: true, state });
   }
 
+  /** The device is offline and the screen has nothing saved to show (L2-056 AC4). */
+  showOffline(retryUrl: string): void {
+    const state: ServerErrorState = { retryUrl };
+    void this.router.navigateByUrl('/offline', { skipLocationChange: true, state });
+  }
+
   showNotFound(): void {
     void this.router.navigateByUrl('/not-found', { skipLocationChange: true });
   }

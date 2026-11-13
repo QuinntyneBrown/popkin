@@ -1,0 +1,15 @@
+<video
+  #video
+  class="scanner__video"
+  autoplay
+  playsinline
+  aria-hidden="true"
+  [muted]="true"
+  [srcObject]="stream()"
+></video>
+@if (busy()) {
+  <span class="spinner" aria-hidden="true"></span>
+} @else {
+  <span class="scanner__frame"></span>
+}
+<span class="scanner__hint">{{ hint() }}</span>

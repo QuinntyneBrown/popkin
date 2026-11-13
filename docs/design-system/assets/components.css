@@ -289,6 +289,11 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .popkin-card__name { font: var(--text-title); }
 .popkin-card__last { margin-top: var(--space-0-5); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); color: var(--color-fg-muted); }
 .popkin-card__foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-3); font: var(--text-meta); color: var(--color-fg-muted); }
+/* A Popkin card that is loading: sand, with shapes in boxes the size of the name, the message and the foot. */
+.popkin-card--skeleton { background: var(--color-bg-subtle); }
+.popkin-card--skeleton:active { scale: none; }
+.popkin-card--skeleton .popkin-card__name, .popkin-card--skeleton .popkin-card__last { display: flex; flex-direction: column; justify-content: center; height: 1lh; }
+.popkin-card--skeleton .popkin-card__last > .skeleton + .skeleton { display: none; }
 .row { display: flex; align-items: center; gap: var(--space-3); min-height: var(--space-18); color: inherit; text-decoration: none; }
 .row:hover { color: inherit; }
 .row--pad { padding: 0 var(--space-5); }
@@ -399,7 +404,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .circle > .avatar { position: absolute; translate: -50% -50%; }
 .circle__centre { position: absolute; inset: 0; display: grid; place-items: center; }
 .scanner { position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: var(--radius-lg); background: var(--color-bg-stage); color: var(--color-fg-on-stage); overflow: hidden; }
-.scanner__frame { width: 62%; aspect-ratio: 1; border: var(--border-width-ring) solid var(--color-fg-on-stage); border-radius: var(--radius-lg); box-shadow: 0 0 0 100vmax var(--color-bg-scrim-subtle); }
+.scanner__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; } /* what the camera sees, under the frame; no mock draws it */
+.scanner--busy .scanner__video { display: none; } /* the code is found: the stage alone, with the spinner */
+.scanner__frame { position: relative; width: 62%; aspect-ratio: 1; border: var(--border-width-ring) solid var(--color-fg-on-stage); border-radius: var(--radius-lg); box-shadow: 0 0 0 100vmax var(--color-bg-scrim-subtle); }
 .scanner__hint { position: absolute; bottom: var(--space-4); left: 0; right: 0; text-align: center; font: var(--text-meta); }
 
 /* ---------- Photos --------------------------------------------------------------- */
@@ -724,6 +731,8 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .popkin-grid .popkin-card { display: flex; flex-direction: column; width: 100%; }
   .popkin-grid .popkin-card__last { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }
   .popkin-grid .popkin-card__foot { margin-top: auto; padding-top: var(--space-5); }
+  .popkin-grid .popkin-card--skeleton .popkin-card__last { display: flex; justify-content: space-between; height: 2lh; }
+  .popkin-grid .popkin-card--skeleton .popkin-card__last > .skeleton + .skeleton { display: block; }
 }
 @media (min-width: 48rem) {
   .screen--page > .topbar { height: var(--space-20); padding-inline: max(var(--space-8), calc((100% - var(--layout-page-max)) / 2 + var(--space-8))); border-bottom: var(--border-width-hairline) solid var(--color-border-default); }

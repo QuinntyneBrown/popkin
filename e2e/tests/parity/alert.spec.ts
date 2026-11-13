@@ -1,3 +1,5 @@
+import { openTheScanner, scanSomethingElse, withACamera } from '../../fixtures/my-popkins';
+import { ScanToJoinDialog } from '../../pages/scan-to-join.dialog';
 import { addTheThreeWithOneFailing, theMockPhotos } from '../../fixtures/photos';
 import { AddPhotosDialog } from '../../pages/add-photos.dialog';
 import { theHomeWithoutPhotos } from '../../fixtures/home';
@@ -45,5 +47,19 @@ parity('alert', [
     region: (page) => new AddPhotosDialog(page).outcome,
     before: theMockPhotos,
     app: addTheThreeWithOneFailing,
+  },
+  {
+    key: 'scanToJoinInvalid',
+    name: 'not-a-popkin-code',
+    region: (page) => new ScanToJoinDialog(page).alert,
+    before: withACamera('allowed'),
+    app: scanSomethingElse,
+  },
+  {
+    key: 'scanToJoinDenied',
+    name: 'no-camera',
+    region: (page) => new ScanToJoinDialog(page).alert,
+    before: withACamera('denied'),
+    app: openTheScanner,
   },
 ]);

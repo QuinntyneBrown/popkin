@@ -1,0 +1,74 @@
+<div pk-page-screen heading="Your Popkins">
+  <header pk-top-bar slot="header">
+    <span pk-logo></span>
+    <div class="cluster">
+      @if (canStart()) {
+        <a pk-button class="only-m-up" variant="primary" size="sm" routerLink="/new"
+          ><svg pk-icon name="plus" size="md"></svg>New Popkin</a
+        >
+      }
+      <button
+        pk-icon-button
+        type="button"
+        icon="scan"
+        label="Scan to join"
+        (click)="scan()"
+      ></button>
+      <a routerLink="/account" [attr.aria-label]="accountLabel()"
+        ><span pk-avatar size="36" data-accent="coral" [name]="name()" [photo]="photo()"></span
+      ></a>
+    </div>
+  </header>
+  @if (store.offline() && store.state() === 'ready') {
+    <div
+      pk-banner
+      slot="banner"
+      variant="warning"
+      icon="wifi-off"
+      heading="You’re offline."
+      text="Showing what we saved last time."
+    ></div>
+  }
+  @switch (store.state()) {
+    @case ('loading') {
+      <div pk-popkin-skeleton label="Loading your Popkins…"></div>
+    }
+    @case ('empty') {
+      <div
+        pk-empty-state
+        heading="No Popkins yet"
+        text="A Popkin is a private little home for one group: chat, photos, plans and calls. Start one, or scan a friend’s code to join theirs."
+        [mark]="true"
+      >
+        <a pk-button variant="primary" size="md" routerLink="/new">Start a Popkin</a>
+        <button pk-button variant="secondary" size="md" type="button" (click)="scan()">
+          <svg pk-icon name="scan" size="md"></svg>Scan to join
+        </button>
+      </div>
+    }
+    @case ('error') {
+      <div
+        pk-empty-state
+        icon="offline"
+        heading="We couldn’t load your Popkins"
+        text="They’re safe; we just couldn’t reach them. Check your connection and try again."
+        [alert]="true"
+      >
+        <button pk-button variant="primary" size="md" type="button" (click)="store.retry()">
+          <svg pk-icon name="retry" size="md"></svg>Try again
+        </button>
+      </div>
+    }
+    @default {
+      @if (active().length) {
+        <ul pk-popkin-grid [popkins]="active()"></ul>
+      }
+      @if (wrapped().length) {
+        <div pk-wrapped-list heading="Wrapped up" action="Recap" [popkins]="wrapped()"></div>
+      }
+    }
+  }
+  @if (canStart()) {
+    <a pk-fab slot="fab" routerLink="/new">New Popkin</a>
+  }
+</div>

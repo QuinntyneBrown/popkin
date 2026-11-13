@@ -12,7 +12,8 @@
   text-decoration: none;
 }
 
-:host(.text-btn--accent) {
+:host(.text-btn--accent),
+.text-btn__action {
   color: var(--color-fg-accent);
   font-weight: var(--font-weight-semibold);
 }

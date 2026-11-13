@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { SignInPage } from './sign-in.page';
 import { SignUpPage } from './sign-up.page';
 
 /** The code screen, `/verify` (L2-004, L2-005). */
@@ -12,6 +13,10 @@ export class VerifyCodePage {
   readonly resend: Locator;
   readonly differentNumber: Locator;
   readonly toast: Locator;
+  /** The name step, for someone signing in who has no account yet (L2-006 AC2). */
+  readonly name: Locator;
+  readonly nameError: Locator;
+  readonly continue: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly codeField: Locator;
   readonly primaryButton: Locator;
@@ -34,6 +39,9 @@ export class VerifyCodePage {
     this.resend = page.getByRole('button', { name: /Send a new code/ });
     this.differentNumber = page.getByRole('link', { name: 'Use a different number' });
     this.toast = page.locator('.toast');
+    this.name = page.getByLabel('Your name');
+    this.nameError = page.locator('#name-err');
+    this.continue = page.getByRole('button', { name: /Continue|Signing you in/ });
     this.codeField = page.locator('.field').filter({ has: page.locator('#code') });
     this.primaryButton = page.locator('.btn--primary');
     this.differentNumberRegion = page.locator('a.text-btn');
@@ -50,6 +58,14 @@ export class VerifyCodePage {
     );
     await signUp.fill('Mara', '(415) 555-0148');
     await signUp.submit();
+    await this.root.waitFor();
+  }
+
+  /** Signs in with Mara's number, the other way the code screen is reached. */
+  async reachBySignIn(returnUrl?: string): Promise<void> {
+    const signIn = new SignInPage(this.page);
+    await signIn.open(returnUrl);
+    await signIn.sendCodeTo('(415) 555-0148');
     await this.root.waitFor();
   }
 

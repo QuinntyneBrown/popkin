@@ -1,0 +1,45 @@
+@for (popkin of popkins(); track $index) {
+  <li class="popkin-grid__item">
+    @if (popkin.href) {
+      <a class="popkin-card" [href]="popkin.href" [attr.data-accent]="popkin.accent">
+        <ng-container *ngTemplateOutlet="card; context: { $implicit: popkin }" />
+      </a>
+    } @else {
+      <a class="popkin-card" [routerLink]="popkin.link" [attr.data-accent]="popkin.accent">
+        <ng-container *ngTemplateOutlet="card; context: { $implicit: popkin }" />
+      </a>
+    }
+  </li>
+}
+<ng-template #card let-popkin>
+  <div class="popkin-card__top">
+    <span pk-popkin-tile size="md" [emoji]="popkin.emoji"></span>
+    <div class="popkin-card__main">
+      <div class="popkin-card__head">
+        <h2 class="popkin-card__name truncate">{{ popkin.name }}</h2>
+        @if (popkin.unread > 0) {
+          <span
+            pk-badge
+            variant="popkin"
+            [count]="popkin.unread"
+            [label]="popkin.unreadLabel"
+          ></span>
+        }
+      </div>
+      @if (popkin.last) {
+        <p class="popkin-card__last truncate">{{ popkin.last }}</p>
+      }
+    </div>
+  </div>
+  <div class="popkin-card__foot">
+    <span class="popkin-card__people">
+      <span pk-avatar-stack size="2xs" [avatars]="popkin.avatars" [more]="popkin.more"></span>
+      <span class="visually-hidden">{{ popkin.members }}</span>
+    </span>
+    @if (popkin.ongoing) {
+      <span class="popkin-card__time">{{ popkin.time }}</span>
+    } @else {
+      <span pk-time-left>{{ popkin.time }}</span>
+    }
+  </div>
+</ng-template>

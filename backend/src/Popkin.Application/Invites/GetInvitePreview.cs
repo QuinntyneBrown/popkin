@@ -79,10 +79,13 @@ public static class InviteMembers
         var members = await db.Memberships.AsNoTracking()
             .Where(m => m.PopkinId == popkin.Id && m.LeftAt == null)
             .ToListAsync(cancellationToken);
-        return members
+        return InOrder(members).ToList();
+    }
+
+    /// <summary>Members in the order every list of them keeps: the Host first, then in the order they joined.</summary>
+    public static IOrderedEnumerable<Membership> InOrder(IEnumerable<Membership> members) =>
+        members
             .OrderByDescending(m => m.Role == MembershipRole.Host)
             .ThenBy(m => m.JoinedAt)
-            .ThenBy(m => m.Id)
-            .ToList();
-    }
+            .ThenBy(m => m.Id);
 }

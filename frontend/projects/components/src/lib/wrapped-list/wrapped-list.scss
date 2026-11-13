@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  margin-top: var(--space-9);
+}
+
+.wrapped-list__heading {
+  font: var(--font-weight-extrabold) var(--font-size-md-plus) / 1 var(--font-family-display);
+  color: var(--color-fg-muted);
+}
+
+.divided {
+  margin-top: var(--space-2);
+}
+
+.divided__item + .divided__item {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-18);
+  color: inherit;
+  text-decoration: none;
+}
+
+.row:hover {
+  color: inherit;
+}
+
+.row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title {
+  font: var(--font-weight-extrabold) var(--font-size-md) / var(--line-height-snug)
+    var(--font-family-display);
+}
+
+.row__text {
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.row__action {
+  flex: none;
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  color: var(--color-fg-accent);
+}
+
+/* M: the rows in the columns of the cards above them, each ruled off underneath. */
+@media (min-width: 48rem) {
+  .divided--grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-8);
+  }
+
+  .divided__item,
+  .divided__item + .divided__item {
+    border-top: 0;
+    border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+  }
+}
+
+@media (min-width: 64rem) {
+  .divided--grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

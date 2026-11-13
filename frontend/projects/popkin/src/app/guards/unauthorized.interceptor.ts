@@ -1,7 +1,7 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { SessionStore } from 'api';
+import { POPKINS_SNAPSHOT, SessionStore } from 'api';
 import { catchError, throwError } from 'rxjs';
 
 /**
@@ -12,11 +12,14 @@ import { catchError, throwError } from 'rxjs';
 export const unauthorizedInterceptor: HttpInterceptorFn = (request, next) => {
   const router = inject(Router);
   const sessions = inject(SessionStore);
+  const snapshot = inject(POPKINS_SNAPSHOT);
   const exempt = request.url === '/api/auth/session' || request.url.startsWith('/api/auth/codes');
   return next(request).pipe(
     catchError((error: unknown) => {
       if (!exempt && error instanceof HttpErrorResponse && error.status === 401) {
         sessions.clear();
+        // Nothing of the person's stays on a device they are signed out of (L2-054).
+        snapshot.clear();
         const returnUrl = router.currentNavigation()?.finalUrl?.toString() ?? router.url;
         void router.navigate(['/sign-in'], { queryParams: { returnUrl } });
       }

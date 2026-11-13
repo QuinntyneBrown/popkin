@@ -1,3 +1,4 @@
+import { OfflinePage } from './pages/offline/offline.page';
 import { Routes } from '@angular/router';
 import { AlbumStore, PopkinFrame } from 'api';
 import { signedInGuard } from './guards/signed-in.guard';
@@ -20,6 +21,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
     data: data({ shell: 'bare', page: 'home' }),
     title: 'Popkin',
+  },
+  {
+    path: 'sign-in',
+    loadComponent: () => import('./pages/sign-in/sign-in.page').then((m) => m.SignInPage),
+    data: data({ shell: 'bare', page: 'sign-in' }),
+    title: 'Sign in · Popkin',
   },
   {
     path: 'sign-up',
@@ -121,6 +128,20 @@ export const routes: Routes = [
   },
   // Until the list of conversations is built (journey 11), Chat is the Everyone thread.
   { path: 'p/:popkinId/chat', redirectTo: 'p/:popkinId/chat/everyone', pathMatch: 'full' },
+  {
+    path: 'popkins',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/my-popkins/my-popkins.page').then((m) => m.MyPopkinsPage),
+    data: data({ shell: 'bare', page: 'my-popkins' }),
+    title: 'Your Popkins · Popkin',
+  },
+  {
+    path: 'offline',
+    // Part of the first download: a screen that cannot be fetched offline still has this one.
+    component: OfflinePage,
+    data: data({ shell: 'bare', page: 'offline' }),
+    title: 'You’re offline · Popkin',
+  },
   {
     path: 'error',
     loadComponent: () =>

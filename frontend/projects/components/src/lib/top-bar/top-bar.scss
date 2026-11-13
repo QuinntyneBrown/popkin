@@ -77,3 +77,21 @@
     padding: var(--space-2) var(--space-4) 0;
   }
 }
+
+/* Over a top-level page the bar is taller, ruled off, and as far in as the page's content. */
+@media (min-width: 48rem) {
+  :host-context(.screen--page) {
+    height: var(--space-20);
+    padding-inline: max(var(--space-8), calc((100% - var(--layout-page-max)) / 2 + var(--space-8)));
+    border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+  }
+}
+
+@media (min-width: 80rem) {
+  :host-context(.screen--page) {
+    padding-inline: max(
+      var(--space-12),
+      calc((100% - var(--layout-page-max)) / 2 + var(--space-12))
+    );
+  }
+}

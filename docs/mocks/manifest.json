@@ -69,13 +69,15 @@
       "requirements": [
         "L2-004",
         "L2-005",
-        "L2-053"
+        "L2-053",
+        "L2-006"
       ],
       "states": [
         "default",
         "invalid",
         "expired",
-        "submitting"
+        "submitting",
+        "name"
       ],
       "not_applicable": {
         "loading": "The screen needs no request before it shows, so it has nothing to wait for.",

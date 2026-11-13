@@ -1,0 +1,75 @@
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  margin-inline: auto;
+  background: var(--color-bg-canvas);
+}
+
+/* The body is as wide as the window, up to the page maximum, with room under it for the action. */
+.screen__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--layout-page-max);
+  min-width: 0;
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-5) var(--space-24);
+}
+
+.screen__body:focus {
+  outline: none;
+}
+
+.screen__heading {
+  margin-top: var(--space-3);
+}
+
+/*
+ * The floating action of a phone, low on a page that has no tabs under it. It stays in view
+ * while the page scrolls under it; only the action itself takes the pointer (pk-fab).
+ */
+.screen__fab {
+  position: sticky;
+  bottom: var(--space-8);
+  z-index: var(--z-sticky);
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(-1 * var(--space-14));
+  padding: 0 var(--space-5);
+  pointer-events: none;
+}
+
+.screen__fab:empty {
+  display: none;
+}
+
+/* M: the action is in the page's bar, and the page sits further in under a larger heading. */
+@media (min-width: 48rem) {
+  .screen__fab {
+    display: none;
+  }
+
+  .screen__body {
+    padding-inline: var(--space-8);
+    padding-bottom: var(--space-12);
+  }
+
+  .screen__heading {
+    padding-top: var(--space-5);
+    font-size: var(--font-size-5xl);
+  }
+}
+
+@media (min-width: 80rem) {
+  .screen__body {
+    padding-inline: var(--space-12);
+  }
+
+  .screen__heading {
+    font-size: var(--font-size-6xl);
+  }
+}

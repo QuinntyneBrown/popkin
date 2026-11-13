@@ -1,0 +1,119 @@
+:host {
+  display: block;
+  margin-top: var(--space-5);
+}
+
+/* The grid of Your Popkins (popkin-grid): one across, then two, then three. */
+.popkin-skeleton__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* A card that is not there yet: flat, on sand, the size of a Popkin card (L2-017 AC7). */
+.popkin-skeleton__card {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+}
+
+.popkin-skeleton__top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.popkin-skeleton__lines {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Each shape sits in a box as tall as the line of text it stands in for. */
+.popkin-skeleton__name,
+.popkin-skeleton__last {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 1lh;
+}
+
+.popkin-skeleton__name {
+  font: var(--text-title);
+}
+
+.popkin-skeleton__last {
+  margin-top: var(--space-0-5);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.popkin-skeleton__last > .skeleton + .skeleton {
+  display: none;
+}
+
+.popkin-skeleton__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* S: two across, the message on two lines and the foot at the end of its card. */
+@media (min-width: 40rem) {
+  .popkin-skeleton__cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .popkin-skeleton__item {
+    display: flex;
+  }
+
+  .popkin-skeleton__card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .popkin-skeleton__last {
+    justify-content: space-between;
+    height: 2lh;
+  }
+
+  .popkin-skeleton__last > .skeleton + .skeleton {
+    display: block;
+  }
+
+  .popkin-skeleton__foot {
+    margin-top: auto;
+    padding-top: var(--space-5);
+  }
+}
+
+@media (min-width: 48rem) {
+  .popkin-skeleton__cards {
+    gap: var(--space-4);
+  }
+
+  .popkin-skeleton__card {
+    padding: var(--space-5);
+  }
+}
+
+/* L: three across. */
+@media (min-width: 64rem) {
+  .popkin-skeleton__cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  .popkin-skeleton__cards {
+    gap: var(--space-5);
+  }
+
+  .popkin-skeleton__card {
+    padding: var(--space-6);
+  }
+}

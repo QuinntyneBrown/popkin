@@ -1,3 +1,4 @@
+import { SignInPage } from '../../pages/sign-in.page';
 import type { Page } from '@playwright/test';
 import { codeScreenAt24Seconds } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
@@ -63,5 +64,16 @@ parity('text-field', [
       await verify.codeError.waitFor();
     },
     prepare: (page) => new VerifyCodePage(page).code.focus(),
+  },
+  {
+    key: 'signInInvalid',
+    name: 'sign-in-invalid',
+    region: (page) => new SignInPage(page).contactField,
+    app: async (page) => {
+      const signIn = new SignInPage(page);
+      await signIn.contact.fill('mara@hey');
+      await signIn.send.click();
+      await signIn.contactError.waitFor();
+    },
   },
 ]);

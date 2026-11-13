@@ -140,6 +140,9 @@ await call('GET', `/api/popkins/${created.id}/photos/summary`);
 await call('GET', `/api/popkins/${created.id}/experiences/summary`);
 await call('GET', `/api/popkins/${created.id}/members`);
 
+// My Popkins: Mara's one active Popkin, as its card (journey 6).
+await call('GET', '/api/popkins');
+
 // Photos: Mara has added none, adds one with a caption, then reads the album and the photo.
 const album = `/api/popkins/${created.id}/photos`;
 await call('GET', `${album}?filter=mine`);
