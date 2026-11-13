@@ -1,7 +1,9 @@
 import type { Page, Route } from '@playwright/test';
 import path from 'node:path';
 import responses from './api/responses.json';
-import type { Hub } from './hub';
+import { hubOf, type Hub } from './hub';
+import { mockToday } from './journeys';
+import { GroupChatPage } from '../pages/group-chat.page';
 import { problem } from './stubs';
 
 /**
@@ -273,5 +275,102 @@ export async function maraInTheChat(page: Page, change?: (chat: Chat) => void): 
   const chat = new Chat(page);
   change?.(chat);
   await chat.install();
+  chats.set(page, chat);
   return chat;
+}
+
+const chats = new WeakMap<Page, Chat>();
+
+function chatOf(page: Page): Chat {
+  const chat = chats.get(page);
+  if (!chat) throw new Error('This page has no chat.');
+  return chat;
+}
+
+/*
+ * The states the mocks draw, for the sweeps and the parity specs: each is the step before the
+ * page opens, and some have a step after.
+ */
+
+/** The thread of the mocks on the mocks' day, Saturday 12 September 2026 at noon. */
+export async function theMockChat(page: Page, change?: (chat: Chat) => void): Promise<void> {
+  await page.clock.install({ time: mockToday });
+  await maraInTheChat(page, change);
+}
+
+export async function theChatLoading(page: Page): Promise<void> {
+  await theMockChat(page, (chat) => chat.holdTheThread());
+}
+
+export async function theChatEmpty(page: Page): Promise<void> {
+  await theMockChat(page, (chat) => {
+    chat.messages = [];
+    chat.thread.memberCount = 1;
+    chat.thread.hereNow = 1;
+  });
+}
+
+export async function theChatFailing(page: Page): Promise<void> {
+  await theMockChat(page, (chat) => chat.failTheThread());
+}
+
+export async function theChatWhoseSendsFail(page: Page): Promise<void> {
+  await theMockChat(page, (chat) => (chat.failSends = 'server'));
+}
+
+/** Sends the message the failed-send mock shows. */
+export async function sendTheReplyToRuth(page: Page): Promise<void> {
+  const chat = new GroupChatPage(page);
+  await chat.sendWithEnter('You’re on the list, Ruth!');
+  await chat.message('You’re on the list, Ruth!').waitFor();
+}
+
+/** Goes offline and writes the two messages the offline mock shows waiting. */
+export async function writeTwoOffline(page: Page): Promise<void> {
+  const chat = new GroupChatPage(page);
+  await chat.texts().first().waitFor();
+  await page.context().setOffline(true);
+  await chat.sendWithEnter('You’re on the list, Ruth!');
+  await chat.sendWithEnter('Back at the dock in ten.');
+  await chat.message('Back at the dock in ten.').waitFor();
+}
+
+/** Comes back online with two messages waiting: "Back online. 2 messages sent." */
+export async function comeBackWithTwo(page: Page): Promise<void> {
+  await writeTwoOffline(page);
+  await page.context().setOffline(false);
+  await new GroupChatPage(page).banner.filter({ hasText: 'Back online.' }).waitFor();
+}
+
+/** A thread longer than the screen, read from its top while a message arrives below. */
+export async function theChatWithManyMessages(page: Page): Promise<void> {
+  await theMockChat(page, (chat) => (chat.messages = aLongThread(60)));
+}
+
+export async function aMessageArrivesBelow(page: Page): Promise<void> {
+  const chat = new GroupChatPage(page);
+  await chat.message('Message 60').waitFor();
+  await chat.readBack();
+  await chatOf(page).arrives(
+    hubOf(page),
+    message(people.ruth, 'Anyone seen the paddles?', new Date()),
+  );
+  await chat.newMessages.waitFor();
+}
+
+/**
+ * Three unread messages that stay unread: the page is in a background tab, so its latest
+ * message is never read. The thread ends on Mara's line, as the list of the mocks shows it.
+ */
+export async function theChatUnread(page: Page): Promise<void> {
+  await page.addInitScript(() =>
+    Object.defineProperty(document, 'visibilityState', { get: () => 'hidden' }),
+  );
+  await theMockChat(page, (chat) => {
+    chat.thread.unreadCount = 3;
+    chat.messages = [
+      ...theMockThread().slice(0, 4),
+      message(people.mara, 'last call for the canoe sign-up 🛶', saturday(9, 24)),
+    ];
+  });
 }

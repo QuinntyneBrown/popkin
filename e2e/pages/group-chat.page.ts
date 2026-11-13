@@ -41,6 +41,10 @@ export class GroupChatPage {
   readonly hereNow: Locator;
   readonly others: Locator;
   readonly toast: Locator;
+  /** Regions for the sweeps and the parity specs. */
+  readonly titles: Locator;
+  readonly skeletonRows: Locator;
+  readonly navBadge: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="group-chat"]');
@@ -84,6 +88,9 @@ export class GroupChatPage {
     this.hereNow = this.detailPane.locator('li .row__title');
     this.others = this.detailPane.locator('.detail-pane__more');
     this.toast = page.locator('.toast');
+    this.titles = this.topBar.locator('.topbar__titles');
+    this.skeletonRows = this.thread.locator('.stack');
+    this.navBadge = this.nav.locator('.badge');
   }
 
   /** The message with this text. */
@@ -130,7 +137,14 @@ export class GroupChatPage {
 
   /** Scrolls the page to the top of the thread, as a member reading back does. */
   async readBack(): Promise<void> {
-    await this.page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+          // Two frames: the page learns from the browser that the latest is out of view.
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+        }),
+    );
   }
 
   /** How far down the page a message is, to see that it did not move. */

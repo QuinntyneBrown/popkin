@@ -4,6 +4,15 @@ import type { Page, WebSocketRoute } from '@playwright/test';
 const END = '\u001e';
 const HUB_PATH = '/hubs/popkin';
 
+/** The hub of each page, for the steps that reach a screen state with the page alone. */
+const hubs = new WeakMap<Page, Hub>();
+
+export function hubOf(page: Page): Hub {
+  const hub = hubs.get(page);
+  if (!hub) throw new Error('This page has no hub stub.');
+  return hub;
+}
+
 interface Frame {
   type?: number;
   target?: string;
@@ -34,6 +43,7 @@ export class Hub {
 
   /** Installed for every page by the `page` fixture; anything else under /hubs is unanswered. */
   async install(page: Page, unanswered: string[]): Promise<void> {
+    hubs.set(page, this);
     await page.route('**/hubs/**', async (route) => {
       const request = route.request();
       const url = new URL(request.url());

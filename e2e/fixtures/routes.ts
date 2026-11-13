@@ -12,6 +12,7 @@ export interface ScreenRoute {
 
 const created = responses['POST /api/popkins'].body;
 const invite = `/i/${created.inviteCode}`;
+const chat = `/p/${created.id}/chat/everyone`;
 
 export const routes = {
   home: { app: '/' },
@@ -50,6 +51,16 @@ export const routes = {
   yourProfileSubmitting: { app: `${invite}/profile`, mock: 'pages/your-profile/submitting.html' },
   yourProfileError: { app: `${invite}/profile`, mock: 'pages/your-profile/error.html' },
   youreIn: { app: `${invite}/welcome`, mock: 'pages/youre-in/default.html' },
+  groupChat: { app: chat, mock: 'pages/group-chat/default.html' },
+  groupChatLoading: { app: chat, mock: 'pages/group-chat/loading.html' },
+  groupChatEmpty: { app: chat, mock: 'pages/group-chat/empty.html' },
+  groupChatError: { app: chat, mock: 'pages/group-chat/error.html' },
+  groupChatFailedSend: { app: chat, mock: 'pages/group-chat/failed-send.html' },
+  groupChatOffline: { app: chat, mock: 'pages/group-chat/offline.html' },
+  groupChatNewMessages: { app: chat, mock: 'pages/group-chat/new-messages.html' },
+  groupChatUnread: { app: chat, mock: 'pages/popkin-home/default.html' },
+  bannerDanger: { app: chat, mock: 'notifications/banner/danger.html' },
+  bannerSuccess: { app: chat, mock: 'notifications/banner/success.html' },
   toastSuccess: { app: '/verify', mock: 'notifications/toast/success.html' },
   serverError: { app: '/error', mock: 'pages/server-error/default.html' },
   serverErrorWithReference: {
