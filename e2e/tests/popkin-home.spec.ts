@@ -386,11 +386,12 @@ test.describe('the Photos and Experiences sections of the Popkin home', () => {
 
 test.describe('a section of the Popkin home that fails', () => {
   // L2-019 AC9
-  test('says so with Try again while the other sections still show', async ({ page, hub }) => {
+  test('says so with Try again while the other sections still show', async ({ page }) => {
     const fixture = await maraAtHome(page, (home) => home.fail('photos'));
     await page.goto(homeUrl);
     const home = new PopkinHomePage(page);
-    await hub.connected();
+    // Once connected the home reads itself again; the section still fails then.
+    await expect.poll(() => fixture.asked.photos).toBe(2);
 
     await expect(home.failureOf(home.photos)).toContainText(
       'Photos didn’t load. The rest of the Popkin is fine.',
@@ -421,6 +422,8 @@ test.describe('a section of the Popkin home that fails', () => {
       await page.goto(homeUrl);
       const home = new PopkinHomePage(page);
       const section = read === 'preview' ? home.chat : home.section(name);
+      // Once connected the home reads itself again; the section still fails then.
+      await expect.poll(() => fixture.asked[read]).toBe(2);
 
       await expect(home.failureOf(section)).toContainText(text);
       await expect(home.thumbnails.first()).toBeVisible();
