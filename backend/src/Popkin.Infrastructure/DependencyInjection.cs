@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -68,7 +69,21 @@ public static class DependencyInjection
             services.AddSingleton<IPhotoStore, UnconfiguredPhotoStore>();
         }
 
-        services.AddSingleton<IMediaRelayCredentials, TurnCredentialIssuer>();
+        // The media relay provider is `<TO SUPPLY>`; any relay that takes the shared-secret scheme fits.
+        var relayUrls = configuration.GetSection("MediaRelay:Urls").GetChildren()
+            .Select(url => url.Value)
+            .OfType<string>()
+            .Where(url => url.Length > 0)
+            .ToList();
+        var relayLifetime = TurnCredentialIssuer.DefaultLifetime;
+        if (configuration["MediaRelay:CredentialLifetime"] is { Length: > 0 } configuredLifetime
+            && (!TimeSpan.TryParse(configuredLifetime, CultureInfo.InvariantCulture, out relayLifetime) || relayLifetime <= TimeSpan.Zero))
+        {
+            throw new InvalidOperationException("MediaRelay:CredentialLifetime is not a length of time, such as 01:00:00.");
+        }
+
+        services.AddSingleton<IMediaRelayCredentials>(sp => new TurnCredentialIssuer(
+            relayUrls, configuration["MediaRelay:Secret"], relayLifetime, sp.GetRequiredService<TimeProvider>()));
 
         foreach (var channel in Enum.GetValues<ContactChannel>())
         {

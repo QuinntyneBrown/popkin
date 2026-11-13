@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Invites;
 using Popkin.Domain;
@@ -34,7 +35,10 @@ public sealed record CallParticipantDto(
 }
 
 /// <summary>A STUN or TURN server as the browser's `RTCPeerConnection` takes it; a STUN server carries no credential.</summary>
-public sealed record IceServerDto(IReadOnlyList<string> Urls, string? Username = null, string? Credential = null);
+public sealed record IceServerDto(
+    IReadOnlyList<string> Urls,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Username = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Credential = null);
 
 /// <summary>
 /// What a member needs once they are on a call: the call, which participant they are, everyone
