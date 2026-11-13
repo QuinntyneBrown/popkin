@@ -4,8 +4,8 @@
  * the same change. It is maintenance, never part of a test run.
  *
  * The journey below is the cast of the mocks: Mara signs up and starts Lakeside Weekend, Walt
- * and Dev join it, Joel opens its invite and joins, and Walt and Mara write in the Everyone
- * thread. Each answer is keyed
+ * and Dev join it, Joel opens its invite and joins, Walt and Mara write in the Everyone
+ * thread, and Mara opens the Popkin's home. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -130,6 +130,14 @@ await call('POST', messages, {
   text: 'On it! Also: last call for the canoe sign-up 🛶',
 });
 await call('GET', `/api/popkins/${created.id}/presence`);
+
+// The Popkin home: Mara reads the header and its four sections. Photos and experiences are
+// empty until their journeys.
+await call('GET', `/api/popkins/${created.id}`);
+await call('GET', `/api/popkins/${created.id}/threads/everyone/preview`);
+await call('GET', `/api/popkins/${created.id}/photos/summary`);
+await call('GET', `/api/popkins/${created.id}/experiences/summary`);
+await call('GET', `/api/popkins/${created.id}/members`);
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

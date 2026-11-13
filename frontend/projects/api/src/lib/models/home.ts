@@ -29,7 +29,7 @@ export interface ChatPreviewView {
 
 export interface PhotosSummaryView {
   count: number;
-  photos: { id: string; thumbnailUrl: string; caption: string }[];
+  photos: { id: string; thumbnailUrl: string; caption: string | null }[];
 }
 
 export interface ExperiencesSummaryView {
