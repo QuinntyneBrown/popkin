@@ -221,6 +221,7 @@ export class Home {
     this.newCount++;
     await hub.push('MessageAdded', {
       id: added.id,
+      popkinId,
       threadId,
       clientMessageId: null,
       kind: 'Member',
@@ -292,6 +293,7 @@ export async function maraAtHome(page: Page, change?: (home: Home) => void): Pro
   const chat = await maraInTheChat(page);
   const home = new Home(page, chat);
   change?.(home);
+  chat.members = home.members;
   await home.install();
   await lakesideInvite(page);
   homes.set(page, home);

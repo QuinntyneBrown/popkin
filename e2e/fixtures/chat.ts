@@ -45,6 +45,7 @@ interface Avatar {
 
 export interface ChatMessage {
   id: string;
+  popkinId: string;
   threadId: string;
   clientMessageId: string | null;
   kind: 'Member' | 'System';
@@ -95,6 +96,7 @@ export function message(
   const id = `10000000-0000-4000-8000-${String(made).padStart(12, '0')}`;
   return {
     id,
+    popkinId,
     threadId,
     clientMessageId: `20000000-0000-4000-8000-${String(made).padStart(12, '0')}`,
     kind: 'Member',
@@ -130,6 +132,94 @@ export function aLongThread(count: number): ChatMessage[] {
   );
 }
 
+type Person = (typeof people)[keyof typeof people];
+
+/** A member as a thread or the list of members names them. */
+export interface Named {
+  membershipId: string;
+  displayName: string;
+  avatar: Avatar;
+}
+
+const named = (person: Person): Named => ({
+  membershipId: person.membershipId,
+  displayName: displayNames[person.firstName] ?? person.firstName,
+  avatar: person.avatar,
+});
+
+/** A direct message of Mara's (L2-023): the other member, and what the two wrote. */
+export interface DirectThread {
+  id: string;
+  other: Named;
+  messages: ChatMessage[];
+  unreadCount: number;
+}
+
+export const directThreadId = (n: number): string =>
+  `30000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+
+/** The address of the direct message with a member. */
+export const directUrl = (person: { membershipId: string }): string =>
+  `/p/${popkinId}/chat/${person.membershipId}`;
+export const conversationsUrl = `/p/${popkinId}/chat`;
+
+const friday = (hour: number, minute = 0): Date => new Date(2026, 8, 11, hour, minute);
+
+/** The four direct messages the mocks list, in words only, the most recent first. */
+export function theMockDirects(): DirectThread[] {
+  const [walt, ellie, dev, ruth] = [1, 2, 3, 4].map(directThreadId);
+  const to = (id: string) => ({ threadId: id });
+  return [
+    {
+      id: walt,
+      other: named(people.walt),
+      unreadCount: 1,
+      messages: [
+        message(
+          people.mara,
+          'Walt, your pancakes were unreal. Is that your mum’s recipe?',
+          saturday(9, 30),
+          to(walt),
+        ),
+        message(
+          people.walt,
+          'Grandma’s, actually. Buttermilk and a pinch of nutmeg. Don’t tell anyone.',
+          saturday(9, 33),
+          to(walt),
+        ),
+        message(people.walt, 'Here’s the card she wrote it on', saturday(9, 34), to(walt)),
+        message(
+          people.mara,
+          'Secret’s safe. Will you make them again tomorrow?',
+          saturday(9, 38),
+          to(walt),
+        ),
+        message(people.walt, 'Ha, I’ll save you the corner piece.', saturday(9, 41), to(walt)),
+      ],
+    },
+    {
+      id: ellie,
+      other: named(people.ellie),
+      unreadCount: 0,
+      messages: [message(people.mara, 'thanks for the paddles!', saturday(8, 5), to(ellie))],
+    },
+    {
+      id: dev,
+      other: named(people.dev),
+      unreadCount: 0,
+      messages: [
+        message(people.dev, 'Did you get the photo of the heron?', friday(18, 0), to(dev)),
+      ],
+    },
+    {
+      id: ruth,
+      other: named(people.ruth),
+      unreadCount: 0,
+      messages: [message(people.ruth, 'See you at the dock 💛', friday(16, 30), to(ruth))],
+    },
+  ];
+}
+
 type SendFailure = 'network' | 'server' | 'rate-limited' | 'too-long';
 
 export class Chat {
@@ -145,6 +235,16 @@ export class Chat {
     viewer: { membershipId: people.mara.membershipId, firstName: 'Mara' },
   };
   messages: ChatMessage[] = theMockThread();
+  /** Mara's direct messages; one without a message is not listed (L2-022 AC2). */
+  directs: DirectThread[] = theMockDirects();
+  /** Who a direct message can be opened with: the Popkin's members. */
+  members: Named[] = Object.values(people).map(named);
+  /** The Everyone card's latest line, where a mock draws another than the thread's last. */
+  everyoneLatest?: { firstName: string; text: string; isMine: boolean; sentAt: string };
+  /** How many times the list of threads was asked for. */
+  listAsked = 0;
+  /** The members a direct message was opened with, in order. */
+  readonly opened: string[] = [];
   hereNow = [people.walt, people.ellie, people.dev, people.mara, people.ruth];
 
   /** What the app sent, read and deleted, in order. */
@@ -158,6 +258,8 @@ export class Chat {
   failSends: SendFailure | null = null;
   private holdThread?: Promise<void>;
   private failReads = false;
+  private holdList?: Promise<void>;
+  private failList = false;
 
   constructor(private readonly page: Page) {}
 
@@ -188,6 +290,88 @@ export class Chat {
 
   recover(): void {
     this.failReads = false;
+    this.failList = false;
+  }
+
+  /** The list of threads never answers until the returned function is called. */
+  holdTheList(): () => void {
+    let release: () => void = () => undefined;
+    this.holdList = new Promise((resolve) => (release = resolve));
+    return release;
+  }
+
+  /** Reading the list of threads fails on the server until `recover` is called. */
+  failTheList(): void {
+    this.failList = true;
+  }
+
+  direct(person: { membershipId: string }): DirectThread {
+    const found = this.directs.find((d) => d.other.membershipId === person.membershipId);
+    if (!found) throw new Error('No direct message with that member.');
+    return found;
+  }
+
+  /** The other member writes in a direct message: stored, counted and sent over the hub. */
+  async writes(hub: Hub, person: Person, text: string, at = new Date()): Promise<ChatMessage> {
+    let thread = this.directs.find((d) => d.other.membershipId === person.membershipId);
+    if (!thread) {
+      thread = {
+        id: directThreadId(this.directs.length + 1),
+        other: named(person),
+        messages: [],
+        unreadCount: 0,
+      };
+      this.directs.push(thread);
+    }
+    const added = message(person, text, at, { threadId: thread.id });
+    thread.messages.push(added);
+    thread.unreadCount++;
+    await hub.push('MessageAdded', added);
+    return added;
+  }
+
+  private listed(): unknown {
+    const mine = (m: ChatMessage) => m.author.membershipId === this.thread.viewer.membershipId;
+    const last = this.messages.filter((m) => m.kind === 'Member').at(-1);
+    const latest = (d: DirectThread) => d.messages.at(-1) as ChatMessage;
+    return {
+      viewerMembershipId: this.thread.viewer.membershipId,
+      everyone: {
+        threadId,
+        latest:
+          this.everyoneLatest ??
+          (last
+            ? {
+                firstName: last.author.firstName,
+                text: last.text,
+                isMine: mine(last),
+                sentAt: last.sentAt,
+              }
+            : null),
+        unreadCount: this.thread.unreadCount,
+      },
+      direct: this.directs
+        .filter((d) => d.messages.length > 0)
+        .sort((a, b) => latest(b).sentAt.localeCompare(latest(a).sentAt))
+        .map((d) => ({
+          threadId: d.id,
+          other: { ...d.other, firstName: d.other.displayName.split(' ')[0] },
+          latest: { text: latest(d).text, isMine: mine(latest(d)), sentAt: latest(d).sentAt },
+          unreadCount: d.unreadCount,
+        })),
+    };
+  }
+
+  private asThread(direct: DirectThread): unknown {
+    return {
+      ...this.thread,
+      id: direct.id,
+      kind: 'Direct',
+      memberCount: 2,
+      unreadCount: direct.unreadCount,
+      lastReadMessageId: null,
+      other: { ...direct.other, firstName: direct.other.displayName.split(' ')[0] },
+    };
   }
 
   /** Someone else's message, stored and sent to the app over the hub. */
@@ -201,13 +385,43 @@ export class Chat {
     const url = new URL(request.url());
     const rest = url.pathname.split(`/api/popkins/${popkinId}/`)[1];
     const method = request.method();
-    const at = (id: string | null) => this.messages.findIndex((m) => m.id === id);
 
     if (method === 'GET' && rest === 'threads/everyone') {
       await this.holdThread;
       if (this.failReads) return route.fulfill(asProblem(problem(500, 'server_error')));
-      return route.fulfill({ json: this.thread });
+      return route.fulfill({ json: { ...this.thread, other: null } });
     }
+    if (method === 'GET' && rest === 'threads') {
+      this.listAsked++;
+      await this.holdList;
+      if (this.failList) return route.fulfill(asProblem(problem(500, 'server_error')));
+      return route.fulfill({ json: this.listed() });
+    }
+    if (method === 'PUT' && rest.startsWith('threads/direct/')) {
+      const memberId = rest.split('/')[2];
+      this.opened.push(memberId);
+      await this.holdThread;
+      if (this.failReads) return route.fulfill(asProblem(problem(500, 'server_error')));
+      if (memberId === this.thread.viewer.membershipId) {
+        return route.fulfill(asProblem(problem(400, 'cannot_message_self')));
+      }
+      const existing = this.directs.find((d) => d.other.membershipId === memberId);
+      if (existing) return route.fulfill({ status: 200, json: this.asThread(existing) });
+      const other = this.members.find((m) => m.membershipId === memberId);
+      if (!other) return route.fulfill(asProblem(problem(404, 'member_not_found')));
+      if (this.thread.readOnly) {
+        return route.fulfill(asProblem(problem(409, 'popkin_wrapped_up')));
+      }
+      const begun: DirectThread = {
+        id: directThreadId(this.directs.length + 1),
+        other,
+        messages: [],
+        unreadCount: 0,
+      };
+      this.directs.push(begun);
+      return route.fulfill({ status: 201, json: this.asThread(begun) });
+    }
+
     if (method === 'GET' && rest === 'presence') {
       return route.fulfill({
         json: {
@@ -221,10 +435,25 @@ export class Chat {
         },
       });
     }
-    if (method === 'GET' && rest === `threads/${threadId}/messages`) {
+    // What follows is said of one thread: Everyone, or one of the direct messages.
+    const named = /^threads\/([0-9a-f-]{36})\/(.*)$/.exec(rest);
+    if (!named) return route.fallback();
+    const [, id, what] = named;
+    const direct = this.directs.find((d) => d.id === id);
+    if (id !== threadId && !direct) {
+      return route.fulfill(asProblem(problem(404, 'thread_not_found')));
+    }
+    const held = (): ChatMessage[] => (direct ? direct.messages : this.messages);
+    const keep = (messages: ChatMessage[]): void => {
+      if (direct) direct.messages = messages;
+      else this.messages = messages;
+    };
+    const at = (messageId: string | null) => held().findIndex((m) => m.id === messageId);
+
+    if (method === 'GET' && what === 'messages') {
       this.asked.push(url.search);
       const query = url.searchParams;
-      const all = this.messages;
+      const all = held();
       if (query.has('before')) {
         const end = at(query.get('before'));
         return route.fulfill({
@@ -247,7 +476,7 @@ export class Chat {
       }
       return route.fulfill({ json: { items: all.slice(-50), hasMore: all.length > 50 } });
     }
-    if (method === 'POST' && rest === `threads/${threadId}/messages`) {
+    if (method === 'POST' && what === 'messages') {
       const body = request.postDataJSON() as { clientMessageId: string; text: string };
       this.sent.push(body);
       switch (this.failSends) {
@@ -260,22 +489,24 @@ export class Chat {
         case 'too-long':
           return route.fulfill(asProblem(problem(400, 'message_too_long', { field: 'text' })));
       }
-      const stored = this.messages.find((m) => m.clientMessageId === body.clientMessageId);
+      const stored = held().find((m) => m.clientMessageId === body.clientMessageId);
       if (stored) return route.fulfill({ status: 200, json: stored });
       const added = message(people.mara, body.text, new Date(), {
         clientMessageId: body.clientMessageId,
+        threadId: id,
       });
-      this.messages.push(added);
+      held().push(added);
       return route.fulfill({ status: 201, json: added });
     }
-    if (method === 'PUT' && rest === `threads/${threadId}/read`) {
+    if (method === 'PUT' && what === 'read') {
+      if (direct) direct.unreadCount = 0;
       this.read.push((request.postDataJSON() as { lastReadMessageId: string }).lastReadMessageId);
       return route.fulfill({ status: 204 });
     }
-    if (method === 'DELETE' && rest.startsWith(`threads/${threadId}/messages/client/`)) {
-      const clientMessageId = rest.split('/').at(-1) ?? '';
+    if (method === 'DELETE' && what.startsWith('messages/client/')) {
+      const clientMessageId = what.split('/').at(-1) ?? '';
       this.discarded.push(clientMessageId);
-      this.messages = this.messages.filter((m) => m.clientMessageId !== clientMessageId);
+      keep(held().filter((m) => m.clientMessageId !== clientMessageId));
       return route.fulfill({ status: 204 });
     }
     return route.fallback();
@@ -297,7 +528,7 @@ export async function maraInTheChat(page: Page, change?: (chat: Chat) => void): 
 
 const chats = new WeakMap<Page, Chat>();
 
-function chatOf(page: Page): Chat {
+export function chatOf(page: Page): Chat {
   const chat = chats.get(page);
   if (!chat) throw new Error('This page has no chat.');
   return chat;
