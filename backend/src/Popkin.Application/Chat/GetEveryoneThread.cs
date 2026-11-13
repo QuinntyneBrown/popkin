@@ -39,17 +39,9 @@ public sealed class GetEveryoneThreadQueryHandler(IAppDbContext db, IMembershipG
     public async Task<ThreadDto> Handle(GetEveryoneThreadQuery request, CancellationToken cancellationToken)
     {
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
-        var thread = await db.ChatThreads.AsNoTracking()
-            .FirstAsync(t => t.PopkinId == popkin.Id && t.Kind == ChatThreadKind.Everyone, cancellationToken);
+        var thread = await ChatThreads.EveryoneAsync(db, popkin.Id, cancellationToken);
         var memberCount = await db.Memberships.CountAsync(m => m.PopkinId == popkin.Id && m.LeftAt == null, cancellationToken);
-
-        // Unread: the messages of others after the reader's read point; all of them before the first read.
-        var read = await db.ThreadReadStates.AsNoTracking()
-            .FirstOrDefaultAsync(s => s.ThreadId == thread.Id && s.MembershipId == membership.Id, cancellationToken);
-        var byOthers = db.Messages.Where(m => m.ThreadId == thread.Id && m.DeletedAt == null && m.AuthorMembershipId != membership.Id);
-        var unreadCount = await (read is null ? byOthers : byOthers.After(new MessagePoint(read.LastReadSentAt, read.LastReadMessageId)))
-            .CountAsync(cancellationToken);
-
+        var unread = await ThreadUnread.OfAsync(db, thread.Id, membership.Id, cancellationToken);
         var hereNow = presence.Get(popkin.Id);
 
         return new ThreadDto(
@@ -64,8 +56,8 @@ public sealed class GetEveryoneThreadQueryHandler(IAppDbContext db, IMembershipG
             hereNow.HereNow,
             hereNow.Version,
             popkin.Status == PopkinStatus.WrappedUp,
-            unreadCount,
-            read?.LastReadMessageId,
+            unread.Count,
+            unread.LastReadMessageId,
             new ThreadViewerDto(membership.Id, PersonName.FirstName(membership.DisplayName)));
     }
 }
