@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Popkin.Application.Invites;
 using Popkin.Application.Photos;
+using Popkin.Domain;
 
 namespace Popkin.Api.Controllers;
 
@@ -13,4 +15,21 @@ public sealed class PhotosController(ISender sender) : ControllerBase
     [HttpGet("summary")]
     public async Task<ActionResult<PhotosSummaryDto>> GetSummary(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetPhotosSummaryQuery(popkinId), cancellationToken));
+
+    /// <summary>
+    /// Adds one photo to the album, with a caption when given (L2-031). The body may be up to
+    /// twice the largest photo, so a photo over 10 MB is refused with its own message and not by
+    /// the server's size limit.
+    /// </summary>
+    [HttpPost]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(2 * Photo.MaxFileBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 2 * Photo.MaxFileBytes)]
+    public async Task<ActionResult<PhotoSummaryDto>> Add(Guid popkinId, IFormFile? file, [FromForm] string? caption, CancellationToken cancellationToken)
+    {
+        await using var content = file?.OpenReadStream();
+        var upload = file is null ? null : new PhotoUpload(content!, file.Length);
+        var photo = await sender.Send(new AddPhotoCommand(popkinId, upload, caption), cancellationToken);
+        return Created($"/api/popkins/{popkinId}/photos/{photo.Id}", photo);
+    }
 }

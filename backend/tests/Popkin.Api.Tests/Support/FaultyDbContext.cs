@@ -36,6 +36,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<ThreadReadState> ThreadReadStates => inner.ThreadReadStates;
 
+    public DbSet<Photo> Photos => inner.Photos;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

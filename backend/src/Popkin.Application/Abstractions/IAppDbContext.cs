@@ -22,5 +22,7 @@ public interface IAppDbContext
 
     DbSet<ThreadReadState> ThreadReadStates { get; }
 
+    DbSet<Photo> Photos { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
