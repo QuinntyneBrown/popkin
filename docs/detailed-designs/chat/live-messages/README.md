@@ -115,8 +115,8 @@ are open.
 
 Journey 3, Chat with everyone, built the hub and this design for the Everyone thread. What waits:
 
-- unread counts on the Popkin home (journey 4) and on My Popkins (journey 6): L2-027 AC3 is met
-  for the Chat tab only. With them, and with the list of conversations (journey 11),
+- unread counts on My Popkins (journey 6): L2-027 AC3 is met for the Chat tab and, since
+  journey 4, for the Popkin home. With them, and with the list of conversations (journey 11),
   `UnreadTracker` reads the counts of every thread and reloads them on `reconnected$`; today a
   count comes from the thread that was opened;
 - starting the connection once a person is signed in: today the thread page starts it;

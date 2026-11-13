@@ -55,13 +55,15 @@ test('the home at every form factor, and in the dark', async ({ page }) => {
       await detail(home.header, 'header', 0);
       await detail(home.identity, 'header-identity', 12);
       await detail(home.actions, 'header-actions', 12);
-      await detail(home.nav, 'tabs', 0);
       await closeUp(home.chat, 'chat');
       await closeUp(home.photos, 'photos');
       await closeUp(home.experiences, 'experiences');
       await closeUp(home.members, 'members');
     }
-    if (size === 'M') await detail(home.nav, 'rail', 0);
+    if (size === 'M') {
+      await detail(home.nav, 'rail', 0);
+      await detail(home.chatTab, 'tab-chat', 10);
+    }
     if (size === 'L') await detail(home.nav, 'sidebar', 0);
     if (size === 'XL') {
       await closeUp(home.chat, 'chat-wide');
@@ -86,8 +88,11 @@ test('a message arrives while the home is open', async ({ page, hub }) => {
   await home.chatLines.filter({ hasText: 'Kettle is on' }).waitFor();
   await home.newCount.filter({ hasText: '4' }).waitFor();
   await shot(page, 'live-xs');
-  await detail(home.nav, 'tabs-live', 0);
   await closeUp(home.chat, 'chat-live');
+
+  // The home shows no tabs on a phone; the same page, made wider without a reload, shows the rail.
+  await frame(page, 'M');
+  await detail(home.chatTab, 'tab-chat-live', 10);
 });
 
 test('a new Popkin', async ({ page }) => {
