@@ -71,6 +71,10 @@ class FakeChat implements ChatApi {
     );
   }
 
+  getEveryonePreview(): Observable<never> {
+    return throwError(() => new Error('not asked here'));
+  }
+
   getMessages(_p: string, _t: string, cursor?: MessagesCursor): Observable<MessagePageView> {
     this.asked.push(cursor);
     if (this.failMessages) return throwError(() => new Error('down'));
