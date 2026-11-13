@@ -14,10 +14,10 @@ public static class RateLimitPolicyNames
     /// <summary>20 invite codes tried per address per 10 minutes (L2-053 AC3).</summary>
     public const string InviteCodes = "invite-codes";
 
-    /// <summary>60 messages per person per minute (L2-053 AC2).</summary>
+    /// <summary>60 messages per person per minute (L2-053 AC2); a rating of an experience and a comment on one count with them.</summary>
     public const string Messages = "messages";
 
-    /// <summary>60 photos added per person per minute: three full selections of 20 (L2-031 AC1).</summary>
+    /// <summary>60 photos added per person per minute: three full selections of 20 (L2-031 AC1); an experience shared or edited, which may carry a picture, counts with them.</summary>
     public const string Photos = "photos";
 
     public static IServiceCollection AddPopkinRateLimits(this IServiceCollection services)
