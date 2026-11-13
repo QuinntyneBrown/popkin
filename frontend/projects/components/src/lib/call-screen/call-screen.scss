@@ -1,0 +1,47 @@
+/*
+ * The stage: dark in both themes, with the cream focus ring that reads on it. From XL a call
+ * with others on it leaves room at the end for the pane that lists them, which is fixed there.
+ */
+:host {
+  --pk-detail-width: 0rem;
+  --color-focus-ring: var(--color-focus-ring-on-stage);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  margin-inline: auto;
+  background: var(--color-bg-stage);
+  color: var(--color-fg-on-stage);
+}
+
+/* What the call shows fills the room between the bar and the controls. */
+.call-screen__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.call-screen__main:focus {
+  outline: none;
+}
+
+/* Alone on the call: the member's own tile and the words under it share the room equally. */
+:host(.screen--alone) .call-screen__main {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: 1fr;
+  gap: var(--space-2);
+  min-height: var(--layout-call-min-height);
+  padding: 0 var(--space-2);
+}
+
+@media (min-width: 80rem) {
+  :host(.screen--call) {
+    --pk-detail-width: var(--layout-detail-pane);
+
+    padding-right: var(--pk-detail-width);
+  }
+}
