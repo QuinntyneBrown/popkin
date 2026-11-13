@@ -11,10 +11,21 @@ public sealed class MessagesController(ISender sender) : ControllerBase
 {
     public sealed record SendMessageRequest(Guid? ClientMessageId, string? Text);
 
-    /// <summary>A page of the thread, oldest first (L2-027 AC5).</summary>
+    /// <summary>
+    /// A page of the thread, oldest first, at most 50 (L2-027 AC5): the latest, the page
+    /// `before` or `after` a message, or the whole window `from` one message `to` another.
+    /// </summary>
     [HttpGet]
-    public async Task<ActionResult<MessagePageDto>> Get(Guid popkinId, Guid threadId, CancellationToken cancellationToken) =>
-        Ok(await sender.Send(new GetMessagesQuery(popkinId, threadId), cancellationToken));
+    public async Task<ActionResult<MessagePageDto>> Get(
+        Guid popkinId,
+        Guid threadId,
+        [FromQuery] Guid? before,
+        [FromQuery] Guid? after,
+        [FromQuery] Guid? from,
+        [FromQuery] Guid? to,
+        [FromQuery] int? limit,
+        CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetMessagesQuery(popkinId, threadId, before, after, from, to, limit), cancellationToken));
 
     /// <summary>Posts a message (L2-021).</summary>
     [HttpPost]
