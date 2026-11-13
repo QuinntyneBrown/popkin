@@ -188,3 +188,42 @@ button {
   margin-inline: auto;
   padding-inline: var(--layout-margin);
 }
+
+/* ---------- Form factors: a part shown at some widths only ---------- */
+/* XS below 40rem, S 40rem, M 48rem, L 64rem, XL 80rem. `display: none` also takes the part out
+   of the tab order and the accessibility tree (L2-058 AC13). */
+@media (max-width: 39.99rem) {
+  .only-s-up {
+    display: none !important;
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .only-m-up {
+    display: none !important;
+  }
+}
+
+@media (max-width: 63.99rem) {
+  .only-l-up {
+    display: none !important;
+  }
+}
+
+@media (max-width: 79.99rem) {
+  .only-xl-up {
+    display: none !important;
+  }
+}
+
+@media (min-width: 48rem) {
+  .only-below-m {
+    display: none !important;
+  }
+}
+
+@media (min-width: 64rem) {
+  .only-below-l {
+    display: none !important;
+  }
+}

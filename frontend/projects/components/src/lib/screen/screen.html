@@ -1,5 +1,12 @@
+<ng-content select="[slot=aside]" />
 <ng-content select="[slot=header]" />
-<main id="main" class="screen__body" [class.screen__body--hero]="body() === 'hero'" tabindex="-1">
+<main
+  id="main"
+  class="screen__body"
+  [class.screen__body--hero]="body() === 'hero'"
+  [class.screen__body--middle]="body() === 'middle'"
+  tabindex="-1"
+>
   @if (heading()) {
     <h1 class="screen__heading">{{ heading() }}</h1>
   }
