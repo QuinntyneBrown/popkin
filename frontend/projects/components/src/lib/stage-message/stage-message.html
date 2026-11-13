@@ -1,0 +1,11 @@
+@if (busy()) {
+  <span class="spinner" aria-hidden="true"></span>
+} @else if (icon(); as name) {
+  <svg pk-icon size="lg" [name]="name"></svg>
+}
+<h2 class="stage-message__heading">{{ heading() }}</h2>
+@if (text()) {
+  <p class="stage-message__text">{{ text() }}</p>
+}
+<ng-content />
+<div class="stage-message__actions"><ng-content select="[slot=actions]" /></div>
