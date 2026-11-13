@@ -19,16 +19,14 @@ public sealed class ShareExperienceCommandHandler(IAppDbContext db, IMembershipG
         var experience = Experience.Share(
             popkin.Id,
             membership.Id,
-            Enum.Parse<ExperienceKind>(request.Kind ?? ""),
-            (request.Title ?? "").Trim(),
-            Optional(request.When),
-            Optional(request.Place),
+            ExperienceFields.Kind(request.Kind),
+            ExperienceFields.Title(request.Title),
+            ExperienceFields.When(request.When),
+            ExperienceFields.Place(request.Place),
             clock.GetUtcNow());
         db.Experiences.Add(experience);
         await db.SaveChangesAsync(cancellationToken);
 
         return ExperienceCardDto.Of(experience, popkin, membership, store);
     }
-
-    private static string? Optional(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 }
