@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Realtime;
 using Popkin.Api.Tests.Support;
 using Popkin.Infrastructure.Persistence;
 
@@ -24,6 +25,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     private readonly string _databaseName = $"popkin-tests-{Guid.NewGuid():N}";
     private readonly ConditionalWeakTable<HttpClient, CookieContainer> _cookies = [];
+    private int _hubConnections;
 
     /// <summary>
     /// Starts at the real time, to the second, because the client's cookie jar expires cookies by
@@ -112,6 +114,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             throw;
         }
 
+        // A SignalR client is started as soon as the handshake is answered, which is before the
+        // hub has put the connection in its Popkins' groups. A test goes on only once it has.
+        await Requests.WaitForAsync<ConnectToHubCommand>(Interlocked.Increment(ref _hubConnections));
         return events;
     }
 }
