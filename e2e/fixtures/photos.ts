@@ -189,6 +189,11 @@ export class Album {
     };
   }
 
+  /** A moment of the mocks' Saturday morning, later each time, so new photos come first. */
+  justNow(): Date {
+    return new Date(sat(11, 0).getTime() + this.next * 1000);
+  }
+
   private store(file: string, caption: string | null, by: Person, at: Date): Shot {
     const one = shot(this.next++, file, caption, by, at);
     this.shots = [one, ...this.shots].sort((a, b) => b.takenAt.getTime() - a.takenAt.getTime());
@@ -273,7 +278,9 @@ export class Album {
       return route.fulfill({ status: refusal.status, json: refusal.body });
     }
     this.uploaded.push({ name, caption });
-    const one = this.store(name, caption, people.mara, new Date());
+    const file = fs.existsSync(path.join(images, name)) ? name : 'picnic.jpg';
+    const one = this.store(file, caption, people.mara, this.justNow());
+    await hubOf(this.page).push('PhotosAdded', popkinId, [one.id]);
     return route.fulfill({ status: 201, json: this.summary(one) });
   }
 }
@@ -354,5 +361,6 @@ export async function someoneAddsAPhoto(
   page: Page,
   caption: string | null = 'Canoe race',
 ): Promise<Shot> {
-  return albumOf(page).added(hubOf(page), people.walt, caption, new Date());
+  const album = albumOf(page);
+  return album.added(hubOf(page), people.walt, caption, album.justNow());
 }

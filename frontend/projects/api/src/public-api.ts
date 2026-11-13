@@ -45,3 +45,4 @@ export * from './lib/api/photos/album-days';
 export * from './lib/api/photos/album-store';
 export * from './lib/api/photos/photo-uploads';
 export * from './lib/api/photos/photo-view-store';
+export * from './lib/api/popkins/popkin-frame';

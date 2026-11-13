@@ -57,6 +57,7 @@ describe('PhotoUploads', () => {
       uploads.choose('p', [file('a.jpg'), file('b.jpg'), file('c.jpg')]);
       expect(uploads.phase()).toBe('choosing');
       expect(states()).toEqual(['ready', 'ready', 'ready']);
+      expect(uploads.allAdded()).toBe(false);
       expect(uploads.items().map((item) => item.label)).toEqual([
         'Caption for photo 1',
         'Caption for photo 2',
@@ -145,6 +146,14 @@ describe('PhotoUploads', () => {
       expect(uploads.items()[0].caption).toBe('  First light  ');
     });
 
+    it('is all added only when no photo was refused or left behind', () => {
+      uploads.add();
+      api.finish(0);
+      api.finish(1);
+      // big.jpg was never sent
+      expect(uploads.allAdded()).toBe(false);
+    });
+
     it('is finished when every photo went up', () => {
       uploads.add();
       api.finish(0);
@@ -186,6 +195,7 @@ describe('PhotoUploads', () => {
       expect(uploads.phase()).toBe('finished');
       expect(uploads.outcome()).toBeNull();
       expect(uploads.added()).toHaveLength(2);
+      expect(uploads.canRetry()).toBe(true);
     });
 
     it.each([

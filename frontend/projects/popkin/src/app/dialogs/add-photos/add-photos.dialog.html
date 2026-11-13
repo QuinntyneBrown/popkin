@@ -1,0 +1,47 @@
+<div
+  pk-dialog
+  heading="Add photos"
+  description="JPEG, PNG, WebP or HEIC, up to 10 MB each. Location data is removed."
+  [accent]="data.accent"
+>
+  @if (uploads.outcome(); as outcome) {
+    <div pk-alert [heading]="outcome.heading">{{ outcome.text }}</div>
+  }
+  @if (uploads.notice(); as notice) {
+    <div pk-alert variant="info" [heading]="notice"></div>
+  }
+  <ul class="stack">
+    @for (row of rows(); track row.item.id) {
+      <li
+        pk-upload-item
+        [fieldId]="row.fieldId"
+        [src]="row.src"
+        [alt]="row.alt"
+        [label]="row.item.label"
+        [caption]="row.item.caption"
+        [state]="row.state"
+        [status]="row.status"
+        [error]="row.item.problem ?? undefined"
+        [retry]="row.retry"
+        [count]="row.item.count ?? undefined"
+        (captionChange)="uploads.caption(row.item.id, $event)"
+        (retried)="uploads.retry(row.item.id)"
+      ></li>
+    }
+  </ul>
+  @if (uploads.progress(); as progress) {
+    <div pk-progress label="Uploading" [value]="percent()" [text]="progress.label"></div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="popkin"
+    [block]="true"
+    [busy]="uploads.phase() === 'uploading'"
+    [disabled]="uploads.action().disabled"
+    (click)="act()"
+  >
+    {{ uploads.action().label }}
+  </button>
+</div>

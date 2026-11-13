@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AlbumStore, PopkinFrame } from 'api';
 import { signedInGuard } from './guards/signed-in.guard';
 
 /**
@@ -93,6 +94,30 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/group-chat/group-chat.page').then((m) => m.GroupChatPage),
     data: data({ shell: 'app', page: 'group-chat' }),
     title: 'Everyone · Popkin',
+  },
+  // The album and the photo open over it share one album, kept while a photo is open so that
+  // closing it returns to the place the member left (L2-033 AC2).
+  {
+    path: 'p/:popkinId/photos',
+    canActivate: [signedInGuard],
+    providers: [AlbumStore, PopkinFrame],
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./pages/photo-album/photo-album.page').then((m) => m.PhotoAlbumPage),
+        data: data({ shell: 'app', page: 'photo-album' }),
+        title: 'Photos · Popkin',
+      },
+      {
+        path: ':photoId',
+        loadComponent: () =>
+          import('./pages/photo-view/photo-view.page').then((m) => m.PhotoViewPage),
+        data: data({ shell: 'bare', page: 'photo-view' }),
+        title: 'Photo · Popkin',
+      },
+    ],
   },
   // Until the list of conversations is built (journey 11), Chat is the Everyone thread.
   { path: 'p/:popkinId/chat', redirectTo: 'p/:popkinId/chat/everyone', pathMatch: 'full' },

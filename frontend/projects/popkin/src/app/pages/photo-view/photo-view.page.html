@@ -1,0 +1,18 @@
+<div
+  pk-photo-viewer
+  [accent]="frame.accent()"
+  [state]="state()"
+  [name]="photo()?.uploader?.displayName ?? ''"
+  [avatar]="avatar()"
+  [time]="store.when()"
+  [src]="photo()?.imageUrl ?? ''"
+  [alt]="store.name()"
+  [width]="photo()?.width"
+  [height]="photo()?.height"
+  [caption]="photo()?.caption ?? ''"
+  (closed)="close()"
+  (previous)="go('previous')"
+  (next)="go('next')"
+  (imageError)="store.imageFailed()"
+  (retried)="store.retry()"
+></div>

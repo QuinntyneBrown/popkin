@@ -1,0 +1,131 @@
+<div pk-app-screen [accent]="frame.accent()" layout="tab" body="flush">
+  <header
+    pk-tab-header
+    slot="header"
+    heading="Photos"
+    [summary]="store.line()"
+    [avatars]="faces()"
+    [more]="more()"
+    [loading]="store.state() === 'loading' && !store.line()"
+    [filter]="filtering()"
+    [action]="adding() ? 'Add photos' : undefined"
+    (acted)="picker.open()"
+  >
+    <button
+      pk-chip
+      type="button"
+      [attr.aria-pressed]="store.filter() === 'everyone'"
+      (click)="store.show('everyone')"
+    >
+      Everyone
+    </button>
+    <button
+      pk-chip
+      type="button"
+      [attr.aria-pressed]="store.filter() === 'mine'"
+      (click)="store.show('mine')"
+    >
+      Mine
+    </button>
+  </header>
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <div pk-album [loading]="true"></div>
+    }
+    @case ('empty') {
+      <div pk-album>
+        <div
+          pk-empty-state
+          icon="photos"
+          heading="No photos yet"
+          text="This is the album everyone shares. Add the first one and the rest will follow."
+        >
+          @if (store.canAdd()) {
+            <button pk-button type="button" variant="popkin" size="md" (click)="picker.open()">
+              <svg pk-icon name="plus" size="md"></svg>Add photos
+            </button>
+          }
+        </div>
+      </div>
+    }
+    @case ('no-results') {
+      <div pk-album>
+        <div
+          pk-empty-state
+          icon="photo-add"
+          heading="You haven’t added any yet"
+          text="Photos you add show up here, and in the album everyone sees."
+        >
+          @if (store.canAdd()) {
+            <button pk-button type="button" variant="popkin" size="md" (click)="picker.open()">
+              <svg pk-icon name="plus" size="md"></svg>Add photos
+            </button>
+          }
+          <button
+            pk-button
+            type="button"
+            variant="secondary"
+            size="md"
+            (click)="store.show('everyone')"
+          >
+            Show everyone’s
+          </button>
+        </div>
+      </div>
+    }
+    @case ('error') {
+      <div pk-album>
+        <div
+          pk-empty-state
+          icon="offline"
+          heading="We couldn’t load the photos"
+          text="They’re safe. Check your connection and try again."
+          [alert]="true"
+        >
+          <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+            <svg pk-icon name="retry" size="md"></svg>Try again
+          </button>
+        </div>
+      </div>
+    }
+    @case ('ready') {
+      <div pk-album>
+        @for (day of days(); track day.key) {
+          <h2 pk-group-label [first]="$first">{{ day.label }}</h2>
+          <div pk-photo-grid [photos]="day.photos"></div>
+        }
+        @if (store.moreState() === 'error') {
+          <div
+            slot="more"
+            pk-alert
+            heading="More photos didn’t load."
+            action="Try again"
+            (acted)="store.more()"
+          >
+            Check your connection and try again.
+          </div>
+        }
+        @if (store.hasMore() && store.moreState() !== 'error') {
+          <div slot="more" #sentinel></div>
+        }
+      </div>
+    }
+  }
+
+  @if (adding()) {
+    <button pk-fab slot="fab" type="button" label="Add photos" (click)="picker.open()">Add</button>
+  }
+  <pk-files-input #picker [accept]="accept" (picked)="chosen($event)" />
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    current="photos"
+    [popkinId]="popkinId()"
+    [name]="frame.name()"
+    [emoji]="frame.emoji()"
+    [members]="frame.members()"
+    [timeLeft]="frame.timeLeft()"
+    [unread]="unreadCount()"
+  ></nav>
+</div>

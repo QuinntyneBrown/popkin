@@ -98,6 +98,14 @@ export class PhotoUploads {
     return uploadOutcome(this.count('failed'), this.added().length);
   });
 
+  /** A photo that failed may be sent again, unless nothing more can be added. */
+  readonly canRetry = computed(() => this.phase() === 'finished' && !this.stopped());
+
+  /** Every chosen photo is in the album: none refused, none left behind. */
+  readonly allAdded = computed(
+    () => this.phase() === 'finished' && this.count('done') === this.list().length,
+  );
+
   choose(popkinId: string, files: readonly File[]): void {
     this.popkinId = popkinId;
     const { taken, message } = choosePhotos(files);
@@ -127,7 +135,7 @@ export class PhotoUploads {
 
   /** Sends a photo that failed once more. */
   retry(id: number): void {
-    if (this.phase() !== 'finished' || this.stopped()) return;
+    if (!this.canRetry()) return;
     this.begin((item) => item.id === id && item.state === 'failed');
   }
 

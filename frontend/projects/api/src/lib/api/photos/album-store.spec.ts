@@ -143,6 +143,36 @@ describe('AlbumStore', () => {
     });
   });
 
+  // L2-033 AC2: the album is kept while a photo is open, so Close returns to the same place
+  describe('coming back from a photo', () => {
+    beforeEach(() => {
+      api.everyone = page([photo('s2', sat(9)), photo('s1', sat(7))], { nextCursor: 'c1' });
+      api.later['c1'] = page([photo('f1', fri(20))]);
+      store.open('p');
+      store.more();
+    });
+
+    it('keeps the photos shown and reads the latest quietly', () => {
+      store.open('p');
+      expect(store.state()).toBe('ready');
+      expect(ids()).toEqual(['s2', 's1', 'f1']);
+      expect(api.asked).toHaveLength(3);
+    });
+
+    it('remembers the photo last seen, once', () => {
+      store.seen('f1');
+      expect(store.takeLastSeen()).toBe('f1');
+      expect(store.takeLastSeen()).toBeNull();
+    });
+
+    it('starts again for another Popkin', () => {
+      api.everyone = new Subject<AlbumPageView>();
+      store.open('q');
+      expect(store.state()).toBe('loading');
+      expect(ids()).toEqual([]);
+    });
+  });
+
   describe('the filters', () => {
     // L2-032 AC3
     it('Mine shows only the member’s photos, none larger', () => {

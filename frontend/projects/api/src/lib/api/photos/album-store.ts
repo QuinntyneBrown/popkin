@@ -24,6 +24,7 @@ export class AlbumStore {
   private readingMore?: Subscription;
   /** Pages shown; a fresh first page keeps the cursor of the later ones. */
   private pages = 0;
+  private lastSeen: string | null = null;
   private readonly cursor = signal<string | null>(null);
   private readonly album = signal<AlbumPageView | null>(null);
   private readonly items = signal<PhotoSummaryView[]>([]);
@@ -56,9 +57,27 @@ export class AlbumStore {
   }
 
   open(popkinId: string): void {
-    this.popkinId = popkinId;
     this.realtime.start();
+    // Back from a photo: what was shown stays, and the latest is read quietly (L2-033 AC2).
+    if (popkinId === this.popkinId && this.state() === 'ready') {
+      this.refresh();
+      return;
+    }
+    this.popkinId = popkinId;
+    this.filter.set('everyone');
     this.read();
+  }
+
+  /** The photo the member is looking at, full screen. */
+  seen(photoId: string): void {
+    this.lastSeen = photoId;
+  }
+
+  /** The photo the member last looked at, to return them to it; told once. */
+  takeLastSeen(): string | null {
+    const photoId = this.lastSeen;
+    this.lastSeen = null;
+    return photoId;
   }
 
   /** Reads the album again, after it failed to open. */
