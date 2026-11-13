@@ -140,10 +140,17 @@ form factors, the live Chat card and Members, and the invite dialog
   ([List experiences](../../experiences/list-experiences/README.md)). "Add the first photo" and
   "Share one" link to `/p/:popkinId/photos` and `/p/:popkinId/experiences`, where their dialogs
   are;
-- "Popkin settings": journey 9, Wrap up, which adds the menu. The header keeps its place;
-- the recap in place of the home of a wrapped-up Popkin (L2-045 AC5): journeys 9 and 10. Until
-  then the home of a wrapped-up Popkin still opens;
-- `PopkinChanged` and `MemberLeft`: journeys 9, 16 and 18. No handler sends them yet;
+- "Popkin settings" was built in journey 9, Wrap up: the button in the header opens the menu,
+  with "Invite people" and, for the Host, "Wrap up"
+  ([Popkin settings](../popkin-settings/README.md));
+- the recap in place of the home of a wrapped-up Popkin (L2-045 AC5) was built in journey 9:
+  `PopkinHomeStore` reads the Popkin, and for a wrapped-up one the page opens
+  `/p/:popkinId/recap` ([Read-only Popkin](../../wrap-up/read-only-popkin/README.md)). The
+  header's read gained `wrappedUpAt`, `keepPhotos`, `photosRemoveAt` and `photosRemovedAt`;
+- the banner of the last hour was built in journey 9, with the Host's "Change", and the home
+  moves to the recap when its Popkin wraps up while it is open
+  ([Time is up](../../wrap-up/time-is-up/README.md));
+- `PopkinChanged` and `MemberLeft`: journeys 16 and 18. No handler sends them yet;
 - the call was built in journey 7, Group call: "Group call" opens the call screen at
   `/p/:popkinId/call`, and the home shows the banner of a call under way, read by
   `CallBannerStore` ([Group call](../../calls/group-call/README.md));

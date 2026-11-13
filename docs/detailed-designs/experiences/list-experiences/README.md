@@ -150,7 +150,10 @@ Gaps found, each in [the register](../../README.md#known-gaps):
   again when the screen opens (gap 38).
 - The list has no paging: one answer carries every experience of the Popkin (gap 39).
 - A "Want to do" card reads "0 keen": nobody can say they are keen until journey 20 (gap 42).
-- "Share one" is still offered in a wrapped-up Popkin (gap 36).
+- "Share one" was still offered in a wrapped-up Popkin. Journey 9 took it away, in the header,
+  floating and in the empty states, and drew `docs/mocks/pages/experiences/wrapped.html`
+  (gap 36, settled). The banner of a Popkin's last hour shows on this screen too
+  ([Time is up](../../wrap-up/time-is-up/README.md)).
 - The skeletons show at once, not after the 300 ms of
   [Loading, failure and offline](../../reliability/loading-failure-offline/README.md).
 - The seeder adds no experiences (gap 40).

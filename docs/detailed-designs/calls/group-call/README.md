@@ -266,7 +266,11 @@ Gaps found, each in [the register](../../README.md#known-gaps):
   `JoinCallCommandHandler` calls `CallDisconnectGrace.Start` for the new participant, and one
   with no connection on the call when it ends leaves it, which ends a call they were alone on
   (gap 28, settled).
-- A call under way is not ended when its Popkin wraps up (gap 30).
+- A call under way was not ended when its Popkin wrapped up. Journey 9, Wrap up, ends it with
+  the Popkin: every participant is taken off it, and `CallEnded` is sent before
+  `PopkinWrappedUp` when the Host wraps up. A change of microphone or camera afterwards answers
+  `409 popkin_wrapped_up` (gap 30, settled by
+  [The Host wraps up](../../wrap-up/host-wraps-up/README.md)).
 - A member has one participant row however many devices they use. A second device's join adds
   nothing, and its `JoinCall` takes the call's events and signals from the first (gap 31).
 - No relay was exercised by any test (gap 32).
@@ -284,9 +288,6 @@ Popkin's id, `SendSignal` as a send, and the direct call.
 - Whether a member may be on two calls at once, for example a direct call and the group call:
   `<TO SUPPLY>` (journey 11). Today `CallSession` holds one call, and starting a call in another
   Popkin leaves the first.
-- What happens to a call under way when its Popkin wraps up (L2-044 AC4 moves the screen to the
-  recap): `<TO SUPPLY>` (journey 9, gap 30). Today nobody new can join, and the call goes on
-  until the last participant leaves.
 - Whether a cap on who may join is wanted; it needs a requirement first (ADR 0014, gap 27).
 
 ## Requirements

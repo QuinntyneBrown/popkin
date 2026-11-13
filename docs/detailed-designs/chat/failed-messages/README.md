@@ -67,8 +67,9 @@ What waits:
   "Try again": journey 13, Photos in chat;
 - `replyToMessageId` on an entry: journey 12, React and reply;
 - the same states in a direct message: journey 11;
-- the read-only line when a send finds the Popkin wrapped up: journey 9. Today the message
-  field is disabled;
+- the read-only line when a send finds the Popkin wrapped up was built in journey 9: the
+  composer closes with the line in its place, and the member is then moved to the recap
+  ([Read-only Popkin](../../wrap-up/read-only-popkin/README.md));
 - clearing the outbox and the drafts at sign-out (journey 17) and at account deletion
   (journey 19).
 

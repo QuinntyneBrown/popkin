@@ -52,9 +52,10 @@ address](../../popkins/open-by-address/README.md), L2-065 AC5).
   `data-page="join-invite"`, `shell: 'bare'`, public, L2-007 AC3) — loads the preview with
   `InvitesApi.getPreview(code, address)`, the address read from the host, and renders by result:
   - **member, active** — navigates to `/`, the Popkin home on the same host (L2-012 AC4);
-  - **member, wrapped up** — navigates to `/recap` on the same host (L2-016 AC3). The recap is
-    built with wrapping up; until then a member of a wrapped-up Popkin goes to `/` like any other
-    member;
+  - **member, wrapped up** — navigates to `/recap` on the same host (L2-016 AC3). The recap was
+    built in journey 9: a member of a wrapped-up Popkin is sent to its home like any other
+    member, and the home of a wrapped-up Popkin opens its recap
+    ([Read-only Popkin](../../wrap-up/read-only-popkin/README.md));
   - **open** — `pk-wordmark`, then `pk-invite-preview`: a `pk-pill` "{first name} invited you"
     with the inviter's `pk-avatar`, `pk-popkin-tile` in the Popkin's colour, the name as the
     screen's `h1`, a `pk-avatar-stack` of up to 5 with "+N", "{n} people", and `pk-time-left`

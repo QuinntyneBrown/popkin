@@ -22,11 +22,17 @@ time left on the Popkin home, updated at least once a minute. When one hour is l
 sees a warning banner; the Host's banner offers to change the length. A member who has the Popkin
 open when it wraps up moves to the recap without reloading.
 
+Journey 9, Wrap up, built this design, with one decision that changed its shape: the Worker
+sends no hub events ([ADR 0015](../../../adr/0015-the-worker-sends-no-hub-events.md)). The
+sections below say what was built, and [Built in journey 9](#built-in-journey-9) lists what
+differs from the design as it first stood and what waits.
+
 ## Description
 
 The slice spans the Popkin Worker, the Popkin API's real-time hub and the Popkin web app. It adds
 no endpoint: the web app reads `endsAt` and `status` from the Popkin home's existing
-`GET /api/popkins/{popkinId}` (see [Popkin home](../../popkins/popkin-home/README.md)).
+`GET /api/popkins/{popkinId}` (see [Popkin home](../../popkins/popkin-home/README.md)), and the
+Everyone thread's read carries `endsAt` and `readOnly` too.
 
 ### Screens and states
 
@@ -34,121 +40,154 @@ no endpoint: the web app reads `endsAt` and `status` from the Popkin home's exis
   up Sun, 6 pm" (L2-044 AC5, L2-019 AC1).
 - `docs/mocks/pages/popkin-home/ongoing.html` — the same home with no time-left pill, for a
   Popkin with no end date (L2-044 AC3).
+- `docs/mocks/pages/popkin-home/last-hour.html` and `last-hour-member.html` — the home in its
+  last hour, for the Host, whose banner offers "Change", and for any other member, whose banner
+  does not (L2-044 AC2). Drawn for journey 9.
 - `docs/mocks/notifications/banner/warning.html` — warning banner "1 hour left. Lakeside Weekend
   wraps up at 6 pm." with the Host's "Change" action and a Dismiss button (L2-044 AC2).
-- `docs/mocks/dialogs/change-length/default.html` — the dialog the Host's banner action opens
-  (owned by [Popkin settings](../../popkins/popkin-settings/README.md)).
+- `docs/mocks/dialogs/change-length/default.html` — the dialog the Host's banner action is to
+  open (owned by [Popkin settings](../../popkins/popkin-settings/README.md)); not built.
 - `docs/mocks/pages/wrapped-up/default.html` — the recap a member lands on when the Popkin wraps
   up while open (L2-044 AC4).
 
 The mock's banner action reads "Change"; L2-044 AC2 names it "Change how long it lasts". The
-action keeps the visible label "Change" and carries the accessible name "Change how long it
-lasts", which contains the visible label (WCAG 2.5.3). The banner copy when less than one hour is
-left (for example "42 min left.") is `<TO SUPPLY>`; the mocks draw only "1 hour left."
+design gave the action the visible label "Change" and the accessible name "Change how long it
+lasts", which contains the visible label (WCAG 2.5.3). The build has the visible label only: the
+accessible name is "Change" (known gap 47).
 
 ### API and real-time
 
 - `GET /api/popkins/{popkinId}` — existing in [Popkin home](../../popkins/popkin-home/README.md);
-  this slice relies on its `endsAt` (nullable), `status` and `isHost` fields.
-- Hub event `PopkinWrappedUp { popkinId }` on group `popkin:{popkinId}` of `PopkinHub` — sent
-  after a Popkin wraps up, by either path.
-- Hub event `PopkinLengthChanged { popkinId, version, endsAt }` — sent by
-  [Popkin settings](../../popkins/popkin-settings/README.md); the clock here re-reads `endsAt`
-  from it (L2-020 AC4). It is a state event: `version` is the Popkin's concurrency counter, and
-  the store drops an event whose version is not above the one it holds.
-- On `reconnected$`, `CurrentPopkinStore` reloads the Popkin, which recovers both events.
+  this slice relies on its `endsAt` (nullable), `status` and `viewerRole` fields.
+- Hub event `PopkinWrappedUp(popkinId)` on group `popkin:{popkinId}` of `PopkinHub` — sent by
+  the API after the Host wraps a Popkin up. A fact, and final; `GET /api/popkins/{popkinId}`
+  recovers it. **It is not sent when a Popkin's time is up**: the Worker wraps that Popkin up,
+  and the Worker sends no hub events (ADR 0015).
+- `PopkinLengthChanged` is not built; it comes with "Change how long it lasts", journey 16
+  ([Popkin settings](../../popkins/popkin-settings/README.md)).
 
 ### Backend — Popkin Worker
 
-- **`WrapUpDuePopkinsJob`** (`backend/src/Popkin.Worker/Jobs/WrapUpDuePopkinsJob.cs`) —
-  introduced; the first job the Worker hosts. A `BackgroundService` that runs a `PeriodicTimer`
-  every 30 seconds. The timer is built from the injected `TimeProvider`
-  (`new PeriodicTimer(period, timeProvider)`), so a test advances `FakeTimeProvider` and the job
-  ticks at once; a timer built without it ticks in real time, and a test of "within one minute"
-  would have to wait for it. Each tick opens a DI scope and sends `WrapUpDuePopkinsCommand`
-  through MediatR. A 30-second period keeps the delay between an end date and its wrap-up under
-  one minute (L2-044 AC1), with one tick of slack for a slow run. An exception in one tick is
-  logged and the next tick runs.
+- **`PeriodicJob<TResponse>`** (`backend/src/Popkin.Worker/Jobs/PeriodicJob.cs`) — what every job
+  of the Worker is: a `BackgroundService` that runs a `PeriodicTimer` built from the injected
+  `TimeProvider` (`new PeriodicTimer(period, clock)`), so a test advances `FakeTimeProvider` and
+  the job ticks at once. Each tick opens a DI scope and sends one command through MediatR. A
+  tick that throws is logged and the next one runs. When stopping is asked, the tick in hand
+  finishes, no other starts, and the job logs that it stopped.
 - **The job is the loop alone.** It decides nothing: what is due, what happens to it and who is
   told all belong to the handler, which the acceptance tests reach through MediatR without a
   timer.
+- **`WrapUpDuePopkinsJob`** (`Jobs/WrapUpDuePopkinsJob.cs`) — sends `WrapUpDuePopkinsCommand`
+  every 30 seconds. A 30-second period keeps the delay between an end date and its wrap-up under
+  one minute (L2-044 AC1), with one tick of slack for a slow run.
 - **Heartbeat** — a Worker that stops ticking fails silently: Popkins stop wrapping up and the
   Worker has no HTTP surface to probe. After each tick the job records the time it finished in
   the gauge `popkin.wrap_up.last_tick` (seconds since the Unix epoch), and for each Popkin
-  wrapped up it records the lateness, now minus `EndsAt`, in the histogram
+  wrapped up the handler records the lateness, `WrappedUpAt` minus `EndsAt`, in the histogram
   `popkin.wrap_up.lateness` ([ADR 0012](../../../adr/0012-opentelemetry.md)). A lateness over
   one minute is also logged as a warning with the Popkin's id, because it breaks L2-044 AC1.
-- **Clean stop** — on shutdown the job finishes the batch in hand, then stops, and logs that it
-  stopped; it starts no new batch once stopping is asked. Popkins are saved one at a time, so
-  finishing a batch is short.
-- **`Program.cs`** (Worker) — registers the job with `AddHostedService<WrapUpDuePopkinsJob>()`
-  next to the existing `AddApplication()` and `AddInfrastructure(...)`.
+- **`Program.cs`** (Worker) — registers the three jobs the Worker hosts, this one,
+  `RemovePhotosOfWrappedUpPopkinsJob` ([Read-only Popkin](../read-only-popkin/README.md)) and
+  `PrepareAlbumExportsJob` ([Recap](../recap/README.md)), next to `AddApplication()` and
+  `AddInfrastructure(...)`, and gives the handlers what the API gives them and the Worker has
+  none of (`WorkerServices.cs`): `SilentPopkinNotifier`, which drops every event,
+  `NoPopkinConnections`, and `NoCurrentPerson`, which throws if a handler asks who is signed in.
+- **One instance.** The version counter on `PopkinSpace` keeps a second from wrapping a Popkin
+  up twice ([`docs/deployment.md`](../../../deployment.md)).
+- **Locally**, `eng/Start-E2eWorker.ps1` runs the Worker beside the API of
+  `eng/Start-E2eApi.ps1`, on its SQLite file and its photo folder.
 
 ### Backend — Popkin Application and Domain
 
 - **`WrapUpDuePopkinsCommand`** — no fields; returns the number of Popkins wrapped up.
 - **`WrapUpDuePopkinsCommandHandler`** — reads `now` from `TimeProvider`, selects every
-  `PopkinSpace` with `Status == Active`, `EndsAt != null` and `EndsAt <= now`, in batches of
-  `<TO SUPPLY>`. For each, it calls `PopkinWrapUpService.WrapUpAsync(popkin, keepPhotos: true)`
-  (L2-044 AC1) and saves that Popkin on its own, so one failure does not hold back the others. A
-  concurrency conflict means the Host wrapped the Popkin up in the same moment; the handler skips
-  it. After each commit it calls `IPopkinNotifier.PopkinWrappedUpAsync(popkinId)`. An ongoing
-  Popkin never matches the filter, so it stays active (L2-044 AC3).
+  `PopkinSpace` with `Status == Active`, `EndsAt != null` and `EndsAt <= now`, the earliest end
+  first, in batches of 100. For each, it calls `PopkinWrapUpService.WrapUpAsync(popkin,
+  keepPhotos: true)` (L2-044 AC1), which saves that Popkin on its own, so one failure does not
+  hold back the others; a Popkin that fails is logged with its id and tried again on the next
+  tick. A Popkin its Host wrapped up in the same moment is passed over: the Host's choice
+  stands. An ongoing Popkin never matches the filter, so it stays active (L2-044 AC3). Once
+  stopping is asked, no new batch is begun.
 - **`PopkinWrapUpService`** and **`PopkinSpace.WrapUp`** — shared with
-  [The Host wraps up](../host-wraps-up/README.md).
+  [The Host wraps up](../host-wraps-up/README.md). The service calls `IPopkinNotifier` after the
+  commit; in the Worker that is `SilentPopkinNotifier`, and nothing is sent.
 
 ### Backend — Popkin Infrastructure
 
 - **`PopkinSpaceConfiguration`** — index on `(Status, EndsAt)`, so the due query reads only
   active Popkins with an end date.
-- **`IPopkinNotifier`** in the Worker — the Worker runs in its own process and holds no SignalR
-  connections. It sends hub events through the same `IHubContext<PopkinHub>` as the API, over a
-  SignalR scale-out backplane shared by both processes. The backplane (Redis or a hosted SignalR
-  service) is `<TO SUPPLY>`, and so is whether a backplane is the path at all: the API is one
-  instance ([ADR 0009](../../../adr/0009-one-api-instance.md)) and needs none for itself. Until
-  this is settled the Worker's `IPopkinNotifier` does nothing, and the web app's clock check
-  below carries the wrap-up to open screens
-  ([known gaps](../../README.md#known-gaps), row 13).
 
 ### Frontend — Popkin web app
 
-- **`formatTimeLeft(endsAt: Date, now: Date): string`**
-  (`frontend/projects/api/src/lib/api/time-left.ts`) — introduced pure helper. It returns the
-  largest two non-zero units: days and hours ("1 day 6 hrs left"), hours and minutes ("1 hr 5 min
-  left") or minutes ("42 min left") (L2-044 AC5). Under one minute the copy is `<TO SUPPLY>`.
-- **`TimeLeftClock`** (`frontend/projects/api/src/lib/api/time-left-clock.ts`) — introduced
-  injectable that exposes a `now` signal updated every 30 seconds, so every time left is redrawn
-  at least once a minute (L2-044 AC5). It corrects for a wrong device clock with the offset
-  between the device time and the `Date` header of the last API response. Tests replace it
-  through its injection token `TIME_LEFT_CLOCK`.
-- **`PopkinHomePage`** (`pages/popkin-home/popkin-home.page.ts`) — existing in
-  [Popkin home](../../popkins/popkin-home/README.md); this slice adds a computed time-left label
-  bound to `pk-time-left`, hidden when `endsAt` is null (L2-044 AC3).
-- **Wrap-up warning** — each Popkin page that shows the Popkin tabs reads a computed signal
-  `wrapUpWarning` from `CurrentPopkinStore`: true when `0 < endsAt - now <= 60 min`. When true,
-  the page renders `pk-banner` (warning) with the lead "1 hour left." and the line "{name} wraps
-  up at {time}." For the Host, the banner carries the action "Change", which opens
-  `ChangeLengthDialog` with CDK `Dialog` (L2-044 AC2). Dismiss hides the banner for that Popkin
-  until the app is reloaded.
-- **Wrap-up redirect** — `CurrentPopkinStore` subscribes to `PopkinWrappedUp` through
-  `POPKIN_REALTIME`. On the event, and also when `TimeLeftClock.now` passes `endsAt`, it reloads
-  the Popkin; when `status` reads `wrappedUp` it navigates to `/p/:popkinId/recap` with
-  `replaceUrl` (L2-044 AC4). The clock check covers a hub event lost while the connection was
-  down.
+- **`timeLeft(endsAt, now)`** (`frontend/projects/api/src/lib/api/popkins/time-left.ts`) — the
+  pure helper built with the Popkin home. It returns the largest two non-zero units: days and
+  hours ("1 day 6 hrs left"), hours and minutes ("1 hr 5 min left") or minutes ("42 min left")
+  (L2-044 AC5). Under one minute it says "1 min left", and nothing once the end has passed.
+- **`WrapUpWatch`** (`frontend/projects/api/src/lib/api/wrap-up/wrap-up-watch.ts`, provided in
+  root, with unit tests) — the one place that knows a Popkin wrapped up while it was open, and
+  that redraws what reads the time. It ticks every 30 seconds.
+  - `look(popkinId, endsAt)` — a screen that has read an active Popkin says which one is on the
+    screen and when it ends; `look(null, null)` for a wrapped-up one. `PopkinHomeStore`,
+    `PopkinFrame` (Photos, Experiences) and `ThreadStore` (the Everyone thread) call it.
+  - On a tick after that end has passed, it reads the Popkin (`getHome`); when `status` reads
+    `WrappedUp`, it reports the Popkin. A read that fails is made again on the next tick.
+  - `wrappedUp$` — the id of a Popkin that has just wrapped up: the hub's `PopkinWrappedUp`
+    merged with what the clock check reports.
+  - `warningFor(popkinId, name, endsAt)` and `dismissWarning(popkinId)` — the banner of the last
+    hour, below.
+- **Wrap-up warning** — `wrapUpWarning(name, endsAt, now)` in `wrap-up-text.ts`, with unit
+  tests: nothing with more than an hour left, with none left, and for a Popkin that keeps going;
+  otherwise a lead and the line "{name} wraps up at {time}." The lead is "1 hour left." for the
+  first minute of the last hour, because the banner comes on a tick a moment after the hour,
+  then the time left: "59 min left." and so on. The home, the Everyone thread, Photos and
+  Experiences each render it as `pk-banner` (warning) with Dismiss. Dismissing it hides it for
+  that Popkin, on all four screens, until the app is loaded again. On the home only, the Host's
+  banner carries the action "Change" (L2-044 AC2). Until "Change how long it lasts" is built
+  (journey 16) it opens Popkin settings, where that dialog will be (known gap 47).
+- **The move to the recap** — the root component `App` subscribes to `WrapUpWatch.wrappedUp$`.
+  When the Popkin that wrapped up is the one on the screen (the address is `/p/{popkinId}` or
+  under it, and is not the recap already), it closes every open dialog and navigates to
+  `/p/:popkinId/recap` with `replaceUrl` (L2-044 AC4). A member looking at another Popkin is
+  left alone.
+- **How long it takes** — a wrap-up by the Host moves every open screen at once, over the hub.
+  A wrap-up by time is carried by the clock check alone: the Worker wraps the Popkin up within
+  a minute of its end, on a tick of 30 seconds, and the watch reads within its own 30 seconds
+  after that, so the member moves within about a minute and a half of the end; 90 seconds,
+  measured by hand (known gap 50). A member who acts in that gap is refused with `409` `popkin_wrapped_up`, the
+  screen they are on answers for itself, and the watch moves them at its next reading ([Read-only Popkin](../read-only-popkin/README.md)).
 
 ### Tests
 
-- API-level acceptance tests send `WrapUpDuePopkinsCommand` through MediatR with
+- `Popkin.Api.Tests/WrapUp/TimeIsUpTests` sends `WrapUpDuePopkinsCommand` through MediatR with
   `FakeTimeProvider` set before and after an end date (L2-044 AC1, AC3).
-- `Popkin.Worker.Tests` hosts the job with `FakeTimeProvider`: advancing 30 seconds sends one
-  command; a tick that throws is followed by the next; stopping the host ends the loop. No test
-  sleeps ([ADR 0010](../../../adr/0010-the-hub-in-tests.md)).
+- `Popkin.Worker.Tests/JobTests` hosts the jobs with `FakeTimeProvider`: advancing a period
+  sends one command; a tick that throws is followed by the next; stopping the host ends the
+  loop. No test sleeps ([ADR 0010](../../../adr/0010-the-hub-in-tests.md)).
+- Unit tests of `WrapUpWatch` and `wrap-up-text.ts` in the `api` library (ADR 0011).
+- Playwright: `e2e/tests/last-hour.spec.ts` and `wrap-up-live.spec.ts`, with
+  `e2e/pages/wrap-up-banner.ts`. "moves to the recap, without the hub, once its time is up"
+  proves the clock check.
 
-### Open points
+### Built in journey 9
 
-- Batch size for the due query: `<TO SUPPLY>`.
-- Number of Worker instances in production: `<TO SUPPLY>`. The concurrency token on
-  `PopkinSpace` keeps a Popkin from being wrapped up twice when more than one instance runs.
+Everything above. What differs from the design as it first stood, and what waits:
+
+- **The Worker sends no hub events** (ADR 0015, known gaps 13 and 14, settled). The design had
+  it send `PopkinWrappedUp` over a backplane shared with the API, with the clock check as the
+  cover for a lost event. The clock check is now the only carrier of a timed wrap-up.
+- `CurrentPopkinStore`, `TimeLeftClock` and its token, and `formatTimeLeft` were not built.
+  Their work is done by `WrapUpWatch`, by the stores of the screens and by `timeLeft`. Nothing
+  corrects for a wrong device clock: a device whose clock is behind reads late by as much, and
+  one that is ahead asks early and keeps asking.
+- The banner under one hour reads the time left; the design left its copy to supply.
+- The Host's "Change" opens Popkin settings, shows on the home only, and has the accessible
+  name "Change" (known gap 47). `ChangeLengthDialog` and `PopkinLengthChanged` wait for
+  journey 16.
+- The batch of the due query is 100.
+- The exporter of ADR 0012 is not set up, so the two instruments are recorded and not exported.
+
+The diagrams below were not redrawn (gap 53). They show a backplane between the Worker and the
+hub, `CurrentPopkinStore`, `TimeLeftClock` and `formatTimeLeft`.
 
 ## Requirements
 
@@ -167,8 +206,8 @@ arrives. No external system takes part.
 
 ### Containers
 
-The Popkin Worker finds due Popkins in the Popkin database and wraps them up; the event reaches
-members' web apps through the Popkin API's hub over a shared backplane.
+The Popkin Worker finds due Popkins in the Popkin database and wraps them up. As built, no
+event leaves the Worker: members' web apps read the Popkin once its end has passed (ADR 0015).
 
 ![C4 container view for a Popkin wrapping up when its time is up](diagrams/c4-container.png)
 
@@ -189,15 +228,18 @@ provider, the shared wrap-up service and the notifier. On the web app side, `Tim
 
 ### Behaviour — the end date arrives
 
-A tick finds the due Popkin, wraps it up with the album kept (L2-044 AC1) and sends
-`PopkinWrappedUp`, a fact event whose recovery read is `GET /api/popkins/{popkinId}`
-([Live messages](../../chat/live-messages/README.md#events-and-their-recovery-reads)); a member with the Popkin open moves to the recap without a reload (L2-044 AC4).
+A tick finds the due Popkin and wraps it up with the album kept (L2-044 AC1). As built it sends
+nothing: `GET /api/popkins/{popkinId}`, the recovery read of `PopkinWrappedUp`
+([Live messages](../../chat/live-messages/README.md#events-and-their-recovery-reads)), is what
+the web app's clock check makes, and a member with the Popkin open moves to the recap without a
+reload (L2-044 AC4).
 
 ![Sequence diagram for the Worker wrapping up a due Popkin](diagrams/sequence-time-is-up.png)
 
 ### Behaviour — one hour left
 
 The web app's clock redraws the time left at least once a minute (L2-044 AC5) and shows the
-warning banner when one hour is left; only the Host's banner offers "Change" (L2-044 AC2).
+warning banner when one hour is left; only the Host's banner offers "Change" (L2-044 AC2), and
+as built it opens Popkin settings.
 
 ![Sequence diagram for the one-hour warning banner](diagrams/sequence-one-hour-left.png)

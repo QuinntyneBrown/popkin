@@ -130,7 +130,8 @@ Everything above, for "Something we did" and "Restaurant". Decided in the build:
 - The mocks' averages were corrected to what their counts give: 4.7 for the canoe (9, 1 and 1),
   4.6 and 4.3 on the list.
 - The page of a wrapped-up Popkin is the same page without the rating panel and without
-  "Experience actions": the flags are false. It has no mock of its own.
+  "Experience actions": the flags are false. Journey 9 drew its mock,
+  `docs/mocks/pages/experience-detail/wrapped.html`.
 
 Gaps found, each in [the register](../../README.md#known-gaps):
 
