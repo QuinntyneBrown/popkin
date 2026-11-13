@@ -10,11 +10,11 @@ import { WelcomePage } from '../../../e2e/pages/welcome.page';
 import { detail, frame, shot, type Size, type Theme } from '../../../tools/video-record/shots';
 
 /**
- * The screenshots of video 11: journey 17, Manage account, in the running app. The account is
+ * The screenshots of video 12: journey 17, Manage account, in the running app. The account is
  * opened by its key in `e2e/fixtures/routes.ts`, with Mara's photograph (`theMockAccount`). Every
  * /api request is answered in memory by the fixtures of `e2e/` or the recording (ADR 0005); no
  * backend and no database ran. Not a test and not a sweep: only
- * `node tools/video-record/record.mjs docs/videos/11-journey-17-manage-account` runs it.
+ * `node tools/video-record/record.mjs docs/videos/12-journey-17-manage-account` runs it.
  */
 
 const SIZES = ['XS', 'M', 'L', 'XL'] as const satisfies readonly Size[];

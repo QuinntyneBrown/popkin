@@ -1,4 +1,4 @@
-# 11 · Journey 17: Manage account
+# 12 · Journey 17: Manage account
 
 A signed-in person opens their account from their avatar on My Popkins. "Your account" shows
 their photo, their name and the phone number they sign in with, which is read-only and never
@@ -7,7 +7,7 @@ confirms it; an empty name saves nothing and is marked invalid. "Match my device
 "Dark" is taken at once and remembered on the device. "Sign out" asks first, ends the session on
 that device and opens the welcome screen.
 
-- **Film:** [`11-journey-17-manage-account.mp4`](11-journey-17-manage-account.mp4), 1920×1080, 30 fps, 1 min 38 s. Captions:
+- **Film:** [`12-journey-17-manage-account.mp4`](12-journey-17-manage-account.mp4), 1920×1080, 30 fps, 1 min 38 s. Captions:
   [`captions.vtt`](captions.vtt), not burned in.
 - **Voice:** Kokoro-82M v1.0 (`af_heart`), run locally with `kokoro-onnx`. Hugging Face could not
   be reached from the machine that made it, so the same model was taken from the `kokoro-onnx`
@@ -36,7 +36,7 @@ that device and opens the welcome screen.
 ## Make it again
 
 ```
-node tools/video-record/record.mjs docs/videos/11-journey-17-manage-account
-.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/11-journey-17-manage-account
-NODE_PATH=e2e/node_modules node tools/video-build/build.mjs docs/videos/11-journey-17-manage-account
+node tools/video-record/record.mjs docs/videos/12-journey-17-manage-account
+.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/12-journey-17-manage-account
+NODE_PATH=e2e/node_modules node tools/video-build/build.mjs docs/videos/12-journey-17-manage-account
 ```

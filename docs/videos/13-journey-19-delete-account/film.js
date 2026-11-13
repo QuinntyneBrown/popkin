@@ -1,4 +1,4 @@
-// Video 12 · Journey 19: Delete account. Eight scenes on a 120 BPM grid (one bar is two seconds).
+// Video 13 · Journey 19: Delete account. Eight scenes on a 120 BPM grid (one bar is two seconds).
 // Every picture is a screenshot of the running app from shots.ts; every position is a pure
 // function of the scene's time (docs/videos/README.md).
 const { enter, exit, ease, prog, lerp, clamp, phone, browser } = Film;

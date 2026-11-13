@@ -10,11 +10,11 @@ import { Toasts } from '../../../e2e/pages/toasts';
 import { detail, frame, shot, type Size, type Theme } from '../../../tools/video-record/shots';
 
 /**
- * The screenshots of video 12: journey 19, Delete account, in the running app. Mara hosts the two
+ * The screenshots of video 13: journey 19, Delete account, in the running app. Mara hosts the two
  * active Popkins the mocks name (`hostingTwoPopkins`). Every /api request is answered in memory by
  * the fixtures of `e2e/` or the recording (ADR 0005); no backend and no database ran, and nothing
  * was deleted. Not a test and not a sweep: only
- * `node tools/video-record/record.mjs docs/videos/12-journey-19-delete-account` runs it.
+ * `node tools/video-record/record.mjs docs/videos/13-journey-19-delete-account` runs it.
  */
 
 const SIZES = ['XS', 'M', 'L', 'XL'] as const satisfies readonly Size[];

@@ -1,4 +1,4 @@
-# 12 · Journey 19: Delete account
+# 13 · Journey 19: Delete account
 
 A person chooses "Delete my account" at the foot of their account. "Delete your account?" says
 what is removed (their name, photo, phone number and direct messages) and what is kept without
@@ -7,7 +7,7 @@ wrap up. "Delete my account" stays disabled until "delete" is typed. Then "Delet
 ends and the landing page opens with "Your account is deleted". One card says what the tests
 prove that no screen shows: the Worker erases the rest within 30 days.
 
-- **Film:** [`12-journey-19-delete-account.mp4`](12-journey-19-delete-account.mp4), 1920×1080, 30 fps, 1 min 22 s. Captions:
+- **Film:** [`13-journey-19-delete-account.mp4`](13-journey-19-delete-account.mp4), 1920×1080, 30 fps, 1 min 22 s. Captions:
   [`captions.vtt`](captions.vtt), not burned in.
 - **Voice:** Kokoro-82M v1.0 (`af_heart`), run locally with `kokoro-onnx`. Hugging Face could not
   be reached from the machine that made it, so the same model was taken from the `kokoro-onnx`
@@ -35,7 +35,7 @@ prove that no screen shows: the Worker erases the rest within 30 days.
 ## Make it again
 
 ```
-node tools/video-record/record.mjs docs/videos/12-journey-19-delete-account
-.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/12-journey-19-delete-account
-NODE_PATH=e2e/node_modules node tools/video-build/build.mjs docs/videos/12-journey-19-delete-account
+node tools/video-record/record.mjs docs/videos/13-journey-19-delete-account
+.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/13-journey-19-delete-account
+NODE_PATH=e2e/node_modules node tools/video-build/build.mjs docs/videos/13-journey-19-delete-account
 ```
