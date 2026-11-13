@@ -20,9 +20,15 @@ export const routes: Routes = [
     path: '',
     pathMatch: 'full',
     canActivate: [signedOutGuard],
-    loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
-    data: data({ shell: 'bare', page: 'home' }),
+    loadComponent: () => import('./pages/landing/landing.page').then((m) => m.LandingPage),
+    data: data({ shell: 'bare', page: 'landing' }),
     title: 'Popkin',
+  },
+  {
+    path: 'welcome',
+    loadComponent: () => import('./pages/welcome/welcome.page').then((m) => m.WelcomePage),
+    data: data({ shell: 'bare', page: 'welcome' }),
+    title: 'Welcome · Popkin',
   },
   {
     path: 'sign-in',
