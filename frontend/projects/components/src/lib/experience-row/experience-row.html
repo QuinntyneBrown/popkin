@@ -1,0 +1,12 @@
+<span class="thumb thumb--sm" aria-hidden="true" [class.thumb--emoji]="!photo()">
+  @if (photo()) {
+    <img class="thumb__photo" alt="" [src]="photo()" />
+  } @else {
+    {{ emoji() }}
+  }
+</span>
+<span class="card__main">
+  <span class="row__title row__title--display truncate">{{ title() }}</span>
+  <span pk-rating [value]="rating()" [label]="ratings()"></span>
+</span>
+<svg pk-icon name="chevron-right" size="md"></svg>
