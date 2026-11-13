@@ -29,7 +29,7 @@
               "projects/components/src/lib/styles/tokens/tokens.css",
               "projects/components/src/lib/styles/ui.css"
             ],
-            "allowedCommonJsDependencies": ["qrcode-generator"]
+            "allowedCommonJsDependencies": ["qrcode-generator", "jsqr"]
           },
           "configurations": {
             "production": {

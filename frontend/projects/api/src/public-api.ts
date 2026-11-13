@@ -50,3 +50,7 @@ export * from './lib/api/auth/parse-contact';
 export * from './lib/models/my-popkins';
 export * from './lib/api/popkins/my-popkins-text';
 export * from './lib/api/invites/invite-input';
+export * from './lib/api/popkins/my-popkins-store';
+export * from './lib/api/popkins/popkins-snapshot';
+export * from './lib/api/invites/qr-scanner';
+export * from './lib/api/invites/scan-to-join';
