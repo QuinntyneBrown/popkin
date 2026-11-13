@@ -6,7 +6,7 @@ import { accentOf } from '../../models/popkin';
 import {
   ScoreBar,
   averageText,
-  intro,
+  kindLabel,
   ratingsText,
   scoreBars,
   starsLabel,
@@ -17,8 +17,10 @@ import { EXPERIENCES_API } from './experiences-api';
 
 /** One experience as its page draws it (L2-038). */
 export interface ExperiencePage {
-  /** "Something we did · Sat morning". */
-  intro: string;
+  /** "Something we did". */
+  kind: string;
+  /** "Sat morning"; undefined when the sharer gave none. */
+  when: string | undefined;
   title: string;
   pictureUrl: string | null;
   emoji: string;
@@ -87,7 +89,8 @@ export class ExperienceStore {
     const mine = experience.myRating;
     const score = experience.score;
     return {
-      intro: intro(experience),
+      kind: kindLabel(experience.kind),
+      when: experience.when?.trim() || undefined,
       title: experience.title,
       pictureUrl: experience.pictureUrl,
       emoji: experience.emoji,

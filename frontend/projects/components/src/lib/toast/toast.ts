@@ -33,6 +33,9 @@ export class Toast {
   readonly variant = input<ToastVariant>('success');
   readonly heading = input.required<string>();
   readonly text = input<string>();
+  /** What the toast offers to do about it: "Try again", "Undo". None when absent. */
+  readonly action = input<string>();
+  readonly acted = output<void>();
   readonly dismissed = output<void>();
 
   protected readonly icons = ICONS;

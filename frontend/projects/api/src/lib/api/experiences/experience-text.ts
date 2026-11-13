@@ -44,12 +44,6 @@ export function byline(experience: {
   return `${experience.sharedBy.firstName} · ${when || fallback}`;
 }
 
-/** "Something we did · Sat morning": the line over an experience's title (L2-038 AC1). */
-export function intro(experience: { kind: ExperienceKind; when: string | null }): string {
-  const when = experience.when?.trim();
-  return when ? `${kindLabel(experience.kind)} · ${when}` : kindLabel(experience.kind);
-}
-
 /** The average to one decimal, "5.0" included (L2-037 AC2); empty when nobody has rated. */
 export function averageText(average: number | null): string {
   return average === null ? '' : (Math.round(average * 10) / 10).toFixed(1);
@@ -77,7 +71,7 @@ export interface ScoreBar {
   /** How far the bar is filled, of 100. */
   percent: number;
   /** The same as text: "5 stars: 9 ratings" (L2-038 AC3). */
-  text: string;
+  label: string;
 }
 
 /**
@@ -91,7 +85,7 @@ export function scoreBars(counts: readonly { stars: number; count: number }[]): 
     return {
       stars,
       percent: largest ? Math.round((count / largest) * 100) : 0,
-      text: `${starName(stars)}: ${count} ${count === 1 ? 'rating' : 'ratings'}`,
+      label: `${starName(stars)}: ${count} ${count === 1 ? 'rating' : 'ratings'}`,
     };
   });
 }

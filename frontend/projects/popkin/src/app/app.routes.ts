@@ -1,6 +1,6 @@
 import { OfflinePage } from './pages/offline/offline.page';
 import { Routes } from '@angular/router';
-import { AlbumStore, ExperiencesStore, PopkinFrame } from 'api';
+import { AlbumStore, ExperienceStore, ExperiencesStore, PopkinFrame } from 'api';
 import { signedInGuard } from './guards/signed-in.guard';
 
 /**
@@ -122,6 +122,16 @@ export const routes: Routes = [
           import('./pages/experiences/experiences.page').then((m) => m.ExperiencesPage),
         data: data({ shell: 'app', page: 'experiences' }),
         title: 'Experiences · Popkin',
+      },
+      {
+        path: ':experienceId',
+        providers: [ExperienceStore],
+        loadComponent: () =>
+          import('./pages/experience-detail/experience-detail.page').then(
+            (m) => m.ExperienceDetailPage,
+          ),
+        data: data({ shell: 'app', page: 'experience-detail' }),
+        title: 'Experience · Popkin',
       },
     ],
   },

@@ -3,7 +3,6 @@ import {
   averageText,
   byline,
   filterOf,
-  intro,
   kindLabel,
   nothingHere,
   ratingsText,
@@ -32,16 +31,6 @@ describe('byline', () => {
     ['Want', 'Next summer', 'Mara · Next summer'],
   ] as const)('%s shared with when %j reads "%s"', (kind, when, text) =>
     expect(byline({ kind, when, sharedAt: sep12, sharedBy: { firstName: 'Mara' } })).toBe(text),
-  );
-});
-
-describe('intro', () => {
-  it.each([
-    ['Did', 'Sat morning', 'Something we did · Sat morning'],
-    ['Restaurant', null, 'Restaurant'],
-    ['Want', '', 'Want to do'],
-  ] as const)('%s with when %j reads "%s"', (kind, when, text) =>
-    expect(intro({ kind, when })).toBe(text),
   );
 });
 
@@ -85,11 +74,11 @@ describe('scoreBars', () => {
 
   it('scales each bar to the largest count, as the mock draws them', () => {
     expect(scoreBars(counts(9, 1, 1, 0, 0))).toEqual([
-      { stars: 5, percent: 100, text: '5 stars: 9 ratings' },
-      { stars: 4, percent: 11, text: '4 stars: 1 rating' },
-      { stars: 3, percent: 11, text: '3 stars: 1 rating' },
-      { stars: 2, percent: 0, text: '2 stars: 0 ratings' },
-      { stars: 1, percent: 0, text: '1 star: 0 ratings' },
+      { stars: 5, percent: 100, label: '5 stars: 9 ratings' },
+      { stars: 4, percent: 11, label: '4 stars: 1 rating' },
+      { stars: 3, percent: 11, label: '3 stars: 1 rating' },
+      { stars: 2, percent: 0, label: '2 stars: 0 ratings' },
+      { stars: 1, percent: 0, label: '1 star: 0 ratings' },
     ]);
   });
 

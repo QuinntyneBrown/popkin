@@ -7,6 +7,8 @@
       [variant]="toast.variant"
       [heading]="toast.heading"
       [text]="toast.text"
+      [action]="toast.action?.label"
+      (acted)="toaster.act(toast)"
       (dismissed)="toaster.dismiss(toast.id)"
     ></div>
   }

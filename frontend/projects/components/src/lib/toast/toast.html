@@ -4,6 +4,9 @@
   @if (text()) {
     <div class="toast__text">{{ text() }}</div>
   }
+  @if (action()) {
+    <button class="toast__action" type="button" (click)="acted.emit()">{{ action() }}</button>
+  }
 </div>
 <button
   pk-icon-button

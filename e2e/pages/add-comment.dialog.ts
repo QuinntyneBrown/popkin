@@ -13,6 +13,8 @@ export class AddCommentDialog {
   readonly comment: Locator;
   readonly hint: Locator;
   readonly error: Locator;
+  /** The alert of a comment that did not save. */
+  readonly failed: Locator;
   readonly action: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly body: Locator;
@@ -34,6 +36,7 @@ export class AddCommentDialog {
     this.commentField = this.body.locator('.field');
     this.hint = this.commentField.locator('.field__hint');
     this.error = this.commentField.locator('.field__error');
+    this.failed = this.root.locator('.alert--danger');
     this.action = this.footer.getByRole('button');
   }
 }

@@ -6,6 +6,13 @@ export interface ToastMessage {
   variant: ToastVariant;
   heading: string;
   text?: string;
+  /** What the toast offers to do: its label, and what choosing it does. */
+  action?: ToastAction;
+}
+
+export interface ToastAction {
+  label: string;
+  run: () => void;
 }
 
 /**
@@ -19,12 +26,18 @@ export class Toaster {
 
   readonly toasts = this.state.asReadonly();
 
-  show(variant: ToastVariant, heading: string, text?: string): void {
+  show(variant: ToastVariant, heading: string, text?: string, action?: ToastAction): void {
     const id = ++this.next;
-    this.state.update((toasts) => [...toasts, { id, variant, heading, text }]);
+    this.state.update((toasts) => [...toasts, { id, variant, heading, text, action }]);
     if (variant === 'success' || variant === 'info') {
       setTimeout(() => this.dismiss(id), 8_000);
     }
+  }
+
+  /** The toast's action was chosen: it is done, and the toast goes. */
+  act(toast: ToastMessage): void {
+    this.dismiss(toast.id);
+    toast.action?.run();
   }
 
   dismiss(id: number): void {

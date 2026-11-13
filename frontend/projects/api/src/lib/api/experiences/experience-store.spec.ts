@@ -109,7 +109,8 @@ describe('ExperienceStore', () => {
   it('shows the experience: what it is, who shared it, where, and its score', () => {
     store.open('p', 'canoe');
     expect(store.view()).toMatchObject({
-      intro: 'Something we did · Sat morning',
+      kind: 'Something we did',
+      when: 'Sat morning',
       title: 'Sunrise canoe to Heron Point',
       pictureUrl: '/d/canoe.jpg?sig=1',
       emoji: '🏕️',

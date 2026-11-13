@@ -44,6 +44,18 @@
   opacity: 0.85;
 }
 
+.toast__action {
+  min-height: var(--space-8);
+  margin-top: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-family-sans);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 /* The dismiss button is the small icon button of the design system's toast. */
 .toast__dismiss {
   width: var(--space-8);
