@@ -4,7 +4,12 @@
     <ng-content select="[slot=label-end]" />
   </div>
 } @else {
-  <label class="field__label" [for]="fieldId()">{{ label() }}</label>
+  <label class="field__label" [for]="fieldId()">
+    {{ label() }}
+    @if (optional()) {
+      <span class="optional">{{ optional() }}</span>
+    }
+  </label>
 }
 <input
   #field
