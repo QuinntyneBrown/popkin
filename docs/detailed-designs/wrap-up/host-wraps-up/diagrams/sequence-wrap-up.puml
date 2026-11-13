@@ -57,7 +57,7 @@ else Host
   alt saved
     db --> handler : Committed
     handler -> notifier : PopkinWrappedUpAsync(popkinId)
-    notifier -> notifier : Send popkinWrappedUp to popkin:{popkinId}
+    notifier -> notifier : Send PopkinWrappedUp to popkin:{popkinId}
     handler --> controller : WrapUpResultDto
     controller --> client : 200 OK
     client --> page : WrapUpResult

@@ -53,9 +53,10 @@ The mechanism adds no endpoint. It constrains every response:
 
 - **HTTPS** — `UseHttpsRedirection()` sends a `308` to the HTTPS address for any HTTP request, and
   `UseHsts()` adds `Strict-Transport-Security: max-age=31536000; includeSubDomains` outside
-  development (L2-054 AC1). Whether TLS ends at a reverse proxy in front of the API is
-  `<TO SUPPLY>`; if it does, the proxy redirects and `UseForwardedHeaders()` lets the API see the
-  original scheme.
+  development (L2-054 AC1). TLS ends at the reverse proxy in front of the API
+  ([ADR 0013](../../../adr/0013-deployment-shape.md)). The API reads `X-Forwarded-Proto` from
+  that proxy only ([Abuse limits](../abuse-limits/README.md)), so it sees the original scheme:
+  without that, every request would look like HTTP and the redirect would loop.
 - **`SecurityHeadersMiddleware`** (`Popkin.Api/Security/`) — introduced; runs first in the
   pipeline and adds, to every response:
   - `Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'
@@ -78,7 +79,12 @@ The mechanism adds no endpoint. It constrains every response:
 - **`RequestLoggingMiddleware`** (`Popkin.Api/Logging/`) — introduced; placed outside
   `UseExceptionHandler()` as `AGENTS.md` requires. It logs method, route template (for example
   `/api/invites/{code}`, never the filled-in path), status, duration and trace id. It logs no query
-  string, body, header or cookie (L2-054 AC3).
+  string, body, header or cookie (L2-054 AC3). A request that matches no route is logged with the
+  route `(none)`, never with the path asked for.
+- **Telemetry** — logs, metrics and traces leave through OpenTelemetry
+  ([ADR 0012](../../../adr/0012-opentelemetry.md)). The same list holds for a span and for a
+  metric dimension as for a log line: no contact detail, code, session token, message text,
+  query string or body, and a route only as its template.
 
 ### Backend — Popkin Application and Domain
 
@@ -114,7 +120,8 @@ The mechanism adds no endpoint. It constrains every response:
   encoding](../input-validation-and-encoding/README.md)).
 - **Retention** — `PurgeExpiredCodesJob` deletes verification codes once expired, and
   `PurgeDeletedAccountsJob` erases a deleted account's personal data within 30 days (L2-049 AC4,
-  [Delete the account](../../accounts/delete-account/README.md)). Log retention is `<TO SUPPLY>`.
+  [Delete the account](../../accounts/delete-account/README.md)). Log retention is a setting of
+  the telemetry backend, `<TO SUPPLY>` ([ADR 0012](../../../adr/0012-opentelemetry.md)).
 
 ### Frontend — Popkin web app
 

@@ -12,7 +12,7 @@ System_Boundary(popkin, "Popkin") {
 }
 Rel(member, spa, "Uses", "HTTPS")
 Rel(spa, api, "Reads the Popkin", "JSON/HTTPS")
-Rel(api, spa, "Pushes popkinWrappedUp", "SignalR/WSS")
+Rel(api, spa, "Pushes PopkinWrappedUp", "SignalR/WSS")
 Rel(worker, db, "Finds and wraps up due Popkins", "EF Core")
 Rel(worker, api, "Publishes hub events via backplane", "TO SUPPLY")
 Rel(api, db, "Reads", "EF Core")

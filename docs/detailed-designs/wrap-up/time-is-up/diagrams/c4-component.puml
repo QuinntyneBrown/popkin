@@ -10,7 +10,7 @@ Container_Boundary(worker, "Popkin Worker") {
   Component(handler, "WrapUpDuePopkinsCommandHandler", "MediatR handler", "Wraps up every due Popkin")
   Component(service, "PopkinWrapUpService", "Application service", "Wraps up and ends open calls")
   Component(entity, "PopkinSpace", "Domain entity", "WrapUp(at, keepPhotos: true)")
-  Component(notifier, "IPopkinNotifier", "SignalR hub context", "popkinWrappedUp to popkin:{popkinId}")
+  Component(notifier, "IPopkinNotifier", "SignalR hub context", "PopkinWrappedUp to popkin:{popkinId}")
   ComponentDb(db, "Popkin database", "SQL Server", "Index on Status, EndsAt")
 }
 Rel(job, handler, "Sends WrapUpDuePopkinsCommand")
@@ -19,5 +19,5 @@ Rel(handler, service, "WrapUpAsync per Popkin")
 Rel(service, entity, "Calls WrapUp")
 Rel(handler, notifier, "PopkinWrappedUpAsync")
 Rel(notifier, api, "Backplane message", "TO SUPPLY")
-Rel(api, spa, "popkinWrappedUp", "SignalR")
+Rel(api, spa, "PopkinWrappedUp", "SignalR")
 @enduml

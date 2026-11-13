@@ -125,7 +125,7 @@ data the Popkin home has already loaded.
 - **`PopkinSpaceConfiguration`** — maps `Status`, `WrappedUpAt`, `KeepPhotos` and the concurrency
   token (`rowversion` on SQL Server). The index on `(Status, EndsAt)` that the worker reads is
   declared here as well.
-- **`SignalRPopkinNotifier`** (in `Popkin.Api`) — sends `popkinWrappedUp { popkinId }` to the
+- **`SignalRPopkinNotifier`** (in `Popkin.Api`) — sends `PopkinWrappedUp { popkinId }` to the
   group `popkin:{popkinId}`. Every member with the Popkin open moves to the recap without a reload
   (L2-044 AC4).
 

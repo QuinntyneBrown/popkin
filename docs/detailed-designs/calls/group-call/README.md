@@ -64,9 +64,12 @@ call banner inside the Everyone thread; the design reuses the home banner there.
   `409 popkin_wrapped_up`, `400` with a `code` for a malformed body (L2-052 AC1).
 - `POST /api/popkins/{popkinId}/calls/{callId}/leave` — `204 No Content`. `404 call_not_found`
   when the caller is not on that call.
-- `PopkinHub` (`/hubs/popkin`): client method `JoinCall(callId)` and
-  `SendSignal(callId, toMembershipId, signal)`. Server events `CallChanged`, `CallEnded` on
-  `popkin:{popkinId}`; `ParticipantJoined`, `ParticipantLeft`, `Signal` on `call:{callId}`.
+- `PopkinHub` (`/hubs/popkin`): client method `JoinCall(callId)`, called with `invoke` because
+  the caller needs the outcome, and `SendSignal(callId, toMembershipId, signal)`, called with
+  `send`. Server events `CallChanged(callId, version, participantCount)` and `CallEnded(callId)`
+  on `popkin:{popkinId}`; `ParticipantJoined`, `ParticipantLeft`, `Signal` on `call:{callId}`.
+  A refused hub call fails with the ProblemDetails `code` of the same refusal over HTTP
+  (`popkin_not_found`, `call_not_found`, `validation_failed`, `rate_limited`).
 
 ### Frontend (`frontend/projects/popkin`, `api`, `components`)
 
@@ -104,7 +107,8 @@ call banner inside the Everyone thread; the design reuses the home banner there.
   `404 popkin_not_found` (L2-051 AC1). It refuses a wrapped-up Popkin with
   `409 popkin_wrapped_up` (L2-045 AC1). It finds the `Call` under way of the requested kind or
   creates one, adds a `CallParticipant` with `MicOn` and `CameraOn` set, and saves in one unit of
-  work. For a group call it pushes `CallChanged` to `popkin:{popkinId}`. It returns the call,
+  work, which raises `Call.Version`. For a group call it pushes `CallChanged` with that version
+  to `popkin:{popkinId}`. It returns the call,
   the participants and the ICE servers from `IMediaRelayCredentials`. A direct call requires a
   `ChatThread` of kind `Direct` whose `MemberAId` or `MemberBId` is the caller; anything else is
   `404 thread_not_found` (L2-023 AC2).
@@ -114,22 +118,57 @@ call banner inside the Everyone thread; the design reuses the home banner there.
 - **`GetCurrentCallQuery` / `GetCurrentCallQueryHandler`** — introduced. Returns the group call
   under way, or `null`.
 - **`PopkinHub`** — introduced by the real-time design and shared here. It refuses a connection
-  without a valid session (L2-050 AC4). `JoinCall` adds the connection to `call:{callId}` only
-  when the caller is a participant. `SendSignal` relays a `CallSignalDto` (type `offer`,
-  `answer` or `candidate`, payload) to the target participant's connection only.
-  `OnDisconnectedAsync` sends `LeaveCallCommand` for a participant whose connection drops, after
-  a grace period of `<TO SUPPLY>` seconds that allows a reconnect.
+  without a valid session (L2-050 AC4). It is a transport: each method checks nothing itself and
+  sends one MediatR request, as a controller does. `JoinCall` sends `JoinCallGroupCommand` and,
+  when it succeeds, adds the connection to `call:{callId}`. `SendSignal` sends
+  `RelaySignalCommand` and relays to the connection the command names.
+- **`JoinCallGroupCommand` / `JoinCallGroupCommandHandler`** — introduced. Loads the caller's
+  membership through `IMembershipGuard` and their `CallParticipant` whose `LeftAt` is empty, or
+  fails with `call_not_found`. It records the connection as `CallParticipant.ConnectionId`.
+- **`RelaySignalCommand` / `RelaySignalCommandHandler` / `RelaySignalCommandValidator`** —
+  introduced. The validator holds the rules of `CallSignalDto`, as every command's does
+  (L2-052 AC1): `type` is `offer`, `answer` or `candidate`; the payload is at most 32 KB for an
+  offer or an answer and 2 KB for a candidate. The handler checks, through `IMembershipGuard`,
+  that the caller and the target are both participants of the call, and returns the target's
+  connection id. It never reads the payload. These sizes are design values, to be confirmed
+  against the session descriptions the chosen topology produces in the first call slice.
+- **Signals are edges.** Each `offer`, `answer` and `candidate` must arrive. The hub never
+  coalesces them, never deduplicates them by content and never drops one under load; a dropped
+  candidate can leave a call that never connects, and looks like an intermittent failure for a
+  long time before anyone finds the cause. When a signal is refused (the limit below, or a
+  target that has left), `CallSession` restarts negotiation with that participant once and then
+  moves to `Failed`, which the page shows (L2-029 AC4).
+- **Limits on what the hub accepts** — SignalR's maximum receive size is set to 64 KB (the
+  default is 32 KB), because a session description with several media sections and the JSON
+  envelope can pass the default; nothing larger is read. `SendSignal` is limited per connection
+  to 600 signals a minute ([Abuse limits](../../security/abuse-limits/README.md)), well above
+  what setting up a call with 12 people needs. Detailed hub errors are on in Development only.
+- **Disconnect grace period** — `OnDisconnectedAsync` sends `LeaveCallCommand` for a participant
+  whose connection drops, after a grace period of 20 seconds without a reconnect. The client
+  retries 0, 2 and 10 seconds after a drop
+  ([Live messages](../../chat/live-messages/README.md)), so its first three attempts, at 0, 2 and
+  12 seconds, all fall inside the grace; a shorter grace would remove a participant whose client
+  is still inside its own retry window. A participant who reconnects in time calls `JoinCall`
+  again, which replaces `ConnectionId`. The grace is a timer built from `TimeProvider`, so its
+  test advances the fake clock and never waits.
 - **`IMediaRelayCredentials`** — introduced in `Popkin.Application.Abstractions`. Issues
   short-lived TURN credentials per participant. It is implemented in Infrastructure by
   `TurnCredentialIssuer`; the provider and the credential lifetime are `<TO SUPPLY>`.
 - **`SignalRPopkinNotifier`** — implements `IPopkinNotifier` and gains `CallChangedAsync`,
   `CallEndedAsync`, `ParticipantJoinedAsync` and `ParticipantLeftAsync`.
+- **Order of events** — `CallChanged` is a state event: it carries the full participant count
+  and `Call.Version`, and a banner drops one whose version is not above the one it holds, so two
+  joins that push out of order still end on the right count. `CallEnded` is a fact event and is
+  final: a banner that has seen it for a call ignores every later `CallChanged` for that call,
+  so a late event cannot bring the banner back. On `reconnected$` the banner's pages read
+  `GET …/calls/current` again.
 - **Domain** — `Call` (`Id`, `PopkinId`, `Kind: CallKind {Group, Direct}`, `ThreadId?`,
-  `StartedAt`, `EndedAt?`) and `CallParticipant` (`CallId`, `MembershipId`, `JoinedAt`, `LeftAt?`,
+  `StartedAt`, `EndedAt?`, `Version`) and `CallParticipant` (`CallId`, `MembershipId`, `JoinedAt`, `LeftAt?`,
   `MicOn`, `CameraOn`). This design adds `CallParticipant.ConnectionId`, the hub connection that
   receives signals. `IAppDbContext` gains `DbSet<Call>` and `DbSet<CallParticipant>`;
   `CallConfiguration` and `CallParticipantConfiguration` map them. A unique filtered index allows
-  one call under way per Popkin for `Group` and per thread for `Direct`. Every clock read uses
+  one call under way per Popkin for `Group` and per thread for `Direct`. `Call.Version` is a
+  counter the entity raises with every change to its participants. Every clock read uses
   `TimeProvider`.
 
 ### Open questions
@@ -142,7 +181,6 @@ call banner inside the Everyone thread; the design reuses the home banner there.
   `<TO SUPPLY>`.
 - What happens to a call under way when its Popkin wraps up (L2-044 AC4 moves the screen to the
   recap): `<TO SUPPLY>`.
-- Disconnect grace period before a dropped participant leaves: `<TO SUPPLY>`.
 - The "+N more" wording and the choice of the 12 tiles shown (L2-029 AC7): `<TO SUPPLY>`.
 
 ## Requirements

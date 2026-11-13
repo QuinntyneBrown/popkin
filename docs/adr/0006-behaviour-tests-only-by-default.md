@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted, 12 November 2026. Amends ADR 0003: the sweeps are kept and maintained, but no default command and no CI job
+Accepted, 12 November 2026. Amended by ADR 0011, which adds unit tests for the `api` library.
+Amends ADR 0003: the sweeps are kept and maintained, but no default command and no CI job
 runs them.
 
 ## Context

@@ -48,8 +48,10 @@ another label such as "Return" is `<TO SUPPLY>`.
   body (L2-052 AC1).
 - `POST /api/popkins/{popkinId}/calls/{callId}/leave` — `204 No Content`; defined by
   [start or join a group call](../group-call/README.md).
-- `PopkinHub` event `ParticipantMediaChanged(callId, membershipId, micOn, cameraOn)` on
-  `call:{callId}`.
+- `PopkinHub` event `ParticipantMediaChanged(callId, membershipId, version, micOn, cameraOn)` on
+  `call:{callId}`. It is a state event: it carries both values in full and
+  `CallParticipant.MediaVersion`, and a client drops one whose version is not above the one it
+  holds for that participant.
 
 ### Frontend
 
@@ -77,6 +79,11 @@ another label such as "Return" is `<TO SUPPLY>`.
   service lives in root, "Minimise call" keeps media running. Remote audio plays through detached
   audio elements while the call page is closed.
 - **`CallsApi`** — gains `setMedia(popkinId, callId, micOn?, cameraOn?)`.
+- **Coalescing** — microphone and camera state is replaceable: each new state replaces the one
+  before it. While a `PATCH` is in flight, `CallSession` keeps only the newest state the member
+  chose and sends it when the request returns, so five quick presses cost two requests and end
+  on the last press. Signals are the opposite and are never coalesced
+  ([Group call](../group-call/README.md)).
 - **`pk-top-bar`** — carries "Minimise call" and "Invite to call" as icon buttons.
 
 ### Backend
@@ -85,10 +92,10 @@ another label such as "Return" is `<TO SUPPLY>`.
 - **`SetCallMediaCommand` / `SetCallMediaCommandHandler` / `SetCallMediaCommandValidator`** —
   introduced. Loads the caller's membership through `IMembershipGuard`. Loads their
   `CallParticipant` whose `LeftAt` is empty, or answers `404 call_not_found`. Calls
-  `CallParticipant.SetMedia`, saves, and pushes `ParticipantMediaChanged` through
-  `IPopkinNotifier`.
-- **`CallParticipant`** — gains `SetMedia(micOn?, cameraOn?)`. The fields `MicOn` and
-  `CameraOn` come from the group call design.
+  `CallParticipant.SetMedia`, saves, and pushes `ParticipantMediaChanged` with the new
+  `MediaVersion` through `IPopkinNotifier`.
+- **`CallParticipant`** — gains `SetMedia(micOn?, cameraOn?)`, which raises `MediaVersion`. The
+  fields `MicOn` and `CameraOn` come from the group call design.
 - **`LeaveCallCommandHandler`** — from the group call design. It ends the call when the last
   participant leaves (L2-029 AC6).
 

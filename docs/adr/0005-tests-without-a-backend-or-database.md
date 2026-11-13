@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted, 12 November 2026.
+Accepted, 12 November 2026. Amended by ADR 0010, which extends these rules to the SignalR hub.
 
 ## Context
 

@@ -46,8 +46,8 @@ loop each due Popkin
   handler -> db : Save this Popkin
   alt committed
     db --> handler : Committed
-    handler -> hub : popkinWrappedUp to popkin:{popkinId} (via backplane)
-    hub -> rt : popkinWrappedUp
+    handler -> hub : PopkinWrappedUp to popkin:{popkinId} (via backplane)
+    hub -> rt : PopkinWrappedUp
     rt -> store : Event
     store -> store : Reload Popkin, status = wrappedUp
     store -> page : Navigate to /p/{popkinId}/recap (replaceUrl)

@@ -11,7 +11,7 @@ back to the screen they asked for.
 - **session cookie** — HttpOnly, Secure, same-site cookie named `__Host-popkin` that carries an encrypted authentication ticket naming the `Session`
 - **live session** — session that is not revoked, has not expired, and whose person is not deleted
 - **public screen** — screen a Visitor may open without a session: the landing page, the welcome screen, sign up, sign in, the code screen and an invite (L2-007 AC3)
-- **anonymous endpoint** — API endpoint served without a session: health, sign up, sign in, code confirmation and invite preview (L2-050 AC1)
+- **anonymous endpoint** — API endpoint served without a session: the two health endpoints (liveness and readiness), sign up, sign in, code confirmation and invite preview (L2-050 AC1)
 
 The API already uses cookie authentication and a fallback policy that requires an authenticated
 user (`backend/src/Popkin.Api/Program.cs`). The cookie is HttpOnly, SameSite=Lax, and answers
@@ -39,8 +39,8 @@ front-end guard and interceptor.
 - **`ValidateSessionQuery`** / **`ValidateSessionQueryHandler`** (`Popkin.Application.Auth`, introduced) — loads the `Session` by `SessionId` and checks that it belongs to `PersonId`, is live at `TimeProvider.GetUtcNow()`, and that the `Person` has no `DeletedAt`.
 - **`ICurrentPerson`** / **`HttpCurrentPerson`** (introduced) — reads `PersonId` and `SessionId` from the claims for handlers. Handlers never read `HttpContext` themselves.
 - **`GetSessionQuery`** / **`GetSessionQueryHandler`**, **`SessionDto`** (introduced) — return the caller's id, name and photo URL for `AuthController.GetSession`.
-- **Fallback policy** (existing) — every endpoint requires an authenticated user unless it carries `[AllowAnonymous]`. The anonymous set is exactly `HealthController`, `AuthController.RequestCode`, `ResendCode`, `ConfirmCode` and the invite preview (`InvitesController`, invites design) (L2-050 AC1). Swagger stays above `UseAuthentication`. `PopkinHub` is mapped under the same policy, so a connection without a live session is refused with 401 during negotiation (L2-050 AC4).
-- **Ticket protection** — ASP.NET Core Data Protection encrypts the ticket. Where the key ring is persisted for more than one API instance is `<TO SUPPLY>`.
+- **Fallback policy** (existing) — every endpoint requires an authenticated user unless it carries `[AllowAnonymous]`. The anonymous set is exactly `HealthController` (`GET /api/health` and `GET /api/health/ready`, each a status and nothing else, L2-050 AC5), `AuthController.RequestCode`, `ResendCode`, `ConfirmCode` and the invite preview (`InvitesController`, invites design) (L2-050 AC1). Swagger stays above `UseAuthentication`. `PopkinHub` is mapped under the same policy, so a connection without a live session is refused with 401 during negotiation (L2-050 AC4).
+- **Ticket protection** — ASP.NET Core Data Protection encrypts the ticket. Popkin runs one API instance ([ADR 0009](../../../adr/0009-one-api-instance.md)); the key ring is persisted outside the container, at the path `DataProtection:KeysPath` names, so sessions survive a restart ([`docs/deployment.md`](../../../deployment.md)).
 - **Logging** — the request log never writes the cookie or `Set-Cookie` header (L2-054 AC3).
 
 ### Front end (introduced)

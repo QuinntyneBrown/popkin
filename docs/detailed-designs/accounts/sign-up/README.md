@@ -76,6 +76,10 @@ requires (L2-006 AC2). The code-issuing command introduced here is shared with s
   `UnconfiguredCodeSender` fails every send with 503 `code_not_sent`. `Auth:DevelopmentCode`
   (Development only) makes every code the configured digits, so the API recorder can confirm a
   code it never sees; `eng/Start-E2eApi.ps1` sets it to 482913.
+- **Measurement** — a send that fails adds one to the counter `popkin.codes.send_failures`, with
+  the channel (`Phone` or `Email`) as its only dimension, never the destination
+  ([ADR 0012](../../../adr/0012-opentelemetry.md)). It is what shows that codes are not arriving
+  (L2-003).
 - **Hash key** — `Auth:CodeHashKey`; required outside Development. Its storage stays `<TO SUPPLY>`.
 
 ## Requirements

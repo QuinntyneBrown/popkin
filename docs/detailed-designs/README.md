@@ -13,7 +13,8 @@ Popkin is one system of five containers:
 - **Popkin web app** — Angular single-page application (`frontend/projects/popkin`, with the
   `api` and `components` libraries).
 - **Popkin API** — ASP.NET Core on .NET 10: controllers under `/api` and the SignalR hub
-  `PopkinHub` at `/hubs/popkin` for live updates and call signalling.
+  `PopkinHub` at `/hubs/popkin` for live updates and call signalling. It runs as one instance
+  ([ADR 0009](../adr/0009-one-api-instance.md)).
 - **Popkin Worker** — .NET worker service for scheduled jobs such as wrapping up a Popkin whose
   time is up.
 - **Popkin database** — SQL Server through EF Core.
@@ -42,6 +43,57 @@ Shared names used across the designs:
   change (L2-007 AC4).
 - Routes follow the mock manifest. A direct message is `/p/:popkinId/chat/:memberId` and the
   welcome screen is `/i/:code/welcome`.
+
+## Shared real-time rules
+
+Every design that sends or receives through `PopkinHub` keeps these rules. They come from the
+audit [Learnings from BombRMan](../audits/learnings-from-bombrman.md), improvements 1 to 7.
+
+- **The hub is a transport.** A hub method checks nothing itself and sends one MediatR request,
+  exactly as a controller does. Membership and participant checks have one home,
+  `IMembershipGuard`, and are tested the same way for HTTP and for the hub.
+- **The contract is typed on both sides.** The hub is `Hub<IPopkinClient>`, with one interface
+  method per event and DTOs from `Popkin.Application`, so the compiler checks every send. In the
+  `api` library the event names live in one typed map that `SignalRPopkinRealtime` alone reads.
+- **Event names are PascalCase**, the name of the `IPopkinClient` method: `MessageAdded`,
+  `PopkinWrappedUp`.
+- **An event is a hint that the state changed, never the only way to learn it.** Each design
+  that adds an event names the read that recovers it, and `PopkinRealtime.reconnected$` triggers
+  that read. The table of events and recovery reads is in
+  [Live messages](chat/live-messages/README.md#events-and-their-recovery-reads).
+- **Every event is one of two kinds.** A **state event** carries the full current value and a
+  version that only rises (a counter on the aggregate); the client keeps the highest version it
+  has seen for that aggregate and drops anything older. A **fact event** is final and idempotent:
+  applying it twice, or before the fact it refers to arrives, ends in the same state.
+- **State may be coalesced; an edge never is.** "The microphone is now off" replaces the state
+  before it. A message, a WebRTC `offer`, `answer` or ICE `candidate` must each arrive: none is
+  coalesced, deduplicated by content or dropped under load. When a limit is hit, the action
+  fails visibly.
+- **Sends are awaited** in the request that causes them, and every send names a group or users;
+  nothing is sent to all connections (L2-051).
+- **Hub failures use the ProblemDetails `code` values**, so the client branches on one
+  vocabulary, and detailed hub errors are on in Development only (L2-052 AC5).
+- **The client is `@microsoft/signalr` from npm**, in `frontend/package.json`, on the release
+  line of the server's ASP.NET Core and updated with it. Nothing is vendored.
+- **Tests**: the hub is stubbed in Playwright and reached in memory by the API tests
+  ([ADR 0010](../adr/0010-the-hub-in-tests.md)); the stores' rules have unit tests
+  ([ADR 0011](../adr/0011-unit-tests-for-frontend-logic.md)).
+
+## Measurements
+
+A design that states a number names the instrument that shows it
+([ADR 0012](../adr/0012-opentelemetry.md)). Popkin's own instruments are on the meter `Popkin`:
+
+| Requirement | Promise | Instrument | Design |
+|---|---|---|---|
+| L2-055 AC3 | 95 % of reads within 300 ms, 99 % within 1 s | `http.server.request.duration` (ASP.NET Core), by route template | [Fast screens](reliability/fast-screens/README.md) |
+| L2-027 AC1 | A message arrives within 1 s | `popkin.hub.send.duration`, from the commit to the end of the hub send, by event | [Live messages](chat/live-messages/README.md) |
+| L2-044 AC1 | A Popkin wraps up within 1 minute of its end | `popkin.wrap_up.lateness`, now minus `EndsAt` at wrap-up | [Time is up](wrap-up/time-is-up/README.md) |
+| L2-053 | Limits hold | `popkin.rate_limit.rejections`, by policy | [Abuse limits](security/abuse-limits/README.md) |
+| L2-003 | A code arrives | `popkin.codes.send_failures`, by channel | [Sign up](accounts/sign-up/README.md) |
+
+A dimension is always one of a fixed set of values; an id, an address or anything a person typed
+is never one (L2-054 AC3).
 
 ## Conflicts between the mocks and the specs
 
@@ -115,6 +167,44 @@ Each design follows the source named below and marks the conflict in its own REA
 | Accessibility | [Optional motion](accessibility/optional-motion/README.md) | L2-060 |
 
 Every L2 requirement from L2-001 to L2-061 is realised by at least one feature above.
+
+## Known gaps
+
+The designs mark what is not decided with `<TO SUPPLY>`. Most markers are copy or a value. The
+ones below are decisions that shape the architecture; a journey cannot be finished, and some
+cannot start, until its row is settled. When a gap is settled, its row stays and names the ADR
+or design that settled it.
+
+| # | Open decision | Blocks | Settled by |
+|---|---|---|---|
+| 1 | SMS provider and email provider for the six-digit codes ([Sign up](accounts/sign-up/README.md)) | First deployment; journeys 1, 2 and 6 outside Development | |
+| 2 | Where `Auth:CodeHashKey` is stored and how it is rotated ([Personal data protection](security/personal-data-protection/README.md)) | First deployment | |
+| 3 | Reverse proxy product in front of the API ([ADR 0013](../adr/0013-deployment-shape.md)) | First deployment | |
+| 4 | Where the images run, where they are pushed and how a release is rolled back ([ADR 0013](../adr/0013-deployment-shape.md)) | First deployment | |
+| 5 | Hosting of SQL Server and key management for encryption at rest ([Personal data protection](security/personal-data-protection/README.md)) | First deployment | |
+| 6 | Telemetry backend, log retention and alert thresholds ([ADR 0012](../adr/0012-opentelemetry.md)) | First deployment | |
+| 7 | Load target: concurrent connections and "normal load" ([Fast screens](reliability/fast-screens/README.md), [Live messages](chat/live-messages/README.md)) | Nothing yet; ends [ADR 0009](../adr/0009-one-api-instance.md) when it passes one instance | |
+| 8 | Whether closing a person's open hub connections at sign-out is needed ([Live messages](chat/live-messages/README.md)) | Journey 3 | |
+| 9 | Photo store provider, its signed-address scheme and its key management ([Add photos](photos/add-photos/README.md)) | Journeys 5, 13 and 14 | |
+| 10 | Media topology for calls, mesh or SFU, and where an SFU would run ([Group call](calls/group-call/README.md)) | Journey 7 | |
+| 11 | Media relay (STUN/TURN) provider and credential lifetime ([Group call](calls/group-call/README.md)) | Journey 7 | |
+| 12 | How the other member learns of a direct call ([Group call](calls/group-call/README.md)) | Journey 11 | |
+| 13 | How a hub event sent by the Worker reaches clients: a backplane, or another path ([Time is up](wrap-up/time-is-up/README.md), [ADR 0009](../adr/0009-one-api-instance.md)) | Journey 9. Until settled, the web app's clock check carries the wrap-up | |
+| 14 | Number of Worker instances ([Time is up](wrap-up/time-is-up/README.md)) | Journey 9 | |
+| 15 | Whether field measurement of screen speed is wanted, and its collector ([Fast screens](reliability/fast-screens/README.md)) | Nothing | |
+| 16 | One command that starts the API, the Worker and the app (an AppHost, by ADR) | Nothing; wanted when the Worker hosts its first job (journey 9) | |
+
+Settled so far:
+
+| Decision | Settled by |
+|---|---|
+| How many API instances run | [ADR 0009](../adr/0009-one-api-instance.md): one |
+| Whether TLS ends at a reverse proxy, and who serves the web app | [ADR 0013](../adr/0013-deployment-shape.md): the proxy does both |
+| The logging sink | [ADR 0012](../adr/0012-opentelemetry.md): OpenTelemetry, exported over OTLP |
+| The SignalR client package | Shared real-time rules above: `@microsoft/signalr` from npm, on the server's release line |
+| Reconnect delays and the disconnect grace period | [Live messages](chat/live-messages/README.md) and [Group call](calls/group-call/README.md) |
+| How pure frontend logic is tested | [ADR 0011](../adr/0011-unit-tests-for-frontend-logic.md) |
+| How the hub is stubbed in tests | [ADR 0010](../adr/0010-the-hub-in-tests.md) |
 
 ## Diagrams
 
