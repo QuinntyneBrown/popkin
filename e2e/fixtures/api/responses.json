@@ -2,18 +2,18 @@
   "POST /api/auth/codes": {
     "status": 202,
     "body": {
-      "verificationId": "3ab614b7-dd88-4c64-ab0f-6fcf45235429",
+      "verificationId": "f730ad12-dc11-45b1-a683-13dcf08818f2",
       "channel": "Phone",
       "displayDestination": "(•••) •••-••48",
-      "resendAvailableAt": "2026-11-12T23:37:28.9829379+00:00"
+      "resendAvailableAt": "2026-11-13T08:28:55.530353+00:00"
     }
   },
-  "POST /api/auth/codes/3ab614b7-dd88-4c64-ab0f-6fcf45235429/confirm": {
+  "POST /api/auth/codes/f730ad12-dc11-45b1-a683-13dcf08818f2/confirm": {
     "status": 200,
     "body": {
       "outcome": "SignedIn",
       "session": {
-        "personId": "a232d9ac-53b6-477d-ae4e-d2a5accc36a0",
+        "personId": "dd5bbc0c-221e-4c9d-9e55-82c616d9c492",
         "name": "Mara Okafor",
         "photoUrl": null
       },
@@ -23,40 +23,126 @@
   "GET /api/auth/session": {
     "status": 200,
     "body": {
-      "personId": "a232d9ac-53b6-477d-ae4e-d2a5accc36a0",
+      "personId": "dd5bbc0c-221e-4c9d-9e55-82c616d9c492",
       "name": "Mara Okafor",
       "photoUrl": null
     }
   },
-  "POST /api/auth/codes/3ab614b7-dd88-4c64-ab0f-6fcf45235429/resend": {
+  "POST /api/auth/codes/f730ad12-dc11-45b1-a683-13dcf08818f2/resend": {
     "status": 202,
     "body": {
-      "verificationId": "00f96d0c-4099-417c-b5a7-5c5c0f784c62",
+      "verificationId": "37826b41-d07f-4cff-a97c-3c5d58a19756",
       "channel": "Phone",
       "displayDestination": "(•••) •••-••48",
-      "resendAvailableAt": "2026-11-12T23:38:01.3498765+00:00"
+      "resendAvailableAt": "2026-11-13T08:29:27.128649+00:00"
     }
   },
   "POST /api/popkins": {
     "status": 201,
     "body": {
-      "id": "10290aab-caa2-479b-8e4c-d1d12c1cf43a",
+      "id": "6a8a1c75-5897-4946-8392-ef961ba4bdd5",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
-      "endsAt": "2026-11-15T18:00:00+00:00",
-      "inviteCode": "kv939k6zkc",
-      "inviteUrl": "https://popk.in/kv939k6zkc"
+      "endsAt": "2026-11-15T23:00:00+00:00",
+      "inviteCode": "zeq58cxkps",
+      "inviteUrl": "https://popk.in/zeq58cxkps"
     }
   },
-  "GET /api/popkins/10290aab-caa2-479b-8e4c-d1d12c1cf43a/invite": {
+  "GET /api/popkins/6a8a1c75-5897-4946-8392-ef961ba4bdd5/invite": {
     "status": 200,
     "body": {
-      "code": "kv939k6zkc",
-      "url": "https://popk.in/kv939k6zkc",
+      "code": "zeq58cxkps",
+      "url": "https://popk.in/zeq58cxkps",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal"
+    }
+  },
+  "GET /api/invites/zeq58cxkps": {
+    "status": 200,
+    "body": {
+      "state": "Open",
+      "name": "Lakeside Weekend",
+      "emoji": "🏕️",
+      "colour": "Teal",
+      "memberCount": 3,
+      "endsAt": "2026-11-15T23:00:00+00:00",
+      "wrappedUpAt": null,
+      "avatars": [
+        {
+          "initials": "MO",
+          "accent": "Teal",
+          "photoUrl": null
+        },
+        {
+          "initials": "WB",
+          "accent": "Sky",
+          "photoUrl": null
+        },
+        {
+          "initials": "DP",
+          "accent": "Coral",
+          "photoUrl": null
+        }
+      ],
+      "inviter": {
+        "firstName": "Mara",
+        "avatar": {
+          "initials": "MO",
+          "accent": "Teal",
+          "photoUrl": null
+        }
+      },
+      "viewer": {
+        "isMember": false,
+        "popkinId": null
+      }
+    }
+  },
+  "GET /api/invites/zeq58cxkps/members": {
+    "status": 200,
+    "body": {
+      "members": [
+        {
+          "displayName": "Mara Okafor",
+          "avatar": {
+            "initials": "MO",
+            "accent": "Teal",
+            "photoUrl": null
+          }
+        },
+        {
+          "displayName": "Walt Brennan",
+          "avatar": {
+            "initials": "WB",
+            "accent": "Sky",
+            "photoUrl": null
+          }
+        },
+        {
+          "displayName": "Dev Patel",
+          "avatar": {
+            "initials": "DP",
+            "accent": "Coral",
+            "photoUrl": null
+          }
+        }
+      ],
+      "othersCount": 0
+    }
+  },
+  "POST /api/invites/zeq58cxkps/join": {
+    "status": 201,
+    "body": {
+      "popkinId": "6a8a1c75-5897-4946-8392-ef961ba4bdd5",
+      "membershipId": "eda24c44-1d8a-4ac1-b9f5-809e63301541",
+      "displayName": "Joel",
+      "popkinName": "Lakeside Weekend",
+      "emoji": "🏕️",
+      "colour": "Teal",
+      "namedMembers": ["Mara", "Walt"],
+      "othersCount": 1
     }
   }
 }

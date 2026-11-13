@@ -30,6 +30,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public DatabaseFaults Faults { get; } = new();
 
+    /// <summary>The photo store of this fixture, in memory.</summary>
+    public InMemoryPhotoStore Photos => Services.GetRequiredService<InMemoryPhotoStore>();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Development");
@@ -45,6 +48,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<ICodeGenerator>(CodeGenerator);
             services.RemoveAll<IAppDbContext>();
             services.AddScoped<IAppDbContext>(sp => new FaultyDbContext(sp.GetRequiredService<AppDbContext>(), Faults));
+            services.RemoveAll<IPhotoStore>();
+            services.AddSingleton<InMemoryPhotoStore>();
+            services.AddSingleton<IPhotoStore>(sp => sp.GetRequiredService<InMemoryPhotoStore>());
             services.RemoveAll<ICodeSender>();
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Email));

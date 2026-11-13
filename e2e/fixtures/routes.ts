@@ -11,6 +11,7 @@ export interface ScreenRoute {
 }
 
 const created = responses['POST /api/popkins'].body;
+const invite = `/i/${created.inviteCode}`;
 
 export const routes = {
   home: { app: '/' },
@@ -38,6 +39,17 @@ export const routes = {
     app: `/p/${created.id}/created`,
     mock: 'pages/popkin-created/copied.html',
   },
+  joinInvite: { app: invite, mock: 'pages/join-invite/default.html' },
+  joinInviteLoading: { app: invite, mock: 'pages/join-invite/loading.html' },
+  joinInviteWrapped: { app: invite, mock: 'pages/join-invite/wrapped.html' },
+  joinInviteNotFound: { app: '/i/nosuchcode', mock: 'pages/join-invite/not-found.html' },
+  joinInviteError: { app: invite, mock: 'pages/join-invite/error.html' },
+  yourProfile: { app: `${invite}/profile`, mock: 'pages/your-profile/default.html' },
+  yourProfileWithPhoto: { app: `${invite}/profile`, mock: 'pages/your-profile/with-photo.html' },
+  yourProfileInvalid: { app: `${invite}/profile`, mock: 'pages/your-profile/invalid.html' },
+  yourProfileSubmitting: { app: `${invite}/profile`, mock: 'pages/your-profile/submitting.html' },
+  yourProfileError: { app: `${invite}/profile`, mock: 'pages/your-profile/error.html' },
+  youreIn: { app: `${invite}/welcome`, mock: 'pages/youre-in/default.html' },
   toastSuccess: { app: '/verify', mock: 'notifications/toast/success.html' },
   serverError: { app: '/error', mock: 'pages/server-error/default.html' },
   serverErrorWithReference: {

@@ -30,6 +30,7 @@ public sealed class MembershipConfiguration : IEntityTypeConfiguration<Membershi
         builder.HasKey(m => m.Id);
         builder.Property(m => m.Role).HasConversion<string>().HasMaxLength(10);
         builder.Property(m => m.DisplayName).HasMaxLength(Person.MaxNameLength).IsRequired();
+        builder.Property(m => m.PhotoKey).HasMaxLength(200);
         builder.HasIndex(m => new { m.PopkinId, m.PersonId }).IsUnique();
         builder.HasIndex(m => m.PersonId);
         builder.HasOne<Person>().WithMany().HasForeignKey(m => m.PersonId).OnDelete(DeleteBehavior.Restrict);

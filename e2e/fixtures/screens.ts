@@ -1,22 +1,35 @@
+import path from 'node:path';
 import type { Locator, Page } from '@playwright/test';
 import {
+  asVisitor,
   codeScreenAt24Seconds,
   howLongForLakeside,
   inviteFailsOnTheServer,
+  joelAtTheMockInvite,
+  joelWhoseJoinFails,
+  joelWhoseJoinHangs,
+  joinFromTheInvite,
   lakesideInvite,
   maraWithPhoto,
+  theInviteFailing,
+  theInviteLoading,
+  theMockInvite,
+  theMockWrappedInvite,
   withShareSheet,
 } from './journeys';
 import type { RouteKey } from './routes';
 import { answer, hold, problem } from './stubs';
 import { EndDateDialog } from '../pages/end-date.dialog';
 import { HowLongPage } from '../pages/how-long.page';
+import { JoinInvitePage } from '../pages/join-invite.page';
 import { NameYourPopkinPage } from '../pages/name-your-popkin.page';
 import { NotFoundPage } from '../pages/not-found.page';
 import { PopkinCreatedPage } from '../pages/popkin-created.page';
 import { ServerErrorPage } from '../pages/server-error.page';
 import { SignUpPage } from '../pages/sign-up.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
+import { YourProfilePage } from '../pages/your-profile.page';
+import { YoureInPage } from '../pages/youre-in.page';
 import responses from './api/responses.json';
 
 /**
@@ -41,6 +54,15 @@ const signUpPicture = (page: Page) => ({ picture: new SignUpPage(page).picture }
 const codePicture = (page: Page) => ({ picture: new VerifyCodePage(page).picture });
 const namePicture = (page: Page) => ({ picture: new NameYourPopkinPage(page).picture });
 const lengthPicture = (page: Page) => ({ picture: new HowLongPage(page).picture });
+
+const invitePicture = (page: Page) => ({ picture: new JoinInvitePage(page).picture });
+const profilePicture = (page: Page) => ({ picture: new YourProfilePage(page).picture });
+const portrait = path.join(__dirname, '../../docs/mocks/assets/images/call3.jpg');
+
+const profileRegions = (page: Page) => {
+  const p = new YourProfilePage(page);
+  return { topBar: p.topBar, heading: p.heading, photo: p.photo, field: p.nameField };
+};
 
 const signUpRegions = (page: Page) => {
   const s = new SignUpPage(page);
@@ -286,5 +308,85 @@ export const screenStates: ScreenState[] = [
       await new PopkinCreatedPage(page).copyLink.click();
     },
     regions: (page) => ({ share: new PopkinCreatedPage(page).shareActions }),
+  },
+  {
+    key: 'joinInvite',
+    before: theMockInvite,
+    regions: (page) => {
+      const i = new JoinInvitePage(page);
+      return { wordmark: i.wordmark, preview: i.preview, button: i.primaryButton, note: i.note };
+    },
+    wideRegions: invitePicture,
+  },
+  {
+    key: 'joinInviteLoading',
+    before: theInviteLoading,
+    regions: (page) => {
+      const i = new JoinInvitePage(page);
+      return { skeletons: i.skeletonGroup, button: i.buttonSkeleton };
+    },
+    wideRegions: invitePicture,
+  },
+  {
+    key: 'joinInviteWrapped',
+    before: theMockWrappedInvite,
+    regions: (page) => {
+      const i = new JoinInvitePage(page);
+      return { preview: i.preview, button: i.startYourOwn };
+    },
+    wideRegions: invitePicture,
+  },
+  {
+    key: 'joinInviteNotFound',
+    before: async (page) => {
+      await asVisitor(page);
+      await answer(page, 'GET /api/invites/nosuchcode', problem(404, 'invite_not_found'));
+    },
+    regions: (page) => ({ emptyState: new JoinInvitePage(page).emptyState }),
+  },
+  {
+    key: 'joinInviteError',
+    before: theInviteFailing,
+    regions: (page) => ({ emptyState: new JoinInvitePage(page).emptyState }),
+  },
+  {
+    key: 'yourProfile',
+    before: joelAtTheMockInvite,
+    regions: profileRegions,
+    wideRegions: profilePicture,
+  },
+  {
+    key: 'yourProfileWithPhoto',
+    before: joelAtTheMockInvite,
+    app: (page) => new YourProfilePage(page).choosePhoto(portrait),
+    regions: profileRegions,
+    wideRegions: profilePicture,
+  },
+  {
+    key: 'yourProfileInvalid',
+    before: joelAtTheMockInvite,
+    app: (page) => new YourProfilePage(page).name.fill(''),
+    regions: profileRegions,
+    wideRegions: profilePicture,
+  },
+  {
+    key: 'yourProfileSubmitting',
+    before: joelWhoseJoinHangs,
+    app: (page) => new YourProfilePage(page).imIn.click(),
+    regions: profileRegions,
+    wideRegions: profilePicture,
+  },
+  {
+    key: 'yourProfileError',
+    before: joelWhoseJoinFails,
+    app: (page) => new YourProfilePage(page).imIn.click(),
+    regions: (page) => ({ ...profileRegions(page), alert: new YourProfilePage(page).alert }),
+    wideRegions: profilePicture,
+  },
+  {
+    key: 'youreIn',
+    before: joelAtTheMockInvite,
+    app: joinFromTheInvite,
+    regions: (page) => ({ arrival: new YoureInPage(page).arrival }),
   },
 ];

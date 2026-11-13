@@ -1,0 +1,30 @@
+@if (joined; as joined) {
+  <div pk-screen layout="arrival" surface="wash" [accent]="accent">
+    <div
+      pk-arrival
+      [emoji]="joined.emoji"
+      [heading]="'Welcome in, ' + joined.displayName + '!'"
+      [lead]="line"
+      [avatars]="avatars()"
+    ></div>
+    <a
+      pk-button
+      slot="actions"
+      variant="popkin"
+      [block]="true"
+      [routerLink]="['/p', joined.popkinId, 'chat', 'everyone']"
+      [state]="sayHi"
+    >
+      <svg pk-icon name="message" size="md"></svg>Say hi to everyone
+    </a>
+    <a
+      pk-button
+      slot="actions"
+      variant="secondary"
+      [block]="true"
+      [routerLink]="['/p', joined.popkinId, 'photos']"
+    >
+      <svg pk-icon name="photos" size="md"></svg>See the photos
+    </a>
+  </div>
+}

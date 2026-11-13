@@ -5,6 +5,7 @@
   class="screen__body"
   [class.screen__body--hero]="body() === 'hero'"
   [class.screen__body--middle]="body() === 'middle'"
+  [class.screen__body--invite]="body() === 'invite'"
   tabindex="-1"
 >
   @if (heading()) {
@@ -14,7 +15,9 @@
     <p class="screen__lead">{{ lead() }}</p>
   }
   <div class="screen__content" [class.screen__content--headed]="heading()"><ng-content /></div>
-  <div class="screen__actions"><ng-content select="[slot=actions]" /></div>
+  <div class="screen__actions" [class.screen__lone-action]="loneAction()">
+    <ng-content select="[slot=actions]" />
+  </div>
 </main>
 @if (footer()) {
   <div class="screen__footer"><ng-content select="[slot=footer]" /></div>

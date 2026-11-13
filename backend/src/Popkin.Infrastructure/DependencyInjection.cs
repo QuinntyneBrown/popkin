@@ -7,7 +7,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Popkin.Application.Abstractions;
 using Popkin.Domain;
+using Popkin.Application.Photos;
 using Popkin.Infrastructure.Auth;
+using Popkin.Infrastructure.Media;
 using Popkin.Infrastructure.Persistence;
 
 namespace Popkin.Infrastructure;
@@ -43,6 +45,28 @@ public static class DependencyInjection
         var key = SHA256.HashData(Encoding.UTF8.GetBytes(hashKey ?? "popkin-development-only-key"));
         services.AddSingleton<ICodeHasher>(new HmacCodeHasher(key));
         services.AddSingleton<IInviteCodeGenerator, RandomInviteCodeGenerator>();
+
+        services.AddSingleton<IPhotoProcessor, MagickPhotoProcessor>();
+        // Signs the addresses stored files are read from; like the code hash key, it must be
+        // configured outside Development.
+        var signingKey = configuration["Photos:SigningKey"];
+        if (string.IsNullOrEmpty(signingKey) && !development)
+        {
+            throw new InvalidOperationException("Photos:SigningKey is not configured.");
+        }
+
+        var photoKey = SHA256.HashData(Encoding.UTF8.GetBytes(signingKey ?? "popkin-development-only-photo-key"));
+        services.AddSingleton(sp => new PhotoUrlSigner(photoKey, sp.GetRequiredService<TimeProvider>()));
+        if (development)
+        {
+            // The photo store provider is `<TO SUPPLY>`; in Development files stay on this machine.
+            var root = configuration["Photos:Root"] ?? Path.Combine(Path.GetTempPath(), "popkin-photos");
+            services.AddSingleton<IPhotoStore>(sp => new LocalPhotoStore(root, sp.GetRequiredService<PhotoUrlSigner>()));
+        }
+        else
+        {
+            services.AddSingleton<IPhotoStore, UnconfiguredPhotoStore>();
+        }
 
         foreach (var channel in Enum.GetValues<ContactChannel>())
         {

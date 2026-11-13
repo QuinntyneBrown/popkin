@@ -1,0 +1,13 @@
+@for (avatar of avatars(); track $index) {
+  <span
+    pk-avatar
+    size="sm"
+    [ring]="true"
+    [initials]="avatar.initials"
+    [photo]="avatar.photo"
+    [attr.data-accent]="avatar.accent"
+  ></span>
+}
+@if (more() > 0) {
+  <span class="avatar-stack__more">+{{ more() }}</span>
+}

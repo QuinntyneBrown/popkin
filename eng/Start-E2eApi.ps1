@@ -36,6 +36,10 @@ $env:ConnectionStrings__Popkin = "DataSource=$database"
 $env:Auth__DevelopmentCode = '482913'
 $env:App__Origin = 'http://localhost:4200'
 $env:Invites__BaseUrl = 'https://popk.in/'
+# Photo files of this run, beside its database, cleared with it.
+$photos = Join-Path $databaseDirectory 'photos'
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $photos
+$env:Photos__Root = $photos
 
 dotnet run --project $cli -c Release -- reset
 if ($LASTEXITCODE -ne 0) {

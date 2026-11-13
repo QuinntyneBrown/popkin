@@ -32,7 +32,7 @@ actor -> page : Open /i/(code) (public route)
 page --> actor : "Loading your invite…" skeleton
 page -> client : getPreview(code)
 client -> ctrl : GET /api/invites/(code), cookie if any
-ctrl -> ctrl : invite-lookup rate limit (L2-053 AC3)
+ctrl -> ctrl : invite-codes rate limit (L2-053 AC3)
 alt more than 20 lookups from this address in 10 min
   ctrl --> client : 429, Retry-After
 else within limit

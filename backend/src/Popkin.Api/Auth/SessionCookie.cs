@@ -93,6 +93,9 @@ public sealed class HttpCurrentPerson(IHttpContextAccessor accessor) : ICurrentP
 
     public Guid SessionId => Guid.Parse(Read(SessionCookie.SessionClaim));
 
+    public Guid? FindPersonId() =>
+        Guid.TryParse(accessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
+
     private string Read(string type) =>
         accessor.HttpContext?.User.FindFirstValue(type) ?? throw new InvalidOperationException("No signed-in person.");
 }

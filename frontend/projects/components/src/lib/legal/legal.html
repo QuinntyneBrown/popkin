@@ -1,2 +1,6 @@
-By continuing you agree to the <a [routerLink]="termsLink()">Terms</a> and
-<a [routerLink]="privacyLink()">Privacy</a>.
+@if (note()) {
+  {{ note() }}
+} @else {
+  By continuing you agree to the <a [routerLink]="termsLink()">Terms</a> and
+  <a [routerLink]="privacyLink()">Privacy</a>.
+}

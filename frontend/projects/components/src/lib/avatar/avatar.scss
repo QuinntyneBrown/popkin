@@ -46,3 +46,18 @@
   height: var(--space-18);
   font-size: var(--font-size-3xl);
 }
+
+:host(.avatar--2xl) {
+  width: var(--space-32);
+  height: var(--space-32);
+  font-size: var(--font-size-6xl);
+}
+
+:host(.avatar--ring) {
+  box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-canvas);
+}
+
+:host(.avatar--blank) {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-subtle);
+}

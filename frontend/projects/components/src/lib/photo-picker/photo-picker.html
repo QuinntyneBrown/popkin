@@ -1,0 +1,29 @@
+<button
+  class="photo-picker__button"
+  type="button"
+  [attr.aria-label]="label()"
+  [attr.aria-describedby]="
+    error() ? 'photo-picker-error' : caption() ? 'photo-picker-caption' : null
+  "
+  [disabled]="disabled()"
+  (click)="open()"
+>
+  <span pk-avatar size="2xl" [initials]="initial()" [photo]="photo()" [blank]="!photo()"></span>
+  <span class="photo-picker__badge"><svg pk-icon name="camera" size="md"></svg></span>
+</button>
+<input
+  #file
+  class="photo-picker__file"
+  type="file"
+  tabindex="-1"
+  aria-hidden="true"
+  [accept]="accept()"
+  (change)="choose()"
+/>
+@if (error()) {
+  <p class="photo-picker__error" id="photo-picker-error" role="alert">
+    <svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span>
+  </p>
+} @else if (caption()) {
+  <p class="photo-picker__caption" id="photo-picker-caption">{{ caption() }}</p>
+}

@@ -42,7 +42,7 @@ else code
   page --> actor : "Finding your Popkin…", disabled
   page -> client : getPreview(code)
   client -> ctrl : GET /api/invites/(code)
-  ctrl -> ctrl : invite-lookup rate limit (L2-053 AC3)
+  ctrl -> ctrl : invite-codes rate limit (L2-053 AC3)
   alt over limit
     ctrl --> client : 429 Retry-After
     client --> page : RateLimited(retryAfter)

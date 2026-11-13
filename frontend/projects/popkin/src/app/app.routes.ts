@@ -57,6 +57,28 @@ export const routes: Routes = [
     title: 'Your Popkin is up · Popkin',
   },
   {
+    path: 'i/:code',
+    loadComponent: () =>
+      import('./pages/join-invite/join-invite.page').then((m) => m.JoinInvitePage),
+    data: data({ shell: 'bare', page: 'join-invite' }),
+    title: 'Your invite · Popkin',
+  },
+  {
+    path: 'i/:code/profile',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/your-profile/your-profile.page').then((m) => m.YourProfilePage),
+    data: data({ shell: 'bare', page: 'your-profile' }),
+    title: 'How should people know you? · Popkin',
+  },
+  {
+    path: 'i/:code/welcome',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/youre-in/youre-in.page').then((m) => m.YoureInPage),
+    data: data({ shell: 'bare', page: 'youre-in' }),
+    title: 'You’re in · Popkin',
+  },
+  {
     path: 'error',
     loadComponent: () =>
       import('./pages/server-error/server-error.page').then((m) => m.ServerErrorPage),

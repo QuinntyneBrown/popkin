@@ -57,6 +57,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)");
 
+                    b.Property<Guid?>("InvitedByMembershipId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("JoinedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -65,6 +68,10 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PhotoKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<Guid>("PopkinId")
                         .HasColumnType("uniqueidentifier");

@@ -62,5 +62,27 @@ public sealed class PopkinSpace
         return (popkin, ChatThread.Everyone(popkin.Id, now));
     }
 
+    /// <summary>
+    /// A person joins as a member under the name they give (L2-013). The invite link does not say
+    /// which member shared it, so the Host is credited with the invite.
+    /// </summary>
+    public Membership Join(Guid personId, string displayName, Guid hostMembershipId, DateTimeOffset now)
+    {
+        LastActivityAt = now;
+        return Membership.Join(Id, personId, displayName, MembershipRole.Member, now, hostMembershipId);
+    }
+
     public void ChangeInviteCode(string inviteCode) => InviteCode = inviteCode;
+
+    /// <summary>Wraps the Popkin up: from now on it is read-only (L2-045). Wrapping up twice changes nothing.</summary>
+    public void WrapUp(DateTimeOffset now)
+    {
+        if (Status == PopkinStatus.WrappedUp)
+        {
+            return;
+        }
+
+        Status = PopkinStatus.WrappedUp;
+        WrappedUpAt = now;
+    }
 }

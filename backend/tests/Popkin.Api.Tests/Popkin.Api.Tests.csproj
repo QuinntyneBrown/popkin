@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
     <ProjectReference Include="..\..\src\Popkin.Api\Popkin.Api.csproj" />
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Assets\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Xunit" />

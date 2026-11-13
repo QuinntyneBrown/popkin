@@ -1,0 +1,81 @@
+:host {
+  display: block;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-subtle) 25%,
+    var(--color-bg-subtle-hover) 37%,
+    var(--color-bg-subtle) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer var(--duration-deliberate) ease infinite;
+}
+
+:host(.skeleton--text) {
+  height: var(--space-4);
+  border-radius: var(--radius-full);
+}
+
+:host(.skeleton--title) {
+  height: var(--space-7);
+  width: 60%;
+  border-radius: var(--radius-full);
+}
+
+:host(.skeleton--circle) {
+  flex: none;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-full);
+}
+
+:host(.skeleton--tile) {
+  flex: none;
+  width: var(--space-13);
+  height: var(--space-13);
+  border-radius: var(--radius-tile);
+}
+
+/* The tile of an invite, the size of popkin-tile--2xl. */
+:host(.skeleton--tile-2xl) {
+  flex: none;
+  width: var(--space-28);
+  height: var(--space-28);
+  border-radius: var(--radius-tile);
+}
+
+:host(.skeleton--card) {
+  height: var(--space-32);
+  border-radius: var(--radius-lg);
+}
+
+:host(.skeleton--btn) {
+  height: var(--control-height-md);
+  border-radius: var(--radius-full);
+}
+
+:host(.skeleton--pill) {
+  height: var(--space-8);
+  width: var(--space-40);
+  border-radius: var(--radius-full);
+}
+
+:host(.w-full) {
+  width: 100%;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 50%;
+  }
+
+  to {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    animation: none;
+  }
+}

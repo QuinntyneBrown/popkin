@@ -1,0 +1,38 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.people-list__list {
+  display: grid;
+  gap: var(--space-1) var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.people-list__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-14);
+}
+
+.people-list__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.people-list__more {
+  margin-top: var(--space-4);
+  color: var(--color-fg-muted);
+}
+
+@media (min-width: 64rem) {
+  .people-list__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

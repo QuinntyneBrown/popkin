@@ -1,0 +1,109 @@
+@if (problem(); as problem) {
+  <div pk-screen>
+    <div class="cluster cluster--center"><span pk-wordmark tone="coral"></span></div>
+    @switch (problem.kind) {
+      @case ('not-found') {
+        <div
+          pk-empty-state
+          icon="not-found"
+          [level]="1"
+          heading="We can’t find that invite"
+          text="The link may be mistyped, or the Popkin may be gone. Ask whoever sent it for a fresh one."
+        >
+          <a pk-button variant="primary" size="md" [routerLink]="startLink()">Start a Popkin</a>
+          <a pk-button variant="secondary" size="md" routerLink="/join">Join with a code</a>
+        </div>
+      }
+      @case ('limited') {
+        <div
+          pk-empty-state
+          icon="alert"
+          [level]="1"
+          heading="That’s a lot of invites"
+          [text]="problem.text"
+        >
+          <a pk-button variant="secondary" size="md" routerLink="/welcome">Back to start</a>
+        </div>
+      }
+      @default {
+        <h1 class="visually-hidden">Your invite</h1>
+        <div
+          pk-empty-state
+          icon="offline"
+          heading="We couldn’t open your invite"
+          text="Your connection dropped or we slipped up. The invite itself is fine."
+          [alert]="true"
+        >
+          <button pk-button type="button" variant="primary" size="md" (click)="load()">
+            <svg pk-icon name="retry" size="md"></svg>Try again
+          </button>
+          <a pk-button variant="secondary" size="md" routerLink="/welcome">Back to start</a>
+        </div>
+      }
+    }
+  </div>
+} @else {
+  <div
+    pk-screen
+    layout="split"
+    surface="wash"
+    [body]="preview() ? 'invite' : 'default'"
+    [accent]="accent()"
+    [loneAction]="!!preview() && !wrappedUp()"
+  >
+    <aside
+      pk-split-aside
+      slot="aside"
+      label="Popkin"
+      photo="/images/lake.jpg"
+      [muted]="wrappedUp()"
+    ></aside>
+    <div class="cluster cluster--center"><span pk-wordmark tone="coral"></span></div>
+    @if (preview(); as preview) {
+      <div
+        pk-invite-preview
+        [inviter]="preview.inviter.firstName"
+        [inviterAvatar]="inviterAvatar()"
+        [emoji]="preview.emoji"
+        [name]="preview.name"
+        [avatars]="avatars()"
+        [more]="more()"
+        [people]="people()"
+        [muted]="wrappedUp()"
+        [note]="wrappedLine()"
+      >
+        @if (until()) {
+          <span pk-time-left>{{ until() }}</span>
+        }
+      </div>
+    } @else {
+      <h1 class="visually-hidden">Your invite</h1>
+      <div pk-invite-preview [loading]="true" loadingLabel="Loading your invite…"></div>
+    }
+    @if (!preview()) {
+      <span pk-skeleton slot="actions" shape="btn" width="full" aria-hidden="true"></span>
+    } @else if (wrappedUp()) {
+      <a pk-button slot="actions" variant="secondary" [block]="true" [routerLink]="startLink()">
+        Start your own Popkin
+      </a>
+    } @else if (signedIn()) {
+      <a pk-button slot="actions" variant="popkin" [block]="true" [routerLink]="profileUrl">
+        Join
+      </a>
+    } @else {
+      <a
+        pk-button
+        slot="actions"
+        variant="popkin"
+        [block]="true"
+        routerLink="/sign-up"
+        [queryParams]="{ returnUrl: profileUrl }"
+      >
+        Join
+      </a>
+    }
+    @if (preview() && !wrappedUp()) {
+      <p pk-legal slot="actions" note="Free, no app to download."></p>
+    }
+  </div>
+}

@@ -1,0 +1,45 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+}
+
+.arrival__circle {
+  position: relative;
+  width: var(--space-55);
+  height: var(--space-55);
+}
+
+.arrival__person {
+  position: absolute;
+  translate: -50% -50%;
+}
+
+.arrival__centre {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.arrival__heading {
+  margin-top: var(--space-6);
+  font: var(--text-display);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.arrival__lead {
+  max-width: 19rem;
+  margin-top: var(--space-2);
+  font: var(--text-body-lg);
+  color: var(--color-fg-muted);
+}
+
+@media (min-width: 64rem) {
+  .arrival__circle {
+    scale: 1.3;
+    margin-block: var(--space-8);
+  }
+}

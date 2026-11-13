@@ -23,7 +23,7 @@ jobs:
         run: ./eng/Test-Backend.ps1
 
   frontend:
-    name: Frontend lint, format and build
+    name: Frontend lint, format, unit tests and build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,6 +39,8 @@ jobs:
       - run: npm run design:check
       - run: npm run lint
       - run: npm run format:check
+      # ADR 0011: the unit tests of the api library's stores and pure helpers.
+      - run: npm test
       - run: npm run build
 
   e2e:

@@ -22,13 +22,16 @@ true: a setting added to the code is added here in the same change.
 | `Database:Provider`, `ConnectionStrings:Popkin` | API, Worker, `popkin` tool | The default is SQL Server on LocalDB, which a deployed system does not have |
 | `Auth:CodeHashKey` | API | The API refuses to start outside Development |
 | `Invites:BaseUrl` | API | Invite links cannot be built |
+| `Photos:SigningKey` | API | The API refuses to start outside Development; with it, every photo address is signed and expires after an hour ([Join a Popkin](detailed-designs/invitations/join-popkin/README.md)) |
+| `Photos:Root` | API, Development only | Photo files go to a `popkin-photos` folder in the machine's temporary folder |
 | `App:Origin` | API | A change from a client that sends no `Sec-Fetch-Site` is refused with 403 `cross_site_request` |
 | `Proxy:KnownProxies`, `Proxy:KnownNetworks` (not built) | API | Every person shares the proxy's address and one allowance of 10 codes per 10 minutes, and the HTTPS redirect can loop ([Abuse limits](detailed-designs/security/abuse-limits/README.md)) |
 | `DataProtection:KeysPath` (not built) | API | The session cookie's keys die with the container, and every restart signs everyone out ([Sessions](detailed-designs/accounts/sessions/README.md)) |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` (not built) | API, Worker | Nothing is exported; the console log is all there is ([ADR 0012](adr/0012-opentelemetry.md)) |
 
 The SMS and email providers are not chosen: outside Development every code request answers 503
-`code_not_sent`. This and the other open decisions are in the
+`code_not_sent`. The photo store provider is not chosen either: outside Development a join with
+a photo fails, and a join without one works. This and the other open decisions are in the
 [known gaps](detailed-designs/README.md#known-gaps).
 
 ## Release
@@ -49,3 +52,4 @@ The SMS and email providers are not chosen: outside Development every code reque
 2. The same request over HTTP is redirected to HTTPS once, not in a loop.
 3. The landing page loads, and a deep link such as `/sign-up` loads after a reload.
 4. Sign up with a code, start a Popkin and see its QR invite (journey 1).
+5. Open the invite link in a private window, sign up as someone else and join (journey 2).

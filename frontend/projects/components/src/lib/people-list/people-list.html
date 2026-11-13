@@ -1,0 +1,18 @@
+@if (people().length) {
+  <ul class="people-list__list">
+    @for (person of people(); track $index) {
+      <li class="people-list__row">
+        <span
+          pk-avatar
+          [initials]="person.initials"
+          [photo]="person.photo"
+          [attr.data-accent]="person.accent"
+        ></span>
+        <span class="people-list__name">{{ person.name }}</span>
+      </li>
+    }
+  </ul>
+}
+@if (more()) {
+  <p class="people-list__more">{{ more() }}</p>
+}

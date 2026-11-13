@@ -1,0 +1,22 @@
+<div class="arrival__circle circle" aria-hidden="true">
+  @for (place of placed(); track $index) {
+    <span
+      pk-avatar
+      class="arrival__person"
+      size="lg"
+      [ring]="true"
+      [initials]="place.avatar.initials"
+      [photo]="place.avatar.photo"
+      [attr.data-accent]="place.avatar.accent"
+      [style.left.%]="place.left"
+      [style.top.%]="place.top"
+    ></span>
+  }
+  <div class="arrival__centre">
+    <div pk-pop [compact]="true" [emoji]="emoji()"></div>
+  </div>
+</div>
+<h1 class="arrival__heading">{{ heading() }}</h1>
+@if (lead()) {
+  <p class="arrival__lead lead">{{ lead() }}</p>
+}
