@@ -1,0 +1,11 @@
+<svg pk-icon name="search" size="md"></svg>
+<input
+  #field
+  class="input input--pill"
+  type="search"
+  autocomplete="off"
+  [attr.aria-label]="label()"
+  [placeholder]="label()"
+  [value]="value()"
+  (input)="typed($event)"
+/>
