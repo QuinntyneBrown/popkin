@@ -20,6 +20,8 @@ public sealed class PopkinSpaceConfiguration : IEntityTypeConfiguration<PopkinSp
         // InMemory provider all refuse the second of two wrap-ups alike.
         builder.Property(p => p.Version).IsConcurrencyToken();
         builder.Ignore(p => p.PhotosRemoveAt);
+        // The Worker reads the active Popkins whose end date has passed (L2-044 AC1).
+        builder.HasIndex(p => new { p.Status, p.EndsAt });
         builder.HasOne<Person>().WithMany().HasForeignKey(p => p.HostPersonId).OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(p => p.Memberships).WithOne().HasForeignKey(m => m.PopkinId).OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(p => p.Memberships).UsePropertyAccessMode(PropertyAccessMode.Field);

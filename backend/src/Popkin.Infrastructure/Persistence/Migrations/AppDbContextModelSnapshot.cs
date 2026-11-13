@@ -22,6 +22,50 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Popkin.Domain.AlbumExport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("PhotosDone")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PhotosTotal")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("RequestedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("RequestedByMembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("StorageKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RequestedByMembershipId");
+
+                    b.HasIndex("PopkinId", "Status");
+
+                    b.HasIndex("Status", "RequestedAt");
+
+                    b.ToTable("AlbumExports", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Call", b =>
                 {
                     b.Property<Guid>("Id")
@@ -116,6 +160,31 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasIndex("PopkinId");
 
                     b.ToTable("ChatThreads", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonId");
+
+                    b.HasIndex("PopkinId", "PersonId")
+                        .IsUnique();
+
+                    b.ToTable("CrewInvites", (string)null);
                 });
 
             modelBuilder.Entity("Popkin.Domain.Experience", b =>
@@ -420,10 +489,20 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("nvarchar(40)");
 
+                    b.Property<DateTimeOffset?>("PhotosRemovedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("PhotosRemovedCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<long>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset?>("WrappedUpAt")
                         .HasColumnType("datetimeoffset");
@@ -434,6 +513,8 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("InviteCode")
                         .IsUnique();
+
+                    b.HasIndex("Status", "EndsAt");
 
                     b.ToTable("Popkins", (string)null);
                 });
@@ -534,6 +615,21 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("VerificationCodes", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.AlbumExport", b =>
+                {
+                    b.HasOne("Popkin.Domain.PopkinSpace", null)
+                        .WithMany()
+                        .HasForeignKey("PopkinId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("RequestedByMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Popkin.Domain.Call", b =>
                 {
                     b.HasOne("Popkin.Domain.PopkinSpace", null)
@@ -560,6 +656,21 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Popkin.Domain.ChatThread", b =>
                 {
+                    b.HasOne("Popkin.Domain.PopkinSpace", null)
+                        .WithMany()
+                        .HasForeignKey("PopkinId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Popkin.Domain.PopkinSpace", null)
                         .WithMany()
                         .HasForeignKey("PopkinId")
