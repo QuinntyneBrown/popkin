@@ -1,0 +1,51 @@
+:host {
+  display: block;
+}
+
+/* The home while the Popkin loads: a card, a strip of photos, a card. */
+:host(.home-skeleton) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-4);
+}
+
+.home-skeleton__strip {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+/* M: a little room around the sections; the side part's sections two abreast. */
+@media (min-width: 48rem) {
+  :host(.home) {
+    padding: var(--space-2) var(--space-2) var(--space-4);
+  }
+
+  .home__side {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+/* L: the main part and the side part are two columns. */
+@media (min-width: 64rem) {
+  :host(.home) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .home__side {
+    display: block;
+  }
+}
+
+@media (min-width: 80rem) {
+  :host(.home) {
+    column-gap: var(--space-2);
+    padding-inline: var(--space-6);
+  }
+}

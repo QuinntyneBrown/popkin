@@ -65,3 +65,4 @@ export * from './lib/experience-row/experience-row';
 export * from './lib/photo-strip/photo-strip';
 export * from './lib/member-list/member-list';
 export * from './lib/section/section';
+export * from './lib/home/home';
