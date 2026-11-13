@@ -52,7 +52,7 @@ waiting, permission and failure states, signalling, and the end of the call.
 - `docs/mocks/pages/video-call/two.html` — the direct call: the header names the other member,
   "Just the two of you · 12:48" (L2-030 AC8). The mock also draws "Invite to call" and "12
   others in Lakeside Weekend can join anytime.", which a direct call does not allow (known
-  gap 65).
+  gap 67).
 - `docs/mocks/notifications/banner/info.html` — the call banner on the Popkin home: "Group call ·
   6 on the call" with "Join" (L2-029 AC2).
 - `docs/mocks/pages/direct-message/call.html` — the banner of a direct call in its direct
@@ -111,7 +111,7 @@ people (L2-029 AC7) is drawn by the design system only (`call-tile--rest` in
   `/p/:popkinId/chat/:memberId/call` for a direct call: its heading is the other member's name,
   "Minimise call" returns to the direct message, and the waiting state reads "Waiting for {first
   name}" without "Invite to call"; the top bar keeps "Invite to call", as `two.html` draws it
-  (known gap 65).
+  (known gap 67).
 - **`CallSession`** (`api` library, `calls/call-session.ts`, with unit tests) — a concrete class
   provided in root, so a call outlives the page (minimise, L2-030 AC7). It has no contract and
   no token: pages inject the class, and its browser parts are behind `CALL_MEDIA`, `PEER_LINKS`
@@ -344,7 +344,7 @@ Decided in the build:
 
 One gap was found: a direct call keeps "Invite to call" in its top bar, which opens the
 Popkin's invite dialog, as `two.html` draws it, and the mock's line under the list of who is on
-the call says that others can join (gap 65).
+the call says that others can join (gap 67).
 
 The diagrams below were not redrawn. They show the design as it stood before journey 7:
 `CALL_SESSION` and `WebRtcCallSession` where there is now the class `CallSession` over

@@ -131,3 +131,5 @@ export * from './lib/thread-pane/thread-pane';
 export * from './lib/dm-intro/dm-intro';
 export * from './lib/search-field/search-field';
 export * from './lib/member-picker/member-picker';
+export * from './lib/status-note/status-note';
+export * from './lib/field-label/field-label';

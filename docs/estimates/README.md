@@ -1,7 +1,7 @@
 # Estimates
 
 - Overall effort: 185 days
-- Complete: 69%
+- Complete: 74%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
@@ -9,7 +9,7 @@
 | [popkins](popkins.md) | 19 days | 82% |
 | [invitations](invitations.md) | 13 days | 81% |
 | [chat](chat.md) | 29 days | 57% |
-| [security](security.md) | 13 days | 59% |
+| [security](security.md) | 13 days | 61% |
 | [reliability](reliability.md) | 8 days | 45% |
 | [accessibility](accessibility.md) | 11 days | 42% |
 | [photos](photos.md) | 20 days | 56% |

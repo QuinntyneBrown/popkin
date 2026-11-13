@@ -15,7 +15,7 @@ A direct message opens from a row on the Chat tab, from the New message dialog (
 from its address. Its header shows the other member's avatar and name and "From {emoji} {Popkin
 name}"; the thread starts with "Only you two can see this". Everything a member can do in Everyone
 works the same way here: text, photos, reactions and replies; journey 11 built text, and photos,
-reactions and replies come with the journeys that build them in Everyone (known gap 62). A direct
+reactions and replies come with the journeys that build them in Everyone (known gap 64). A direct
 message belongs to its Popkin: it exists only between members of that Popkin and becomes
 read-only when the Popkin wraps up. "Call {first name}" opens a call between the two
 ([Group call](../../calls/group-call/README.md)).
@@ -28,7 +28,7 @@ read-only when the Popkin wraps up. "Call {first name}" opens a call between the
 - `docs/mocks/pages/direct-message/loading.html` — skeleton bubbles and "Loading messages…".
 - `docs/mocks/pages/direct-message/empty.html` — "Say hello to Walt. This is the start of your chat."
 - `docs/mocks/pages/direct-message/error.html` — "We couldn't load this chat" with "Try again" and "Back to Chat".
-- `docs/mocks/pages/direct-message/read-only.html` — added in journey 11: the wrapped-up line in place of the composer, and no "Call Walt" (L2-023 AC5). Its list pane still offers "New message" (known gap 61).
+- `docs/mocks/pages/direct-message/read-only.html` — added in journey 11: the wrapped-up line in place of the composer, and no "Call Walt" (L2-023 AC5). Its list pane still offers "New message" (known gap 63).
 - `docs/mocks/pages/direct-message/call.html` — added in journey 11: the banner "Call · 1 on the call" with "Join" when the other member has started a call between the two.
 
 **API:**
@@ -42,7 +42,7 @@ the idempotent `PUT` above, which is safe to repeat and may create the thread.
 
 **Frontend (Popkin web app):**
 
-- **`DirectMessagePage`** — `pages/direct-message/direct-message.page.ts`, selector `pk-direct-message-page`, route `/p/:popkinId/chat/:memberId` behind `signedInGuard`, route data `{ shell: 'app', page: 'direct-message' }`, title "Direct message · Popkin". It composes `pk-app-screen`, `pk-top-bar` (Back to the Chat tab, the other member's `pk-avatar`, name, "From {emoji} {name}", icon button "Call {first name}"), `pk-dm-intro`, `pk-message`, `pk-day-divider`, `pk-system-note`, `pk-thread`, `pk-empty-state`, `pk-composer` with the label "Message {first name}", `pk-banner` for the call, the Popkin's last hour and offline, and `pk-popkin-nav`. From 1024 px `pk-list-pane` holds `pk-conversations` with the row of this direct message marked current (L2-058 AC11); from 1280 px `pk-detail-pane` shows the other member: avatar, name, "In {emoji} {Popkin}", "Call {first name}" and "Shared between you", which stays empty until photos in chat are built (L2-058 AC12, known gap 62).
+- **`DirectMessagePage`** — `pages/direct-message/direct-message.page.ts`, selector `pk-direct-message-page`, route `/p/:popkinId/chat/:memberId` behind `signedInGuard`, route data `{ shell: 'app', page: 'direct-message' }`, title "Direct message · Popkin". It composes `pk-app-screen`, `pk-top-bar` (Back to the Chat tab, the other member's `pk-avatar`, name, "From {emoji} {name}", icon button "Call {first name}"), `pk-dm-intro`, `pk-message`, `pk-day-divider`, `pk-system-note`, `pk-thread`, `pk-empty-state`, `pk-composer` with the label "Message {first name}", `pk-banner` for the call, the Popkin's last hour and offline, and `pk-popkin-nav`. From 1024 px `pk-list-pane` holds `pk-conversations` with the row of this direct message marked current (L2-058 AC11); from 1280 px `pk-detail-pane` shows the other member: avatar, name, "In {emoji} {Popkin}", "Call {first name}" and "Shared between you", which stays empty until photos in chat are built (L2-058 AC12, known gap 64).
 - **`ThreadStore`** — the store of the Everyone thread. `open(popkinId, memberId?, { inView })` opens the direct message with that member through `ChatApi.openDirect`, then loads the latest 50 messages; the outbox, drafts, read point, "New messages" and loading earlier work as in Everyone. A 404, or `cannot_message_self` for a direct message with oneself, is the not-found screen; any other failure is the error state.
 - **`ChatApi.openDirect(popkinId, memberId)`** — returns `ThreadView`, with `other` (`ThreadMemberView`) on a direct message.
 - **Read-only** — when `ThreadView.readOnly` is true the composer is replaced by "This Popkin has wrapped up. Messages stay, but nobody can post new ones." and "Call {first name}" is hidden, in the top bar and the person pane (L2-023 AC5, L2-045 AC1).
@@ -58,7 +58,7 @@ the idempotent `PUT` above, which is safe to repeat and may create the thread.
 - **`MessageDto.PopkinId`** — every message names its Popkin as well as its thread, so a client that holds several threads knows where one belongs.
 - **Delivery** — `ChatThreads.AudienceAsync` gives the `Audience` of a thread: the Popkin for Everyone, and for a direct message the people of its two members who have not left. `IPopkinNotifier` takes that `Audience`, and `SignalRPopkinNotifier` sends to the Popkin's group or with `Clients.Users(...)` to the people named, never to the group for a direct message (L2-023 AC2, L2-051). `MessageAdded` and `MessageDeleted` follow it; `ThreadRead` goes to the reader alone, as before.
 - **Unread counts** — the Popkin home's header and each card of My Popkins add the unread messages of the member's direct messages of that Popkin to those of Everyone (L2-022 AC3), through `DirectThreads.Of`.
-- **A participant who leaves** — journey 11 took a stopgap until the design of leaving a Popkin (L2-047): events reach only members who have not left; a direct message whose other member has left is neither listed on the Chat tab nor counted; and it can no longer be opened, since `PUT …/direct/{memberId}` answers 404 `member_not_found` for a member who has left. What a direct message shows after one participant leaves, and the `code` of a send refused then, are `<TO SUPPLY>` (known gap 63).
+- **A participant who leaves** — journey 11 took a stopgap until the design of leaving a Popkin (L2-047): events reach only members who have not left; a direct message whose other member has left is neither listed on the Chat tab nor counted; and it can no longer be opened, since `PUT …/direct/{memberId}` answers 404 `member_not_found` for a member who has left. What a direct message shows after one participant leaves, and the `code` of a send refused then, are `<TO SUPPLY>` (known gap 65).
 
 ### Tests
 
@@ -71,8 +71,8 @@ the idempotent `PUT` above, which is safe to repeat and may create the thread.
 
 Everything above, for messages of text. Waiting, each in [the register](../../README.md#known-gaps):
 
-- reactions, replies and photos in a direct message (L2-023 AC3), with journeys 12 and 13, and "Shared between you" in the person pane, with journey 13 (gap 62);
-- what a direct message shows when one of the two leaves the Popkin, with journey 18 (gap 63).
+- reactions, replies and photos in a direct message (L2-023 AC3), with journeys 12 and 13, and "Shared between you" in the person pane, with journey 13 (gap 64);
+- what a direct message shows when one of the two leaves the Popkin, with journey 18 (gap 65).
 
 Decided in the build:
 
@@ -82,7 +82,7 @@ Decided in the build:
 
 Gaps found: the read-only mock's list pane keeps "New message", though the API refuses to start a
 direct message in a wrapped-up Popkin, so choosing a member with whom there is none yet ends on
-"We couldn't load this chat" (gap 61).
+"We couldn't load this chat" (gap 63).
 
 ## Requirements
 
@@ -101,7 +101,7 @@ realises AC11 and AC12 for a direct message.
 The diagrams below were not redrawn after journey 11. They show `ChatApi.openDirectThread`,
 `ThreadNotFoundException`, a `GET` of a thread by its id and `Photo.DirectThreadId`, where there
 are now `ChatApi.openDirect`, the `ProblemException` of `ChatThreads.RequireAsync`, the `PUT`
-alone and no photos (known gap 66).
+alone and no photos (known gap 68).
 
 ### System context
 

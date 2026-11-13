@@ -31,8 +31,8 @@ From 1024 px the Everyone thread opens beside the list.
 - `docs/mocks/dialogs/new-message/no-results.html` — "Nobody by that name" and "Only members of Lakeside Weekend can be messaged here."
 
 The loading and error mocks draw no thread beside the list from 1024 px, and the app follows
-them (known gap 60). No mock draws a failed load of the New message dialog's members (known
-gap 64).
+them (known gap 62). No mock draws a failed load of the New message dialog's members (known
+gap 66).
 
 **API:**
 
@@ -47,7 +47,7 @@ gap 64).
 - **`ConversationsStore`** — `api` library, `chat/conversations-store.ts`, with unit tests; provided by each page that shows the list. `open(popkinId)` reads `ChatApi.listThreads`, seeds `UnreadTracker` with every thread's count and exposes `state` (`loading`, `ready`, `error`, `not-found`), `everyone` and `rows`. A `MessageAdded` by a member in Everyone changes the card's latest line; one in a listed direct message moves its row first with the new line; one in a direct message the list does not hold yet, begun by someone else, reads the list again quietly. `MessageDeleted` and `reconnected$` read it again quietly too, and a quiet read that fails keeps what is shown. A 404 opens the not-found screen (L2-051 AC1).
 - **`conversation-text.ts`** — `api` library, with unit tests. `rowTime` gives the clock time for today ("9:41"), the weekday within the past week ("Fri"), then the date ("5 Sep"), with its year when it is another year; `directLatest` puts "You: " before the member's own latest message (L2-022 AC2); `matchesMember` finds a member by any part of the name, ignoring case and accents ("tomas" finds "Tomás").
 - **`ConversationList`** — `pages/conversations/conversation-list.ts`, an injectable of the app provided beside `ConversationsStore`. It turns the store's card and rows into the inputs of `pk-conversations` (links, avatars, the Popkin's emoji) and opens New message. The Chat tab, the Everyone thread and a direct message share it.
-- **`NewMessageDialog`** — `dialogs/new-message/new-message.dialog.ts`, opened with CDK `Dialog` (focus on the search field; Escape closes it and returns focus to "New message"), composed of `pk-dialog` and `pk-member-picker`, which holds `pk-search-field` (label "Search members") and the member rows. It loads members through `PopkinsApi.getMembers`, removes the caller (L2-022 AC4) and filters with `matchesMember` as the member types. Choosing a member closes the dialog with that member's membership id, and the page navigates to `/p/:popkinId/chat/:memberId` (direct-messages). A member list that cannot be read is shown as an empty one, "Nobody by that name" (known gap 64).
+- **`NewMessageDialog`** — `dialogs/new-message/new-message.dialog.ts`, opened with CDK `Dialog` (focus on the search field; Escape closes it and returns focus to "New message"), composed of `pk-dialog` and `pk-member-picker`, which holds `pk-search-field` (label "Search members") and the member rows. It loads members through `PopkinsApi.getMembers`, removes the caller (L2-022 AC4) and filters with `matchesMember` as the member types. Choosing a member closes the dialog with that member's membership id, and the page navigates to `/p/:popkinId/chat/:memberId` (direct-messages). A member list that cannot be read is shown as an empty one, "Nobody by that name" (known gap 66).
 - **`UnreadTracker`** — root service in the `api` library (live-messages). Since journey 11 it counts a message in a direct message it was not told of, begun by someone else in a Popkin it knows, and `setPopkin` takes the count the API answers for a whole Popkin, direct messages included, which My Popkins hands it. The Popkin home does not yet (known gap 67).
 - **`ChatApi.listThreads`**, **`PopkinsApi.getMembers`** — methods on the `CHAT_API` and `POPKINS_API` contracts; view models `ConversationsView`, `DirectSummaryView`, `MemberView`.
 - **The home's Chat card** opens the Everyone thread directly, not the Chat tab.
@@ -74,13 +74,13 @@ Everything above. Decided in the build:
 - The list comes first at every width, and from 1024 px the Everyone thread sits beside it and is not read until it is seen (L2-058 AC11).
 - The cut-overs of a row's time: the clock time today, the weekday within the past week, then the date, with its year when it is another year.
 - The home's Chat card opens the Everyone thread, and the Everyone card beside the open Everyone thread shows no count.
-- A direct message whose other member has left is neither listed nor counted, a stopgap until the design of leaving a Popkin (known gap 63).
+- A direct message whose other member has left is neither listed nor counted, a stopgap until the design of leaving a Popkin (known gap 65).
 
 Gaps found, each in [the register](../../README.md#known-gaps):
 
-- The Everyone card can read "No messages yet" beside an unread count of 1: the count includes the notes Popkin writes ("popped in"), and the latest line leaves them out (gap 59).
-- The loading and error mocks draw no thread beside the list from 1024 px, which L2-058 AC11 asks for; the app follows the mocks (gap 60).
-- A failed load of New message's members reads "Nobody by that name" (gap 64).
+- The Everyone card can read "No messages yet" beside an unread count of 1: the count includes the notes Popkin writes ("popped in"), and the latest line leaves them out (gap 61).
+- The loading and error mocks draw no thread beside the list from 1024 px, which L2-058 AC11 asks for; the app follows the mocks (gap 62).
+- A failed load of New message's members reads "Nobody by that name" (gap 66).
 
 ### Open questions
 
@@ -102,7 +102,7 @@ from 1024 px.
 The diagrams below were not redrawn after journey 11. They show `ThreadSummaryDto`, rows of
 `pk-list-row` and a page that seeds `UnreadTracker` itself, where there are now
 `EveryoneSummaryDto`, `DirectSummaryDto`, `pk-conversations` and `ConversationsStore`
-(known gap 66).
+(known gap 68).
 
 ### System context
 

@@ -198,7 +198,7 @@ Everything above. What differs from the design as it first stood, and what waits
   `DirectMessagePage` came with journey 11: a direct message of a wrapped-up Popkin opens
   read-only, with the wrapped-up line in place of the composer and no "Call {first name}", a new
   one is refused with `409` `popkin_wrapped_up`, and a wrap-up ends every direct call with the
-  group call ([Direct messages](../../chat/direct-messages/README.md), known gap 61).
+  group call ([Direct messages](../../chat/direct-messages/README.md), known gap 63).
 - Photo reactions and comments have no rows to delete with the album, because they are not
   built.
 

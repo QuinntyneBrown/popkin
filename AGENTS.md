@@ -17,11 +17,12 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first eleven journeys and journey 18 are built; the rest is designed.** Journey 1, Start a
-Popkin, journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin home,
-journey 5, Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an
-experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, and
-journey 18, Leave a Popkin, run end to end: the backend has sign up and sign in
+**The first eleven journeys, and journeys 17 to 19, are built; the rest is designed.** Journey
+1, Start a Popkin, journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin
+home, journey 5, Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an
+experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey
+17, Manage account, journey 18, Leave a Popkin, and journey 19, Delete account, run end to end:
+the backend has sign up and sign in
 with a code, sessions, Popkin creation, the list of a person's Popkins, the invite preview, joining with a name and a photo,
 the photo store behind avatars, the Everyone thread, messages, read points, presence, the
 SignalR hub `PopkinHub` and the reads of the Popkin home (the header, the chat preview, the
@@ -47,8 +48,8 @@ sends no hub events
 `signedOutGuard`, which sends a signed-in person to My Popkins), the welcome screen, the group
 chat screen, the Chat tab, the direct message, the Popkin home, the photo album and the photo
 view, the sign-in screen, My Popkins, the call screen (for the group call and for a direct
-call), Experiences, the experience page, the wrap-up screen and the recap among them, and no
-placeholder screen, built for the
+call), Experiences, the experience page, the wrap-up screen, the recap and the account
+(`/account`, with its theme of the device) among them, and no placeholder screen, built for the
 five form factors of L2-058, the read-only chat, Photos and Experiences of a wrapped-up Popkin,
 the banner of a Popkin's last hour, the invite dialog, the New message dialog, the Add photos
 dialog, the Scan to join
