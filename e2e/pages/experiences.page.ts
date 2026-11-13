@@ -15,6 +15,8 @@ export class ExperiencesPage {
   readonly shareInHeader: Locator;
   /** "Share one", the floating action of a phone. */
   readonly shareFloating: Locator;
+  /** "Share one" wherever this width shows it: in the header or floating. */
+  readonly shareOne: Locator;
   /** "Share one" of the empty list and of a filter with none. */
   readonly shareFirst: Locator;
   readonly showAll: Locator;
@@ -51,6 +53,7 @@ export class ExperiencesPage {
     this.shareInHeader = this.headerAction;
     this.fab = page.locator('.fab');
     this.shareFloating = this.fab;
+    this.shareOne = page.locator('.tab-header__action:visible, .fab:visible');
     this.body = page.locator('#main');
     this.grid = this.body.locator('.exp-grid');
     this.cards = this.grid.locator('.exp-card');

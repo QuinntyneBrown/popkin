@@ -68,6 +68,14 @@ export class ExperiencesStore {
     return true;
   }
 
+  /** An experience is gone from the list: the one just shared was taken back. */
+  removed(experienceId: string): void {
+    this.items.update((items) => items.filter((item) => item.id !== experienceId));
+    if (this.state() === 'ready' && !this.items().length) {
+      this.state.set(this.filter() === 'all' ? 'empty' : 'no-results');
+    }
+  }
+
   private read(): void {
     // A filter chosen later cancels the read of an earlier one.
     this.reading?.unsubscribe();

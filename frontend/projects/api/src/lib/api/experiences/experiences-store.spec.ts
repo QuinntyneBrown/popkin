@@ -169,6 +169,21 @@ describe('ExperiencesStore', () => {
       expect(store.cards().map((c) => c.id)).toEqual(['bonfire', 'canoe', 'tacos', 'beach']);
     });
 
+    it('is taken back out of the list', () => {
+      store.open('p', 'all');
+      store.added(card('bonfire'));
+      store.removed('bonfire');
+      expect(store.cards().map((c) => c.id)).toEqual(['canoe', 'tacos', 'beach']);
+    });
+
+    it('leaves the list empty when it was the only one and is taken back', () => {
+      answers.all = [];
+      store.open('p', 'all');
+      store.added(canoe);
+      store.removed('canoe');
+      expect(store.state()).toBe('empty');
+    });
+
     it('makes an empty list ready', () => {
       answers.all = [];
       store.open('p', 'all');

@@ -1,0 +1,74 @@
+<form
+  pk-dialog
+  novalidate
+  heading="Share an experience"
+  [accent]="data.accent"
+  (submit)="share($event)"
+>
+  @if (summary().length) {
+    <div pk-form-summary [problems]="summary()"></div>
+  }
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t share that.">Everything you entered is still here.</div>
+  }
+  <div
+    pk-text-field
+    fieldId="etitle"
+    label="Title"
+    [maxlength]="titleMax"
+    [error]="problems().title"
+    [readonly]="busy()"
+    [formControl]="title"
+  ></div>
+  <div
+    pk-choice-chips
+    fieldId="kind"
+    label="Kind"
+    [options]="kinds"
+    [(value)]="kind"
+    [disabled]="busy()"
+  ></div>
+  <div
+    pk-text-field
+    fieldId="ewhen"
+    label="When"
+    optional="(optional)"
+    [error]="problems().when"
+    [readonly]="busy()"
+    [formControl]="when"
+  ></div>
+  <div
+    pk-text-field
+    fieldId="eplace"
+    label="Place"
+    optional="(optional)"
+    placeholder="Where it was"
+    [maxlength]="placeMax"
+    [error]="problems().place"
+    [readonly]="busy()"
+    [formControl]="place"
+  ></div>
+  <div
+    pk-picture-field
+    fieldId="epicture"
+    label="Add a picture"
+    optional="(optional)"
+    [accept]="accept"
+    [picture]="preview()"
+    [error]="problems().picture"
+    [disabled]="busy()"
+    (picked)="picked($event)"
+    (removed)="removed()"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="submit"
+    variant="popkin"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+  >
+    {{ busy() ? 'Sharing…' : 'Share it' }}
+  </button>
+</form>

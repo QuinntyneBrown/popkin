@@ -6,6 +6,7 @@
     lead="What we did, and what we want to do next."
     [filter]="filtering()"
     [action]="sharing() ? 'Share one' : undefined"
+    (acted)="share()"
   >
     @for (filter of filters; track filter.key) {
       <button
@@ -31,7 +32,7 @@
           [heading]="store.nothing().heading"
           [text]="store.nothing().text"
         >
-          <button pk-button type="button" variant="popkin" size="md">
+          <button pk-button type="button" variant="popkin" size="md" (click)="share()">
             <svg pk-icon name="plus" size="md"></svg>Share one
           </button>
         </div>
@@ -45,7 +46,7 @@
           [heading]="store.nothing().heading"
           [text]="store.nothing().text"
         >
-          <button pk-button type="button" variant="popkin" size="md">
+          <button pk-button type="button" variant="popkin" size="md" (click)="share()">
             <svg pk-icon name="plus" size="md"></svg>Share one
           </button>
           <button pk-button type="button" variant="secondary" size="md" (click)="show('all')">
@@ -93,7 +94,7 @@
   }
 
   @if (sharing()) {
-    <button pk-fab slot="fab" type="button">Share one</button>
+    <button pk-fab slot="fab" type="button" (click)="share()">Share one</button>
   }
   <nav
     pk-popkin-nav
