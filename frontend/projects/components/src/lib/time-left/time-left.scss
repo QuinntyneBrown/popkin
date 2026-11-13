@@ -1,0 +1,22 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  height: var(--space-8);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--accent-tint);
+  color: var(--accent-text);
+  font: var(--text-meta);
+  white-space: nowrap;
+}
+
+.time-left__ring {
+  flex: none;
+  width: var(--space-4);
+  height: var(--space-4);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

@@ -104,3 +104,55 @@ test.describe('naming a Popkin', () => {
     await expect(step.colour('Teal')).toHaveAttribute('aria-pressed', 'true');
   });
 });
+
+test.describe('naming a Popkin on a wider screen', () => {
+  // L2-058 AC10
+  test('from 768 px a card beside the form shows how the Popkin will look to everyone', async ({
+    page,
+    pk,
+  }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await pk.open('nameYourPopkin');
+    const step = new NameYourPopkinPage(page);
+
+    await expect(step.picture).toBeVisible();
+    await expect(step.picture).toContainText('How it’ll look to everyone');
+    await expect(step.previewName).toHaveText('Your Popkin');
+    await expect(step.previewTile).toHaveText('🏕️');
+    await expect(step.previewAvatar).toHaveText('MO');
+    await expect(step.previewHost).toContainText('Just you, for now');
+    await expect(step.previewTimeLeft).toHaveText('Just started');
+  });
+
+  // L2-008 AC2, L2-058 AC10
+  test('the card follows the name, the emoji and the colour as they change', async ({
+    page,
+    pk,
+  }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await pk.open('nameYourPopkin');
+    const step = new NameYourPopkinPage(page);
+
+    await step.name.fill('Lakeside Weekend');
+    await step.emojiNamed('Guitar').click();
+    await step.colour('Teal').click();
+
+    await expect(step.previewName).toHaveText('Lakeside Weekend');
+    await expect(step.previewTile).toHaveText('🎸');
+    await expect(step.screen).toHaveAttribute('data-accent', 'teal');
+    await expect(step.looksGood).toBeVisible();
+  });
+
+  // L2-058 AC2, AC13
+  test('on a phone the card is not there to reach, and the row above the form previews the Popkin', async ({
+    page,
+    pk,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await pk.open('nameYourPopkin');
+    const step = new NameYourPopkinPage(page);
+
+    await expect(step.preview).toHaveText('🏕️');
+    await expect(step.picture).toHaveCount(0);
+  });
+});

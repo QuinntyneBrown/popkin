@@ -7,7 +7,7 @@
     }
   </p>
 } @else {
-  <div class="split-aside__body" [class.split-aside__body--center]="align() === 'center'">
+  <div class="split-aside__body" [class.split-aside__body--center]="justify() === 'center'">
     @if (icon()) {
       <span class="split-aside__icon" aria-hidden="true">{{ icon() }}</span>
     }

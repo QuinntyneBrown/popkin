@@ -33,3 +33,6 @@ export * from './lib/qr-card/qr-card';
 export * from './lib/share-action/share-action';
 export * from './lib/share-actions/share-actions';
 export * from './lib/split-aside/split-aside';
+export * from './lib/avatar/avatar';
+export * from './lib/time-left/time-left';
+export * from './lib/preview-card/preview-card';

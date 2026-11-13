@@ -35,5 +35,5 @@ export class SplitAside {
   readonly heading = input<string>();
   readonly text = input<string>();
   /** `center` sets the body's content in the middle of the aside. */
-  readonly align = input<'start' | 'center'>('start');
+  readonly justify = input<'start' | 'center'>('start');
 }

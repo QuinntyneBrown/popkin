@@ -1,0 +1,42 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: var(--layout-preview-max);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-2);
+}
+
+.popkin-card__top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.preview-card__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.popkin-card__name {
+  font: var(--text-title);
+  font-size: var(--font-size-2xl);
+}
+
+.popkin-card__last {
+  margin-top: var(--space-0-5);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.popkin-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  font: var(--text-meta);
+  color: var(--color-fg-muted);
+}
