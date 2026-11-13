@@ -2,7 +2,7 @@
   <a
     pk-icon-button
     class="topbar__back"
-    icon="back"
+    [icon]="backIcon()"
     [label]="backLabel()"
     size="lg"
     [routerLink]="back()"
@@ -14,6 +14,9 @@
       }
       @if (tile(); as emoji) {
         <span pk-popkin-tile size="xs" [emoji]="emoji"></span>
+      }
+      @if (emoji(); as symbol) {
+        <span class="topbar__emoji" aria-hidden="true">{{ symbol }}</span>
       }
       @if (heading()) {
         <h1 class="topbar__heading truncate">{{ heading() }}</h1>
