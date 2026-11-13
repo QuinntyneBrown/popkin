@@ -95,6 +95,15 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         return client;
     }
 
+    /// <summary>The session cookie `client` holds, as a `Cookie` header gives it, to copy to another client.</summary>
+    public string SessionCookieOf(HttpClient client)
+    {
+        var cookie = _cookies.TryGetValue(client, out var jar)
+            ? jar.GetCookies(new Uri("https://localhost"))["__Host-popkin"]
+            : null;
+        return cookie is null ? throw new ArgumentException("The client holds no session.", nameof(client)) : $"{cookie.Name}={cookie.Value}";
+    }
+
     /// <summary>
     /// Connects a real SignalR client to `PopkinHub` through the test server's handler, as the
     /// browser of `client` would: with its session cookie and `Sec-Fetch-Site: same-origin`

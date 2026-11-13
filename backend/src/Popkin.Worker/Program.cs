@@ -17,5 +17,6 @@ builder.Services.AddScoped<ICurrentPerson, NoCurrentPerson>();
 builder.Services.AddHostedService<WrapUpDuePopkinsJob>();
 builder.Services.AddHostedService<RemovePhotosOfWrappedUpPopkinsJob>();
 builder.Services.AddHostedService<PrepareAlbumExportsJob>();
+builder.Services.AddHostedService<PurgeDeletedAccountsJob>();
 
 await builder.Build().RunAsync();

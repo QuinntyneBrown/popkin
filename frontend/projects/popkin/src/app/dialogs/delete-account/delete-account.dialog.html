@@ -1,0 +1,46 @@
+<div pk-dialog heading="Delete your account?" description="This can’t be undone.">
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t delete your account.">It’s still here. Try again.</div>
+  }
+  @if (hosted; as hosted) {
+    <div pk-alert variant="warning" icon="warning" [heading]="hosted.heading">
+      {{ hosted.text }}
+    </div>
+  }
+  <ul class="stack stack--sm text-sm">
+    <li><strong>Removed:</strong> your name, photo, phone number and direct messages.</li>
+    <li><strong>Kept, without your name:</strong> your messages and photos in Popkins.</li>
+  </ul>
+  <div
+    pk-text-field
+    fieldId="confirm"
+    label="Type delete to confirm"
+    autocomplete="off"
+    autocapitalize="none"
+    [formControl]="confirmation"
+    [readonly]="busy()"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="!canDelete() || busy()"
+    (click)="delete()"
+  >
+    {{ busy() ? 'Deleting…' : 'Delete my account' }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="secondary"
+    [block]="true"
+    [disabled]="busy()"
+    (click)="keep()"
+  >
+    Keep my account
+  </button>
+</div>

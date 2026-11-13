@@ -1,8 +1,6 @@
 using MediatR;
 using Popkin.Application.Abstractions;
-using Popkin.Application.Calls;
 using Popkin.Application.Problems;
-using Popkin.Application.Realtime;
 using Popkin.Application.Security;
 using Popkin.Domain;
 
@@ -18,10 +16,7 @@ public sealed class LeavePopkinCommandHandler(
     IAppDbContext db,
     IMembershipGuard guard,
     TimeProvider clock,
-    CallLeaver calls,
-    PresenceTracker presence,
-    IPopkinConnections connections,
-    IPopkinNotifier notifier)
+    MemberDepartures departures)
     : IRequestHandler<LeavePopkinCommand>
 {
     public async Task Handle(LeavePopkinCommand request, CancellationToken cancellationToken)
@@ -37,20 +32,7 @@ public sealed class LeavePopkinCommandHandler(
         membership.Leave(clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
 
-        // After the commit: off the call, no longer here, and out of the Popkin's group before
-        // the others are told, so the one who left hears nothing more of it.
-        if (await CallReads.UnderWayAsync(db, popkin.Id, cancellationToken) is { } call
-            && await CallReads.ParticipantIdAsync(db, popkin.Id, call.Id, membership.Id, cancellationToken) is { } participantId)
-        {
-            await calls.LeaveAsync(participantId, CancellationToken.None);
-        }
-
-        foreach (var connectionId in presence.Leave(membership.PersonId, popkin.Id))
-        {
-            await connections.RemoveFromPopkinAsync(connectionId, popkin.Id, CancellationToken.None);
-        }
-
-        await notifier.MemberLeft(popkin.Id, membership.Id);
+        await departures.AnnounceAsync(popkin.Id, membership, cancellationToken);
     }
 
     public static ProblemException HostCannotLeave() =>

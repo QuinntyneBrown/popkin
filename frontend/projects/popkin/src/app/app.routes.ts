@@ -191,6 +191,13 @@ export const routes: Routes = [
     title: 'Your Popkins · Popkin',
   },
   {
+    path: 'account',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/account/account.page').then((m) => m.AccountPage),
+    data: data({ shell: 'bare', page: 'account' }),
+    title: 'Your account · Popkin',
+  },
+  {
     path: 'offline',
     // Part of the first download: a screen that cannot be fetched offline still has this one.
     component: OfflinePage,

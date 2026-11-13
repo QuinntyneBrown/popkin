@@ -13,6 +13,7 @@ public sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
         builder.Property(p => p.Name).HasMaxLength(Person.MaxNameLength).IsRequired();
         builder.Property(p => p.Phone).HasMaxLength(20);
         builder.Property(p => p.Email).HasMaxLength(254);
+        builder.Property(p => p.PhotoKey).HasMaxLength(200);
         builder.HasIndex(p => p.Phone).IsUnique().HasFilter("[Phone] IS NOT NULL AND [DeletedAt] IS NULL");
         builder.HasIndex(p => p.Email).IsUnique().HasFilter("[Email] IS NOT NULL AND [DeletedAt] IS NULL");
     }

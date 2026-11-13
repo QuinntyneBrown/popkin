@@ -10,6 +10,8 @@ export interface AuthApi {
   resendCode(verificationId: string): Observable<CodeSentView>;
   /** 401 when there is no live session. */
   getSession(): Observable<SessionView>;
+  /** Ends the session on this device (L2-048 AC5); 401 when it had already ended. */
+  signOut(): Observable<void>;
 }
 
 export const AUTH_API = new InjectionToken<AuthApi>('AuthApi');
@@ -35,5 +37,9 @@ export class HttpAuthApi implements AuthApi {
 
   getSession(): Observable<SessionView> {
     return this.http.get<SessionView>('/api/auth/session');
+  }
+
+  signOut(): Observable<void> {
+    return this.http.post<void>('/api/auth/sign-out', null);
   }
 }

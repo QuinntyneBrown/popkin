@@ -1,6 +1,8 @@
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
+import { accountStates } from '../../fixtures/account-states';
 import { parity } from '../../fixtures/parity';
+import { AccountPage } from '../../pages/account.page';
 import { ExperienceActionsDialog } from '../../pages/experience-actions.dialog';
 import { PopkinSettingsDialog } from '../../pages/popkin-settings.dialog';
 
@@ -31,5 +33,11 @@ parity('menu-item', [
     ...wrapUpStates.popkinSettingsMember,
     name: 'leave',
     region: (page) => new PopkinSettingsDialog(page).leave,
+  },
+  {
+    key: 'account',
+    ...accountStates.account,
+    name: 'account-sign-out',
+    region: (page) => new AccountPage(page).signOutRow,
   },
 ]);

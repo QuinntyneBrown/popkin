@@ -26,11 +26,11 @@ public sealed class ValidateSessionQueryHandler(IAppDbContext db, TimeProvider c
 /// <summary>The caller's id, name and photo (GET /api/auth/session).</summary>
 public sealed record GetSessionQuery : IRequest<SessionDto>;
 
-public sealed class GetSessionQueryHandler(IAppDbContext db, ICurrentPerson current) : IRequestHandler<GetSessionQuery, SessionDto>
+public sealed class GetSessionQueryHandler(IAppDbContext db, ICurrentPerson current, IPhotoStore photos) : IRequestHandler<GetSessionQuery, SessionDto>
 {
     public async Task<SessionDto> Handle(GetSessionQuery request, CancellationToken cancellationToken)
     {
         var person = await db.People.AsNoTracking().SingleAsync(p => p.Id == current.PersonId, cancellationToken);
-        return new SessionDto(person.Id, person.Name, null);
+        return new SessionDto(person.Id, person.Name, Account.AccountDtos.PhotoUrl(person, photos));
     }
 }

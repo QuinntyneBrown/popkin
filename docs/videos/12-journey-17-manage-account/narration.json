@@ -1,0 +1,19 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Your name, your photo, your theme. This is your account."] },
+    { "id": "account", "bars": 8, "lines": ["Tap your avatar on My Popkins, and Your account opens.", "It shows your photo, your name, and the phone number you sign in with. That number is read-only, and never shown to other members."] },
+    { "id": "save", "bars": 6, "lines": ["Change your name or your photo, and choose Save changes.", "A message says it was saved just now, and the new name shows wherever you appear."] },
+    { "id": "invalid", "bars": 5, "lines": ["Leave the name empty, and nothing is saved. The field says: enter a name so people know who you are."] },
+    { "id": "theme", "bars": 5, "lines": ["Pick a theme: Match my device, Light or Dark. Popkin takes it at once, and remembers it on this device."] },
+    { "id": "signout", "bars": 6, "lines": ["Sign out asks first. Stay signed in is where the focus starts.", "Confirm, and the session ends on this device. The welcome screen opens."] },
+    { "id": "grow", "bars": 5, "lines": ["On a phone or a desktop, the account keeps one readable column in the middle."] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: a signed out session stops working at once, wherever a copy of it is.", "Still to come: telling the others live when a name changes."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey seventeen. Popkin is a free platform for pop-up communities."] }
+  ]
+}

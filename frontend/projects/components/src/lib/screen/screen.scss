@@ -167,7 +167,9 @@
  * the start of the screen and the form the rest (AC10).
  */
 :host(.screen--split) .screen__body,
-:host(.screen--split) .screen__footer {
+:host(.screen--split) .screen__footer,
+:host(.screen--column) .screen__body,
+:host(.screen--column) .screen__footer {
   width: 100%;
   max-width: var(--layout-app-max);
   margin-inline: auto;
@@ -175,7 +177,9 @@
 
 @media (min-width: 40rem) {
   :host(.screen--split) .screen__body,
-  :host(.screen--split) .screen__footer {
+  :host(.screen--split) .screen__footer,
+  :host(.screen--column) .screen__body,
+  :host(.screen--column) .screen__footer {
     max-width: var(--layout-form-max-s);
   }
 }

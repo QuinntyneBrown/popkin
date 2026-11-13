@@ -1,12 +1,21 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import {
   provideRouter,
   withComponentInputBinding,
   withNavigationErrorHandler,
 } from '@angular/router';
 import {
+  ACCOUNT_API,
   AUTH_API,
+  HttpAccountApi,
+  LocalStorageThemePreferences,
+  THEME_PREFERENCES,
   BrowserQrScanner,
   LocalPopkinsSnapshot,
   PEER_LINKS,
@@ -54,6 +63,10 @@ export const appConfig: ApplicationConfig = {
       withNavigationErrorHandler(offlineNavigation),
     ),
     { provide: AUTH_API, useClass: HttpAuthApi },
+    { provide: ACCOUNT_API, useClass: HttpAccountApi },
+    { provide: THEME_PREFERENCES, useClass: LocalStorageThemePreferences },
+    // The theme chosen on this device is drawn before the first screen (L2-048 AC4).
+    provideAppInitializer(() => inject(THEME_PREFERENCES).apply()),
     { provide: POPKINS_API, useClass: HttpPopkinsApi },
     { provide: INVITES_API, useClass: HttpInvitesApi },
     { provide: CHAT_API, useClass: HttpChatApi },

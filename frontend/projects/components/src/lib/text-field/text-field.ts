@@ -39,6 +39,8 @@ export class TextField implements ControlValueAccessor {
   readonly type = input<'text' | 'tel' | 'email' | 'date' | 'time'>('text');
   readonly inputmode = input<string>();
   readonly autocomplete = input<string>();
+  /** `none` for a word that must be typed as it is, such as "delete". */
+  readonly autocapitalize = input<string>();
   readonly placeholder = input<string>();
   readonly maxlength = input<number>();
   readonly hint = input<string>();

@@ -27,6 +27,17 @@ const recap = `${home}/recap`;
 const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
 
 export const routes = {
+  account: { app: '/account', mock: 'pages/account/default.html' },
+  accountLoading: { app: '/account', mock: 'pages/account/loading.html' },
+  accountError: { app: '/account', mock: 'pages/account/error.html' },
+  accountInvalid: { app: '/account', mock: 'pages/account/invalid.html' },
+  accountSubmitting: { app: '/account', mock: 'pages/account/submitting.html' },
+  accountSuccess: { app: '/account', mock: 'pages/account/success.html' },
+  signOut: { app: '/account', mock: 'dialogs/sign-out/default.html' },
+  signOutBusy: { app: '/account', mock: 'dialogs/sign-out/busy.html' },
+  deleteAccount: { app: '/account', mock: 'dialogs/delete-account/default.html' },
+  deleteAccountConfirm: { app: '/account', mock: 'dialogs/delete-account/confirm.html' },
+  deleteAccountBusy: { app: '/account', mock: 'dialogs/delete-account/busy.html' },
   landing: { app: '/', mock: 'pages/landing/default.html' },
   welcome: { app: '/welcome', mock: 'pages/welcome/default.html' },
   signIn: { app: '/sign-in', mock: 'pages/sign-in/default.html' },

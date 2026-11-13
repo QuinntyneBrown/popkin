@@ -7,7 +7,8 @@
  * and Dev join it, Joel opens its invite and joins, Walt and Mara write in the Everyone
  * thread, Mara opens the Popkin's home, starts a group call and leaves it, she adds the
  * album's first photo, she shares an experience, rates it and comments on it, she wraps the
- * Popkin up and reads its recap, and Dev leaves it. Each answer is keyed
+ * Popkin up and reads its recap, and Dev leaves it. Then she gives her full name, reads her
+ * account and saves a photo; Joel signs out; and Mara deletes her account. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -106,7 +107,7 @@ const dev = await signUp('Dev Patel', '(415) 555-0162');
 await call('POST', `${invite}/join`, joinForm('Dev Patel'));
 person = { cookie: '', record: true };
 await call('GET', invite);
-await signUp('Joel', '(415) 555-0123', true);
+const joel = await signUp('Joel', '(415) 555-0123', true);
 await call('GET', `${invite}/members`);
 await call('POST', `${invite}/join`, joinForm('Joel'));
 
@@ -191,6 +192,10 @@ await call('PUT', `${experiences}/${shared.id}/my-rating/comment`, {
 await call('GET', `${experiences}?filter=all`);
 await call('GET', `${experiences}?filter=did`);
 
+// Deleting the account: while Lakeside Weekend is still active, Mara reads what deleting her
+// account would wrap up (journey 19).
+await call('GET', '/api/account/deletion-impact');
+
 // Wrap up: Mara reads what the wrap-up screen says, wraps Lakeside Weekend up keeping its album,
 // reads the recap and asks for the album as a zip (journey 9). It comes last: every answer
 // above is of a Popkin that is still open. No Worker runs beside the recording, so the zip is
@@ -201,11 +206,31 @@ await call('GET', `/api/popkins/${created.id}/recap`);
 const zip = await call('POST', `/api/popkins/${created.id}/recap/album-exports`);
 await call('GET', `/api/popkins/${created.id}/recap/album-exports/${zip.id}`);
 
-// Leave a Popkin: Dev leaves Lakeside Weekend (journey 18). It comes after everything else, so
+// Leave a Popkin: Dev leaves Lakeside Weekend (journey 18). It comes after the recap, so
 // every answer above counts him; only his leave is recorded.
 person = dev;
 dev.record = true;
 await call('DELETE', `/api/popkins/${created.id}/members/me`);
+
+// The account: Mara gives her full name, reads her account, then saves a photo (journey 17).
+// It comes after the wrap-up, so every answer above keeps the name she signed up with.
+person = mara;
+await call('PATCH', '/api/account', { name: 'Mara Okafor' });
+await call('GET', '/api/account');
+const portrait = new FormData();
+portrait.append(
+  'photo',
+  new Blob([readFileSync(join(mockImages, 'call1.jpg'))], { type: 'image/jpeg' }),
+  'call1.jpg',
+);
+await call('PUT', '/api/account/photo', portrait);
+
+// Signing out ends the session it is sent with, so Joel's is the one recorded; then Mara deletes
+// her account, which ends hers. Both come last.
+person = joel;
+await call('POST', '/api/auth/sign-out');
+person = mara;
+await call('DELETE', '/api/account');
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

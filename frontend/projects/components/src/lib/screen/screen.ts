@@ -22,6 +22,7 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
     class: 'screen',
     '[class.screen--wash]': "surface() === 'wash'",
     '[class.screen--split]': "layout() === 'split'",
+    '[class.screen--column]': "layout() === 'column'",
     '[class.screen--arrival]': "layout() === 'arrival'",
     '[class.screen--middle]': 'middle()',
     '[attr.data-accent]': 'accent()',
@@ -34,8 +35,10 @@ export class Screen {
   /**
    * `split` is a step screen: a form column, and from 768 px a picture beside it. `arrival` is
    * a welcome: its content in the middle, its actions under it, side by side from 640 px.
+   * `column` keeps one readable column in the middle at every width, with no picture (the
+   * account).
    */
-  readonly layout = input<'fill' | 'split' | 'arrival'>('fill');
+  readonly layout = input<'fill' | 'split' | 'arrival' | 'column'>('fill');
   /** From 768 px, sets the body and its footer together in the middle (a celebration). */
   readonly middle = input(false);
   /** The `h1` of the screen. Leave it out when the content brings its own. */

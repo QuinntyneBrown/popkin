@@ -45,6 +45,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .text-caption { font: var(--text-caption); color: var(--color-fg-subtle); }
 .text-center { text-align: center; }
 .text-accent { color: var(--accent-text); font-weight: var(--font-weight-semibold); }
+.status-note { display: flex; align-items: center; gap: var(--space-2); margin: 0; color: var(--color-success-fg); font: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans); }
 .emoji { font-family: var(--font-family-emoji); font-style: normal; }
 .lead { font: var(--text-body-lg); color: var(--color-fg-muted); }
 .sub { margin-top: var(--space-2); color: var(--color-fg-muted); }
@@ -319,6 +320,8 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .row__action { flex: none; font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-accent); }
 .divided > li + li { border-top: var(--border-width-hairline) solid var(--color-border-default); }
 .menu-list { display: flex; flex-direction: column; }
+/* A menu after the content of a screen, set off by a rule: the account's Sign out and Delete my account. */
+.menu-list--separated { margin-top: var(--space-8); border-top: var(--border-width-hairline) solid var(--color-border-default); }
 .menu-list__item { display: flex; align-items: center; gap: var(--space-4); width: 100%; min-height: var(--space-16); padding: var(--space-2) 0; border: 0; background: none; color: var(--color-fg-default); font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal) var(--font-family-sans); text-align: left; text-decoration: none; }
 .menu-list__item:hover { color: var(--color-fg-default); }
 .menu-list__item--danger, .menu-list__item--danger:hover { color: var(--color-danger-fg); }

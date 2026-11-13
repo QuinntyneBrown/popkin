@@ -13,8 +13,9 @@ export interface SegmentedOption<T extends string = string> {
 }
 
 /**
- * Segmented control (docs/design-system/components/segmented-control.html), as tabs that switch
- * the field below (APG Tabs): Tab moves onto the chosen option, the arrow keys move and select.
+ * Segmented control (docs/design-system/components/segmented-control.html). As `tabs` it switches
+ * the field below (APG Tabs); as `radio` it is a setting, such as the theme (APG Radio group).
+ * Either way Tab moves onto the chosen option, and the arrow keys move and select.
  */
 @Component({
   selector: 'div[pk-segmented-control]',
@@ -23,12 +24,13 @@ export interface SegmentedOption<T extends string = string> {
   styleUrl: './segmented-control.scss',
   host: {
     class: 'segmented',
-    role: 'tablist',
+    '[attr.role]': "kind() === 'radio' ? 'radiogroup' : 'tablist'",
     '[attr.aria-label]': 'label()',
   },
 })
 export class SegmentedControl {
   readonly label = input.required<string>();
+  readonly kind = input<'tabs' | 'radio'>('tabs');
   readonly options = input.required<SegmentedOption[]>();
   readonly value = model.required<string>();
 

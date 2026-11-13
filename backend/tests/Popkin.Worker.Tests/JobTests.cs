@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
+using Popkin.Application.Account;
 using Popkin.Application.Telemetry;
 using Popkin.Application.WrapUp;
 using Popkin.Worker.Jobs;
@@ -40,6 +41,7 @@ public sealed class JobTests : IDisposable
         { nameof(WrapUpDuePopkinsJob), 30, typeof(WrapUpDuePopkinsCommand) },
         { nameof(RemovePhotosOfWrappedUpPopkinsJob), 3600, typeof(RemoveWrappedUpAlbumsCommand) },
         { nameof(PrepareAlbumExportsJob), 2, typeof(PrepareAlbumExportsCommand) },
+        { nameof(PurgeDeletedAccountsJob), 86400, typeof(PurgeDeletedAccountsCommand) },
     };
 
     private BackgroundService Job(string name)
@@ -52,6 +54,7 @@ public sealed class JobTests : IDisposable
             nameof(RemovePhotosOfWrappedUpPopkinsJob) => new RemovePhotosOfWrappedUpPopkinsJob(
                 scopes, _clock, NullLogger<RemovePhotosOfWrappedUpPopkinsJob>.Instance),
             nameof(PrepareAlbumExportsJob) => new PrepareAlbumExportsJob(scopes, _clock, NullLogger<PrepareAlbumExportsJob>.Instance),
+            nameof(PurgeDeletedAccountsJob) => new PurgeDeletedAccountsJob(scopes, _clock, NullLogger<PurgeDeletedAccountsJob>.Instance),
             _ => throw new ArgumentOutOfRangeException(nameof(name)),
         };
     }

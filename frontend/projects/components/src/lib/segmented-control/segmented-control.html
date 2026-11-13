@@ -3,7 +3,8 @@
     #option
     class="segmented__option"
     type="button"
-    role="tab"
+    [attr.role]="kind() === 'radio' ? 'radio' : 'tab'"
+    [attr.aria-checked]="kind() === 'radio' ? option.value === value() : null"
     [attr.aria-selected]="option.value === value()"
     [tabIndex]="option.value === value() ? 0 : -1"
     (click)="choose(option.value)"
