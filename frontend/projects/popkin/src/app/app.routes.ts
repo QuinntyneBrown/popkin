@@ -22,6 +22,12 @@ export const routes: Routes = [
     title: 'Popkin',
   },
   {
+    path: 'sign-in',
+    loadComponent: () => import('./pages/sign-in/sign-in.page').then((m) => m.SignInPage),
+    data: data({ shell: 'bare', page: 'sign-in' }),
+    title: 'Sign in · Popkin',
+  },
+  {
     path: 'sign-up',
     loadComponent: () => import('./pages/sign-up/sign-up.page').then((m) => m.SignUpPage),
     data: data({ shell: 'bare', page: 'sign-up' }),

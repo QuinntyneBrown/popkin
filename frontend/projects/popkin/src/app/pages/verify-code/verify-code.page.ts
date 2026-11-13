@@ -9,7 +9,14 @@ import {
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AUTH_API, PendingVerificationStore, SessionStore, toApiProblem, tryAgainIn } from 'api';
+import {
+  AUTH_API,
+  PendingVerificationStore,
+  SessionStore,
+  nameProblem,
+  toApiProblem,
+  tryAgainIn,
+} from 'api';
 import { Button, Link, Screen, SplitAside, TextField, TopBar } from 'components';
 import { Toaster } from '../../toasts/toaster';
 
@@ -32,6 +39,10 @@ export class VerifyCodePage {
   protected readonly pending = this.store.pending;
   protected readonly code = new FormControl('', { nonNullable: true });
   protected readonly status = signal<'idle' | 'checking'>('idle');
+  /** `name` once the code was right and no account has the number or email (L2-006 AC2). */
+  protected readonly step = signal<'code' | 'name'>('code');
+  protected readonly name = new FormControl('', { nonNullable: true });
+  protected readonly nameError = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
   /** After an expired, used or exhausted code, a new code may be asked for at once. */
   protected readonly needsNewCode = signal(false);
@@ -46,6 +57,13 @@ export class VerifyCodePage {
     if (!pending) return '';
     const verb = pending.channel === 'Phone' ? 'texted' : 'emailed';
     return `We ${verb} 6 digits to ${pending.displayDestination}.`;
+  });
+  /** Back to sign in keeps the screen that was asked for (L2-007 AC2). */
+  protected readonly startedOnParams = computed(() => {
+    const pending = this.pending();
+    return pending?.purpose === 'SignIn' && pending.returnUrl
+      ? { returnUrl: pending.returnUrl }
+      : null;
   });
   protected readonly differentLabel = computed(() =>
     this.pending()?.channel === 'Email' ? 'Use a different email' : 'Use a different number',
@@ -64,7 +82,8 @@ export class VerifyCodePage {
     return `Send a new code in ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
   });
 
-  private readonly field = viewChild.required(TextField);
+  private readonly field = viewChild<TextField>('codeField');
+  private readonly nameField = viewChild<TextField>('nameField');
 
   constructor() {
     if (!this.pending()) {
@@ -73,7 +92,7 @@ export class VerifyCodePage {
     }
     const timer = setInterval(() => this.now.set(Date.now()), 1000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
-    setTimeout(() => this.field().focus());
+    setTimeout(() => this.field()?.focus());
   }
 
   /**
@@ -89,12 +108,31 @@ export class VerifyCodePage {
     if (this.code.value.length === CODE_LENGTH) this.confirm();
   }
 
-  private confirm(): void {
+  /** The name step: the same code is confirmed again, with the name (L2-006 AC2). */
+  protected submitName(event: Event): void {
+    event.preventDefault();
+    const problem = nameProblem(this.name.value);
+    this.nameError.set(problem);
+    if (problem) {
+      this.nameField()?.focus();
+      return;
+    }
+    this.confirm(this.name.value.trim());
+  }
+
+  private confirm(name?: string): void {
     const pending = this.pending();
     if (!pending || this.status() === 'checking') return;
     this.status.set('checking');
-    this.auth.confirmCode(pending.verificationId, this.code.value, pending.name).subscribe({
+    const called = name ?? pending.name;
+    this.auth.confirmCode(pending.verificationId, this.code.value, called).subscribe({
       next: (result) => {
+        if (result.outcome === 'NameRequired' && !called) {
+          this.status.set('idle');
+          this.step.set('name');
+          setTimeout(() => this.nameField()?.focus());
+          return;
+        }
         if (result.outcome !== 'SignedIn' || !result.session) {
           this.fail('We couldn’t check your code. Try again.');
           return;
@@ -131,10 +169,11 @@ export class VerifyCodePage {
 
   private fail(message: string, needsNewCode = false): void {
     this.status.set('idle');
+    this.step.set('code');
     this.code.setValue('');
     this.error.set(message);
     this.needsNewCode.set(needsNewCode);
-    setTimeout(() => this.field().focus());
+    setTimeout(() => this.field()?.focus());
   }
 
   protected resend(): void {
@@ -151,7 +190,7 @@ export class VerifyCodePage {
         this.code.setValue('');
         const where = sent.channel === 'Phone' ? 'messages' : 'email';
         this.toaster.show('success', 'New code sent', `Check your ${where} for the 6 digits.`);
-        this.field().focus();
+        this.field()?.focus();
       },
       error: (error: unknown) => {
         this.resending.set(false);

@@ -1,4 +1,14 @@
-<div pk-screen layout="split" body="middle" heading="Enter your code" [lead]="sentTo()">
+<div
+  pk-screen
+  layout="split"
+  body="middle"
+  [heading]="step() === 'name' ? 'What should we call you?' : 'Enter your code'"
+  [lead]="
+    step() === 'name'
+      ? 'Your code checked out. This is the name people in your Popkins will see.'
+      : sentTo()
+  "
+>
   <aside
     pk-split-aside
     slot="aside"
@@ -8,36 +18,53 @@
     text="One link, one QR code, and your whole group is in."
   ></aside>
   <header pk-top-bar slot="header" [back]="startedOn()" [step]="1" [steps]="3"></header>
-  <div class="stack">
-    <form id="verify-code" novalidate (submit)="submit($event)">
+  @if (step() === 'name') {
+    <form id="verify-code" novalidate (submit)="submitName($event)">
       <div
+        #nameField
         pk-text-field
-        fieldId="code"
-        label="6-digit code"
-        variant="code"
-        inputmode="numeric"
-        autocomplete="one-time-code"
-        [maxlength]="6"
-        [announceError]="true"
-        [digitsOnly]="true"
-        [formControl]="code"
+        fieldId="name"
+        label="Your name"
+        autocomplete="given-name"
+        [maxlength]="40"
+        [formControl]="name"
         [readonly]="status() === 'checking'"
-        [error]="error() ?? undefined"
-        (changed)="changed($event)"
+        [error]="nameError() ?? undefined"
       ></div>
     </form>
-    <div class="cluster cluster--center">
-      <button
-        pk-link
-        type="button"
-        [variant]="canResend() ? 'accent' : 'text'"
-        [disabled]="!canResend()"
-        (click)="resend()"
-      >
-        {{ resendLabel() }}
-      </button>
+  } @else {
+    <div class="stack">
+      <form id="verify-code" novalidate (submit)="submit($event)">
+        <div
+          #codeField
+          pk-text-field
+          fieldId="code"
+          label="6-digit code"
+          variant="code"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          [maxlength]="6"
+          [announceError]="true"
+          [digitsOnly]="true"
+          [formControl]="code"
+          [readonly]="status() === 'checking'"
+          [error]="error() ?? undefined"
+          (changed)="changed($event)"
+        ></div>
+      </form>
+      <div class="cluster cluster--center">
+        <button
+          pk-link
+          type="button"
+          [variant]="canResend() ? 'accent' : 'text'"
+          [disabled]="!canResend()"
+          (click)="resend()"
+        >
+          {{ resendLabel() }}
+        </button>
+      </div>
     </div>
-  </div>
+  }
   <div slot="actions" class="stack stack--sm">
     <button
       pk-button
@@ -47,8 +74,14 @@
       [block]="true"
       [busy]="status() === 'checking'"
     >
-      {{ status() === 'checking' ? 'Checking…' : 'Confirm' }}
+      @if (step() === 'name') {
+        {{ status() === 'checking' ? 'Signing you in…' : 'Continue' }}
+      } @else {
+        {{ status() === 'checking' ? 'Checking…' : 'Confirm' }}
+      }
     </button>
-    <a pk-link variant="text" [routerLink]="startedOn()">{{ differentLabel() }}</a>
+    <a pk-link variant="text" [routerLink]="startedOn()" [queryParams]="startedOnParams()">{{
+      differentLabel()
+    }}</a>
   </div>
 </div>
