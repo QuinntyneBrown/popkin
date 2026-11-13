@@ -84,6 +84,7 @@ describe('PopkinHomeStore', () => {
     threadRead$: new Subject<string>(),
     presenceChanged$: new Subject<{ popkinId: string; version: number; hereNow: number }>(),
     memberJoined$: new Subject<{ popkinId: string; member: MemberJoinedView }>(),
+    photosAdded$: new Subject<{ popkinId: string; photoIds: string[] }>(),
     reconnected$: new Subject<void>(),
     started: 0,
     start() {
@@ -314,6 +315,22 @@ describe('PopkinHomeStore', () => {
       realtime.reconnected$.next();
       expect(store.state()).toBe('ready');
       expect(store.members()).toMatchObject({ state: 'ready', data: [mara] });
+    });
+  });
+  // L2-031 AC7
+  describe('photos added while the home is open', () => {
+    it('are read into the Photos section without a reload', () => {
+      store.open('p');
+      api.photos = { count: 49, photos: [{ id: 'new', thumbnailUrl: '/n.jpg', caption: null }] };
+      realtime.photosAdded$.next({ popkinId: 'p', photoIds: ['new'] });
+      expect(store.photos()).toMatchObject({ state: 'ready', data: { count: 49 } });
+      expect(api.asked.photos).toBe(2);
+    });
+
+    it('are ignored when they are another Popkin’s', () => {
+      store.open('p');
+      realtime.photosAdded$.next({ popkinId: 'other', photoIds: ['x'] });
+      expect(api.asked.photos).toBe(1);
     });
   });
 });

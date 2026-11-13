@@ -88,6 +88,12 @@ export class PopkinHomeStore {
         this.readPopkin(true);
         this.readMembers(true);
       });
+    this.realtime.photosAdded$
+      .pipe(
+        filter((added) => added.popkinId === this.popkinId),
+        mine,
+      )
+      .subscribe(() => this.readPhotos(true));
     this.realtime.reconnected$.pipe(mine).subscribe(() => {
       if (this.state() === 'ready') this.readAll(true);
     });
