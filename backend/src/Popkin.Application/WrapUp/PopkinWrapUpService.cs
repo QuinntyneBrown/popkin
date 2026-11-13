@@ -73,13 +73,14 @@ public sealed class PopkinWrapUpService(IAppDbContext db, TimeProvider clock, IP
         return new PreparedWrapUp(calls, participants);
     }
 
-            throw;
-        }
-
-        // Told after the commit: the call's end first, then the wrap-up, whose recovery read is
-        // the Popkin itself (L2-044 AC4).
+    /// <summary>
+    /// Told after the commit: the call's end first, then the wrap-up, whose recovery read is the
+    /// Popkin itself (L2-044 AC4).
+    /// </summary>
+    public async Task AnnounceAsync(PopkinSpace popkin, IReadOnlyList<Call> endedCalls)
+    {
         // A direct call's end goes to its two members only (L2-023 AC2).
-        foreach (var call in calls)
+        foreach (var call in endedCalls)
         {
             await notifier.CallEnded(await CallReads.AudienceAsync(db, call, CancellationToken.None), call.Id, call.ThreadId);
         }
