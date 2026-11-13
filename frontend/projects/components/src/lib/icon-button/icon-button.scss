@@ -23,6 +23,16 @@
   scale: var(--scale-press);
 }
 
+:host(.icon-btn--send) {
+  background: var(--color-accent);
+  color: var(--color-fg-on-accent);
+}
+
+:host(.icon-btn--send:hover) {
+  background: var(--color-accent-hover);
+  color: var(--color-fg-on-accent);
+}
+
 :host(:disabled) {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
