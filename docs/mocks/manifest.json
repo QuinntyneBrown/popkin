@@ -586,6 +586,131 @@
       }
     },
     {
+      "id": "trip-board",
+      "kind": "page",
+      "title": "Trip board",
+      "route": "/p/:popkin/trips",
+      "requirements": [
+        "L2-068",
+        "L2-069",
+        "L2-070",
+        "L2-077"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "read-only",
+        "off"
+      ]
+    },
+    {
+      "id": "burn-down",
+      "kind": "page",
+      "title": "Burn-down",
+      "route": "/p/:popkin/trips/burn-down",
+      "requirements": [
+        "L2-071"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "done"
+      ]
+    },
+    {
+      "id": "time-off",
+      "kind": "page",
+      "title": "Time off",
+      "route": "/p/:popkin/schedule",
+      "requirements": [
+        "L2-072",
+        "L2-073",
+        "L2-077"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "confirmed",
+        "off"
+      ]
+    },
+    {
+      "id": "this-week",
+      "kind": "page",
+      "title": "This week",
+      "route": "/p/:popkin/schedule/week",
+      "requirements": [
+        "L2-074"
+      ],
+      "states": [
+        "default",
+        "working",
+        "loading",
+        "empty",
+        "error"
+      ]
+    },
+    {
+      "id": "admin-features",
+      "kind": "page",
+      "title": "Features (admin)",
+      "route": "admin.popkin.community/features",
+      "requirements": [
+        "L2-076",
+        "L2-077",
+        "L2-078"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "error",
+        "off"
+      ],
+      "not_applicable": {
+        "empty": "The two switches always exist; there is no empty list."
+      }
+    },
+    {
+      "id": "admin-sign-in",
+      "kind": "page",
+      "title": "Admin sign in",
+      "route": "admin.popkin.community/sign-in",
+      "requirements": [
+        "L2-078"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "The invalid, submitting and failed states are the sign-in screen's (sign-in/invalid, sign-in/submitting, sign-up/error); only the chrome differs."
+      }
+    },
+    {
+      "id": "admin-denied",
+      "kind": "page",
+      "title": "Not an admin",
+      "route": "admin.popkin.community/not-an-admin",
+      "requirements": [
+        "L2-078"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "This screen is itself the refusal."
+      }
+    },
+    {
       "id": "invite",
       "kind": "dialog",
       "title": "Invite",
@@ -869,6 +994,87 @@
       ],
       "not_applicable": {
         "invalid": "The button stays disabled until the word matches, so there is nothing to submit wrongly."
+      }
+    },
+    {
+      "id": "new-story",
+      "kind": "dialog",
+      "title": "New story",
+      "opens_from": "trip-board",
+      "requirements": [
+        "L2-069",
+        "L2-052"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
+    },
+    {
+      "id": "story",
+      "kind": "dialog",
+      "title": "Story",
+      "opens_from": "trip-board",
+      "requirements": [
+        "L2-070"
+      ],
+      "states": [
+        "default",
+        "done",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The title rule and its message are the same as New story (new-story/invalid)."
+      }
+    },
+    {
+      "id": "add-time-off",
+      "kind": "dialog",
+      "title": "Add my time off",
+      "opens_from": "time-off",
+      "requirements": [
+        "L2-073"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
+    },
+    {
+      "id": "my-hours",
+      "kind": "dialog",
+      "title": "My hours",
+      "opens_from": "this-week",
+      "requirements": [
+        "L2-074"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
+    },
+    {
+      "id": "turn-off-feature",
+      "kind": "dialog",
+      "title": "Turn off a feature",
+      "opens_from": "admin-features",
+      "requirements": [
+        "L2-076"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no field to fill in."
       }
     },
     {

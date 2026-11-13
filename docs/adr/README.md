@@ -26,6 +26,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0013](0013-deployment-shape.md) | Deployment: two container images behind one reverse proxy, one origin | Accepted |
 | [0014](0014-calls-are-a-mesh.md) | Calls: a mesh of peer connections, signalled through the hub, with a TURN relay by configuration | Accepted |
 | [0015](0015-the-worker-sends-no-hub-events.md) | The Worker sends no hub events: a timed wrap-up reaches open screens by the clock | Accepted |
+| [0016](0016-admin-app.md) | The admin app: a fourth frontend project at `admin.popkin.community`, admin sessions, feature switches read through one cached service | Accepted |
 
 ## Format
 
