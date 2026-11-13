@@ -15,11 +15,13 @@ public sealed class FilesController(ISender sender) : ControllerBase
 {
     [HttpGet("{**key}")]
     [AllowAnonymous]
-    public async Task<IActionResult> Get(string key, [FromQuery] long expires, [FromQuery] string? signature, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(
+        string key, [FromQuery] long expires, [FromQuery] string? signature, [FromQuery] string? download, CancellationToken cancellationToken)
     {
-        var file = await sender.Send(new GetPhotoFileQuery(key, expires, signature), cancellationToken);
+        var file = await sender.Send(new GetPhotoFileQuery(key, expires, signature, download), cancellationToken);
         // The address stops working when it expires; the browser may keep the bytes that long, no proxy may.
         Response.Headers.CacheControl = $"private, max-age={(int)PhotoUrlSigner.Lifetime.TotalSeconds}";
-        return File(file.Content, file.ContentType);
+        // An address signed with a file name downloads under it, as the zip of an album does (L2-046 AC4).
+        return download is null ? File(file.Content, file.ContentType) : File(file.Content, file.ContentType, download);
     }
 }

@@ -110,12 +110,12 @@ public static class ApiExtensions
         return scope.ServiceProvider.GetRequiredService<AppDbContext>().Memberships.Count();
     }
 
-    /// <summary>Wraps a Popkin up now, as the Host or the clock will (journey 9).</summary>
-    public static async Task WrapUpAsync(this ApiFactory api, Guid popkinId)
+    /// <summary>Wraps a Popkin up now, straight in the store, for a test of what a wrapped-up Popkin refuses.</summary>
+    public static async Task WrapUpAsync(this ApiFactory api, Guid popkinId, bool keepPhotos = true)
     {
         using var scope = api.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Popkins.Single(p => p.Id == popkinId).WrapUp(api.Clock.GetUtcNow());
+        db.Popkins.Single(p => p.Id == popkinId).WrapUp(api.Clock.GetUtcNow(), keepPhotos);
         await db.SaveChangesAsync();
     }
 }

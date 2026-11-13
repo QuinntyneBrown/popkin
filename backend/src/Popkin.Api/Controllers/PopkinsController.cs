@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Popkin.Application.Popkins;
 using Popkin.Application.Realtime;
+using Popkin.Application.WrapUp;
 
 namespace Popkin.Api.Controllers;
 
@@ -29,6 +30,31 @@ public sealed class PopkinsController(ISender sender) : ControllerBase
     [HttpGet("{popkinId:guid}")]
     public async Task<ActionResult<PopkinHomeDto>> GetHome(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetPopkinHomeQuery(popkinId), cancellationToken));
+
+    /// <summary>What the wrap-up screen tells the Host the recap will count (L2-043 AC1).</summary>
+    [HttpGet("{popkinId:guid}/wrap-up")]
+    public async Task<ActionResult<WrapUpPreviewDto>> GetWrapUpPreview(Guid popkinId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetWrapUpPreviewQuery(popkinId), cancellationToken));
+
+    public sealed record WrapUpPopkinRequest(bool? KeepPhotos);
+
+    /// <summary>The Host wraps the Popkin up, keeping its photo album or not (L2-043).</summary>
+    [HttpPost("{popkinId:guid}/wrap-up")]
+    public async Task<ActionResult<WrapUpResultDto>> WrapUp(Guid popkinId, WrapUpPopkinRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new WrapUpPopkinCommand(popkinId, request.KeepPhotos), cancellationToken));
+
+    public sealed record InviteCrewRequest(Guid? FromPopkinId);
+
+    /// <summary>
+    /// "Pop up another with this crew" (L2-046 AC5): sends this Popkin's invite to every member
+    /// of the wrapped-up Popkin named, for the Host of both.
+    /// </summary>
+    [HttpPost("{popkinId:guid}/crew-invites")]
+    public async Task<IActionResult> InviteCrew(Guid popkinId, InviteCrewRequest request, CancellationToken cancellationToken)
+    {
+        await sender.Send(new InviteCrewCommand(popkinId, request.FromPopkinId), cancellationToken);
+        return Accepted();
+    }
 
     /// <summary>The Popkin's invite, for any member (L2-011).</summary>
     [HttpGet("{popkinId:guid}/invite")]

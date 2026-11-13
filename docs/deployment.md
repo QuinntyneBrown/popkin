@@ -12,7 +12,14 @@ true: a setting added to the code is added here in the same change.
   `/api` and `/hubs` to the API, with WebSockets allowed on `/hubs`. Product: `<TO SUPPLY>`.
 - **One** instance of the Popkin API ([ADR 0009](adr/0009-one-api-instance.md)). Do not scale it
   out: hub groups, presence and the rate limits live in its memory.
-- The Popkin Worker, once it hosts a job (journey 9).
+- **One** instance of the Popkin Worker. It must run: it wraps up the Popkins whose time is up
+  (every 30 seconds), removes the photos of a Popkin wrapped up without its album after 30 days
+  (every hour) and prepares the zip behind "Save the album" (every 2 seconds). Without it a
+  Popkin with an end date never wraps up by itself and an album export stays "Preparing". It
+  reads and writes the same database **and the same photo store** as the API: the zip it writes
+  is the file the API hands out. It serves no HTTP and sends no hub events; a screen that is
+  open learns of a timed wrap-up from its own clock check
+  ([known gap 13](detailed-designs/README.md#known-gaps)).
 - SQL Server.
 
 ## Settings
@@ -20,10 +27,10 @@ true: a setting added to the code is added here in the same change.
 | Setting | Needed by | Without it |
 |---|---|---|
 | `Database:Provider`, `ConnectionStrings:Popkin` | API, Worker, `popkin` tool | The default is SQL Server on LocalDB, which a deployed system does not have |
-| `Auth:CodeHashKey` | API | The API refuses to start outside Development |
+| `Auth:CodeHashKey` | API, Worker | Each refuses to start outside Development |
 | `Invites:BaseUrl` | API | Invite links cannot be built |
-| `Photos:SigningKey` | API | The API refuses to start outside Development; with it, every photo address is signed and expires after an hour ([Join a Popkin](detailed-designs/invitations/join-popkin/README.md)) |
-| `Photos:Root` | API, Development only | Photo files go to a `popkin-photos` folder in the machine's temporary folder |
+| `Photos:SigningKey` | API, Worker | Each refuses to start outside Development; with it, every photo address, and the address an album's zip downloads from, is signed and expires after an hour ([Join a Popkin](detailed-designs/invitations/join-popkin/README.md)). The API signs and checks; give the Worker the same value |
+| `Photos:Root` | API, Worker, Development only | Photo files go to a `popkin-photos` folder in the machine's temporary folder. The API and the Worker must name the same folder |
 | `App:Origin` | API | A change from a client that sends no `Sec-Fetch-Site` is refused with 403 `cross_site_request` |
 | `MediaRelay:Urls` (a list: `MediaRelay:Urls:0`, `MediaRelay:Urls:1`, …) | API | A participant is handed no STUN or TURN server, so a group call connects only between browsers that reach each other directly, as on one machine or one network ([Group call](detailed-designs/calls/group-call/README.md)) |
 | `MediaRelay:Secret` | API | The servers of `MediaRelay:Urls` are handed out without a username or a credential, which a STUN server accepts and a TURN server refuses. It is the shared secret of the relay's TURN REST scheme (`use-auth-secret` and `static-auth-secret` in coturn): the API signs `{expiry}:{membershipId}` with HMAC-SHA1 and never calls the relay |
@@ -35,7 +42,12 @@ true: a setting added to the code is added here in the same change.
 The SMS and email providers are not chosen: outside Development every code request answers 503
 `code_not_sent`. The photo store provider is not chosen either: outside Development a join with
 a photo fails, and a join without one works; the same holds for the album, where adding a photo
-fails. No setting was added for the album. The media relay provider is not chosen either: any
+fails. No setting was added for the album. Journey 9 added no setting either: outside
+Development an album export fails for want of a photo store, and "Pop up another with this crew"
+is accepted and sends no invite for want of an SMS or email provider. The Worker has no probe;
+its heartbeat is the gauge `popkin.wrap_up.last_tick` on the `Popkin` meter, which stops rising
+when it stops ticking, and `popkin.wrap_up.lateness` measures how long after its end date each
+Popkin was wrapped up ([ADR 0012](adr/0012-opentelemetry.md)). The media relay provider is not chosen either: any
 STUN/TURN server that takes the shared-secret scheme fits the three `MediaRelay` settings, and
 the proxy must allow hub messages of up to 64 KB on `/hubs`, the size of the largest call signal.
 This and the other open decisions are in the [known gaps](detailed-designs/README.md#known-gaps).

@@ -141,6 +141,14 @@ With the two running, chat works locally: start a Popkin, open its invite link i
 browser profile, join, and each side sees the other's messages in the Everyone thread as they
 are sent.
 
+4. To see what the Worker does (a Popkin wrapping up when its time is up, "Save the album"
+   becoming a zip to download), start it in a third terminal. It uses the database and the photo
+   folder of the API started in step 2.
+
+   ```shell
+   pwsh eng/Start-E2eWorker.ps1
+   ```
+
 ### The database and the `popkin` tool
 
 The API never changes the database schema on startup. The `popkin` tool

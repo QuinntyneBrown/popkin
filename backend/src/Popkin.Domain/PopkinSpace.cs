@@ -31,11 +31,29 @@ public sealed class PopkinSpace
 
     public bool KeepPhotos { get; private set; } = true;
 
+    /// <summary>How long the photos of a Popkin wrapped up without its album stay (L2-045 AC4).</summary>
+    public static readonly TimeSpan PhotosStayFor = TimeSpan.FromDays(30);
+
+    /// <summary>When the photos go: 30 days after the wrap-up when the album was not kept, never otherwise.</summary>
+    public DateTimeOffset? PhotosRemoveAt => WrappedUpAt is { } wrappedUpAt && !KeepPhotos ? wrappedUpAt + PhotosStayFor : null;
+
+    /// <summary>When the photos were removed; null while the album is there.</summary>
+    public DateTimeOffset? PhotosRemovedAt { get; private set; }
+
+    /// <summary>How many photos the album held when it was removed, so the recap still counts them (L2-046 AC2).</summary>
+    public int? PhotosRemovedCount { get; private set; }
+
     public string InviteCode { get; private set; } = "";
 
     public DateTimeOffset CreatedAt { get; private set; }
 
     public DateTimeOffset LastActivityAt { get; private set; }
+
+    /// <summary>
+    /// Rises when the Popkin wraps up. Two wrap-ups at once, the Host's and the clock's, cannot
+    /// both be saved from the same version.
+    /// </summary>
+    public long Version { get; private set; }
 
     public IReadOnlyCollection<Membership> Memberships => _memberships;
 
@@ -74,15 +92,32 @@ public sealed class PopkinSpace
 
     public void ChangeInviteCode(string inviteCode) => InviteCode = inviteCode;
 
-    /// <summary>Wraps the Popkin up: from now on it is read-only (L2-045). Wrapping up twice changes nothing.</summary>
-    public void WrapUp(DateTimeOffset now)
+    /// <summary>
+    /// Wraps the Popkin up: from now on it is read-only (L2-045), and its photo album is kept or
+    /// goes 30 days later, as chosen (L2-043 AC2). A Popkin wraps up once.
+    /// </summary>
+    public void WrapUp(DateTimeOffset at, bool keepPhotos)
     {
         if (Status == PopkinStatus.WrappedUp)
         {
-            return;
+            throw new InvalidOperationException("The Popkin has wrapped up already.");
         }
 
         Status = PopkinStatus.WrappedUp;
-        WrappedUpAt = now;
+        WrappedUpAt = at;
+        KeepPhotos = keepPhotos;
+        Version++;
+    }
+
+    /// <summary>Records that the photos of a Popkin wrapped up without its album were removed (L2-045 AC4).</summary>
+    public void RemovePhotos(DateTimeOffset at, int photoCount)
+    {
+        if (PhotosRemoveAt is null)
+        {
+            throw new InvalidOperationException("The photos of this Popkin are kept.");
+        }
+
+        PhotosRemovedAt = at;
+        PhotosRemovedCount = photoCount;
     }
 }
