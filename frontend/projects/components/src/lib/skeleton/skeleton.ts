@@ -21,13 +21,24 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[class.skeleton--card]': "shape() === 'card'",
     '[class.skeleton--btn]': "shape() === 'btn'",
     '[class.skeleton--pill]': "shape() === 'pill'",
+    '[class.skeleton--bubble]': "shape() === 'bubble'",
+    '[class.w-20]': 'width() === 20',
+    '[class.w-30]': 'width() === 30',
+    '[class.w-40]': 'width() === 40',
+    '[class.w-50]': 'width() === 50',
+    '[class.w-60]': 'width() === 60',
+    '[class.w-70]': 'width() === 70',
+    '[class.w-80]': 'width() === 80',
     '[class.w-full]': "width() === 'full'",
   },
 })
 export class Skeleton {
   readonly shape = input.required<
-    'text' | 'title' | 'circle' | 'tile' | 'tile-2xl' | 'card' | 'btn' | 'pill'
+    'text' | 'title' | 'circle' | 'tile' | 'tile-2xl' | 'card' | 'btn' | 'pill' | 'bubble'
   >();
-  /** `full` stretches the shape across its container. */
-  readonly width = input<'auto' | 'full'>('auto');
+  /** `full` stretches the shape across its container; a number is that share of it in percent. */
+  readonly width = input<SkeletonWidth>('auto');
 }
+
+/** The widths the design system gives a skeleton (`w-20` to `w-80`, `w-full`). */
+export type SkeletonWidth = 'auto' | 'full' | 20 | 30 | 40 | 50 | 60 | 70 | 80;
