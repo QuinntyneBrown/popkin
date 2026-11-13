@@ -1,0 +1,6 @@
+<span pk-wordmark size="lg" tone="coral"></span>
+<svg pk-mark-picture class="welcome__picture" [picture]="picture()"></svg>
+<h1 class="welcome__heading">{{ heading() }}</h1>
+<p class="welcome__lead">{{ lead() }}</p>
+<div pk-action-pair class="welcome__actions"><ng-content select="[slot=action]" /></div>
+<div class="welcome__link"><ng-content select="[slot=link]" /></div>
