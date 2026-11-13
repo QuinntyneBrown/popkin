@@ -10,6 +10,7 @@ export const HUB_EVENTS = {
   threadRead: 'ThreadRead',
   presenceChanged: 'PresenceChanged',
   memberJoined: 'MemberJoined',
+  photosAdded: 'PhotosAdded',
 } as const;
 
 /** The waits before each try to reconnect; after the last, every 30 seconds without limit. */

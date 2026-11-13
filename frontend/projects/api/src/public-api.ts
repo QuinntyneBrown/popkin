@@ -42,3 +42,5 @@ export * from './lib/api/experiences/experiences-api';
 export * from './lib/models/photos';
 export * from './lib/api/photos/photo-rules';
 export * from './lib/api/photos/album-days';
+export * from './lib/api/photos/album-store';
+export * from './lib/api/photos/photo-uploads';

@@ -25,6 +25,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   private readonly read = new Subject<string>();
   private readonly presence = new Subject<{ popkinId: string; version: number; hereNow: number }>();
   private readonly joined = new Subject<{ popkinId: string; member: MemberJoinedView }>();
+  private readonly photos = new Subject<{ popkinId: string; photoIds: string[] }>();
   private readonly back = new Subject<void>();
 
   readonly state = this.status.asReadonly();
@@ -33,6 +34,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   readonly threadRead$ = this.read.asObservable();
   readonly presenceChanged$ = this.presence.asObservable();
   readonly memberJoined$ = this.joined.asObservable();
+  readonly photosAdded$ = this.photos.asObservable();
   readonly reconnected$ = this.back.asObservable();
 
   start(): void {
@@ -58,6 +60,9 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
     );
     connection.on(HUB_EVENTS.memberJoined, (popkinId: string, member: MemberJoinedView) =>
       this.joined.next({ popkinId, member }),
+    );
+    connection.on(HUB_EVENTS.photosAdded, (popkinId: string, photoIds: string[]) =>
+      this.photos.next({ popkinId, photoIds }),
     );
     connection.onreconnecting(() => this.status.set('reconnecting'));
     connection.onreconnected(() => {
