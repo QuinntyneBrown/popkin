@@ -125,6 +125,8 @@ These were `<TO SUPPLY>`; journey 20 settled each with the simplest option that 
 - Sharing a "Want to do" experience does not make the sharer keen; they say so like anyone else.
 - Keen records stay when the experience is marked done; the page of something the group did
   shows no keen. They go when the experience is deleted.
+- A member who leaves the Popkin is still counted among who is keen, as their ratings and
+  comments stay ([Leave a Popkin](../../popkins/leave-popkin/README.md), L2-047).
 - The failure toasts: "Your keen didn't save" / "It's back to how it was." with "Try again", and
   "That didn't save" / "It's still something you want to do." with "Try again".
 - In a wrapped-up Popkin an idea's panel keeps who is keen and the count, and offers neither
