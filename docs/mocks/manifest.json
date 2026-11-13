@@ -315,6 +315,8 @@
         "empty",
         "error",
         "failed-send",
+        "offline",
+        "new-messages",
         "read-only"
       ]
     },
