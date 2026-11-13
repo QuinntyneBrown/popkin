@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<CodeIssuer>();
         services.AddScoped<IMembershipGuard, MembershipGuard>();
         services.AddScoped<CallLeaver>();
+        services.AddSingleton<CallDisconnectGrace>();
         services.AddSingleton<PopkinMetrics>();
         // Who is here now is kept in this process: one API instance (ADR 0009).
         services.AddSingleton<PresenceTracker>();
