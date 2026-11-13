@@ -98,6 +98,35 @@ public sealed class PresenceTracker(TimeProvider clock)
     }
 
     /// <summary>
+    /// A person left a Popkin: they are no longer here in it, at once and without the grace.
+    /// Returns the connections they hold, so they can be sent no more of its events.
+    /// </summary>
+    public IReadOnlyList<string> Leave(Guid personId, Guid popkinId)
+    {
+        var changes = new List<PresenceSnapshot>();
+        List<string> connectionIds;
+        lock (_gate)
+        {
+            var held = _connections.Where(c => c.Value.PersonId == personId).ToList();
+            connectionIds = held.Select(c => c.Key).ToList();
+            foreach (var (_, connection) in held)
+            {
+                connection.PopkinIds.Remove(popkinId);
+            }
+
+            if (_popkins.TryGetValue(popkinId, out var popkin) && popkin.People.Remove(personId, out var person))
+            {
+                person.Timer?.Dispose();
+                popkin.Version++;
+                changes.Add(popkin.Snapshot(popkinId));
+            }
+        }
+
+        Raise(changes);
+        return connectionIds;
+    }
+
+    /// <summary>
     /// A connection closed. When it was the person's last in a Popkin, they still count for
     /// <see cref="Grace"/>, and are released then unless they have reconnected.
     /// </summary>

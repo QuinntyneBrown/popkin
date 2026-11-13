@@ -41,8 +41,9 @@ request the former member makes in that Popkin is answered as if it did not exis
 - **`LeavePopkinDialog`** (`dialogs/leave-popkin/leave-popkin.dialog.ts`) — CDK dialog in
   `pk-dialog`, opened with the Popkin's name. It names the Popkin and states what stays and how
   to return (L2-047 AC1), with `pk-button` "Leave" (danger) and "Stay". "Leave" sets `busy`,
-  reads "Leaving…" and disables both buttons (L2-056 AC3), then calls `PopkinsApi.leave`. On
-  `204` it closes and navigates to `/popkins` (L2-047 AC2). On failure it re-enables the buttons
+  reads "Leaving…" and is disabled (L2-056 AC3), then calls `PopkinsApi.leave`; "Stay" stays
+  as `busy.html` draws it. On
+  `204` it closes and navigates to `/popkins` (L2-047 AC2). On failure it re-enables "Leave"
   and shows a danger `pk-alert` in its body, as "Delete this experience?" does.
   "Stay", Escape or the backdrop close it and return focus to "Popkin settings".
 - **`PopkinsApi.leave(popkinId)`** — `HttpPopkinsApi` sends the `DELETE`.

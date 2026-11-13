@@ -41,4 +41,10 @@ public sealed class Membership
     };
 
     public void SetPhoto(string photoKey) => PhotoKey = photoKey;
+
+    /// <summary>
+    /// The member leaves (L2-047): the membership grants nothing from now on, and what they
+    /// added stays under the name it held. Coming back is a new membership.
+    /// </summary>
+    public void Leave(DateTimeOffset now) => LeftAt ??= now;
 }

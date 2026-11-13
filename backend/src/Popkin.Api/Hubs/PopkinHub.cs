@@ -68,6 +68,9 @@ public sealed class HubPopkinConnections(IHubContext<PopkinHub, IPopkinClient> h
     public Task AddToPopkinAsync(string connectionId, Guid popkinId, CancellationToken cancellationToken) =>
         hub.Groups.AddToGroupAsync(connectionId, PopkinHub.GroupOf(popkinId), cancellationToken);
 
+    public Task RemoveFromPopkinAsync(string connectionId, Guid popkinId, CancellationToken cancellationToken) =>
+        hub.Groups.RemoveFromGroupAsync(connectionId, PopkinHub.GroupOf(popkinId), cancellationToken);
+
     public Task AddToCallAsync(string connectionId, Guid callId, CancellationToken cancellationToken) =>
         hub.Groups.AddToGroupAsync(connectionId, PopkinHub.CallGroupOf(callId), cancellationToken);
 

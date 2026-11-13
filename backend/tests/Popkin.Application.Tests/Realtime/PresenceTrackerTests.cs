@@ -194,4 +194,45 @@ public sealed class PresenceTrackerTests
         Assert.Empty(_tracker.Join(Joel, Lakeside));
         Assert.Equal(new PresenceSnapshot(Lakeside, 0, 0), _tracker.Get(Lakeside));
     }
+    [Fact]
+    public void A_person_who_leaves_a_Popkin_is_no_longer_here_in_it_at_once_and_stays_in_the_others()
+    {
+        _tracker.Connect("phone", Mara, [Lakeside, BookClub]);
+        _tracker.Connect("laptop", Mara, [Lakeside, BookClub]);
+        _tracker.Connect("joel-phone", Joel, [Lakeside]);
+
+        var held = _tracker.Leave(Mara, Lakeside);
+
+        Assert.Equal(["laptop", "phone"], held.Order());
+        Assert.Equal(new PresenceSnapshot(Lakeside, 3, 1), _tracker.Get(Lakeside));
+        Assert.Equal([Joel], _tracker.PeopleHere(Lakeside));
+        Assert.Equal(new PresenceSnapshot(BookClub, 1, 1), _tracker.Get(BookClub));
+        Assert.Equal(new PresenceSnapshot(Lakeside, 3, 1), _changes[^1]);
+    }
+
+    [Fact]
+    public void A_person_who_left_is_not_counted_again_when_their_connection_drops()
+    {
+        _tracker.Connect("phone", Mara, [Lakeside]);
+        _tracker.Leave(Mara, Lakeside);
+        _changes.Clear();
+
+        _tracker.Disconnect("phone");
+        _clock.Advance(PresenceTracker.Grace);
+
+        Assert.Equal(new PresenceSnapshot(Lakeside, 2, 0), _tracker.Get(Lakeside));
+        Assert.Empty(_changes);
+    }
+
+    [Fact]
+    public void A_person_who_leaves_a_Popkin_they_do_not_have_open_changes_nothing()
+    {
+        _tracker.Connect("joel-phone", Joel, [Lakeside]);
+        _changes.Clear();
+
+        Assert.Empty(_tracker.Leave(Mara, Lakeside));
+
+        Assert.Equal(new PresenceSnapshot(Lakeside, 1, 1), _tracker.Get(Lakeside));
+        Assert.Empty(_changes);
+    }
 }

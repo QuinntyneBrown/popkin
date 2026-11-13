@@ -31,6 +31,12 @@ public interface IPopkinClient
     Task MemberJoined(Guid popkinId, MemberJoinedDto member);
 
     /// <summary>
+    /// Someone left the Popkin (L2-047 AC2). A fact: the members read again, and the one who
+    /// left is not told, nor sent anything of the Popkin after it.
+    /// </summary>
+    Task MemberLeft(Guid popkinId, Guid membershipId);
+
+    /// <summary>
     /// Photos were added to the Popkin's album. A hint: it carries their ids only, and the
     /// album read gives the photos (L2-031 AC7).
     /// </summary>
