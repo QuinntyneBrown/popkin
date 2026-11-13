@@ -20,6 +20,11 @@ public sealed class PopkinsController(ISender sender) : ControllerBase
         return Created($"/api/popkins/{created.Id}", created);
     }
 
+    /// <summary>My Popkins: the caller's own, active and wrapped up (L2-017, L2-018, L2-051 AC3).</summary>
+    [HttpGet]
+    public async Task<ActionResult<MyPopkinsDto>> List(CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetMyPopkinsQuery(), cancellationToken));
+
     /// <summary>The header of the Popkin home, for any member (L2-019, L2-051).</summary>
     [HttpGet("{popkinId:guid}")]
     public async Task<ActionResult<PopkinHomeDto>> GetHome(Guid popkinId, CancellationToken cancellationToken) =>
