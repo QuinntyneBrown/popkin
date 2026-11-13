@@ -10,7 +10,7 @@ Container_Boundary(spa, "Popkin web app") {
 }
 Container_Boundary(api, "Popkin API") {
   Component(ctrl, "InvitesController", "Controller, AllowAnonymous on GET", "GET /api/invites/(code)")
-  Component(rl, "invite-lookup rate limit policy", "ASP.NET Core rate limiter", "20 per 10 min per address")
+  Component(rl, "invite-codes rate limit policy", "ASP.NET Core rate limiter", "20 per 10 min per address")
   Component(handler, "GetInvitePreviewQueryHandler", "MediatR handler", "Returns only what L2-012 shows")
   Component(cur, "ICurrentPerson", "Abstraction", "Optional caller")
   ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")

@@ -17,11 +17,13 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first journey is built; the rest is designed.** Journey 1, Start a Popkin, runs end to
-end: the backend has sign up with a code, sessions and Popkin creation, with their migrations;
-the app has the screens of that journey, built for the five form factors of L2-058, and the
-not-found and server-error screens; the `components` library holds the `pk-*` components they
-use, each with a parity spec. Everything
+**The first two journeys are built; the rest is designed.** Journey 1, Start a Popkin, and
+journey 2, Join by invite, run end to end: the backend has sign up with a code, sessions, Popkin
+creation, the invite preview, joining with a name and a photo, and the photo store behind
+avatars, with their migrations; the app has the screens of those journeys, built for the five
+form factors of L2-058, and the not-found and server-error screens; the `components` library
+holds the `pk-*` components they use, each with a parity spec; the `api` library has its first
+unit tests. Everything
 else exists as documents, not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of
 every screen in every state (`docs/mocks/`), the design system (`docs/design-system/`), a
 detailed design per feature (`docs/detailed-designs/`) and a prompt per journey
@@ -38,7 +40,7 @@ Roles, requirements and the journeys to build are in `docs/specs/L1.md` (each tr
 L0-001), `docs/specs/L2.md` and `docs/journeys.md`. Use the words those documents use in code,
 docs and UI; do not invent synonyms.
 
-Journey 1 filled in the layout below; every later feature follows it.
+Journeys 1 and 2 filled in the layout below; every later feature follows it.
 
 ## Prefer best practice
 

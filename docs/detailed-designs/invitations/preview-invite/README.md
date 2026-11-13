@@ -33,7 +33,7 @@ visitor.
 
 ### API
 
-- `GET /api/invites/{code}` — `[AllowAnonymous]`, rate-limited by the `invite-lookup` policy.
+- `GET /api/invites/{code}` — `[AllowAnonymous]`, rate-limited by the `invite-codes` policy.
   `200` `InvitePreviewDto`. Failures: `404` `invite_not_found`; `429` with `Retry-After`.
 
 ### Frontend (Popkin web app)
@@ -42,27 +42,42 @@ visitor.
   `data-page="join-invite"`, `shell: 'bare'`, public, L2-007 AC3) — loads the preview with
   `InvitesApi.getPreview(code)` and renders by result:
   - **member, active** — navigates to `/p/:popkinId` (L2-012 AC4);
-  - **member, wrapped up** — navigates to `/p/:popkinId/recap` (L2-016 AC3);
-  - **open** — `pk-logo`, "{first name} invited you" with the inviter's `pk-avatar`,
-    `pk-popkin-tile` in the Popkin's colour, the name, a `pk-avatar` stack of up to 5 with "+N",
-    "{n} people", `pk-time-left` "Here until {day}, {time}" only when `endsAt` is set
-    (L2-012 AC1, AC2), `pk-button` "Join" and the line "Free, no app to download.";
-  - **wrapped up** — muted `pk-popkin-tile`, name, count, the wrapped-up sentence naming the
-    inviter, `pk-button` "Start your own Popkin" (to `/new`, via sign-up for a visitor) and no
-    "Join" (L2-016 AC1);
+  - **member, wrapped up** — navigates to `/p/:popkinId/recap` (L2-016 AC3). The recap is built
+    with wrapping up; until then a member of a wrapped-up Popkin goes to `/p/:popkinId` like any
+    other member;
+  - **open** — `pk-wordmark`, then `pk-invite-preview`: a `pk-pill` "{first name} invited you"
+    with the inviter's `pk-avatar`, `pk-popkin-tile` in the Popkin's colour, the name as the
+    screen's `h1`, a `pk-avatar-stack` of up to 5 with "+N", "{n} people", and `pk-time-left`
+    "Here until {day}, {time}" only when `endsAt` is set (L2-012 AC1, AC2); then `pk-button`
+    "Join" and the line "Free, no app to download." (`pk-legal` as a note);
+  - **wrapped up** — the same with a muted `pk-popkin-tile`, the wrapped-up sentence naming the
+    inviter in place of the time, `pk-button` "Start your own Popkin" (to `/new`, or `/sign-up`
+    for a visitor) and no "Join" (L2-016 AC1);
   - **not found** — `pk-empty-state` with "Start a Popkin" and "Join with a code" (`/join`)
     (L2-016 AC2);
-  - **rate limited** — the time the person may try again (L2-053 AC4); the mocks draw no such
-    state, and its copy is `<TO SUPPLY>`;
-  - **failure** — `pk-empty-state` with "Try again" and "Back to start" (`/welcome`)
-    (L2-056 AC2);
-  - **loading** — `pk-skeleton` shaped like the preview (L2-056 AC1).
+  - **rate limited** — `pk-empty-state` "That's a lot of invites" with the time the person may
+    try again, "Try again in 5 minutes." (L2-053 AC4), and "Back to start". The mocks draw no
+    such state; the copy follows "That's a lot of codes." of sign up;
+  - **failure** — `pk-empty-state`, announced as an alert, with "Try again", which loads the
+    preview again in place, and "Back to start" (`/welcome`) (L2-056 AC2);
+  - **loading** — `pk-skeleton`s shaped like the preview, hidden from assistive technology
+    beside the status line "Loading your invite…" (L2-056 AC1).
+- **Days and times** — `hereUntil` and `wrappedUpLine` (`api` library, `invite-text.ts`, unit
+  tested by ADR 0011) word the end and the wrap-up on the device's clock: "today", the weekday
+  within a week, else "19 Sep", with the year when it differs; "6 pm", "9:05 am".
+- **Wide layouts** (L2-058 AC10) — from 768 px a `pk-split-aside` holds a photograph beside the
+  invite (`/images/lake.jpg`, greyed when the Popkin has wrapped up). It is a stock picture and
+  not one of the Popkin's photos: a visitor is shown nothing from inside the Popkin
+  (L2-012 AC5). "Join" stays no wider than a button.
 - **"Join"** — stores the preview in `JoinInviteState`. A signed-in person goes to
   `/i/:code/profile`. A visitor goes to `/sign-up?returnUrl=/i/{code}/profile`; after the code is
   confirmed, the auth flow navigates to the return URL, accepting only same-origin app paths, so
-  the person reaches the profile step without opening the link again (L2-012 AC3).
-- **`InvitesApi` / `INVITES_API` / `HttpInvitesApi`** — `getPreview(code)` maps `404` to
-  `NotFound` and `429` to `RateLimited(retryAfter)`.
+  the person reaches the profile step without opening the link again (L2-012 AC3). A visitor
+  who already has an account uses "sign in instead" on that screen once signing in is built;
+  the invite itself offers one way in.
+- **`InvitesApi` / `INVITES_API` / `HttpInvitesApi`** — `getPreview(code)`; the page reads the
+  refusal with `toApiProblem`: `404` is not found, `429` is rate limited with its
+  `retryAfterSeconds`, anything else a failure.
 - **`JoinInviteState`** (`api` library) — holds the preview and, later, the join result for the
   profile and welcome steps.
 - The page's text is bound as text, never as HTML, so a Popkin or member name cannot run script
@@ -71,13 +86,15 @@ visitor.
 ### Backend
 
 - **`InvitesController.GetPreview`** — `[AllowAnonymous]`, the only Popkin read open without a
-  session (L2-050 AC1). It carries `[EnableRateLimiting("invite-lookup")]`: a fixed window of 20
+  session (L2-050 AC1). It carries `[EnableRateLimiting("invite-codes")]`: a fixed window of 20
   requests per client address per 10 minutes, answering `429` with `Retry-After`
   (L2-053 AC3). `invitations/join-by-code` shares the policy.
 - **`GetInvitePreviewQueryHandler`** — finds the `PopkinSpace` by `InviteCode` or throws
   `InviteNotFoundException` (`404` `invite_not_found`). It reads `ICurrentPerson` when a session
   exists. It returns `InvitePreviewDto` with only what L2-012 shows (L2-012 AC5, L2-051 AC5):
-  `State` (`Open` or `WrappedUp`), name, emoji, colour, active member count, `EndsAt`,
+  `State` (`Open` or `WrappedUp`, from the Popkin's status; a Popkin whose time is up but which
+  has not been wrapped up yet is decided with wrapping up), name, emoji, colour, active member
+  count, `EndsAt`,
   `WrappedUpAt`, up to 5 `AvatarDto`s carrying initials, accent and an expiring photo URL but no
   names, the inviter's first name and avatar, and `Viewer { IsMember, PopkinId }`. `PopkinId` is
   filled only for a member; a non-member never learns it.

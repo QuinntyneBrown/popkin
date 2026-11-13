@@ -35,7 +35,7 @@ instead" and "Scan a QR code instead".
 ### API
 
 - `GET /api/invites/{code}` — shared with `invitations/preview-invite`; `[AllowAnonymous]`,
-  `invite-lookup` rate limit. `200` `InvitePreviewDto`; `404` `invite_not_found`; `429` with
+  `invite-codes` rate limit. `200` `InvitePreviewDto`; `404` `invite_not_found`; `429` with
   `Retry-After`.
 
 The scanner calls no endpoint: it navigates to `/i/{code}`, whose preview does the lookup.
@@ -81,7 +81,7 @@ The scanner calls no endpoint: it navigates to `/i/{code}`, whose preview does t
 ### Backend
 
 - **`InvitesController.GetPreview`** and **`GetInvitePreviewQueryHandler`** — as described in
-  `invitations/preview-invite`. The `invite-lookup` policy counts every lookup from one client
+  `invitations/preview-invite`. The `invite-codes` policy counts every lookup from one client
   address, typed or opened by link, and refuses the 21st within 10 minutes with `429` and
   `Retry-After` (L2-053 AC3), which bounds guessing of codes.
 

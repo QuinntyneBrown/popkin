@@ -129,6 +129,7 @@ proxy and the release steps are in [`docs/deployment.md`](docs/deployment.md).
 |---|---|---|
 | Build the frontend | `npm run build` | `frontend/` |
 | Backend tests | `pwsh eng/Test-Backend.ps1` | repository root |
+| Frontend unit tests (the `api` library) | `npm test` | `frontend/` |
 | Frontend lint | `npm run lint` | `frontend/` |
 | Frontend format check | `npm run format:check` | `frontend/` |
 | End-to-end type check | `npm run typecheck` | `e2e/` |
