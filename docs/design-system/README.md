@@ -81,6 +81,17 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Preview card](components/preview-card.html) | Identity | With a name. No name yet. A 40-character name. | Static (both themes) | pages/name-your-popkin/default, pages/name-your-popkin/blank, pages/name-your-popkin/edge |
 | [Timeline](components/timeline.html) | Content | Day, weekend, custom, forever. | Static (both themes) | pages/how-long/default, pages/how-long/custom, pages/how-long/forever |
 
+Added with the Trips, Schedules and admin mocks on 13 November 2026, in `assets/components.css`
+and not yet given a page of their own (the next run of `extracting-design-systems` writes them):
+view switch (`.view-nav`), plan header (`.plan-header`), sprint chip and sparkline
+(`.sprint-chip`, `.sparkline`), board and story card (`.board`, `.story-card`, `.pts-group`,
+`.who-chip`), burn-down chart and legend (`.burn`, `.burn-chart`, `.chart-legend`, `.biggest`),
+month and week pickers (`.month-nav`, `.weeks`), the time-off table (`.table-wrap`, `.leave`),
+the day picker and shift timeline (`.day-picker`, `.free`, `.shifts`), the hours and leave rows
+of the dialogs (`.hours-row`, `.leave-row`), the panel dialog (`.dialog--panel`) and the admin
+app's feature row and mark (`.feature-row`, `.topbar__app`). The Popkin tabs now take four or six
+tabs.
+
 Not built, because no screen needs them yet: dropdown menu (Popkin settings is a sheet with menu rows), select, checkbox, radio buttons (choice cards and the segmented control cover the choices),
 side navigation, breadcrumb, pagination and table. Add one from the extracting-design-systems catalog when a mock first needs it.
 
