@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve popkin",
     "build": "ng build popkin",
+    "test": "ng test api --no-watch",
     "watch": "ng build popkin --watch --configuration development",
     "lint": "ng lint",
     "format": "prettier --write .",
@@ -35,10 +36,12 @@
     "angular-eslint": "22.6.0",
     "eslint": "^10.12.0",
     "husky": "^9.1.7",
+    "jsdom": "^31.0.1",
     "lint-staged": "^17.6.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
-    "typescript-eslint": "8.71.0"
+    "typescript-eslint": "8.71.0",
+    "vitest": "^5.1.0"
   },
   "lint-staged": {
     "*.{ts,html}": [

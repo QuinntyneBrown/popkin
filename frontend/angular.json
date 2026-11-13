@@ -89,6 +89,15 @@
           "options": {
             "lintFilePatterns": ["projects/api/**/*.ts", "projects/api/**/*.html"]
           }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "popkin:build:development",
+            "tsConfig": "projects/api/tsconfig.spec.json",
+            "include": ["projects/api/src/**/*.spec.ts"],
+            "runner": "vitest"
+          }
         }
       }
     },

@@ -1,7 +1,14 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { AUTH_API, HttpAuthApi, HttpPopkinsApi, POPKINS_API } from 'api';
+import {
+  AUTH_API,
+  HttpAuthApi,
+  HttpInvitesApi,
+  HttpPopkinsApi,
+  INVITES_API,
+  POPKINS_API,
+} from 'api';
 import { routes } from './app.routes';
 import { unauthorizedInterceptor } from './guards/unauthorized.interceptor';
 
@@ -13,5 +20,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     { provide: AUTH_API, useClass: HttpAuthApi },
     { provide: POPKINS_API, useClass: HttpPopkinsApi },
+    { provide: INVITES_API, useClass: HttpInvitesApi },
   ],
 };
