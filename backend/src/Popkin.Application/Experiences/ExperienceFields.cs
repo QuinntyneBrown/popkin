@@ -37,6 +37,20 @@ public static class ExperienceFields
     public static string? Place(string? place) =>
         Optional(place, Experience.MaxPlaceLength, "place_too_long", "A place is at most 80 characters.", "place");
 
+    /// <summary>The words a member adds to their rating: 1 to 500 characters (L2-041 AC2). A comment is not cleared.</summary>
+    public static string Comment(string? comment)
+    {
+        var text = (comment ?? "").Trim();
+        if (text.Length == 0)
+        {
+            throw ProblemException.Invalid("comment_required", "Write a few words, or close this to keep just your stars.", "text");
+        }
+
+        return text.Length <= ExperienceRating.MaxCommentLength
+            ? text
+            : throw ProblemException.Invalid("comment_too_long", "A comment is at most 500 characters.", "text");
+    }
+
     private static string? Optional(string? given, int maxLength, string code, string title, string field)
     {
         var text = (given ?? "").Trim();

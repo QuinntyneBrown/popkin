@@ -111,6 +111,32 @@ public sealed class ExperienceFieldsTests
         AssertRefused(() => ExperienceFields.Kind(given), "invalid_kind", "kind");
     }
 
+    [Theory]
+    // 1 to 500 characters, less the white space around them (L2-041 AC2).
+    [InlineData("a", 1, null)]
+    [InlineData("Worth the 6 am alarm.", 21, null)]
+    [InlineData("  Lovely.\n", 7, null)]
+    [InlineData(500, 500, null)]
+    [InlineData(501, 0, "comment_too_long")]
+    [InlineData(5000, 0, "comment_too_long")]
+    // Nothing, or white space only: a comment is not cleared.
+    [InlineData(null, 0, "comment_required")]
+    [InlineData("", 0, "comment_required")]
+    [InlineData("  \n\t ", 0, "comment_required")]
+    public void A_comment_is_1_to_500_characters(object? given, int keptLength, string? refusal)
+    {
+        var text = Text(given);
+
+        if (refusal is null)
+        {
+            Assert.Equal(keptLength, ExperienceFields.Comment(text).Length);
+        }
+        else
+        {
+            AssertRefused(() => ExperienceFields.Comment(text), refusal, "text");
+        }
+    }
+
     /// <summary>A number stands for a text of that many characters.</summary>
     private static string? Text(object? given) => given is int length ? new string('a', length) : (string?)given;
 

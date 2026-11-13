@@ -60,6 +60,14 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
         int? stars = request.Stars is { ValueKind: JsonValueKind.Number } value && value.TryGetInt32(out var whole) ? whole : null;
         return Ok(await sender.Send(new RateExperienceCommand(popkinId, experienceId, stars), cancellationToken));
     }
+
+    /// <summary>Adds a few words to the caller's rating, or replaces the ones they had (L2-041).</summary>
+    [HttpPut("{experienceId:guid}/my-rating/comment")]
+    public async Task<ActionResult<ExperienceCommentDto>> Comment(
+        Guid popkinId, Guid experienceId, CommentOnExperienceRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new CommentOnExperienceCommand(popkinId, experienceId, request.Text), cancellationToken));
 }
+
+public sealed record CommentOnExperienceRequest(string? Text);
 
 public sealed record RateExperienceRequest(JsonElement? Stars);

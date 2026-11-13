@@ -66,6 +66,18 @@ public sealed class GetExperienceQueryHandler(IAppDbContext db, IMembershipGuard
         var score = await ExperienceScores.OfAsync(db, experience, cancellationToken);
         var mine = await db.ExperienceRatings.AsNoTracking()
             .FirstOrDefaultAsync(r => r.ExperienceId == experience.Id && r.MembershipId == membership.Id, cancellationToken);
+        // What people said: the ratings that carry words, the newest words first (L2-038 AC4).
+        // Something the group wants to do has no ratings, so nothing is said of it here.
+        var said = experience.IsRateable
+            ? await db.ExperienceRatings.AsNoTracking()
+                .Where(r => r.ExperienceId == experience.Id && r.Comment != null)
+                .OrderByDescending(r => r.CommentedAt)
+                .ThenByDescending(r => r.MembershipId)
+                .ToListAsync(cancellationToken)
+            : [];
+        // A member who has left still said what they said.
+        var authorIds = said.Select(r => r.MembershipId).ToList();
+        var authors = await db.Memberships.AsNoTracking().Where(m => authorIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, cancellationToken);
 
         return new ExperienceDetailDto(
             experience.Id,
@@ -82,8 +94,8 @@ public sealed class GetExperienceQueryHandler(IAppDbContext db, IMembershipGuard
             score.Count,
             KeenCount: 0,
             ExperienceScoreDto.Of(score),
-            mine is null ? null : new MyRatingDto(mine.Stars, Comment: null),
-            Comments: [],
+            mine is null || !experience.IsRateable ? null : new MyRatingDto(mine.Stars, mine.Comment),
+            [.. said.Select(r => ExperienceCommentDto.Of(r, authors[r.MembershipId], store))],
             CanRate: active && experience.IsRateable,
             CanEdit: active && experience.CanBeEditedBy(membership),
             CanDelete: active && experience.CanBeDeletedBy(membership));

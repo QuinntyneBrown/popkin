@@ -10,6 +10,9 @@ public sealed class ExperienceRating
 
     public const int MaxStars = 5;
 
+    /// <summary>A comment is at most 500 characters (L2-041 AC2).</summary>
+    public const int MaxCommentLength = 500;
+
     private ExperienceRating()
     {
     }
@@ -21,6 +24,19 @@ public sealed class ExperienceRating
     public int Stars { get; private set; }
 
     public DateTimeOffset RatedAt { get; private set; }
+
+    /// <summary>The few words the member added to their rating; null when they added none (L2-041).</summary>
+    public string? Comment { get; private set; }
+
+    /// <summary>When the comment was last written; what people said is ordered by it.</summary>
+    public DateTimeOffset? CommentedAt { get; private set; }
+
+    /// <summary>Adds the member's words to their rating, or replaces the ones they had (L2-041 AC3, AC4).</summary>
+    public void SetComment(string text, DateTimeOffset now)
+    {
+        Comment = text;
+        CommentedAt = now;
+    }
 
     public static bool IsInRange(int stars) => stars is >= MinStars and <= MaxStars;
 

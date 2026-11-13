@@ -32,6 +32,7 @@ public sealed class ExperienceRatingConfiguration : IEntityTypeConfiguration<Exp
         builder.ToTable("ExperienceRatings", table => table.HasCheckConstraint("CK_ExperienceRatings_Stars", "[Stars] BETWEEN 1 AND 5"));
         // One rating per member and experience, even when two requests race (L2-039).
         builder.HasKey(r => new { r.ExperienceId, r.MembershipId });
+        builder.Property(r => r.Comment).HasMaxLength(ExperienceRating.MaxCommentLength);
         // The ratings go with their experience.
         builder.HasOne<Experience>().WithMany().HasForeignKey(r => r.ExperienceId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Membership>().WithMany().HasForeignKey(r => r.MembershipId).OnDelete(DeleteBehavior.Restrict);

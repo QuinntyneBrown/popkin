@@ -15,7 +15,12 @@ public sealed record ExperienceSharerDto(Guid MembershipId, string FirstName, Av
 /// What a member said about an experience: the words they added to their rating, with the stars
 /// they gave (L2-038 AC4, L2-041).
 /// </summary>
-public sealed record ExperienceCommentDto(Guid MembershipId, string FirstName, AvatarDto Avatar, int Stars, string Text, DateTimeOffset CommentedAt);
+public sealed record ExperienceCommentDto(Guid MembershipId, string FirstName, AvatarDto Avatar, int Stars, string Text, DateTimeOffset CommentedAt)
+{
+    /// <summary>The comment of a rating that has one.</summary>
+    public static ExperienceCommentDto Of(ExperienceRating rating, Membership author, IPhotoStore store) =>
+        new(author.Id, PersonName.FirstName(author.DisplayName), AvatarDto.Of(author, store), rating.Stars, rating.Comment!, rating.CommentedAt!.Value);
+}
 
 /// <summary>
 /// An experience as its card shows it (L2-037): the Popkin's emoji and colour stand in the
