@@ -71,6 +71,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .screen--stage { --color-focus-ring: var(--color-focus-ring-on-stage); background: var(--color-bg-stage); color: var(--color-fg-on-stage); border-color: transparent; }
 .screen__body { flex: 1; display: flex; flex-direction: column; padding: var(--space-4) var(--space-6) var(--space-6); min-width: 0; }
 .screen__body--flush { padding-inline: 0; }
+.screen__body--tiled { padding-top: 0; } /* a screen about one Popkin, its tile above the heading: wrap up */
+.screen__body--recap { padding: 0 var(--space-5) var(--space-8); } /* the recap's body */
+.screen__notice { margin-top: var(--space-5); } /* what went wrong, between the lead and the content */
 .screen__body--center { justify-content: center; align-items: center; text-align: center; }
 .screen__body--hero { padding-top: var(--space-10); align-items: center; text-align: center; } /* a celebration screen: the created screen */
 .screen__content--headed { margin-top: var(--space-8); } /* the content under a screen's h1 and lead */
