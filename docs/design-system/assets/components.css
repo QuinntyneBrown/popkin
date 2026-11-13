@@ -464,6 +464,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .hero-media img { width: 100%; height: 100%; }
 .hero-media__emoji { display: grid; place-items: center; height: 100%; font: var(--font-size-7xl) / 1 var(--font-family-emoji); } /* no picture: the Popkin's emoji on its colour */
 .hero-media .icon-btn { position: absolute; left: var(--space-3); top: var(--space-3); }
+.hero-media .hero-media__actions { left: auto; right: var(--space-3); } /* the actions of an experience, at the end opposite Back */
 .score-card { display: flex; align-items: center; gap: var(--space-5); }
 .score-card__value { font: var(--font-weight-black) var(--font-size-6xl) / 1 var(--font-family-display); }
 .score-card__count { margin-top: var(--space-1); font: var(--font-weight-regular) var(--font-size-sm-plus) / 1 var(--font-family-sans); color: var(--color-fg-muted); }
@@ -843,6 +844,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 @media (min-width: 48rem) {
   .detail .hero-media { aspect-ratio: 21 / 9; }
   .detail .hero-media .icon-btn { left: var(--space-6); top: var(--space-6); }
+  .detail .hero-media .hero-media__actions { left: auto; right: var(--space-6); }
   .detail__intro { padding: var(--space-7) var(--space-8) 0; }
   .detail__rest { padding-inline: var(--space-8); }
   .detail__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-8); }
@@ -853,6 +855,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .detail__lead { position: sticky; top: var(--space-8); }
   .detail .hero-media { aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--radius-xl); }
   .detail .hero-media .icon-btn { left: var(--space-4); top: var(--space-4); }
+  .detail .hero-media .hero-media__actions { left: auto; right: var(--space-4); }
   .detail__intro { padding-inline: 0; }
   .detail__rest { padding: 0; }
   .detail__cards { grid-template-columns: minmax(0, 1fr); margin-top: 0; }
