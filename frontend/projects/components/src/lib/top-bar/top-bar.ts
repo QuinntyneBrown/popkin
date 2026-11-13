@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { IconName } from '../icon/icons';
 import { IconButton } from '../icon-button/icon-button';
 import { PopkinTile } from '../popkin-tile/popkin-tile';
 import { StepDots } from '../step-dots/step-dots';
@@ -12,6 +13,11 @@ import { StepDots } from '../step-dots/step-dots';
  * screen's `h1`) and a `sub` line. In a thread screen Back is absent from 1024 px, where the
  * list of threads is beside the thread. In a page screen (`pk-page-screen`) the brand
  * bar is taller from 768 px, ruled off, and keeps its content in line with the page's.
+ *
+ * On the stage of a call (`pk-call-screen`) the start is "Minimise call" (`backIcon`,
+ * `backLabel`), the title carries the Popkin's `emoji` and is a little smaller, the `sub` line
+ * says how many are on the call and for how long, and from 640 px the bar is taller where
+ * others are on the call.
  */
 @Component({
   selector: 'header[pk-top-bar], div[pk-top-bar]',
@@ -31,6 +37,8 @@ export class TopBar {
   readonly back = input<string>();
   /** Where Back leads, in words, when it is not the screen before: "My Popkins". */
   readonly backLabel = input('Back');
+  /** Another icon than Back's, where the start leaves the screen another way: `chevron-down`. */
+  readonly backIcon = input<IconName>('back');
   /** Step dots: the current step (from 1) and the number of steps. */
   readonly step = input<number>();
   readonly steps = input<number>();
@@ -40,6 +48,8 @@ export class TopBar {
   readonly sticky = input(false);
   /** The emoji of the Popkin, on a small tile before the heading. */
   readonly tile = input<string>();
+  /** The emoji of the Popkin, in the line of the title: the bar of a call. */
+  readonly emoji = input<string>();
   /** The title as the screen's `h1`. */
   readonly heading = input<string>();
   /** The muted line under the title: "14 members · 5 here now". */

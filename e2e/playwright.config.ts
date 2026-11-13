@@ -65,9 +65,15 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Parity compares pixels: without this flag Chromium draws text with coloured (LCD)
-        // edges on some layers and grey edges on others.
-        ...(parity ? { launchOptions: { args: ['--disable-lcd-text'] } } : {}),
+        launchOptions: {
+          args: [
+            // A call measures sound from the moment it opens, with no press before it.
+            '--autoplay-policy=no-user-gesture-required',
+            // Parity compares pixels: without this flag Chromium draws text with coloured (LCD)
+            // edges on some layers and grey edges on others.
+            ...(parity ? ['--disable-lcd-text'] : []),
+          ],
+        },
       },
     },
   ],

@@ -102,6 +102,13 @@ export const routes: Routes = [
     data: data({ shell: 'app', page: 'group-chat' }),
     title: 'Everyone · Popkin',
   },
+  {
+    path: 'p/:popkinId/call',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/video-call/video-call.page').then((m) => m.VideoCallPage),
+    data: data({ shell: 'bare', page: 'video-call' }),
+    title: 'Group call · Popkin',
+  },
   // The album and the photo open over it share one album, kept while a photo is open so that
   // closing it returns to the place the member left (L2-033 AC2).
   {

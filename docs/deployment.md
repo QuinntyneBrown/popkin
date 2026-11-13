@@ -25,6 +25,9 @@ true: a setting added to the code is added here in the same change.
 | `Photos:SigningKey` | API | The API refuses to start outside Development; with it, every photo address is signed and expires after an hour ([Join a Popkin](detailed-designs/invitations/join-popkin/README.md)) |
 | `Photos:Root` | API, Development only | Photo files go to a `popkin-photos` folder in the machine's temporary folder |
 | `App:Origin` | API | A change from a client that sends no `Sec-Fetch-Site` is refused with 403 `cross_site_request` |
+| `MediaRelay:Urls` (a list: `MediaRelay:Urls:0`, `MediaRelay:Urls:1`, …) | API | A participant is handed no STUN or TURN server, so a group call connects only between browsers that reach each other directly, as on one machine or one network ([Group call](detailed-designs/calls/group-call/README.md)) |
+| `MediaRelay:Secret` | API | The servers of `MediaRelay:Urls` are handed out without a username or a credential, which a STUN server accepts and a TURN server refuses. It is the shared secret of the relay's TURN REST scheme (`use-auth-secret` and `static-auth-secret` in coturn): the API signs `{expiry}:{membershipId}` with HMAC-SHA1 and never calls the relay |
+| `MediaRelay:CredentialLifetime` | API | A TURN credential lives one hour (`01:00:00`); a value that is not a length of time stops the API at startup |
 | `Proxy:KnownProxies`, `Proxy:KnownNetworks` (not built) | API | Every person shares the proxy's address and one allowance of 10 codes per 10 minutes, and the HTTPS redirect can loop ([Abuse limits](detailed-designs/security/abuse-limits/README.md)) |
 | `DataProtection:KeysPath` (not built) | API | The session cookie's keys die with the container, and every restart signs everyone out ([Sessions](detailed-designs/accounts/sessions/README.md)) |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` (not built) | API, Worker | Nothing is exported; the console log is all there is ([ADR 0012](adr/0012-opentelemetry.md)) |
@@ -32,8 +35,10 @@ true: a setting added to the code is added here in the same change.
 The SMS and email providers are not chosen: outside Development every code request answers 503
 `code_not_sent`. The photo store provider is not chosen either: outside Development a join with
 a photo fails, and a join without one works; the same holds for the album, where adding a photo
-fails. No setting was added for the album. This and the other open decisions are in the
-[known gaps](detailed-designs/README.md#known-gaps).
+fails. No setting was added for the album. The media relay provider is not chosen either: any
+STUN/TURN server that takes the shared-secret scheme fits the three `MediaRelay` settings, and
+the proxy must allow hub messages of up to 64 KB on `/hubs`, the size of the largest call signal.
+This and the other open decisions are in the [known gaps](detailed-designs/README.md#known-gaps).
 
 ## Release
 

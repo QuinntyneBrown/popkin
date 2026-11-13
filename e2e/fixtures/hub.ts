@@ -33,6 +33,7 @@ export class Hub {
   /** How many connections the app has opened so far. */
   connections = 0;
 
+  private readonly handlers = new Map<string, (args: unknown[]) => void>();
   private socket?: WebSocketRoute;
   private ready: Promise<void>;
   private markReady: () => void = () => undefined;
@@ -90,6 +91,11 @@ export class Hub {
     this.socket?.send(JSON.stringify({ type: 1, target: event, arguments: args }) + END);
   }
 
+  /** Has a fixture act on what the app invokes, as the server would: relay a signal, say. */
+  onInvoke(target: string, handler: (args: unknown[]) => void): void {
+    this.handlers.set(target, handler);
+  }
+
   /** Drops the connection, as a tunnel does; the app reconnects by itself. */
   async drop(): Promise<void> {
     await this.ready;
@@ -111,6 +117,7 @@ export class Hub {
       if (frame.invocationId) {
         socket.send(JSON.stringify({ type: 3, invocationId: frame.invocationId }) + END);
       }
+      this.handlers.get(frame.target)?.(frame.arguments ?? []);
     }
   }
 }

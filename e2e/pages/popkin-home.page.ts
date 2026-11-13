@@ -50,6 +50,8 @@ export class PopkinHomePage {
   readonly inviteRegion: Locator;
   readonly stack: Locator;
   readonly bodySkeleton: Locator;
+  /** The banner of a call that is under way: how many are on it, and Join. */
+  readonly callBanner: Locator;
   readonly photoStrip: Locator;
   readonly memberList: Locator;
   readonly firstExperience: Locator;
@@ -108,6 +110,7 @@ export class PopkinHomePage {
     this.inviteRegion = this.actions.locator('.btn--secondary');
     this.stack = this.header.locator('.avatar-stack');
     this.bodySkeleton = page.locator('main > [aria-hidden="true"]');
+    this.callBanner = page.locator('.banner--popkin');
     this.photoStrip = this.photos.locator('.hscroll');
     this.memberList = this.members.getByRole('list');
     this.firstExperience = this.experienceCards.first();

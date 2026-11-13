@@ -5,10 +5,14 @@ import {
   HubConnectionState,
   LogLevel,
 } from '@microsoft/signalr';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { CallParticipantView, CallSignal } from '../../models/calls';
 import { MemberJoinedView, MessageView } from '../../models/chat';
-import { HUB_EVENTS, HUB_URL, reconnectDelay } from './hub-events';
+import { HUB_EVENTS, HUB_METHODS, HUB_URL, reconnectDelay } from './hub-events';
 import { PopkinRealtime, RealtimeState } from './popkin-realtime';
+
+/** What one of the client's streams of events carries. */
+type Of<K extends keyof PopkinRealtime> = PopkinRealtime[K] extends Observable<infer V> ? V : never;
 
 /**
  * `PopkinRealtime` over SignalR. A lost connection is tried again after 0, 2, 10 and 30 seconds
@@ -27,6 +31,14 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   private readonly joined = new Subject<{ popkinId: string; member: MemberJoinedView }>();
   private readonly photos = new Subject<{ popkinId: string; photoIds: string[] }>();
   private readonly back = new Subject<void>();
+  private readonly callChange = new Subject<Of<'callChanged$'>>();
+  private readonly callEnd = new Subject<Of<'callEnded$'>>();
+  private readonly onCall = new Subject<Of<'participantJoined$'>>();
+  private readonly offCall = new Subject<Of<'participantLeft$'>>();
+  private readonly media = new Subject<Of<'participantMediaChanged$'>>();
+  private readonly signals = new Subject<Of<'signal$'>>();
+  /** Calls waiting for the connection. */
+  private waiting: (() => void)[] = [];
 
   readonly state = this.status.asReadonly();
   readonly messageAdded$ = this.added.asObservable();
@@ -36,6 +48,12 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   readonly memberJoined$ = this.joined.asObservable();
   readonly photosAdded$ = this.photos.asObservable();
   readonly reconnected$ = this.back.asObservable();
+  readonly callChanged$ = this.callChange.asObservable();
+  readonly callEnded$ = this.callEnd.asObservable();
+  readonly participantJoined$ = this.onCall.asObservable();
+  readonly participantLeft$ = this.offCall.asObservable();
+  readonly participantMediaChanged$ = this.media.asObservable();
+  readonly signal$ = this.signals.asObservable();
 
   start(): void {
     if (this.connection) return;
@@ -64,9 +82,40 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
     connection.on(HUB_EVENTS.photosAdded, (popkinId: string, photoIds: string[]) =>
       this.photos.next({ popkinId, photoIds }),
     );
+    connection.on(
+      HUB_EVENTS.callChanged,
+      (popkinId: string, callId: string, version: number, participantCount: number) =>
+        this.callChange.next({ popkinId, callId, version, participantCount }),
+    );
+    connection.on(HUB_EVENTS.callEnded, (popkinId: string, callId: string) =>
+      this.callEnd.next({ popkinId, callId }),
+    );
+    connection.on(
+      HUB_EVENTS.participantJoined,
+      (callId: string, participant: CallParticipantView) =>
+        this.onCall.next({ callId, participant }),
+    );
+    connection.on(HUB_EVENTS.participantLeft, (callId: string, membershipId: string) =>
+      this.offCall.next({ callId, membershipId }),
+    );
+    connection.on(
+      HUB_EVENTS.participantMediaChanged,
+      (
+        callId: string,
+        membershipId: string,
+        mediaVersion: number,
+        micOn: boolean,
+        cameraOn: boolean,
+      ) => this.media.next({ callId, membershipId, mediaVersion, micOn, cameraOn }),
+    );
+    connection.on(
+      HUB_EVENTS.signal,
+      (callId: string, fromMembershipId: string, signal: CallSignal) =>
+        this.signals.next({ callId, fromMembershipId, signal }),
+    );
     connection.onreconnecting(() => this.status.set('reconnecting'));
     connection.onreconnected(() => {
-      this.status.set('connected');
+      this.connected();
       this.back.next();
     });
     // Automatic reconnection gave up, or the server closed the connection: begin again.
@@ -82,7 +131,32 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
     this.connection = undefined;
     clearTimeout(this.retry);
     this.status.set('disconnected');
+    this.waiting.splice(0).forEach((resume) => resume());
     void connection?.stop();
+  }
+
+  async joinCall(callId: string): Promise<void> {
+    await (await this.ready()).invoke(HUB_METHODS.joinCall, callId);
+  }
+
+  async sendSignal(callId: string, toMembershipId: string, signal: CallSignal): Promise<void> {
+    // Invoked, not sent: a refused signal must be known, or a call would never connect.
+    await (await this.ready()).invoke(HUB_METHODS.sendSignal, callId, toMembershipId, signal);
+  }
+
+  private connected(): void {
+    this.status.set('connected');
+    this.waiting.splice(0).forEach((resume) => resume());
+  }
+
+  /** The connection, once it is up. */
+  private async ready(): Promise<HubConnection> {
+    this.start();
+    while (this.connection?.state !== HubConnectionState.Connected) {
+      if (!this.connection) throw new Error('The connection was stopped.');
+      await new Promise<void>((resume) => this.waiting.push(resume));
+    }
+    return this.connection;
   }
 
   /** The first connection is not retried by the client itself, so it is here, on the same waits. */
@@ -94,7 +168,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
         if (connection.state !== HubConnectionState.Disconnected) return;
         connection.start().then(
           () => {
-            this.status.set('connected');
+            this.connected();
             // The server answers before it has put the connection in its Popkins' groups, and
             // nothing was heard while it was not connected: the screens read again what they show.
             this.back.next();

@@ -1,5 +1,6 @@
 import { InjectionToken, Signal } from '@angular/core';
 import { Observable } from 'rxjs';
+import { CallParticipantView, CallSignal } from '../../models/calls';
 import { MemberJoinedView, MessageView } from '../../models/chat';
 
 export type RealtimeState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
@@ -19,10 +20,38 @@ export interface PopkinRealtime {
   readonly memberJoined$: Observable<{ popkinId: string; member: MemberJoinedView }>;
   /** Photos were added to a Popkin's album (L2-031 AC7). */
   readonly photosAdded$: Observable<{ popkinId: string; photoIds: string[] }>;
+  /** Who is on a Popkin's group call changed; `version` orders these (L2-029 AC2). */
+  readonly callChanged$: Observable<{
+    popkinId: string;
+    callId: string;
+    version: number;
+    participantCount: number;
+  }>;
+  /** The last person left a Popkin's group call (L2-029 AC6). */
+  readonly callEnded$: Observable<{ popkinId: string; callId: string }>;
+  /** Heard only by those on the call, once `joinCall` succeeded. */
+  readonly participantJoined$: Observable<{ callId: string; participant: CallParticipantView }>;
+  readonly participantLeft$: Observable<{ callId: string; membershipId: string }>;
+  readonly participantMediaChanged$: Observable<{
+    callId: string;
+    membershipId: string;
+    mediaVersion: number;
+    micOn: boolean;
+    cameraOn: boolean;
+  }>;
+  /** A step of setting up media, sent by someone on the call to this member alone. */
+  readonly signal$: Observable<{ callId: string; fromMembershipId: string; signal: CallSignal }>;
   readonly reconnected$: Observable<void>;
   /** Opens the connection if it is not open; safe to call from every screen that needs it. */
   start(): void;
   stop(): void;
+  /**
+   * Puts this connection on a call the member has joined, so it hears the call's events. It
+   * waits for the connection, and fails with the refusal's `code` (`call_not_found`).
+   */
+  joinCall(callId: string): Promise<void>;
+  /** Sends a step of setting up media to one person on the call. Fails when it is refused. */
+  sendSignal(callId: string, toMembershipId: string, signal: CallSignal): Promise<void>;
 }
 
 export const POPKIN_REALTIME = new InjectionToken<PopkinRealtime>('PopkinRealtime');

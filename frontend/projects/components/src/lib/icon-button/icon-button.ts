@@ -4,7 +4,9 @@ import { IconName } from '../icon/icons';
 
 /**
  * Icon button (docs/design-system/components/icon-button.html): a 44 px round target whose
- * accessible name is its label, shown as a tooltip too.
+ * accessible name is its label, shown as a tooltip too. With `text` it is labelled
+ * (`icon-btn--labelled`): from 640 px a short word shows beside the icon, as Invite does on a
+ * call. The word is for the eye; the name stays the `label`, which begins with it.
  */
 @Component({
   selector: 'a[pk-icon-button], button[pk-icon-button]',
@@ -16,6 +18,8 @@ import { IconName } from '../icon/icons';
     class: 'icon-btn',
     '[class.icon-btn--card]': "variant() === 'card'",
     '[class.icon-btn--send]': "variant() === 'send'",
+    '[class.icon-btn--popkin]': "variant() === 'popkin'",
+    '[class.icon-btn--labelled]': '!!text()',
     '[attr.aria-label]': 'label()',
     '[attr.title]': 'label()',
   },
@@ -25,8 +29,11 @@ export class IconButton {
   readonly label = input.required<string>();
   /**
    * `card` is a button on a tinted surface, such as the home header: a white disc with a shadow.
-   * `send` is the coral button that sends a message.
+   * `send` is the coral button that sends a message. `popkin` draws the icon in the Popkin's
+   * colour: "Start group call".
    */
-  readonly variant = input<'plain' | 'card' | 'send'>('plain');
+  readonly variant = input<'plain' | 'card' | 'send' | 'popkin'>('plain');
   readonly size = input<'sm' | 'md' | 'lg' | 'base'>('base');
+  /** The word shown beside the icon from 640 px: "Invite". */
+  readonly text = input<string>();
 }

@@ -1,0 +1,33 @@
+@if (rest(); as counted) {
+  <span class="call-tile__rest">{{ counted }}</span>
+} @else {
+  @if (shown(); as media) {
+    <video
+      class="call-tile__video"
+      autoplay
+      playsinline
+      aria-hidden="true"
+      [muted]="true"
+      [srcObject]="media"
+    ></video>
+  }
+  @if (!shown()) {
+    <span
+      pk-avatar
+      size="xl"
+      [initials]="avatar()?.initials ?? ''"
+      [photo]="avatar()?.photoUrl"
+      [blank]="!avatar()"
+      [attr.data-accent]="avatar()?.accent"
+    ></span>
+  }
+  <span class="call-tile__name">
+    @if (muted()) {
+      <svg pk-icon class="call-tile__muted" name="mic-off"></svg>
+      <span class="visually-hidden">{{ mutedText() }}</span>
+    }
+    <span class="call-tile__person"
+      >{{ name() }}<span class="visually-hidden">{{ speaking() ? speakingText() : '' }}</span></span
+    >
+  </span>
+}

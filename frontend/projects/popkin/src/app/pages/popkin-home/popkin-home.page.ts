@@ -11,6 +11,7 @@ import {
 import { RouterLink } from '@angular/router';
 import {
   AvatarView,
+  CallBannerStore,
   ErrorScreens,
   HomeSection,
   PopkinHomeStore,
@@ -25,6 +26,7 @@ import {
 import {
   Alert,
   AppScreen,
+  Banner,
   Button,
   Card,
   ChatCard,
@@ -55,6 +57,7 @@ const accent = (avatar: AvatarView) => accentOf(avatar.accent);
 @Component({
   selector: 'pk-popkin-home-page',
   imports: [
+    Banner,
     Alert,
     AppScreen,
     Button,
@@ -73,7 +76,7 @@ const accent = (avatar: AvatarView) => accentOf(avatar.accent);
     Section,
     TopBar,
   ],
-  providers: [PopkinHomeStore],
+  providers: [PopkinHomeStore, CallBannerStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './popkin-home.page.html',
 })
@@ -82,6 +85,9 @@ export class PopkinHomePage {
   readonly popkinId = input.required<string>();
 
   protected readonly store = inject(PopkinHomeStore);
+  /** The group call under way, if there is one (L2-029 AC2). */
+  protected readonly call = inject(CallBannerStore).banner;
+  private readonly calls = inject(CallBannerStore);
   private readonly unread = inject(UnreadTracker);
   private readonly errors = inject(ErrorScreens);
   private readonly dialog = inject(Dialog);
@@ -156,7 +162,10 @@ export class PopkinHomePage {
   constructor() {
     effect(() => {
       const popkinId = this.popkinId();
-      untracked(() => this.store.open(popkinId));
+      untracked(() => {
+        this.store.open(popkinId);
+        this.calls.open(popkinId);
+      });
     });
     // L2-051 AC1: someone who is not a member cannot tell the Popkin exists.
     effect(() => {

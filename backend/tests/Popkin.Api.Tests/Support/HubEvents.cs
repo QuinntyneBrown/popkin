@@ -25,6 +25,12 @@ public sealed class HubEvents : IAsyncDisposable
         ("PresenceChanged", 3),
         ("MemberJoined", 2),
         ("PhotosAdded", 2),
+        ("CallChanged", 4),
+        ("CallEnded", 2),
+        ("ParticipantJoined", 2),
+        ("ParticipantLeft", 2),
+        ("ParticipantMediaChanged", 5),
+        ("Signal", 3),
     ];
 
     private readonly object _gate = new();

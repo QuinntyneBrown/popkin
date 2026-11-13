@@ -11,6 +11,18 @@ export const HUB_EVENTS = {
   presenceChanged: 'PresenceChanged',
   memberJoined: 'MemberJoined',
   photosAdded: 'PhotosAdded',
+  callChanged: 'CallChanged',
+  callEnded: 'CallEnded',
+  participantJoined: 'ParticipantJoined',
+  participantLeft: 'ParticipantLeft',
+  participantMediaChanged: 'ParticipantMediaChanged',
+  signal: 'Signal',
+} as const;
+
+/** What the app asks of `PopkinHub`, by the names the server gives its methods. */
+export const HUB_METHODS = {
+  joinCall: 'JoinCall',
+  sendSignal: 'SendSignal',
 } as const;
 
 /** The waits before each try to reconnect; after the last, every 30 seconds without limit. */

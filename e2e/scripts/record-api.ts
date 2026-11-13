@@ -5,7 +5,8 @@
  *
  * The journey below is the cast of the mocks: Mara signs up and starts Lakeside Weekend, Walt
  * and Dev join it, Joel opens its invite and joins, Walt and Mara write in the Everyone
- * thread, Mara opens the Popkin's home, and she adds the album's first photo. Each answer is keyed
+ * thread, Mara opens the Popkin's home, starts a group call and leaves it, and she adds the
+ * album's first photo. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -139,6 +140,14 @@ await call('GET', `/api/popkins/${created.id}/threads/everyone/preview`);
 await call('GET', `/api/popkins/${created.id}/photos/summary`);
 await call('GET', `/api/popkins/${created.id}/experiences/summary`);
 await call('GET', `/api/popkins/${created.id}/members`);
+
+// Calls: no group call is under way, which is what the home and the thread read; then Mara
+// starts one, turns her camera off and leaves, which ends it (journey 7).
+const calls = `/api/popkins/${created.id}/calls`;
+await call('GET', `${calls}/current`);
+const joined = await call('POST', calls, { micOn: true, cameraOn: true });
+await call('PATCH', `${calls}/${joined.call.id}/participants/me`, { micOn: true, cameraOn: false });
+await call('POST', `${calls}/${joined.call.id}/leave`);
 
 // My Popkins: Mara's one active Popkin, as its card (journey 6).
 await call('GET', '/api/popkins');

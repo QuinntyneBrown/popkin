@@ -24,6 +24,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0011](0011-unit-tests-for-frontend-logic.md) | Unit tests for the `api` library's stores and helpers, run in CI | Accepted |
 | [0012](0012-opentelemetry.md) | Telemetry: OpenTelemetry for logs, metrics and traces, exported by configuration alone | Accepted |
 | [0013](0013-deployment-shape.md) | Deployment: two container images behind one reverse proxy, one origin | Accepted |
+| [0014](0014-calls-are-a-mesh.md) | Calls: a mesh of peer connections, signalled through the hub, with a TURN relay by configuration | Accepted |
 
 ## Format
 

@@ -39,7 +39,29 @@
       [tile]="thread()?.emoji ?? ''"
       [heading]="thread()?.popkinName ?? 'Chat'"
       [sub]="sub()"
-    ></header>
+    >
+      <a
+        pk-icon-button
+        slot="end"
+        variant="popkin"
+        icon="video"
+        label="Start group call"
+        [routerLink]="['/p', popkinId(), 'call']"
+      ></a>
+    </header>
+
+    @if (call(); as call) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="popkin"
+        icon="video"
+        heading="Group call"
+        [text]="'· ' + call.text"
+        [action]="call.action"
+        [actionLink]="['/p', popkinId(), 'call']"
+      ></div>
+    }
 
     @if (offline()) {
       <div

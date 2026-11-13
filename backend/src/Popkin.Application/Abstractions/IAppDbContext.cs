@@ -24,5 +24,9 @@ public interface IAppDbContext
 
     DbSet<Photo> Photos { get; }
 
+    DbSet<Call> Calls { get; }
+
+    DbSet<CallParticipant> CallParticipants { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

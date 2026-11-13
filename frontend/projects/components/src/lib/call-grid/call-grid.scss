@@ -1,0 +1,33 @@
+:host {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: var(--space-2);
+  min-height: var(--layout-call-min-height);
+  padding: 0 var(--space-2);
+}
+
+:host(.call-grid--solo) {
+  grid-template-columns: 1fr;
+}
+
+/* Alone on the call, the screen sets the member's tile in from its sides. */
+:host-context(.screen--alone) {
+  padding: 0;
+}
+
+@media (min-width: 40rem) {
+  :host(.call-grid--pair) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  :host(.call-grid--six) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  :host-context(.screen--call) {
+    gap: var(--space-3);
+    padding-inline: var(--space-4);
+  }
+}

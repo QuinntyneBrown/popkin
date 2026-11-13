@@ -1,0 +1,47 @@
+:host {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+/* Under the member's own tile it takes the room of its part, set in less. */
+:host-context(.screen--alone) {
+  flex: none;
+  padding: var(--space-4);
+}
+
+.stage-message__text {
+  color: var(--color-fg-on-stage-muted);
+}
+
+.stage-message__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.stage-message__actions:empty {
+  display: none;
+}
+
+.spinner {
+  width: var(--space-10);
+  height: var(--space-10);
+  border: var(--border-width-ring) solid var(--color-bg-stage-control-strong);
+  border-top-color: var(--color-fg-on-stage);
+  border-radius: var(--radius-full);
+  animation: spin var(--duration-deliberate) linear infinite;
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}

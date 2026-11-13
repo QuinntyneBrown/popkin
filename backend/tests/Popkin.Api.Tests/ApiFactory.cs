@@ -42,6 +42,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     /// <summary>The requests the API has finished handling, to await what it does on its own time.</summary>
     public HandledRequests Requests { get; } = new();
 
+    /// <summary>Settings a test gives the API, set before its first request.</summary>
+    public Dictionary<string, string?> Settings { get; } = [];
+
     /// <summary>The photo store of this fixture, in memory.</summary>
     public InMemoryPhotoStore Photos => Services.GetRequiredService<InMemoryPhotoStore>();
 
@@ -52,6 +55,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Database:Name", _databaseName);
         builder.UseSetting("App:Origin", "https://localhost");
         builder.UseSetting("Invites:BaseUrl", "https://popk.in/");
+        foreach (var (key, value) in Settings)
+        {
+            builder.UseSetting(key, value);
+        }
+
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<TimeProvider>();

@@ -50,6 +50,19 @@
       </button>
     </header>
 
+    @if (call(); as call) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="popkin"
+        icon="video"
+        heading="Group call"
+        [text]="'· ' + call.text"
+        [action]="call.action"
+        [actionLink]="['/p', popkinId(), 'call']"
+      ></div>
+    }
+
     @if (!popkin()) {
       <div pk-home [loading]="true"></div>
     }
