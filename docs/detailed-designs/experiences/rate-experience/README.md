@@ -29,7 +29,8 @@ The member sees the result at once and never loses track of what was saved.
 - `docs/mocks/pages/experience-detail/default.html` — not yet rated: "How was it for you?" with
   five unchecked star buttons ("1 star" to "5 stars") in a radio group.
 - `docs/mocks/pages/experience-detail/rated.html` — rated: "Thanks! Your rating", the stars up to
-  the chosen one checked, the count raised from 11 to 12 and "Add a comment".
+  the chosen one checked, the count raised from 11 to 12, the average from 4.7 to 4.8, and "Add
+  a comment".
 - `docs/mocks/notifications/toast/danger.html` — the failure toast: "Your rating didn't save",
   "Your stars are back to how they were." and "Try again".
 
@@ -39,58 +40,97 @@ The member sees the result at once and never loses track of what was saved.
   `200` with `RatingResultDto` (the caller's stars and the new group score). The verb is `PUT`
   because the call sets the caller's single rating and repeating it has the same effect.
   Refusals:
-  - `400` `stars_out_of_range` when `stars` is missing or outside one to five (L2-039 AC6,
-    L2-052 AC1);
+  - `400` `stars_out_of_range`, naming the field `stars`, when `stars` is missing, not a whole
+    number or outside one to five (L2-039 AC6, L2-052 AC1);
   - `401` without a session; the anti-forgery or same-site proof of L2-050 AC2 applies;
   - `404` `popkin_not_found` for a non-member (L2-039 AC6, L2-051 AC1);
   - `404` `experience_not_found` for an experience not in the Popkin;
   - `409` `experience_not_rateable` for a "Want to do" experience;
-  - `409` `popkin_wrapped_up` for a wrapped-up Popkin (L2-045 AC2).
-- A rate limit for this endpoint is `<TO SUPPLY>`; L2-053 sets none.
+  - `409` `popkin_wrapped_up` for a wrapped-up Popkin (L2-045 AC2);
+  - `429` `rate_limited` past the limit.
+- The endpoint is under the `messages` policy
+  ([Abuse limits](../../security/abuse-limits/README.md)): 60 a minute per person, counted with
+  the messages they send and the comments they post. L2-053 names no limit for ratings; this
+  one stops a script without touching a member who changes their mind.
 
 ### Frontend (`frontend/projects/`)
 
-- **`ExperienceDetailPage`** — shows the rating panel when `CanRate` is true. Its `rate(stars)`
-  method:
-  1. keeps the current stars and score;
-  2. sets the chosen stars at once (optimistic update);
-  3. calls `ExperiencesApi.rate` through a `switchMap`, so a later choice cancels an earlier
-     request still in flight and the last choice wins;
-  4. on success, replaces the score with the server's, changes the panel heading to "Thanks!
-     Your rating" and shows "Add a comment" (L2-039 AC2);
-  5. on any failure, restores the kept stars and score and asks `Toaster` for the danger toast
-     with "Try again", which repeats the same rating (L2-039 AC5).
-- **`pk-rating` (input variant)** — `star-btns` with `role="radiogroup"` labelled by the panel
-  heading; five `star-btn` buttons with `role="radio"`, `aria-checked`, accessible names "1
-  star" to "5 stars" and a target of at least 44 px (L2-039 AC1). It uses roving `tabindex`:
-  only the checked star, or the first when none is checked, is in the tab order. The arrow keys
-  move and check the next or previous star, as a radio group does (L2-039 AC4). It emits
-  `valueChange` and holds no data access.
-- **`ExperiencesApi.rate(popkinId, experienceId, stars)`** — returns `RatingResultView`.
-- **`Toaster`** (`popkin/src/app/toasts/`) — shows `pk-toast`; a failure toast stays until
-  dismissed (L2-056 AC7).
-- **`pk-button`** in its Popkin variant for "Add a comment".
+- **`ExperienceStore.rate(stars)`** (`api/src/lib/api/experiences/experience-store.ts`) — the
+  logic is in the store, not the page:
+  1. it does nothing where `canRate` is false;
+  2. it cancels a rating still on its way, so the last choice wins;
+  3. it shows the chosen stars at once (L2-039 AC2);
+  4. on success it takes the score and the stars from the answer, the panel's heading becomes
+     "Thanks! Your rating" and the panel offers "Add a comment", or "Edit your comment" when
+     the member has one. When they have one, the store reads the experience again, so their
+     comment under "What people said" carries the new stars;
+  5. on any failure it puts the stars back as they were and emits the stars that were chosen on
+     `rateFailed$` (L2-039 AC5). The score was never changed, so it needs no putting back.
+- **`ExperienceDetailPage`** — shows `pk-rating-panel` when the store's view has a panel, passes
+  `(rated)` to `store.rate`, and answers `rateFailed$` with the danger toast "Your rating didn't
+  save", "Your stars are back to how they were." and the action "Try again", which rates with
+  the same stars again.
+- **`pk-rating-panel`** — the tinted card with its heading and the star buttons (`star-btns`): a
+  `radiogroup` labelled by the heading; five buttons with `role="radio"`, `aria-checked`, the
+  names "1 star" to "5 stars" (`starName`) and a target of at least 44 px (L2-039 AC1). It uses
+  roving `tabindex`: only the checked star, or the first when none is checked, is in the tab
+  order. The arrow keys move and check the next or previous star, as a radio group does
+  (L2-039 AC4). It emits `rated` and holds no data access.
+- **`ExperiencesApi.rate(popkinId, experienceId, stars)`** — answers `RatingResultView`.
+- **`Toaster`** (`popkin/src/app/toasts/`) — a toast gained an action: `show(variant, heading,
+  text, action)` takes a label and what choosing it does, and `act(toast)` dismisses the toast
+  and runs it. `pk-toast` draws the action as a button. A failure toast stays until dismissed
+  (L2-056 AC7).
 
 ### Backend (`backend/src/`)
 
-- **`ExperiencesController.Rate`** — binds the body into `RateExperienceCommand` and sends it.
-- **`RateExperienceCommandValidator`** — `Stars` between 1 and 5. The validation library is
-  `<TO SUPPLY>`.
-- **`RateExperienceCommandHandler`** —
-  1. calls `IMembershipGuard.RequireMemberAsync(popkinId)`;
-  2. loads `PopkinSpace`, `Experience` and the caller's `ExperienceRating`;
-  3. refuses a wrapped-up Popkin through `PopkinSpace.EnsureActive()` (`409`
-     `popkin_wrapped_up`) and a non-rateable experience (`409` `experience_not_rateable`);
-  4. calls `Experience.Rate(membershipId, stars, now)` when no rating exists, otherwise
+- **`ExperiencesController.Rate`** — reads `stars` as JSON, passes a whole number or nothing to
+  `RateExperienceCommand`, and sends it. It is under `RateLimitPolicyNames.Messages`.
+- **`RateExperienceCommandHandler`** — there is no validator class and no validation library:
+  the handler checks and throws `ProblemException`, as every command does
+  ([Send a message to everyone](../../chat/send-message-to-everyone/README.md)).
+  1. calls `IMembershipGuard.RequireActiveMemberAsync(popkinId)`, which answers `404` for a
+     non-member and `409` `popkin_wrapped_up` for a wrapped-up Popkin;
+  2. refuses stars outside one to five with `400` `stars_out_of_range`;
+  3. loads the `Experience` within the Popkin and refuses a "Want to do" one with `409`
+     `experience_not_rateable`;
+  4. calls `Experience.Rate(membershipId, stars, now)` when the member has no rating, otherwise
      `ExperienceRating.ChangeStars(stars, now)`, so the count does not change (L2-039 AC3);
-  5. saves in one unit of work and returns the new `ExperienceScore` as in
+  5. saves and returns the stars with the new score, as in
      [View an experience](../view-experience/README.md).
   It reads the time from `TimeProvider`.
 - **`ExperienceRating`** — primary key `(ExperienceId, MembershipId)`, which keeps one rating per
-  member and experience even when two requests race. A key conflict on insert is retried once
-  as an update. `ExperienceRatingConfiguration` adds a check constraint `Stars BETWEEN 1 AND 5`.
-- Live updates of the score on other members' screens are `<TO SUPPLY>`; L2-039 does not ask for
-  them.
+  member and experience even when two requests race. A first rating that loses the race on the
+  key is applied once more as a change to the rating that won. `ExperienceRatingConfiguration`
+  adds the check constraint `[Stars] BETWEEN 1 AND 5`.
+
+### Tests
+
+- API integration tests on InMemory: `RateExperienceTests`, `RefusedExperienceTests` and
+  `ExperienceRateLimitTests`, in `Popkin.Api.Tests/Experiences/`. The limit advances
+  `FakeTimeProvider`.
+- Unit tests of `ExperienceStore`: the stars shown at once, the later choice that wins, the
+  stars put back.
+- Playwright: "Rating an experience" in `e2e/tests/experience-detail.spec.ts`.
+
+### Built in journey 8
+
+Everything above. Decided in the build:
+
+- The limit: the `messages` policy, shared with messages and comments.
+- The logic is in `ExperienceStore`; the page only shows the toast.
+- A toast has an action, which the success toast of sharing uses too.
+- No validation library.
+
+Gaps found, each in [the register](../../README.md#known-gaps):
+
+- The score on other members' screens does not change until they open the page again; nothing
+  is sent over the hub, and L2-039 asks for nothing (gap 38).
+- An experience edited to "Want to do" keeps its ratings, hidden: it has no score and no
+  panel, and they show again if it is edited back (gap 37).
+
+The diagrams below were not redrawn (gap 44). They show a `RateExperienceCommandValidator` and
+the page holding the rating, where the handler checks and `ExperienceStore` holds it.
 
 ## Requirements
 

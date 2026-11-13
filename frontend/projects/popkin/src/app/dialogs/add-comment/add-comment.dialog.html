@@ -1,0 +1,27 @@
+<form pk-dialog novalidate [heading]="data.title" [accent]="data.accent" (submit)="post($event)">
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t post that.">Your words are still here. Try again.</div>
+  }
+  <div pk-stars [value]="data.stars" [label]="starsLabel" caption="Your rating"></div>
+  <div
+    pk-textarea
+    fieldId="ctext"
+    label="Your comment"
+    hint="Up to 500 characters."
+    [maxlength]="max"
+    [error]="error() ?? undefined"
+    [readonly]="busy()"
+    [formControl]="text"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="submit"
+    variant="popkin"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+  >
+    {{ busy() ? 'Posting…' : 'Post comment' }}
+  </button>
+</form>

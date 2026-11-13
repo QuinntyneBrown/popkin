@@ -1,6 +1,6 @@
 import { OfflinePage } from './pages/offline/offline.page';
 import { Routes } from '@angular/router';
-import { AlbumStore, PopkinFrame } from 'api';
+import { AlbumStore, ExperienceStore, ExperiencesStore, PopkinFrame } from 'api';
 import { signedInGuard } from './guards/signed-in.guard';
 
 /**
@@ -108,6 +108,32 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/video-call/video-call.page').then((m) => m.VideoCallPage),
     data: data({ shell: 'bare', page: 'video-call' }),
     title: 'Group call · Popkin',
+  },
+  {
+    path: 'p/:popkinId/experiences',
+    canActivate: [signedInGuard],
+    providers: [PopkinFrame],
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        providers: [ExperiencesStore],
+        loadComponent: () =>
+          import('./pages/experiences/experiences.page').then((m) => m.ExperiencesPage),
+        data: data({ shell: 'app', page: 'experiences' }),
+        title: 'Experiences · Popkin',
+      },
+      {
+        path: ':experienceId',
+        providers: [ExperienceStore],
+        loadComponent: () =>
+          import('./pages/experience-detail/experience-detail.page').then(
+            (m) => m.ExperienceDetailPage,
+          ),
+        data: data({ shell: 'app', page: 'experience-detail' }),
+        title: 'Experience · Popkin',
+      },
+    ],
   },
   // The album and the photo open over it share one album, kept while a photo is open so that
   // closing it returns to the place the member left (L2-033 AC2).

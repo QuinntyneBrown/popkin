@@ -427,11 +427,13 @@
       "requirements": [
         "L2-038",
         "L2-039",
+        "L2-040",
         "L2-041",
         "L2-042"
       ],
       "states": [
         "default",
+        "own",
         "rated",
         "want",
         "loading",
@@ -768,7 +770,8 @@
         "default",
         "busy",
         "invalid",
-        "failed"
+        "failed",
+        "edit"
       ]
     },
     {
@@ -784,6 +787,40 @@
         "busy",
         "invalid"
       ]
+    },
+    {
+      "id": "experience-actions",
+      "kind": "dialog",
+      "title": "Experience actions",
+      "opens_from": "experience-detail",
+      "requirements": [
+        "L2-040"
+      ],
+      "states": [
+        "default",
+        "host"
+      ],
+      "not_applicable": {
+        "busy": "Each row opens another dialog; nothing is sent from this one.",
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "delete-experience",
+      "kind": "dialog",
+      "title": "Delete experience",
+      "opens_from": "experience-actions",
+      "requirements": [
+        "L2-040"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no field to fill in."
+      }
     },
     {
       "id": "sign-out",

@@ -1,0 +1,14 @@
+@if (loading()) {
+  <p class="visually-hidden" role="status">{{ loadingText() }}</p>
+  <div class="experiences__skeleton" aria-hidden="true">
+    @for (card of cards; track card) {
+      <div class="experiences__skeleton-card">
+        <span pk-skeleton shape="media"></span>
+        <span pk-skeleton shape="text" [width]="70"></span>
+        <span pk-skeleton shape="text" [width]="40"></span>
+      </div>
+    }
+  </div>
+} @else {
+  <ng-content />
+}

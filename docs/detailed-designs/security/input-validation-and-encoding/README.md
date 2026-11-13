@@ -67,6 +67,7 @@ Validators take their limits from L2. The limits that apply across features:
 | Photo or experience comment | 1 to 500 characters | L2-035, L2-041 |
 | Experience title | 1 to 80 characters | L2-040 |
 | Experience place | 0 to 80 characters | L2-040 |
+| Experience "when" | 0 to 40 characters | a design value; L2-040 names none |
 | Rating | 1 to 5 stars | L2-039 |
 | Photo file | JPEG, PNG, WebP or HEIC by content, at most 10 MB, at most 20 per request | L2-013, L2-031 |
 | Ids | non-empty GUID | L2-052 |

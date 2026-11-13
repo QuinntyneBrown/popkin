@@ -30,8 +30,9 @@ and replaces them. A wrapped-up Popkin accepts no new comment (L2-045).
   "Write a few words, or close this to keep just your stars."
 - `docs/mocks/dialogs/add-comment/busy.html` — field read-only, "Posting…" disabled with
   `aria-busy`.
-- "Edit your comment" (L2-041 AC4) has no mock; where the page offers it is `<TO SUPPLY>`. A
-  failed-save state of the dialog has no mock; its copy is `<TO SUPPLY>`.
+- "Edit your comment" (L2-041 AC4) has no mock: the rating panel offers it in the place of "Add
+  a comment" once the member has one. A failed save has no mock: the dialog shows the alert "We
+  couldn't post that. Your words are still here. Try again."
 
 ### API
 
@@ -42,10 +43,14 @@ and replaces them. A wrapped-up Popkin accepts no new comment (L2-045).
     characters), naming the field `text` (L2-041 AC2, L2-052 AC1);
   - `401` without a session;
   - `404` `popkin_not_found` (L2-051) or `experience_not_found`;
-  - `409` `rating_required` when the caller has not rated the experience;
-  - `409` `popkin_wrapped_up` (L2-045 AC2).
-- Removing a comment is not in L2-041; whether a member may clear their comment is
-  `<TO SUPPLY>`.
+  - `409` `rating_required` when the caller has not rated the experience, or when it is a
+    "Want to do" experience, which has no ratings;
+  - `409` `popkin_wrapped_up` (L2-045 AC2);
+  - `429` `rate_limited` past the limit.
+- The endpoint is under the `messages` policy
+  ([Abuse limits](../../security/abuse-limits/README.md)), counted with rating and with the
+  messages the person sends.
+- A comment is not cleared: L2-041 does not ask for it, and an empty text is refused.
 
 ### Frontend (`frontend/projects/`)
 
@@ -54,40 +59,70 @@ and replaces them. A wrapped-up Popkin accepts no new comment (L2-045).
   comment". It receives `AddCommentData`: the experience title, the member's stars and the
   existing text, if any (L2-041 AC1, AC4).
   - The `textarea` carries `maxlength="500"`, so the field cannot exceed the limit.
-  - "Post comment" with an empty or blank comment sends nothing and shows the invalid state
-    (L2-041 AC2).
+  - "Post comment" with an empty or blank comment sends nothing, shows the invalid state and
+    returns focus to the field (L2-041 AC2).
   - While saving, the field is read-only and the button reads "Posting…" and is disabled.
-  - A `400` maps onto the field; other failures keep the text and enable the button again.
+  - A `400` puts its message under the field; other failures show the alert, keep the text and
+    enable the button again.
   - On success the dialog closes with the saved `ExperienceCommentView`.
-- **`ExperienceDetailPage`** — offers "Add a comment" when the member has rated and has no
-  comment, and "Edit your comment" when they have one. On close it removes the member's earlier
+- **`commentProblem`** (`api/src/lib/api/experiences/experience-rules.ts`) — why a text will not
+  save, or what the API's refusal of it means; a pure helper with unit tests.
+- **`ExperienceStore`** — `commentDraft` is what the dialog opens with, null before a rating.
+  The panel's `comment` is "Add a comment" when the member has rated and has no comment, and
+  "Edit your comment" when they have one. `commented(comment)` removes the member's earlier
   entry, if any, and puts the returned comment first under "What people said" (L2-041 AC3).
 - **`ExperiencesApi.comment(popkinId, experienceId, text)`**.
-- **Components**: `pk-dialog`, `pk-rating` (inline stars with `role="img"`), `pk-textarea` with
-  its hint and error, `pk-button` (Popkin, block).
+- **Components**: `pk-dialog`, `pk-stars` (the member's stars with `role="img"` and "Your
+  rating"), `pk-textarea` with its hint and error, `pk-alert`, `pk-button` (Popkin, block);
+  `pk-comments` and `pk-comment` for the list.
 
 ### Backend (`backend/src/`)
 
-- **`ExperiencesController.Comment`** — sends `CommentOnExperienceCommand`.
-- **`CommentOnExperienceCommandValidator`** — `Text` not empty after trimming, at most 500
-  characters. The validation library is `<TO SUPPLY>`.
+- **`ExperiencesController.Comment`** — sends `CommentOnExperienceCommand`. It is under
+  `RateLimitPolicyNames.Messages`.
+- **`ExperienceFields.Comment`** — the text is not empty after trimming and is at most 500
+  characters. There is no validator class and no validation library.
 - **`CommentOnExperienceCommandHandler`** —
-  1. calls `IMembershipGuard.RequireMemberAsync(popkinId)`;
-  2. loads `PopkinSpace`, `Experience` and the caller's `ExperienceRating`;
-  3. refuses a wrapped-up Popkin (`409` `popkin_wrapped_up`) and a caller without a rating
-     (`409` `rating_required`);
+  1. calls `IMembershipGuard.RequireActiveMemberAsync(popkinId)` (`404`, or `409`
+     `popkin_wrapped_up`);
+  2. checks the text;
+  3. loads the `Experience` within the Popkin and the caller's `ExperienceRating`, and refuses
+     a caller without one, or a "Want to do" experience, with `409` `rating_required`;
   4. calls `ExperienceRating.SetComment(text, now)`, which replaces any earlier text and sets
      `CommentedAt` from `TimeProvider`;
   5. saves and returns the comment with the author's first name, avatar and stars.
-- **`ExperienceRating.Comment`** — `nvarchar(500)`; `CommentedAt` orders "What people said". The
-  text is stored as typed and rendered by Angular interpolation, so HTML or script shows as
-  text (L2-052 AC2).
+- **`ExperienceRating.Comment`** — at most 500 characters; `CommentedAt` orders "What people
+  said". The text is stored as typed, less the white space around it, and rendered by Angular
+  interpolation, so HTML or script shows as text (L2-052 AC2).
 
-### Open points
+### Tests
+
+- API integration tests on InMemory: `CommentOnExperienceTests`, in
+  `Popkin.Api.Tests/Experiences/`; `ExperienceFieldsTests` for the rule of the text.
+- Unit tests of `commentProblem` and of `ExperienceStore.commented`.
+- Playwright: "Commenting on an experience" in `e2e/tests/experience-detail.spec.ts`.
+
+### Built in journey 8
+
+Everything above. Decided in the build:
+
+- "Edit your comment" is in the rating panel, where "Add a comment" was.
+- The copy of a failed save.
+- A member may not clear their comment.
+- The limit: the `messages` policy.
+- No validation library.
+
+Gaps found, each in [the register](../../README.md#known-gaps):
 
 - `docs/mocks/pages/experience-detail/want.html` shows comments without stars on a "Want to do"
-  experience, which has no rating. How a member comments there, and whether such comments live
-  on `ExperienceRating`, is `<TO SUPPLY>`.
+  experience, which has no rating. Nothing is built for them: the page lists none and the API
+  answers `409` `rating_required`. How a member comments there, and where such a comment
+  lives, is decided with journey 20 (gap 43).
+- A new comment does not show on other members' screens until they open the page again
+  (gap 38).
+
+The diagrams below were not redrawn (gap 44). They show a
+`CommentOnExperienceCommandValidator` and an "Edit your comment" placement still to supply.
 
 ## Requirements
 

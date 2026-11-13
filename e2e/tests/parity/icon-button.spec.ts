@@ -1,3 +1,5 @@
+import { experienceStates } from '../../fixtures/experience-states';
+import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { callStates } from '../../fixtures/call-states';
 import { parity } from '../../fixtures/parity';
 import { SignUpPage } from '../../pages/sign-up.page';
@@ -11,5 +13,18 @@ parity('icon-button', [
     ...callStates.videoCall,
     name: 'labelled',
     region: (page) => new VideoCallPage(page).invite,
+  },
+  // On a picture: a white disc with a shadow.
+  {
+    key: 'experienceDetail',
+    ...experienceStates.experienceDetail,
+    name: 'on-picture',
+    region: (page) => new ExperienceDetailPage(page).back,
+  },
+  {
+    key: 'experienceDetailOwn',
+    ...experienceStates.experienceDetailOwn,
+    name: 'actions-on-picture',
+    region: (page) => new ExperienceDetailPage(page).actions,
   },
 ]);

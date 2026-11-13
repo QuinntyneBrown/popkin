@@ -19,6 +19,14 @@
   color: var(--color-fg-muted);
 }
 
+/* A sentence in place of the summary, a little larger. */
+.tab-header__lead {
+  margin-top: var(--space-1);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
 .tab-header__tools {
   display: flex;
   flex-wrap: wrap;
@@ -49,7 +57,8 @@
   }
 
   .tab-header__title,
-  .tab-header__summary {
+  .tab-header__summary,
+  .tab-header__lead {
     grid-column: 1;
   }
 

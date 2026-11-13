@@ -1,6 +1,13 @@
 import path from 'node:path';
 import type { Locator, Page } from '@playwright/test';
 import { callStates } from './call-states';
+import { experienceStates } from './experience-states';
+import { AddCommentDialog } from '../pages/add-comment.dialog';
+import { DeleteExperienceDialog } from '../pages/delete-experience.dialog';
+import { ExperienceActionsDialog } from '../pages/experience-actions.dialog';
+import { ExperienceDetailPage } from '../pages/experience-detail.page';
+import { ExperiencesPage } from '../pages/experiences.page';
+import { ShareExperienceDialog } from '../pages/share-experience.dialog';
 import { CallBanner } from '../pages/call-banner';
 import { VideoCallPage } from '../pages/video-call.page';
 import {
@@ -126,6 +133,16 @@ const signUpRegions = (page: Page) => {
   const s = new SignUpPage(page);
   return { topBar: s.topBar, heading: s.heading, legal: s.legal, button: s.primaryButton };
 };
+
+const experiencesRegions = (page: Page) => {
+  const experiences = new ExperiencesPage(page);
+  return { header: experiences.header, body: experiences.body };
+};
+const shareRegions = (page: Page) => ({ dialog: new ShareExperienceDialog(page).panel });
+const detailRegions = (page: Page) => ({ detail: new ExperienceDetailPage(page).detail });
+const commentRegions = (page: Page) => ({ dialog: new AddCommentDialog(page).panel });
+const actionsRegions = (page: Page) => ({ dialog: new ExperienceActionsDialog(page).panel });
+const deleteRegions = (page: Page) => ({ dialog: new DeleteExperienceDialog(page).panel });
 
 export const screenStates: ScreenState[] = [
   {
@@ -834,5 +851,66 @@ export const screenStates: ScreenState[] = [
     key: 'bannerInfo',
     ...callStates.bannerInfo,
     regions: (page) => ({ banner: new CallBanner(page).root }),
+  },
+  // Experiences (journey 8).
+  { key: 'experiences', ...experienceStates.experiences, regions: experiencesRegions },
+  {
+    key: 'experiencesLoading',
+    ...experienceStates.experiencesLoading,
+    regions: experiencesRegions,
+  },
+  { key: 'experiencesEmpty', ...experienceStates.experiencesEmpty, regions: experiencesRegions },
+  { key: 'experiencesError', ...experienceStates.experiencesError, regions: experiencesRegions },
+  { key: 'experiencesDid', ...experienceStates.experiencesDid, regions: experiencesRegions },
+  {
+    key: 'experiencesNoResults',
+    ...experienceStates.experiencesNoResults,
+    regions: experiencesRegions,
+  },
+  { key: 'shareExperience', ...experienceStates.shareExperience, regions: shareRegions },
+  { key: 'shareExperienceBusy', ...experienceStates.shareExperienceBusy, regions: shareRegions },
+  {
+    key: 'shareExperienceInvalid',
+    ...experienceStates.shareExperienceInvalid,
+    regions: shareRegions,
+  },
+  {
+    key: 'shareExperienceFailed',
+    ...experienceStates.shareExperienceFailed,
+    regions: shareRegions,
+  },
+  { key: 'shareExperienceEdit', ...experienceStates.shareExperienceEdit, regions: shareRegions },
+  { key: 'experienceDetail', ...experienceStates.experienceDetail, regions: detailRegions },
+  {
+    key: 'experienceDetailRated',
+    ...experienceStates.experienceDetailRated,
+    regions: detailRegions,
+  },
+  { key: 'experienceDetailOwn', ...experienceStates.experienceDetailOwn, regions: detailRegions },
+  {
+    key: 'experienceDetailLoading',
+    ...experienceStates.experienceDetailLoading,
+    regions: detailRegions,
+  },
+  { key: 'addComment', ...experienceStates.addComment, regions: commentRegions },
+  { key: 'addCommentBusy', ...experienceStates.addCommentBusy, regions: commentRegions },
+  { key: 'addCommentInvalid', ...experienceStates.addCommentInvalid, regions: commentRegions },
+  { key: 'experienceActions', ...experienceStates.experienceActions, regions: actionsRegions },
+  {
+    key: 'experienceActionsHost',
+    ...experienceStates.experienceActionsHost,
+    regions: actionsRegions,
+  },
+  { key: 'deleteExperience', ...experienceStates.deleteExperience, regions: deleteRegions },
+  { key: 'deleteExperienceBusy', ...experienceStates.deleteExperienceBusy, regions: deleteRegions },
+  {
+    key: 'deleteExperienceFailed',
+    ...experienceStates.deleteExperienceFailed,
+    regions: deleteRegions,
+  },
+  {
+    key: 'experienceDetailError',
+    ...experienceStates.experienceDetailError,
+    regions: (page) => ({ error: new ExperienceDetailPage(page).error }),
   },
 ];

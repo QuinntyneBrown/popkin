@@ -1,0 +1,33 @@
+<div
+  pk-dialog
+  heading="Delete this experience?"
+  description="Its ratings and comments go with it. This can’t be undone."
+  [accent]="data.accent"
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t delete that.">It’s still here. Try again.</div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="delete()"
+  >
+    {{ busy() ? 'Deleting…' : 'Delete' }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="secondary"
+    cdkFocusInitial
+    [block]="true"
+    (click)="keep()"
+  >
+    Keep it
+  </button>
+</div>

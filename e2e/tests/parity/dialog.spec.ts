@@ -1,3 +1,8 @@
+import { experienceStates } from '../../fixtures/experience-states';
+import { AddCommentDialog } from '../../pages/add-comment.dialog';
+import { DeleteExperienceDialog } from '../../pages/delete-experience.dialog';
+import { ExperienceActionsDialog } from '../../pages/experience-actions.dialog';
+import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { openTheScanner, withACamera } from '../../fixtures/my-popkins';
 import { ScanToJoinDialog } from '../../pages/scan-to-join.dialog';
 import { copyTheInvite, openTheInvite, theMockHome } from '../../fixtures/home';
@@ -14,6 +19,12 @@ const openEndDate = async (page: Page, today?: Date) => {
   await step.option('Until a date').click();
   await step.endDate.click();
   await new EndDateDialog(page).panel.waitFor();
+};
+
+const keepInFocus = async (page: Page) => {
+  // A key first, so the browser draws the ring it draws for the keyboard, as the mock has.
+  await page.keyboard.press('Shift');
+  await new DeleteExperienceDialog(page).keep.focus();
 };
 
 parity('dialog', [
@@ -73,5 +84,91 @@ parity('dialog', [
       await page.keyboard.press('Shift');
       await new ScanToJoinDialog(page).typeTheCode.focus();
     },
+  },
+  {
+    key: 'shareExperience',
+    ...experienceStates.shareExperience,
+    name: 'share-experience',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    // The mock's Title has autofocus; the dialog focuses it on open.
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'shareExperienceBusy',
+    ...experienceStates.shareExperienceBusy,
+    name: 'share-experience-busy',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'shareExperienceInvalid',
+    ...experienceStates.shareExperienceInvalid,
+    name: 'share-experience-invalid',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'shareExperienceFailed',
+    ...experienceStates.shareExperienceFailed,
+    name: 'share-experience-failed',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'shareExperienceEdit',
+    ...experienceStates.shareExperienceEdit,
+    name: 'share-experience-edit',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'experienceActions',
+    ...experienceStates.experienceActions,
+    name: 'experience-actions',
+    region: (page) => new ExperienceActionsDialog(page).panel,
+  },
+  {
+    key: 'deleteExperience',
+    ...experienceStates.deleteExperience,
+    name: 'delete-experience',
+    region: (page) => new DeleteExperienceDialog(page).panel,
+    // The mock's "Keep it" has autofocus; the dialog focuses it on open.
+    prepare: (page) => keepInFocus(page),
+  },
+  {
+    key: 'deleteExperienceBusy',
+    ...experienceStates.deleteExperienceBusy,
+    name: 'delete-experience-busy',
+    region: (page) => new DeleteExperienceDialog(page).panel,
+    prepare: (page) => keepInFocus(page),
+  },
+  {
+    key: 'deleteExperienceFailed',
+    ...experienceStates.deleteExperienceFailed,
+    name: 'delete-experience-failed',
+    region: (page) => new DeleteExperienceDialog(page).panel,
+    prepare: (page) => keepInFocus(page),
+  },
+  {
+    key: 'addComment',
+    ...experienceStates.addComment,
+    name: 'add-comment',
+    region: (page) => new AddCommentDialog(page).panel,
+    // The mock's field has autofocus; the dialog focuses it on open.
+    prepare: (page) => new AddCommentDialog(page).comment.focus(),
+  },
+  {
+    key: 'addCommentBusy',
+    ...experienceStates.addCommentBusy,
+    name: 'add-comment-busy',
+    region: (page) => new AddCommentDialog(page).panel,
+    prepare: (page) => new AddCommentDialog(page).comment.focus(),
+  },
+  {
+    key: 'addCommentInvalid',
+    ...experienceStates.addCommentInvalid,
+    name: 'add-comment-invalid',
+    region: (page) => new AddCommentDialog(page).panel,
+    prepare: (page) => new AddCommentDialog(page).comment.focus(),
   },
 ]);

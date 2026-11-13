@@ -120,8 +120,9 @@ Every endpoint answers `401` without a session. A wrapped-up Popkin is still rea
   from `IPhotoStore` no larger than twice its shown size (L2-055 AC4, L2-051 AC2). URL lifetime
   is `<TO SUPPLY>`; it belongs to journey 5.
 - **`GetExperiencesSummaryQueryHandler`** (`ExperiencesController`) — `ExperiencesSummaryDto`:
-  `Count` and `Top` (`Id`, `Name`, `PhotoUrl` or null, `Average`, `RatingCount`), highest average
-  first; the tie-break is `<TO SUPPLY>` and belongs to journey 8.
+  `Count` and `Top` (`Id`, `Name`, `PhotoUrl` or null, `Average`, `RatingCount`), at most three,
+  highest average first; of two with one average, the one more members rated, then the newer.
+  An experience nobody has rated, or that the group wants to do, is not named.
 - **`GetMembersQueryHandler`** (`MembersController`) — `MemberDto`: `MembershipId`,
   `DisplayName`, `Avatar`, `Role`, `IsViewer`; active members, Host first, then by `JoinedAt`;
   never a phone number or email (L2-054 AC2).
@@ -134,10 +135,11 @@ Journey 4, Popkin home, built this design: the five reads, the screen in its sta
 form factors, the live Chat card and Members, and the invite dialog
 ([Invite people](../../invitations/invite-people/README.md)). What waits, and for which journey:
 
-- photos and experiences themselves: journeys 5, Share photos, and 8, Rate an experience. Until
-  then the two summaries answer empty behind the membership check, and no entity exists. "Add
-  the first photo" and "Share one" link to `/p/:popkinId/photos` and `/p/:popkinId/experiences`,
-  because their dialogs come with those journeys;
+- photos and experiences themselves were built in journeys 5, Share photos, and 8, Rate an
+  experience, and the two summaries now answer what the Popkin holds
+  ([List experiences](../../experiences/list-experiences/README.md)). "Add the first photo" and
+  "Share one" link to `/p/:popkinId/photos` and `/p/:popkinId/experiences`, where their dialogs
+  are;
 - "Popkin settings": journey 9, Wrap up, which adds the menu. The header keeps its place;
 - the recap in place of the home of a wrapped-up Popkin (L2-045 AC5): journeys 9 and 10. Until
   then the home of a wrapped-up Popkin still opens;

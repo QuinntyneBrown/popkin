@@ -1,0 +1,95 @@
+@if (store.state() === 'error') {
+  <div pk-screen [accent]="frame.accent()">
+    <header pk-top-bar slot="header" [back]="back()"></header>
+    <h1 class="visually-hidden">Experience</h1>
+    <div
+      pk-empty-state
+      icon="offline"
+      heading="We couldn’t load this experience"
+      text="It’s still there. Check your connection and try again."
+      [alert]="true"
+    >
+      <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+        <svg pk-icon name="retry" size="md"></svg>Try again
+      </button>
+      <a pk-button variant="secondary" size="md" [routerLink]="back()">Back to Experiences</a>
+    </div>
+  </div>
+} @else {
+  <div pk-app-screen [accent]="frame.accent()" layout="tab" body="flush">
+    @if (store.view(); as view) {
+      <div
+        pk-experience-detail
+        [back]="back()"
+        [photo]="view.pictureUrl"
+        [emoji]="view.emoji"
+        [kind]="view.kind"
+        [when]="view.when"
+        [title]="view.title"
+        [by]="view.sharedBy"
+        [avatar]="view.avatar"
+        [place]="view.place ?? undefined"
+        [actions]="view.canEdit || view.canDelete ? 'Experience actions' : undefined"
+        (actionsOpened)="actions()"
+      >
+        @if (view.score; as score) {
+          <div
+            pk-score-card
+            slot="cards"
+            [average]="score.value ? score.stars : null"
+            [count]="score.count"
+            [bars]="score.bars"
+          ></div>
+        }
+        @if (view.panel; as panel) {
+          <div
+            pk-rating-panel
+            slot="cards"
+            [heading]="panel.heading"
+            [value]="panel.stars || null"
+            (rated)="store.rate($event)"
+          >
+            @if (panel.comment) {
+              <button pk-button type="button" variant="popkin" size="md" (click)="comment()">
+                {{ panel.comment }}
+              </button>
+            }
+          </div>
+        }
+        @if (view.comments.length) {
+          <section pk-comments heading="What people said">
+            @for (said of view.comments; track said.id) {
+              <li
+                pk-comment
+                [name]="said.name"
+                [avatar]="said.avatar"
+                [stars]="'' + said.stars"
+                [text]="said.text"
+              ></li>
+            }
+          </section>
+        } @else if (view.score) {
+          <section
+            pk-comments
+            heading="What people said"
+            empty="Nobody has commented yet."
+          ></section>
+        }
+      </div>
+    } @else {
+      <div pk-experience-detail [back]="back()" [loading]="true"></div>
+    }
+    <nav
+      pk-popkin-nav
+      slot="nav"
+      current="experiences"
+      [popkinId]="popkinId()"
+      [name]="frame.name()"
+      [emoji]="frame.emoji()"
+      [members]="frame.members()"
+      [timeLeft]="frame.timeLeft()"
+      [unread]="unreadCount()"
+      [wide]="true"
+    ></nav>
+  </div>
+}

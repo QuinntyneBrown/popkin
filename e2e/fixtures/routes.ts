@@ -18,6 +18,11 @@ const call = `${home}/call`;
 const photos = `${home}/photos`;
 // The photo the mocks open: the first of the album fixture.
 const photo = `${photos}/00000000-0000-4000-a000-000000000018`;
+const experiences = `${home}/experiences`;
+// The experience the mocks open: the sunrise canoe to Heron Point.
+const experience = `${experiences}/00000000-0000-4000-a000-000000000081`;
+// One the signed-in Host did not share: Ellie's idea, a beach day next summer.
+const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
 
 export const routes = {
   home: { app: '/' },
@@ -99,6 +104,30 @@ export const routes = {
   photoView: { app: photo, mock: 'pages/photo-view/default.html' },
   photoViewLoading: { app: photo, mock: 'pages/photo-view/loading.html' },
   photoViewError: { app: photo, mock: 'pages/photo-view/error.html' },
+  experiences: { app: experiences, mock: 'pages/experiences/default.html' },
+  experiencesLoading: { app: experiences, mock: 'pages/experiences/loading.html' },
+  experiencesEmpty: { app: experiences, mock: 'pages/experiences/empty.html' },
+  experiencesError: { app: experiences, mock: 'pages/experiences/error.html' },
+  experiencesDid: { app: experiences, mock: 'pages/experiences/did.html' },
+  experiencesNoResults: { app: experiences, mock: 'pages/experiences/no-results.html' },
+  shareExperience: { app: experiences, mock: 'dialogs/share-experience/default.html' },
+  shareExperienceBusy: { app: experiences, mock: 'dialogs/share-experience/busy.html' },
+  shareExperienceInvalid: { app: experiences, mock: 'dialogs/share-experience/invalid.html' },
+  shareExperienceFailed: { app: experiences, mock: 'dialogs/share-experience/failed.html' },
+  shareExperienceEdit: { app: experience, mock: 'dialogs/share-experience/edit.html' },
+  experienceDetail: { app: experience, mock: 'pages/experience-detail/default.html' },
+  experienceDetailOwn: { app: experience, mock: 'pages/experience-detail/own.html' },
+  experienceDetailRated: { app: experience, mock: 'pages/experience-detail/rated.html' },
+  experienceDetailLoading: { app: experience, mock: 'pages/experience-detail/loading.html' },
+  experienceDetailError: { app: experience, mock: 'pages/experience-detail/error.html' },
+  experienceActions: { app: experience, mock: 'dialogs/experience-actions/default.html' },
+  experienceActionsHost: { app: idea, mock: 'dialogs/experience-actions/host.html' },
+  deleteExperience: { app: experience, mock: 'dialogs/delete-experience/default.html' },
+  deleteExperienceBusy: { app: experience, mock: 'dialogs/delete-experience/busy.html' },
+  deleteExperienceFailed: { app: experience, mock: 'dialogs/delete-experience/failed.html' },
+  addComment: { app: experience, mock: 'dialogs/add-comment/default.html' },
+  addCommentBusy: { app: experience, mock: 'dialogs/add-comment/busy.html' },
+  addCommentInvalid: { app: experience, mock: 'dialogs/add-comment/invalid.html' },
   groupChat: { app: chat, mock: 'pages/group-chat/default.html' },
   groupChatLoading: { app: chat, mock: 'pages/group-chat/loading.html' },
   groupChatEmpty: { app: chat, mock: 'pages/group-chat/empty.html' },

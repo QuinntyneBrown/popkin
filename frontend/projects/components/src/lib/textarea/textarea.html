@@ -1,0 +1,23 @@
+<label class="field__label" [for]="fieldId()">{{ label() }}</label>
+<textarea
+  #field
+  class="textarea"
+  [id]="fieldId()"
+  [rows]="rows()"
+  [value]="value()"
+  [attr.placeholder]="placeholder()"
+  [attr.maxlength]="maxlength()"
+  [attr.aria-describedby]="describedBy()"
+  [attr.aria-invalid]="error() ? 'true' : null"
+  [readOnly]="readonly()"
+  [disabled]="disabled()"
+  (input)="input($event)"
+  (blur)="blur()"
+></textarea>
+@if (error()) {
+  <span class="field__error" [id]="fieldId() + '-err'"
+    ><svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span></span
+  >
+} @else if (hint()) {
+  <span class="field__hint" [id]="fieldId() + '-hint'">{{ hint() }}</span>
+}

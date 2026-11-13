@@ -1,0 +1,69 @@
+<div class="detail__lead">
+  <div class="hero-media" [class.hero-media--loading]="loading()">
+    @if (loading()) {
+      <span pk-skeleton class="hero-media__skeleton" shape="square" aria-hidden="true"></span>
+    } @else if (photo()) {
+      <img class="hero-media__photo" alt="" width="960" height="720" [src]="photo()" />
+    } @else {
+      <span class="hero-media__emoji" aria-hidden="true">{{ emoji() }}</span>
+    }
+    <a
+      pk-icon-button
+      class="hero-media__back"
+      variant="card"
+      icon="back"
+      size="lg"
+      [label]="backLabel()"
+      [routerLink]="back()"
+    ></a>
+    @if (actions(); as label) {
+      <button
+        pk-icon-button
+        class="hero-media__actions"
+        type="button"
+        variant="card"
+        icon="more"
+        [label]="label"
+        (click)="actionsOpened.emit()"
+      ></button>
+    }
+  </div>
+  <div class="detail__intro">
+    @if (loading()) {
+      <h1 class="visually-hidden">{{ heading() }}</h1>
+      <p class="visually-hidden" role="status">{{ loadingText() }}</p>
+      <div class="detail__skeleton" aria-hidden="true">
+        <span pk-skeleton shape="text" [width]="40"></span>
+        <span pk-skeleton shape="title"></span>
+        <span pk-skeleton shape="text" [width]="60"></span>
+        <span pk-skeleton shape="card"></span>
+        <span pk-skeleton shape="card"></span>
+      </div>
+    } @else {
+      <p class="detail__kind">{{ kicker() }}</p>
+      <h1 class="detail__title">{{ title() }}</h1>
+      <div class="detail__meta">
+        <span class="detail__by">
+          <span
+            pk-avatar
+            size="2xs"
+            [initials]="avatar()?.initials ?? ''"
+            [photo]="avatar()?.photoUrl"
+            [blank]="!avatar()"
+            [attr.data-accent]="avatar()?.accent"
+          ></span
+          >{{ by() }}
+        </span>
+        @if (place()) {
+          <span class="detail__place"><svg pk-icon name="pin" size="sm"></svg>{{ place() }}</span>
+        }
+      </div>
+    }
+  </div>
+</div>
+<div class="detail__rest">
+  @if (!loading()) {
+    <div class="detail__cards"><ng-content select="[slot=cards]" /></div>
+    <ng-content />
+  }
+</div>

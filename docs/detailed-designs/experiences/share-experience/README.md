@@ -11,7 +11,7 @@ experience.
 - **share** — act of adding an experience to a Popkin, with a title, a kind and, optionally, a
   picture, a "when" and a place
 - **kind** — one of "Something we did", "Restaurant" or "Want to do"
-  (`ExperienceKind` `Did`, `Restaurant`, `WantToDo`)
+  (`ExperienceKind` `Did`, `Restaurant`, `Want`)
 - **when** — free text that says when the experience happened, such as "Sat night"
 - **sharer** — member who shared an experience
 - **Host** — member who started the Popkin
@@ -37,82 +37,154 @@ its own page ([View an experience](../view-experience/README.md)). A "Something 
 - `docs/mocks/dialogs/share-experience/failed.html` — alert "We couldn't share that. Everything
   you entered is still here."
 - `docs/mocks/notifications/toast/success.html` — "Experience shared", "Bonfire songs on the
-  beach is first in the list." with "Undo". What "Undo" does is `<TO SUPPLY>`; the design
-  assumes it deletes the new experience through the delete endpoint.
-- Edit, delete, a delete confirmation and the actions menu that offers them (L2-040 AC6) have no
-  mock: `<TO SUPPLY>`. The design reuses `ShareExperienceDialog` in an edit mode until a mock
-  decides otherwise.
-- The messages for a place over 80 characters and a refused picture have no mock; their copy is
-  `<TO SUPPLY>`.
+  beach is first in the list." with "Undo". "Undo" deletes what was just shared.
+- `docs/mocks/pages/experience-detail/own.html` — the sharer's page, with the "Experience
+  actions" button over the picture (L2-040 AC6).
+- `docs/mocks/dialogs/experience-actions/default.html` and `host.html` — the menu, titled with
+  the experience: "Edit" and "Delete" for the sharer, "Delete" alone for the Host on someone
+  else's.
+- `docs/mocks/dialogs/share-experience/edit.html` — the same dialog as "Edit experience", filled
+  with what the experience has, with "Save changes".
+- `docs/mocks/dialogs/delete-experience/default.html`, `busy.html` and `failed.html` — "Delete
+  this experience?", "Its ratings and comments go with it. This can't be undone.", "Delete" and
+  "Keep it"; "Deleting…" while it is sent; "We couldn't delete that. It's still here. Try
+  again."
+- The other messages have no mock: "Keep the title to 80 characters.", "Keep the place to 80
+  characters.", "Keep this to 40 characters." for "when", and, for a picture, the messages of a
+  photo that is the wrong type or too large ([Add photos](../../photos/add-photos/README.md)).
+  A failed edit reads "We couldn't save that." and a failed "Undo" is a danger toast, "We
+  couldn't undo that".
 
 ### API
 
 - `POST /api/popkins/{popkinId}/experiences` (`multipart/form-data`: `title`, `kind`, `when?`,
   `place?`, `picture?`) → `201 Created` with `ExperienceCardDto` and a `Location` header.
+  `kind` is `Did`, `Restaurant` or `Want`.
 - `PATCH /api/popkins/{popkinId}/experiences/{experienceId}` (same fields, plus
-  `removePicture`) → `200` with `ExperienceCardDto`. Sharer only.
+  `removePicture`) → `200` with `ExperienceCardDto`. Sharer only. A field that is not sent stays
+  as it is; a "when" or a place sent empty is cleared.
 - `DELETE /api/popkins/{popkinId}/experiences/{experienceId}` → `204`. Sharer or Host.
-- Refusals for all three: `400` with `code` `title_required`, `title_too_long`,
-  `place_too_long`, `invalid_kind`, `picture_type_not_allowed` or `picture_too_large`, naming the
-  field (L2-040 AC2, AC3, L2-052 AC1); `401` without a session; `403` `not_experience_sharer`
-  for an edit by anyone but the sharer or a delete by anyone but the sharer or the Host; `404`
-  `popkin_not_found` (L2-051) or `experience_not_found`; `409` `popkin_wrapped_up` (L2-045 AC2).
-- The limit on "when" is `<TO SUPPLY>`; the specs give none and the mock sets no `maxlength`. A
-  rate limit for sharing is `<TO SUPPLY>`.
+- Refusals: `400` with `code` `title_required`, `title_too_long`, `when_too_long`,
+  `place_too_long`, `invalid_kind`, `picture_type_not_allowed` or `picture_too_large`, naming
+  the field (L2-040 AC2, AC3, L2-052 AC1); `401` without a session; `403`
+  `not_experience_sharer` for an edit by anyone but the sharer or a delete by anyone but the
+  sharer or the Host; `404` `popkin_not_found` (L2-051) or `experience_not_found`; `409`
+  `popkin_wrapped_up` (L2-045 AC2); `429` `rate_limited` past the limit.
+- "When" is at most 40 characters. The specs give no limit; 40 holds "Sat morning" and a date
+  with room to spare.
+- Sharing and editing are under the `photos` policy
+  ([Abuse limits](../../security/abuse-limits/README.md)): 60 a minute per person, counted with
+  the photos they add, because each may carry a picture. Deleting is not limited.
 
 ### Frontend (`frontend/projects/`)
 
 - **`ShareExperienceDialog`** — `popkin/src/app/dialogs/share-experience/share-experience.dialog.ts`
-  with its `.html`, opened with CDK `Dialog` by `ExperiencesPage` ("Share one" on the floating
-  button and in the empty states). It holds a typed reactive form:
+  with its `.html`, opened with CDK `Dialog`. `ExperiencesPage` opens it from "Share one";
+  `ExperienceDetailPage` opens it with `editing`, the experience to change, and it is then
+  "Edit experience" with "Save changes", "Saving…" and "We couldn't save that." It holds:
   - `title` — required, at most 80 characters (`maxlength="80"`);
   - `kind` — "Something we did" preselected;
-  - `when` — optional;
-  - `place` — at most 80 characters;
-  - `picture` — one file, checked against the limits of L2-031 (JPEG, PNG, WebP or HEIC, at most
-    10 MB) before upload.
-  On "Share it" with an invalid form it sends nothing, marks each invalid field, shows the form
-  summary and moves focus to it. While the request runs, the fields are read-only and the
-  button reads "Sharing…" and is disabled, so the request cannot be sent twice (L2-056 AC3). A
-  `400` maps each `code` onto its field. Any other failure shows the danger alert and keeps
-  every value. On success the dialog closes with the new `ExperienceCardView`.
-- **`ExperiencesPage`** — inserts the returned card first (L2-040 AC4), switching the filter to
-  "All" when the new kind is outside the current filter, and asks `Toaster` for the success toast
-  (shown for 8 seconds, L2-056 AC7).
-- **`ExperiencesApi.share`, `.edit`, `.remove`** — build the multipart body and map the answer.
+  - `when` — optional, at most 40 characters;
+  - `place` — optional, at most 80 characters (`maxlength="80"`);
+  - `picture` — one file, with a preview drawn on the device and "Remove picture".
+  On submit with something wrong it sends nothing, marks each field, and shows the form
+  summary, whose links go to the fields. While the request runs, the fields are read-only and
+  the button reads "Sharing…" and is disabled, so the request cannot be sent twice
+  (L2-056 AC3). A `400` puts its message under its field. Any other failure shows the danger
+  alert and keeps every value. On success the dialog closes with the `ExperienceCardView`.
+- **`experience-rules.ts`** (`api/src/lib/api/experiences/`) — the rules, as pure helpers with
+  unit tests: `draftProblems` (what is wrong, field by field; a picture is checked as a photo
+  is, JPEG, PNG, WebP or HEIC and at most 10 MB), `fixSummary` ("One thing to fix", "2 things
+  to fix") and `refusedField` (the field a `code` of the API is about).
+- **`ExperiencesPage`** — after a share, asks `ExperiencesStore.added(card)` to put the card
+  first (L2-040 AC4); when the filter leaves the new kind out, it shows "All". It then shows
+  the success toast, for 8 seconds (L2-056 AC7), with the action "Undo". "Undo" calls
+  `ExperiencesApi.remove` and takes the card out of the list.
+- **`ExperienceDetailPage`** — shows "Experience actions" over the picture when `canEdit` or
+  `canDelete` is true. It opens **`ExperienceActionsDialog`**
+  (`dialogs/experience-actions/`), a menu that closes with `edit` or `delete`. "Edit" opens
+  `ShareExperienceDialog`, and a saved edit reads the experience again. "Delete" opens
+  **`DeleteExperienceDialog`** (`dialogs/delete-experience/`), which asks first, with focus on
+  "Keep it"; once deleted, the page goes back to Experiences and a success toast says
+  "Experience deleted".
+- **`ExperiencesApi.share`, `.edit`, `.remove`** — build the multipart body and return the
+  answer.
 - **Components**: `pk-dialog` (bottom sheet under 640 px, Escape closes), `pk-text-field` for
-  Title, When and Place, `pk-chip` in its radio variant for Kind, `pk-form-summary`, `pk-alert`
-  (danger), `pk-button` (Popkin, block) and `pk-toast`. The "Add a picture" control is drawn with
-  a `date-btn` block that has no design-system page; its component name and the preview of a
-  chosen picture are `<TO SUPPLY>`.
+  Title, When and Place, with its "(optional)" mark, `pk-choice-chips` for Kind (a radio group
+  of `pk-chip`), `pk-picture-field` for "Add a picture", `pk-form-summary`, `pk-alert`
+  (danger), `pk-button`, `pk-menu-list` and `pk-menu-item` for the actions, and `pk-toast`.
 
 ### Backend (`backend/src/`)
 
 - **`ExperiencesController.Share`, `.Edit`, `.Delete`** — bind the form, wrap the file in
-  `UploadedPicture`, and send `ShareExperienceCommand`, `EditExperienceCommand` or
-  `DeleteExperienceCommand`. The request size limit matches 10 MB plus the text fields.
-- **`ShareExperienceCommandValidator`** — `Title` trimmed, 1 to 80 characters; `Kind` one of the
-  three values; `Place` at most 80 characters; `Picture` at most 10 MB. The validation library
-  is `<TO SUPPLY>`. `EditExperienceCommand` uses the same rules.
+  `PhotoUpload`, and send `ShareExperienceCommand`, `EditExperienceCommand` or
+  `DeleteExperienceCommand`. The body may be up to twice the largest picture, so a picture over
+  10 MB is refused with its own message and not by the server's size limit. `Edit` reads the
+  form itself, because a field sent empty is not a field that was not sent.
+- **`ExperienceFields`** (`Popkin.Application`) — the rules of the text, for sharing and for
+  editing: `Title` trimmed, 1 to 80 characters; `Kind` one of the three names; `When` at most
+  40 characters; `Place` at most 80; an empty "when" or place is none. There is no validator
+  class and no validation library; a refusal is a `ProblemException`.
+- **`ExperiencePictures`** — the picture of an experience keeps the limits of a photo and goes
+  through the same processing and the same store ([Add photos](../../photos/add-photos/README.md)):
+  the type is decided from the file's own bytes (L2-052 AC3), `IPhotoProcessor` makes a display
+  image and a thumbnail without location or device data (L2-031 AC6), and `IPhotoStore` keeps
+  both under one random name, `popkins/{popkinId}/experiences/{name}`. It is not a photo of the
+  album: no `Photo` row is added, and Photos does not show it.
 - **`ShareExperienceCommandHandler`** —
-  1. calls `IMembershipGuard.RequireMemberAsync(popkinId)`;
-  2. loads `PopkinSpace` and calls `EnsureActive()` (`409` `popkin_wrapped_up`);
-  3. when a picture is given, calls `IPhotoStore.SaveAsync`, which checks the content bytes
-     against the allowed image types whatever the file name says (L2-052 AC3), removes location
-     and device data (as L2-031 AC6 does for photos), writes the file and a thumbnail, and adds
-     a `Photo` row;
+  1. calls `IMembershipGuard.RequireActiveMemberAsync(popkinId)` (`404`, or `409`
+     `popkin_wrapped_up`);
+  2. checks every field before a file is written;
+  3. stores the picture, when one is given;
   4. creates the experience with `Experience.Share(...)`, `SharedAt` from `TimeProvider`;
-  5. saves in one unit of work and returns the `ExperienceCardDto`.
-  When the save fails after the file is written, the handler deletes the file. Whether the
-  picture also appears in the Popkin's album (Photos) is `<TO SUPPLY>`.
-- **`EditExperienceCommandHandler`** — allows only the sharer (`Experience.CanBeEditedBy`);
-  replaces or removes the picture. Whether changing the kind of an experience that has ratings
-  is allowed is `<TO SUPPLY>`.
-- **`DeleteExperienceCommandHandler`** — allows the sharer or a member with `MemberRole.Host`
-  (`Experience.CanBeDeletedBy`); removes the experience with its ratings, comments and keen
-  records, then the picture file.
-- Titles, places and "when" are stored as typed and rendered by Angular interpolation, so HTML
-  or script shows as text (L2-052 AC2).
+  5. saves and returns the `ExperienceCardDto`.
+  When the save fails after the files are written, the handler deletes them.
+- **`EditExperienceCommandHandler`** — allows only the sharer (`Experience.CanBeEditedBy`),
+  under the rules of sharing. A new picture replaces the one it had and `removePicture` leaves
+  it with none; the old files are deleted only after the save. The kind may change, whatever
+  ratings the experience has.
+- **`DeleteExperienceCommandHandler`** — allows the sharer or the Host
+  (`Experience.CanBeDeletedBy`); removes the experience with its ratings, and the comments
+  they carry, in one save, then the picture's files.
+- Titles, places and "when" are stored as typed, less the white space around them, and
+  rendered by Angular interpolation, so HTML or script shows as text (L2-052 AC2).
+
+### Tests
+
+- API integration tests on InMemory, in `Popkin.Api.Tests/Experiences/`: `ShareExperienceTests`,
+  `ExperiencePictureTests`, `EditExperienceTests`, `DeleteExperienceTests`,
+  `RefusedExperienceTests` and `ExperienceRateLimitTests`. `ExperienceFieldsTests`
+  (`Popkin.Application.Tests`) has one case per row of the rules.
+- Unit tests of `experience-rules.ts` and of `ExperiencesStore`.
+- Playwright: `e2e/tests/share-experience.spec.ts` and `e2e/tests/experience-actions.spec.ts`.
+
+### Built in journey 8
+
+Everything above. Decided in the build:
+
+- "When" is at most 40 characters.
+- The limit: the `photos` policy, for sharing and editing.
+- A picture uses the photo store and its processing and is not a photo of the album.
+- "Undo" deletes what was shared.
+- Edit and delete open from "Experience actions" over the picture into a menu; edit reuses the
+  share dialog; delete asks first. Their mocks were drawn before the build.
+- The "Add a picture" control is `pk-picture-field`, with a preview and "Remove picture".
+- The kind of an experience that has ratings may change.
+
+Gaps found, each in [the register](../../README.md#known-gaps):
+
+- "Share one" is still offered in a wrapped-up Popkin. The API refuses with `409`
+  `popkin_wrapped_up`, which the dialog shows as the general failure, "We couldn't share that."
+  Wrap up is journey 9 (gap 36).
+- An experience edited to "Want to do" keeps its ratings, hidden (gap 37).
+- A HEIC picture has no preview in the dialog in a browser that cannot draw it; the picture is
+  still sent and stored as a JPEG (gap 41).
+- Other members' lists do not change when an experience is shared, edited or deleted
+  (gap 38).
+
+The diagrams below were not redrawn (gap 44). They show a `ShareExperienceCommandValidator`,
+`UploadedPicture`, a `Photo` row for the picture, kind `WantToDo` and an actions placement
+still to supply.
 
 ## Requirements
 

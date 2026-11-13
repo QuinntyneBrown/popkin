@@ -49,6 +49,12 @@
   border-radius: var(--radius-lg);
 }
 
+/* The picture of an experience card that is loading. */
+:host(.skeleton--media) {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+}
+
 :host(.skeleton--btn) {
   height: var(--control-height-md);
   border-radius: var(--radius-full);

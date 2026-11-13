@@ -1,3 +1,5 @@
+import { experienceStates } from '../../fixtures/experience-states';
+import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { theMockHome } from '../../fixtures/home';
 import { PopkinHomePage } from '../../pages/popkin-home.page';
 import { PopkinCreatedPage } from '../../pages/popkin-created.page';
@@ -79,5 +81,11 @@ parity('button', [
     name: 'secondary-md-icon',
     region: (page) => new PopkinHomePage(page).inviteRegion,
     before: theMockHome,
+  },
+  {
+    key: 'shareExperienceBusy',
+    ...experienceStates.shareExperienceBusy,
+    name: 'sharing',
+    region: (page) => new ShareExperienceDialog(page).action,
   },
 ]);

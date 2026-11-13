@@ -1,0 +1,8 @@
+<h2 class="comments__heading" [id]="headingId()">{{ heading() }}</h2>
+@if (empty()) {
+  <p class="comments__empty">{{ empty() }}</p>
+} @else {
+  <ul class="divided">
+    <ng-content />
+  </ul>
+}

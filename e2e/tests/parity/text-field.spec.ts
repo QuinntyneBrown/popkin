@@ -1,3 +1,5 @@
+import { experienceStates } from '../../fixtures/experience-states';
+import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { SignInPage } from '../../pages/sign-in.page';
 import type { Page } from '@playwright/test';
 import { codeScreenAt24Seconds } from '../../fixtures/journeys';
@@ -75,5 +77,32 @@ parity('text-field', [
       await signIn.send.click();
       await signIn.contactError.waitFor();
     },
+  },
+  // "(optional)" after the label.
+  {
+    key: 'shareExperience',
+    ...experienceStates.shareExperience,
+    name: 'optional',
+    region: (page) => new ShareExperienceDialog(page).whenField,
+  },
+  {
+    key: 'shareExperience',
+    ...experienceStates.shareExperience,
+    name: 'optional-empty',
+    region: (page) => new ShareExperienceDialog(page).placeField,
+  },
+  {
+    key: 'shareExperienceBusy',
+    ...experienceStates.shareExperienceBusy,
+    name: 'read-only',
+    region: (page) => new ShareExperienceDialog(page).whenField,
+  },
+  {
+    key: 'shareExperienceInvalid',
+    ...experienceStates.shareExperienceInvalid,
+    name: 'title-invalid',
+    region: (page) => new ShareExperienceDialog(page).titleField,
+    // The mock's Title has autofocus; the dialog focuses it on open.
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
   },
 ]);

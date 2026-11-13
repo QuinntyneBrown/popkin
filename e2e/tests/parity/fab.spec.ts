@@ -1,3 +1,5 @@
+import { experienceStates } from '../../fixtures/experience-states';
+import { ExperiencesPage } from '../../pages/experiences.page';
 import { theMockPopkins } from '../../fixtures/my-popkins';
 import { MyPopkinsPage } from '../../pages/my-popkins.page';
 import { parity } from '../../fixtures/parity';
@@ -19,6 +21,13 @@ parity('fab', [
     name: 'new-popkin',
     region: (page) => new MyPopkinsPage(page).fab,
     before: theMockPopkins,
+    widths: [360],
+  },
+  {
+    key: 'experiences',
+    ...experienceStates.experiences,
+    name: 'share-one',
+    region: (page) => new ExperiencesPage(page).fab,
     widths: [360],
   },
 ]);

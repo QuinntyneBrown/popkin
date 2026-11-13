@@ -13,7 +13,8 @@
   text-decoration: none;
 }
 
-:host([aria-pressed='true']) {
+:host([aria-pressed='true']),
+:host([aria-checked='true']) {
   background: var(--color-bg-inverse);
   color: var(--color-fg-inverse);
 }

@@ -1,0 +1,42 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: var(--space-16);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+  color: var(--color-fg-default);
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+  text-align: left;
+  text-decoration: none;
+}
+
+:host(:hover) {
+  color: var(--color-fg-default);
+}
+
+:host(.menu-list__item--danger),
+:host(.menu-list__item--danger:hover) {
+  color: var(--color-danger-fg);
+}
+
+/* The tile the icon sits on; it keeps the ink whatever the row's colour. */
+.icon-tile {
+  display: grid;
+  place-items: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  flex: none;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+}
+
+.menu-list__hint {
+  display: block;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}

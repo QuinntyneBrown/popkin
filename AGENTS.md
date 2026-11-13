@@ -17,30 +17,32 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first seven journeys are built; the rest is designed.** Journey 1, Start a Popkin,
-journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin home, journey 5,
-Share photos, journey 6, Come back, and journey 7, Group call, run end to end: the backend has
-sign up and sign in with a code, sessions, Popkin creation, the list of a person's Popkins, the
-invite preview, joining
-with a name and a photo, the photo store behind avatars, the Everyone thread, messages, read
-points, presence, the SignalR hub `PopkinHub` and the reads of the Popkin home (the header, the
-chat preview, the members, the photos summary, and the experiences summary, which answers empty
-until journey 8), adding a photo, the album and one photo, the group call (starting, joining
-and leaving it, the call under way, each participant's microphone and camera, the relay of
-signals through the hub and the media relay's credentials), with their migrations; the app has
-the screens of those journeys, the group chat screen, the Popkin home, the photo album and the
-photo view, the sign-in screen, My Popkins and the call screen among them, built for the five
-form factors of L2-058, the invite dialog, the Add photos dialog, the Scan to join dialog, and
-the not-found, server-error and offline screens; the `components` library holds the
-`pk-*` components they use, each with a parity spec; the `api` library has the chat's stores,
-the home's store, the album's stores, the store of My Popkins and its saved list, the QR
-scanner, the call session, its peer links (a mesh, ADR 0014) and the call banner's store, and
-the real-time client, with unit tests of its stores and pure helpers. Everything
-else exists as documents, not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of
-every screen in every state (`docs/mocks/`), the design system (`docs/design-system/`), a
-detailed design per feature (`docs/detailed-designs/`) and a prompt per journey
-(`docs/prompts/`). The Worker hosts no job. `docs/estimates/`
-tracks how far each design is; read it, not this paragraph, for the current figure.
+**The first eight journeys are built; the rest is designed.** Journey 1, Start a Popkin, journey
+2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin home, journey 5, Share
+photos, journey 6, Come back, journey 7, Group call, and journey 8, Rate an experience, run end
+to end: the backend has sign up and sign in with a code, sessions, Popkin creation, the list of
+a person's Popkins, the invite preview, joining with a name and a photo, the photo store behind
+avatars, the Everyone thread, messages, read points, presence, the SignalR hub `PopkinHub` and
+the reads of the Popkin home (the header, the chat preview, the members, the photos summary, and
+the experiences summary), adding a photo, the album and one photo, the group call (starting,
+joining and leaving it, the call under way, each participant's microphone and camera, the relay
+of signals through the hub and the media relay's credentials), experiences (sharing one with a
+picture, the list and its filter, one experience with the group's score, rating it, commenting
+on it, editing and deleting it), with their migrations; the app has the screens of those
+journeys, the group chat screen, the Popkin home, the photo album and the photo view, the
+sign-in screen, My Popkins, the call screen, Experiences and the experience page among them,
+built for the five form factors of L2-058, the invite dialog, the Add photos dialog, the Scan to
+join dialog, the dialogs of an experience (Share an experience, Add a comment, its actions and
+its deletion), and the not-found, server-error and offline screens; the `components` library
+holds the `pk-*` components they use, each with a parity spec; the `api` library has the chat's
+stores, the home's store, the album's stores, the store of My Popkins and its saved list, the QR
+scanner, the call session, its peer links (a mesh, ADR 0014) and the call banner's store, the
+stores of Experiences and of one experience, and the real-time client, with unit tests of its
+stores and pure helpers. Everything else exists as documents, not code: the requirements
+(`docs/specs/L1.md` and `L2.md`), a mock of every screen in every state (`docs/mocks/`), the
+design system (`docs/design-system/`), a detailed design per feature (`docs/detailed-designs/`)
+and a prompt per journey (`docs/prompts/`). The Worker hosts no job. `docs/estimates/` tracks
+how far each design is; read it, not this paragraph, for the current figure.
 
 Before building a feature, read its requirement, its detailed design and its mocks: they exist.
 `docs/detailed-designs/README.md` holds the shared architecture, the shared real-time rules and
