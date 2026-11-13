@@ -1,0 +1,65 @@
+/* XS and S: a strip that scrolls sideways, close under its section's head. */
+:host {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  padding: 0 var(--space-4);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.thumb {
+  display: block;
+  flex: none;
+  width: var(--space-28);
+  height: var(--space-28);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.thumb__photo {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 47.99rem) {
+  .thumb:nth-child(n + 7) {
+    display: none;
+  }
+}
+
+/* M: a grid, four abreast. */
+@media (min-width: 48rem) {
+  :host {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+    overflow: visible;
+  }
+
+  .thumb {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+}
+
+/* L: three abreast beside the side column, and six photos. */
+@media (min-width: 64rem) {
+  :host {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) and (max-width: 79.99rem) {
+  .thumb:nth-child(n + 7) {
+    display: none;
+  }
+}
+
+/* XL: four abreast again. */
+@media (min-width: 80rem) {
+  :host {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
