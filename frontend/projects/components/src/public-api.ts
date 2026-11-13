@@ -82,3 +82,4 @@ export * from './lib/wrapped-list/wrapped-list';
 export * from './lib/popkin-skeleton/popkin-skeleton';
 export * from './lib/scanner/scanner';
 export * from './lib/call-screen/call-screen';
+export * from './lib/call-grid/call-grid';
