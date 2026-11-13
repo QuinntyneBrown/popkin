@@ -31,6 +31,12 @@ public sealed class PopkinSpace
 
     public bool KeepPhotos { get; private set; } = true;
 
+    /// <summary>How long the photos of a Popkin wrapped up without its album stay (L2-045 AC4).</summary>
+    public static readonly TimeSpan PhotosStayFor = TimeSpan.FromDays(30);
+
+    /// <summary>When the photos go: 30 days after the wrap-up when the album was not kept, never otherwise.</summary>
+    public DateTimeOffset? PhotosRemoveAt => WrappedUpAt is { } wrappedUpAt && !KeepPhotos ? wrappedUpAt + PhotosStayFor : null;
+
     public string InviteCode { get; private set; } = "";
 
     public DateTimeOffset CreatedAt { get; private set; }
@@ -74,15 +80,19 @@ public sealed class PopkinSpace
 
     public void ChangeInviteCode(string inviteCode) => InviteCode = inviteCode;
 
-    /// <summary>Wraps the Popkin up: from now on it is read-only (L2-045). Wrapping up twice changes nothing.</summary>
-    public void WrapUp(DateTimeOffset now)
+    /// <summary>
+    /// Wraps the Popkin up: from now on it is read-only (L2-045), and its photo album is kept or
+    /// goes 30 days later, as chosen (L2-043 AC2). A Popkin wraps up once.
+    /// </summary>
+    public void WrapUp(DateTimeOffset at, bool keepPhotos)
     {
         if (Status == PopkinStatus.WrappedUp)
         {
-            return;
+            throw new InvalidOperationException("The Popkin has wrapped up already.");
         }
 
         Status = PopkinStatus.WrappedUp;
-        WrappedUpAt = now;
+        WrappedUpAt = at;
+        KeepPhotos = keepPhotos;
     }
 }

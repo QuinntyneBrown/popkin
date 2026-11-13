@@ -6,6 +6,7 @@ using Popkin.Application.Popkins;
 using Popkin.Application.Realtime;
 using Popkin.Application.Security;
 using Popkin.Application.Telemetry;
+using Popkin.Application.WrapUp;
 
 namespace Popkin.Application;
 
@@ -18,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<CodeIssuer>();
         services.AddScoped<IMembershipGuard, MembershipGuard>();
         services.AddScoped<CallLeaver>();
+        services.AddScoped<PopkinWrapUpService>();
         services.AddSingleton<CallDisconnectGrace>();
         services.AddSingleton<PopkinMetrics>();
         // Who is here now is kept in this process: one API instance (ADR 0009).

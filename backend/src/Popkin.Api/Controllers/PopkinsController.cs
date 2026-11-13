@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Popkin.Application.Popkins;
 using Popkin.Application.Realtime;
+using Popkin.Application.WrapUp;
 
 namespace Popkin.Api.Controllers;
 
@@ -29,6 +30,13 @@ public sealed class PopkinsController(ISender sender) : ControllerBase
     [HttpGet("{popkinId:guid}")]
     public async Task<ActionResult<PopkinHomeDto>> GetHome(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetPopkinHomeQuery(popkinId), cancellationToken));
+
+    public sealed record WrapUpPopkinRequest(bool? KeepPhotos);
+
+    /// <summary>The Host wraps the Popkin up, keeping its photo album or not (L2-043).</summary>
+    [HttpPost("{popkinId:guid}/wrap-up")]
+    public async Task<ActionResult<WrapUpResultDto>> WrapUp(Guid popkinId, WrapUpPopkinRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new WrapUpPopkinCommand(popkinId, request.KeepPhotos), cancellationToken));
 
     /// <summary>The Popkin's invite, for any member (L2-011).</summary>
     [HttpGet("{popkinId:guid}/invite")]

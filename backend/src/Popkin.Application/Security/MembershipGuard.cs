@@ -24,6 +24,8 @@ public sealed class MembershipGuard(IAppDbContext db, ICurrentPerson current) : 
 {
     public static ProblemException NotFound() => new(404, "popkin_not_found", "This Popkin isn't here.");
 
+    public static ProblemException WrappedUp() => new(409, "popkin_wrapped_up", "This Popkin has wrapped up.");
+
     public async Task<(PopkinSpace Popkin, Membership Membership)> RequireMemberAsync(Guid popkinId, CancellationToken cancellationToken)
     {
         var membership = await db.Memberships.FirstOrDefaultAsync(
@@ -38,7 +40,7 @@ public sealed class MembershipGuard(IAppDbContext db, ICurrentPerson current) : 
         var found = await RequireMemberAsync(popkinId, cancellationToken);
         if (found.Popkin.Status == PopkinStatus.WrappedUp)
         {
-            throw new ProblemException(409, "popkin_wrapped_up", "This Popkin has wrapped up.");
+            throw WrappedUp();
         }
 
         return found;
