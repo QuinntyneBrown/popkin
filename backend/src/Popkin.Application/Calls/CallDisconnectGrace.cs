@@ -8,7 +8,8 @@ using Popkin.Application.Abstractions;
 namespace Popkin.Application.Calls;
 
 /// <summary>
-/// The grace a participant has after the connection they are on a call with dropped. The
+/// The grace a participant has after the connection they are on a call with dropped, or after
+/// joining a call before any connection of theirs is on it. The
 /// client tries again 0, 2 and 12 seconds after a drop, all inside the grace; a participant
 /// who has not come back when it ends leaves the call. The grace is a timer of the clock, so
 /// a test passes it without waiting. Kept in this process: one API instance (ADR 0009).
@@ -21,14 +22,17 @@ public sealed class CallDisconnectGrace(TimeProvider clock, IServiceScopeFactory
     /// <summary>The graces that are running, held so that none is collected before it ends.</summary>
     private readonly ConcurrentDictionary<object, ITimer> _running = new();
 
-    /// <summary>The connection a participant was on the call with has gone: their grace starts.</summary>
-    public void Start(Guid participantId, string connectionId)
+    /// <summary>
+    /// The connection a participant was on the call with has gone, or (with no connection) they
+    /// have just joined and none is on the call yet: their grace starts.
+    /// </summary>
+    public void Start(Guid participantId, string? connectionId)
     {
         var grace = new object();
         _running[grace] = clock.CreateTimer(_ => _ = EndAsync(grace, participantId, connectionId), null, Grace, Timeout.InfiniteTimeSpan);
     }
 
-    private async Task EndAsync(object grace, Guid participantId, string connectionId)
+    private async Task EndAsync(object grace, Guid participantId, string? connectionId)
     {
         if (_running.TryRemove(grace, out var timer))
         {
@@ -49,10 +53,11 @@ public sealed class CallDisconnectGrace(TimeProvider clock, IServiceScopeFactory
 }
 
 /// <summary>
-/// The grace of a dropped connection has ended. The participant leaves the call unless they
-/// came back, which shows in the connection they are on the call with: `JoinCall` replaced it.
+/// The grace of a dropped connection, or of a join no connection followed, has ended. The
+/// participant leaves the call unless they came, or came back, which shows in the connection
+/// they are on the call with: `JoinCall` set or replaced it.
 /// </summary>
-public sealed record LeaveDroppedCallCommand(Guid ParticipantId, string ConnectionId) : IRequest;
+public sealed record LeaveDroppedCallCommand(Guid ParticipantId, string? ConnectionId) : IRequest;
 
 public sealed class LeaveDroppedCallCommandHandler(IAppDbContext db, CallLeaver leaver) : IRequestHandler<LeaveDroppedCallCommand>
 {

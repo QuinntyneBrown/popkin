@@ -16,7 +16,7 @@ public sealed record JoinCallResult(JoinedCallDto Joined, bool Started);
 public sealed record JoinCallCommand(Guid PopkinId, bool MicOn, bool CameraOn) : IRequest<JoinCallResult>;
 
 public sealed class JoinCallCommandHandler(
-    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos, IMediaRelayCredentials relay, IPopkinNotifier notifier)
+    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos, IMediaRelayCredentials relay, IPopkinNotifier notifier, CallDisconnectGrace grace)
     : IRequestHandler<JoinCallCommand, JoinCallResult>
 {
     /// <summary>How often a join that lost to another change of the same call is tried again.</summary>
@@ -63,6 +63,9 @@ public sealed class JoinCallCommandHandler(
             // Told after the commit, in the same request: those on the call learn who came, and
             // the banner of every member with Popkin open shows the new count (L2-029 AC2).
             var joined = await JoinedAsync(call, membership, cancellationToken);
+            // A browser that joins puts a connection on the call at once. One that never does
+            // (the tab closed in between) must not hold the call open for ever.
+            grace.Start(participant.Id, participant.ConnectionId);
             await notifier.ParticipantJoined(call.Id, joined.Participants.Single(p => p.MembershipId == membership.Id));
             await notifier.CallChanged(popkin.Id, call.Id, call.Version, joined.Call.ParticipantCount);
             return new JoinCallResult(joined, started);

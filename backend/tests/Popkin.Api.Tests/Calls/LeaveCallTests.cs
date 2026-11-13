@@ -67,7 +67,8 @@ public sealed class LeaveCallTests
         var started = await lakeside.Host.OnCallAsync(lakeside.Id);
         await joel.OnCallAsync(lakeside.Id);
         await lakeside.Host.LeaveCallAsync(lakeside.Id, started.CallId());
-        api.Clock.Advance(TimeSpan.FromMinutes(1));
+        // Less than the grace Joel's join has before a connection of his must be on the call.
+        api.Clock.Advance(TimeSpan.FromSeconds(10));
 
         var back = await lakeside.Host.OnCallAsync(lakeside.Id);
 

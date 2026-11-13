@@ -20,7 +20,8 @@ public sealed class JoinCallTests
         var joel = await api.SignedUpAsync("Joel Ferreira", "(415) 555-0123");
         await joel.JoinAsync(lakeside.Code, "Joel F");
         var started = await lakeside.Host.OnCallAsync(lakeside.Id);
-        api.Clock.Advance(TimeSpan.FromMinutes(2));
+        // Less than the grace a join has before a connection must be on the call.
+        api.Clock.Advance(TimeSpan.FromSeconds(10));
 
         var response = await joel.StartOrJoinCallAsync(lakeside.Id, new { micOn = false });
 
@@ -49,7 +50,8 @@ public sealed class JoinCallTests
         using var api = new ApiFactory();
         var lakeside = await api.StartLakesideAsync();
         var started = await lakeside.Host.OnCallAsync(lakeside.Id, new { cameraOn = false });
-        api.Clock.Advance(TimeSpan.FromMinutes(2));
+        // Less than the grace a join has before a connection must be on the call.
+        api.Clock.Advance(TimeSpan.FromSeconds(10));
 
         var response = await lakeside.Host.StartOrJoinCallAsync(lakeside.Id);
 

@@ -262,8 +262,10 @@ Gaps found, each in [the register](../../README.md#known-gaps):
 
 - Nothing caps how many may join a call, and a mesh serves a large call badly (gap 27).
 - A member who posted the join and never called `JoinCall`, because the tab closed in between,
-  has no `ConnectionId`, so no dropped connection starts their grace and they stay on the call
-  (gap 28).
+  has no `ConnectionId` and no connection to drop. The join itself therefore starts the grace:
+  `JoinCallCommandHandler` calls `CallDisconnectGrace.Start` for the new participant, and one
+  with no connection on the call when it ends leaves it, which ends a call they were alone on
+  (gap 28, settled).
 - A call under way is not ended when its Popkin wraps up (gap 30).
 - A member has one participant row however many devices they use. A second device's join adds
   nothing, and its `JoinCall` takes the call's events and signals from the first (gap 31).

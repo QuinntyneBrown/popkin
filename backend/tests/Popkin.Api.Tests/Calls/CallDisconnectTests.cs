@@ -101,6 +101,49 @@ public sealed class CallDisconnectTests
         Assert.Equal(HttpStatusCode.NoContent, (await joel.CurrentCallAsync(lakeside.Id)).StatusCode);
     }
 
+    // Given a member who joined a call over HTTP,
+    // when their browser never puts a connection on the call (the tab closed in between),
+    // then they leave the call when the grace has passed, and a call they were alone on ends:
+    // its banner does not stay for ever (L2-029 AC6).
+    [Fact]
+    public async Task A_participant_who_never_connects_to_the_call_leaves_after_the_grace()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var joel = await api.SignedUpAsync("Joel Ferreira", "(415) 555-0123");
+        await joel.JoinAsync(lakeside.Code, "Joel F");
+        await using var joelHub = await api.CreateHubConnectionAsync(joel);
+        var callId = (await lakeside.Host.OnCallAsync(lakeside.Id)).CallId();
+
+        api.Clock.Advance(CallDisconnectGrace.Grace - TimeSpan.FromMilliseconds(1));
+        var during = (await joel.CurrentCallAsync(lakeside.Id)).StatusCode;
+        api.Clock.Advance(TimeSpan.FromMilliseconds(1));
+
+        Assert.Equal(HttpStatusCode.OK, during);
+        var ended = await joelHub.WaitForAsync("CallEnded");
+        Assert.Equal(callId, ended.Arguments[1].GetGuid());
+        Assert.Equal(HttpStatusCode.NoContent, (await joel.CurrentCallAsync(lakeside.Id)).StatusCode);
+    }
+
+    // Given a member who joined a call over HTTP,
+    // when their connection joins the call within the grace,
+    // then they are still on it after the grace has passed.
+    [Fact]
+    public async Task A_participant_who_connects_to_the_call_within_the_grace_stays_on_it()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        await using var maraHub = await api.CreateHubConnectionAsync(lakeside.Host);
+        var callId = (await lakeside.Host.OnCallAsync(lakeside.Id)).CallId();
+
+        api.Clock.Advance(TimeSpan.FromSeconds(5));
+        await maraHub.JoinCallAsync(callId);
+        api.Clock.Advance(CallDisconnectGrace.Grace);
+
+        Assert.Equal(1, await CountOnCallAsync(lakeside.Host, lakeside.Id));
+        Assert.Empty(maraHub.ReceivedNamed("CallEnded"));
+    }
+
     // Given a participant with Popkin open in a second tab that is not on the call,
     // when that tab closes and the grace passes, then they are still on the call: only the
     // connection they are on the call with counts.
