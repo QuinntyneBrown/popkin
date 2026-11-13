@@ -1,0 +1,42 @@
+/*
+ * A column that fills the screen's flush body: a little room under the header, and at its end,
+ * with the body's own, the room of the floating action and the tabs.
+ */
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--space-4) 0 var(--space-18);
+}
+
+.album__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.album__skeleton-label {
+  padding: 0 var(--space-4);
+}
+
+/* Under the last day: the sentinel of the next page, and the alert of a page that did not load. */
+.album__more {
+  padding: var(--space-4) var(--space-4) 0;
+}
+
+.album__more:empty {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .album__more {
+    padding-inline: var(--space-8);
+  }
+}
+
+@media (min-width: 80rem) {
+  .album__more {
+    padding-inline: var(--space-10);
+  }
+}

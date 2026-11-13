@@ -70,3 +70,4 @@ export * from './lib/home-header/home-header';
 export * from './lib/fab/fab';
 export * from './lib/group-label/group-label';
 export * from './lib/photo-grid/photo-grid';
+export * from './lib/album/album';

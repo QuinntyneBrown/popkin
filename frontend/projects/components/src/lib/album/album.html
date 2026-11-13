@@ -1,0 +1,10 @@
+@if (loading()) {
+  <p class="visually-hidden" role="status">{{ loadingText() }}</p>
+  <div class="album__skeleton" aria-hidden="true">
+    <div class="album__skeleton-label"><span pk-skeleton shape="text" [width]="20"></span></div>
+    <div pk-photo-grid [loading]="true"></div>
+  </div>
+} @else {
+  <ng-content />
+  <div class="album__more"><ng-content select="[slot=more]" /></div>
+}
