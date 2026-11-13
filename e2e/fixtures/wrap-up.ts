@@ -41,6 +41,23 @@ export const ready = (): AlbumExport => ({
   downloadUrl: zipUrl,
 });
 
+/** The Popkin has wrapped up, as its home and its thread answer it. */
+export function wrappedUp(home: Home, keepPhotos = true, at: Date = sundayEvening): void {
+  home.popkin = {
+    ...home.popkin,
+    status: 'WrappedUp',
+    wrappedUpAt: at.toISOString(),
+    keepPhotos,
+    photosRemoveAt: keepPhotos ? null : new Date(at.getTime() + 30 * DAY_MS).toISOString(),
+  };
+  home.chat.thread = { ...home.chat.thread, readOnly: true };
+}
+
+/** Thirty days after an album was not kept, its photos are gone. */
+export function photosRemoved(home: Home): void {
+  home.popkin = { ...home.popkin, photosRemovedAt: home.popkin.photosRemoveAt };
+}
+
 export class WrapUp {
   /** What the wrap-up screen says of the recap to come. */
   preview = { memberCount: 14, photoCount: 48, messageCount: 1286 };
@@ -152,22 +169,15 @@ export class WrapUp {
 
   /** The Popkin has wrapped up: the home, the thread and the recap all say so. */
   wrap(keepPhotos = true, at: Date = sundayEvening): void {
-    const photosRemoveAt = keepPhotos ? null : new Date(at.getTime() + 30 * DAY_MS).toISOString();
-    this.home.popkin = {
-      ...this.home.popkin,
-      status: 'WrappedUp',
-      wrappedUpAt: at.toISOString(),
-      keepPhotos,
-      photosRemoveAt,
-    };
-    this.home.chat.thread = { ...this.home.chat.thread, readOnly: true };
+    wrappedUp(this.home, keepPhotos, at);
+    const photosRemoveAt = this.home.popkin.photosRemoveAt;
     this.recap = { ...this.recap, wrappedUpAt: at.toISOString(), keepPhotos, photosRemoveAt };
   }
 
   /** Thirty days on, the photos of an album that was not kept are gone. */
   removePhotos(): void {
     const removedAt = this.recap.photosRemoveAt ?? new Date().toISOString();
-    this.home.popkin = { ...this.home.popkin, photosRemovedAt: removedAt };
+    photosRemoved(this.home);
     this.recap = { ...this.recap, photosRemovedAt: removedAt, photos: [] };
   }
 

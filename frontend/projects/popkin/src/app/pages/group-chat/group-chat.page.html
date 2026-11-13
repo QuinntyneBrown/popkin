@@ -33,21 +33,25 @@
     <header
       pk-top-bar
       slot="header"
-      [back]="'/p/' + popkinId() + '/chat'"
+      [back]="'/p/' + popkinId() + (readOnly() ? '/recap' : '/chat')"
+      [backLabel]="readOnly() ? 'Recap' : 'Back'"
       [line]="true"
       [sticky]="true"
       [tile]="thread()?.emoji ?? ''"
+      [tileMuted]="readOnly()"
       [heading]="thread()?.popkinName ?? 'Chat'"
       [sub]="sub()"
     >
-      <a
-        pk-icon-button
-        slot="end"
-        variant="popkin"
-        icon="video"
-        label="Start group call"
-        [routerLink]="['/p', popkinId(), 'call']"
-      ></a>
+      @if (!readOnly()) {
+        <a
+          pk-icon-button
+          slot="end"
+          variant="popkin"
+          icon="video"
+          label="Start group call"
+          [routerLink]="['/p', popkinId(), 'call']"
+        ></a>
+      }
     </header>
 
     @if (call(); as call) {
@@ -150,7 +154,8 @@
         slot="composer"
         [(value)]="text"
         [label]="fieldLabel()"
-        [disabled]="state() === 'loading' || !!thread()?.readOnly"
+        [closed]="readOnly() ? closedLine : undefined"
+        [disabled]="state() === 'loading'"
         (send)="send($event)"
       ></div>
     }

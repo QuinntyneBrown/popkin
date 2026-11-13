@@ -12,9 +12,11 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AlbumStore, ErrorScreens, PHOTO_ACCEPT, PopkinFrame, UnreadTracker, accentOf } from 'api';
 import {
   Album,
+  Banner,
   Alert,
   AppScreen,
   Button,
@@ -42,6 +44,7 @@ const FACES = 4;
   selector: 'pk-photo-album-page',
   imports: [
     Album,
+    Banner,
     Alert,
     AppScreen,
     Button,
@@ -53,6 +56,7 @@ const FACES = 4;
     Icon,
     PhotoGrid,
     PopkinNav,
+    RouterLink,
     TabHeader,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -102,7 +106,15 @@ export class PhotoAlbumPage {
   );
   /** "Add photos" in the header and floating: where photos show, or are about to. */
   protected readonly adding = computed(
-    () => this.store.canAdd() && ['loading', 'ready'].includes(this.store.state()),
+    () => this.canAdd() && ['loading', 'ready'].includes(this.store.state()),
+  );
+  /** Nothing is added to a Popkin that has wrapped up (L2-045 AC3). */
+  protected readonly canAdd = computed(() => this.store.canAdd() && !this.frame.wrappedUp());
+  protected readonly recap = computed(() => ['/p', this.popkinId(), 'recap']);
+  /** What became of an album that was not kept, once its photos went (L2-045 AC4). */
+  protected readonly removedText = computed(
+    () =>
+      `The album wasn’t kept when ${this.frame.name()} wrapped up, so its photos went after 30 days. The chat and the experiences are still here.`,
   );
   protected readonly unreadCount = computed(() => this.unread.forPopkin(this.popkinId()));
 

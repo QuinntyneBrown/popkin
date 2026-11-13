@@ -23,6 +23,10 @@ export class GroupChatPage {
   readonly tryAgain: Locator;
   readonly backToChat: Locator;
   readonly composer: Locator;
+  /** What a wrapped-up Popkin says in place of the field (L2-045 AC1). */
+  readonly closed: Locator;
+  readonly backToRecap: Locator;
+  readonly startCall: Locator;
   readonly field: Locator;
   readonly send: Locator;
   readonly count: Locator;
@@ -71,6 +75,9 @@ export class GroupChatPage {
     this.composer = page.locator('.composer');
     this.field = this.composer.getByRole('textbox');
     this.send = this.composer.getByRole('button', { name: 'Send' });
+    this.closed = this.composer.locator('.composer__closed');
+    this.backToRecap = this.topBar.getByRole('link', { name: 'Recap' });
+    this.startCall = this.topBar.getByRole('link', { name: 'Start group call' });
     this.count = this.composer.locator('.composer__count');
     this.newMessages = page.getByRole('button', { name: 'New messages' });
     this.announcements = page.locator(

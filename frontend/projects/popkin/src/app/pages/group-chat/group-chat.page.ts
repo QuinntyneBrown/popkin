@@ -22,6 +22,7 @@ import {
   MessageRow,
   NETWORK_STATUS,
   POPKIN_REALTIME,
+  PopkinFrame,
   ThreadStore,
   UnreadTracker,
   accentOf,
@@ -83,7 +84,7 @@ const BACK_ONLINE_MS = 5_000;
     Thread,
     TopBar,
   ],
-  providers: [ThreadStore, CallBannerStore],
+  providers: [ThreadStore, CallBannerStore, PopkinFrame],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './group-chat.page.html',
 })
@@ -127,12 +128,18 @@ export class GroupChatPage {
   /** How many messages went out when the connection returned; null when there is nothing to say. */
   protected readonly sentOnReturn = signal<number | null>(null);
 
+  /** What the Popkin itself says once it has wrapped up: when it did (L2-045 AC1). */
+  private readonly frame = inject(PopkinFrame);
   protected readonly thread = this.store.thread;
+  protected readonly readOnly = computed(() => !!this.thread()?.readOnly);
+  protected readonly closedLine =
+    'This Popkin has wrapped up. Messages stay, but nobody can post new ones.';
   protected readonly state = this.store.state;
   protected readonly accent = computed(() => accentOf(this.thread()?.colour ?? 'Coral'));
   protected readonly sub = computed(() => {
     const thread = this.thread();
     if (!thread) return this.state() === 'loading' ? 'Loading…' : '';
+    if (thread.readOnly) return this.frame.wrappedUpOn() ?? '';
     return threadSub(thread.memberCount, thread.hereNow);
   });
   protected readonly members = computed(() => {
@@ -192,6 +199,9 @@ export class GroupChatPage {
 
     effect(() => {
       if (this.state() === 'not-found') untracked(() => this.errors.showNotFound());
+    });
+    effect(() => {
+      if (this.readOnly()) untracked(() => this.frame.open(this.popkinId()));
     });
 
     // Once the thread is known: the draft left here earlier, the latest in view, and focus.

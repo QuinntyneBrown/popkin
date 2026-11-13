@@ -89,7 +89,10 @@ export class ExperiencesPage {
     ['loading', 'ready', 'no-results'].includes(this.store.state()) ? 'Filter' : undefined,
   );
   /** "Share one" in the header and floating: where cards show, or are about to. */
-  protected readonly sharing = computed(() => ['loading', 'ready'].includes(this.store.state()));
+  /** Nothing is shared in a Popkin that has wrapped up (L2-045 AC2). */
+  protected readonly sharing = computed(
+    () => !this.frame.wrappedUp() && ['loading', 'ready'].includes(this.store.state()),
+  );
   protected readonly unreadCount = computed(() => this.unread.forPopkin(this.popkinId()));
 
   constructor() {
