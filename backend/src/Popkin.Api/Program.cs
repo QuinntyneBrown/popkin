@@ -72,8 +72,9 @@ if (!app.Environment.IsProduction())
 
 app.UseMiddleware<SameSiteRequestMiddleware>();
 app.UseRouting();
-app.UseRateLimiter();
 app.UseAuthentication();
+// After authentication, so a limit counted per person can read who is asking.
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 

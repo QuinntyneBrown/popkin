@@ -1,5 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Popkin.Api.RateLimiting;
 using Popkin.Application.Chat;
 
 namespace Popkin.Api.Controllers;
@@ -27,8 +29,12 @@ public sealed class MessagesController(ISender sender) : ControllerBase
         CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetMessagesQuery(popkinId, threadId, before, after, from, to, limit), cancellationToken));
 
-    /// <summary>Posts a message (L2-021).</summary>
+    /// <summary>
+    /// Posts a message (L2-021): 201 when stored, 200 with the stored message when this author
+    /// already sent the client message id (L2-028). At most 60 a minute per person (L2-053 AC2).
+    /// </summary>
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
     public async Task<ActionResult<MessageDto>> Send(Guid popkinId, Guid threadId, SendMessageRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new SendMessageCommand(popkinId, threadId, request.ClientMessageId, request.Text), cancellationToken);
