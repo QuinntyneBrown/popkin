@@ -1,3 +1,4 @@
+import { SignInPage } from '../../pages/sign-in.page';
 import { theMockChat } from '../../fixtures/chat';
 import { parity } from '../../fixtures/parity';
 import { GroupChatPage } from '../../pages/group-chat.page';
@@ -13,4 +14,5 @@ parity('top-bar', [
     region: (page) => new GroupChatPage(page).titles,
     before: theMockChat,
   },
+  { key: 'signIn', name: 'back-only', region: (page) => new SignInPage(page).topBar },
 ]);

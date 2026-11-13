@@ -292,3 +292,23 @@ test.describe('signing in with no account yet', () => {
     await expect(verify.codeError).toHaveText('That code has expired.');
   });
 });
+
+// L2-058 AC10
+test.describe('sign in on each form factor', () => {
+  test('is one column on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    const signIn = new SignInPage(page);
+    await signIn.open();
+
+    await expect(signIn.picture).toBeHidden();
+  });
+
+  test('is a split screen from 768 px', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    const signIn = new SignInPage(page);
+    await signIn.open();
+
+    await expect(signIn.picture).toBeVisible();
+    await expect(signIn.contact).toBeVisible();
+  });
+});

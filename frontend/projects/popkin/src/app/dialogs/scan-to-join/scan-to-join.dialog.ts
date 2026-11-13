@@ -6,6 +6,8 @@ import {
   effect,
   inject,
   untracked,
+  ElementRef,
+  viewChild,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ScanToJoin } from 'api';
@@ -27,11 +29,18 @@ export class ScanToJoinDialog {
   protected readonly scan = inject(ScanToJoin);
   protected readonly ref = inject<DialogRef<void>>(DialogRef);
   private readonly router = inject(Router);
+  private readonly typeIt = viewChild<unknown, ElementRef<HTMLElement>>('typeIt', {
+    read: ElementRef,
+  });
 
   protected readonly denied = computed(() => this.scan.state() === 'denied');
   protected readonly found = computed(() => this.scan.state() === 'found');
 
   constructor() {
+    // The way on takes the focus when the camera cannot be used (L2-015 AC4).
+    effect(() => {
+      if (this.denied()) setTimeout(() => this.typeIt()?.nativeElement.focus());
+    });
     effect(() => {
       const code = this.scan.code();
       if (!code) return;

@@ -50,6 +50,18 @@ import {
   thePhotoFailing,
   thePhotoLoading,
 } from './photos';
+import {
+  openTheScanner,
+  scanAPopkinAndWait,
+  scanSomethingElse,
+  theMockPopkins,
+  thePopkinsActiveOnly,
+  thePopkinsEmpty,
+  thePopkinsFailing,
+  thePopkinsGoOffline,
+  thePopkinsLoading,
+  withACamera,
+} from './my-popkins';
 import type { RouteKey } from './routes';
 import { answer, hold, problem } from './stubs';
 import { EndDateDialog } from '../pages/end-date.dialog';
@@ -59,7 +71,11 @@ import { GroupChatPage } from '../pages/group-chat.page';
 import { HowLongPage } from '../pages/how-long.page';
 import { JoinInvitePage } from '../pages/join-invite.page';
 import { NameYourPopkinPage } from '../pages/name-your-popkin.page';
+import { MyPopkinsPage } from '../pages/my-popkins.page';
 import { NotFoundPage } from '../pages/not-found.page';
+import { OfflinePage } from '../pages/offline.page';
+import { ScanToJoinDialog } from '../pages/scan-to-join.dialog';
+import { SignInPage } from '../pages/sign-in.page';
 import { PopkinCreatedPage } from '../pages/popkin-created.page';
 import { ServerErrorPage } from '../pages/server-error.page';
 import { SignUpPage } from '../pages/sign-up.page';
@@ -632,5 +648,142 @@ export const screenStates: ScreenState[] = [
     key: 'photoViewError',
     before: thePhotoFailing,
     regions: (page) => ({ error: new PhotoViewPage(page).error }),
+  },
+  // Journey 6. Sign in, the name step of the code screen, My Popkins, Scan to join and the
+  // offline screen. The scanner is compared while the browser still asks for the camera: the
+  // mocks draw no camera picture.
+  {
+    key: 'signIn',
+    app: (page) => new SignInPage(page).contact.fill('mara@hey.com'),
+    regions: (page) => {
+      const signIn = new SignInPage(page);
+      return {
+        topBar: signIn.topBar,
+        field: signIn.contactField,
+        button: signIn.primaryButton,
+        link: signIn.startAPopkinRegion,
+      };
+    },
+    wideRegions: (page) => ({ picture: new SignInPage(page).picture }),
+  },
+  {
+    key: 'signInInvalid',
+    app: async (page) => {
+      const signIn = new SignInPage(page);
+      await signIn.contact.fill('mara@hey');
+      await signIn.send.click();
+      await signIn.contactError.waitFor();
+    },
+    regions: (page) => ({ field: new SignInPage(page).contactField }),
+  },
+  {
+    key: 'signInSubmitting',
+    before: async (page) => void (await hold(page, 'POST /api/auth/codes')),
+    app: async (page) => {
+      const signIn = new SignInPage(page);
+      await signIn.contact.fill('mara@hey.com');
+      await signIn.send.click();
+    },
+    regions: (page) => ({ button: new SignInPage(page).primaryButton }),
+  },
+  {
+    key: 'verifyCodeName',
+    app: async (page) => {
+      const id = responses['POST /api/auth/codes'].body.verificationId;
+      await answer(page, `POST /api/auth/codes/${id}/confirm`, {
+        status: 200,
+        body: { outcome: 'NameRequired', session: null, isNewPerson: true },
+      });
+      const verify = new VerifyCodePage(page);
+      await verify.reachBySignIn();
+      await verify.type('482913');
+      await verify.name.waitFor();
+    },
+    regions: (page) => {
+      const verify = new VerifyCodePage(page);
+      return { heading: verify.heading, button: verify.primaryButton };
+    },
+  },
+  {
+    key: 'myPopkins',
+    before: theMockPopkins,
+    regions: (page) => {
+      const popkins = new MyPopkinsPage(page);
+      return {
+        topBar: popkins.topBar,
+        grid: popkins.grid,
+        wrappedUpHeading: popkins.wrappedUpHeading,
+        wrappedUp: popkins.wrappedUpList,
+      };
+    },
+  },
+  {
+    key: 'myPopkinsActiveOnly',
+    before: thePopkinsActiveOnly,
+    regions: (page) => ({ grid: new MyPopkinsPage(page).grid }),
+  },
+  {
+    key: 'myPopkinsLoading',
+    before: thePopkinsLoading,
+    regions: (page) => ({ skeleton: new MyPopkinsPage(page).skeletonCards }),
+  },
+  {
+    key: 'myPopkinsEmpty',
+    before: thePopkinsEmpty,
+    regions: (page) => {
+      const popkins = new MyPopkinsPage(page);
+      return { topBar: popkins.topBar, empty: popkins.emptyState };
+    },
+  },
+  {
+    key: 'myPopkinsError',
+    before: thePopkinsFailing,
+    regions: (page) => ({ error: new MyPopkinsPage(page).emptyState }),
+  },
+  {
+    key: 'myPopkinsOffline',
+    before: theMockPopkins,
+    app: thePopkinsGoOffline,
+    regions: (page) => {
+      const popkins = new MyPopkinsPage(page);
+      return { banner: popkins.offlineBanner, grid: popkins.grid };
+    },
+  },
+  {
+    key: 'scanToJoin',
+    before: withACamera('asking'),
+    app: openTheScanner,
+    regions: (page) => ({ panel: new ScanToJoinDialog(page).panel }),
+  },
+  {
+    key: 'scanToJoinBusy',
+    before: withACamera('allowed'),
+    app: scanAPopkinAndWait,
+    regions: (page) => {
+      const scan = new ScanToJoinDialog(page);
+      return { header: scan.header, hint: scan.hint, footer: scan.footer };
+    },
+  },
+  {
+    key: 'scanToJoinInvalid',
+    before: withACamera('allowed'),
+    app: scanSomethingElse,
+    regions: (page) => {
+      const scan = new ScanToJoinDialog(page);
+      return { alert: scan.alert, footer: scan.footer };
+    },
+  },
+  {
+    key: 'scanToJoinDenied',
+    before: withACamera('denied'),
+    app: openTheScanner,
+    regions: (page) => ({ panel: new ScanToJoinDialog(page).panel }),
+  },
+  {
+    key: 'offline',
+    regions: (page) => {
+      const offline = new OfflinePage(page);
+      return { empty: offline.emptyState };
+    },
   },
 ];

@@ -5,7 +5,8 @@ import type { Page } from '@playwright/test';
  * stub answers the request for the camera (allowed, refused, or none on the device), plays a
  * blank picture, and reads as a QR code whatever text a spec holds up to it.
  */
-export type CameraAnswer = 'allowed' | 'denied' | 'none';
+/** `asking` never answers: the browser's question is still open, and the view stays dark. */
+export type CameraAnswer = 'allowed' | 'denied' | 'none' | 'asking';
 
 interface CameraStub {
   answer: CameraAnswer;
@@ -49,6 +50,7 @@ export async function aCamera(page: Page, answer: CameraAnswer = 'allowed'): Pro
           if (stub.answer === 'none') {
             return Promise.reject(new DOMException('No camera', 'NotFoundError'));
           }
+          if (stub.answer === 'asking') return new Promise<MediaStream>(() => undefined);
           const stream = picture();
           stub.streams.push(stream);
           return Promise.resolve(stream);

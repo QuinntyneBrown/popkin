@@ -52,6 +52,8 @@ export class MyPopkinsPage {
   readonly wrappedUpList: Locator;
   readonly fab: Locator;
   readonly emptyState: Locator;
+  readonly headerNewPopkin: Locator;
+  readonly skeletonCards: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="my-popkins"]');
@@ -78,6 +80,11 @@ export class MyPopkinsPage {
     this.wrappedUpList = page.locator('.divided');
     this.fab = page.locator('.fab');
     this.emptyState = page.locator('.empty');
+    this.headerNewPopkin = page.locator('.topbar').getByRole('link', { name: 'New Popkin' });
+    this.skeletonCards = page
+      .locator('main [aria-hidden="true"]')
+      .filter({ has: page.locator('.skeleton') })
+      .first();
   }
 
   async open(): Promise<void> {
@@ -87,6 +94,29 @@ export class MyPopkinsPage {
 
   card(name: string): PopkinCard {
     return new PopkinCard(this.cards.filter({ hasText: name }));
+  }
+
+  /** How many cards sit side by side in the first row. */
+  async across(): Promise<number> {
+    const tops = await this.cards.evaluateAll((cards) =>
+      cards.map((card) => Math.round(card.getBoundingClientRect().top)),
+    );
+    return tops.filter((top) => top === tops[0]).length;
+  }
+
+  /** How many wrapped-up Popkins sit side by side in the first row. */
+  async wrappedUpAcross(): Promise<number> {
+    const tops = await this.wrappedUp.evaluateAll((rows) =>
+      rows.map((row) => Math.round(row.getBoundingClientRect().top)),
+    );
+    return tops.filter((top) => top === tops[0]).length;
+  }
+
+  /** Nothing is wider than the screen, so the page never scrolls sideways. */
+  fitsTheScreen(): Promise<boolean> {
+    return this.page.evaluate(
+      () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
+    );
   }
 
   wrappedUpRow(name: string): Locator {

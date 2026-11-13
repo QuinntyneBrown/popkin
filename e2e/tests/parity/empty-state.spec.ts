@@ -1,3 +1,6 @@
+import { thePopkinsEmpty, thePopkinsFailing } from '../../fixtures/my-popkins';
+import { MyPopkinsPage } from '../../pages/my-popkins.page';
+import { OfflinePage } from '../../pages/offline.page';
 import { theHomeEmpty, theHomeFailing } from '../../fixtures/home';
 import { PopkinHomePage } from '../../pages/popkin-home.page';
 import { theChatEmpty, theChatFailing } from '../../fixtures/chat';
@@ -52,4 +55,17 @@ parity('empty-state', [
     region: (page) => new PopkinHomePage(page).error,
     before: theHomeFailing,
   },
+  {
+    key: 'myPopkinsEmpty',
+    name: 'no-popkins',
+    region: (page) => new MyPopkinsPage(page).emptyState,
+    before: thePopkinsEmpty,
+  },
+  {
+    key: 'myPopkinsError',
+    name: 'popkins-error',
+    region: (page) => new MyPopkinsPage(page).emptyState,
+    before: thePopkinsFailing,
+  },
+  { key: 'offline', name: 'offline', region: (page) => new OfflinePage(page).emptyState },
 ]);

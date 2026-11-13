@@ -95,6 +95,7 @@ test.describe('Scan to join', () => {
     );
     await expect(scan.scanner).toHaveCount(0);
     await expect(scan.typeTheCode).toHaveAttribute('href', '/join');
+    await expect(scan.typeTheCode).toBeFocused();
 
     await allowTheCamera(page);
     await scan.tryTheCamera.click();

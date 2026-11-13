@@ -44,8 +44,13 @@
     >
       {{ status() === 'sending' ? 'Sending your code…' : 'Send my code' }}
     </button>
-    <a pk-link variant="text" routerLink="/sign-up" [queryParams]="{ returnUrl }"
-      >New here? <strong>Start a Popkin</strong></a
+    <a
+      pk-link
+      variant="text"
+      action="Start a Popkin"
+      routerLink="/sign-up"
+      [queryParams]="{ returnUrl }"
+      >New here?</a
     >
   </div>
 </div>

@@ -1,3 +1,5 @@
+import { openTheScanner, withACamera } from '../../fixtures/my-popkins';
+import { ScanToJoinDialog } from '../../pages/scan-to-join.dialog';
 import { copyTheInvite, openTheInvite, theMockHome } from '../../fixtures/home';
 import { InviteDialog } from '../../pages/invite.dialog';
 import type { Page } from '@playwright/test';
@@ -51,5 +53,25 @@ parity('dialog', [
     region: (page) => new InviteDialog(page).footer,
     before: theMockHome,
     app: copyTheInvite,
+  },
+  {
+    key: 'scanToJoin',
+    name: 'scan-header',
+    region: (page) => new ScanToJoinDialog(page).header,
+    before: withACamera('asking'),
+    app: openTheScanner,
+  },
+  {
+    key: 'scanToJoinDenied',
+    name: 'scan-denied-footer',
+    region: (page) => new ScanToJoinDialog(page).footer,
+    before: withACamera('denied'),
+    app: openTheScanner,
+    // The mock's first action has autofocus; the app moves the focus to it.
+    prepare: async (page) => {
+      // A key first, so the browser draws the ring it draws for the keyboard, as the mock has.
+      await page.keyboard.press('Shift');
+      await new ScanToJoinDialog(page).typeTheCode.focus();
+    },
   },
 ]);

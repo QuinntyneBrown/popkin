@@ -11,6 +11,7 @@ import {
   someoneWritesIn,
   theActiveOnly,
   theListFailing,
+  theListHasSettled,
   theListLoading,
   theMockList,
   thursday,
@@ -228,6 +229,7 @@ test.describe('My Popkins', () => {
       'They’re safe; we just couldn’t reach them. Check your connection and try again.',
     );
     await expect(popkins.account).toBeVisible();
+    await theListHasSettled(page);
     await answer(page, listKey, { status: 200, body: theMockList });
     await popkins.tryAgain.click();
 
@@ -299,5 +301,56 @@ test.describe('My Popkins offline', () => {
 
     const offline = new OfflinePage(page);
     await expect(offline.heading).toHaveText('You’re offline');
+  });
+});
+
+// L2-058 AC7
+test.describe('My Popkins on each form factor', () => {
+  for (const [width, across, wrappedAcross] of [
+    [360, 1, 1],
+    [640, 2, 1],
+    [768, 2, 2],
+    [1024, 3, 3],
+    [1280, 3, 3],
+  ] as const) {
+    test(`is ${across} cards across at ${width} px, wrapped-up Popkins ${wrappedAcross}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await maraWithPopkins(page, {
+        active: theMockList.active,
+        wrappedUp: [...theMockList.wrappedUp, { ...buildWeekend, id: `${buildWeekend.id}9` }],
+      });
+      const popkins = new MyPopkinsPage(page);
+      await popkins.open();
+
+      await expect(popkins.cards).toHaveCount(3);
+      expect(await popkins.across()).toBe(across);
+      expect(await popkins.wrappedUpAcross()).toBe(wrappedAcross);
+      expect(await popkins.fitsTheScreen()).toBe(true);
+    });
+  }
+
+  // L2-058 AC9
+  test('New Popkin is a floating action on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await maraWithPopkins(page);
+    const popkins = new MyPopkinsPage(page);
+    await popkins.open();
+
+    await expect(popkins.fab).toBeVisible();
+    await expect(popkins.fab).toHaveAccessibleName('New Popkin');
+    await expect(popkins.headerNewPopkin).toBeHidden();
+  });
+
+  // L2-058 AC9
+  test('New Popkin is a button in the header from 768 px', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await maraWithPopkins(page);
+    const popkins = new MyPopkinsPage(page);
+    await popkins.open();
+
+    await expect(popkins.headerNewPopkin).toBeVisible();
+    await expect(popkins.fab).toBeHidden();
   });
 });
