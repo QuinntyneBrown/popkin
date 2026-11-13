@@ -6,6 +6,7 @@
       [attr.cx]="shape.circle[0]"
       [attr.cy]="shape.circle[1]"
       [attr.r]="shape.circle[2]"
+      [attr.fill]="shape.fill ? 'currentColor' : null"
     />
   } @else if ('line' in shape) {
     <svg:line

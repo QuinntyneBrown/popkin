@@ -44,3 +44,4 @@ export * from './lib/skeleton/skeleton';
 export * from './lib/invite-preview/invite-preview';
 export * from './lib/photo-picker/photo-picker';
 export * from './lib/people-list/people-list';
+export * from './lib/arrival/arrival';

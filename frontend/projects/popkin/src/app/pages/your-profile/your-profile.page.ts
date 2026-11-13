@@ -158,7 +158,13 @@ export class YourProfilePage {
   /** Who is already in is a picture beside the step; joining does not wait for it. */
   private loadMembers(): void {
     this.invites.getMembers(this.code).subscribe({
-      next: (members) => this.members.set(members),
+      next: (members) => {
+        this.members.set(members);
+        this.state.setAvatars(
+          this.code,
+          members.members.map((member) => member.avatar),
+        );
+      },
       error: () => this.members.set(null),
     });
   }

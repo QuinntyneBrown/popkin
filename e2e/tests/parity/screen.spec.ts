@@ -2,6 +2,7 @@ import {
   joelAtTheMockInvite,
   joelWhoseJoinFails,
   joelWhoseJoinHangs,
+  joinFromTheInvite,
   theInviteFailing,
   theMockInvite,
   theMockWrappedInvite,
@@ -10,6 +11,7 @@ import { parity } from '../../fixtures/parity';
 import { JoinInvitePage } from '../../pages/join-invite.page';
 import { NotFoundPage } from '../../pages/not-found.page';
 import { YourProfilePage } from '../../pages/your-profile.page';
+import { YoureInPage } from '../../pages/youre-in.page';
 
 parity('screen', [
   { key: 'notFound', region: (page) => new NotFoundPage(page).screen },
@@ -57,5 +59,12 @@ parity('screen', [
     region: (page) => new YourProfilePage(page).screen,
     before: joelWhoseJoinFails,
     app: (page) => new YourProfilePage(page).imIn.click(),
+  },
+  {
+    key: 'youreIn',
+    name: 'arrival',
+    region: (page) => new YoureInPage(page).screen,
+    before: joelAtTheMockInvite,
+    app: joinFromTheInvite,
   },
 ]);

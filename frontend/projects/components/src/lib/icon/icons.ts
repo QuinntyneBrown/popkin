@@ -4,7 +4,7 @@
  */
 export type IconShape =
   | { path: string }
-  | { circle: [cx: number, cy: number, r: number] }
+  | { circle: [cx: number, cy: number, r: number]; fill?: boolean }
   | { line: [x1: number, x2: number, y1: number, y2: number] }
   | { rect: [width: number, height: number, x: number, y: number, rx: number] };
 
@@ -33,6 +33,12 @@ export const ICONS = {
       path: 'M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z',
     },
     { circle: [12, 13, 3] },
+  ],
+  photos: [
+    { path: 'm22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16' },
+    { path: 'M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2' },
+    { circle: [13, 7, 1], fill: true },
+    { rect: [14, 14, 8, 2, 2] },
   ],
   retry: [
     { path: 'M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8' },

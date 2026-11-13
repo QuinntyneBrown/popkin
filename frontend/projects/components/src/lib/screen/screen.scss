@@ -71,6 +71,49 @@
   display: none;
 }
 
+/* An arrival: the welcome in the middle of the screen, its actions at the end. */
+:host(.screen--arrival) .screen__body {
+  padding-top: var(--space-12);
+}
+
+:host(.screen--arrival) .screen__content {
+  flex: none;
+  align-items: center;
+  margin-block: auto;
+  text-align: center;
+}
+
+:host(.screen--arrival) .screen__actions {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: var(--layout-app-max);
+  margin: 0 auto;
+  padding-top: 0;
+}
+
+@media (min-width: 40rem) {
+  :host(.screen--arrival) .screen__actions {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    max-width: var(--layout-form-max-l);
+  }
+}
+
+@media (min-width: 48rem) {
+  :host(.screen--arrival) .screen__body {
+    justify-content: center;
+  }
+
+  :host(.screen--arrival) .screen__content {
+    margin-block: 0;
+  }
+
+  :host(.screen--arrival) .screen__actions {
+    margin-top: var(--space-10);
+  }
+}
+
 .screen__footer {
   position: sticky;
   bottom: 0;

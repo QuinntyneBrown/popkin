@@ -2,8 +2,11 @@ import path from 'node:path';
 import type { Page } from '@playwright/test';
 import responses from './api/responses.json';
 import { answer, answerOnce, problem } from './stubs';
+import { JoinInvitePage } from '../pages/join-invite.page';
 import { NameYourPopkinPage } from '../pages/name-your-popkin.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
+import { YourProfilePage } from '../pages/your-profile.page';
+import { YoureInPage } from '../pages/youre-in.page';
 
 /**
  * Brings the app to states the recorded journey reaches, for specs and parity cases that start
@@ -247,4 +250,17 @@ export async function joelWhoseJoinFails(page: Page): Promise<void> {
 export async function joelWhoseJoinHangs(page: Page): Promise<void> {
   await joelAtTheMockInvite(page);
   await page.route(`**/api/invites/${inviteCode}/join`, () => undefined);
+}
+
+/** Joins the Popkin from its invite screen, as far as the welcome. */
+export async function joinFromTheInvite(page: Page): Promise<void> {
+  await new JoinInvitePage(page).join.click();
+  await new YourProfilePage(page).imIn.click();
+  await new YoureInPage(page).root.waitFor();
+}
+
+/** Joel, joined a moment ago and looking at the welcome. */
+export async function joelJustJoined(page: Page): Promise<void> {
+  await page.goto(`/i/${inviteCode}`);
+  await joinFromTheInvite(page);
 }

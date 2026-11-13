@@ -6,6 +6,11 @@
   margin-bottom: var(--space-7);
 }
 
+:host(.pop-compact) {
+  width: auto;
+  margin-bottom: 0;
+}
+
 .pop {
   position: relative;
   display: grid;

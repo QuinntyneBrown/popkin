@@ -72,6 +72,13 @@ export const routes: Routes = [
     title: 'How should people know you? · Popkin',
   },
   {
+    path: 'i/:code/welcome',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/youre-in/youre-in.page').then((m) => m.YoureInPage),
+    data: data({ shell: 'bare', page: 'youre-in' }),
+    title: 'You’re in · Popkin',
+  },
+  {
     path: 'error',
     loadComponent: () =>
       import('./pages/server-error/server-error.page').then((m) => m.ServerErrorPage),
