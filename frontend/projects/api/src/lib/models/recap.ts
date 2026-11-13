@@ -33,7 +33,7 @@ export interface RecapView {
   photoCount: number;
   /** At most three; none once the photos were removed. */
   photos: { id: string; thumbnailUrl: string }[];
-  /** At most four, the Host first. */
+  /** At most five, the Host first. */
   avatars: AvatarView[];
   topRated: {
     experienceId: string;
