@@ -38,6 +38,8 @@ export interface RecapView {
   topRated: {
     experienceId: string;
     title: string;
+    /** An address that expires; null for an experience without a picture. */
+    pictureUrl: string | null;
     average: number;
     ratingCount: number;
     sharedBy: { firstName: string };

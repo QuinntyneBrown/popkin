@@ -32,6 +32,7 @@ function recap(extra: Partial<RecapView> = {}): RecapView {
     topRated: {
       experienceId: 'canoe',
       title: 'Sunrise canoe to Heron Point',
+      pictureUrl: '/e/canoe?sig=1',
       average: 4.7,
       ratingCount: 11,
       sharedBy: { firstName: 'Mara' },
@@ -129,6 +130,7 @@ describe('RecapStore', () => {
       topRated: {
         experienceId: 'canoe',
         title: 'Sunrise canoe to Heron Point',
+        photo: '/e/canoe?sig=1',
         score: '4.7',
         by: 'shared by Mara',
       },
@@ -211,9 +213,9 @@ describe('RecapStore', () => {
         zip({ status: 'Ready', photosDone: 48, downloadUrl: '/z/x?sig=1' }),
       ];
       store.saveAlbum();
-      expect(store.saving()).toEqual({ label: 'Preparing 0 of 48', value: 0, max: 48 });
+      expect(store.saving()).toEqual({ label: 'Preparing 0 of 48', percent: 0 });
       vi.advanceTimersByTime(1000);
-      expect(store.saving()).toEqual({ label: 'Preparing 12 of 48', value: 12, max: 48 });
+      expect(store.saving()).toEqual({ label: 'Preparing 12 of 48', percent: 25 });
       vi.advanceTimersByTime(1000);
       expect(store.saving()).toBeNull();
       expect(downloads).toEqual(['/z/x?sig=1']);

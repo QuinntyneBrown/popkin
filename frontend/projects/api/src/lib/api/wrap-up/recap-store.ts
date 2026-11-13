@@ -30,7 +30,13 @@ export interface RecapScreen {
   more: number;
   people: string;
   stats: { value: string; label: string }[];
-  topRated: { experienceId: string; title: string; score: string; by: string } | null;
+  topRated: {
+    experienceId: string;
+    title: string;
+    photo: string | null;
+    score: string;
+    by: string;
+  } | null;
   isHost: boolean;
   /** There are photos to save. */
   canSave: boolean;
@@ -74,6 +80,7 @@ export class RecapStore {
       topRated: recap.topRated && {
         experienceId: recap.topRated.experienceId,
         title: recap.topRated.title,
+        photo: recap.topRated.pictureUrl,
         score: recap.topRated.average.toFixed(1),
         by: topRatedBy(recap.topRated.sharedBy.firstName),
       },
@@ -82,14 +89,13 @@ export class RecapStore {
       photosGo: recap.photosRemovedAt ? null : photosGo(recap.photosRemoveAt, new Date()),
     };
   });
-  /** The album's zip while it is prepared; null otherwise. */
+  /** The album's zip while it is prepared, with how far it is in hundredths; null otherwise. */
   readonly saving = computed(() => {
     const zip = this.zip();
     return zip
       ? {
           label: exportProgress(zip.photosDone, zip.photosTotal),
-          value: zip.photosDone,
-          max: zip.photosTotal,
+          percent: zip.photosTotal ? Math.round((zip.photosDone / zip.photosTotal) * 100) : 0,
         }
       : null;
   });

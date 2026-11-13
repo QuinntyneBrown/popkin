@@ -1,3 +1,103 @@
-<div pk-screen>
-  <h1 class="visually-hidden">Recap</h1>
-</div>
+@if (store.state() === 'error') {
+  <div pk-screen surface="wash" [accent]="accent()">
+    <header pk-top-bar slot="header" back="/popkins" backLabel="My Popkins"></header>
+    <h1 class="visually-hidden">Recap</h1>
+    <div
+      pk-empty-state
+      icon="offline"
+      heading="We couldn’t load the recap"
+      text="It’s all still there. Check your connection and try again."
+      [alert]="true"
+    >
+      <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+        <svg pk-icon name="retry" size="md"></svg>Try again
+      </button>
+      <a pk-button variant="secondary" size="md" routerLink="/popkins">My Popkins</a>
+    </div>
+  </div>
+} @else {
+  <div pk-screen surface="wash" body="recap" [accent]="accent()">
+    <ng-container slot="header">
+      <header pk-top-bar back="/popkins" backLabel="My Popkins"></header>
+      @if (view()?.photosGo; as going) {
+        <div
+          pk-banner
+          variant="warning"
+          icon="photos"
+          action="Save"
+          [heading]="going.lead"
+          [text]="going.text"
+          (acted)="store.saveAlbum()"
+        ></div>
+      }
+    </ng-container>
+    @if (view(); as view) {
+      <div
+        pk-recap
+        heading="This Popkin wrapped up. What a time."
+        [photos]="view.photos"
+        [emoji]="view.emoji"
+        [line]="view.line"
+        [avatars]="avatars()"
+        [more]="view.more"
+        [people]="view.people"
+        [stats]="view.stats"
+        [moment]="moment()"
+      >
+        @if (store.saving(); as saving) {
+          <button
+            pk-button
+            type="button"
+            variant="popkin"
+            [block]="true"
+            [busy]="true"
+            [disabled]="true"
+          >
+            Preparing the album…
+          </button>
+          <div
+            pk-progress
+            label="Preparing the album"
+            [value]="saving.percent"
+            [text]="saving.label"
+          ></div>
+        } @else if (view.canSave) {
+          <button
+            pk-button
+            type="button"
+            variant="popkin"
+            [block]="true"
+            (click)="store.saveAlbum()"
+          >
+            <svg pk-icon name="download" size="md"></svg>Save the album
+          </button>
+        }
+        @if (view.isHost) {
+          <a
+            pk-button
+            variant="secondary"
+            routerLink="/new"
+            [block]="true"
+            [queryParams]="{ crew: popkinId() }"
+          >
+            Pop up another with this crew
+          </a>
+        } @else {
+          <a pk-button variant="secondary" routerLink="/new" [block]="true">
+            Start your own Popkin
+          </a>
+        }
+        <a
+          pk-button
+          variant="quiet"
+          [block]="true"
+          [routerLink]="['/p', popkinId(), 'chat', 'everyone']"
+        >
+          Read the chat
+        </a>
+      </div>
+    } @else {
+      <div pk-recap [loading]="true"></div>
+    }
+  </div>
+}

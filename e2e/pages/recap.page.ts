@@ -24,8 +24,11 @@ export class RecapPage {
   readonly firstStat: Locator;
   /** The top-rated moment; absent when nothing was rated. */
   readonly moment: Locator;
+  readonly momentLink: Locator;
   readonly actions: Locator;
   readonly saveTheAlbum: Locator;
+  /** The same button while the album is prepared. */
+  readonly preparing: Locator;
   /** The album being prepared: "Preparing 12 of 48". */
   readonly progress: Locator;
   readonly progressText: Locator;
@@ -59,8 +62,11 @@ export class RecapPage {
     this.statValues = this.stats.locator('.stat__value');
     this.firstStat = this.stats.locator('> div').first();
     this.moment = this.recap.locator('.recap__moment');
+    // The card is the link.
+    this.momentLink = this.moment;
     this.actions = this.recap.locator('.recap__actions');
     this.saveTheAlbum = this.actions.getByRole('button', { name: 'Save the album' });
+    this.preparing = this.actions.getByRole('button', { name: 'Preparing the album…' });
     this.progress = this.actions.getByRole('progressbar');
     this.progressText = this.actions.getByText(/^Preparing \d/);
     this.popUpAnother = this.actions.getByRole('link', { name: 'Pop up another with this crew' });
@@ -68,12 +74,19 @@ export class RecapPage {
     this.readTheChat = this.actions.getByRole('link', { name: 'Read the chat' });
     this.photosGo = page.locator('.banner--warning');
     this.save = this.photosGo.locator('.banner__action');
-    this.loading = page.getByRole('status');
+    this.loading = page.locator('.recap-skeleton').getByRole('status');
     this.skeletons = this.main
       .locator('[aria-hidden="true"]')
       .filter({ has: page.locator('.skeleton') })
       .first();
     this.error = this.main.locator('.empty');
     this.tryAgain = this.error.locator('.btn--primary');
+  }
+
+  /** Whether the collage sits beside the numbers and actions, as it does from 1024 px. */
+  async sideBySide(): Promise<boolean> {
+    const lead = await this.lead.boundingBox();
+    const rest = await this.rest.boundingBox();
+    return !!lead && !!rest && rest.x >= lead.x + lead.width - 1;
   }
 }

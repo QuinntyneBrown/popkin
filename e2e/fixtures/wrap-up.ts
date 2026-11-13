@@ -63,16 +63,20 @@ export class WrapUp {
       { id: '00000000-0000-4000-a000-000000000002', thumbnailUrl: '/photos/bonfire.jpg' },
       { id: '00000000-0000-4000-a000-000000000003', thumbnailUrl: '/photos/hike.jpg' },
     ],
-    avatars: [people.mara, people.walt, people.dev, people.ruth].map((person) => person.avatar),
+    avatars: [people.mara, people.walt, people.dev, people.ellie, people.ruth].map(
+      (person) => person.avatar,
+    ),
     topRated: {
       experienceId: '00000000-0000-4000-a000-000000000081',
       title: 'Sunrise canoe to Heron Point',
+      pictureUrl: '/photos/lake.jpg',
       average: 4.7,
       ratingCount: 11,
       sharedBy: { firstName: 'Mara' },
     } as {
       experienceId: string;
       title: string;
+      pictureUrl: string | null;
       average: number;
       ratingCount: number;
       sharedBy: { firstName: string };
@@ -89,6 +93,7 @@ export class WrapUp {
   private readonly broken = new Set<WrapUpCall>();
   private readonly held = new Map<WrapUpCall, Promise<void>>();
   private step = 0;
+  private stranger = false;
 
   constructor(
     private readonly page: Page,
@@ -139,6 +144,12 @@ export class WrapUp {
     this.recap = { ...this.recap, isHost: false };
   }
 
+  /** Whoever looks is not a member: nothing of the Popkin answers them. */
+  notAMember(): void {
+    this.stranger = true;
+    this.home.fail('popkin', 'not-found');
+  }
+
   /** The Popkin has wrapped up: the home, the thread and the recap all say so. */
   wrap(keepPhotos = true, at: Date = sundayEvening): void {
     const photosRemoveAt = keepPhotos ? null : new Date(at.getTime() + 30 * DAY_MS).toISOString();
@@ -168,6 +179,10 @@ export class WrapUp {
 
   private async gate(route: Route, call: WrapUpCall): Promise<boolean> {
     await this.held.get(call);
+    if (this.stranger) {
+      await this.refuse(route, 404, 'popkin_not_found');
+      return false;
+    }
     if (!this.broken.has(call)) return true;
     await this.refuse(route, 500, 'server_error');
     return false;
