@@ -136,9 +136,28 @@ class FakeChat implements ChatApi {
     return of({ items: all.slice(at(cursor.from), at(cursor.to) + 1), hasMore: false });
   }
 
-  send(_p: string, _t: string, clientMessageId: string, text: string): Observable<MessageView> {
+  /** The message each send replied to, if any. */
+  readonly replies: (string | undefined)[] = [];
+
+  send(
+    _p: string,
+    _t: string,
+    clientMessageId: string,
+    text: string,
+    replyTo?: string,
+  ): Observable<MessageView> {
     this.sends.push(text);
-    return of(message(900 + this.sends.length, 'Mara', { clientMessageId, text }));
+    this.replies.push(replyTo);
+    const target = this.stored.find((m) => m.id === replyTo);
+    const quote = target
+      ? {
+          messageId: target.id,
+          authorFirstName: target.author.firstName,
+          snippet: target.text.split('\n')[0],
+          deleted: false,
+        }
+      : null;
+    return of(message(900 + this.sends.length, 'Mara', { clientMessageId, text, quote }));
   }
 
   discard(): Observable<void> {
@@ -502,6 +521,56 @@ describe('ThreadStore', () => {
     it('sends nothing for white space', () => {
       store.send('   ');
       expect(chat.sends).toEqual([]);
+    });
+  });
+
+  describe('replying (L2-025)', () => {
+    beforeEach(() => {
+      chat.stored = [
+        message(1, 'Ellie', { text: 'Can someone grab the paddles?\nThey are in the shed' }),
+      ];
+      store.open('p');
+    });
+
+    it('says whom the reply is to, with one line of their message (AC1)', () => {
+      store.startReply('id-0001');
+      expect(store.replyingTo()).toEqual({
+        messageId: 'id-0001',
+        firstName: 'Ellie',
+        snippet: 'Can someone grab the paddles?',
+        deleted: false,
+      });
+    });
+
+    it('sends the reply with what it answers, shows its quote at once, and is done (AC2)', () => {
+      store.startReply('id-0001');
+      store.send('On it');
+      expect(chat.replies).toEqual(['id-0001']);
+      expect(store.replyingTo()).toBeNull();
+      const sent = store.rows().find((row) => row.kind === 'message' && row.text === 'On it');
+      expect(sent?.kind === 'message' && sent.quote?.firstName).toBe('Ellie');
+    });
+
+    it('sends a plain message once the reply is cancelled', () => {
+      store.startReply('id-0001');
+      store.cancelReply();
+      store.send('Nothing to do with it');
+      expect(store.replyingTo()).toBeNull();
+      expect(chat.replies).toEqual([undefined]);
+    });
+
+    it('cuts a long line to 120 characters', () => {
+      chat.stored = [message(2, 'Walt', { text: 'x'.repeat(200) })];
+      store.open('p');
+      store.startReply('id-0002');
+      expect(store.replyingTo()?.snippet).toHaveLength(120);
+    });
+
+    it('does not reply in a Popkin that has wrapped up', () => {
+      chat.thread = { ...thread, readOnly: true };
+      store.open('p');
+      store.startReply('id-0001');
+      expect(store.replyingTo()).toBeNull();
     });
   });
 

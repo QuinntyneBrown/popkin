@@ -4,6 +4,7 @@ import { MessageView } from '../../models/chat';
 import { toApiProblem } from '../problem';
 import { CHAT_API } from './chat-api';
 import { NETWORK_STATUS } from './network-status';
+import type { ReplyQuote } from './thread-rows';
 
 /** A message the server has not confirmed yet, as the device keeps it (L2-028). */
 export interface OutboxEntry {
@@ -17,6 +18,8 @@ export interface OutboxEntry {
   failure?: 'network' | 'rejected' | 'rate_limited';
   /** ISO date-time the member wrote it. */
   createdAt: string;
+  /** The message it replies to, as its quote shows it (L2-025). */
+  replyTo?: ReplyQuote;
 }
 
 /** Where the outbox is kept on the device, so a reload loses nothing. */
@@ -63,7 +66,7 @@ export class MessageOutbox {
     return this.held().filter((entry) => entry.threadId === threadId);
   }
 
-  enqueue(popkinId: string, threadId: string, text: string): OutboxEntry {
+  enqueue(popkinId: string, threadId: string, text: string, replyTo?: ReplyQuote): OutboxEntry {
     const entry: OutboxEntry = {
       clientMessageId: crypto.randomUUID(),
       popkinId,
@@ -71,6 +74,7 @@ export class MessageOutbox {
       text,
       state: this.network.online() ? 'Sending' : 'Waiting',
       createdAt: new Date().toISOString(),
+      ...(replyTo ? { replyTo } : {}),
     };
     this.update((entries) => [...entries, entry]);
     this.pump(threadId);
@@ -116,7 +120,7 @@ export class MessageOutbox {
 
     this.inFlight.add(threadId);
     this.chat
-      .send(next.popkinId, threadId, next.clientMessageId, next.text)
+      .send(next.popkinId, threadId, next.clientMessageId, next.text, next.replyTo?.messageId)
       .pipe(timeout(SEND_TIMEOUT_MS))
       .subscribe({
         next: (message) => {

@@ -132,7 +132,7 @@ export function threadRows(
       time: messageTime(createdAt),
       state: SHOWN_AS[entry.state],
       reactions: [],
-      quote: null,
+      quote: entry.replyTo ?? null,
     });
     lastAuthor = viewerMembershipId;
   }

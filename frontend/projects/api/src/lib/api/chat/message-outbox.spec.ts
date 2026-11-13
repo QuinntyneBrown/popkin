@@ -25,12 +25,23 @@ class MemoryStorage implements OutboxStorage {
 
 /** Answers each send when the test says so, and records what was asked. */
 class FakeChat implements Partial<ChatApi> {
-  readonly sends: { text: string; clientMessageId: string; answer: Subject<MessageView> }[] = [];
+  readonly sends: {
+    text: string;
+    clientMessageId: string;
+    replyTo?: string;
+    answer: Subject<MessageView>;
+  }[] = [];
   readonly discards: string[] = [];
 
-  send(_popkinId: string, threadId: string, clientMessageId: string, text: string) {
+  send(
+    _popkinId: string,
+    threadId: string,
+    clientMessageId: string,
+    text: string,
+    replyTo?: string,
+  ) {
     const answer = new Subject<MessageView>();
-    this.sends.push({ text, clientMessageId, answer });
+    this.sends.push({ text, clientMessageId, replyTo, answer });
     return answer.asObservable();
   }
 
@@ -152,6 +163,18 @@ describe('MessageOutbox (L2-028)', () => {
     expect(states()).toEqual(['one:Sending', 'two:Sending']);
     chat.succeed(1);
     expect(chat.sends[2].text).toBe('two');
+  });
+
+  it('sends a reply with the message it answers, and again on a retry (L2-025)', () => {
+    const quote = { messageId: 'id-7', firstName: 'Ellie', snippet: 'Paddles?', deleted: false };
+    const reply = outbox.enqueue('p', 't', 'On it', quote);
+    expect(outbox.entries()[0].replyTo).toEqual(quote);
+    expect(chat.sends[0].replyTo).toBe('id-7');
+    chat.fail(0, 0);
+
+    outbox.retry(reply.clientMessageId);
+
+    expect(chat.sends[1].replyTo).toBe('id-7');
   });
 
   it('deletes a message that failed, on the server too in case the answer was lost', () => {

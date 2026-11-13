@@ -24,7 +24,7 @@ import { toApiProblem } from '../problem';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { CHAT_API } from './chat-api';
 import { MessageOutbox } from './message-outbox';
-import { ThreadRow, mergeMessages, threadRows } from './thread-rows';
+import { ReplyQuote, ThreadRow, mergeMessages, threadRows } from './thread-rows';
 import { announcement } from './thread-text';
 import { UnreadTracker } from './unread-tracker';
 
@@ -62,6 +62,7 @@ export class ThreadStore {
   private readonly today = signal(new Date());
   private readonly addedTo = new Subject<'mine' | 'theirs'>();
   private readonly failed = new Subject<ThreadFailure>();
+  private readonly reply = signal<ReplyQuote | null>(null);
 
   /** The other member of the direct message that is open; none for Everyone. */
   private memberId?: string;
@@ -79,6 +80,8 @@ export class ThreadStore {
   readonly hereNow = this.here.asReadonly();
   /** A message was added at the end: the member's own, or someone else's. */
   readonly added$: Observable<'mine' | 'theirs'> = this.addedTo.asObservable();
+  /** The message the member is replying to, for the bar above the field (L2-025 AC1). */
+  readonly replyingTo = this.reply.asReadonly();
   /** A reaction or a deletion that did not save, after what it changed is put back. */
   readonly failures$: Observable<ThreadFailure> = this.failed.asObservable();
 
@@ -228,8 +231,26 @@ export class ThreadStore {
     const trimmed = text.trim();
     if (!thread || !trimmed || thread.readOnly) return;
     this.today.set(new Date());
-    this.outbox.enqueue(thread.popkinId, thread.id, trimmed);
+    this.outbox.enqueue(thread.popkinId, thread.id, trimmed, this.reply() ?? undefined);
+    this.reply.set(null);
     this.addedTo.next('mine');
+  }
+
+  /** The next message sent replies to this one, with its first name and one line (L2-025). */
+  startReply(messageId: string): void {
+    const thread = this.header();
+    const message = this.messages().find((shown) => shown.id === messageId);
+    if (!thread || thread.readOnly || !message || message.kind !== 'Member') return;
+    this.reply.set({
+      messageId,
+      firstName: message.author.firstName,
+      snippet: firstLine(message.text),
+      deleted: false,
+    });
+  }
+
+  cancelReply(): void {
+    this.reply.set(null);
   }
 
   /**
@@ -398,4 +419,9 @@ function toggled(
   );
   if (adding && !found) changed.push({ emoji, membershipIds: [me] });
   return changed.filter((r) => r.membershipIds.length > 0);
+}
+
+/** The first line of a message, at most 120 characters, as the server quotes it. */
+function firstLine(text: string): string {
+  return (text.split('\n')[0] ?? '').slice(0, 120);
 }
