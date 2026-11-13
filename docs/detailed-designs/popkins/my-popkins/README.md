@@ -67,8 +67,8 @@ Popkins.
   addresses are built.
 - **Wrapped-up row** — a row of `pk-wrapped-list`: the muted emoji tile, the name, "Wrapped
   {Mon d} · {n} people · {n} photos" and a "Recap" label (L2-018 AC1). It links to
-  `/p/:popkinId/recap` (AC2), the screen of journey 9; until that journey the link reaches the
-  not-found screen. The section is rendered only when the list is not empty (AC3).
+  `/p/:popkinId/recap` (AC2), the recap, built in journey 9
+  ([Recap](../../wrap-up/recap/README.md)). The section is rendered only when the list is not empty (AC3).
 - **Empty state** — `pk-empty-state` explains what a Popkin is, with "Start a Popkin" (`/new`)
   and "Scan to join" (opens `ScanToJoinDialog`, `invitations/join-by-code`) (L2-017 AC6).
 - **Loading** — `pk-popkin-skeleton`: skeleton cards the size of real cards, hidden from
@@ -140,7 +140,7 @@ Popkins.
 ### Built in journey 6
 
 Everything above except what it names as waiting: `AddressUrl` and the full page load to an
-address (the addresses rework), the recap behind a wrapped-up row (journey 9), the account
+address (the addresses rework), the recap behind a wrapped-up row (built since, in journey 9), the account
 screen behind the avatar (journey 17), direct messages in the unread count (journey 11) and the
 clearing of the snapshot at sign out (journey 17).
 

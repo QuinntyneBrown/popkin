@@ -18,6 +18,8 @@ export interface PopkinRealtime {
   readonly threadRead$: Observable<string>;
   readonly presenceChanged$: Observable<{ popkinId: string; version: number; hereNow: number }>;
   readonly memberJoined$: Observable<{ popkinId: string; member: MemberJoinedView }>;
+  /** A Popkin wrapped up, by its Host; the id of the Popkin (L2-044 AC4). */
+  readonly popkinWrappedUp$: Observable<string>;
   /** Photos were added to a Popkin's album (L2-031 AC7). */
   readonly photosAdded$: Observable<{ popkinId: string; photoIds: string[] }>;
   /** Who is on a Popkin's group call changed; `version` orders these (L2-029 AC2). */

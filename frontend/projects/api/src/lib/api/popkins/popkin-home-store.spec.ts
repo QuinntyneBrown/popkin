@@ -25,6 +25,10 @@ const home: PopkinHomeView = {
   emoji: '🏕️',
   colour: 'Teal',
   status: 'Active',
+  wrappedUpAt: null,
+  keepPhotos: true,
+  photosRemoveAt: null,
+  photosRemovedAt: null,
   endsAt: new Date(2026, 8, 13, 18, 0).toISOString(),
   memberCount: 14,
   avatars: [avatar],
@@ -86,6 +90,7 @@ describe('PopkinHomeStore', () => {
     memberJoined$: new Subject<{ popkinId: string; member: MemberJoinedView }>(),
     photosAdded$: new Subject<{ popkinId: string; photoIds: string[] }>(),
     reconnected$: new Subject<void>(),
+    popkinWrappedUp$: new Subject<string>(),
     started: 0,
     start() {
       this.started++;
@@ -139,6 +144,21 @@ describe('PopkinHomeStore', () => {
     it('opens the connection, so the home hears what happens', () => {
       store.open('p');
       expect(realtime.started).toBe(1);
+    });
+
+    it('is wrapped up for a Popkin that has ended: its recap is the place to be', () => {
+      api.home = { ...(api.home as PopkinHomeView), status: 'WrappedUp' };
+      store.open('p');
+      expect(store.state()).toBe('wrapped-up');
+    });
+
+    it('warns in the last hour, until dismissed', () => {
+      const home = api.home as PopkinHomeView;
+      vi.setSystemTime(new Date(new Date(home.endsAt as string).getTime() - 42 * 60_000));
+      store.open('p');
+      expect(store.warning()?.lead).toBe('42 min left.');
+      store.dismissWarning();
+      expect(store.warning()).toBeNull();
     });
 
     it('is not found for someone who is not a member', () => {

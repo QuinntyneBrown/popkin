@@ -17,31 +17,40 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first eight journeys are built; the rest is designed.** Journey 1, Start a Popkin, journey
+**The first nine journeys are built; the rest is designed.** Journey 1, Start a Popkin, journey
 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin home, journey 5, Share
-photos, journey 6, Come back, journey 7, Group call, and journey 8, Rate an experience, run end
-to end: the backend has sign up and sign in with a code, sessions, Popkin creation, the list of
-a person's Popkins, the invite preview, joining with a name and a photo, the photo store behind
-avatars, the Everyone thread, messages, read points, presence, the SignalR hub `PopkinHub` and
-the reads of the Popkin home (the header, the chat preview, the members, the photos summary, and
-the experiences summary), adding a photo, the album and one photo, the group call (starting,
-joining and leaving it, the call under way, each participant's microphone and camera, the relay
-of signals through the hub and the media relay's credentials), experiences (sharing one with a
-picture, the list and its filter, one experience with the group's score, rating it, commenting
-on it, editing and deleting it), with their migrations; the app has the screens of those
-journeys, the group chat screen, the Popkin home, the photo album and the photo view, the
-sign-in screen, My Popkins, the call screen, Experiences and the experience page among them,
-built for the five form factors of L2-058, the invite dialog, the Add photos dialog, the Scan to
-join dialog, the dialogs of an experience (Share an experience, Add a comment, its actions and
-its deletion), and the not-found, server-error and offline screens; the `components` library
-holds the `pk-*` components they use, each with a parity spec; the `api` library has the chat's
-stores, the home's store, the album's stores, the store of My Popkins and its saved list, the QR
-scanner, the call session, its peer links (a mesh, ADR 0014) and the call banner's store, the
-stores of Experiences and of one experience, and the real-time client, with unit tests of its
-stores and pure helpers. Everything else exists as documents, not code: the requirements
-(`docs/specs/L1.md` and `L2.md`), a mock of every screen in every state (`docs/mocks/`), the
-design system (`docs/design-system/`), a detailed design per feature (`docs/detailed-designs/`)
-and a prompt per journey (`docs/prompts/`). The Worker hosts no job. `docs/estimates/` tracks
+photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an experience, and journey
+9, Wrap up, run end to end: the backend has sign up and sign in with a code, sessions, Popkin
+creation, the list of a person's Popkins, the invite preview, joining with a name and a photo,
+the photo store behind avatars, the Everyone thread, messages, read points, presence, the
+SignalR hub `PopkinHub` and the reads of the Popkin home (the header, the chat preview, the
+members, the photos summary, and the experiences summary), adding a photo, the album and one
+photo, the group call (starting, joining and leaving it, the call under way, each participant's
+microphone and camera, the relay of signals through the hub and the media relay's credentials),
+experiences (sharing one with a picture, the list and its filter, one experience with the
+group's score, rating it, commenting on it, editing and deleting it), wrapping up (the Host's wrap-up and what it will count, the
+wrap-up of a Popkin whose time is up, the refusal of every write to a wrapped-up Popkin with
+`409` `popkin_wrapped_up`, the end of the call under way, the hub event `PopkinWrappedUp`, the
+recap, the album export as a zip, the removal of an album that was not kept, and the crew
+invites), with their migrations; the Worker hosts three jobs (`WrapUpDuePopkinsJob`,
+`RemovePhotosOfWrappedUpPopkinsJob`, `PrepareAlbumExportsJob`) and sends no hub events
+(ADR 0015); the app has the screens of those journeys, the group chat screen, the Popkin home,
+the photo album and the photo view, the sign-in screen, My Popkins, the call screen,
+Experiences, the experience page, the wrap-up screen and the recap among them, built for the
+five form factors of L2-058, the read-only chat, Photos and Experiences of a wrapped-up Popkin,
+the banner of a Popkin's last hour, the invite dialog, the Add photos dialog, the Scan to join
+dialog, the dialogs of an experience (Share an experience, Add a comment, its actions and its
+deletion), the Popkin settings dialog (Invite people, and Wrap up for the Host), and the
+not-found, server-error and offline screens; the `components` library holds the `pk-*`
+components they use, each with a parity spec; the `api` library has the chat's stores, the
+home's store, the album's stores, the store of My Popkins and its saved list, the QR scanner,
+the call session, its peer links (a mesh, ADR 0014) and the call banner's store, the stores of
+Experiences and of one experience, the recap's store (`RecapStore`, behind `RECAP_API`), the
+wrap-up watch (`WrapUpWatch`) and the wrap-up text (`wrap-up-text.ts`), and the real-time
+client, with unit tests of its stores and pure helpers. Everything else exists as documents,
+not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of every screen in every
+state (`docs/mocks/`), the design system (`docs/design-system/`), a detailed design per feature
+(`docs/detailed-designs/`) and a prompt per journey (`docs/prompts/`). `docs/estimates/` tracks
 how far each design is; read it, not this paragraph, for the current figure.
 
 Before building a feature, read its requirement, its detailed design and its mocks: they exist.
@@ -82,7 +91,8 @@ say so and propose the correction; do not work around it silently.
 - `docs/personas/` — invented people who come across Popkin, one folder each: who they are,
   their journeys, and their feedback
 - `docs/journeys.md`, `docs/prompts/` — the user journeys and one implementation prompt per journey
-- `eng/` — local engineering scripts (`Test-Backend.ps1`, `Start-E2eApi.ps1`)
+- `eng/` — local engineering scripts (`Test-Backend.ps1`, `Start-E2eApi.ps1`,
+  `Start-E2eWorker.ps1`)
 - `docs/videos/` — narrated videos, one folder each; `tools/` holds the scripts that build them
 
 ```
@@ -105,7 +115,7 @@ popkin/
 │       ├── Popkin.Api.Tests/
 │       ├── Popkin.Application.Tests/
 │       ├── Popkin.Infrastructure.Tests/   empty until its first test
-│       ├── Popkin.Worker.Tests/           empty until its first test
+│       ├── Popkin.Worker.Tests/
 │       └── Popkin.Cli.Tests/
 ├── frontend/
 │   ├── angular.json
@@ -144,7 +154,8 @@ Layer dependency direction (strict):
 - `Popkin.Application` — MediatR handlers, validators, DTO contracts, `IAppDbContext`
 - `Popkin.Infrastructure` — `AppDbContext`, EF configurations and migrations, SQL Server / SQLite, auth services
 - `Popkin.Api` — controllers, `Program.cs`, DI composition, Swagger, middleware
-- `Popkin.Worker` — background jobs
+- `Popkin.Worker` — background jobs. A job is the loop alone: on each tick it sends one MediatR
+  request, and the handler holds the rules. The Worker sends no hub events (ADR 0015)
 - `Popkin.Cli` — the `popkin` tool: `migrate` / `seed` / `reset`, added with the first migration
 
 Non-obvious rules:

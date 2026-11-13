@@ -71,6 +71,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .screen--stage { --color-focus-ring: var(--color-focus-ring-on-stage); background: var(--color-bg-stage); color: var(--color-fg-on-stage); border-color: transparent; }
 .screen__body { flex: 1; display: flex; flex-direction: column; padding: var(--space-4) var(--space-6) var(--space-6); min-width: 0; }
 .screen__body--flush { padding-inline: 0; }
+.screen__body--tiled { padding-top: 0; } /* a screen about one Popkin, its tile above the heading: wrap up */
+.screen__body--recap { padding: 0 var(--space-5) var(--space-8); } /* the recap's body */
+.screen__notice { margin-top: var(--space-5); } /* what went wrong, between the lead and the content */
 .screen__body--center { justify-content: center; align-items: center; text-align: center; }
 .screen__body--hero { padding-top: var(--space-10); align-items: center; text-align: center; } /* a celebration screen: the created screen */
 .screen__content--headed { margin-top: var(--space-8); } /* the content under a screen's h1 and lead */
@@ -209,6 +212,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .setting-row__sub { display: block; font: var(--text-body-sm); color: var(--color-fg-muted); }
 .icon-tile { display: grid; place-items: center; width: var(--space-10); height: var(--space-10); flex: none; border-radius: var(--radius-md); background: var(--color-bg-subtle); color: var(--color-fg-default); }
 .fact { display: flex; gap: var(--space-4); }
+.facts { display: flex; flex-direction: column; gap: var(--space-5); } /* the list of facts */
 .fact__title { font-weight: var(--font-weight-bold); }
 .fact__body { margin-top: var(--space-0-5); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
 
@@ -505,6 +509,8 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .polaroids img:nth-child(2) { right: 0; top: var(--space-4); rotate: 7deg; }
 .polaroids img:nth-child(3) { left: 50%; top: 0; width: var(--space-40); height: var(--space-40); translate: -50% 0; rotate: -1deg; }
 .polaroids .popkin-tile { position: absolute; left: 50%; bottom: 0; translate: -50% 0; }
+.polaroids--empty { display: grid; place-items: center; height: auto; } /* no photo was shared: the emoji stands alone */
+.polaroids--empty .popkin-tile { position: static; translate: none; }
 .stat-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-top: var(--space-5); padding-top: var(--space-5); border-top: var(--border-width-hairline) solid var(--color-border-default); }
 .stat__value { font: var(--font-weight-black) var(--font-size-5xl) / 1 var(--font-family-display); font-variant-numeric: tabular-nums; }
 .stat__label { margin-top: var(--space-1); font: var(--text-body-sm); color: var(--color-fg-muted); }
@@ -584,6 +590,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .progress { height: var(--space-2); overflow: hidden; border-radius: var(--radius-full); background: var(--color-bg-subtle); }
 .progress span { display: block; height: 100%; border-radius: var(--radius-full); background: var(--accent); }
 .progress--62 span { width: 62%; }
+.progress--25 span { width: 25%; }
 .spinner { width: var(--space-10); height: var(--space-10); border: var(--border-width-ring) solid var(--color-bg-stage-control-strong); border-top-color: var(--color-fg-on-stage); border-radius: var(--radius-full); animation: spin var(--duration-deliberate) linear infinite; }
 
 /* ---------- Landing page -------------------------------------------------------------- */
@@ -985,9 +992,16 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .recap .polaroids { width: var(--layout-polaroids-width-l); height: var(--layout-polaroids-height-l); }
   .recap .polaroids img { width: var(--layout-polaroid-l); height: var(--layout-polaroid-l); }
   .recap .polaroids img:nth-child(3) { width: var(--layout-polaroid-centre-l); height: var(--layout-polaroid-centre-l); }
+  .recap .polaroids--empty { height: auto; }
   .recap__lead h1 { font-size: var(--font-size-5xl); }
   .recap__rest > :first-child { margin-top: 0 !important; }
 }
+/* The recap's parts by name. */
+.recap__headline { margin-top: var(--space-5); text-align: center; }
+.recap__card { margin-top: var(--space-7); padding: var(--space-5); }
+.recap__people { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); font-weight: var(--font-weight-semibold); font-size: var(--font-size-md-minus); }
+.recap__moment { margin-top: var(--space-3); }
+.recap__actions { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-7); }
 @media (min-width: 80rem) { .recap { gap: var(--space-24); max-width: var(--layout-recap-max-xl); } }
 
 /* The stage: a call fills the screen and lists who is on it from XL; a photo gets a side panel from L. */

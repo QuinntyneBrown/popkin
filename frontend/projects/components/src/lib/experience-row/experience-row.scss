@@ -52,3 +52,20 @@
   font: var(--font-weight-extrabold) var(--font-size-md) / var(--line-height-snug)
     var(--font-family-display);
 }
+
+/* The recap's top-rated moment: a card of its own, with a label above the title. */
+:host(.card--moment) {
+  margin: 0;
+  padding: var(--space-4);
+}
+
+.card__kicker {
+  display: block;
+  color: var(--accent-text);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm-plus);
+}
+
+:host(.card--moment) .row__title {
+  font-size: var(--font-size-md-plus);
+}

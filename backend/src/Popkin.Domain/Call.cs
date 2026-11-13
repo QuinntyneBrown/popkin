@@ -55,4 +55,24 @@ public sealed class Call
             EndedAt = now;
         }
     }
+
+    /// <summary>
+    /// Ends the call for everyone on it, because its Popkin wrapped up: no call outlives its
+    /// Popkin (L2-045 AC1).
+    /// </summary>
+    public void End(IEnumerable<CallParticipant> on, DateTimeOffset now)
+    {
+        foreach (var participant in on)
+        {
+            if (participant.CallId != Id)
+            {
+                throw new ArgumentException("A participant is on another call.", nameof(on));
+            }
+
+            participant.Leave(now);
+        }
+
+        Version++;
+        EndedAt = now;
+    }
 }

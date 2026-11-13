@@ -120,7 +120,8 @@ home's header and by "Invite people" in the empty Chat card:
 
 What waits, and for what:
 
-- the entry "Invite people" in the Popkin settings menu: journey 9, Wrap up, which adds the menu;
+- the entry "Invite people" in the Popkin settings menu was built in journey 9, Wrap up, which
+  added the menu ([Popkin settings](../../popkins/popkin-settings/README.md));
 - the link on the Popkin's address (L2-065 AC1, AC3): `Addresses:BaseDomain` and
   `PopkinUrlBuilder` are not built. The endpoint still builds the link from `Invites:BaseUrl`,
   and the dialog shows and copies that link. It waits for addresses (known gaps 18 and 20);

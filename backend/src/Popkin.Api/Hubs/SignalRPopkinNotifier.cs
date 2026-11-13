@@ -41,6 +41,9 @@ public sealed class SignalRPopkinNotifier(
     public Task CallEnded(Guid popkinId, Guid callId) =>
         SendAsync(nameof(IPopkinClient.CallEnded), () => Group(popkinId).CallEnded(popkinId, callId));
 
+    public Task PopkinWrappedUp(Guid popkinId) =>
+        SendAsync(nameof(IPopkinClient.PopkinWrappedUp), () => Group(popkinId).PopkinWrappedUp(popkinId));
+
     public Task ParticipantJoined(Guid callId, CallParticipantDto participant) =>
         SendAsync(nameof(IPopkinClient.ParticipantJoined), () => Call(callId).ParticipantJoined(callId, participant));
 

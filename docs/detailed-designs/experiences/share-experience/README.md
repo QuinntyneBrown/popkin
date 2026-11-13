@@ -173,9 +173,11 @@ Everything above. Decided in the build:
 
 Gaps found, each in [the register](../../README.md#known-gaps):
 
-- "Share one" is still offered in a wrapped-up Popkin. The API refuses with `409`
-  `popkin_wrapped_up`, which the dialog shows as the general failure, "We couldn't share that."
-  Wrap up is journey 9 (gap 36).
+- "Share one" was still offered in a wrapped-up Popkin. Journey 9, Wrap up, settled it: such a
+  Popkin offers no "Share one" and no "Experience actions"
+  ([Read-only Popkin](../../wrap-up/read-only-popkin/README.md), gap 36). A member who shares
+  in the moment the Popkin wraps up still gets the API's `409` `popkin_wrapped_up` as the
+  general failure, "We couldn't share that.", and is then moved to the recap.
 - An experience edited to "Want to do" keeps its ratings, hidden (gap 37).
 - A HEIC picture has no preview in the dialog in a browser that cannot draw it; the picture is
   still sent and stored as a JPEG (gap 41).

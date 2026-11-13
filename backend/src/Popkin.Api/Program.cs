@@ -24,7 +24,10 @@ builder.Services
         // the field it names (L2-052 AC1).
         options.InvalidModelStateResponseFactory = context =>
         {
-            var field = context.ModelState.FirstOrDefault(e => e.Value?.Errors.Count > 0).Key?.TrimStart('$', '.');
+            // A JSON value of the wrong type is reported twice: under its path (`$.keepPhotos`)
+            // and under the name of the body's parameter. The path names the field.
+            var invalid = context.ModelState.Where(e => e.Value?.Errors.Count > 0).Select(e => e.Key).ToList();
+            var field = (invalid.FirstOrDefault(key => key.StartsWith("$.", StringComparison.Ordinal)) ?? invalid.FirstOrDefault())?.TrimStart('$', '.');
             var details = new ProblemDetails { Status = 400, Title = "A field is not valid." };
             details.Extensions["code"] = "validation_failed";
             if (!string.IsNullOrEmpty(field))

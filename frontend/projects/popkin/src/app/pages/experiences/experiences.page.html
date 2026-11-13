@@ -20,6 +20,18 @@
     }
   </header>
 
+  @if (frame.warning(); as warning) {
+    <div
+      pk-banner
+      slot="banner"
+      variant="warning"
+      [heading]="warning.lead"
+      [text]="warning.text"
+      [dismissible]="true"
+      (dismissed)="frame.dismissWarning()"
+    ></div>
+  }
+
   @switch (store.state()) {
     @case ('loading') {
       <div pk-experiences [loading]="true"></div>
@@ -32,9 +44,11 @@
           [heading]="store.nothing().heading"
           [text]="store.nothing().text"
         >
-          <button pk-button type="button" variant="popkin" size="md" (click)="share()">
-            <svg pk-icon name="plus" size="md"></svg>Share one
-          </button>
+          @if (!frame.wrappedUp()) {
+            <button pk-button type="button" variant="popkin" size="md" (click)="share()">
+              <svg pk-icon name="plus" size="md"></svg>Share one
+            </button>
+          }
         </div>
       </div>
     }
@@ -46,9 +60,11 @@
           [heading]="store.nothing().heading"
           [text]="store.nothing().text"
         >
-          <button pk-button type="button" variant="popkin" size="md" (click)="share()">
-            <svg pk-icon name="plus" size="md"></svg>Share one
-          </button>
+          @if (!frame.wrappedUp()) {
+            <button pk-button type="button" variant="popkin" size="md" (click)="share()">
+              <svg pk-icon name="plus" size="md"></svg>Share one
+            </button>
+          }
           <button pk-button type="button" variant="secondary" size="md" (click)="show('all')">
             Show all
           </button>

@@ -1,0 +1,48 @@
+@if (loading()) {
+  <h1 class="visually-hidden">{{ loadingHeading() }}</h1>
+  <p class="visually-hidden" role="status">{{ loadingText() }}</p>
+  <div class="recap-skeleton__parts" aria-hidden="true">
+    <span pk-skeleton class="recap-skeleton__photos" shape="card"></span>
+    <div class="recap-skeleton__lines">
+      <span pk-skeleton shape="title"></span>
+      <span pk-skeleton shape="text" [width]="50"></span>
+    </div>
+    <span pk-skeleton shape="card"></span>
+    <span pk-skeleton shape="card"></span>
+  </div>
+} @else {
+  <div class="recap__lead">
+    <div pk-polaroids [photos]="photos()" [emoji]="emoji()"></div>
+    <div class="recap__headline">
+      <h1 class="recap__heading">{{ heading() }}</h1>
+      <p class="recap__line">{{ line() }}</p>
+    </div>
+  </div>
+  <div class="recap__rest">
+    <div class="recap__card">
+      <div class="recap__people">
+        <span pk-avatar-stack size="sm" [avatars]="avatars()" [more]="more()"></span>
+        <span>{{ people() }}</span>
+      </div>
+      <dl pk-stat-pair>
+        @for (stat of stats(); track stat.label) {
+          <div pk-stat [value]="stat.value" [label]="stat.label"></div>
+        }
+      </dl>
+    </div>
+    @if (moment(); as top) {
+      <a
+        pk-experience-row
+        class="recap__moment"
+        [kicker]="momentLabel()"
+        [title]="top.title"
+        [photo]="top.photo"
+        [emoji]="top.emoji"
+        [rating]="top.rating"
+        [ratings]="top.by"
+        [routerLink]="top.link"
+      ></a>
+    }
+    <div class="recap__actions"><ng-content /></div>
+  </div>
+}

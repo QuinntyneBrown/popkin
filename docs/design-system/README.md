@@ -46,6 +46,7 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [List row](components/list-row.html) | Content | Two direct messages, one unread. Short row: members. Menu rows in an action sheet; the destructive one is cora | Default, Hover, Focus | pages/conversations/default, pages/my-popkins/default, dialogs/popkin-settings/default |
 | [Rating](components/rating.html) | Content | Inline score and stars. Your rating: five 48px star buttons. Score card. | None, Chosen (5), Focus | pages/experience-detail/default, pages/experience-detail/rated, pages/experiences/default |
 | [Stat](components/stat.html) | Content | A pair. | Static (both themes) | pages/wrapped-up/default |
+| [Recap](components/recap.html) | Content | The collage. No photos. The people row. | Static (both themes) | pages/wrapped-up/default, pages/wrapped-up/plain |
 | [Message](components/message.html) | Chat | Divider, system note, theirs with reactions, yours with a reply quote. Photo message; a message that did not s | Not reacted, Reacted (yours), Focus | pages/group-chat/default, pages/direct-message/default, pages/group-chat/failed-send |
 | [Composer](components/composer.html) | Chat | Replying to Ruth. Closed: a wrapped-up Popkin. | Empty, With text, Focus | pages/group-chat/default, pages/group-chat/read-only |
 | [Photo grid](components/photo-grid.html) | Media | Saturday, featured. Strip on the home. | Default, Focus, Uploading | pages/photo-album/default, pages/popkin-home/default, dialogs/add-photos/busy |

@@ -3,11 +3,11 @@
     pk-tab-header
     slot="header"
     heading="Photos"
-    [summary]="store.line()"
+    [summary]="frame.photosRemoved() ? 'No photos' : store.line()"
     [avatars]="faces()"
     [more]="more()"
     [loading]="store.state() === 'loading' && !store.line()"
-    [filter]="filtering()"
+    [filter]="frame.photosRemoved() ? undefined : filtering()"
     [action]="adding() ? 'Add photos' : undefined"
     (acted)="picker.open()"
   >
@@ -29,7 +29,39 @@
     </button>
   </header>
 
-  @switch (store.state()) {
+  @if (frame.warning(); as warning) {
+    <div
+      pk-banner
+      slot="banner"
+      variant="warning"
+      [heading]="warning.lead"
+      [text]="warning.text"
+      [dismissible]="true"
+      (dismissed)="frame.dismissWarning()"
+    ></div>
+  }
+
+  @if (frame.photosGo(); as going) {
+    <div
+      pk-banner
+      slot="banner"
+      variant="warning"
+      icon="photos"
+      action="Save"
+      [heading]="going.lead"
+      [text]="going.text"
+      [actionLink]="recap()"
+    ></div>
+  }
+
+  @switch (frame.photosRemoved() ? 'removed' : store.state()) {
+    @case ('removed') {
+      <div pk-album>
+        <div pk-empty-state icon="photos" heading="The photos were removed" [text]="removedText()">
+          <a pk-button variant="secondary" size="md" [routerLink]="recap()">See the recap</a>
+        </div>
+      </div>
+    }
     @case ('loading') {
       <div pk-album [loading]="true"></div>
     }
@@ -41,7 +73,7 @@
           heading="No photos yet"
           text="This is the album everyone shares. Add the first one and the rest will follow."
         >
-          @if (store.canAdd()) {
+          @if (canAdd()) {
             <button pk-button type="button" variant="popkin" size="md" (click)="picker.open()">
               <svg pk-icon name="plus" size="md"></svg>Add photos
             </button>
@@ -57,7 +89,7 @@
           heading="You haven’t added any yet"
           text="Photos you add show up here, and in the album everyone sees."
         >
-          @if (store.canAdd()) {
+          @if (canAdd()) {
             <button pk-button type="button" variant="popkin" size="md" (click)="picker.open()">
               <svg pk-icon name="plus" size="md"></svg>Add photos
             </button>

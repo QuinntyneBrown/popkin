@@ -6,14 +6,20 @@
   [class.screen__body--hero]="body() === 'hero'"
   [class.screen__body--middle]="body() === 'middle'"
   [class.screen__body--invite]="body() === 'invite'"
+  [class.screen__body--recap]="body() === 'recap'"
+  [class.screen__body--tiled]="tile()"
   tabindex="-1"
 >
+  @if (tile(); as emoji) {
+    <span pk-popkin-tile size="lg" [emoji]="emoji"></span>
+  }
   @if (heading()) {
     <h1 class="screen__heading">{{ heading() }}</h1>
   }
   @if (lead()) {
     <p class="screen__lead">{{ lead() }}</p>
   }
+  <div class="screen__notice"><ng-content select="[slot=notice]" /></div>
   <div class="screen__content" [class.screen__content--headed]="heading()"><ng-content /></div>
   <div class="screen__actions" [class.screen__lone-action]="loneAction()">
     <ng-content select="[slot=actions]" />

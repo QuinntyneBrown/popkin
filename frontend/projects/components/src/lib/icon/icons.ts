@@ -230,6 +230,23 @@ export const ICONS = {
       path: 'm7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a1 1 0 0 0-2.75-2.91',
     },
   ],
+  archive: [
+    { rect: [20, 5, 2, 3, 1] },
+    { path: 'M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8' },
+    { path: 'M10 12h4' },
+  ],
+  'message-off': [
+    { path: 'm2 2 20 20' },
+    {
+      path: 'M4.93 4.929a10 10 0 0 0-1.938 11.412 2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 0 0 11.302-1.989',
+    },
+    { path: 'M8.35 2.69A10 10 0 0 1 21.3 15.65' },
+  ],
+  download: [
+    { path: 'M12 15V3' },
+    { path: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' },
+    { path: 'm7 10 5 5 5-5' },
+  ],
 } satisfies Record<string, IconShape[]>;
 
 export type IconName = keyof typeof ICONS;

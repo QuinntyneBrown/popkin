@@ -8,6 +8,11 @@ export interface NewPopkinDraftState {
   length: PopkinLength;
   /** The end picked for "Until a date", as an ISO date-time. */
   customEndsAt: string | null;
+  /**
+   * The wrapped-up Popkin whose members are sent the new one's invite: "Pop up another with
+   * this crew" (L2-046 AC5). Null for a Popkin started on its own.
+   */
+  crewOf: string | null;
 }
 
 const FIRST: NewPopkinDraftState = {
@@ -16,6 +21,7 @@ const FIRST: NewPopkinDraftState = {
   colour: 'Coral',
   length: 'TheWeekend',
   customEndsAt: null,
+  crewOf: null,
 };
 
 /**

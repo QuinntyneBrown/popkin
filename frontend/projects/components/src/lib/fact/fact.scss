@@ -1,0 +1,27 @@
+:host {
+  display: flex;
+  gap: var(--space-4);
+}
+
+/* The tile the icon sits on (the design system's icon tile). */
+.fact__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+}
+
+.fact__title {
+  font-weight: var(--font-weight-bold);
+}
+
+.fact__body {
+  margin-top: var(--space-0-5);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}

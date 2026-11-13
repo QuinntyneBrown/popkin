@@ -1,3 +1,4 @@
+import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
 import { DOCUMENT } from '@angular/common';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -32,6 +33,7 @@ export type ThreadState = 'loading' | 'ready' | 'empty' | 'error' | 'not-found';
 @Injectable()
 export class ThreadStore {
   private readonly chat = inject(CHAT_API);
+  private readonly watch = inject(WrapUpWatch);
   private readonly realtime = inject(POPKIN_REALTIME);
   private readonly outbox = inject(MessageOutbox);
   private readonly unread = inject(UnreadTracker);
@@ -136,6 +138,8 @@ export class ThreadStore {
         next: ({ thread, page }) => {
           this.today.set(new Date());
           this.header.set(thread);
+          if (thread.readOnly) this.watch.look(null, null);
+          else this.watch.look(thread.popkinId, thread.endsAt);
           this.messages.set(page.items);
           this.earlier.set(page.hasMore);
           this.unread.set({

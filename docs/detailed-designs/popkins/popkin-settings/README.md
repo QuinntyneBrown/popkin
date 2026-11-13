@@ -16,6 +16,11 @@ rules of L2-008 and the length rules of L2-009. "Invite people", "Wrap up" and "
 Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
 `popkins/leave-popkin`.
 
+Journey 9, Wrap up, built the menu with the two rows it needed: "Invite people" for every
+member and "Wrap up" for the Host. "Edit name and look" and "Change how long it lasts" are
+journey 16 and "Leave this Popkin" is journey 18; nothing else of this design is built
+([Built in journey 9](#built-in-journey-9)).
+
 A Popkin's address ([Choose the address](../choose-address/README.md)) is not part of its look.
 Renaming the Popkin leaves the address as it was, so printed QR codes and saved links keep
 working for as long as the Popkin exists (L2-066). "Edit name and look" shows the address as text
@@ -25,7 +30,11 @@ that cannot be edited, and no endpoint changes it.
 
 ### Screens and states
 
-- `docs/mocks/dialogs/popkin-settings/default.html` (Host menu) and `member.html` (member menu).
+- `docs/mocks/dialogs/popkin-settings/default.html` (Host menu) and `member.html` (member menu),
+  the whole menu.
+- `docs/mocks/dialogs/popkin-settings/host-now.html` and `member-now.html` — the menu as
+  journey 9 built it: "Invite people", with the hint "QR code and link", and, for the Host,
+  "Wrap up", with the hint "End it now and send the recap".
 - `docs/mocks/dialogs/edit-popkin/default.html`, `busy.html` ("Saving…"), `invalid.html` ("Give
   your Popkin a name."), `failed.html` ("We couldn't save that. Your changes are still here. Try
   again.").
@@ -103,6 +112,31 @@ that cannot be edited, and no endpoint changes it.
 - **`PopkinDto`** (changed) — gains `Address`, which `EditPopkinDialog` shows.
 - The order of checks — membership, then role, then status — keeps a non-member's answer at
   `404` whatever the Popkin's state.
+
+### Built in journey 9
+
+- **`PopkinSettingsDialog`** (`dialogs/popkin-settings/popkin-settings.dialog.ts` and `.html`) —
+  a CDK dialog in `pk-dialog`, titled with the Popkin's name, with `pk-menu-list` and one
+  `pk-menu-item` per row: "Invite people" for every member and "Wrap up" for the Host only,
+  chosen by `viewerRole` (L2-020 AC1, AC2). A member who is not the Host sees "Invite people"
+  alone. The dialog closes with the row chosen and does nothing else: the home then opens the
+  invite dialog ([Invite people](../../invitations/invite-people/README.md)) or navigates to
+  `/p/:popkinId/wrap-up` ([The Host wraps up](../../wrap-up/host-wraps-up/README.md)). It closes
+  on Escape and gives the focus back to its button, and every row works by the keyboard.
+- **The home** — `pk-home-header` has the "Popkin settings" button, and `PopkinHomePage` opens
+  the dialog from it. The Host's "Change" on the banner of the last hour opens the dialog too,
+  until "Change how long it lasts" is built ([Time is up](../../wrap-up/time-is-up/README.md),
+  known gap 47).
+- The rows are `pk-menu-item` in `pk-menu-list`, where this design named `pk-list-row` in its
+  `menu-list` variant.
+- Playwright: `e2e/tests/popkin-settings.spec.ts`, with `e2e/pages/popkin-settings.dialog.ts`.
+- Not built: `EditPopkinDialog`, `ChangeLengthDialog`, `PATCH /api/popkins/{popkinId}`,
+  `PUT …/length`, `PopkinChanged`, and the "Leave this Popkin" row
+  ([Leave a Popkin](../leave-popkin/README.md)). Settings cannot be reached in a wrapped-up
+  Popkin, whose home opens its recap (known gap 52).
+
+The diagrams below were not redrawn (gap 53). They show the whole menu, four rows for the Host
+and two for any other member.
 
 ## Requirements
 

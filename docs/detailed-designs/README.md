@@ -15,8 +15,10 @@ Popkin is one system of five containers:
 - **Popkin API** — ASP.NET Core on .NET 10: controllers under `/api` and the SignalR hub
   `PopkinHub` at `/hubs/popkin` for live updates and call signalling. It runs as one instance
   ([ADR 0009](../adr/0009-one-api-instance.md)).
-- **Popkin Worker** — .NET worker service for scheduled jobs such as wrapping up a Popkin whose
-  time is up.
+- **Popkin Worker** — .NET worker service for scheduled jobs. It hosts three: it wraps up the
+  Popkins whose time is up, removes the photos of a Popkin wrapped up without its album, and
+  prepares the zip of an album. It runs as one instance, holds no hub connection and sends no hub
+  events ([ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md)).
 - **Popkin database** — SQL Server through EF Core.
 - **Photo store** — object storage for photo files. Provider: `<TO SUPPLY>`.
 
@@ -47,7 +49,13 @@ Shared names used across the designs:
 - `IMembershipGuard` (`RequireMemberAsync`, `RequireActiveMemberAsync`, `RequireHostAsync`) is
   defined in [Membership authorisation](security/membership-authorisation/README.md).
 - ProblemDetails codes shared by every write: `404` `popkin_not_found`, `403` `host_only`, `409`
-  `popkin_wrapped_up`, `429` `rate_limited`.
+  `popkin_wrapped_up`, `429` `rate_limited`. What only a wrapped-up Popkin has, its recap, its
+  album export and its crew, answers `409` `popkin_active` for a Popkin that has not wrapped up.
+- No HTTP interceptor of the web app reacts to `409` `popkin_wrapped_up`. The screen that was
+  refused answers for itself, the thread by closing its composer and a dialog with its general
+  failure, and `WrapUpWatch` moves the member to the recap
+  ([Read-only Popkin](wrap-up/read-only-popkin/README.md),
+  [ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md)).
 - Rate-limiter policy names live in `RateLimitPolicyNames`
   ([Abuse limits](security/abuse-limits/README.md)).
 - The session cookie is `__Host-popkin`, `Secure`, `HttpOnly` and `SameSite=Strict`, as built in
@@ -77,6 +85,10 @@ audit [Learnings from BombRMan](../audits/learnings-from-bombrman.md), improveme
   that adds an event names the read that recovers it, and `PopkinRealtime.reconnected$` triggers
   that read. The table of events and recovery reads is in
   [Live messages](chat/live-messages/README.md#events-and-their-recovery-reads).
+- **Only the API sends events.** The Worker holds no connection and sends none
+  ([ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md)): what it does at a time every
+  client knows, wrapping up a Popkin whose time is up, an open screen learns from its own clock
+  check and the event's recovery read.
 - **Every event is one of two kinds.** A **state event** carries the full current value and a
   version that only rises (a counter on the aggregate); the client keeps the highest version it
   has seen for that aggregate and drops anything older. A **fact event** is final and idempotent:
@@ -117,9 +129,12 @@ A dimension is always one of a fixed set of values; an id, an address or anythin
 is never one (L2-054 AC3).
 
 Built so far: `popkin.hub.send.duration` and, beside it, `popkin.hub.send.failures`, both by
-event name (`PopkinMetrics`). The other instruments of the table, and the exporter set-up of
-ADR 0012, are not built. Calls have no instrument of their own: nothing counts the calls
-started, the people on them or the signals refused (known gap 33). Experiences added none either.
+event name, and, with journey 9, `popkin.wrap_up.lateness` and the Worker's heartbeat
+`popkin.wrap_up.last_tick`, the time its last wrap-up tick finished (`PopkinMetrics`). The
+other instruments of the table, and the exporter set-up of ADR 0012, are not built, so nothing
+is exported yet. Calls have no instrument of their own: nothing counts the calls started, the
+people on them or the signals refused (known gap 33). Experiences added none either, and
+neither did the recap, the album exports or the crew invites.
 
 ## Conflicts between the mocks and the specs
 
@@ -146,6 +161,9 @@ Each design follows the source named below and marks the conflict in its own REA
 - L2-002 AC4 shows "Sign in" from 640 px, while the design system's responsive page says
   576 px ([Responsive layout](accessibility/responsive-layout/README.md)). The design follows
   the requirement.
+- The banner of the last hour draws the Host's action as "Change", while L2-044 AC2 names it
+  "Change how long it lasts" ([Time is up](wrap-up/time-is-up/README.md)). Journey 9 built the
+  mock: the button reads "Change" and its accessible name is "Change" too (known gap 47).
 
 ## Subsystems and features
 
@@ -218,7 +236,7 @@ or design that settled it.
 
 | # | Open decision | Blocks | Settled by |
 |---|---|---|---|
-| 1 | SMS provider and email provider for the six-digit codes ([Sign up](accounts/sign-up/README.md)) | First deployment; journeys 1, 2 and 6 outside Development | |
+| 1 | SMS provider and email provider for the six-digit codes ([Sign up](accounts/sign-up/README.md)) | First deployment; journeys 1, 2 and 6 outside Development; the crew invites of journey 9, which are accepted and send nothing until a provider is chosen ([Recap](wrap-up/recap/README.md)) | |
 | 2 | Where `Auth:CodeHashKey` is stored and how it is rotated ([Personal data protection](security/personal-data-protection/README.md)) | First deployment | |
 | 3 | Reverse proxy product in front of the API ([ADR 0013](../adr/0013-deployment-shape.md)) | First deployment | |
 | 4 | Where the images run, where they are pushed and how a release is rolled back ([ADR 0013](../adr/0013-deployment-shape.md)) | First deployment | |
@@ -226,14 +244,14 @@ or design that settled it.
 | 6 | Telemetry backend, log retention and alert thresholds ([ADR 0012](../adr/0012-opentelemetry.md)) | First deployment | |
 | 7 | Load target: concurrent connections and "normal load" ([Fast screens](reliability/fast-screens/README.md), [Live messages](chat/live-messages/README.md)) | Nothing yet; ends [ADR 0009](../adr/0009-one-api-instance.md) when it passes one instance | |
 | 8 | Whether closing a person's open hub connections at sign-out is needed ([Live messages](chat/live-messages/README.md)) | Sign out (journey 17). Journey 3 was built without it: there is no sign-out yet, and nothing closes a connection | |
-| 9 | Photo store provider and the management of its keys ([Add photos](photos/add-photos/README.md)) | First deployment with profile photos (journey 2) or with the album: journey 5 is built, and outside Development no photo can be added, because there is no photo store there; journeys 13 and 14 outside Development | The contract and the address scheme are settled by [Join a Popkin](invitations/join-popkin/README.md): `IPhotoStore`, with addresses the API signs and serves for one hour. The provider behind it stays open |
+| 9 | Photo store provider and the management of its keys ([Add photos](photos/add-photos/README.md)) | First deployment with profile photos (journey 2) or with the album: journey 5 is built, and outside Development no photo can be added, because there is no photo store there; journeys 13 and 14 outside Development. The album's zip of journey 9 is written to the same store, so outside Development an album export fails too | The contract and the address scheme are settled by [Join a Popkin](invitations/join-popkin/README.md): `IPhotoStore`, with addresses the API signs and serves for one hour. The provider behind it stays open |
 | 10 | Media topology for calls, mesh or SFU, and where an SFU would run ([Group call](calls/group-call/README.md)) | Journey 7 | [ADR 0014](../adr/0014-calls-are-a-mesh.md): a mesh, signalled through the hub; no SFU runs |
 | 11 | Media relay (STUN/TURN) provider and credential lifetime ([Group call](calls/group-call/README.md)) | Journey 7 | [ADR 0014](../adr/0014-calls-are-a-mesh.md) and [`docs/deployment.md`](../deployment.md): any TURN server that takes shared-secret (TURN REST) credentials, through the `MediaRelay` settings; one hour unless set. Which relay a deployment runs stays its own choice |
 | 12 | How the other member learns of a direct call ([Group call](calls/group-call/README.md)). Journey 7 built the group call only: the direct call, its `threadId` and its `Kind` wait | Journey 11 | |
-| 13 | How a hub event sent by the Worker reaches clients: a backplane, or another path ([Time is up](wrap-up/time-is-up/README.md), [ADR 0009](../adr/0009-one-api-instance.md)) | Journey 9. Until settled, the web app's clock check carries the wrap-up | |
-| 14 | Number of Worker instances ([Time is up](wrap-up/time-is-up/README.md)) | Journey 9 | |
+| 13 | How a hub event sent by the Worker reaches clients: a backplane, or another path ([Time is up](wrap-up/time-is-up/README.md), [ADR 0009](../adr/0009-one-api-instance.md)) | Journey 9 | [ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md): no backplane and no other path; the Worker sends no hub events. `WrapUpWatch` in the web app reads the Popkin every 30 seconds once its end has passed, and opens the recap when it reads as wrapped up. A wrap-up by the Host is still sent over the hub, by the API |
+| 14 | Number of Worker instances ([Time is up](wrap-up/time-is-up/README.md)) | Journey 9 | [ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md) and [`docs/deployment.md`](../deployment.md): one. The version counter on a Popkin keeps a second instance from wrapping it up twice; nothing keeps two instances from preparing one album export twice |
 | 15 | Whether field measurement of screen speed is wanted, and its collector ([Fast screens](reliability/fast-screens/README.md)) | Nothing | |
-| 16 | One command that starts the API, the Worker and the app (an AppHost, by ADR) | Nothing; wanted when the Worker hosts its first job (journey 9) | |
+| 16 | One command that starts the API, the Worker and the app (an AppHost, by ADR). The Worker hosts its jobs since journey 9, and three terminals start the three: `eng/Start-E2eApi.ps1`, `eng/Start-E2eWorker.ps1` and `npm start` | Nothing; wanted now that a wrap-up by time and "Save the album" need the Worker running | |
 | 17 | DNS provider, wildcard certificate authority and renewal for `*.popkin.community` ([Address safety](security/address-safety/README.md)) | First deployment with addresses; L2-067 AC1 | |
 | 18 | How each web app build sets `BASE_DOMAIN`, and whether development needs one session across `*.localhost` ([Open a Popkin by its address](popkins/open-by-address/README.md), [Address safety](security/address-safety/README.md)) | Building addresses (journey 1 rework) | |
 | 19 | Whether a host more than one label deep should reach the not-found screen, which needs a certificate beyond the wildcard (L2-064 AC7 against L2-067 AC5) | Nothing | |
@@ -243,17 +261,17 @@ or design that settled it.
 | 23 | Whether starting a Popkin adds the connections its creator already holds to the new Popkin's hub group. `CreatePopkinCommandHandler` does not, so a person who starts a Popkin in one tab gets no event for it in another until the hub reconnects ([My Popkins](popkins/my-popkins/README.md), [Live messages](chat/live-messages/README.md)) | Nothing; found in journey 6 | |
 | 24 | How the app opens without a connection, and whether every screen keeps a saved answer. There is no service worker, so the app does not open offline from cold, and only My Popkins keeps a saved list; the `ResponseCache`, `screenLoad()` and `httpErrorInterceptor` of the design are not built ([Loading, failure and offline](reliability/loading-failure-offline/README.md)) | L2-056 AC4 for every screen but My Popkins | |
 | 25 | Clearing the saved list of My Popkins at sign out and at account deletion (L2-054). Only a 401 clears it today ([My Popkins](popkins/my-popkins/README.md)) | Journeys 17 and 19 | |
-| 26 | Screens My Popkins and the scanner link to that are not built: Join with a code (`/join`, journey 15), the recap (`/p/:popkinId/recap`, journey 9) and the account (`/account`, journey 17). Each link reaches the not-found screen until its journey | Journeys 9, 15 and 17 | |
+| 26 | Screens My Popkins and the scanner link to that are not built: Join with a code (`/join`, journey 15) and the account (`/account`, journey 17). Each link reaches the not-found screen until its journey. The recap (`/p/:popkinId/recap`) was the third, and journey 9 built it | Journeys 15 and 17 | The recap: [Recap](wrap-up/recap/README.md). The other two stay open |
 | 27 | Whether a cap on who may join a call is wanted. There is none: the limit of 12 tiles is a limit of what is shown, and a mesh serves a large call badly, each browser sending its picture once per other person. A cap needs a requirement first; an SFU needs its own record ([ADR 0014](../adr/0014-calls-are-a-mesh.md), [Group call](calls/group-call/README.md)) | None; found in journey 7 | |
 | 28 | A participant who posted the join and never called `JoinCall`, because the tab closed in between, is not taken off the call. They have no connection on it, so no dropped connection starts their grace, and a call they are the last on never ends ([Group call](calls/group-call/README.md)) | None; found in journey 7 | Journey 7: a join starts the same 20-second grace as a dropped connection, and `JoinCall` within it keeps the participant on the call |
 | 29 | A failed `PATCH` of the microphone or camera is not shown and is not made again until the member's next change. The device sends nothing it should not, but the others see the earlier state until then ([Call controls](calls/call-controls/README.md)) | None; found in journey 7 | |
-| 30 | What happens to a call under way when its Popkin wraps up. Nothing ends it: nobody new can join, and it goes on until the last participant leaves ([Group call](calls/group-call/README.md), [Read-only Popkin](wrap-up/read-only-popkin/README.md)) | Journey 9 | |
+| 30 | What happens to a call under way when its Popkin wraps up ([Group call](calls/group-call/README.md), [Read-only Popkin](wrap-up/read-only-popkin/README.md)) | Journey 9 | Journey 9, [The Host wraps up](wrap-up/host-wraps-up/README.md): the wrap-up ends it in the same unit of work, by its Host or by its time. Every participant is taken off it, `CallEnded` is sent before `PopkinWrappedUp`, and a change of microphone or camera afterwards answers `409` `popkin_wrapped_up`. A wrap-up by time ends the call in the database and sends neither event, because the Worker sends none (ADR 0015) |
 | 31 | A member on a call from two devices. The same membership has one participant row, so the second device's join adds nothing; its `JoinCall` then takes the call's events and signals from the first device, which is told nothing ([Group call](calls/group-call/README.md)) | None; found in journey 7 | |
 | 32 | No media relay was exercised by any test. Calls were checked by hand between two browsers on one machine, which connect directly; the credentials are proved by their signature only ([ADR 0014](../adr/0014-calls-are-a-mesh.md), [`docs/deployment.md`](../deployment.md)) | First deployment with calls on the public internet | |
 | 33 | Calls have no instrument on the `Popkin` meter, and a refused signal is not counted by `popkin.rate_limit.rejections`, which is not built ([ADR 0012](../adr/0012-opentelemetry.md), [Abuse limits](security/abuse-limits/README.md)) | None | |
 | 34 | The diagrams of [Group call](calls/group-call/README.md) and [Call controls](calls/call-controls/README.md) were not redrawn after journey 7. They show `CALL_SESSION` and `WebRtcCallSession`, a `threadId` and a `Kind`, and events without the Popkin's id; each design says so above its diagrams | None | |
 | 35 | Alone on a call on a phone shorter than about 980 px, "Invite to call" under "Waiting for the others" starts beneath the controls and shows only after scrolling. The mock (`video-call/empty.html`) draws it so: the tile and the message each keep the call's minimum height. "Invite to call" in the top bar is always in view ([Group call](calls/group-call/README.md)); found in journey 7 | None | |
-| 36 | "Share one" is still offered in a wrapped-up Popkin. The API refuses with `409` `popkin_wrapped_up`, and the dialog shows it as the general failure, "We couldn’t share that." ([Share an experience](experiences/share-experience/README.md), [Read-only Popkin](wrap-up/read-only-popkin/README.md)) | Journey 9 | |
+| 36 | "Share one" was still offered in a wrapped-up Popkin, and the dialog showed the API's `409` `popkin_wrapped_up` as the general failure ([Share an experience](experiences/share-experience/README.md), [Read-only Popkin](wrap-up/read-only-popkin/README.md)) | Journey 9 | Journey 9, [Read-only Popkin](wrap-up/read-only-popkin/README.md): Experiences of a wrapped-up Popkin offers no "Share one", in its header, floating or in its empty states, and an experience offers no rating, no comment and no actions. A member who shares in the moment the Popkin wraps up still sees the general failure, then is moved to the recap |
 | 37 | An experience edited from "Something we did" or "Restaurant" to "Want to do" keeps its ratings and comments, hidden: it has no score and no rating panel, and they show again if it is edited back. Whether the edit should be refused, or the ratings removed, is not decided ([Share an experience](experiences/share-experience/README.md), [Rate an experience](experiences/rate-experience/README.md)) | None; found in journey 8. Journey 20 decides the same for "We did this" | |
 | 38 | The list of experiences, the score and the comments do not update live. Nothing about an experience is sent over the hub, so another member sees a share, a rating, a comment, an edit or a delete when they next open the screen. L2-037 to L2-041 ask for nothing more ([List experiences](experiences/list-experiences/README.md), [View an experience](experiences/view-experience/README.md)) | None | |
 | 39 | The list of experiences has no paging: one answer carries every experience of the Popkin, and the home's summary reads them all to rank them ([List experiences](experiences/list-experiences/README.md)) | None; a Popkin with hundreds of experiences | |
@@ -264,6 +282,13 @@ or design that settled it.
 | 44 | The diagrams of the five built designs of Experiences were not redrawn after journey 8. They show validator classes, `ExperienceKeen`, kind `WantToDo`, a `Photo` row for the picture, bars computed by the API and pages that hold the logic the stores now hold; each design says so above its diagrams | None | |
 | 45 | Experience cards in one row have pictures of different heights between 640 px and the widest layouts (168 and 224 px at 1024 px), and a long byline is cut ("Mara · Sat mo…"). The mock (`experiences/default.html`) draws both, and the app matches it: the mock changes first ([List experiences](experiences/list-experiences/README.md)); found in journey 8 | None | |
 | 46 | Choosing a picture in Share an experience on a phone scrolls the dialog's heading and the "Title" label out of view, as the dialog grows taller than the screen ([Share an experience](experiences/share-experience/README.md)); found in journey 8 | None | |
+| 47 | The Host's "Change" on the banner of the last hour. L2-044 AC2 asks for "Change how long it lasts", which is not built: the button opens Popkin settings, where that dialog will be, and the menu does not offer it yet. The banner offers "Change" on the Popkin home only, not on the Everyone thread, Photos or Experiences, where the banner also shows; and its accessible name is "Change", not "Change how long it lasts" ([Time is up](wrap-up/time-is-up/README.md), [Popkin settings](popkins/popkin-settings/README.md)) | Journey 16; L2-044 AC2 | |
+| 48 | `dotnet format --verify-no-changes` reports whitespace in three files of `Popkin.Domain`: `Experience.cs`, `Membership.cs` and `Photo.cs`. They predate journey 9, which left them as they were | None; a formatting change of its own | |
+| 49 | The local API, on SQLite, stores a time to about 100 µs, because `AppDbContext` converts every `DateTimeOffset` to a sortable number there (`DateTimeOffsetToBinaryConverter`). A time read back can differ from the one written by less than that; SQL Server and the tests' InMemory provider keep it whole. Found in journey 9, which compares `EndsAt`, `WrappedUpAt` and `ExpiresAt` with the clock | None; local runs and recordings only | |
+| 50 | A timed wrap-up reaches an open screen late. The Worker wraps the Popkin up within a minute of its end, on a tick of 30 seconds, and the web app's clock check reads within 30 seconds after that: about a minute and a half after the end; 90 seconds, measured by hand. L2-044 AC4 asks for no reload and names no time. A device whose clock is behind is late by as much more ([ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md), [Time is up](wrap-up/time-is-up/README.md)) | None; a tighter time needs a record that supersedes ADR 0015 | |
+| 51 | A crew invite is delivered to nobody. In Development the sender writes one log line and sends nothing; outside Development no provider is configured, so nothing is sent and nothing is recorded as sent. The request is accepted with `202` either way, and the Host reads "Invites are on their way" ([Recap](wrap-up/recap/README.md)) | First deployment; with gap 1 | |
+| 52 | A wrapped-up Popkin cannot be left, and nothing says whether it should be: Popkin settings opens from the home, and the home of a wrapped-up Popkin opens its recap ([Read-only Popkin](wrap-up/read-only-popkin/README.md), [Leave a Popkin](popkins/leave-popkin/README.md)) | Journey 18 | |
+| 53 | The diagrams of the four designs of Wrap up and of [Popkin settings](popkins/popkin-settings/README.md) were not redrawn after journey 9. They show `CurrentPopkinStore`, `TimeLeftClock`, `activePopkinGuard` and `wrappedUpInterceptor`, a backplane between the Worker and the hub, validator and exception classes, `album_not_kept`, and a settings menu of four rows; each design says so above its diagrams | None | |
 
 Settled so far:
 
@@ -320,6 +345,18 @@ Settled so far:
 | The `pk-*` homes of the tab header, the picture block, the comment row and "Add a picture" | [List experiences](experiences/list-experiences/README.md), [View an experience](experiences/view-experience/README.md) and [Share an experience](experiences/share-experience/README.md): `pk-tab-header`, `pk-experience-detail`, `pk-comment` in `pk-comments`, and `pk-picture-field` |
 | Where "Edit your comment" is offered, the copy of a comment that does not save, and whether a comment can be cleared | [Comment on an experience](experiences/comment-on-experience/README.md): in the rating panel; "We couldn’t post that."; no |
 | The tie-break of the home's highest-rated experiences | [Popkin home](popkins/popkin-home/README.md): the one more members rated, then the newer; an experience nobody has rated is not named |
+| How a wrap-up by time reaches an open screen, and how many Worker instances run | [ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md): by the web app's clock check, `WrapUpWatch`, within about a minute and a half; one |
+| Whether the web app has an interceptor for `409` `popkin_wrapped_up` | [Read-only Popkin](wrap-up/read-only-popkin/README.md): no; the screen that was refused answers for itself and `WrapUpWatch` moves the member |
+| What a wrap-up does to the call under way, and to "Share one" | [The Host wraps up](wrap-up/host-wraps-up/README.md) and [Read-only Popkin](wrap-up/read-only-popkin/README.md): it ends the call; Experiences offers nothing to share, rate, say or change |
+| How two wrap-ups at once, the Host's and the clock's, are kept apart | [The Host wraps up](wrap-up/host-wraps-up/README.md): a version counter on `PopkinSpace` that the entity raises, a concurrency token on every provider; the Host's request that loses answers `409` `popkin_wrapped_up`, and the wrap-up screen opens the recap |
+| What the wrap-up screen reads before it shows, and its lede | [The Host wraps up](wrap-up/host-wraps-up/README.md): `GET /api/popkins/{popkinId}/wrap-up`, for the Host only, with the members, photos and messages the recap will count; "Every good Popkin ends. Here’s what happens next for all {n} of you." |
+| The periods of the Worker's jobs and the batch of the due query | [Time is up](wrap-up/time-is-up/README.md), [Read-only Popkin](wrap-up/read-only-popkin/README.md) and [Recap](wrap-up/recap/README.md): 30 seconds, one hour and 2 seconds; 100 Popkins at a time, each saved alone |
+| The banner's words under one hour, and how long a dismissal lasts | [Time is up](wrap-up/time-is-up/README.md): "1 hour left." for the first minute of the last hour, then "59 min left." and so on down to "1 min left."; until the app is loaded again, on every screen of that Popkin |
+| What the recap counts, which photos and how many avatars it shows, and its top-rated moment | [Recap](wrap-up/recap/README.md): everyone who ever joined; the messages members wrote in the Everyone thread and did not delete; the photos of the album, and the number it held once it was removed; the latest three photos; at most five avatars, the Host first; the highest average, then the one more members rated, then the one shared first, with its picture |
+| The album's zip: its name, its address, how long it is kept and whether one in preparation is reused | [Recap](wrap-up/recap/README.md): `{Popkin name}.zip`; a signed address that expires after an hour and downloads as an attachment; a day; yes, and so is a ready one that has not expired |
+| How the crew is invited, to whom, and how once only | [Recap](wrap-up/recap/README.md): to the phone number or, without one, the email a person signs in with; the members of the old Popkin who have not left, still have an account and are not in the new one; a `CrewInvites` table records each invite sent. No contact detail, link or name is logged |
+| The mocks of the wrapped-up states, and the copy chosen in the build | [Read-only Popkin](wrap-up/read-only-popkin/README.md) and [Recap](wrap-up/recap/README.md): `photo-album/wrapped.html`, `going.html` and `removed.html`, `experiences/wrapped.html`, `experience-detail/wrapped.html`, `wrapped-up/exporting.html` and `plain.html`, `popkin-home/last-hour.html` and `last-hour-member.html`; "The photos were removed", "Preparing the album…", "We couldn’t prepare the album", "Invites are on their way", "We couldn’t invite the crew" |
+| What Popkin settings offers until journeys 16 and 18 | [Popkin settings](popkins/popkin-settings/README.md): "Invite people" for every member and "Wrap up" for the Host; `popkin-settings/host-now.html` and `member-now.html` |
 
 ## Diagrams
 

@@ -28,6 +28,8 @@
       [more]="more()"
       [members]="membersLabel()"
       [timeLeft]="store.timeLeftLine()"
+      settings="Popkin settings"
+      (settingsOpened)="settings()"
     >
       <a
         pk-button
@@ -49,6 +51,20 @@
         <svg pk-icon name="qr" size="md"></svg>Invite
       </button>
     </header>
+
+    @if (store.warning(); as warning) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="warning"
+        [heading]="warning.lead"
+        [text]="warning.text"
+        [action]="isHost() ? 'Change' : undefined"
+        [dismissible]="true"
+        (acted)="settings()"
+        (dismissed)="store.dismissWarning()"
+      ></div>
+    }
 
     @if (call(); as call) {
       <div

@@ -1,0 +1,77 @@
+:host {
+  position: relative;
+  display: block;
+  width: var(--layout-polaroids-width);
+  height: var(--layout-polaroids-height);
+  margin-inline: auto;
+}
+
+.polaroids__print {
+  position: absolute;
+  width: var(--space-36);
+  height: var(--space-36);
+  border: var(--space-1-5) solid var(--color-constant-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+}
+
+.polaroids__print:nth-child(1) {
+  left: 0;
+  top: var(--space-6);
+  rotate: -8deg;
+}
+
+.polaroids__print:nth-child(2) {
+  right: 0;
+  top: var(--space-4);
+  rotate: 7deg;
+}
+
+.polaroids__print:nth-child(3) {
+  left: 50%;
+  top: 0;
+  width: var(--space-40);
+  height: var(--space-40);
+  translate: -50% 0;
+  rotate: -1deg;
+}
+
+.polaroids__tile {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  translate: -50% 0;
+}
+
+/* No photo was shared: the emoji stands alone. */
+:host(.polaroids--empty) {
+  display: grid;
+  place-items: center;
+  height: auto;
+}
+
+:host(.polaroids--empty) .polaroids__tile {
+  position: static;
+  translate: none;
+}
+
+@media (min-width: 64rem) {
+  :host {
+    width: var(--layout-polaroids-width-l);
+    height: var(--layout-polaroids-height-l);
+  }
+
+  :host(.polaroids--empty) {
+    height: auto;
+  }
+
+  .polaroids__print {
+    width: var(--layout-polaroid-l);
+    height: var(--layout-polaroid-l);
+  }
+
+  .polaroids__print:nth-child(3) {
+    width: var(--layout-polaroid-centre-l);
+    height: var(--layout-polaroid-centre-l);
+  }
+}

@@ -56,7 +56,12 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > each one from one to five stars, add a few words to their rating and see the group's score;
 > whoever shared an experience edits or deletes it.
 > [Watch it](docs/videos/08-journey-08-rate-an-experience/08-journey-08-rate-an-experience.mp4)
-> (2 min 12 s, with sound).
+> (2 min 12 s, with sound). Journey 9, Wrap up, is built as well: the Host wraps a Popkin up
+> from Popkin settings, or its time runs out, with a banner in its last hour; it turns
+> read-only, and everyone gets a recap with the people, the messages, the photos and the
+> top-rated moment, saves the album as a zip, and the Host pops up another with the same crew.
+> [Watch it](docs/videos/09-journey-09-wrap-up/09-journey-09-wrap-up.mp4)
+> (2 min 20 s, with sound).
 > The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
@@ -140,6 +145,14 @@ python3.12 -m venv .cache/video-venv
 With the two running, chat works locally: start a Popkin, open its invite link in a second
 browser profile, join, and each side sees the other's messages in the Everyone thread as they
 are sent.
+
+4. To see what the Worker does (a Popkin wrapping up when its time is up, "Save the album"
+   becoming a zip to download), start it in a third terminal. It uses the database and the photo
+   folder of the API started in step 2.
+
+   ```shell
+   pwsh eng/Start-E2eWorker.ps1
+   ```
 
 ### The database and the `popkin` tool
 

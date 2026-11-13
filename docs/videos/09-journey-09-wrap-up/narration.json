@@ -1,0 +1,26 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Every good Popkin ends. Here is the send-off."] },
+    { "id": "settings", "bars": 5, "lines": ["On the Popkin home, the Host opens Popkin settings, and chooses Wrap up: End it now and send the recap."] },
+    { "id": "ask", "bars": 8, "lines": ["The wrap-up screen asks: Wrap up Lakeside Weekend? It says what happens next for all fourteen of you: everyone gets a recap, and chat goes quiet.", "Keep the photo album is on. Turn it off, and photos are removed after thirty days."] },
+    { "id": "wrapping", "bars": 4, "lines": ["Choose Wrap it up. The button reads Wrapping up, and the recap opens for everyone who has the Popkin open."] },
+    { "id": "recap", "bars": 7, "lines": ["This Popkin wrapped up. What a time.", "Fourteen people showed up. One thousand two hundred and eighty-six messages sent, forty-eight photos shared, and the top-rated moment: Sunrise canoe to Heron Point."] },
+    { "id": "album", "bars": 6, "lines": ["Save the album prepares a zip of every photo, and shows its progress: Preparing twelve of forty-eight.", "If the album was not kept, a notice counts the days: Photos go in twelve days."] },
+    { "id": "readonly", "bars": 7, "lines": ["The chat stays readable: This Popkin has wrapped up. Messages stay, but nobody can post new ones.", "Photos and Experiences stay readable too, and nothing can be added."] },
+    { "id": "lasthour", "bars": 7, "lines": ["A Popkin with an end date warns in its last hour: One hour left.", "Every member sees the banner. The Host's offers Change.", "When the time comes, it wraps up by itself, with its photo album kept."] },
+    { "id": "next", "bars": 4, "lines": ["From the recap, the Host can Pop up another with this crew. A member can Start your own Popkin."] },
+    { "id": "grow", "bars": 7, "lines": [
+      { "text": "On a phone, the recap is one column.", "at": 0 },
+      { "text": "From ten twenty-four pixels, its pictures sit beside its numbers and actions.", "at": 8 },
+      { "text": "And from seven sixty-eight, the wrap-up screen shows the recap it will make.", "at": 18 }
+    ] },
+    { "id": "proof", "bars": 7, "lines": ["What no screen shows: once a Popkin has wrapped up, every request to add to it is refused, and only the Host can wrap one up.", "Still to come: Change how long it lasts."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey nine. Popkin is a free platform for pop-up communities."] }
+  ]
+}

@@ -17,6 +17,7 @@ export const HUB_EVENTS = {
   participantLeft: 'ParticipantLeft',
   participantMediaChanged: 'ParticipantMediaChanged',
   signal: 'Signal',
+  popkinWrappedUp: 'PopkinWrappedUp',
 } as const;
 
 /** What the app asks of `PopkinHub`, by the names the server gives its methods. */

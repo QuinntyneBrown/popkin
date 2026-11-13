@@ -6,7 +6,12 @@
   }
 </span>
 <span class="card__main">
-  <span class="row__title row__title--display truncate">{{ title() }}</span>
+  @if (kicker()) {
+    <span class="card__kicker">{{ kicker() }}</span>
+  }
+  <span class="row__title row__title--display" [class.truncate]="!kicker()">{{ title() }}</span>
   <span pk-rating [value]="rating()" [label]="ratings()"></span>
 </span>
-<svg pk-icon name="chevron-right" size="md"></svg>
+@if (!kicker()) {
+  <svg pk-icon name="chevron-right" size="md"></svg>
+}

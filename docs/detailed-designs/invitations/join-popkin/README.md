@@ -121,8 +121,8 @@ Still waiting:
   heading and a text, and no action;
 - the toast on the other screens of a Popkin: with those screens, and with the hub connection
   starting outside the thread ([Live messages](../../chat/live-messages/README.md));
-- the recap a member of a wrapped-up Popkin is sent to (L2-016 AC3): with wrapping up
-  (journey 9).
+- the recap a member of a wrapped-up Popkin is sent to (L2-016 AC3) was built with wrapping
+  up, journey 9 ([Recap](../../wrap-up/recap/README.md)).
 
 Steps 5 and 6 of `JoinPopkinCommandHandler` below are built.
 

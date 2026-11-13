@@ -15,6 +15,8 @@ export class PopkinHomePage {
   readonly actions: Locator;
   readonly groupCall: Locator;
   readonly invite: Locator;
+  /** "Popkin settings": the one of the two the width shows. */
+  readonly settings: Locator;
   readonly loading: Locator;
   readonly skeletons: Locator;
   readonly main: Locator;
@@ -77,6 +79,9 @@ export class PopkinHomePage {
     this.actions = this.header.locator('.home-header__actions');
     this.groupCall = this.header.getByRole('link', { name: 'Group call' });
     this.invite = this.header.getByRole('button', { name: 'Invite', exact: true });
+    this.settings = this.header
+      .getByRole('button', { name: 'Popkin settings' })
+      .filter({ visible: true });
     this.loading = page.getByRole('status').filter({ hasText: 'Loading this Popkin…' });
     this.skeletons = page.locator('.skeleton');
     this.main = page.locator('.home__main');
@@ -173,5 +178,10 @@ export class PopkinHomePage {
   async columns(): Promise<number> {
     const [main, side] = await Promise.all([this.main.boundingBox(), this.side.boundingBox()]);
     return main && side && Math.abs(main.x - side.x) > 1 ? 2 : 1;
+  }
+
+  /** A tab of the Popkin, by its name. */
+  tab(name: 'Home' | 'Chat' | 'Photos' | 'Experiences'): Locator {
+    return this.nav.getByRole('link', { name: new RegExp(`^${name}`) });
   }
 }

@@ -9,6 +9,13 @@ export interface PopkinHomeView {
   emoji: string;
   colour: PopkinColour;
   status: 'Active' | 'WrappedUp';
+  /** When it wrapped up; null while it is active. */
+  wrappedUpAt: string | null;
+  keepPhotos: boolean;
+  /** When the photos of an album that was not kept go (L2-045 AC4). */
+  photosRemoveAt: string | null;
+  /** When they went. */
+  photosRemovedAt: string | null;
   /** ISO date-time; null when the Popkin keeps going. */
   endsAt: string | null;
   memberCount: number;

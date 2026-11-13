@@ -18,6 +18,7 @@ export class PhotoAlbumPage {
   readonly addFloating: Locator;
   /** "Add photos" of the empty album and of Mine with none. */
   readonly addFirst: Locator;
+  readonly seeTheRecap: Locator;
   readonly showEveryones: Locator;
   readonly days: Locator;
   readonly grids: Locator;
@@ -58,6 +59,7 @@ export class PhotoAlbumPage {
     this.empty = this.album.locator('.empty');
     this.emptyHeading = this.empty.getByRole('heading');
     this.addFirst = this.empty.getByRole('button', { name: 'Add photos' });
+    this.seeTheRecap = this.empty.getByRole('link', { name: 'See the recap' });
     this.showEveryones = this.empty.getByRole('button', { name: 'Show everyone’s' });
     this.days = this.album.locator('.group-label');
     this.grids = this.album.locator('.photo-grid');

@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { parity } from '../../fixtures/parity';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
@@ -46,5 +47,12 @@ parity('experience-detail', [
     ...experienceStates.experienceDetailLoading,
     name: 'loading',
     region: (page) => new ExperienceDetailPage(page).detail,
+  },
+  // A wrapped-up Popkin: the score alone, with no panel to rate it beside it.
+  {
+    key: 'experienceDetailWrapped',
+    ...wrapUpStates.experienceDetailWrapped,
+    name: 'wrapped-cards',
+    region: (page) => new ExperienceDetailPage(page).cards,
   },
 ]);

@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { AddCommentDialog } from '../../pages/add-comment.dialog';
 import { DeleteExperienceDialog } from '../../pages/delete-experience.dialog';
@@ -12,6 +13,7 @@ import { howLongForLakeside } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { EndDateDialog } from '../../pages/end-date.dialog';
 import { HowLongPage } from '../../pages/how-long.page';
+import { PopkinSettingsDialog } from '../../pages/popkin-settings.dialog';
 
 const openEndDate = async (page: Page, today?: Date) => {
   await howLongForLakeside(page, today);
@@ -170,5 +172,11 @@ parity('dialog', [
     name: 'add-comment-invalid',
     region: (page) => new AddCommentDialog(page).panel,
     prepare: (page) => new AddCommentDialog(page).comment.focus(),
+  },
+  {
+    key: 'popkinSettings',
+    ...wrapUpStates.popkinSettings,
+    name: 'popkin-settings',
+    region: (page) => new PopkinSettingsDialog(page).panel,
   },
 ]);

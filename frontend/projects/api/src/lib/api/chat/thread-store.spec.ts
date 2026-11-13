@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   MemberJoinedView,
   MessagePageView,
@@ -14,6 +14,8 @@ import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { CHAT_API, ChatApi, MessagesCursor } from './chat-api';
 import { OUTBOX_STORAGE } from './message-outbox';
 import { NETWORK_STATUS } from './network-status';
+import { POPKINS_API } from '../popkins/popkins-api';
+import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
 import { ThreadStore } from './thread-store';
 import { UnreadTracker } from './unread-tracker';
 
@@ -123,6 +125,7 @@ describe('ThreadStore', () => {
     presenceChanged$: new Subject<{ popkinId: string; version: number; hereNow: number }>(),
     memberJoined$: new Subject<{ popkinId: string; member: MemberJoinedView }>(),
     reconnected$: new Subject<void>(),
+    popkinWrappedUp$: new Subject<string>(),
     started: 0,
     start() {
       this.started++;
@@ -142,6 +145,7 @@ describe('ThreadStore', () => {
         ThreadStore,
         { provide: CHAT_API, useValue: chat },
         { provide: POPKIN_REALTIME, useValue: realtime },
+        { provide: POPKINS_API, useValue: {} },
         { provide: NETWORK_STATUS, useValue: { online: signal(true), backOnline$: new Subject() } },
         { provide: OUTBOX_STORAGE, useValue: { load: () => [], save: () => undefined } },
       ],
@@ -158,6 +162,17 @@ describe('ThreadStore', () => {
       expect(store.thread()?.popkinName).toBe('Lakeside Weekend');
       expect(shown()).toEqual(['message 1', 'message 2', 'message 3']);
       expect(realtime.started).toBeGreaterThan(0);
+    });
+
+    it('has the watch look at the Popkin until it has wrapped up (L2-044 AC4)', () => {
+      const look = vi.spyOn(TestBed.inject(WrapUpWatch), 'look');
+      const endsAt = new Date(2026, 8, 13, 18, 0).toISOString();
+      chat.thread = { ...thread, endsAt };
+      store.open('p');
+      expect(look).toHaveBeenLastCalledWith('p', endsAt);
+      chat.thread = { ...thread, endsAt, readOnly: true };
+      store.open('p');
+      expect(look).toHaveBeenLastCalledWith(null, null);
     });
 
     it('is empty when the Popkin has no messages (L2-021 AC8)', () => {

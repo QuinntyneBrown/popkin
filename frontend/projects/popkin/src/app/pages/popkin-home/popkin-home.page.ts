@@ -8,7 +8,7 @@ import {
   input,
   untracked,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   AvatarView,
   CallBannerStore,
@@ -42,6 +42,11 @@ import {
   Section,
   TopBar,
 } from 'components';
+import {
+  PopkinSetting,
+  PopkinSettingsData,
+  PopkinSettingsDialog,
+} from '../../dialogs/popkin-settings/popkin-settings.dialog';
 import { InviteData, InviteDialog } from '../../dialogs/invite/invite.dialog';
 
 /** How many of what a section holds the home lists; the layout shows fewer on a narrow screen. */
@@ -91,6 +96,7 @@ export class PopkinHomePage {
   private readonly unread = inject(UnreadTracker);
   private readonly errors = inject(ErrorScreens);
   private readonly dialog = inject(Dialog);
+  private readonly router = inject(Router);
 
   protected readonly popkin = this.store.popkin;
   protected readonly accent = computed(() => {
@@ -171,6 +177,13 @@ export class PopkinHomePage {
     effect(() => {
       if (this.store.state() === 'not-found') untracked(() => this.errors.showNotFound());
     });
+    // L2-045 AC5: a wrapped-up Popkin shows its recap first.
+    effect(() => {
+      if (this.store.state() !== 'wrapped-up') return;
+      untracked(
+        () => void this.router.navigate(['/p', this.popkinId(), 'recap'], { replaceUrl: true }),
+      );
+    });
   }
 
   /** "Bring someone in" (L2-011); closing it returns focus to what opened it. */
@@ -182,6 +195,28 @@ export class PopkinHomePage {
       // pk-dialog draws its own backdrop, as the mocks do.
       hasBackdrop: false,
       ariaModal: true,
+    });
+  }
+
+  /**
+   * The Host's banner offers to change how long the Popkin lasts (L2-044 AC2). Until that
+   * dialog is built (journey 16), "Change" opens Popkin settings, where it will be.
+   */
+  protected readonly isHost = computed(() => this.popkin()?.viewerRole === 'Host');
+
+  /** "Popkin settings" (L2-020): what a member, or the Host, may do with the Popkin. */
+  protected settings(): void {
+    const popkin = this.popkin();
+    if (!popkin) return;
+    const opened = this.dialog.open<PopkinSetting, PopkinSettingsData>(PopkinSettingsDialog, {
+      data: { accent: this.accent(), name: popkin.name, host: popkin.viewerRole === 'Host' },
+      ariaLabelledBy: 'dlg-title',
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((setting) => {
+      if (setting === 'invite') this.invite();
+      if (setting === 'wrap-up') void this.router.navigate(['/p', this.popkinId(), 'wrap-up']);
     });
   }
 

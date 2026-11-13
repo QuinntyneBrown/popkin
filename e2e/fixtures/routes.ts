@@ -21,6 +21,8 @@ const photo = `${photos}/00000000-0000-4000-a000-000000000018`;
 const experiences = `${home}/experiences`;
 // The experience the mocks open: the sunrise canoe to Heron Point.
 const experience = `${experiences}/00000000-0000-4000-a000-000000000081`;
+const wrapUp = `${home}/wrap-up`;
+const recap = `${home}/recap`;
 // One the signed-in Host did not share: Ellie's idea, a beach day next summer.
 const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
 
@@ -145,6 +147,29 @@ export const routes = {
     mock: 'pages/server-error/default.html',
   },
   notFound: { app: '/no-such-screen', mock: 'pages/not-found/default.html' },
+  // Journey 9, Wrap up.
+  popkinSettings: { app: home, mock: 'dialogs/popkin-settings/host-now.html' },
+  popkinSettingsMember: { app: home, mock: 'dialogs/popkin-settings/member-now.html' },
+  wrapUp: { app: wrapUp, mock: 'pages/wrap-up/default.html' },
+  wrapUpAlbumOff: { app: wrapUp, mock: 'pages/wrap-up/album-off.html' },
+  wrapUpSubmitting: { app: wrapUp, mock: 'pages/wrap-up/submitting.html' },
+  wrapUpError: { app: wrapUp, mock: 'pages/wrap-up/error.html' },
+  recap: { app: recap, mock: 'pages/wrapped-up/default.html' },
+  recapHost: { app: recap, mock: 'pages/wrapped-up/host.html' },
+  recapLoading: { app: recap, mock: 'pages/wrapped-up/loading.html' },
+  recapError: { app: recap, mock: 'pages/wrapped-up/error.html' },
+  recapExporting: { app: recap, mock: 'pages/wrapped-up/exporting.html' },
+  recapPlain: { app: recap, mock: 'pages/wrapped-up/plain.html' },
+  // The album was not kept: the recap under the banner that counts the days.
+  recapGoing: { app: recap, mock: 'notifications/banner/persistent.html' },
+  popkinHomeLastHour: { app: home, mock: 'pages/popkin-home/last-hour.html' },
+  popkinHomeLastHourMember: { app: home, mock: 'pages/popkin-home/last-hour-member.html' },
+  groupChatReadOnly: { app: chat, mock: 'pages/group-chat/read-only.html' },
+  photoAlbumWrapped: { app: photos, mock: 'pages/photo-album/wrapped.html' },
+  photoAlbumGoing: { app: photos, mock: 'pages/photo-album/going.html' },
+  photoAlbumRemoved: { app: photos, mock: 'pages/photo-album/removed.html' },
+  experiencesWrapped: { app: experiences, mock: 'pages/experiences/wrapped.html' },
+  experienceDetailWrapped: { app: experience, mock: 'pages/experience-detail/wrapped.html' },
 } satisfies Record<string, ScreenRoute>;
 
 export type RouteKey = keyof typeof routes;

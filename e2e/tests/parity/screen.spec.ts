@@ -1,3 +1,4 @@
+import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import {
   joelAtTheMockInvite,
   joelWhoseJoinFails,
@@ -12,6 +13,8 @@ import { JoinInvitePage } from '../../pages/join-invite.page';
 import { NotFoundPage } from '../../pages/not-found.page';
 import { YourProfilePage } from '../../pages/your-profile.page';
 import { YoureInPage } from '../../pages/youre-in.page';
+import { WrapUpPage } from '../../pages/wrap-up.page';
+import { RecapPage } from '../../pages/recap.page';
 
 parity('screen', [
   { key: 'notFound', region: (page) => new NotFoundPage(page).screen },
@@ -66,5 +69,44 @@ parity('screen', [
     region: (page) => new YoureInPage(page).screen,
     before: joelAtTheMockInvite,
     app: joinFromTheInvite,
+  },
+  // Wrap up: the Popkin's tile above the heading, a split screen from 768 px.
+  {
+    key: 'wrapUp',
+    ...wrapUpStates.wrapUp,
+    name: 'wrap-up',
+    region: (page) => new WrapUpPage(page).main,
+  },
+  {
+    key: 'wrapUpAlbumOff',
+    ...wrapUpStates.wrapUpAlbumOff,
+    name: 'wrap-up-album-off',
+    region: (page) => new WrapUpPage(page).main,
+  },
+  {
+    key: 'wrapUpSubmitting',
+    ...wrapUpStates.wrapUpSubmitting,
+    name: 'wrap-up-submitting',
+    region: (page) => new WrapUpPage(page).main,
+  },
+  // What went wrong sits between the lead and the facts.
+  {
+    key: 'wrapUpError',
+    ...wrapUpStates.wrapUpError,
+    name: 'wrap-up-error',
+    region: (page) => new WrapUpPage(page).main,
+  },
+  // The recap's body: right under the top bar, on the Popkin's wash.
+  {
+    key: 'recap',
+    ...wrapUpStates.recap,
+    name: 'recap',
+    region: (page) => new RecapPage(page).main,
+  },
+  {
+    key: 'recapError',
+    ...wrapUpStates.recapError,
+    name: 'recap-error',
+    region: (page) => new RecapPage(page).main,
   },
 ]);
