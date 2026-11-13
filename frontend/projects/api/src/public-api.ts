@@ -46,3 +46,7 @@ export * from './lib/api/photos/album-store';
 export * from './lib/api/photos/photo-uploads';
 export * from './lib/api/photos/photo-view-store';
 export * from './lib/api/popkins/popkin-frame';
+export * from './lib/api/auth/parse-contact';
+export * from './lib/models/my-popkins';
+export * from './lib/api/popkins/my-popkins-text';
+export * from './lib/api/invites/invite-input';
