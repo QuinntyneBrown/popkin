@@ -19,6 +19,31 @@ public sealed class DevelopmentCodeSender(ContactChannel channel, ILogger<Develo
     }
 }
 
+/// <summary>
+/// Development only: says in the log that a crew invite was sent instead of sending it, because
+/// the SMS and email providers are `&lt;TO SUPPLY&gt;`. The destination, the link and the names
+/// are never logged (L2-054 AC3).
+/// </summary>
+public sealed class DevelopmentCrewInviteSender(ContactChannel channel, ILogger<DevelopmentCrewInviteSender> logger) : ICrewInviteSender
+{
+    public ContactChannel Channel => channel;
+
+    public Task SendAsync(string destination, CrewInviteMessage invite, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Development {Channel} crew invite: not sent, no provider is chosen", channel);
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Where no provider is configured, no crew invite is sent; the Host's request is accepted all the same.</summary>
+public sealed class UnconfiguredCrewInviteSender(ContactChannel channel) : ICrewInviteSender
+{
+    public ContactChannel Channel => channel;
+
+    public Task SendAsync(string destination, CrewInviteMessage invite, CancellationToken cancellationToken) =>
+        throw new CrewInviteNotSentException();
+}
+
 /// <summary>Where no provider is configured, every code fails to send (503 code_not_sent).</summary>
 public sealed class UnconfiguredCodeSender(ContactChannel channel) : ICodeSender
 {

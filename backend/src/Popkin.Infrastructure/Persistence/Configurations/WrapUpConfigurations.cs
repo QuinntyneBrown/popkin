@@ -19,3 +19,16 @@ public sealed class AlbumExportConfiguration : IEntityTypeConfiguration<AlbumExp
         builder.HasOne<Membership>().WithMany().HasForeignKey(e => e.RequestedByMembershipId).OnDelete(DeleteBehavior.Restrict);
     }
 }
+
+public sealed class CrewInviteConfiguration : IEntityTypeConfiguration<CrewInvite>
+{
+    public void Configure(EntityTypeBuilder<CrewInvite> builder)
+    {
+        builder.ToTable("CrewInvites");
+        builder.HasKey(i => i.Id);
+        // A person is sent a Popkin's invite once.
+        builder.HasIndex(i => new { i.PopkinId, i.PersonId }).IsUnique();
+        builder.HasOne<PopkinSpace>().WithMany().HasForeignKey(i => i.PopkinId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Person>().WithMany().HasForeignKey(i => i.PersonId).OnDelete(DeleteBehavior.Restrict);
+    }
+}

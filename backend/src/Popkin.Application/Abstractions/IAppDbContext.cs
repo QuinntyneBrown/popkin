@@ -34,5 +34,7 @@ public interface IAppDbContext
 
     DbSet<AlbumExport> AlbumExports { get; }
 
+    DbSet<CrewInvite> CrewInvites { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

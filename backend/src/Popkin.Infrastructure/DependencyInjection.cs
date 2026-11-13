@@ -90,10 +90,13 @@ public static class DependencyInjection
             if (development)
             {
                 services.AddSingleton<ICodeSender>(sp => new DevelopmentCodeSender(channel, sp.GetRequiredService<ILogger<DevelopmentCodeSender>>()));
+                services.AddSingleton<ICrewInviteSender>(
+                    sp => new DevelopmentCrewInviteSender(channel, sp.GetRequiredService<ILogger<DevelopmentCrewInviteSender>>()));
             }
             else
             {
                 services.AddSingleton<ICodeSender>(new UnconfiguredCodeSender(channel));
+                services.AddSingleton<ICrewInviteSender>(new UnconfiguredCrewInviteSender(channel));
             }
         }
 
