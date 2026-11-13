@@ -87,6 +87,30 @@ public sealed class LeavePopkinTests
         Assert.Equal(1, call.GetProperty("participantCount").GetInt32());
     }
 
+    // Given Joel on a direct call with the Host, and on the group call as well,
+    // when Joel leaves the Popkin,
+    // then he is off both calls: each has the Host alone.
+    [Fact]
+    public async Task Leaving_takes_the_member_off_a_direct_call_too()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var joel = await api.SignedUpAsync("Joel Ferreira", "(415) 555-0123");
+        await joel.JoinAsync(lakeside.Code, "Joel Ferreira");
+        var threadId = await lakeside.Host.DirectThreadIdAsync(lakeside.Id, await joel.MembershipIdAsync(lakeside.Id));
+        await lakeside.Host.OnDirectCallAsync(lakeside.Id, threadId);
+        await joel.OnDirectCallAsync(lakeside.Id, threadId);
+        await lakeside.Host.OnCallAsync(lakeside.Id);
+        await joel.OnCallAsync(lakeside.Id);
+
+        await LeaveAsync(joel, lakeside.Id);
+
+        var direct = await (await lakeside.Host.CurrentDirectCallAsync(lakeside.Id, threadId)).Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(1, direct.GetProperty("participantCount").GetInt32());
+        var group = await (await lakeside.Host.CurrentCallAsync(lakeside.Id)).Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(1, group.GetProperty("participantCount").GetInt32());
+    }
+
     // Given the Host of Lakeside Weekend,
     // when they ask to leave, by a request made by hand,
     // then it is refused with 403 host_cannot_leave, and they are still its Host.
