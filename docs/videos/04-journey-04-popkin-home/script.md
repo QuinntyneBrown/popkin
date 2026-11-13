@@ -32,7 +32,7 @@ Invite opens Bring someone in: the QR code and the invite link. Copy invite link
 
 **grow** (10 bars)
 
-On a phone, the home is one column. From a tablet, the tabs are a rail. On a laptop, a sidebar names the Popkin, with its members and the time left, and the home goes to two columns. Wider still, the same home, with more room.
+On a phone, the home is one column, with the tabs along the bottom. From a tablet, the tabs become a rail. On a laptop, a sidebar names the Popkin, with its members and the time left, and the home goes to two columns. Wider still, the same home, with more room.
 
 **wide** (5 bars)
 

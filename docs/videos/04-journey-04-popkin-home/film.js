@@ -179,8 +179,8 @@ Film.scene('grow', (S) => {
       { src: 'shots/home-xl.png', width: 1440, height: 900 },
     ], p, { height: 760 })}
   </div>
-  ${label(0, 'A phone: one column')}
-  ${label(1, 'From 768 px: the tabs are a rail')}
+  ${label(0, 'A phone: one column, the tabs along the bottom')}
+  ${label(1, 'From 768 px: the tabs become a rail')}
   ${label(2, 'From 1024 px: the sidebar, and two columns')}
   ${label(3, '1440 px: the same home, with more room')}
   </div>`;

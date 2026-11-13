@@ -296,10 +296,10 @@ window.FILM_TIMING = {
   },
   {
    "scene": "grow",
-   "text": "On a phone, the home is one column.",
-   "caption": "On a phone, the home is one column.",
+   "text": "On a phone, the home is one column, with the tabs along the bottom.",
+   "caption": "On a phone, the home is one column, with the tabs along the bottom.",
    "start": 84.0,
-   "end": 85.955,
+   "end": 87.867,
    "speed": 1.0,
    "window": [
     84.0,
@@ -308,10 +308,10 @@ window.FILM_TIMING = {
   },
   {
    "scene": "grow",
-   "text": "From a tablet, the tabs are a rail.",
-   "caption": "From a tablet, the tabs are a rail.",
+   "text": "From a tablet, the tabs become a rail.",
+   "caption": "From a tablet, the tabs become a rail.",
    "start": 89.0,
-   "end": 90.878,
+   "end": 91.05,
    "speed": 1.0,
    "window": [
     89.0,
@@ -521,13 +521,13 @@ window.FILM_TIMING = {
   },
   {
    "start": 84.0,
-   "end": 86.255,
-   "text": "On a phone, the home is one column."
+   "end": 88.167,
+   "text": "On a phone, the home is one column, with the tabs along the bottom."
   },
   {
    "start": 89.0,
-   "end": 91.178,
-   "text": "From a tablet, the tabs are a rail."
+   "end": 91.35,
+   "text": "From a tablet, the tabs become a rail."
   },
   {
    "start": 92.0,

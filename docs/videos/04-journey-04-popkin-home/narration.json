@@ -14,8 +14,8 @@
     { "id": "partial", "bars": 5, "lines": ["If one section fails to load, it says so, with Try again. The rest of the Popkin is fine.", "Try again, and the photos are back."] },
     { "id": "invite", "bars": 6, "lines": ["Invite opens Bring someone in: the QR code and the invite link.", "Copy invite link, and the button reads Copied.", "A sheet on a phone, centred on a wider screen."] },
     { "id": "grow", "bars": 10, "lines": [
-      { "text": "On a phone, the home is one column.", "at": 0 },
-      { "text": "From a tablet, the tabs are a rail.", "at": 10 },
+      { "text": "On a phone, the home is one column, with the tabs along the bottom.", "at": 0 },
+      { "text": "From a tablet, the tabs become a rail.", "at": 10 },
       { "text": "On a laptop, a sidebar names the Popkin, with its members and the time left, and the home goes to two columns.", "at": 16 },
       { "text": "Wider still, the same home, with more room.", "at": 32 }
     ] },

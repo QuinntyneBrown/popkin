@@ -3,8 +3,8 @@
 A member opens the home of a Popkin and sees it at a glance: who is in it and how long is left,
 the latest of the chat, the photos, the experiences and the members. A new Popkin says what each
 section is for; a section that fails says so on its own; Invite opens the QR code. The home is one
-column on a phone, gains the rail and then the sidebar as the screen grows, and goes to two
-columns.
+column on a phone with the tabs along the bottom; as the screen grows the tabs become the rail and
+then the sidebar, and the home goes to two columns.
 
 - **Film:** [`04-journey-04-popkin-home.mp4`](04-journey-04-popkin-home.mp4), 1920×1080, 30 fps,
   2 min 12 s. Captions: [`captions.vtt`](captions.vtt), not burned in.
@@ -13,7 +13,7 @@ columns.
   ([credits](../assets/music/CREDITS.md)), reused from videos 01 to 03. 120 BPM; a bar is two
   seconds and every scene is a whole number of bars. The track is 116 seconds long, so it starts
   again, on a bar, at 1:56.
-- **Requirements shown:** L2-019 (AC1 to AC6, AC8, AC9; AC7 from 768 px), L2-027 AC3,
+- **Requirements shown:** L2-019 (AC1 to AC9), L2-027 AC3,
   L2-011 (AC1, AC2, AC4), L2-058 AC8, L2-059.
 
 ## Run sheet
@@ -22,7 +22,7 @@ columns.
 |---|---|---|---|---|
 | 0:00 | 4 | `hook` | The home on a phone, dark, over an aurora | A Popkin, **at a glance.** |
 | 0:08 | 7 | `header` | The home on a phone; the emoji, name, avatars and "14 members", the time left, and "Group call" and "Invite" close up | Who’s in, **how long.** |
-| 0:22 | 7 | `chat` | The Chat card with "3 new", then with "Kettle is on" and "4 new"; the Chat tab of the rail with 3, then 4 | The latest, **and what’s new.** |
+| 0:22 | 7 | `chat` | The Chat card with "3 new", then with "Kettle is on" and "4 new"; the Chat tab with 3, then 4 | The latest, **and what’s new.** |
 | 0:36 | 7 | `sections` | Photos, Experiences and Members, close up, one by one | Photos. Experiences. **Members.** |
 | 0:50 | 6 | `empty` | The home of a new Popkin: "It’s just you so far", "No photos yet", "Nothing shared yet" | Never a **blank page.** |
 | 1:02 | 5 | `partial` | "Photos didn’t load. The rest of the Popkin is fine." with "Try again", then the photos | One fails. **The rest is fine.** |
@@ -48,15 +48,9 @@ A wipe in a Popkin colour marks each change of act (into `chat`, `empty`, `invit
   not built, and the film opens none of them.
 - **"Group call" is a link** in the Popkin's colour (L2-019 AC2); the call is a later journey and
   is not shown. Nor are Popkin settings, My Popkins or the recap.
-- **On a phone the home shows no tabs.** As built, the home's navigation is absent below 768 px
-  (the header has the way back to My Popkins), where the mock
-  `docs/mocks/pages/popkin-home/default.html` draws four tabs along the bottom. The film shows
-  what the app does: `grow` says "one column" for the phone and names the tabs from 768 px, and
-  the count on the Chat tab in `chat` is the rail's, at 768 px.
 - "Kettle is on" is pushed over the stubbed hub while the home is open on a phone, as the server
-  sends a message to a thread; the card and its count change without a reload (L2-027 AC3). The
-  close-up of the Chat tab with 4 is the same page made 768 px wide afterwards, without a reload.
-  No two real devices were filmed.
+  sends a message to a thread; the card and its count change without a reload (L2-027 AC3), and
+  so does the count on the Chat tab along the bottom. No two real devices were filmed.
 - The clock of the pictures is the mocks' Saturday (12 September 2026) at twenty to noon on the
   device, twenty minutes before the specs' clock, so the time left reads "1 day 6 hrs" for every
   shot while the clock runs.
