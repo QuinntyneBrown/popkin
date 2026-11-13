@@ -42,6 +42,13 @@ public sealed class GetEveryoneThreadQueryHandler(IAppDbContext db, IMembershipG
             .FirstAsync(t => t.PopkinId == popkin.Id && t.Kind == ChatThreadKind.Everyone, cancellationToken);
         var memberCount = await db.Memberships.CountAsync(m => m.PopkinId == popkin.Id && m.LeftAt == null, cancellationToken);
 
+        // Unread: the messages of others after the reader's read point; all of them before the first read.
+        var read = await db.ThreadReadStates.AsNoTracking()
+            .FirstOrDefaultAsync(s => s.ThreadId == thread.Id && s.MembershipId == membership.Id, cancellationToken);
+        var byOthers = db.Messages.Where(m => m.ThreadId == thread.Id && m.DeletedAt == null && m.AuthorMembershipId != membership.Id);
+        var unreadCount = await (read is null ? byOthers : byOthers.After(new MessagePoint(read.LastReadSentAt, read.LastReadMessageId)))
+            .CountAsync(cancellationToken);
+
         return new ThreadDto(
             thread.Id,
             popkin.Id,
@@ -54,8 +61,8 @@ public sealed class GetEveryoneThreadQueryHandler(IAppDbContext db, IMembershipG
             HereNow: 0,
             PresenceVersion: 0,
             popkin.Status == PopkinStatus.WrappedUp,
-            UnreadCount: 0,
-            LastReadMessageId: null,
+            unreadCount,
+            read?.LastReadMessageId,
             new ThreadViewerDto(membership.Id, PersonName.FirstName(membership.DisplayName)));
     }
 }

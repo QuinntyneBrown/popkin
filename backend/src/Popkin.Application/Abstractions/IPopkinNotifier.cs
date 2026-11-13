@@ -14,4 +14,7 @@ public interface IPopkinNotifier
 
     /// <summary>To every member of the Popkin with a connection open.</summary>
     Task MessageDeleted(Guid popkinId, Guid threadId, Guid messageId);
+
+    /// <summary>To that person only, on every connection they hold.</summary>
+    Task ThreadRead(Guid personId, Guid threadId);
 }

@@ -15,4 +15,7 @@ public interface IPopkinClient
 
     /// <summary>A message was deleted. A fact: applying it twice, or before its message, ends the same.</summary>
     Task MessageDeleted(Guid threadId, Guid messageId);
+
+    /// <summary>The person read a thread, here or on another device: its unread count is zero.</summary>
+    Task ThreadRead(Guid threadId);
 }

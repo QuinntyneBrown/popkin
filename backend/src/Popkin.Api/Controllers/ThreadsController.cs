@@ -13,4 +13,14 @@ public sealed class ThreadsController(ISender sender) : ControllerBase
     [HttpGet("everyone")]
     public async Task<ActionResult<ThreadDto>> GetEveryone(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetEveryoneThreadQuery(popkinId), cancellationToken));
+
+    public sealed record MarkReadRequest(Guid? LastReadMessageId);
+
+    /// <summary>Moves the caller's read point forward to a message; it never moves back (L2-027 AC4).</summary>
+    [HttpPut("{threadId:guid}/read")]
+    public async Task<IActionResult> MarkRead(Guid popkinId, Guid threadId, MarkReadRequest request, CancellationToken cancellationToken)
+    {
+        await sender.Send(new MarkThreadReadCommand(popkinId, threadId, request.LastReadMessageId), cancellationToken);
+        return NoContent();
+    }
 }

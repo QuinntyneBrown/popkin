@@ -21,6 +21,9 @@ public sealed class SignalRPopkinNotifier(
     public Task MessageDeleted(Guid popkinId, Guid threadId, Guid messageId) =>
         SendAsync(nameof(IPopkinClient.MessageDeleted), () => Group(popkinId).MessageDeleted(threadId, messageId));
 
+    public Task ThreadRead(Guid personId, Guid threadId) =>
+        SendAsync(nameof(IPopkinClient.ThreadRead), () => hub.Clients.User(personId.ToString()).ThreadRead(threadId));
+
     private IPopkinClient Group(Guid popkinId) => hub.Clients.Group(PopkinHub.GroupOf(popkinId));
 
     private async Task SendAsync(string eventName, Func<Task> send)

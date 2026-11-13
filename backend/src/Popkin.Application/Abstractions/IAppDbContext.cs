@@ -20,5 +20,7 @@ public interface IAppDbContext
 
     DbSet<Message> Messages { get; }
 
+    DbSet<ThreadReadState> ThreadReadStates { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

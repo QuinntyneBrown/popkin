@@ -21,3 +21,16 @@ public sealed class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.HasOne<Membership>().WithMany().HasForeignKey(m => m.AuthorMembershipId).OnDelete(DeleteBehavior.Restrict);
     }
 }
+
+public sealed class ThreadReadStateConfiguration : IEntityTypeConfiguration<ThreadReadState>
+{
+    public void Configure(EntityTypeBuilder<ThreadReadState> builder)
+    {
+        builder.ToTable("ThreadReadStates");
+        // One read point per member and thread.
+        builder.HasKey(s => new { s.ThreadId, s.MembershipId });
+        builder.HasIndex(s => s.MembershipId);
+        builder.HasOne<ChatThread>().WithMany().HasForeignKey(s => s.ThreadId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Membership>().WithMany().HasForeignKey(s => s.MembershipId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
