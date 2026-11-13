@@ -9,6 +9,12 @@ namespace Popkin.Api.Tests.Support;
 public sealed class DatabaseFaults
 {
     public bool FailSaves { get; set; }
+
+    /// <summary>
+    /// Makes the next save lose a race: the action stores the winner, then the save fails as a
+    /// unique index would fail it. The InMemory provider has no unique index of its own.
+    /// </summary>
+    public Func<Task>? LoseNextSaveTo { get; set; }
 }
 
 /// <summary>The database as handlers see it, with faults a test can switch on (ADR 0005).</summary>
@@ -28,8 +34,20 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<Message> Messages => inner.Messages;
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
-        faults.FailSaves
-            ? throw new InvalidOperationException("Simulated database failure in table Popkins.")
-            : inner.SaveChangesAsync(cancellationToken);
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        if (faults.FailSaves)
+        {
+            throw new InvalidOperationException("Simulated database failure in table Popkins.");
+        }
+
+        if (faults.LoseNextSaveTo is { } winner)
+        {
+            faults.LoseNextSaveTo = null;
+            await winner();
+            throw new DbUpdateException("Simulated violation of a unique index.");
+        }
+
+        return await inner.SaveChangesAsync(cancellationToken);
+    }
 }

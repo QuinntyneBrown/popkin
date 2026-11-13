@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
 using Popkin.Application.Security;
@@ -38,6 +39,13 @@ public sealed class SendMessageCommandHandler(
             throw ProblemException.Invalid("message_too_long", "A message is at most 2,000 characters.", "text");
         }
 
+        // A repeat of a message this author already sent answers the stored one, whatever the
+        // repeat says, so "Try again" after a lost answer adds nothing (L2-028 AC1).
+        if (await StoredAsync(membership.Id, clientMessageId, cancellationToken) is { } stored)
+        {
+            return new SendMessageResult(MessageDto.Of(stored, membership, photos), Created: false);
+        }
+
         if (popkin.Status == PopkinStatus.WrappedUp)
         {
             throw new ProblemException(409, "popkin_wrapped_up", "This Popkin has wrapped up.");
@@ -45,7 +53,27 @@ public sealed class SendMessageCommandHandler(
 
         var message = Message.Send(thread.Id, membership.Id, text, clientMessageId, clock.GetUtcNow());
         db.Messages.Add(message);
-        await db.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            // Two sends of one client message id raced and this one lost on the unique index:
+            // the winner is the message.
+            var winner = await StoredAsync(membership.Id, clientMessageId, cancellationToken);
+            if (winner is null)
+            {
+                throw;
+            }
+
+            return new SendMessageResult(MessageDto.Of(winner, membership, photos), Created: false);
+        }
+
         return new SendMessageResult(MessageDto.Of(message, membership, photos), Created: true);
     }
+
+    private Task<Message?> StoredAsync(Guid authorMembershipId, Guid clientMessageId, CancellationToken cancellationToken) =>
+        db.Messages.AsNoTracking().FirstOrDefaultAsync(
+            m => m.AuthorMembershipId == authorMembershipId && m.ClientMessageId == clientMessageId, cancellationToken);
 }
