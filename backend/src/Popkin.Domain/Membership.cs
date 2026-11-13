@@ -22,7 +22,11 @@ public sealed class Membership
 
     public DateTimeOffset? LeftAt { get; private set; }
 
-    public static Membership Join(Guid popkinId, Guid personId, string displayName, MembershipRole role, DateTimeOffset now) => new()
+    /// <summary>The member credited with the invite; null for the Host, who started the Popkin.</summary>
+    public Guid? InvitedByMembershipId { get; private set; }
+
+    public static Membership Join(
+        Guid popkinId, Guid personId, string displayName, MembershipRole role, DateTimeOffset now, Guid? invitedByMembershipId = null) => new()
     {
         Id = Guid.NewGuid(),
         PopkinId = popkinId,
@@ -30,5 +34,6 @@ public sealed class Membership
         DisplayName = displayName,
         Role = role,
         JoinedAt = now,
+        InvitedByMembershipId = invitedByMembershipId,
     };
 }

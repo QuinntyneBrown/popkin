@@ -48,6 +48,47 @@ public static class ApiExtensions
         return new StartedPopkin(id, body.GetProperty("inviteCode").GetString()!, endsAt, hostPersonId, host);
     }
 
+    /// <summary>Joins through an invite code with a name and, when given, a photo file.</summary>
+    public static Task<HttpResponseMessage> JoinAsync(this HttpClient client, string code, string displayName, byte[]? photo = null, string fileName = "me.jpg", string contentType = "image/jpeg")
+    {
+        var form = new MultipartFormDataContent { { new StringContent(displayName), "displayName" } };
+        if (photo is not null)
+        {
+            var file = new ByteArrayContent(photo);
+            file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+            form.Add(file, "photo", fileName);
+        }
+
+        return client.PostAsync($"/api/invites/{code}/join", form);
+    }
+
+    /// <summary>
+    /// Adds members straight to the store, a minute apart, for a cast larger than one address may
+    /// sign up within ten minutes (L2-053 AC1).
+    /// </summary>
+    public static async Task AddMembersAsync(this ApiFactory api, Guid popkinId, params string[] names)
+    {
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var popkin = db.Popkins.Single(p => p.Id == popkinId);
+        var host = db.Memberships.Single(m => m.PopkinId == popkinId && m.Role == MembershipRole.Host);
+        foreach (var name in names)
+        {
+            api.Clock.Advance(TimeSpan.FromMinutes(1));
+            var person = Person.Create(name, ContactChannel.Email, $"{Guid.NewGuid():N}@example.com", api.Clock.GetUtcNow());
+            db.People.Add(person);
+            db.Memberships.Add(popkin.Join(person.Id, name, host.Id, api.Clock.GetUtcNow()));
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    public static int MembershipCount(this ApiFactory api)
+    {
+        using var scope = api.Services.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<AppDbContext>().Memberships.Count();
+    }
+
     /// <summary>Wraps a Popkin up now, as the Host or the clock will (journey 9).</summary>
     public static async Task WrapUpAsync(this ApiFactory api, Guid popkinId)
     {

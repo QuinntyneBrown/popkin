@@ -67,6 +67,8 @@ public sealed class GetInvitePreviewQueryHandler(IAppDbContext db, ICurrentPerso
 public static class InviteProblems
 {
     public static ProblemException NotFound() => new(404, "invite_not_found", "We can't find that invite.");
+
+    public static ProblemException WrappedUp() => new(409, "popkin_wrapped_up", "This Popkin has wrapped up.");
 }
 
 public static class InviteMembers

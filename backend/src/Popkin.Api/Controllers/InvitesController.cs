@@ -21,4 +21,18 @@ public sealed class InvitesController(ISender sender) : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<InvitePreviewDto>> GetPreview(string code, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetInvitePreviewQuery(code), cancellationToken));
+
+    /// <summary>Who is already in, for a signed-in person on the profile step (L2-058 AC10).</summary>
+    [HttpGet("{code}/members")]
+    public async Task<ActionResult<InviteMembersDto>> GetMembers(string code, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetInviteMembersQuery(code), cancellationToken));
+
+    /// <summary>Joins as a member under a display name (L2-013). 200 when the caller already belongs.</summary>
+    [HttpPost("{code}/join")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<JoinedDto>> Join(string code, [FromForm] string? displayName, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new JoinPopkinCommand(code, displayName), cancellationToken);
+        return result.Created ? Created($"/api/popkins/{result.Joined.PopkinId}", result.Joined) : Ok(result.Joined);
+    }
 }
