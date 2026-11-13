@@ -42,6 +42,11 @@ import {
   Section,
   TopBar,
 } from 'components';
+import {
+  PopkinSetting,
+  PopkinSettingsData,
+  PopkinSettingsDialog,
+} from '../../dialogs/popkin-settings/popkin-settings.dialog';
 import { InviteData, InviteDialog } from '../../dialogs/invite/invite.dialog';
 
 /** How many of what a section holds the home lists; the layout shows fewer on a narrow screen. */
@@ -190,6 +195,22 @@ export class PopkinHomePage {
       // pk-dialog draws its own backdrop, as the mocks do.
       hasBackdrop: false,
       ariaModal: true,
+    });
+  }
+
+  /** "Popkin settings" (L2-020): what a member, or the Host, may do with the Popkin. */
+  protected settings(): void {
+    const popkin = this.popkin();
+    if (!popkin) return;
+    const opened = this.dialog.open<PopkinSetting, PopkinSettingsData>(PopkinSettingsDialog, {
+      data: { accent: this.accent(), name: popkin.name, host: popkin.viewerRole === 'Host' },
+      ariaLabelledBy: 'dlg-title',
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((setting) => {
+      if (setting === 'invite') this.invite();
+      if (setting === 'wrap-up') void this.router.navigate(['/p', this.popkinId(), 'wrap-up']);
     });
   }
 

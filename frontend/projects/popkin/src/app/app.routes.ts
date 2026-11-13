@@ -103,6 +103,13 @@ export const routes: Routes = [
     title: 'Everyone · Popkin',
   },
   {
+    path: 'p/:popkinId/wrap-up',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/wrap-up/wrap-up.page').then((m) => m.WrapUpPage),
+    data: data({ shell: 'bare', page: 'wrap-up' }),
+    title: 'Wrap up · Popkin',
+  },
+  {
     path: 'p/:popkinId/recap',
     canActivate: [signedInGuard],
     loadComponent: () => import('./pages/wrapped-up/wrapped-up.page').then((m) => m.WrappedUpPage),

@@ -1,0 +1,18 @@
+<div pk-dialog [heading]="data.name" [accent]="data.accent">
+  <div pk-menu-list>
+    <button pk-menu-item type="button" icon="qr" hint="QR code and link" (click)="choose('invite')">
+      Invite people
+    </button>
+    @if (data.host) {
+      <button
+        pk-menu-item
+        type="button"
+        icon="archive"
+        hint="End it now and send the recap"
+        (click)="choose('wrap-up')"
+      >
+        Wrap up
+      </button>
+    }
+  </div>
+</div>
