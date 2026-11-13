@@ -15,8 +15,11 @@ public sealed record RecapPhotoDto(Guid Id, string ThumbnailUrl);
 /// <summary>Who shared the top-rated moment: a first name, never a contact detail (L2-054 AC2).</summary>
 public sealed record RecapSharerDto(string FirstName);
 
-/// <summary>The top-rated moment: the experience with the highest score, with its score and who shared it (L2-046 AC3).</summary>
-public sealed record TopRatedDto(Guid ExperienceId, string Title, double Average, int RatingCount, RecapSharerDto SharedBy);
+/// <summary>
+/// The top-rated moment: the experience with the highest score, with its score, who shared it
+/// and its picture as its card shows it, the thumbnail at an expiring address, or null (L2-046 AC3).
+/// </summary>
+public sealed record TopRatedDto(Guid ExperienceId, string Title, string? PictureUrl, double Average, int RatingCount, RecapSharerDto SharedBy);
 
 /// <summary>
 /// The recap of a wrapped-up Popkin (L2-046): what it was, when it ran, the people who showed
@@ -50,8 +53,8 @@ public sealed class GetRecapQueryHandler(IAppDbContext db, IMembershipGuard guar
     /// <summary>The recap shows three photos (L2-046 AC1).</summary>
     public const int MaxPhotos = 3;
 
-    /// <summary>The recap shows up to four avatars, as the header of the Popkin home does.</summary>
-    public const int MaxAvatars = 4;
+    /// <summary>The recap shows up to five avatars, as its mock draws them.</summary>
+    public const int MaxAvatars = 5;
 
     public async Task<RecapDto> Handle(GetRecapQuery request, CancellationToken cancellationToken)
     {
@@ -94,7 +97,12 @@ public sealed class GetRecapQueryHandler(IAppDbContext db, IMembershipGuard guar
         // A member who has left still shared it.
         var sharer = await db.Memberships.AsNoTracking().FirstAsync(m => m.Id == experience.SharerMembershipId, cancellationToken);
         return new TopRatedDto(
-            experience.Id, experience.Title, score.Average!.Value, score.Count, new RecapSharerDto(PersonName.FirstName(sharer.DisplayName)));
+            experience.Id,
+            experience.Title,
+            experience.PictureThumbnailKey is { } thumbnailKey ? store.GetReadUrl(thumbnailKey) : null,
+            score.Average!.Value,
+            score.Count,
+            new RecapSharerDto(PersonName.FirstName(sharer.DisplayName)));
     }
 }
 

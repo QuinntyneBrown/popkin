@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using ImageMagick;
 using Popkin.Api.Tests.Support;
 
 namespace Popkin.Api.Tests.WrapUp;
@@ -24,7 +25,7 @@ public sealed class RecapTests
         await api.LeaveAsync(lakeside.Id, "Priya N");
         await api.AddMessagesAsync(lakeside.Id, 3, TimeSpan.FromMinutes(1));
         var photoIds = await api.AddPhotosAsync(lakeside.Id, "Mara Okafor", 5, TimeSpan.FromMinutes(1));
-        var paddle = (await joel.SharedExperienceAsync(lakeside.Id, "Sunrise paddle")).Id();
+        var paddle = (await joel.SharedExperienceAsync(lakeside.Id, "Sunrise paddle", picture: TestPhotos.WithLocation(MagickFormat.Jpeg, 200, 200))).Id();
         var bonfire = (await lakeside.Host.SharedExperienceAsync(lakeside.Id, "Bonfire")).Id();
         await lakeside.Host.RatedAsync(lakeside.Id, paddle, 5);
         await joel.RatedAsync(lakeside.Id, paddle, 4);
@@ -65,7 +66,11 @@ public sealed class RecapTests
         Assert.Equal(2, top.GetProperty("ratingCount").GetInt32());
         Assert.Equal("Joel", top.GetProperty("sharedBy").GetProperty("firstName").GetString());
         Assert.Equal(["firstName"], top.GetProperty("sharedBy").EnumerateObject().Select(p => p.Name));
-        Assert.Equal(["average", "experienceId", "ratingCount", "sharedBy", "title"], top.EnumerateObject().Select(p => p.Name).Order());
+        // Its picture, as the experience's card shows it: the thumbnail at an expiring address.
+        var card = (await joel.ExperiencesAsync(lakeside.Id)).EnumerateArray().Single(c => c.Id() == paddle);
+        Assert.StartsWith("/api/files/", top.GetProperty("pictureUrl").GetString());
+        Assert.Equal(card.GetProperty("pictureUrl").GetString(), top.GetProperty("pictureUrl").GetString());
+        Assert.Equal(["average", "experienceId", "pictureUrl", "ratingCount", "sharedBy", "title"], top.EnumerateObject().Select(p => p.Name).Order());
 
         Assert.Equal(
             [
@@ -77,7 +82,7 @@ public sealed class RecapTests
 
     // Given a Popkin of six members where nothing was rated, no photo was added and nobody wrote,
     // when its recap is read, then there is no top-rated moment, no photo, nothing counted but
-    // the people, and at most four avatars (L2-046 AC3).
+    // the people, and at most five avatars (L2-046 AC3).
     [Fact]
     public async Task A_quiet_Popkin_has_a_recap_without_a_top_rated_moment()
     {
@@ -94,10 +99,27 @@ public sealed class RecapTests
         Assert.Equal(6, recap.GetProperty("peopleCount").GetInt32());
         Assert.Equal(0, recap.GetProperty("messageCount").GetInt32());
         Assert.Equal(0, recap.GetProperty("photoCount").GetInt32());
-        Assert.Equal(["MO", "JF", "PN", "DS"], recap.GetProperty("avatars").EnumerateArray().Select(a => a.GetProperty("initials").GetString()));
+        Assert.Equal(["MO", "JF", "PN", "DS", "AL"], recap.GetProperty("avatars").EnumerateArray().Select(a => a.GetProperty("initials").GetString()));
         Assert.False(recap.GetProperty("keepPhotos").GetBoolean());
         Assert.Equal(
             recap.GetProperty("wrappedUpAt").GetDateTimeOffset().AddDays(30), recap.GetProperty("photosRemoveAt").GetDateTimeOffset());
+    }
+
+    // Given a top-rated moment that has no picture, when the recap names it, then its picture address is null.
+    [Fact]
+    public async Task A_top_rated_moment_without_a_picture_has_no_picture_address()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var bonfire = (await lakeside.Host.SharedExperienceAsync(lakeside.Id, "Bonfire")).Id();
+        await lakeside.Host.RatedAsync(lakeside.Id, bonfire, 4);
+        await lakeside.Host.WrappedUpAsync(lakeside.Id);
+
+        var top = (await lakeside.Host.ReadRecapAsync(lakeside.Id)).GetProperty("topRated");
+
+        Assert.Equal(bonfire, top.GetProperty("experienceId").GetGuid());
+        Assert.Equal(4.0, top.GetProperty("average").GetDouble());
+        Assert.Equal(JsonValueKind.Null, top.GetProperty("pictureUrl").ValueKind);
     }
 
     // Given a message its author deleted, when the recap counts the messages sent, then it is not one of them.
