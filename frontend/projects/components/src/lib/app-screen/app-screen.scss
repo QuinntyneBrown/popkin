@@ -45,6 +45,25 @@
   justify-content: flex-end;
 }
 
+/*
+ * The floating action of a phone: it stays above the tabs while the screen scrolls under it. Only
+ * the action itself takes the pointer (pk-fab), not the row it sits in.
+ */
+.screen__fab {
+  position: sticky;
+  bottom: var(--space-24);
+  z-index: var(--z-sticky);
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(-1 * var(--space-14));
+  padding: 0 var(--space-5);
+  pointer-events: none;
+}
+
+.screen__fab:empty {
+  display: none;
+}
+
 .screen__body:focus,
 .thread:focus {
   outline: none;
@@ -60,6 +79,11 @@
 
   .thread {
     padding-inline: var(--space-6);
+  }
+
+  /* The action is in the screen's header from here on. */
+  .screen__fab {
+    display: none;
   }
 }
 

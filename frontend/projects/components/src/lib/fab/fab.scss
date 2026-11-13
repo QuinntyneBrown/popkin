@@ -1,0 +1,29 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-lg);
+  padding: 0 var(--space-6) 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: var(--color-fg-on-popkin);
+  font: var(--font-weight-extrabold) var(--font-size-md-plus) / 1 var(--font-family-display);
+  text-decoration: none;
+  box-shadow: var(--shadow-2);
+  /* The row the app screen keeps it in lets the pointer through; the action takes it. */
+  pointer-events: auto;
+  transition: scale var(--duration-fast) var(--ease-pop);
+}
+
+:host(:hover) {
+  color: var(--color-fg-on-popkin);
+}
+
+:host(:active) {
+  scale: var(--scale-press);
+}
+
+.icon {
+  stroke-width: 3;
+}
