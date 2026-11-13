@@ -79,6 +79,8 @@ export class Call {
   underWay = false;
   /** Whether Mara is on it. */
   maraIsOn = false;
+  /** The direct message the call belongs to (L2-030 AC8); null for the group call. */
+  threadId: string | null = null;
   /** When the call started: 12 minutes 48 seconds before the mocks' moment, as they draw it. */
   startedAt = new Date(homeNow.getTime() - (12 * 60 + 48) * 1000).toISOString();
   version = 1;
@@ -88,7 +90,7 @@ export class Call {
   startedAgo = 0;
 
   /** What the app asked: each join's microphone and camera, each change of them, each leave. */
-  readonly joined: { micOn: boolean; cameraOn: boolean }[] = [];
+  readonly joined: { micOn: boolean; cameraOn: boolean; threadId?: string }[] = [];
   readonly switched: { micOn: boolean; cameraOn: boolean }[] = [];
   left = 0;
   readCurrent = 0;
@@ -137,7 +139,7 @@ export class Call {
   async ends(hub: Hub): Promise<void> {
     this.underWay = false;
     this.others = [];
-    await hub.push('CallEnded', popkinId, callId);
+    await hub.push('CallEnded', popkinId, callId, this.threadId);
   }
 
   /** Someone switches their microphone or camera. */
@@ -166,7 +168,7 @@ export class Call {
   }
 
   private async changed(hub: Hub): Promise<void> {
-    await hub.push('CallChanged', popkinId, callId, ++this.version, this.count());
+    await hub.push('CallChanged', popkinId, callId, ++this.version, this.count(), this.threadId);
   }
 
   private dto() {
@@ -175,16 +177,20 @@ export class Call {
       startedAt: this.startedAt,
       version: this.version,
       participantCount: this.count(),
+      threadId: this.threadId,
     };
   }
 
   private async answer(route: Route): Promise<void> {
     const request = route.request();
-    const rest = new URL(request.url()).pathname.split(`${popkinId}/calls`)[1];
+    const url = new URL(request.url());
+    const rest = url.pathname.split(`${popkinId}/calls`)[1];
     const method = request.method();
     if (method === 'GET' && rest === '/current') {
       this.readCurrent++;
-      return this.underWay
+      // The group call is answered without a thread; a direct call for its own thread only.
+      const asked = url.searchParams.get('threadId');
+      return this.underWay && asked === this.threadId
         ? route.fulfill({ json: this.dto() })
         : route.fulfill({ status: 204, body: '' });
     }
@@ -199,9 +205,15 @@ export class Call {
               : problem(500, 'server_error');
         return route.fulfill({ status: refusal.status, json: refusal.body });
       }
-      const state = request.postDataJSON() as { micOn: boolean; cameraOn: boolean };
-      this.joined.push(state);
+      const body = request.postDataJSON() as {
+        micOn: boolean;
+        cameraOn: boolean;
+        threadId?: string;
+      };
+      this.joined.push(body);
+      const state = { micOn: body.micOn, cameraOn: body.cameraOn };
       const starts = !this.underWay;
+      if (starts) this.threadId = body.threadId ?? null;
       if (starts)
         this.startedAt = new Date(await this.page.evaluate(() => Date.now())).toISOString();
       this.underWay = true;

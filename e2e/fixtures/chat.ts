@@ -259,7 +259,7 @@ export class Chat {
   private holdThread?: Promise<void>;
   private failReads = false;
   private holdList?: Promise<void>;
-  private failList = false;
+  private failList: 'server' | 'not-found' | false = false;
 
   constructor(private readonly page: Page) {}
 
@@ -300,9 +300,9 @@ export class Chat {
     return release;
   }
 
-  /** Reading the list of threads fails on the server until `recover` is called. */
-  failTheList(): void {
-    this.failList = true;
+  /** Reading the list of threads fails this way until `recover` is called. */
+  failTheList(how: 'server' | 'not-found' = 'server'): void {
+    this.failList = how;
   }
 
   direct(person: { membershipId: string }): DirectThread {
@@ -394,6 +394,9 @@ export class Chat {
     if (method === 'GET' && rest === 'threads') {
       this.listAsked++;
       await this.holdList;
+      if (this.failList === 'not-found') {
+        return route.fulfill(asProblem(problem(404, 'popkin_not_found')));
+      }
       if (this.failList) return route.fulfill(asProblem(problem(500, 'server_error')));
       return route.fulfill({ json: this.listed() });
     }
