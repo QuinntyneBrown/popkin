@@ -1,3 +1,5 @@
+import { copyTheInvite, openTheInvite, theMockHome } from '../../fixtures/home';
+import { InviteDialog } from '../../pages/invite.dialog';
 import type { Page } from '@playwright/test';
 import { howLongForLakeside } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
@@ -35,5 +37,19 @@ parity('dialog', [
       await dialog.error.waitFor();
     },
     prepare: (page) => new EndDateDialog(page).day.focus(),
+  },
+  {
+    key: 'inviteDialog',
+    name: 'invite-header',
+    region: (page) => new InviteDialog(page).header,
+    before: theMockHome,
+    app: openTheInvite,
+  },
+  {
+    key: 'inviteDialogCopied',
+    name: 'invite-copied',
+    region: (page) => new InviteDialog(page).footer,
+    before: theMockHome,
+    app: copyTheInvite,
   },
 ]);

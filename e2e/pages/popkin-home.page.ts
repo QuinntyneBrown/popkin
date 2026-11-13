@@ -45,6 +45,21 @@ export class PopkinHomePage {
   readonly chatTab: Locator;
   readonly unreadCount: Locator;
   readonly sidebarTimeLeft: Locator;
+  /** Regions for the sweeps and the parity specs. */
+  readonly identity: Locator;
+  readonly inviteRegion: Locator;
+  readonly stack: Locator;
+  readonly bodySkeleton: Locator;
+  readonly photoStrip: Locator;
+  readonly memberList: Locator;
+  readonly firstExperience: Locator;
+  readonly firstRating: Locator;
+  readonly photosCard: Locator;
+  readonly chatEmpty: Locator;
+  readonly photosEmpty: Locator;
+  readonly photosFailure: Locator;
+  readonly photosHead: Locator;
+  readonly membersHead: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="popkin-home"]');
@@ -89,6 +104,20 @@ export class PopkinHomePage {
     this.chatTab = this.nav.getByRole('link', { name: /^Chat/ });
     this.unreadCount = this.nav.locator('.badge [aria-hidden="true"]');
     this.sidebarTimeLeft = this.nav.locator('.time-left');
+    this.identity = this.header.locator('.home-header__id');
+    this.inviteRegion = this.actions.locator('.btn--secondary');
+    this.stack = this.header.locator('.avatar-stack');
+    this.bodySkeleton = page.locator('main > [aria-hidden="true"]');
+    this.photoStrip = this.photos.locator('.hscroll');
+    this.memberList = this.members.getByRole('list');
+    this.firstExperience = this.experienceCards.first();
+    this.firstRating = this.firstExperience.locator('.rating');
+    this.photosCard = this.photos.locator('.card');
+    this.chatEmpty = this.chat.locator('.empty');
+    this.photosEmpty = this.photos.locator('.empty');
+    this.photosFailure = this.photos.locator('.alert');
+    this.photosHead = this.photos.locator('.section-head');
+    this.membersHead = this.members.locator('.section-head');
   }
 
   /** The section with this heading. */

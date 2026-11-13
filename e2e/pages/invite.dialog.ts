@@ -18,6 +18,8 @@ export class InviteDialog {
   readonly tryAgain: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly qrCard: Locator;
+  readonly header: Locator;
+  readonly footer: Locator;
 
   constructor(page: Page) {
     this.root = page.getByRole('dialog', { name: 'Bring someone in' });
@@ -27,7 +29,9 @@ export class InviteDialog {
     this.close = this.root.getByRole('button', { name: 'Close' });
     this.qr = this.root.getByRole('img', { name: /^QR code for / });
     this.qrCard = this.root.locator('.qr-card');
-    this.tile = this.qrCard.locator('.qr-card__name > [aria-hidden="true"]');
+    this.header = page.locator('.dialog__header');
+    this.footer = page.locator('.dialog__footer');
+    this.tile = this.qrCard.locator('.qr-card__name > [aria-hidden="true"]').first();
     this.name = this.qrCard.locator('.qr-card__name');
     this.link = this.qrCard.locator('.qr-card__link');
     this.copy = this.root.getByRole('button', { name: /^(Copy invite link|Copied)$/ });

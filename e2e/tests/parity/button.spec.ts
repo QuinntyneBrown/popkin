@@ -1,3 +1,5 @@
+import { theMockHome } from '../../fixtures/home';
+import { PopkinHomePage } from '../../pages/popkin-home.page';
 import { PopkinCreatedPage } from '../../pages/popkin-created.page';
 import { lakesideInvite } from '../../fixtures/journeys';
 import { HowLongPage } from '../../pages/how-long.page';
@@ -65,5 +67,17 @@ parity('button', [
     name: 'popkin-link',
     region: (page) => new PopkinCreatedPage(page).footerButton,
     before: lakesideInvite,
+  },
+  {
+    key: 'popkinHome',
+    name: 'popkin-md-link',
+    region: (page) => new PopkinHomePage(page).groupCall,
+    before: theMockHome,
+  },
+  {
+    key: 'popkinHome',
+    name: 'secondary-md-icon',
+    region: (page) => new PopkinHomePage(page).inviteRegion,
+    before: theMockHome,
   },
 ]);

@@ -321,3 +321,16 @@ export async function theHomeWithoutPhotos(page: Page): Promise<void> {
 export async function someoneWrites(page: Page, text = 'Kettle is on'): Promise<void> {
   await homeOf(page).arrives(hubOf(page), people.walt, text, new Date());
 }
+
+/** Opens "Bring someone in" from the home. */
+export async function openTheInvite(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Invite', exact: true }).click();
+  await page.getByRole('dialog').getByRole('img').waitFor();
+}
+
+/** The same, with the link copied a moment ago. */
+export async function copyTheInvite(page: Page): Promise<void> {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  await openTheInvite(page);
+  await page.getByRole('button', { name: 'Copy invite link' }).click();
+}
