@@ -115,7 +115,7 @@ describe('ExperienceStore', () => {
       emoji: '🏕️',
       accent: 'teal',
       sharedBy: 'Shared by Mara',
-      avatar: face('MO'),
+      avatar: { ...face('MO'), accent: 'leaf' },
       place: 'Heron Point, Lake Ossia',
       score: { value: '4.8', stars: 4.8, label: '4.8 out of 5', count: '11 ratings' },
     });
@@ -139,12 +139,19 @@ describe('ExperienceStore', () => {
       {
         id: 'm-walt',
         name: 'Walt',
-        avatar: face('WA'),
+        avatar: { ...face('WA'), accent: 'leaf' },
         stars: 5,
         rated: 'Rated 5',
         text: 'Saw a heron take off.',
       },
-      { id: 'm-dev', name: 'Dev', avatar: face('DE'), stars: 4, rated: 'Rated 4', text: 'Cold.' },
+      {
+        id: 'm-dev',
+        name: 'Dev',
+        avatar: { ...face('DE'), accent: 'leaf' },
+        stars: 4,
+        rated: 'Rated 4',
+        text: 'Cold.',
+      },
     ]);
   });
 

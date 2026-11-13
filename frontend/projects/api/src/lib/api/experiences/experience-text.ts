@@ -3,6 +3,8 @@
  * empty list says (docs/detailed-designs/experiences).
  */
 import { ExperienceFilter, ExperienceKind } from '../../models/experiences';
+import { AvatarView } from '../../models/invite';
+import { accentOf } from '../../models/popkin';
 
 const KINDS: Record<ExperienceKind, string> = {
   Did: 'Something we did',
@@ -117,4 +119,15 @@ export function nothingHere(filter: ExperienceFilter): { heading: string; text: 
     heading: 'Nothing shared yet',
     text: 'Experiences are the things your group did, the places you ate and the ideas for next time. Share one and everyone can rate it.',
   };
+}
+
+/** A member's avatar as a component draws it: the accent as its `data-accent`. */
+export interface Face {
+  initials: string;
+  accent: string;
+  photoUrl: string | null;
+}
+
+export function faceOf(avatar: AvatarView): Face {
+  return { initials: avatar.initials, accent: accentOf(avatar.accent), photoUrl: avatar.photoUrl };
 }

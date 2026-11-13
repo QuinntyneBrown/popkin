@@ -2,7 +2,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { ExperienceCommentView, ExperienceDetailView } from '../../models/experiences';
-import { AvatarView } from '../../models/invite';
 import { accentOf } from '../../models/popkin';
 import {
   ScoreBar,
@@ -11,6 +10,8 @@ import {
   ratingsText,
   scoreBars,
   starsLabel,
+  Face,
+  faceOf,
 } from './experience-text';
 import { EXPERIENCES_API } from './experiences-api';
 
@@ -24,7 +25,7 @@ export interface ExperiencePage {
   accent: string;
   /** "Shared by Mara". */
   sharedBy: string;
-  avatar: AvatarView;
+  avatar: Face;
   place: string | null;
   /** The group's score; null for something the group wants to do, which is not rated. */
   score: {
@@ -49,7 +50,7 @@ export interface ExperiencePage {
   comments: {
     id: string;
     name: string;
-    avatar: AvatarView;
+    avatar: Face;
     stars: number;
     rated: string;
     text: string;
@@ -92,7 +93,7 @@ export class ExperienceStore {
       emoji: experience.emoji,
       accent: accentOf(experience.colour),
       sharedBy: `Shared by ${experience.sharedBy.firstName}`,
-      avatar: experience.sharedBy.avatar,
+      avatar: faceOf(experience.sharedBy.avatar),
       place: experience.place,
       score:
         experience.kind === 'Want'
@@ -114,7 +115,7 @@ export class ExperienceStore {
       comments: experience.comments.map((comment) => ({
         id: comment.membershipId,
         name: comment.firstName,
-        avatar: comment.avatar,
+        avatar: faceOf(comment.avatar),
         stars: comment.stars,
         rated: `Rated ${comment.stars}`,
         text: comment.text,

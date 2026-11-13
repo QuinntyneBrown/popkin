@@ -2,9 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ExperienceCardView, ExperienceFilter } from '../../models/experiences';
-import { AvatarView } from '../../models/invite';
 import { accentOf } from '../../models/popkin';
-import { averageText, byline, kindLabel, nothingHere } from './experience-text';
+import { Face, averageText, byline, faceOf, kindLabel, nothingHere } from './experience-text';
 import { EXPERIENCES_API } from './experiences-api';
 
 /** An experience as its card draws it (L2-037). */
@@ -17,10 +16,10 @@ export interface ExperienceCard {
   pictureUrl: string | null;
   emoji: string;
   accent: string;
-  avatar: AvatarView;
+  avatar: Face;
   /** "Mara · Sat morning". */
   by: string;
-  /** "4.8" and "(11)"; null for an idea and for something nobody has rated (L2-037 AC2). */
+  /** "4.8" and "11"; null for an idea and for something nobody has rated (L2-037 AC2). */
   rating: { average: string; count: string; label: string } | null;
   /** "7 keen" on an idea (L2-037 AC3); null otherwise. */
   keen: string | null;
@@ -96,14 +95,14 @@ function toCard(card: ExperienceCardView): ExperienceCard {
     pictureUrl: card.pictureUrl,
     emoji: card.emoji,
     accent: accentOf(card.colour),
-    avatar: card.sharedBy.avatar,
+    avatar: faceOf(card.sharedBy.avatar),
     by: byline(card),
     rating:
       idea || card.average === null
         ? null
         : {
             average,
-            count: `(${card.ratingCount})`,
+            count: String(card.ratingCount),
             label: `Rated ${average} out of 5 by ${card.ratingCount}`,
           },
     keen: idea ? `${card.keenCount} keen` : null,

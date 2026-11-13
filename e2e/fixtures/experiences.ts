@@ -59,7 +59,7 @@ export interface Shared {
 const id = (n: number) => `00000000-0000-4000-b000-${String(n).padStart(12, '0')}`;
 const sat = (hour: number, minute = 0) => new Date(2026, 8, 12, hour, minute);
 
-export const canoeId = id(4);
+export const canoeId = '00000000-0000-4000-a000-000000000081';
 export const tacosId = id(3);
 export const ridgeId = id(2);
 export const beachId = id(1);
@@ -156,6 +156,8 @@ export class Experiences {
   viewer: Person = people.mara;
   host = true;
   wrappedUp = false;
+  /** Whoever is signed in is not a member: every answer is 404 `popkin_not_found` (L2-051). */
+  notAMember = false;
 
   /** What was asked of the list, in order: its filter. */
   readonly asked: string[] = [];
@@ -295,6 +297,7 @@ export class Experiences {
 
   private async read(route: Route, read: Read, body: () => unknown): Promise<void> {
     await this.heldReads.get(read);
+    if (this.notAMember) return this.refuse(route, 404, 'popkin_not_found');
     if (this.failing.has(read)) return this.refuse(route, 500, 'server_error');
     return route.fulfill({ json: body() });
   }

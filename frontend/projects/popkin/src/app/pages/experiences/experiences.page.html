@@ -1,0 +1,109 @@
+<div pk-app-screen [accent]="frame.accent()" layout="tab" body="flush">
+  <header
+    pk-tab-header
+    slot="header"
+    heading="Experiences"
+    lead="What we did, and what we want to do next."
+    [filter]="filtering()"
+    [action]="sharing() ? 'Share one' : undefined"
+  >
+    @for (filter of filters; track filter.key) {
+      <button
+        pk-chip
+        type="button"
+        [attr.aria-pressed]="store.filter() === filter.key"
+        (click)="show(filter.key)"
+      >
+        {{ filter.label }}
+      </button>
+    }
+  </header>
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <div pk-experiences [loading]="true"></div>
+    }
+    @case ('empty') {
+      <div pk-experiences>
+        <div
+          pk-empty-state
+          icon="experiences"
+          [heading]="store.nothing().heading"
+          [text]="store.nothing().text"
+        >
+          <button pk-button type="button" variant="popkin" size="md">
+            <svg pk-icon name="plus" size="md"></svg>Share one
+          </button>
+        </div>
+      </div>
+    }
+    @case ('no-results') {
+      <div pk-experiences>
+        <div
+          pk-empty-state
+          icon="experiences"
+          [heading]="store.nothing().heading"
+          [text]="store.nothing().text"
+        >
+          <button pk-button type="button" variant="popkin" size="md">
+            <svg pk-icon name="plus" size="md"></svg>Share one
+          </button>
+          <button pk-button type="button" variant="secondary" size="md" (click)="show('all')">
+            Show all
+          </button>
+        </div>
+      </div>
+    }
+    @case ('error') {
+      <div pk-experiences>
+        <div
+          pk-empty-state
+          icon="offline"
+          heading="We couldn’t load the experiences"
+          text="They’re safe. Check your connection and try again."
+          [alert]="true"
+        >
+          <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+            <svg pk-icon name="retry" size="md"></svg>Try again
+          </button>
+        </div>
+      </div>
+    }
+    @case ('ready') {
+      <div pk-experiences>
+        <ul pk-experience-grid>
+          @for (card of cards(); track card.id) {
+            <li
+              pk-experience-card
+              [link]="card.link"
+              [title]="card.title"
+              [kind]="card.tag"
+              [photo]="card.pictureUrl"
+              [emoji]="card.emoji"
+              [by]="card.by"
+              [avatar]="card.avatar"
+              [rating]="card.rating?.average ?? null"
+              [count]="card.rating?.count"
+              [keen]="card.keen ?? undefined"
+            ></li>
+          }
+        </ul>
+      </div>
+    }
+  }
+
+  @if (sharing()) {
+    <button pk-fab slot="fab" type="button">Share one</button>
+  }
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    current="experiences"
+    [popkinId]="popkinId()"
+    [name]="frame.name()"
+    [emoji]="frame.emoji()"
+    [members]="frame.members()"
+    [timeLeft]="frame.timeLeft()"
+    [unread]="unreadCount()"
+  ></nav>
+</div>
