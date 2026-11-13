@@ -24,6 +24,7 @@ import {
   POPKIN_REALTIME,
   PopkinFrame,
   ThreadStore,
+  WrapUpWatch,
   UnreadTracker,
   accentOf,
   othersHere,
@@ -132,6 +133,14 @@ export class GroupChatPage {
   private readonly frame = inject(PopkinFrame);
   protected readonly thread = this.store.thread;
   protected readonly readOnly = computed(() => !!this.thread()?.readOnly);
+  private readonly watch = inject(WrapUpWatch);
+  /** The banner of the Popkin's last hour (L2-044 AC2). */
+  protected readonly warning = computed(() => {
+    const thread = this.thread();
+    return thread && !thread.readOnly
+      ? this.watch.warningFor(thread.popkinId, thread.popkinName, thread.endsAt)
+      : null;
+  });
   protected readonly closedLine =
     'This Popkin has wrapped up. Messages stay, but nobody can post new ones.';
   protected readonly state = this.store.state;
@@ -292,6 +301,10 @@ export class GroupChatPage {
 
   protected jumpToLatest(): void {
     this.threadView()?.scrollToLatest('smooth');
+  }
+
+  protected dismissWarning(): void {
+    this.watch.dismissWarning(this.popkinId());
   }
 
   protected reload(): void {

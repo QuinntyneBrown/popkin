@@ -22,6 +22,7 @@ import {
 } from 'api';
 import {
   AppScreen,
+  Banner,
   Button,
   Chip,
   EmptyState,
@@ -48,6 +49,7 @@ import { Toaster } from '../../toasts/toaster';
   selector: 'pk-experiences-page',
   imports: [
     AppScreen,
+    Banner,
     Button,
     Chip,
     EmptyState,

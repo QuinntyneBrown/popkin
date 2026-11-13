@@ -20,6 +20,18 @@
     }
   </header>
 
+  @if (frame.warning(); as warning) {
+    <div
+      pk-banner
+      slot="banner"
+      variant="warning"
+      [heading]="warning.lead"
+      [text]="warning.text"
+      [dismissible]="true"
+      (dismissed)="frame.dismissWarning()"
+    ></div>
+  }
+
   @switch (store.state()) {
     @case ('loading') {
       <div pk-experiences [loading]="true"></div>

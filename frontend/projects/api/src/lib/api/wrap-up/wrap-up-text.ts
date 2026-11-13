@@ -83,8 +83,8 @@ export function wrappedUpOn(wrappedUpAt: string): string {
 }
 
 /**
- * The banner of a Popkin's last hour (L2-044 AC2): "1 hour left." at the hour, the time left
- * under it, and when it wraps up. Null with more than an hour left, with none, and for a
+ * The banner of a Popkin's last hour (L2-044 AC2): "1 hour left." for the hour's first minute, the time
+ * left after it, and when it wraps up. Null with more than an hour left, with none, and for a
  * Popkin that keeps going.
  */
 export function wrapUpWarning(
@@ -96,7 +96,8 @@ export function wrapUpWarning(
   const end = new Date(endsAt);
   const left = end.getTime() - now.getTime();
   if (left <= 0 || left > HOUR_MS) return null;
-  const lead = left === HOUR_MS ? '1 hour left.' : `${timeLeft(end, now)}.`;
+  // The banner comes on a tick a moment after the hour: its first minute still says the hour.
+  const lead = left > HOUR_MS - 60_000 ? '1 hour left.' : `${timeLeft(end, now)}.`;
   return { lead, text: `${name} wraps up at ${clock(end)}.` };
 }
 

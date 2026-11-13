@@ -89,6 +89,8 @@ describe('the words of wrapping up', () => {
     it.each([
       ['more than an hour', at(9, 13, 16, 59), null],
       ['an hour', at(9, 13, 17, 0), '1 hour left.'],
+      ['a moment under an hour', new Date(at(9, 13, 17, 0).getTime() + 400), '1 hour left.'],
+      ['59 minutes', at(9, 13, 17, 1), '59 min left.'],
       ['under an hour', at(9, 13, 17, 18), '42 min left.'],
       ['under a minute', at(9, 13, 17, 59, 2026), '1 min left.'],
       ['no time', at(9, 13, 18), null],

@@ -52,6 +52,18 @@
       </button>
     </header>
 
+    @if (store.warning(); as warning) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="warning"
+        [heading]="warning.lead"
+        [text]="warning.text"
+        [dismissible]="true"
+        (dismissed)="store.dismissWarning()"
+      ></div>
+    }
+
     @if (call(); as call) {
       <div
         pk-banner

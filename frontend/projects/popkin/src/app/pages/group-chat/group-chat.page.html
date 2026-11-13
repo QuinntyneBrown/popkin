@@ -54,6 +54,18 @@
       }
     </header>
 
+    @if (warning(); as warning) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="warning"
+        [heading]="warning.lead"
+        [text]="warning.text"
+        [dismissible]="true"
+        (dismissed)="dismissWarning()"
+      ></div>
+    }
+
     @if (call(); as call) {
       <div
         pk-banner

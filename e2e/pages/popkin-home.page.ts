@@ -179,4 +179,9 @@ export class PopkinHomePage {
     const [main, side] = await Promise.all([this.main.boundingBox(), this.side.boundingBox()]);
     return main && side && Math.abs(main.x - side.x) > 1 ? 2 : 1;
   }
+
+  /** A tab of the Popkin, by its name. */
+  tab(name: 'Home' | 'Chat' | 'Photos' | 'Experiences'): Locator {
+    return this.nav.getByRole('link', { name: new RegExp(`^${name}`) });
+  }
 }
