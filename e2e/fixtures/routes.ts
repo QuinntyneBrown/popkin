@@ -20,6 +20,11 @@ const photo = `${photos}/00000000-0000-4000-a000-000000000018`;
 
 export const routes = {
   home: { app: '/' },
+  signIn: { app: '/sign-in', mock: 'pages/sign-in/default.html' },
+  signInInvalid: { app: '/sign-in', mock: 'pages/sign-in/invalid.html' },
+  signInSubmitting: { app: '/sign-in', mock: 'pages/sign-in/submitting.html' },
+  verifyCodeName: { app: '/verify', mock: 'pages/verify-code/name.html' },
+  offline: { app: '/offline', mock: 'pages/offline/default.html' },
   signUp: { app: '/sign-up', mock: 'pages/sign-up/default.html' },
   signUpEmail: { app: '/sign-up', mock: 'pages/sign-up/email.html' },
   signUpError: { app: '/sign-up', mock: 'pages/sign-up/error.html' },

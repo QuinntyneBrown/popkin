@@ -1,0 +1,15 @@
+<div pk-screen>
+  <header pk-top-bar slot="header"><a pk-logo routerLink="/popkins"></a></header>
+  <div
+    pk-empty-state
+    icon="wifi-off"
+    [level]="1"
+    heading="You’re offline"
+    text="This screen needs a connection the first time it opens. Popkins you’ve opened before still show what they had."
+  >
+    <button pk-button variant="primary" size="md" type="button" (click)="tryAgain()">
+      <svg pk-icon name="retry" size="md"></svg>Try again
+    </button>
+    <a pk-button variant="secondary" size="md" routerLink="/popkins">My Popkins</a>
+  </div>
+</div>

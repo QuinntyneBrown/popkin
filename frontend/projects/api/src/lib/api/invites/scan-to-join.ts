@@ -14,7 +14,6 @@ export class ScanToJoin {
   private readonly scanner = inject(QR_SCANNER);
   private readonly origin = inject(DOCUMENT).location.origin;
 
-  private video: HTMLVideoElement | null = null;
   private camera?: Subscription;
 
   readonly state = signal<'starting' | 'scanning' | 'invalid' | 'found' | 'denied'>('starting');
@@ -27,7 +26,6 @@ export class ScanToJoin {
 
   start(video: HTMLVideoElement): void {
     this.stop();
-    this.video = video;
     this.state.set('starting');
     this.camera = this.scanner.start(video).subscribe({
       next: (event) => {
@@ -48,9 +46,13 @@ export class ScanToJoin {
     });
   }
 
-  /** "Try the camera again" (L2-015 AC4). */
+  /**
+   * "Try the camera again" (L2-015 AC4): back to waiting for the camera, which the dialog then
+   * starts on the view it shows again.
+   */
   retry(): void {
-    if (this.video) this.start(this.video);
+    this.stop();
+    this.state.set('starting');
   }
 
   /** Stops every camera track. */

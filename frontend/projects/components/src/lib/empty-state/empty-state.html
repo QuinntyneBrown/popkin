@@ -7,7 +7,7 @@
 }
 @switch (level()) {
   @case (1) {
-    <h1>{{ heading() }}</h1>
+    <h1 #screenHeading tabindex="-1">{{ heading() }}</h1>
   }
   @case (3) {
     <h3 class="empty__heading empty__heading--sub">{{ heading() }}</h3>

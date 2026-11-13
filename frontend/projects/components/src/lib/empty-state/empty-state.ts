@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, input, viewChild } from '@angular/core';
 import { Icon } from '../icon/icon';
 import { IconName } from '../icon/icons';
 import { Mark } from '../mark/mark';
@@ -37,4 +37,11 @@ export class EmptyState {
   readonly alert = input(false);
   /** A reference code shown under the actions, as the server-error screen does. */
   readonly code = input<string>();
+
+  private readonly screenHeading = viewChild<ElementRef<HTMLElement>>('screenHeading');
+
+  /** Moves the focus to the heading of a whole-screen state, when an action left it as it was. */
+  focusHeading(): void {
+    this.screenHeading()?.nativeElement.focus();
+  }
 }

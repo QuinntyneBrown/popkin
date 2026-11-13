@@ -150,8 +150,9 @@ describe('MyPopkinsStore', () => {
         more: 11,
         members: '14 members',
         timeLeft: '1 day 6 hrs left',
-        badge: '3',
-        badgeLabel: '3 unread messages',
+        ongoing: false,
+        unread: 3,
+        unreadLabel: '3 unread messages',
       },
       {
         id: 'thursday',
@@ -163,8 +164,9 @@ describe('MyPopkinsStore', () => {
         more: 0,
         members: '2 members',
         timeLeft: 'Ongoing',
-        badge: null,
-        badgeLabel: null,
+        ongoing: true,
+        unread: 0,
+        unreadLabel: '',
       },
     ]);
   });
@@ -220,24 +222,24 @@ describe('MyPopkinsStore', () => {
       expect(first).toMatchObject({
         id: 'thursday',
         latest: 'Walt: Same time next week?',
-        badge: '1',
-        badgeLabel: '1 unread message',
+        unread: 1,
+        unreadLabel: '1 unread message',
       });
       expect(second.id).toBe('lakeside');
     });
 
     it('does not count the member’s own message', () => {
       messages.next(from('t-lakeside', 'm-mara', 'Mara', 'on my way'));
-      expect(store.cards()[0]).toMatchObject({ latest: 'Mara: on my way', badge: '3' });
+      expect(store.cards()[0]).toMatchObject({ latest: 'Mara: on my way', unread: 3 });
     });
 
-    it('shows 99+ above 99', () => {
+    it('names a count above 99', () => {
       answer = { active: [{ ...lakeside, unreadCount: 99 }], wrappedUp: [] };
       store.retry();
       messages.next(from('t-lakeside', 'm-walt', 'Walt', 'one more'));
       expect(store.cards()[0]).toMatchObject({
-        badge: '99+',
-        badgeLabel: 'More than 99 unread messages',
+        unread: 100,
+        unreadLabel: 'More than 99 unread messages',
       });
     });
 

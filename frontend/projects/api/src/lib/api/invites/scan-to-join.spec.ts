@@ -72,13 +72,14 @@ describe('ScanToJoin', () => {
     },
   );
 
-  it('tries the camera again', () => {
+  it('waits for the camera again on "Try the camera again"', () => {
     scan.start(video);
     refuses('denied');
     scan.retry();
-    expect(started).toBe(2);
     expect(scan.state()).toBe('starting');
+    scan.start(video);
     camera?.next({ kind: 'started' });
+    expect(started).toBe(2);
     expect(scan.state()).toBe('scanning');
   });
 
