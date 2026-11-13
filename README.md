@@ -33,7 +33,10 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > Everyone thread by day, send messages that reach the others as they are sent, and keep a
 > message that cannot be sent, marked "Not sent" or "Waiting to send".
 > [Watch it](docs/videos/03-journey-03-chat-with-everyone/03-journey-03-chat-with-everyone.mp4)
-> (2 min 10 s, with sound). The journeys still to build are in
+> (2 min 10 s, with sound). Journey 4, Popkin home, is built too: a member sees who is in the
+> Popkin, how long it has left and the latest chat, with the count of new messages rising as
+> they arrive, and brings someone in with the QR code or the invite link. The journeys still to
+> build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents
