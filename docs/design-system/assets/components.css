@@ -68,7 +68,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 /* A screen fills the viewport at every width; "Form factors" below says how each kind uses the room. */
 .screen { position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100dvh; margin-inline: auto; background: var(--color-bg-canvas); }
 .screen--wash { background: var(--accent-wash); }
-.screen--stage { background: var(--color-bg-stage); color: var(--color-fg-on-stage); border-color: transparent; }
+.screen--stage { --color-focus-ring: var(--color-focus-ring-on-stage); background: var(--color-bg-stage); color: var(--color-fg-on-stage); border-color: transparent; }
 .screen__body { flex: 1; display: flex; flex-direction: column; padding: var(--space-4) var(--space-6) var(--space-6); min-width: 0; }
 .screen__body--flush { padding-inline: 0; }
 .screen__body--center { justify-content: center; align-items: center; text-align: center; }
