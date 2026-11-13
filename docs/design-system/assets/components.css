@@ -209,7 +209,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .setting-row__sub { display: block; font: var(--text-body-sm); color: var(--color-fg-muted); }
 .icon-tile { display: grid; place-items: center; width: var(--space-10); height: var(--space-10); flex: none; border-radius: var(--radius-md); background: var(--color-bg-subtle); color: var(--color-fg-default); }
 .fact { display: flex; gap: var(--space-4); }
-.facts { display: flex; flex-direction: column; gap: var(--space-5); } /* the list of facts; the mocks write a stack */
+.facts { display: flex; flex-direction: column; gap: var(--space-5); } /* the list of facts */
 .fact__title { font-weight: var(--font-weight-bold); }
 .fact__body { margin-top: var(--space-0-5); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
 
@@ -993,7 +993,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .recap__lead h1 { font-size: var(--font-size-5xl); }
   .recap__rest > :first-child { margin-top: 0 !important; }
 }
-/* The recap's parts by name; the mocks write them with utilities and inline styles. */
+/* The recap's parts by name. */
 .recap__headline { margin-top: var(--space-5); text-align: center; }
 .recap__card { margin-top: var(--space-7); padding: var(--space-5); }
 .recap__people { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); font-weight: var(--font-weight-semibold); font-size: var(--font-size-md-minus); }
