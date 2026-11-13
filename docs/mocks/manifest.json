@@ -278,7 +278,9 @@
         "empty",
         "error",
         "partial",
-        "ongoing"
+        "ongoing",
+        "last-hour",
+        "last-hour-member"
       ]
     },
     {
@@ -367,7 +369,8 @@
       "route": "/p/:popkin/photos",
       "requirements": [
         "L2-032",
-        "L2-031"
+        "L2-031",
+        "L2-045"
       ],
       "states": [
         "default",
@@ -375,7 +378,10 @@
         "empty",
         "error",
         "mine",
-        "no-results"
+        "no-results",
+        "wrapped",
+        "going",
+        "removed"
       ]
     },
     {
@@ -407,7 +413,8 @@
       "route": "/p/:popkin/experiences",
       "requirements": [
         "L2-037",
-        "L2-040"
+        "L2-040",
+        "L2-045"
       ],
       "states": [
         "default",
@@ -416,7 +423,8 @@
         "error",
         "did",
         "want",
-        "no-results"
+        "no-results",
+        "wrapped"
       ]
     },
     {
@@ -429,7 +437,8 @@
         "L2-039",
         "L2-040",
         "L2-041",
-        "L2-042"
+        "L2-042",
+        "L2-045"
       ],
       "states": [
         "default",
@@ -437,7 +446,8 @@
         "rated",
         "want",
         "loading",
-        "error"
+        "error",
+        "wrapped"
       ],
       "not_applicable": {
         "empty": "The screen shows one experience. An experience nobody has rated says so in its score card."
@@ -475,7 +485,9 @@
         "default",
         "host",
         "loading",
-        "error"
+        "error",
+        "exporting",
+        "plain"
       ],
       "not_applicable": {
         "empty": "A wrapped-up Popkin always has its people and dates; the top-rated card is left out when nothing was rated."
@@ -632,12 +644,15 @@
       ],
       "states": [
         "default",
-        "member"
+        "member",
+        "host-now",
+        "member-now"
       ],
       "not_applicable": {
         "busy": "The dialog sends nothing until a choice is made; the screen it leads to has its own busy state.",
         "invalid": "The dialog has no field to fill in."
-      }
+      },
+      "notes": "host-now and member-now draw the menu as journey 9 builds it: Invite people and, for the Host, Wrap up. Journey 16 adds Edit name and look and Change how long it lasts, journey 18 adds Leave this Popkin; default and member draw the whole menu."
     },
     {
       "id": "edit-popkin",

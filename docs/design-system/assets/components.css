@@ -505,6 +505,8 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .polaroids img:nth-child(2) { right: 0; top: var(--space-4); rotate: 7deg; }
 .polaroids img:nth-child(3) { left: 50%; top: 0; width: var(--space-40); height: var(--space-40); translate: -50% 0; rotate: -1deg; }
 .polaroids .popkin-tile { position: absolute; left: 50%; bottom: 0; translate: -50% 0; }
+.polaroids--empty { display: grid; place-items: center; height: auto; } /* no photo was shared: the emoji stands alone */
+.polaroids--empty .popkin-tile { position: static; translate: none; }
 .stat-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-top: var(--space-5); padding-top: var(--space-5); border-top: var(--border-width-hairline) solid var(--color-border-default); }
 .stat__value { font: var(--font-weight-black) var(--font-size-5xl) / 1 var(--font-family-display); font-variant-numeric: tabular-nums; }
 .stat__label { margin-top: var(--space-1); font: var(--text-body-sm); color: var(--color-fg-muted); }
@@ -584,6 +586,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .progress { height: var(--space-2); overflow: hidden; border-radius: var(--radius-full); background: var(--color-bg-subtle); }
 .progress span { display: block; height: 100%; border-radius: var(--radius-full); background: var(--accent); }
 .progress--62 span { width: 62%; }
+.progress--25 span { width: 25%; }
 .spinner { width: var(--space-10); height: var(--space-10); border: var(--border-width-ring) solid var(--color-bg-stage-control-strong); border-top-color: var(--color-fg-on-stage); border-radius: var(--radius-full); animation: spin var(--duration-deliberate) linear infinite; }
 
 /* ---------- Landing page -------------------------------------------------------------- */
@@ -985,6 +988,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .recap .polaroids { width: var(--layout-polaroids-width-l); height: var(--layout-polaroids-height-l); }
   .recap .polaroids img { width: var(--layout-polaroid-l); height: var(--layout-polaroid-l); }
   .recap .polaroids img:nth-child(3) { width: var(--layout-polaroid-centre-l); height: var(--layout-polaroid-centre-l); }
+  .recap .polaroids--empty { height: auto; }
   .recap__lead h1 { font-size: var(--font-size-5xl); }
   .recap__rest > :first-child { margin-top: 0 !important; }
 }
