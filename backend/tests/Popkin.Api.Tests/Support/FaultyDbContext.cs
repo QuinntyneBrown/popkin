@@ -26,6 +26,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<ChatThread> ChatThreads => inner.ChatThreads;
 
+    public DbSet<Message> Messages => inner.Messages;
+
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         faults.FailSaves
             ? throw new InvalidOperationException("Simulated database failure in table Popkins.")
