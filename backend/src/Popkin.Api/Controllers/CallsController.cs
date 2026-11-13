@@ -27,4 +27,12 @@ public sealed class CallsController(ISender sender) : ControllerBase
         var result = await sender.Send(new JoinCallCommand(popkinId, request?.MicOn ?? true, request?.CameraOn ?? true), cancellationToken);
         return result.Started ? Created($"/api/popkins/{popkinId}/calls/current", result.Joined) : Ok(result.Joined);
     }
+
+    /// <summary>The member leaves the call (L2-030 AC6); when nobody remains, the call ends (L2-029 AC6).</summary>
+    [HttpPost("{callId:guid}/leave")]
+    public async Task<IActionResult> Leave(Guid popkinId, Guid callId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new LeaveCallCommand(popkinId, callId), cancellationToken);
+        return NoContent();
+    }
 }

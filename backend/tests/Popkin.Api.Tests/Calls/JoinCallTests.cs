@@ -83,6 +83,7 @@ public sealed class JoinCallTests
         Assert.Equal(winner!.Value.CallId(), joined.CallId());
         Assert.Equal(2, joined.GetProperty("call").GetProperty("version").GetInt64());
         Assert.Equal(2, joined.GetProperty("call").GetProperty("participantCount").GetInt32());
-        Assert.Equal(["Mara Okafor", "Joel F"], joined.ParticipantNames());
+        // Both joined at the same instant, so neither is first.
+        Assert.Equal(["Joel F", "Mara Okafor"], joined.ParticipantNames().Order());
     }
 }

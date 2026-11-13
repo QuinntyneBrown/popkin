@@ -39,4 +39,20 @@ public sealed class Call
         Version++;
         return CallParticipant.Join(Id, membershipId, micOn, cameraOn, now);
     }
+
+    /// <summary>A participant leaves; when they were the last one on it, the call ends (L2-029 AC6).</summary>
+    public void Leave(CallParticipant participant, bool last, DateTimeOffset now)
+    {
+        if (participant.CallId != Id)
+        {
+            throw new ArgumentException("The participant is on another call.", nameof(participant));
+        }
+
+        participant.Leave(now);
+        Version++;
+        if (last)
+        {
+            EndedAt = now;
+        }
+    }
 }

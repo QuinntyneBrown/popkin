@@ -39,4 +39,6 @@ public sealed class CallParticipant
         MicOn = micOn,
         CameraOn = cameraOn,
     };
+
+    internal void Leave(DateTimeOffset now) => LeftAt = now;
 }

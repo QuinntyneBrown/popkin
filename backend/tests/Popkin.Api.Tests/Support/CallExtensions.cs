@@ -19,6 +19,12 @@ public static class CallExtensions
         return await response.Content.ReadFromJsonAsync<JsonElement>();
     }
 
+    public static Task<HttpResponseMessage> LeaveCallAsync(this HttpClient member, Guid popkinId, Guid callId) =>
+        member.PostAsync($"/api/popkins/{popkinId}/calls/{callId}/leave", null);
+
+    public static Task<HttpResponseMessage> CurrentCallAsync(this HttpClient member, Guid popkinId) =>
+        member.GetAsync($"/api/popkins/{popkinId}/calls/current");
+
     public static Guid CallId(this JsonElement joined) => joined.GetProperty("call").GetProperty("id").GetGuid();
 
     public static Guid ViewerMembershipId(this JsonElement joined) => joined.GetProperty("viewerMembershipId").GetGuid();

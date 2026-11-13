@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Popkin.Application.Auth;
+using Popkin.Application.Calls;
 using Popkin.Application.Popkins;
 using Popkin.Application.Realtime;
 using Popkin.Application.Security;
@@ -16,6 +17,7 @@ public static class DependencyInjection
             configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
         services.AddScoped<CodeIssuer>();
         services.AddScoped<IMembershipGuard, MembershipGuard>();
+        services.AddScoped<CallLeaver>();
         services.AddSingleton<PopkinMetrics>();
         // Who is here now is kept in this process: one API instance (ADR 0009).
         services.AddSingleton<PresenceTracker>();
