@@ -167,7 +167,8 @@ await call('GET', `${album}?filter=everyone`);
 await call('GET', `${album}/${added.id}`);
 
 // Experiences: Mara has shared none, shares the sunrise canoe with its picture, opens it, rates
-// it, says a few words, then reads the list again and what the home shows (journey 8).
+// it, says a few words, then reads the list again (journey 8). What the home shows was read
+// before, while there was none, as the album's summary was.
 const experiences = `/api/popkins/${created.id}/experiences`;
 await call('GET', `${experiences}?filter=want`);
 const canoe = new FormData();
@@ -188,7 +189,6 @@ await call('PUT', `${experiences}/${shared.id}/my-rating/comment`, {
 });
 await call('GET', `${experiences}?filter=all`);
 await call('GET', `${experiences}?filter=did`);
-await call('GET', `${experiences}/summary`);
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);
