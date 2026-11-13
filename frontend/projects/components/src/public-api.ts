@@ -107,3 +107,5 @@ export * from './lib/facts/facts';
 export * from './lib/fact/fact';
 export * from './lib/stat-pair/stat-pair';
 export * from './lib/stat/stat';
+export * from './lib/polaroids/polaroids';
+export * from './lib/recap/recap';

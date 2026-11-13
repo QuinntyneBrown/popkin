@@ -1,0 +1,9 @@
+@for (photo of prints(); track $index) {
+  <img class="polaroids__print" alt="" [src]="photo" />
+}
+<span
+  pk-popkin-tile
+  class="polaroids__tile"
+  [size]="prints().length ? 'base' : '2xl'"
+  [emoji]="emoji()"
+></span>
