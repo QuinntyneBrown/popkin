@@ -1,3 +1,5 @@
+import { addTheThreeWithOneFailing, theMockPhotos } from '../../fixtures/photos';
+import { AddPhotosDialog } from '../../pages/add-photos.dialog';
 import { theHomeWithoutPhotos } from '../../fixtures/home';
 import { PopkinHomePage } from '../../pages/popkin-home.page';
 import { HowLongPage } from '../../pages/how-long.page';
@@ -36,5 +38,12 @@ parity('alert', [
     name: 'with-action',
     region: (page) => new PopkinHomePage(page).photosFailure,
     before: theHomeWithoutPhotos,
+  },
+  {
+    key: 'addPhotosFailed',
+    name: 'upload-outcome',
+    region: (page) => new AddPhotosDialog(page).outcome,
+    before: theMockPhotos,
+    app: addTheThreeWithOneFailing,
   },
 ]);

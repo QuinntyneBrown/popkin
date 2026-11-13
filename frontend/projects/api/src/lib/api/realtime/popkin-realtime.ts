@@ -17,6 +17,8 @@ export interface PopkinRealtime {
   readonly threadRead$: Observable<string>;
   readonly presenceChanged$: Observable<{ popkinId: string; version: number; hereNow: number }>;
   readonly memberJoined$: Observable<{ popkinId: string; member: MemberJoinedView }>;
+  /** Photos were added to a Popkin's album (L2-031 AC7). */
+  readonly photosAdded$: Observable<{ popkinId: string; photoIds: string[] }>;
   readonly reconnected$: Observable<void>;
   /** Opens the connection if it is not open; safe to call from every screen that needs it. */
   start(): void;

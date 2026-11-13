@@ -1,0 +1,23 @@
+@if (loading()) {
+  @for (cell of cells; track $index) {
+    <span pk-skeleton shape="square" [class.photo-grid__feature]="$first"></span>
+  }
+} @else {
+  @for (photo of photos(); track $index) {
+    <a
+      class="photo-grid__cell"
+      [class.photo-grid__feature]="photo.feature"
+      [routerLink]="photo.link"
+    >
+      <img
+        class="photo-grid__photo"
+        loading="lazy"
+        decoding="async"
+        width="320"
+        height="320"
+        [src]="photo.src"
+        [alt]="photo.alt"
+      />
+    </a>
+  }
+}

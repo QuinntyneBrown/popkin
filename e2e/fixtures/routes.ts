@@ -14,6 +14,9 @@ const created = responses['POST /api/popkins'].body;
 const invite = `/i/${created.inviteCode}`;
 const chat = `/p/${created.id}/chat/everyone`;
 const home = `/p/${created.id}`;
+const photos = `${home}/photos`;
+// The photo the mocks open: the first of the album fixture.
+const photo = `${photos}/00000000-0000-4000-a000-000000000018`;
 
 export const routes = {
   home: { app: '/' },
@@ -59,6 +62,19 @@ export const routes = {
   popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
   inviteDialog: { app: home, mock: 'dialogs/invite/default.html' },
   inviteDialogCopied: { app: home, mock: 'dialogs/invite/copied.html' },
+  photoAlbum: { app: photos, mock: 'pages/photo-album/default.html' },
+  photoAlbumLoading: { app: photos, mock: 'pages/photo-album/loading.html' },
+  photoAlbumEmpty: { app: photos, mock: 'pages/photo-album/empty.html' },
+  photoAlbumError: { app: photos, mock: 'pages/photo-album/error.html' },
+  photoAlbumMine: { app: photos, mock: 'pages/photo-album/mine.html' },
+  photoAlbumNoResults: { app: photos, mock: 'pages/photo-album/no-results.html' },
+  addPhotos: { app: photos, mock: 'dialogs/add-photos/default.html' },
+  addPhotosInvalid: { app: photos, mock: 'dialogs/add-photos/invalid.html' },
+  addPhotosBusy: { app: photos, mock: 'dialogs/add-photos/busy.html' },
+  addPhotosFailed: { app: photos, mock: 'dialogs/add-photos/failed.html' },
+  photoView: { app: photo, mock: 'pages/photo-view/default.html' },
+  photoViewLoading: { app: photo, mock: 'pages/photo-view/loading.html' },
+  photoViewError: { app: photo, mock: 'pages/photo-view/error.html' },
   groupChat: { app: chat, mock: 'pages/group-chat/default.html' },
   groupChatLoading: { app: chat, mock: 'pages/group-chat/loading.html' },
   groupChatEmpty: { app: chat, mock: 'pages/group-chat/empty.html' },

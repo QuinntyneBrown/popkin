@@ -1,3 +1,5 @@
+import { withTheAlbum } from '../fixtures/photos';
+import { PhotoAlbumPage } from '../pages/photo-album.page';
 import responses from '../fixtures/api/responses.json';
 import { asJoel, asVisitor, inviteCode, joelJustJoined, lakesideCast } from '../fixtures/journeys';
 import { maraInTheChat } from '../fixtures/chat';
@@ -63,11 +65,13 @@ test.describe('the welcome after joining', () => {
   // L2-014 AC3
   test('See the photos opens Photos', async ({ page }) => {
     await joelJustJoined(page);
+    await withTheAlbum(page);
     const welcome = new YoureInPage(page);
 
     await welcome.seeThePhotos.click();
 
     await expect(page).toHaveURL(`/p/${created.id}/photos`);
+    await expect(new PhotoAlbumPage(page).heading).toHaveText('Photos');
   });
 
   test('the confetti bursts', async ({ page }) => {

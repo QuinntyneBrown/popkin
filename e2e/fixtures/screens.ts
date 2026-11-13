@@ -37,6 +37,19 @@ import {
   theMockWrappedInvite,
   withShareSheet,
 } from './journeys';
+import {
+  addTheThreeSlowly,
+  addTheThreeWithOneFailing,
+  chooseOneTooLarge,
+  chooseTheThree,
+  theAlbumEmpty,
+  theAlbumFailing,
+  theAlbumLoading,
+  theAlbumWithoutMine,
+  theMockPhotos,
+  thePhotoFailing,
+  thePhotoLoading,
+} from './photos';
 import type { RouteKey } from './routes';
 import { answer, hold, problem } from './stubs';
 import { EndDateDialog } from '../pages/end-date.dialog';
@@ -53,6 +66,9 @@ import { SignUpPage } from '../pages/sign-up.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
 import { YourProfilePage } from '../pages/your-profile.page';
 import { YoureInPage } from '../pages/youre-in.page';
+import { AddPhotosDialog } from '../pages/add-photos.dialog';
+import { PhotoAlbumPage } from '../pages/photo-album.page';
+import { PhotoViewPage } from '../pages/photo-view.page';
 import responses from './api/responses.json';
 
 /**
@@ -519,5 +535,102 @@ export const screenStates: ScreenState[] = [
     before: theMockHome,
     app: copyTheInvite,
     regions: (page) => ({ footer: new InviteDialog(page).footer }),
+  },
+  // Photos. Below 640 px the mock leaves three of Friday's photos out, so the album is compared
+  // by its header and its first day.
+  {
+    key: 'photoAlbum',
+    before: theMockPhotos,
+    regions: (page) => {
+      const album = new PhotoAlbumPage(page);
+      return { header: album.header, day: album.firstDay, grid: album.firstGrid };
+    },
+  },
+  {
+    key: 'photoAlbumLoading',
+    before: theAlbumLoading,
+    regions: (page) => {
+      const album = new PhotoAlbumPage(page);
+      return { header: album.header, skeleton: album.albumSkeleton };
+    },
+  },
+  {
+    key: 'photoAlbumEmpty',
+    before: theAlbumEmpty,
+    regions: (page) => {
+      const album = new PhotoAlbumPage(page);
+      return { header: album.header, empty: album.empty };
+    },
+  },
+  {
+    key: 'photoAlbumError',
+    before: theAlbumFailing,
+    regions: (page) => ({ error: new PhotoAlbumPage(page).error }),
+  },
+  {
+    key: 'photoAlbumMine',
+    before: theMockPhotos,
+    app: (page) => new PhotoAlbumPage(page).mine.click(),
+    regions: (page) => {
+      const album = new PhotoAlbumPage(page);
+      return { header: album.header, grid: album.firstGrid };
+    },
+  },
+  {
+    key: 'photoAlbumNoResults',
+    before: theAlbumWithoutMine,
+    app: (page) => new PhotoAlbumPage(page).mine.click(),
+    regions: (page) => {
+      const album = new PhotoAlbumPage(page);
+      return { header: album.header, empty: album.empty };
+    },
+  },
+  // Add photos. The busy mock draws all three on their way and the bar 62 % full, and the
+  // failed mock draws no mark on the two that are in the album, so those are compared by row.
+  {
+    key: 'addPhotos',
+    before: theMockPhotos,
+    app: chooseTheThree,
+    regions: (page) => ({ panel: new AddPhotosDialog(page).panel }),
+  },
+  {
+    key: 'addPhotosInvalid',
+    before: theMockPhotos,
+    app: chooseOneTooLarge,
+    regions: (page) => ({ panel: new AddPhotosDialog(page).panel }),
+  },
+  {
+    key: 'addPhotosBusy',
+    before: theMockPhotos,
+    app: (page) => addTheThreeSlowly(page),
+    regions: (page) => {
+      const dialog = new AddPhotosDialog(page);
+      return { rows: dialog.list, footer: dialog.footer };
+    },
+  },
+  {
+    key: 'addPhotosFailed',
+    before: theMockPhotos,
+    app: addTheThreeWithOneFailing,
+    regions: (page) => {
+      const dialog = new AddPhotosDialog(page);
+      return { outcome: dialog.outcome, failed: dialog.row(3), footer: dialog.footer };
+    },
+  },
+  // The photo view. "Save photo", the reactions, the comments and the react bar are journey 14.
+  {
+    key: 'photoView',
+    before: theMockPhotos,
+    regions: (page) => ({ caption: new PhotoViewPage(page).captionRegion }),
+  },
+  {
+    key: 'photoViewLoading',
+    before: thePhotoLoading,
+    regions: (page) => ({ stage: new PhotoViewPage(page).stage }),
+  },
+  {
+    key: 'photoViewError',
+    before: thePhotoFailing,
+    regions: (page) => ({ error: new PhotoViewPage(page).error }),
   },
 ];

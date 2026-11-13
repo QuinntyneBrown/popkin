@@ -220,7 +220,7 @@ or design that settled it.
 | 6 | Telemetry backend, log retention and alert thresholds ([ADR 0012](../adr/0012-opentelemetry.md)) | First deployment | |
 | 7 | Load target: concurrent connections and "normal load" ([Fast screens](reliability/fast-screens/README.md), [Live messages](chat/live-messages/README.md)) | Nothing yet; ends [ADR 0009](../adr/0009-one-api-instance.md) when it passes one instance | |
 | 8 | Whether closing a person's open hub connections at sign-out is needed ([Live messages](chat/live-messages/README.md)) | Sign out (journey 17). Journey 3 was built without it: there is no sign-out yet, and nothing closes a connection | |
-| 9 | Photo store provider and the management of its keys ([Add photos](photos/add-photos/README.md)) | First deployment with profile photos (journey 2); journeys 5, 13 and 14 outside Development | The contract and the address scheme are settled by [Join a Popkin](invitations/join-popkin/README.md): `IPhotoStore`, with addresses the API signs and serves for one hour. The provider behind it stays open |
+| 9 | Photo store provider and the management of its keys ([Add photos](photos/add-photos/README.md)) | First deployment with profile photos (journey 2) or with the album: journey 5 is built, and outside Development no photo can be added, because there is no photo store there; journeys 13 and 14 outside Development | The contract and the address scheme are settled by [Join a Popkin](invitations/join-popkin/README.md): `IPhotoStore`, with addresses the API signs and serves for one hour. The provider behind it stays open |
 | 10 | Media topology for calls, mesh or SFU, and where an SFU would run ([Group call](calls/group-call/README.md)) | Journey 7 | |
 | 11 | Media relay (STUN/TURN) provider and credential lifetime ([Group call](calls/group-call/README.md)) | Journey 7 | |
 | 12 | How the other member learns of a direct call ([Group call](calls/group-call/README.md)) | Journey 11 | |
@@ -232,6 +232,8 @@ or design that settled it.
 | 18 | How each web app build sets `BASE_DOMAIN`, and whether development needs one session across `*.localhost` ([Open a Popkin by its address](popkins/open-by-address/README.md), [Address safety](security/address-safety/README.md)) | Building addresses (journey 1 rework) | |
 | 19 | Whether a host more than one label deep should reach the not-found screen, which needs a certificate beyond the wildcard (L2-064 AC7 against L2-067 AC5) | Nothing | |
 | 20 | Mocks for the address field, the not-here screen, the address on the created screen and in Edit name and look, and the invite link on the address ([Choose the address](popkins/choose-address/README.md)) | Building addresses | |
+| 21 | Whether the photo view gains a visible previous and next control. It has none, as the mock draws none, so a member who uses a pointer and cannot swipe cannot move between photos (WCAG 2.5.1, L2-057) ([View a photo](photos/view-photo/README.md)) | Nothing built; L2-057 for the photo view | |
+| 22 | Whether "Save photo" must save the photo at the size it was added (L2-036 AC1). The file a member chooses is not kept: the stored display image is at most 2048 px on its longest edge, and that is what would be saved ([Add photos](photos/add-photos/README.md), [Save a photo](photos/save-photo/README.md)) | Journey 14 | |
 
 Settled so far:
 
@@ -255,6 +257,11 @@ Settled so far:
 | How many messages the home's Chat card holds | [Popkin home](popkins/popkin-home/README.md): four, of which a phone shows the three latest; system notes are left out |
 | What the home shows per form factor | [Popkin home](popkins/popkin-home/README.md): the page passes the most any width shows and the stylesheets show fewer; nothing reads the viewport |
 | The failure copy of the invite dialog | [Invite people](invitations/invite-people/README.md): "We couldn’t load the invite." with "Try again"; the state has no mock |
+| The imaging library, HEIC, and the sizes and format of the stored photo files | [Add photos](photos/add-photos/README.md): Magick.NET, HEIC accepted; two JPEG files, a display image of at most 2048 px and a thumbnail of at most 480 px; the file chosen is not kept |
+| The rate limit on photo uploads | [Abuse limits](security/abuse-limits/README.md): 60 per person per minute, refused attempts counted |
+| The message when more than 20 photos are chosen, and the failed load of a later album page | [Add photos](photos/add-photos/README.md) and [Browse the album](photos/browse-album/README.md); neither state has a mock |
+| Which day an album's day group follows, and in which time zone | [Browse the album](photos/browse-album/README.md): the capture day (`TakenAt`), as the member's device counts days |
+| Whether previous and next follow the filter, and which time the photo view shows | [View a photo](photos/view-photo/README.md): the whole album; when the photo was added |
 
 ## Diagrams
 

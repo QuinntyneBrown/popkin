@@ -28,4 +28,10 @@ public interface IPopkinClient
 
     /// <summary>Someone joined the Popkin. The one who joined is not told.</summary>
     Task MemberJoined(Guid popkinId, MemberJoinedDto member);
+
+    /// <summary>
+    /// Photos were added to the Popkin's album. A hint: it carries their ids only, and the
+    /// album read gives the photos (L2-031 AC7).
+    /// </summary>
+    Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds);
 }

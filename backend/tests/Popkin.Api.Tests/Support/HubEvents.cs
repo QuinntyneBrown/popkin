@@ -24,6 +24,7 @@ public sealed class HubEvents : IAsyncDisposable
         ("ThreadRead", 1),
         ("PresenceChanged", 3),
         ("MemberJoined", 2),
+        ("PhotosAdded", 2),
     ];
 
     private readonly object _gate = new();

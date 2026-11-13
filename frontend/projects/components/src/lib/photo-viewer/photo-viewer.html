@@ -1,0 +1,122 @@
+<header class="topbar">
+  @if (close(); as route) {
+    <a pk-icon-button icon="close" [label]="closeLabel()" [routerLink]="route"></a>
+  } @else {
+    <button
+      pk-icon-button
+      type="button"
+      icon="close"
+      [label]="closeLabel()"
+      (click)="closed.emit()"
+    ></button>
+  }
+  <span
+    pk-avatar
+    size="36"
+    [initials]="avatar()?.initials ?? ''"
+    [photo]="avatar()?.photoUrl"
+    [blank]="!avatar()"
+    [attr.data-accent]="avatar()?.accent"
+  ></span>
+  <div class="topbar__titles">
+    <div class="photo-viewer__name truncate">
+      {{ state() === 'loading' ? loadingTitle() : name() }}
+    </div>
+    <div class="topbar__sub">{{ state() === 'loading' ? '' : time() }}</div>
+  </div>
+  <div class="photo-viewer__actions"><ng-content select="[slot=actions]" /></div>
+</header>
+<main id="main" class="photo-viewer__main" tabindex="-1">
+  @switch (state()) {
+    @case ('error') {
+      <h1 class="visually-hidden">{{ heading() }}</h1>
+      <div class="stage-message" role="alert">
+        <svg pk-icon name="photo-off" size="lg"></svg>
+        <h2 class="stage-message__heading">{{ errorHeading() }}</h2>
+        <p class="stage-message__text">{{ errorText() }}</p>
+        <button pk-button type="button" variant="on-accent" size="md" (click)="retried.emit()">
+          {{ retryLabel() }}
+        </button>
+      </div>
+    }
+    @case ('loading') {
+      <h1 class="visually-hidden">{{ heading() }}</h1>
+      <div class="photo-stage" role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="visually-hidden">{{ loadingText() }}</span>
+      </div>
+      <div class="photo-info" aria-hidden="true">
+        <div class="photo-info__by">
+          <span
+            pk-avatar
+            size="36"
+            [initials]="avatar()?.initials ?? ''"
+            [photo]="avatar()?.photoUrl"
+            [blank]="!avatar()"
+            [attr.data-accent]="avatar()?.accent"
+          ></span>
+          <div class="photo-info__who">
+            <div class="photo-viewer__name truncate">{{ loadingTitle() }}</div>
+          </div>
+        </div>
+        <span pk-skeleton shape="text" [width]="80"></span>
+      </div>
+    }
+    @default {
+      <div
+        class="photo-stage"
+        (pointerdown)="pressed($event)"
+        (pointerup)="released($event)"
+        (pointercancel)="cancelled()"
+      >
+        <img
+          class="photo-stage__photo"
+          draggable="false"
+          [src]="src()"
+          [alt]="alt()"
+          [attr.width]="width() ?? null"
+          [attr.height]="height() ?? null"
+          (error)="imageError.emit()"
+        />
+      </div>
+      <div class="photo-info">
+        <div class="photo-info__by">
+          <span
+            pk-avatar
+            size="36"
+            [initials]="avatar()?.initials ?? ''"
+            [photo]="avatar()?.photoUrl"
+            [blank]="!avatar()"
+            [attr.data-accent]="avatar()?.accent"
+          ></span>
+          <div class="photo-info__who">
+            <div class="photo-viewer__name truncate">{{ name() }}</div>
+            <div class="topbar__sub">{{ time() }}</div>
+          </div>
+        </div>
+        @if (caption()) {
+          <h1 class="photo-info__caption">{{ caption() }}</h1>
+        } @else {
+          <h1 class="visually-hidden">{{ heading() }}</h1>
+        }
+        @if (reactions().length || comments()) {
+          <div class="photo-info__counts">
+            @for (reaction of reactions(); track reaction.emoji) {
+              <span
+                class="stage-chip"
+                role="img"
+                [class.stage-chip--mine]="reaction.mine"
+                [attr.aria-label]="reaction.label"
+                >{{ reaction.emoji }} {{ reaction.count }}</span
+              >
+            }
+            @if (comments()) {
+              <span class="photo-info__comment-count">{{ comments() }}</span>
+            }
+          </div>
+        }
+        <div class="photo-info__more"><ng-content /></div>
+      </div>
+    }
+  }
+</main>

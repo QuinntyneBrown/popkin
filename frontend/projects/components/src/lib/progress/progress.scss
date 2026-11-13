@@ -1,0 +1,23 @@
+:host {
+  display: block;
+}
+
+.progress {
+  height: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+}
+
+.progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+}
+
+.progress__text {
+  margin-top: var(--space-1);
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+}

@@ -22,6 +22,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[class.skeleton--btn]': "shape() === 'btn'",
     '[class.skeleton--pill]': "shape() === 'pill'",
     '[class.skeleton--bubble]': "shape() === 'bubble'",
+    '[class.skeleton--square]': "shape() === 'square'",
     '[class.thumb]': "shape() === 'thumb'",
     '[class.w-20]': 'width() === 20',
     '[class.w-30]': 'width() === 30',
@@ -35,7 +36,17 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class Skeleton {
   readonly shape = input.required<
-    'text' | 'title' | 'circle' | 'tile' | 'tile-2xl' | 'card' | 'btn' | 'pill' | 'bubble' | 'thumb'
+    | 'text'
+    | 'title'
+    | 'circle'
+    | 'tile'
+    | 'tile-2xl'
+    | 'card'
+    | 'btn'
+    | 'pill'
+    | 'bubble'
+    | 'square'
+    | 'thumb'
   >();
   /** `full` stretches the shape across its container; a number is that share of it in percent. */
   readonly width = input<SkeletonWidth>('auto');

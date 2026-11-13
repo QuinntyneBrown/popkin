@@ -1,5 +1,6 @@
 using ImageMagick;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Photos;
 
 namespace Popkin.Infrastructure.Media;
 
@@ -19,20 +20,47 @@ public sealed class MagickPhotoProcessor : IPhotoProcessor
             using var image = new MagickImage(upload.Span);
             // Turn it upright first: the orientation is in the data about to be removed.
             image.AutoOrient();
-            const uint side = IPhotoProcessor.AvatarSide;
-            if (image.Width > side || image.Height > side)
-            {
-                image.Resize(side, side);
-            }
-
-            image.Strip();
-            image.Format = MagickFormat.Jpeg;
-            image.Quality = Quality;
-            return new ProcessedPhoto(image.ToByteArray(), "image/jpeg", ".jpg");
+            return Rendition(image, IPhotoProcessor.AvatarSide);
         }
         catch (MagickException)
         {
             return null;
         }
+    }
+
+    public ProcessedAlbumPhoto? MakeAlbumPhoto(ReadOnlyMemory<byte> upload)
+    {
+        try
+        {
+            using var image = new MagickImage(upload.Span);
+            // When it was taken is read first: it is in the data about to be removed.
+            var exif = image.GetExifProfile();
+            var capturedAt = CaptureTime.Parse(
+                exif?.GetValue(ExifTag.DateTimeOriginal)?.Value, exif?.GetValue(ExifTag.OffsetTimeOriginal)?.Value);
+            image.AutoOrient();
+            // The display image first, then the thumbnail from it: each step only makes it smaller.
+            var display = Rendition(image, IPhotoProcessor.DisplaySide);
+            var (width, height) = ((int)image.Width, (int)image.Height);
+            var thumbnail = Rendition(image, IPhotoProcessor.ThumbnailSide);
+            return new ProcessedAlbumPhoto(display, thumbnail, width, height, capturedAt);
+        }
+        catch (MagickException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>The image as a JPEG no side of which is longer than `side`, with nothing but its pixels.</summary>
+    private static ProcessedPhoto Rendition(MagickImage image, uint side)
+    {
+        if (image.Width > side || image.Height > side)
+        {
+            image.Resize(side, side);
+        }
+
+        image.Strip();
+        image.Format = MagickFormat.Jpeg;
+        image.Quality = Quality;
+        return new ProcessedPhoto(image.ToByteArray(), "image/jpeg", ".jpg");
     }
 }

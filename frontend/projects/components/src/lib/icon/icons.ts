@@ -40,6 +40,23 @@ export const ICONS = {
     { circle: [13, 7, 1], fill: true },
     { rect: [14, 14, 8, 2, 2] },
   ],
+  /* A photo with a plus: add the first one. */
+  'photo-add': [
+    { path: 'M16 5h6' },
+    { path: 'M19 2v6' },
+    { path: 'M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5' },
+    { path: 'm21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21' },
+    { circle: [9, 9, 2] },
+  ],
+  /* A photo struck through: it did not load. */
+  'photo-off': [
+    { line: [2, 22, 2, 22] },
+    { path: 'M10.41 10.41a2 2 0 1 1-2.83-2.83' },
+    { line: [13.5, 6, 13.5, 21] },
+    { line: [18, 21, 12, 15] },
+    { path: 'M3.59 3.59A1.99 1.99 0 0 0 3 5v14a2 2 0 0 0 2 2h14c.55 0 1.052-.22 1.41-.59' },
+    { path: 'M21 15V5a2 2 0 0 0-2-2H9' },
+  ],
   retry: [
     { path: 'M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8' },
     { path: 'M21 3v5h-5' },

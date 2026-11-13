@@ -68,7 +68,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 /* A screen fills the viewport at every width; "Form factors" below says how each kind uses the room. */
 .screen { position: relative; display: flex; flex-direction: column; width: 100%; min-height: 100dvh; margin-inline: auto; background: var(--color-bg-canvas); }
 .screen--wash { background: var(--accent-wash); }
-.screen--stage { background: var(--color-bg-stage); color: var(--color-fg-on-stage); border-color: transparent; }
+.screen--stage { --color-focus-ring: var(--color-focus-ring-on-stage); background: var(--color-bg-stage); color: var(--color-fg-on-stage); border-color: transparent; }
 .screen__body { flex: 1; display: flex; flex-direction: column; padding: var(--space-4) var(--space-6) var(--space-6); min-width: 0; }
 .screen__body--flush { padding-inline: 0; }
 .screen__body--center { justify-content: center; align-items: center; text-align: center; }
@@ -420,6 +420,10 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .stage-btn { display: grid; place-items: center; width: var(--space-12); height: var(--space-12); flex: none; border: 0; border-radius: var(--radius-full); background: var(--color-bg-stage-control-subtle); color: var(--color-fg-on-stage); text-decoration: none; }
 .upload-item { display: flex; gap: var(--space-3); align-items: flex-start; }
 .upload-item .thumb { position: relative; }
+.upload-item__state { position: absolute; inset: 0; display: grid; place-items: center; background: var(--color-bg-scrim); color: var(--color-fg-on-stage); font: var(--text-meta); } /* the row's state over its thumbnail; the mocks write .photo-grid__state */
+.upload-item__blank { display: grid; place-items: center; width: 100%; height: 100%; background: var(--color-bg-subtle); color: var(--color-fg-muted); } /* a file the browser cannot draw */
+.upload-item__retry { position: relative; min-height: 0; padding: 0; }
+.upload-item__retry::after { content: ""; position: absolute; inset: calc(-1 * var(--space-3)) calc(-1 * var(--space-2)); } /* a 44px target around the words */
 
 /* ---------- Experiences ------------------------------------------------------------ */
 .exp-card { display: block; overflow: hidden; border-radius: var(--radius-lg); background: var(--color-bg-surface); box-shadow: var(--shadow-1); color: inherit; text-decoration: none; transition: scale var(--duration-fast) var(--ease-pop); }

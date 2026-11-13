@@ -50,6 +50,7 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Composer](components/composer.html) | Chat | Replying to Ruth. Closed: a wrapped-up Popkin. | Empty, With text, Focus | pages/group-chat/default, pages/group-chat/read-only |
 | [Photo grid](components/photo-grid.html) | Media | Saturday, featured. Strip on the home. | Default, Focus, Uploading | pages/photo-album/default, pages/popkin-home/default, dialogs/add-photos/busy |
 | [Photo viewer](components/photo-viewer.html) | Media | Reactions and the react bar. | Default, Pressed, Focus | pages/photo-view/default |
+| [Upload row](components/upload-item.html) | Media | Ready, with and without a caption. Near the limit, with a count. | Invalid, Uploading, Added, Failed | dialogs/add-photos/default, dialogs/add-photos/invalid, dialogs/add-photos/busy, dialogs/add-photos/failed |
 | [QR card](components/qr-card.html) | Media | With the name. Without the name (just created). Large, in the aside of the created screen. | Static (both themes) | pages/popkin-created/default, dialogs/invite/default |
 | [Call tile and controls](components/call-tile.html) | Media | Speaking, muted, camera off. Controls: Mute, Camera (off, pressed), Leave. | Static (both themes) | pages/video-call/default, pages/video-call/muted, pages/video-call/two |
 | [Top bar](components/top-bar.html) | Navigation | Onboarding: back and step dots. Thread: tile, title, subline, call. Root: logo and actions. | Static (both themes) | pages/sign-up/default, pages/group-chat/default, pages/my-popkins/default |

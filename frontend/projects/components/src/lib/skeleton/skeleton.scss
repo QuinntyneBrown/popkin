@@ -66,6 +66,12 @@
   border-radius: var(--radius-lg);
 }
 
+/* A photo of the album that is loading: a square cell of the grid. */
+:host(.skeleton--square) {
+  aspect-ratio: 1;
+  border-radius: 0;
+}
+
 /* A photo of a strip that is loading, the size of a thumb. */
 :host(.thumb) {
   flex: none;
@@ -103,6 +109,12 @@
 
 :host(.w-full) {
   width: 100%;
+}
+
+/* On the dark stage a skeleton is a still, darker shape. */
+:host-context(.screen--stage) {
+  background: var(--color-bg-stage-tile);
+  animation: none;
 }
 
 @keyframes shimmer {

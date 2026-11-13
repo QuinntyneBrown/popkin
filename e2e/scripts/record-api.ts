@@ -5,14 +5,15 @@
  *
  * The journey below is the cast of the mocks: Mara signs up and starts Lakeside Weekend, Walt
  * and Dev join it, Joel opens its invite and joins, Walt and Mara write in the Everyone
- * thread, and Mara opens the Popkin's home. Each answer is keyed
+ * thread, Mara opens the Popkin's home, and she adds the album's first photo. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const api = process.env['PK_API'] ?? 'http://localhost:5080';
+const mockImages = join(import.meta.dirname, '..', '..', 'docs', 'mocks', 'assets', 'images');
 const recorded: Record<string, { status: number; body?: unknown }> = {};
 
 /** One person's browser: their session cookie, and whether their answers are recorded. */
@@ -138,6 +139,20 @@ await call('GET', `/api/popkins/${created.id}/threads/everyone/preview`);
 await call('GET', `/api/popkins/${created.id}/photos/summary`);
 await call('GET', `/api/popkins/${created.id}/experiences/summary`);
 await call('GET', `/api/popkins/${created.id}/members`);
+
+// Photos: Mara has added none, adds one with a caption, then reads the album and the photo.
+const album = `/api/popkins/${created.id}/photos`;
+await call('GET', `${album}?filter=mine`);
+const upload = new FormData();
+upload.append(
+  'file',
+  new Blob([readFileSync(join(mockImages, 'lake.jpg'))], { type: 'image/jpeg' }),
+  'lake.jpg',
+);
+upload.append('caption', 'First light on the dock. Worth the 6 am alarm.');
+const added = await call('POST', album, upload);
+await call('GET', `${album}?filter=everyone`);
+await call('GET', `${album}/${added.id}`);
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

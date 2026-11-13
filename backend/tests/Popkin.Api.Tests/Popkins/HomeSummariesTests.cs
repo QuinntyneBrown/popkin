@@ -7,8 +7,9 @@ namespace Popkin.Api.Tests.Popkins;
 
 /// <summary>
 /// GET /api/popkins/{popkinId}/photos/summary and /experiences/summary, the Photos and
-/// Experiences sections of the Popkin home (L2-019 AC4, AC5, AC8, L2-051 AC1). Photos arrive
-/// with journey 5 and experiences with journey 8; until then both sections are empty.
+/// Experiences sections of the Popkin home (L2-019 AC4, AC5, AC8, L2-051 AC1). The summary of
+/// an album with photos is in `PhotosSummaryTests`; experiences arrive with journey 8, and
+/// until then that section is empty.
 /// </summary>
 public sealed class HomeSummariesTests
 {

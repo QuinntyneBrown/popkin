@@ -1,0 +1,132 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { Observable, Subject, of, throwError } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { PhotoDetailView } from '../../models/photos';
+import { PhotoViewStore } from './photo-view-store';
+import { PHOTOS_API } from './photos-api';
+
+const avatar = { initials: 'MO', accent: 'Coral', photoUrl: null } as const;
+
+function detail(id: string, extra: Partial<PhotoDetailView> = {}): PhotoDetailView {
+  return {
+    id,
+    uploader: { membershipId: 'm-mara', firstName: 'Mara', displayName: 'Mara Okafor', avatar },
+    addedAt: new Date(2026, 8, 12, 7, 2).toISOString(),
+    takenAt: new Date(2026, 8, 12, 6, 58).toISOString(),
+    caption: 'First light on the dock.',
+    imageUrl: `/d/${id}.jpg?v=1`,
+    width: 2048,
+    height: 1365,
+    reactions: [],
+    commentCount: 0,
+    previousPhotoId: 'newer',
+    nextPhotoId: 'older',
+    canDelete: true,
+    isMine: true,
+    ...extra,
+  };
+}
+
+describe('PhotoViewStore', () => {
+  let answers: Record<string, PhotoDetailView | 'missing' | 'down' | Subject<PhotoDetailView>>;
+  let asked: string[];
+  let store: PhotoViewStore;
+
+  beforeEach(() => {
+    vi.useFakeTimers({ now: new Date(2026, 8, 12, 12, 0) });
+    answers = { a: detail('a') };
+    asked = [];
+    const getPhoto = (_: string, id: string): Observable<PhotoDetailView> => {
+      asked.push(id);
+      const answer = answers[id] ?? 'missing';
+      if (answer === 'missing') return throwError(() => new HttpErrorResponse({ status: 404 }));
+      if (answer === 'down') return throwError(() => new HttpErrorResponse({ status: 500 }));
+      return answer instanceof Subject ? answer : of(answer);
+    };
+    TestBed.configureTestingModule({
+      providers: [PhotoViewStore, { provide: PHOTOS_API, useValue: { getPhoto } }],
+    });
+    store = TestBed.inject(PhotoViewStore);
+  });
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
+    vi.useRealTimers();
+  });
+
+  it('is loading until the photo answers', () => {
+    answers['a'] = new Subject<PhotoDetailView>();
+    store.open('p', 'a');
+    expect(store.state()).toBe('loading');
+  });
+
+  // L2-033 AC1
+  it('shows who added it and when, with its caption', () => {
+    store.open('p', 'a');
+    expect(store.state()).toBe('ready');
+    expect(store.photo()?.uploader.displayName).toBe('Mara Okafor');
+    expect(store.when()).toBe('Saturday, 7:02 am');
+    expect(store.name()).toBe('First light on the dock.');
+  });
+
+  it('names a photo without a caption by who added it', () => {
+    answers['a'] = detail('a', { caption: null });
+    store.open('p', 'a');
+    expect(store.name()).toBe('Photo by Mara');
+  });
+
+  // L2-033 AC3
+  it('knows the photos either side', () => {
+    store.open('p', 'a');
+    expect(store.neighbour('previous')).toBe('newer');
+    expect(store.neighbour('next')).toBe('older');
+  });
+
+  it('has none at the ends of the album', () => {
+    answers['a'] = detail('a', { previousPhotoId: null, nextPhotoId: null });
+    store.open('p', 'a');
+    expect(store.neighbour('previous')).toBeNull();
+    expect(store.neighbour('next')).toBeNull();
+  });
+
+  it('shows the next photo opened, dropping a slower answer for the one left', () => {
+    const slow = new Subject<PhotoDetailView>();
+    answers['a'] = slow;
+    answers['b'] = detail('b');
+    store.open('p', 'a');
+    store.open('p', 'b');
+    slow.next(detail('a'));
+    expect(store.photo()?.id).toBe('b');
+  });
+
+  // L2-033 AC4
+  it('says so when the photo does not load, and reads it again on Try again', () => {
+    answers['a'] = 'down';
+    store.open('p', 'a');
+    expect(store.state()).toBe('error');
+
+    answers['a'] = detail('a');
+    store.retry();
+    expect(store.state()).toBe('ready');
+  });
+
+  // L2-033 AC4: an address may have expired, so Try again asks for a fresh one
+  it('says so when the image itself fails, and Try again reads a fresh address', () => {
+    store.open('p', 'a');
+    store.imageFailed();
+    expect(store.state()).toBe('error');
+
+    answers['a'] = detail('a', { imageUrl: '/d/a.jpg?v=2' });
+    store.retry();
+    expect(store.state()).toBe('ready');
+    expect(store.photo()?.imageUrl).toBe('/d/a.jpg?v=2');
+    expect(asked).toEqual(['a', 'a']);
+  });
+
+  // L2-051
+  it('is not found for a photo that is not in the Popkin', () => {
+    store.open('p', 'gone');
+    expect(store.state()).toBe('not-found');
+  });
+});

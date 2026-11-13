@@ -187,6 +187,7 @@
   --color-fg-accent: var(--palette-coral-deep);     /* coral as text */
 
   --color-focus-ring: var(--palette-ink);
+  --color-focus-ring-on-stage: var(--palette-cream); /* the ring on the dark stage, the same in both themes */
   --color-focus-halo: var(--palette-coral-soft);
 
   --color-star: var(--palette-sun);
@@ -580,6 +581,7 @@
 @media (forced-colors: active) {
   :root {
     --color-focus-ring: Highlight;
+    --color-focus-ring-on-stage: Highlight;
     --color-border-default: CanvasText;
     --color-border-strong: CanvasText;
   }

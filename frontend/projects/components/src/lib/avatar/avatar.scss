@@ -67,3 +67,9 @@
   background: var(--color-bg-subtle);
   color: var(--color-fg-subtle);
 }
+
+/* On the dark stage a blank avatar is a light veil, in both themes. */
+:host-context(.screen--stage).avatar--blank {
+  background: var(--color-bg-stage-control);
+  color: var(--color-fg-on-stage-muted);
+}

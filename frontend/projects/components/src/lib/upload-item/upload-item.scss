@@ -1,0 +1,121 @@
+:host {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.thumb {
+  position: relative;
+  display: block;
+  flex: none;
+  width: var(--space-16);
+  height: var(--space-16);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.thumb__photo {
+  width: 100%;
+  height: 100%;
+}
+
+/* A file the browser cannot draw. */
+.upload-item__blank {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+}
+
+/* The row's state, over its thumbnail. */
+.upload-item__state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg-scrim);
+  color: var(--color-fg-on-stage);
+  font: var(--text-meta);
+}
+
+.upload-item__field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The caption: the text field as a pill. */
+.input {
+  display: block;
+  width: 100%;
+  height: var(--control-height-md);
+  padding: 0 var(--space-4);
+  border: var(--border-width-thick) solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+  transition:
+    border-color var(--duration-fast) var(--ease-pop),
+    box-shadow var(--duration-fast) var(--ease-pop);
+}
+
+.input::placeholder {
+  color: var(--color-fg-subtle);
+  opacity: 1;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--color-danger-border);
+}
+
+.input[readonly] {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+}
+
+.field__count {
+  float: right;
+  margin-top: var(--space-2);
+  font: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-fg-subtle);
+  text-align: right;
+}
+
+.field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1-5);
+  margin-top: var(--space-2);
+  font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-danger-fg);
+}
+
+/* Try again: a line of text with a 44 px target around it. */
+.upload-item__retry {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-fg-accent);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+}
+
+.upload-item__retry::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--space-3)) calc(-1 * var(--space-2));
+}

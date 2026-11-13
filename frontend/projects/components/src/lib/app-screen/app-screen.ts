@@ -13,8 +13,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
  * It makes the room for the three fixed parts and tells them their widths through
  * `--pk-nav-width`, `--pk-list-width` and `--pk-detail-width`.
  *
- * Slots: `[slot=header]`, `[slot=banner]`, the default slot inside `main`, `[slot=composer]`,
- * `[slot=nav]`, `[slot=list]` and `[slot=detail]`.
+ * Slots: `[slot=header]`, `[slot=banner]`, the default slot inside `main`, `[slot=fab]` (the
+ * floating action of a phone, a `pk-fab`; absent from 768 px, where the header holds the action,
+ * L2-058 AC9), `[slot=composer]`, `[slot=nav]`, `[slot=list]` and `[slot=detail]`.
  */
 @Component({
   selector: 'div[pk-app-screen]',

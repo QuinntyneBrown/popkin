@@ -1,0 +1,27 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["A Popkin has one album, and everyone adds to it."] },
+    { "id": "album", "bars": 7, "lines": ["Photos shows how many there are, and from how many people: forty-eight photos from eleven people.", "They are grouped by day, the latest day first.", "The first photo of the latest day is twice the width and height of the others."] },
+    { "id": "filters", "bars": 6, "lines": ["Everyone shows all the photos.", "Mine shows only yours, and the filter is marked as pressed.", "With no photos yet, Photos explains the album and offers Add photos."] },
+    { "id": "add", "bars": 5, "lines": ["Choose Add, and pick up to twenty photos from your device.", "A dialog shows each one, with a caption field.", "The action counts them: Add three photos."] },
+    { "id": "limits", "bars": 4, "lines": ["A photo can be up to ten megabytes. This file is fourteen: it is marked with the reason and not uploaded. The others are."] },
+    { "id": "upload", "bars": 6, "lines": ["While photos upload, a progress bar shows how far, and the action reads Adding.", "If one fails, it stays in the dialog with Try again. The ones that succeeded are in the album."] },
+    { "id": "live", "bars": 4, "lines": ["When someone else adds a photo, it appears in your album without a reload."] },
+    { "id": "view", "bars": 8, "lines": ["Choose a photo, and it opens full screen on a dark background: who added it and when, the whole photo without cropping, and its caption.", "Swipe sideways, or press an arrow key, for the next one.", "Close, or Escape, returns you to the place you left."] },
+    { "id": "grow", "bars": 9, "lines": [
+      { "text": "On a phone, the album is three photos across, and Add floats over it.", "at": 0 },
+      { "text": "From a tablet, four across, with Add photos in the header.", "at": 12 },
+      { "text": "On a laptop, five, beside the sidebar.", "at": 22 },
+      { "text": "Wider still, six.", "at": 31 }
+    ] },
+    { "id": "panel", "bars": 4, "lines": ["The photo grows too. On a laptop, who added it and the caption move to a panel beside the photo."] },
+    { "id": "proof", "bars": 7, "lines": ["What no screen shows, the tests prove: location and device data are removed from every stored file.", "Reactions, comments, saving and deleting come in journey fourteen. And a deployed system still needs a photo store."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey five. Popkin is a free platform for pop-up communities."] }
+  ]
+}

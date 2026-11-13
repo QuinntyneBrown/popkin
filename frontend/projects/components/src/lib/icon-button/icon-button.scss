@@ -19,6 +19,11 @@
   color: inherit;
 }
 
+/* On the dark stage the hover is a light veil. */
+:host-context(.screen--stage):hover {
+  background: var(--color-bg-stage-control-subtle);
+}
+
 :host(:active) {
   scale: var(--scale-press);
 }

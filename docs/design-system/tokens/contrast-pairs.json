@@ -182,6 +182,12 @@
       "note": "focus ring vs page"
     },
     {
+      "fg": "--color-focus-ring-on-stage",
+      "bg": "--color-bg-stage",
+      "min": 3,
+      "note": "focus ring vs the dark stage (photo view, calls)"
+    },
+    {
       "fg": "--color-focus-ring",
       "bg": "--color-accent",
       "min": 3,

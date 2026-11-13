@@ -1,0 +1,50 @@
+<span class="thumb thumb--sm">
+  @if (src() && !broken()) {
+    <img class="thumb__photo" [src]="src()" [alt]="alt()" (error)="broken.set(true)" />
+  } @else {
+    <span class="upload-item__blank" role="img" [attr.aria-label]="alt()">
+      <svg pk-icon name="photos"></svg>
+    </span>
+  }
+  @if (status(); as words) {
+    <span class="upload-item__state photo-grid__state">
+      @if (state() === 'done') {
+        <svg pk-icon name="check" size="md"></svg><span class="visually-hidden">{{ words }}</span>
+      } @else {
+        {{ words }}
+      }
+    </span>
+  }
+</span>
+<div class="upload-item__field">
+  <label class="visually-hidden" [for]="fieldId()">{{ label() }}</label>
+  <input
+    class="input input--pill"
+    type="text"
+    [id]="fieldId()"
+    [value]="caption()"
+    [attr.placeholder]="placeholder()"
+    [attr.maxlength]="maxlength()"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    [readOnly]="locked()"
+    (input)="typed($event)"
+  />
+  @if (count()) {
+    <span class="field__count" [id]="fieldId() + '-count'">{{ count() }}</span>
+  }
+  @if (error()) {
+    <span class="field__error" [id]="fieldId() + '-err'">
+      <svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span>
+      @if (retry(); as words) {
+        <button
+          class="text-btn text-btn--accent upload-item__retry"
+          type="button"
+          (click)="retried.emit()"
+        >
+          {{ words }}
+        </button>
+      }
+    </span>
+  }
+</div>

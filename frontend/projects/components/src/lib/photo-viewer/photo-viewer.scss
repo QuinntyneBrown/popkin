@@ -1,0 +1,246 @@
+/*
+ * The whole screen, on the stage: dark in both themes, with the cream focus ring that reads on
+ * it. From L the panel beside the photo is fixed at the end, and the screen leaves it room.
+ */
+:host {
+  --pk-detail-width: 0rem;
+  --color-focus-ring: var(--color-focus-ring-on-stage);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  margin-inline: auto;
+  background: var(--color-bg-stage);
+  color: var(--color-fg-on-stage);
+}
+
+/* The bar: Close, who and when, and the actions at its end. */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--space-16);
+  flex: none;
+  padding: 0 var(--space-2);
+}
+
+.topbar__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.photo-viewer__name {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-md-minus);
+}
+
+.topbar__sub {
+  font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-on-stage-muted);
+}
+
+.photo-viewer__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.photo-viewer__actions:empty {
+  display: none;
+}
+
+.photo-viewer__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.photo-viewer__main:focus {
+  outline: none;
+}
+
+/* The photo, whole. A drag across it is a swipe; a drag up or down still scrolls the page. */
+.photo-stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: var(--space-40);
+  touch-action: pan-y pinch-zoom;
+}
+
+.photo-stage__photo {
+  width: 100%;
+  height: auto;
+  max-height: 60dvh;
+  object-fit: contain;
+  user-select: none;
+}
+
+.spinner {
+  width: var(--space-10);
+  height: var(--space-10);
+  border: var(--border-width-ring) solid var(--color-bg-stage-control-strong);
+  border-top-color: var(--color-fg-on-stage);
+  border-radius: var(--radius-full);
+  animation: spin var(--duration-deliberate) linear infinite;
+}
+
+/* Under the photo: the caption and the counts. */
+.photo-info {
+  flex: none;
+  padding: var(--space-4) var(--space-4) var(--space-8);
+}
+
+/* Who and when, again: only in the panel, from L. */
+.photo-info__by {
+  display: none;
+}
+
+.photo-info__who {
+  flex: 1;
+  min-width: 0;
+}
+
+.photo-info__caption {
+  font: var(--text-body);
+  line-height: var(--line-height-relaxed);
+}
+
+.photo-info__counts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.photo-info__comment-count {
+  color: var(--color-fg-on-stage-muted);
+  font-size: var(--font-size-sm-plus);
+}
+
+.photo-info__more:empty {
+  display: none;
+}
+
+.stage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--space-8);
+  padding: 0 var(--space-3);
+  border: var(--border-width-thick) solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-stage-control);
+  color: var(--color-fg-on-stage);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+}
+
+/* A reaction the person looking has given: white, and its name says so. */
+.stage-chip--mine {
+  background: var(--color-constant-light);
+  color: var(--color-constant-dark);
+}
+
+/* The photo did not load. */
+.stage-message {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.stage-message__text {
+  color: var(--color-fg-on-stage-muted);
+}
+
+/* M: more room around the photo; the caption keeps a readable width. */
+@media (min-width: 48rem) {
+  :host(.screen--viewer) .topbar {
+    padding-inline: var(--space-4);
+  }
+
+  :host(.screen--viewer) .photo-stage {
+    padding: 0 var(--space-6) var(--space-6);
+  }
+
+  :host(.screen--viewer) .photo-stage__photo {
+    border-radius: var(--radius-md);
+  }
+
+  :host(.screen--viewer) .photo-info {
+    width: 100%;
+    max-width: var(--layout-viewer-info-max);
+    margin-inline: auto;
+    padding-inline: var(--space-6);
+  }
+}
+
+/* L: who, when, the caption and the counts are a panel beside the photo. */
+@media (min-width: 64rem) {
+  :host(.screen--viewer) {
+    --pk-detail-width: var(--layout-list-pane);
+
+    padding-right: var(--pk-detail-width);
+  }
+
+  /* The panel names the person, so the bar keeps their place but not their name. */
+  :host(.screen--viewer) .topbar > .avatar,
+  :host(.screen--viewer) .topbar__titles {
+    visibility: hidden;
+  }
+
+  :host(.screen--viewer) .photo-stage__photo {
+    width: auto;
+    max-width: 100%;
+    max-height: calc(100dvh - var(--layout-topbar-height) - var(--space-6));
+  }
+
+  :host(.screen--viewer) .photo-info {
+    position: fixed;
+    inset: 0 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    width: var(--pk-detail-width);
+    max-width: none;
+    margin: 0;
+    padding: var(--space-6);
+    border-left: var(--border-width-hairline) solid var(--color-bg-stage-control);
+    background: var(--color-bg-stage-tile);
+    overflow-y: auto;
+  }
+
+  .photo-info__by {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+
+  /* What a later journey adds fills the rest of the panel, so its last part can sit at the end. */
+  .photo-info__more {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 80rem) {
+  :host(.screen--viewer) {
+    --pk-detail-width: var(--layout-list-pane-xl);
+  }
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
