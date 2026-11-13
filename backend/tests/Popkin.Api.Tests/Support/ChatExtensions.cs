@@ -16,6 +16,26 @@ public static class ChatExtensions
     public static Task<JsonElement> EveryoneThreadAsync(this HttpClient member, Guid popkinId) =>
         member.GetFromJsonAsync<JsonElement>($"/api/popkins/{popkinId}/threads/everyone");
 
+    /// <summary>The member's own membership id in the Popkin.</summary>
+    public static async Task<Guid> MembershipIdAsync(this HttpClient member, Guid popkinId) =>
+        (await member.EveryoneThreadAsync(popkinId)).GetProperty("viewer").GetProperty("membershipId").GetGuid();
+
+    /// <summary>Opens the direct message with another member, named by their membership id.</summary>
+    public static Task<HttpResponseMessage> OpenDirectAsync(this HttpClient member, Guid popkinId, Guid memberId) =>
+        member.PutAsync($"/api/popkins/{popkinId}/threads/direct/{memberId}", null);
+
+    /// <summary>Opens a direct message that must be answered, and returns the thread.</summary>
+    public static async Task<JsonElement> DirectThreadAsync(this HttpClient member, Guid popkinId, Guid memberId)
+    {
+        var response = await member.OpenDirectAsync(popkinId, memberId);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<JsonElement>();
+    }
+
+    /// <summary>The id of the direct message with another member, opened if it was not yet.</summary>
+    public static async Task<Guid> DirectThreadIdAsync(this HttpClient member, Guid popkinId, Guid memberId) =>
+        (await member.DirectThreadAsync(popkinId, memberId)).GetProperty("id").GetGuid();
+
     /// <summary>Posts a message under a new client message id, or the one given.</summary>
     public static Task<HttpResponseMessage> SendMessageAsync(this HttpClient member, Guid popkinId, Guid threadId, string? text, Guid? clientMessageId = null) =>
         member.PostAsJsonAsync($"/api/popkins/{popkinId}/threads/{threadId}/messages", new { clientMessageId = clientMessageId ?? Guid.NewGuid(), text });

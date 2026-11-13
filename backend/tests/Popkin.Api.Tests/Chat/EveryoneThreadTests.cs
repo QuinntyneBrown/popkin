@@ -35,7 +35,7 @@ public sealed class EveryoneThreadTests
         Assert.Equal(joined.GetProperty("membershipId").GetGuid(), thread.GetProperty("viewer").GetProperty("membershipId").GetGuid());
         Assert.Equal("Joel", thread.GetProperty("viewer").GetProperty("firstName").GetString());
         Assert.Equal(
-            ["colour", "emoji", "endsAt", "hereNow", "id", "kind", "lastReadMessageId", "memberCount", "popkinId", "popkinName", "presenceVersion", "readOnly", "unreadCount", "viewer"],
+            ["colour", "emoji", "endsAt", "hereNow", "id", "kind", "lastReadMessageId", "memberCount", "other", "popkinId", "popkinName", "presenceVersion", "readOnly", "unreadCount", "viewer"],
             thread.EnumerateObject().Select(p => p.Name).Order());
     }
 
