@@ -1,0 +1,7 @@
+<span class="icon-tile"><svg pk-icon [name]="icon()" size="md"></svg></span>
+<span class="menu-list__words">
+  <ng-content />
+  @if (hint()) {
+    <small class="menu-list__hint">{{ hint() }}</small>
+  }
+</span>

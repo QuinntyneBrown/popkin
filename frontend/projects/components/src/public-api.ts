@@ -99,3 +99,5 @@ export * from './lib/comment/comment';
 export * from './lib/choice-chips/choice-chips';
 export * from './lib/textarea/textarea';
 export * from './lib/picture-field/picture-field';
+export * from './lib/menu-list/menu-list';
+export * from './lib/menu-item/menu-item';
