@@ -36,6 +36,6 @@ public sealed class DiscardPendingMessageCommandHandler(IAppDbContext db, IMembe
 
         message.Delete(clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
-        await notifier.MessageDeleted(popkin.Id, thread.Id, message.Id);
+        await notifier.MessageDeleted(await ChatThreads.AudienceAsync(db, thread, cancellationToken), thread.Id, message.Id);
     }
 }

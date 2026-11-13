@@ -72,7 +72,7 @@ public sealed class SendMessageCommandHandler(
 
         // Told after the commit, in the same request: there is no queue between store and push (L2-027 AC1).
         var sent = MessageDto.Of(message, membership, photos);
-        await notifier.MessageAdded(popkin.Id, sent);
+        await notifier.MessageAdded(await ChatThreads.AudienceAsync(db, thread, cancellationToken), sent);
         return new SendMessageResult(sent, Created: true);
     }
 

@@ -58,6 +58,25 @@ public static class ChatThreads
         return thread is not null && thread.CanRead(membership.Id) ? thread : throw ChatProblems.ThreadNotFound();
     }
 
+    /// <summary>
+    /// Who is told of what happens in a thread: every member of the Popkin for Everyone, and for
+    /// a direct message the people of its two members who have not left, on every connection
+    /// they hold, so nobody else hears of it (L2-023 AC2, L2-051).
+    /// </summary>
+    public static async Task<Audience> AudienceAsync(IAppDbContext db, ChatThread thread, CancellationToken cancellationToken)
+    {
+        if (thread.Kind == ChatThreadKind.Everyone)
+        {
+            return Audience.Popkin(thread.PopkinId);
+        }
+
+        var people = await db.Memberships.AsNoTracking()
+            .Where(m => (m.Id == thread.MemberAId || m.Id == thread.MemberBId) && m.PopkinId == thread.PopkinId && m.LeftAt == null)
+            .Select(m => m.PersonId)
+            .ToListAsync(cancellationToken);
+        return Audience.People(thread.PopkinId, people);
+    }
+
     public static async Task<ChatThread> EveryoneAsync(IAppDbContext db, Guid popkinId, CancellationToken cancellationToken) =>
         await db.ChatThreads.AsNoTracking().FirstAsync(t => t.PopkinId == popkinId && t.Kind == ChatThreadKind.Everyone, cancellationToken);
 }

@@ -12,9 +12,9 @@ namespace Popkin.Worker;
 /// </summary>
 public sealed class SilentPopkinNotifier : IPopkinNotifier
 {
-    public Task MessageAdded(Guid popkinId, MessageDto message) => Task.CompletedTask;
+    public Task MessageAdded(Audience audience, MessageDto message) => Task.CompletedTask;
 
-    public Task MessageDeleted(Guid popkinId, Guid threadId, Guid messageId) => Task.CompletedTask;
+    public Task MessageDeleted(Audience audience, Guid threadId, Guid messageId) => Task.CompletedTask;
 
     public Task ThreadRead(Guid personId, Guid threadId) => Task.CompletedTask;
 

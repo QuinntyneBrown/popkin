@@ -129,7 +129,7 @@ public sealed class JoinPopkinCommandHandler(
         }
 
         presence.Join(membership.PersonId, popkin.Id);
-        await notifier.MessageAdded(popkin.Id, MessageDto.Of(note, membership, photos));
+        await notifier.MessageAdded(Audience.Popkin(popkin.Id), MessageDto.Of(note, membership, photos));
     }
 
     private static JoinedDto Joined(PopkinSpace popkin, Membership joiner, List<Membership> members)

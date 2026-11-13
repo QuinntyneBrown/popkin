@@ -11,11 +11,11 @@ namespace Popkin.Application.Abstractions;
 /// </summary>
 public interface IPopkinNotifier
 {
-    /// <summary>To every member of the Popkin with a connection open.</summary>
-    Task MessageAdded(Guid popkinId, MessageDto message);
+    /// <summary>To the thread's audience: the Popkin for Everyone, the two members for a direct message.</summary>
+    Task MessageAdded(Audience audience, MessageDto message);
 
-    /// <summary>To every member of the Popkin with a connection open.</summary>
-    Task MessageDeleted(Guid popkinId, Guid threadId, Guid messageId);
+    /// <summary>To the thread's audience: the Popkin for Everyone, the two members for a direct message.</summary>
+    Task MessageDeleted(Audience audience, Guid threadId, Guid messageId);
 
     /// <summary>To that person only, on every connection they hold.</summary>
     Task ThreadRead(Guid personId, Guid threadId);
