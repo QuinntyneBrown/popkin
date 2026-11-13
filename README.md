@@ -23,6 +23,58 @@
 Popkin is a free platform for pop-up communities. Spin up a private space in seconds, invite
 people by QR code, then chat, video call, share photos and rate experiences together.
 
+> **Status: in progress.** Journey 1, Start a Popkin, is built: sign up with a code, name a
+> Popkin, choose how long it lasts and get its QR invite, on every screen size from a phone to a
+> desktop. [Watch it](docs/videos/01-journey-01-start-a-popkin/01-journey-01-start-a-popkin.mp4)
+> (1 min 48 s, with sound). Journey 2, Join by invite, is built too: open an invite link, see
+> what you are joining, join with a name and an optional photo, and be welcomed.
+> [Watch it](docs/videos/02-journey-02-join-by-invite/02-journey-02-join-by-invite.mp4)
+> (2 min 14 s, with sound). Journey 3, Chat with everyone, is built as well: members read the
+> Everyone thread by day, send messages that reach the others as they are sent, and keep a
+> message that cannot be sent, marked "Not sent" or "Waiting to send".
+> [Watch it](docs/videos/03-journey-03-chat-with-everyone/03-journey-03-chat-with-everyone.mp4)
+> (2 min 10 s, with sound). Journey 4, Popkin home, is built too: a member sees who is in the
+> Popkin, how long it has left and the latest chat, with the count of new messages rising as
+> they arrive, and brings someone in with the QR code or the invite link.
+> [Watch it](docs/videos/04-journey-04-popkin-home/04-journey-04-popkin-home.mp4)
+> (2 min 12 s, with sound). Journey 5, Share photos, is built as well: members add up to 20
+> photos at a time with captions, browse the album by day under Everyone or Mine, and open each
+> photo full screen, and new photos appear for everyone without a reload.
+> [Watch it](docs/videos/05-journey-05-share-photos/05-journey-05-share-photos.mp4)
+> (2 min 16 s, with sound). Journey 6, Come back, is built too: a person signs in again with
+> a new code, sees every Popkin they belong to on My Popkins, with the latest message and the
+> count of unread messages on each, opens any of them, and scans a QR code to join another;
+> offline, My Popkins shows the list it saved last time.
+> [Watch it](docs/videos/06-journey-06-come-back/06-journey-06-come-back.mp4)
+> (2 min 22 s, with sound). Journey 7, Group call, is built as well: a member starts a video
+> call for the whole Popkin with one tap, the others join from a banner on the home and in the
+> chat, and each mutes, turns the camera off, leaves, or minimises the call and returns to it;
+> whoever is speaking has a ring round their tile.
+> [Watch it](docs/videos/07-journey-07-group-call/07-journey-07-group-call.mp4)
+> (2 min 16 s, with sound). Journey 8, Rate an experience, is built too: members share what
+> the group did, where it ate and what it wants to do next, with a picture, filter the list, rate
+> each one from one to five stars, add a few words to their rating and see the group's score;
+> whoever shared an experience edits or deletes it.
+> [Watch it](docs/videos/08-journey-08-rate-an-experience/08-journey-08-rate-an-experience.mp4)
+> (2 min 12 s, with sound). Journey 9, Wrap up, is built as well: the Host wraps a Popkin up
+> from Popkin settings, or its time runs out, with a banner in its last hour; it turns
+> read-only, and everyone gets a recap with the people, the messages, the photos and the
+> top-rated moment, saves the album as a zip, and the Host pops up another with the same crew.
+> [Watch it](docs/videos/09-journey-09-wrap-up/09-journey-09-wrap-up.mp4)
+> (2 min 20 s, with sound). Journey 10, Discover Popkin, is built too: a visitor reads on the
+> landing page what Popkin is, how it works, what it is for, how it compares with a group chat
+> and that it is free, and starts a Popkin or signs in from there; a person who is signed in
+> goes straight to My Popkins.
+> [Watch it](docs/videos/10-journey-10-discover-popkin/10-journey-10-discover-popkin.mp4)
+> (2 min 26 s, with sound). Journey 11, Direct message, is built as well: the Chat tab lists
+> Everyone first and then a member's direct messages, the most recent first with what is
+> unread; New message finds any other member by name, and a direct message is between the two
+> of them alone, live, and read-only once the Popkin wraps up; "Call" opens a video call
+> between the two, which the other joins from the banner in their chat.
+> <!-- video of journey 11 -->
+> The journeys still to build are in
+> [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
+
 ## Contents
 
 - [Architecture](#architecture)
