@@ -102,7 +102,7 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 ## Tokens
 
 - `tokens/tokens.css`: the source of truth. Primitives (`--palette-*`), roles (`--color-*`, `--text-*`, `--space-*`, `--radius-*`, `--shadow-*`, `--duration-*`, `--layout-*` …) with light and dark values, and the Popkin colour (`--accent*`, set with `data-accent`).
-- `tokens/tokens.json`: the DTCG export, generated from `tokens.css` (342 tokens).
+- `tokens/tokens.json`: the DTCG export, generated from `tokens.css` (347 tokens).
 - `tokens/contrast-pairs.json`: the 75 foreground and background pairs the components rely on, checked in both themes.
 - `assets/components.css`: every component class, tokens only. `assets/fonts/`: Nunito, Inter and Rubik (SIL Open Font License).
 - `assets/ds.css`, `assets/ds.js`: the documentation chrome; not product UI.
@@ -123,30 +123,44 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 | `dialogs/*` without a description | No gap between title and body | The body always starts 16px under the header |
 | `pages/brand-components` | A `btn--ghost` class that did not exist | Ghost is the base `.btn`; the brand-sheet-only classes moved to the mocks' `mock.css` |
 | Design (Magic Patterns) | Faint text #8a8090 (3.6:1), hairline field and switch edges (1.3:1), future step dots (1.3:1) | Already corrected in the mocks; recorded as `--color-fg-subtle`, `--color-border-strong`, and `--palette-ink-muted` for disabled text only |
+| Design (Magic Patterns), Straight palette | Coral (2.9:1) as a focused field's edge and an invalid field's edge; the seven Popkin colours (1.7 to 2.9:1) as edges, rings and icons on white | `--color-border-focus` and `--color-danger-border` are deep coral; `--accent-line` darkens the Popkin colour 30% toward black in light |
 
 ## Popkin colour contrast
+
+The Straight palette (Magic Patterns, 12 November 2026) makes every Popkin colour a light mid-tone that carries black text. Coral, sun and green fills
+are lighter than 3:1 against white; that is allowed because the label or the text beside a fill identifies it (1.4.11 asks no fill contrast). Where a
+colour is drawn as text or an edge it is darkened: `--accent-text` 55% and `--accent-line` 70% of the colour, mixed with black, in light.
 
 `check_contrast.py` cannot resolve `color-mix()`, so every pairing that mixes a Popkin colour into a surface was computed separately with the
 same sRGB mixing the browser uses. Minimums: 4.5:1 for text, 3:1 for lines. All 98 pass.
 
-| Colour | Theme | White on colour | Colour text on tint | on card | on washed page | Text on tint | Line on card | Line on page |
+| Colour | Theme | Black on colour | Colour text on tint | on card | on washed page | Text on tint | Line on card | Line on page |
 |---|---|---|---|---|---|---|---|---|
-| Coral | light | 4.55 | 5.58 | 6.51 | 5.55 | 14.09 | 4.55 | 4.33 |
-| Coral | dark | 4.55 | 6.67 | 8.25 | 8.27 | 11.87 | 5.97 | 6.63 |
-| Teal | light | 4.87 | 5.92 | 6.86 | 5.87 | 14.20 | 4.87 | 4.62 |
-| Teal | dark | 4.87 | 6.86 | 8.46 | 8.47 | 11.91 | 6.11 | 6.78 |
-| Sky | light | 5.32 | 6.37 | 7.40 | 6.32 | 14.16 | 5.32 | 5.06 |
-| Sky | dark | 5.32 | 6.77 | 8.29 | 8.32 | 11.99 | 5.87 | 6.52 |
-| Berry | light | 5.65 | 6.61 | 7.82 | 6.60 | 13.91 | 5.65 | 5.36 |
-| Berry | dark | 5.65 | 6.49 | 7.71 | 7.86 | 12.36 | 5.33 | 5.91 |
-| Leaf | light | 5.09 | 6.16 | 7.12 | 6.10 | 14.22 | 5.09 | 4.83 |
-| Leaf | dark | 5.09 | 6.89 | 8.48 | 8.49 | 11.93 | 6.07 | 6.74 |
-| Plum | light | 6.55 | 7.47 | 8.79 | 7.44 | 13.97 | 6.55 | 6.22 |
-| Plum | dark | 6.55 | 6.56 | 7.75 | 7.90 | 12.43 | 5.26 | 5.83 |
-| Amber | light | 4.58 | 5.66 | 6.52 | 5.60 | 14.27 | 4.58 | 4.36 |
-| Amber | dark | 4.58 | 6.87 | 8.65 | 8.58 | 11.66 | 6.32 | 7.01 |
+| Coral | light | 7.33 | 6.85 | 7.61 | 7.04 | 18.89 | 5.35 | 4.94 |
+| Coral | dark | 7.33 | 7.21 | 10.22 | 9.56 | 10.37 | 8.24 | 7.71 |
+| Teal (green) | light | 5.52 | 8.10 | 9.12 | 8.36 | 18.64 | 6.76 | 6.19 |
+| Teal (green) | dark | 5.52 | 7.16 | 9.51 | 9.17 | 11.06 | 7.21 | 6.95 |
+| Sky | light | 8.33 | 6.35 | 6.96 | 6.53 | 19.18 | 4.81 | 4.52 |
+| Sky | dark | 8.33 | 7.38 | 11.01 | 10.13 | 9.86 | 9.12 | 8.39 |
+| Berry | light | 8.37 | 6.32 | 6.93 | 6.51 | 19.16 | 4.77 | 4.48 |
+| Berry | dark | 8.37 | 7.30 | 10.90 | 9.99 | 9.84 | 9.07 | 8.31 |
+| Leaf (sage) | light | 9.91 | 5.68 | 6.10 | 5.80 | 19.56 | 4.13 | 3.93 |
+| Leaf (sage) | dark | 9.91 | 7.48 | 11.75 | 10.52 | 9.35 | 10.14 | 9.07 |
+| Plum | light | 7.32 | 6.91 | 7.63 | 7.11 | 19.00 | 5.37 | 5.01 |
+| Plum | dark | 7.32 | 7.27 | 10.50 | 9.80 | 10.18 | 8.50 | 7.93 |
+| Amber (sun) | light | 12.28 | 4.94 | 5.21 | 4.99 | 19.91 | 3.43 | 3.28 |
+| Amber (sun) | dark | 12.28 | 7.62 | 12.79 | 11.13 | 8.75 | 11.45 | 9.96 |
 
 ## Verification
+
+Run on 13 November 2026, after applying the Straight palette:
+
+- `check_contrast.py` on `tokens/tokens.css`: 142 passed, 0 failed, 0 unresolved (light and dark). The primary fill pairs now ask 1:1 (the label
+  identifies the button), the dark focus ring is checked against the page it sits on, and the raw Popkin colours as edges are checked in dark only
+  (light draws them with `--accent-line`).
+- Popkin colour mixes: 98 passed, 0 failed (table above).
+- `check_design_system.py docs/design-system`: 63 pages, 0 errors, 0 warnings. `check_mocks.py docs/mocks`: 46 screens, 162 mocks, 0 errors, 0 warnings.
+- The app: `npm run lint`, `npm run format:check`, the behaviour specs (63 passed) and `npm run parity` (220 passed).
 
 Run on 12 November 2026:
 

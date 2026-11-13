@@ -37,15 +37,15 @@
   --palette-white: #ffffff;
   --palette-black: #000000;
 
-  /* Warm neutrals, light */
-  --palette-paper: #fff8f1;
-  --palette-sand: #f8ecdf;
-  --palette-line: #eedfcf;
-  --palette-clay: #8f7d6b;        /* control edges, 3:1 on paper */
-  --palette-ink: #231c2e;
-  --palette-ink-soft: #5d5466;
-  --palette-ink-faint: #6e6475;   /* the design's #8a8090 darkened to reach 4.5:1 */
-  --palette-ink-muted: #8a8090;   /* the design's faint text, kept for disabled text only */
+  /* Neutrals, light: white paper and black ink (the Straight palette) */
+  --palette-paper: #ffffff;
+  --palette-sand: #f4f4f1;
+  --palette-line: #e4e4e0;
+  --palette-clay: #8a8a84;        /* control edges, 3:1 on paper and sand */
+  --palette-ink: #000000;
+  --palette-ink-soft: #3b3b3b;
+  --palette-ink-faint: #6b6b6b;   /* 4.8:1 on sand */
+  --palette-ink-muted: #8f8f8f;   /* disabled text only */
 
   /* Warm neutrals, dark */
   --palette-night-deep: #140f19;
@@ -57,8 +57,8 @@
   --palette-cream: #fbf3ea;
   --palette-cream-soft: #cbbfcf;
   --palette-cream-faint: #a69bab;
-  --palette-stage: #1d1724;       /* call and photo view background, both themes */
-  --palette-stage-tile: #2c2434;
+  --palette-stage: #000000;       /* call and photo view background, both themes */
+  --palette-stage-tile: #1c1c1c;
   --palette-veil-light-subtle: rgb(255 255 255 / 0.1);
   --palette-veil-light: rgb(255 255 255 / 0.15);
   --palette-veil-light-strong: rgb(255 255 255 / 0.25);
@@ -68,32 +68,34 @@
   --palette-veil-grey: rgb(128 128 128 / 0.3);
 
   /* Brand */
-  --palette-coral: #d6401f;
-  --palette-coral-deep: #ad3118;
-  --palette-coral-deeper: #8f2814;
-  --palette-coral-soft: #ffe3d9;
-  --palette-coral-soft-hover: #ffd2c2;
-  --palette-coral-light: #ff9b82; /* coral as text on dark */
+  --palette-coral: #ea7671;       /* carries black text */
+  --palette-coral-hover: #de706b;
+  --palette-coral-active: #d1655f;
+  --palette-coral-deep: #b4403b;  /* coral as text and edges on white; carries white text */
+  --palette-coral-deeper: #963430;
+  --palette-coral-soft: #fbe2e1;
+  --palette-coral-soft-hover: #f9d7d5;
+  --palette-coral-light: #f09a96; /* coral as text on dark */
   --palette-coral-night: #4a2a25;
   --palette-coral-night-hover: #5c332c;
-  --palette-sun: #ffc83d;
-  --palette-sun-soft: #fff1c7;
-  --palette-sun-deep: #7a5200;
+  --palette-sun: #dcc573;
+  --palette-sun-soft: #f6efd3;
+  --palette-sun-deep: #6b5a1a;
   --palette-sun-night: #43391f;
-  --palette-teal: #0b7f77;
-  --palette-teal-deep: #075f59;
-  --palette-teal-soft: #d4f1ed;
-  --palette-teal-light: #7fd6cd;
+  --palette-teal: #5c8f57;        /* the green; the token keeps the design's name */
+  --palette-teal-deep: #3c6338;
+  --palette-teal-soft: #e2ece0;
+  --palette-teal-light: #9dbb8a;
   --palette-teal-night: #1d3c3a;
 
-  /* The seven colours a Popkin can pick. Each carries white text at AA. */
-  --palette-accent-coral: #d6401f;
-  --palette-accent-teal: #0b7f77;
-  --palette-accent-sky: #2f68c9;
-  --palette-accent-berry: #bb2f68;
-  --palette-accent-leaf: #2c7d45;
-  --palette-accent-plum: #7044b8;
-  --palette-accent-amber: #b45f06;
+  /* The seven colours a Popkin can pick: mid-tones that each carry black text at AA. */
+  --palette-accent-coral: #ea7671;
+  --palette-accent-teal: #5c8f57;  /* Green */
+  --palette-accent-sky: #7fa6d6;
+  --palette-accent-berry: #e08aa8;
+  --palette-accent-leaf: #9dbb8a;  /* Sage */
+  --palette-accent-plum: #a98bd3;
+  --palette-accent-amber: #dcc573; /* Sun */
 
   /* ---------- Primitives: typography ----------------------------------- */
   --font-family-display: "Nunito", ui-rounded, system-ui, sans-serif;
@@ -146,7 +148,7 @@
   --color-bg-subtle: var(--palette-sand);           /* quiet fills, chips */
   --color-bg-subtle-hover: var(--palette-line);
   --color-bg-inverse: var(--palette-ink);           /* pressed chips, toasts */
-  --color-bg-backdrop: rgb(35 28 46 / 0.4);         /* modal scrim */
+  --color-bg-backdrop: rgb(0 0 0 / 0.4);         /* modal scrim */
   --color-bg-stage: var(--palette-stage);           /* calls, photo view */
   --color-bg-stage-tile: var(--palette-stage-tile);
   --color-bg-stage-control: var(--palette-veil-light);          /* call controls, chips on the stage */
@@ -173,13 +175,14 @@
   --color-border-default: var(--palette-line);      /* hairlines (decorative) */
   --color-border-strong: var(--palette-clay);       /* control edges (>= 3:1) */
   --color-border-inverse: var(--palette-ink-soft);  /* edges on the inverse surface */
+  --color-border-focus: var(--palette-coral-deep);  /* a focused field's edge (>= 3:1) */
 
   --color-accent: var(--palette-coral);             /* the brand's primary action */
-  --color-accent-hover: var(--palette-coral-deep);
-  --color-accent-active: var(--palette-coral-deeper);
+  --color-accent-hover: var(--palette-coral-hover);
+  --color-accent-active: var(--palette-coral-active);
   --color-accent-subtle: var(--palette-coral-soft);
   --color-accent-subtle-hover: var(--palette-coral-soft-hover);
-  --color-fg-on-accent: var(--palette-white);
+  --color-fg-on-accent: var(--palette-black);
   --color-fg-accent: var(--palette-coral-deep);     /* coral as text */
 
   --color-focus-ring: var(--palette-ink);
@@ -210,7 +213,7 @@
 
   --color-danger-bg: var(--palette-coral-soft);
   --color-danger-fg: var(--palette-coral-deep);
-  --color-danger-border: var(--palette-coral);
+  --color-danger-border: var(--palette-coral-deep);
   --color-danger-icon: var(--palette-coral-deep);
   --color-danger-solid: var(--palette-coral-deep);
   --color-danger-solid-hover: var(--palette-coral-deeper);
@@ -225,10 +228,10 @@
   --accent: var(--palette-accent-coral);
   --accent-tint-strength: 11%;        /* how much of the colour a tinted surface takes */
   --accent-wash-strength: 8%;         /* a whole screen washed in the colour */
-  --accent-text-strength: 80%;        /* the colour as text: mixed toward --accent-text-toward */
+  --accent-text-strength: 55%;        /* the colour as text: mixed toward --accent-text-toward */
   --accent-text-toward: var(--palette-black);
-  --accent-line-strength: 100%;       /* the colour as an edge, ring or icon */
-  --color-fg-on-popkin: var(--palette-white);
+  --accent-line-strength: 70%;        /* the colour as an edge, ring or icon (>= 3:1) */
+  --color-fg-on-popkin: var(--palette-black);
 
   /* ---------- Semantic: typography roles ------------------------------- */
   --text-hero: var(--font-weight-black) var(--font-size-6xl) / var(--line-height-tight) var(--font-family-display);
@@ -325,7 +328,7 @@
   --border-width-ring: 3px;
 
   /* ---------- Semantic: elevation -------------------------------------- */
-  --shadow-color: 35 28 46;
+  --shadow-color: 0 0 0;
   --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.04), 0 6px 20px -6px rgb(var(--shadow-color) / 0.12);   /* soft: cards, bubbles */
   --shadow-2: 0 2px 4px rgb(var(--shadow-color) / 0.05), 0 18px 40px -12px rgb(var(--shadow-color) / 0.22); /* lift: QR card, floating action */
   --shadow-3: 0 -8px 40px -8px rgb(var(--shadow-color) / 0.3);                                               /* sheets, dialogs */
@@ -392,11 +395,13 @@
   --color-border-inverse: var(--palette-cream-soft);
   --color-accent-subtle-hover: var(--palette-coral-night-hover);
   --color-danger-solid: var(--palette-coral);
-  --color-danger-solid-hover: var(--palette-coral-deep);
+  --color-danger-solid-hover: var(--palette-coral-hover);
+  --color-fg-on-danger: var(--palette-black);
+  --color-border-focus: var(--palette-coral-light);
   --color-info-solid: var(--palette-cream-soft);
   --color-success-solid: var(--palette-teal-light);
   --color-warning-solid: var(--palette-sun);
-  --color-inverse-success-icon: var(--palette-teal);
+  --color-inverse-success-icon: var(--palette-teal-deep);
   --color-inverse-warning-icon: var(--palette-sun-deep);
   --color-inverse-danger-icon: var(--palette-coral-deep);
   --color-bg-inverse-hover: var(--palette-veil-grey);
@@ -464,11 +469,13 @@
     --color-border-inverse: var(--palette-cream-soft);
     --color-accent-subtle-hover: var(--palette-coral-night-hover);
     --color-danger-solid: var(--palette-coral);
-    --color-danger-solid-hover: var(--palette-coral-deep);
+    --color-danger-solid-hover: var(--palette-coral-hover);
+    --color-fg-on-danger: var(--palette-black);
+    --color-border-focus: var(--palette-coral-light);
     --color-info-solid: var(--palette-cream-soft);
     --color-success-solid: var(--palette-teal-light);
     --color-warning-solid: var(--palette-sun);
-    --color-inverse-success-icon: var(--palette-teal);
+    --color-inverse-success-icon: var(--palette-teal-deep);
     --color-inverse-warning-icon: var(--palette-sun-deep);
     --color-inverse-danger-icon: var(--palette-coral-deep);
     --color-bg-inverse-hover: var(--palette-veil-grey);
@@ -514,7 +521,6 @@
     --accent-text-strength: 45%;
     --accent-text-toward: var(--palette-white);
     --accent-line-strength: 65%;
-  --accent-line-strength: 65%;
     --shadow-color: 0 0 0;
     --shadow-1: 0 1px 2px rgb(var(--shadow-color) / 0.3), 0 6px 20px -6px rgb(var(--shadow-color) / 0.5);
     --shadow-2: 0 2px 4px rgb(var(--shadow-color) / 0.35), 0 18px 40px -12px rgb(var(--shadow-color) / 0.7);

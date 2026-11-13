@@ -44,10 +44,18 @@ The mocks are built on the design system, so a change there shows here:
 
 ## Where the mocks differ from the designs
 
-- **Contrast.** The design's faint text (`#8a8090`) is 3.6:1 on paper; it is darkened to
-  `#6e6475` (5:1). Control edges use a darker line (`#8f7d6b`, 3.3:1) than the design's hairline,
-  so fields meet WCAG 2.2 AA (L2-057).
-- **Dark theme.** The designs define dark colours for the brand sheet only. The mocks apply them
+- **Colour scheme.** On 12 November 2026 the designs moved to the Straight palette: white paper,
+  black ink, coral `#EA7671`, sun `#DCC573` and green `#5C8F57`, with black text on every colour
+  and a black stage for calls and photos. The mocks follow it through the design system's tokens.
+- **Contrast.** Control edges use a darker line (`#8a8a84`, 3.5:1) than the design's hairline
+  (`#e4e4e0`), and a focused field's edge is deep coral (`#b4403b`) rather than coral (2.9:1), so
+  fields meet WCAG 2.2 AA (L2-057). A Popkin colour drawn as an edge or icon on white is darkened
+  30% toward black for 3:1.
+- **Popkin colour names.** The designs now label three of the seven colours Green, Sage and Sun;
+  the requirements still call them Teal, Leaf and Amber, and so do the mocks until L1 and L2
+  change.
+- **Dark theme.** The designs define dark colours for the brand sheet only, and the Straight
+  palette left them as they were. The mocks apply them
   to every screen and tint each Popkin's colour for dark surfaces.
 - **States the designs do not draw.** Loading, empty, error, invalid, busy, offline and read-only
   states, the code screen, sign in, account, the dialogs and the notifications are new, built

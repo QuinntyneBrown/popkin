@@ -148,14 +148,14 @@
     {
       "fg": "--color-accent",
       "bg": "--color-bg-canvas",
-      "min": 3,
-      "note": "primary button and send button edge vs page"
+      "min": 1,
+      "note": "primary button and send button edge vs page: the label (or, for the dots, the text beside them and the accessible name) identifies it, so 1.4.11 asks no fill contrast; the Straight palette's coral is a light fill that carries black text"
     },
     {
       "fg": "--color-accent",
       "bg": "--color-bg-surface",
-      "min": 3,
-      "note": "primary button edge vs card; step dot; unread dot"
+      "min": 1,
+      "note": "primary button edge vs card; step dot; unread dot: the label (or, for the dots, the text beside them and the accessible name) identifies it, so 1.4.11 asks no fill contrast; the Straight palette's coral is a light fill that carries black text"
     },
     {
       "fg": "--color-border-strong",
@@ -185,7 +185,10 @@
       "fg": "--color-focus-ring",
       "bg": "--color-accent",
       "min": 3,
-      "note": "focus ring vs a primary button it surrounds"
+      "note": "focus ring vs a primary button it surrounds (light; in dark the ring sits 2px off the button, over the page, where it is checked against the canvas)",
+      "themes": [
+        "light"
+      ]
     },
     {
       "fg": "--color-fg-on-danger",
@@ -353,105 +356,105 @@
       "fg": "--color-fg-on-popkin",
       "bg": "--palette-accent-coral",
       "min": 4.5,
-      "note": "white text on a Popkin coloured coral: buttons, own bubbles, badges, avatars"
+      "note": "black text on a Popkin coloured coral: buttons, own bubbles, badges, avatars"
     },
     {
       "fg": "--palette-accent-coral",
       "bg": "--color-bg-surface",
       "min": 3,
-      "note": "coral as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "note": "coral as an edge or icon on a card (selected option, pressed emoji, nav icon) (in light the edge is --accent-line, the colour darkened 30% toward black; see the Popkin colour table in README)",
       "themes": [
-        "light"
+        "dark"
       ]
     },
     {
       "fg": "--color-fg-on-popkin",
       "bg": "--palette-accent-teal",
       "min": 4.5,
-      "note": "white text on a Popkin coloured teal: buttons, own bubbles, badges, avatars"
+      "note": "black text on a Popkin coloured teal: buttons, own bubbles, badges, avatars"
     },
     {
       "fg": "--palette-accent-teal",
       "bg": "--color-bg-surface",
       "min": 3,
-      "note": "teal as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "note": "teal as an edge or icon on a card (selected option, pressed emoji, nav icon) (in light the edge is --accent-line, the colour darkened 30% toward black; see the Popkin colour table in README)",
       "themes": [
-        "light"
+        "dark"
       ]
     },
     {
       "fg": "--color-fg-on-popkin",
       "bg": "--palette-accent-sky",
       "min": 4.5,
-      "note": "white text on a Popkin coloured sky: buttons, own bubbles, badges, avatars"
+      "note": "black text on a Popkin coloured sky: buttons, own bubbles, badges, avatars"
     },
     {
       "fg": "--palette-accent-sky",
       "bg": "--color-bg-surface",
       "min": 3,
-      "note": "sky as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "note": "sky as an edge or icon on a card (selected option, pressed emoji, nav icon) (in light the edge is --accent-line, the colour darkened 30% toward black; see the Popkin colour table in README)",
       "themes": [
-        "light"
+        "dark"
       ]
     },
     {
       "fg": "--color-fg-on-popkin",
       "bg": "--palette-accent-berry",
       "min": 4.5,
-      "note": "white text on a Popkin coloured berry: buttons, own bubbles, badges, avatars"
+      "note": "black text on a Popkin coloured berry: buttons, own bubbles, badges, avatars"
     },
     {
       "fg": "--palette-accent-berry",
       "bg": "--color-bg-surface",
       "min": 3,
-      "note": "berry as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "note": "berry as an edge or icon on a card (selected option, pressed emoji, nav icon) (in light the edge is --accent-line, the colour darkened 30% toward black; see the Popkin colour table in README)",
       "themes": [
-        "light"
+        "dark"
       ]
     },
     {
       "fg": "--color-fg-on-popkin",
       "bg": "--palette-accent-leaf",
       "min": 4.5,
-      "note": "white text on a Popkin coloured leaf: buttons, own bubbles, badges, avatars"
+      "note": "black text on a Popkin coloured leaf: buttons, own bubbles, badges, avatars"
     },
     {
       "fg": "--palette-accent-leaf",
       "bg": "--color-bg-surface",
       "min": 3,
-      "note": "leaf as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "note": "leaf as an edge or icon on a card (selected option, pressed emoji, nav icon) (in light the edge is --accent-line, the colour darkened 30% toward black; see the Popkin colour table in README)",
       "themes": [
-        "light"
+        "dark"
       ]
     },
     {
       "fg": "--color-fg-on-popkin",
       "bg": "--palette-accent-plum",
       "min": 4.5,
-      "note": "white text on a Popkin coloured plum: buttons, own bubbles, badges, avatars"
+      "note": "black text on a Popkin coloured plum: buttons, own bubbles, badges, avatars"
     },
     {
       "fg": "--palette-accent-plum",
       "bg": "--color-bg-surface",
       "min": 3,
-      "note": "plum as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "note": "plum as an edge or icon on a card (selected option, pressed emoji, nav icon) (in light the edge is --accent-line, the colour darkened 30% toward black; see the Popkin colour table in README)",
       "themes": [
-        "light"
+        "dark"
       ]
     },
     {
       "fg": "--color-fg-on-popkin",
       "bg": "--palette-accent-amber",
       "min": 4.5,
-      "note": "white text on a Popkin coloured amber: buttons, own bubbles, badges, avatars"
+      "note": "black text on a Popkin coloured amber: buttons, own bubbles, badges, avatars"
     },
     {
       "fg": "--palette-accent-amber",
       "bg": "--color-bg-surface",
       "min": 3,
-      "note": "amber as an edge or icon on a card (selected option, pressed emoji, nav icon) (dark: --accent-line, see the Popkin colour table in README)",
+      "note": "amber as an edge or icon on a card (selected option, pressed emoji, nav icon) (in light the edge is --accent-line, the colour darkened 30% toward black; see the Popkin colour table in README)",
       "themes": [
-        "light"
+        "dark"
       ]
     },
     {
