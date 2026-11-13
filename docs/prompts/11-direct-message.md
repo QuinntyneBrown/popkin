@@ -23,7 +23,7 @@ A member opens the Chat tab at `/p/:popkin/chat`, sees Everyone first and their 
 ## Finish the whole feature in one run. Do not stop. (CRITICAL)
 
 - You are authorised to take this feature all the way: the alignment check of its requirement, design and
-  mocks, the `pk-*` components it needs, test-first implementation, the estimate update, green tests and a PR.
+  mocks, the `pk-*` components it needs, test-first implementation, the estimate update, the narrated video, green tests and a PR.
   Go through every phase and every slice in one continuous run. Do not pause between phases to report, ask
   for approval, or wait for "continue".
 - Do not end your turn until the "Done means" list at the bottom is fully true. A partial result, a plan, or
@@ -67,7 +67,11 @@ A member opens the Chat tab at `/p/:popkin/chat`, sees Everyone first and their 
     `ng-content` slot once. Services in `frontend/projects/api/src/lib/` have a contract and an injection
     token; pages depend on the token; `app.config.ts` is the composition root. Button-triggered editing
     opens a CDK Dialog in `dialogs/` or navigates to a screen; never an inline form. Route data sets `shell`
-    and `page` (stamped on `<body data-page>`). Every interaction works by touch at 360 px and by keyboard;
+    and `page` (stamped on `<body data-page>`). Every interaction works by touch at 360 px and by keyboard.
+    Every screen uses the width it is given on the five form factors of L2-058: XS (below 640 px), S
+    (640), M (768), L (1024) and XL (1280). The layout of each comes from `pk-screen` and the other
+    `pk-*` components in plain CSS; no page or service reads the viewport width, and a part shown at one
+    width only is hidden with `display: none`, so it leaves the tab order and the accessibility tree too;
     colour is never the only carrier of a state.
   - **E2E (ADR 0003, ADR 0005, ADR 0006, ADR 0008).** Specs import `test` and `expect` from
     `e2e/fixtures/pk-test.ts`. Every `/api/**` request is answered from `e2e/fixtures/api/responses.json`;
@@ -116,6 +120,12 @@ any code, and change them only where they disagree with each other or leave a ga
   - `docs/mocks/pages/conversations/`: default, loading, empty, error
   - `docs/mocks/pages/direct-message/`: default, loading, empty, error
   - `docs/mocks/dialogs/new-message/`: default, no-results
+- Form factors. The mocks draw every screen for XS, S, M, L and XL (`docs/mocks/README.md`); open each
+  mock of this journey at 360, 640, 768, 1024 and 1280 px before you build its screen. For this journey:
+  From 1024 px the conversations screen shows the list beside the open thread, the group's thread when none is chosen (L2-058 AC11), so choosing a conversation changes the pane, not the whole screen. A direct message shows the list beside it from 1024 px, and from 1280 px a pane with the other person and the photos shared with them (AC12). "New message" is in the list's header at every width.
+  The criteria are L2-058 AC2, AC3 and AC7 to AC13; the design is
+  `docs/detailed-designs/accessibility/responsive-layout/README.md`. Where this journey's own detailed
+  design still describes one phone column, bring it in line with the mocks before the first slice.
 - Known conflicts and open points to respect: the route is `/p/:popkinId/chat/:memberId` (`docs/detailed-designs/README.md`). Hub messages for a direct message go only to its two members' connections; prove it with an API test.
 - If a criterion, design and mock disagree, follow the source `docs/detailed-designs/README.md` names for that
   conflict. For a new one, fix the artifact that is wrong with the skill that owns it (requirements with
@@ -132,6 +142,16 @@ any code, and change them only where they disagree with each other or leave a ga
 - For each new component, add its parity spec in `e2e/tests/parity/` (ADR 0008) and its page-object region,
   and make `npm run parity` pass in `e2e/`. Build a component in the same slice as the first screen that
   uses it, so it is proven by that slice's behaviour test as well.
+- Wide layouts are part of a component, not an afterthought. Build each `pk-*` component for every form
+  factor its mock shows, with the mock's BEM classes (`screen--app`, `screen--split`, `split-aside`,
+  `list-pane`, `detail-pane` and the rest of the "Form factors" section of
+  `docs/design-system/assets/components.css`), and copy the layout tokens it reads from
+  `docs/design-system/tokens/tokens.css` into `components/src/lib/styles/`. A block of that section that
+  has no page in `docs/design-system/components/` yet gets one first (`extracting-design-systems`).
+- Components and screens built by an earlier journey may still be the earlier phone column: their parity
+  specs fail at 1280 px. Bring every shared component this journey uses in line with the mocks first, in
+  its own slice, and with it the earlier screens that slice changes, so `npm run parity` is green before
+  this journey's first screen.
 - If a component needs something the design system lacks, update `docs/design-system/` first (with
   `extracting-design-systems`), then the component.
 
@@ -155,6 +175,10 @@ any code, and change them only where they disagree with each other or leave a ga
   - Run the regression checks: `pwsh eng/Test-Backend.ps1` from the repository root; `npm run lint`,
     `npm run format:check` and `npm run build` in `frontend/`; `npm run typecheck`, `npm test` and
     `npm run parity` in `e2e/`. Then commit.
+- Prove the wide layout where a criterion states a behaviour: a behaviour spec sets the viewport (360 px
+  and the width the criterion names) and asserts what a person can reach, through the page object, such
+  as the tabs as a rail, the list beside the thread, or an action in the header in place of the floating
+  one. Assert roles, names and visibility, never pixels; pixels are what parity is for.
 - Add or update the sweeps for each new screen state (routes, page-object regions, entries in
   `e2e/tests/visual/`, `responsive.spec.ts` and `accessibility.spec.ts` where a requirement calls for them).
   Write them; do not run them.
@@ -166,6 +190,43 @@ any code, and change them only where they disagree with each other or leave a ga
 - Keep the requirements, designs and mocks aligned with what was built. Update `README.md` if a command,
   prerequisite or setting changed.
 
+## Phase 5: The narrated video (`creating-videos`)
+
+A video of this journey is part of the feature, not an extra. Make it when every slice is green, from the
+running app, and follow `docs/videos/README.md`: it is the standard, and it wins over the skill's defaults.
+
+- Folder: `docs/videos/NN-journey-11-direct-message/`, where `NN` is the next free video number.
+- What to show: A member starts a direct message and it arrives live. Show the conversations as one list on a phone, then the list, the thread and the person on a desktop.
+- **Narrated**, in a pleasant, warm voice: Kokoro-82M from Hugging Face
+  (`onnx-community/Kokoro-82M-v1.0-ONNX`), run locally with `kokoro-onnx`. No paid or hosted speech service.
+- **Music in the background**: an engaging, exciting soca track from Pixabay Music
+  (`https://pixabay.com/music/`, search "soca"), from the first frame to the last, turned down under the
+  voice and up between lines. Keep the file in `docs/videos/assets/music/` and credit it in `CREDITS.md`
+  there. If Pixabay cannot be reached, follow "If Pixabay cannot be reached" in the standard; never
+  synthesise a substitute.
+- **No captions by default.** Nothing is burned into the picture; write `captions.vtt` beside the MP4.
+- **Great slides and great use of screenshots.** Screenshots of the running app carry the film: each key
+  state at 390, 768, 1024 and 1440 px at double density, drawn in a phone, tablet or browser frame, with
+  enlarged close-ups wherever the text is small. At least one scene shows the same screen growing from
+  the phone to the desktop. A slide holds a headline, a number or a label, never the narration.
+  The frame is always full and no two scenes in a row share a layout: a screenshot takes at least 60 %
+  of the width, a headline is two to six words with one in the accent colour, and a card has a headline
+  and at most two short lines. Build it as a deck of screenshots, not a screen recording; the standard's
+  "Learnings carried over from Jubilee" says why.
+- **Transitions.** Cut to the beat of the track; give each change of act a designed transition. Every
+  frame is a pure function of film time, so no CSS animation or transition. WebGL and WebGPU are in
+  scope for backgrounds, particles and 3D device moves, under the three rules of the standard.
+- **True.** Say and show only what this branch does, in the words of `docs/specs/`. One card may say what
+  the tests prove that no screen shows, and one what is left for the owner.
+- The screenshots come from `shots.ts`, written with the fixtures and page objects of `e2e/` and answered
+  from the recorded API (ADR 0005). It is not a test and not a sweep: it never sets `PK_SWEEPS` or
+  `PK_BASELINE` and is not run by `npm test`, `npm run parity` or CI.
+- If `tools/video-record/`, `tools/video-audio/` or `tools/video-build/` do not exist yet, build them
+  first as the standard describes, and add their commands to the root `README.md`. Otherwise reuse them.
+- Check the result as the standard's "Check before committing" says: `ffprobe`, one frame per scene looked
+  at, the mix listened to. Then add the video's row to the table in `docs/videos/README.md` and link it
+  from the pull request.
+
 ## Deferred (not in this journey)
 
 - Reactions and replies in direct messages (journey 12) and photos in them (journey 13).
@@ -175,6 +236,11 @@ any code, and change them only where they disagree with each other or leave a ga
 - Members can start and hold private conversations that nobody else can read, see them listed with unread state, and call the other member from the thread.
 - Every acceptance criterion of L2-022, L2-023, L2-030 (AC8), L2-051 that is in scope above has a passing test that proves it.
 - All the new and existing tests pass: `pwsh eng/Test-Backend.ps1`, `npm run lint`, `npm run format:check`, `npm run build`, `npm run typecheck`, `npm test` and `npm run parity`. No sweep was run.
+- Every screen of this journey uses the width it is given at 360, 640, 768, 1024 and 1280 px as its mock
+  shows, and `npm run parity` proves it at 360 and 1280 px.
 - Docs, estimates and design artifacts agree with the code.
+- The narrated video is in `docs/videos/NN-journey-11-direct-message/`: 1920×1080, a Kokoro voice, soca from
+  Pixabay under it, no captions burned in, `captions.vtt` beside it, checked frame by frame, listed in
+  `docs/videos/README.md` and linked from the pull request.
 - The work is on a branch with a PR to `main` that fills in `.github/PULL_REQUEST_TEMPLATE.md` (what changed, why, the requirements it satisfies and how it was tested), with CI green. Fetch and rebase onto `main` first, because another session may have pushed to it.
 - Only then end the run, with a short summary of what was built, the decisions made along the way, and anything deferred.
