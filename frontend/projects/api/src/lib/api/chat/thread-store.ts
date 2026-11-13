@@ -50,6 +50,8 @@ export class ThreadStore {
   private readonly today = signal(new Date());
   private readonly addedTo = new Subject<'mine' | 'theirs'>();
 
+  /** The other member of the direct message that is open; none for Everyone. */
+  private memberId?: string;
   private latestInView = true;
   private loadingEarlier?: Promise<void>;
   private reported: string | null = null;
@@ -128,11 +130,14 @@ export class ThreadStore {
     });
   }
 
-  /** Reads the Everyone thread of a Popkin and its latest messages, and starts listening. */
-  open(popkinId: string): void {
+  /**
+   * Reads a thread of a Popkin and its latest messages, and starts listening: the Everyone
+   * thread, or the direct message with a member when one is named (L2-023).
+   */
+  open(popkinId: string, memberId?: string): void {
+    this.memberId = memberId;
     this.phase.set('loading');
-    this.chat
-      .getEveryone(popkinId)
+    (memberId ? this.chat.openDirect(popkinId, memberId) : this.chat.getEveryone(popkinId))
       .pipe(
         switchMap((thread) =>
           this.chat.getMessages(popkinId, thread.id).pipe(map((page) => ({ thread, page }))),
@@ -235,7 +240,7 @@ export class ThreadStore {
     const before = this.messages().length;
     const newest = this.messages().at(-1);
     if (!newest) {
-      this.open(thread.popkinId);
+      this.open(thread.popkinId, this.memberId);
       return;
     }
     const after = (id: string): Observable<MessagePageView> =>
@@ -275,6 +280,8 @@ export class ThreadStore {
   }
 
   private readPresence(): void {
+    // Who is here is said of the Popkin, in the Everyone thread; a direct message has two.
+    if (this.header()?.kind !== 'Everyone') return;
     const popkinId = this.header()?.popkinId;
     if (!popkinId) return;
     this.chat

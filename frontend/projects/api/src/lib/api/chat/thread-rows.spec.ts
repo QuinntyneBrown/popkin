@@ -15,6 +15,7 @@ function message(
 ): MessageView {
   return {
     id,
+    popkinId: 'p',
     threadId: 't',
     clientMessageId: `c-${id}`,
     kind: 'Member',

@@ -20,6 +20,35 @@ export interface ThreadView {
   unreadCount: number;
   lastReadMessageId: string | null;
   viewer: { membershipId: string; firstName: string };
+  /** The other member of a direct message; null on Everyone. */
+  other: ThreadMemberView | null;
+}
+
+/** A member as a thread names them: never a phone number or an email (L2-054 AC2). */
+export interface ThreadMemberView {
+  membershipId: string;
+  displayName: string;
+  firstName: string;
+  avatar: AvatarView;
+}
+
+/** The member's threads in one Popkin, as the Chat tab lists them (L2-022). */
+export interface ConversationsView {
+  viewerMembershipId: string;
+  everyone: {
+    threadId: string;
+    latest: { firstName: string; text: string; isMine: boolean; sentAt: string } | null;
+    unreadCount: number;
+  };
+  /** Direct messages that hold a message, the most recent first. */
+  direct: DirectSummaryView[];
+}
+
+export interface DirectSummaryView {
+  threadId: string;
+  other: ThreadMemberView;
+  latest: { text: string; isMine: boolean; sentAt: string };
+  unreadCount: number;
 }
 
 export interface MessageAuthorView {
@@ -31,6 +60,8 @@ export interface MessageAuthorView {
 /** A message, the same for everyone who receives it: whose it is, is read from its author. */
 export interface MessageView {
   id: string;
+  /** The Popkin of its thread, so a list can tell a thread it has not read yet. */
+  popkinId: string;
   threadId: string;
   /** The name the sender's device gave it; null for a note the system wrote. */
   clientMessageId: string | null;
