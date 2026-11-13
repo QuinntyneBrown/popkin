@@ -14,7 +14,7 @@ public sealed record SendMessageResult(MessageDto Message, bool Created);
 public sealed record SendMessageCommand(Guid PopkinId, Guid ThreadId, Guid? ClientMessageId, string? Text) : IRequest<SendMessageResult>;
 
 public sealed class SendMessageCommandHandler(
-    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos)
+    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos, IPopkinNotifier notifier)
     : IRequestHandler<SendMessageCommand, SendMessageResult>
 {
     public async Task<SendMessageResult> Handle(SendMessageCommand request, CancellationToken cancellationToken)
@@ -70,7 +70,10 @@ public sealed class SendMessageCommandHandler(
             return new SendMessageResult(MessageDto.Of(winner, membership, photos), Created: false);
         }
 
-        return new SendMessageResult(MessageDto.Of(message, membership, photos), Created: true);
+        // Told after the commit, in the same request: there is no queue between store and push (L2-027 AC1).
+        var sent = MessageDto.Of(message, membership, photos);
+        await notifier.MessageAdded(popkin.Id, sent);
+        return new SendMessageResult(sent, Created: true);
     }
 
     private Task<Message?> StoredAsync(Guid authorMembershipId, Guid clientMessageId, CancellationToken cancellationToken) =>

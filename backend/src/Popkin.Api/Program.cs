@@ -1,11 +1,14 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Popkin.Api.Auth;
+using Popkin.Api.Hubs;
 using Popkin.Api.Problems;
 using Popkin.Api.RateLimiting;
 using Popkin.Api.Security;
 using Popkin.Application;
+using Popkin.Application.Abstractions;
 using Popkin.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +44,14 @@ builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = 
 builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
 builder.Services.AddExceptionHandler<UnexpectedExceptionHandler>();
 builder.Services.AddPopkinRateLimits();
+
+// The hub speaks the JSON of the controllers: camelCase, enums as their names. Detailed hub
+// errors are for Development only (L2-052 AC5). Its state lives in this one instance (ADR 0009).
+builder.Services
+    .AddSignalR(options => options.EnableDetailedErrors = builder.Environment.IsDevelopment())
+    .AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+builder.Services.AddSingleton<IUserIdProvider, PersonUserIdProvider>();
+builder.Services.AddSingleton<IPopkinNotifier, SignalRPopkinNotifier>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -77,6 +88,7 @@ app.UseAuthentication();
 app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<PopkinHub>(PopkinHub.Path);
 
 app.Run();
 
