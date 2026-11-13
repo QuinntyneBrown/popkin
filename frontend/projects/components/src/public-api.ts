@@ -51,3 +51,4 @@ export * from './lib/banner/banner';
 export * from './lib/popkin-nav/popkin-nav';
 export * from './lib/app-screen/app-screen';
 export * from './lib/day-divider/day-divider';
+export * from './lib/system-note/system-note';
