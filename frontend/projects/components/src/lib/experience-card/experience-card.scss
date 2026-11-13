@@ -1,0 +1,116 @@
+/* A cell of the grid; from 640 px it stretches its card to the height of the row. */
+:host {
+  display: block;
+}
+
+.exp-card {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+  color: inherit;
+  text-decoration: none;
+  transition: scale var(--duration-fast) var(--ease-pop);
+}
+
+.exp-card:hover {
+  color: inherit;
+}
+
+.exp-card:active {
+  scale: var(--scale-press);
+}
+
+.exp-card__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--accent-tint);
+}
+
+.exp-card__photo {
+  width: 100%;
+  height: 100%;
+}
+
+.exp-card__emoji {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font: var(--font-size-7xl) / 1 var(--font-family-emoji);
+}
+
+.tag {
+  position: absolute;
+  left: var(--space-3);
+  top: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  font: var(--text-meta);
+}
+
+.exp-card__body {
+  padding: var(--space-4);
+}
+
+.exp-card__title {
+  font: var(--text-title);
+}
+
+.exp-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.exp-card__by {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* How many are keen on one the group wants to do, where a rating would be. */
+.exp-card__keen {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* S: the card fills its cell, and its foot sits at the end whatever the length of the title. */
+@media (min-width: 40rem) {
+  :host {
+    display: flex;
+  }
+
+  .exp-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .exp-card__media {
+    aspect-ratio: 4 / 3;
+  }
+
+  .exp-card__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .exp-card__foot {
+    margin-top: auto;
+    padding-top: var(--space-3);
+  }
+}

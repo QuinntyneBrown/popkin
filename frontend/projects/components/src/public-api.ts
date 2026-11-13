@@ -90,3 +90,4 @@ export * from './lib/call-aside/call-aside';
 export * from './lib/stars/stars';
 export * from './lib/experiences/experiences';
 export * from './lib/experience-grid/experience-grid';
+export * from './lib/experience-card/experience-card';
