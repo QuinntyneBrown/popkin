@@ -30,6 +30,9 @@ public static class AccountDtos
     {
         var channel = person.Phone is null ? ContactChannel.Email : ContactChannel.Phone;
         var destination = person.Phone ?? person.Email ?? "";
-        return new AccountDto(person.Id, person.Name, null, channel, ContactRules.Format(channel, destination));
+        return new AccountDto(person.Id, person.Name, PhotoUrl(person, photos), channel, ContactRules.Format(channel, destination));
     }
+
+    public static string? PhotoUrl(Person person, IPhotoStore photos) =>
+        person.PhotoKey is null ? null : photos.GetReadUrl(person.PhotoKey);
 }

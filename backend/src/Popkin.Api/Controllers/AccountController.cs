@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Popkin.Application.Account;
+using Popkin.Application.Invites;
+using Popkin.Application.Photos;
 
 namespace Popkin.Api.Controllers;
 
@@ -22,4 +24,19 @@ public sealed class AccountController(ISender sender) : ControllerBase
     [HttpPatch]
     public async Task<ActionResult<AccountDto>> Update(UpdateAccountRequest request, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new UpdateAccountNameCommand(request.Name), cancellationToken));
+
+    /// <summary>
+    /// A new photo (L2-048 AC2): 400 `photo_type_not_allowed` or `photo_too_large` when it is
+    /// refused. The body may be a little larger than the largest photo, so a photo too large is
+    /// told so rather than cut off.
+    /// </summary>
+    [HttpPut("photo")]
+    [RequestSizeLimit(2 * AvatarPhotos.MaxBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 2 * AvatarPhotos.MaxBytes)]
+    public async Task<ActionResult<AccountDto>> ChangePhoto(IFormFile? photo, CancellationToken cancellationToken)
+    {
+        await using var content = photo?.OpenReadStream();
+        var upload = photo is null ? null : new PhotoUpload(content!, photo.Length);
+        return Ok(await sender.Send(new ChangeAccountPhotoCommand(upload), cancellationToken));
+    }
 }

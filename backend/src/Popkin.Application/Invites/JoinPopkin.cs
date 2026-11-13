@@ -49,7 +49,7 @@ public sealed class JoinPopkinCommandHandler(
     public const int NamedMembers = 2;
 
     /// <summary>A photo is at most 10 MB (L2-013 AC2).</summary>
-    public const long MaxPhotoBytes = 10 * 1024 * 1024;
+    public const long MaxPhotoBytes = AvatarPhotos.MaxBytes;
 
     public async Task<JoinResult> Handle(JoinPopkinCommand request, CancellationToken cancellationToken)
     {
@@ -64,7 +64,7 @@ public sealed class JoinPopkinCommandHandler(
             throw ProblemException.Invalid("display_name_too_long", "A name is at most 40 characters.", "displayName");
         }
 
-        var avatar = request.Photo is null ? null : await ReadAvatarAsync(request.Photo, cancellationToken);
+        var avatar = request.Photo is null ? null : await AvatarPhotos.ReadAsync(request.Photo, processor, cancellationToken);
 
         var popkin = await db.Popkins.FirstOrDefaultAsync(p => p.InviteCode == request.Code, cancellationToken)
             ?? throw InviteProblems.NotFound();
@@ -94,7 +94,7 @@ public sealed class JoinPopkinCommandHandler(
         }
 
         // The photo is not added to the album: it is kept under its own random key.
-        var key = $"avatars/{Guid.NewGuid():N}{avatar.Extension}";
+        var key = AvatarPhotos.NewKey(avatar);
         await photos.SaveAsync(key, avatar.Content, avatar.ContentType, cancellationToken);
         membership.SetPhoto(key);
         try
@@ -130,20 +130,6 @@ public sealed class JoinPopkinCommandHandler(
 
         presence.Join(membership.PersonId, popkin.Id);
         await notifier.MessageAdded(popkin.Id, MessageDto.Of(note, membership, photos));
-    }
-
-    private async Task<ProcessedPhoto> ReadAvatarAsync(PhotoUpload upload, CancellationToken cancellationToken)
-    {
-        if (upload.Length > MaxPhotoBytes)
-        {
-            throw ProblemException.Invalid("photo_too_large", "A photo is at most 10 MB.", "photo");
-        }
-
-        using var buffer = new MemoryStream();
-        await upload.Content.CopyToAsync(buffer, cancellationToken);
-        var bytes = buffer.ToArray();
-        var avatar = ImageSniffer.Sniff(bytes) is null ? null : processor.MakeAvatar(bytes);
-        return avatar ?? throw ProblemException.Invalid("photo_type_not_allowed", "A photo must be a JPEG, PNG, WebP or HEIC image.", "photo");
     }
 
     private static JoinedDto Joined(PopkinSpace popkin, Membership joiner, List<Membership> members)
