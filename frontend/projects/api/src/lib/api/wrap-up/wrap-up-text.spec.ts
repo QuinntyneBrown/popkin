@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  albumLine,
+  keepAlbumLine,
   count,
   exportProgress,
   peopleLine,
@@ -127,8 +127,8 @@ describe('the words of wrapping up', () => {
     });
 
     it('says what the switch means', () => {
-      expect(albumLine(true)).toBe('Members can keep browsing and saving');
-      expect(albumLine(false)).toBe('Photos are removed after 30 days');
+      expect(keepAlbumLine(true)).toBe('Members can keep browsing and saving');
+      expect(keepAlbumLine(false)).toBe('Photos are removed after 30 days');
     });
   });
 });

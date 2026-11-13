@@ -119,6 +119,6 @@ export function recapPreviewLine(photoCount: number, messageCount: number): stri
 }
 
 /** What "Keep the photo album" means, on and off (L2-043 AC2). */
-export function albumLine(keepPhotos: boolean): string {
+export function keepAlbumLine(keepPhotos: boolean): string {
   return keepPhotos ? 'Members can keep browsing and saving' : 'Photos are removed after 30 days';
 }
