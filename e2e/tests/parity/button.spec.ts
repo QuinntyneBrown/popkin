@@ -13,6 +13,8 @@ import { NameYourPopkinPage } from '../../pages/name-your-popkin.page';
 import { hold } from '../../fixtures/stubs';
 import { NotFoundPage } from '../../pages/not-found.page';
 import { SignUpPage } from '../../pages/sign-up.page';
+import { LandingPage } from '../../pages/landing.page';
+import { WelcomePage } from '../../pages/welcome.page';
 
 parity('button', [
   { key: 'notFound', name: 'primary-md', region: (page) => new NotFoundPage(page).primaryButton },
@@ -87,5 +89,13 @@ parity('button', [
     ...experienceStates.shareExperienceBusy,
     name: 'sharing',
     region: (page) => new ShareExperienceDialog(page).action,
+  },
+  { key: 'landing', name: 'primary-sm-link', region: (page) => new LandingPage(page).navStart },
+  { key: 'landing', name: 'primary-link', region: (page) => new LandingPage(page).heroStart },
+  { key: 'landing', name: 'on-accent-link', region: (page) => new LandingPage(page).freeStart },
+  {
+    key: 'welcome',
+    name: 'secondary-block-link',
+    region: (page) => new WelcomePage(page).joinWithCode,
   },
 ]);

@@ -2,6 +2,7 @@ import { SignInPage } from '../../pages/sign-in.page';
 import { codeScreenAt24Seconds } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { VerifyCodePage } from '../../pages/verify-code.page';
+import { WelcomePage } from '../../pages/welcome.page';
 
 parity('link', [
   {
@@ -21,4 +22,6 @@ parity('link', [
     name: 'with-action',
     region: (page) => new SignInPage(page).startAPopkinRegion,
   },
+  // The same link as the whole of its line: the welcome screen.
+  { key: 'welcome', name: 'with-action-line', region: (page) => new WelcomePage(page).signIn },
 ]);
