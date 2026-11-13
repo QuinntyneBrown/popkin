@@ -1,0 +1,72 @@
+/* A card whose summary sits beside its bars. */
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.score-card__summary {
+  text-align: center;
+}
+
+.score-card__value {
+  font: var(--font-weight-black) var(--font-size-6xl) / 1 var(--font-family-display);
+}
+
+.score-card__stars {
+  margin-top: var(--space-2);
+}
+
+.score-card__count {
+  margin-top: var(--space-1);
+  font: var(--font-weight-regular) var(--font-size-sm-plus) / 1 var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+/* Nobody has rated it: the empty stars and the words, in the middle of the card. */
+:host(.score-card--empty) {
+  justify-content: center;
+}
+
+:host(.score-card--empty) .score-card__stars {
+  margin-top: 0;
+}
+
+:host(.score-card--empty) .score-card__count {
+  margin-top: var(--space-2);
+  line-height: var(--line-height-normal);
+}
+
+.score-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+.score-bars__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--text-caption);
+  color: var(--color-fg-muted);
+}
+
+.meter {
+  flex: 1;
+  height: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+}
+
+.meter__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-star);
+}
