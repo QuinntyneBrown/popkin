@@ -68,10 +68,10 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
 | Policy | Endpoints |
 |--------|-----------|
 | `codes` | the sign-up, sign-in and resend endpoints under `/api/auth` that send a code ([Sign up](../../accounts/sign-up/README.md), [Sign in](../../accounts/sign-in/README.md), [Confirm the code](../../accounts/confirm-code/README.md)) |
-| `messages` | `POST /api/popkins/{popkinId}/threads/{threadId}/messages` ([Send a message to everyone](../../chat/send-message-to-everyone/README.md), [Direct messages](../../chat/direct-messages/README.md)) |
+| `messages` | `POST /api/popkins/{popkinId}/threads/{threadId}/messages` ([Send a message to everyone](../../chat/send-message-to-everyone/README.md), [Direct messages](../../chat/direct-messages/README.md)); `PUT …/experiences/{experienceId}/my-rating` and `PUT …/my-rating/comment` ([Rate an experience](../../experiences/rate-experience/README.md), [Comment on an experience](../../experiences/comment-on-experience/README.md)) |
 | `invite-codes` | `GET /api/invites/{code}` and `POST /api/invites/{code}/join` ([Preview an invite](../../invitations/preview-invite/README.md), [Join by code](../../invitations/join-by-code/README.md)) |
 | `address-checks` | `GET /api/addresses/{address}` ([Choose the address](../../popkins/choose-address/README.md)) |
-| `photos` | `POST /api/popkins/{popkinId}/photos` ([Add photos](../../photos/add-photos/README.md)) |
+| `photos` | `POST /api/popkins/{popkinId}/photos` ([Add photos](../../photos/add-photos/README.md)); `POST /api/popkins/{popkinId}/experiences` and `PATCH …/experiences/{experienceId}` ([Share an experience](../../experiences/share-experience/README.md)) |
 
 ### Backend — Popkin API
 
@@ -177,6 +177,10 @@ The limits were built with the journeys that needed them, and part of this desig
   `retryAfterSeconds` from the answer's body and each page words the delay.
 - The call-signal limit was built with the group call, journey 7, as a sliding log where this
   design first named a token bucket. Its refusals are not counted.
+- Experiences, journey 8, added no policy. Sharing and editing an experience count with the
+  photos a person adds, because each may carry a picture; rating and commenting count with
+  the messages they send. L2-053 names no limit for any of them. Deleting an experience is not
+  limited.
 
 ## Requirements
 

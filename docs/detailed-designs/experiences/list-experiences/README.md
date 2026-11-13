@@ -26,21 +26,21 @@ same answer as for a Popkin that does not exist.
 
 ## Description
 
-The slice runs from the Experiences page to the database. Everything below is introduced by this
-design; the existing code holds only the cookie authentication, the fallback authorisation
-policy, ProblemDetails, `IAppDbContext` and `AppDbContext`.
+The slice runs from the Experiences page to the database. Journey 8, Rate an experience, built
+it; what it left is under [Built in journey 8](#built-in-journey-8).
 
 ### Screens and states
 
-- `docs/mocks/pages/experiences/default.html` — filter "All": four cards, three with a score and
-  one with "7 keen".
+- `docs/mocks/pages/experiences/default.html` — filter "All": four cards, three with a score
+  (4.7, 4.6 and 4.3, each what its counts give) and one with "7 keen".
 - `docs/mocks/pages/experiences/did.html` — filter "We did": things done and restaurants.
 - `docs/mocks/pages/experiences/want.html` — filter "Want to do".
 - `docs/mocks/pages/experiences/no-results.html` — "Want to do" with nothing in it: "Nothing on
-  the wish list", "Share one" and "Show all". The copy for an empty "We did" filter has no mock:
-  `<TO SUPPLY>`.
+  the wish list", "Share one" and "Show all". An empty "We did" has no mock: it reads "Nothing
+  done yet", "Share what the group did or where you ate, and everyone can rate it.", with the
+  same two buttons.
 - `docs/mocks/pages/experiences/empty.html` — a Popkin with no experiences: "Nothing shared yet"
-  and "Share one".
+  and "Share one". The filters are not shown.
 - `docs/mocks/pages/experiences/loading.html` — card skeletons and the hidden status "Loading
   experiences…".
 - `docs/mocks/pages/experiences/error.html` — "We couldn't load the experiences" with "Try
@@ -49,73 +49,115 @@ policy, ProblemDetails, `IAppDbContext` and `AppDbContext`.
 ### API
 
 - `GET /api/popkins/{popkinId}/experiences?filter=all|did|want` → `200` with a list of
-  `ExperienceCardDto`. Refusals: `401` without a session (L2-050), `404` `popkin_not_found` for a
-  non-member or an unknown Popkin (L2-051), `400` `invalid_filter` for any other filter value
-  (L2-052).
+  `ExperienceCardDto`, the newest first. No filter is `all`. Refusals: `401` without a session
+  (L2-050), `404` `popkin_not_found` for a non-member or an unknown Popkin (L2-051), `400`
+  `invalid_filter`, naming the field `filter`, for any other value (L2-052).
 
 ### Frontend (`frontend/projects/`)
 
 - **`ExperiencesPage`** — `popkin/src/app/pages/experiences/experiences.page.ts` with
-  `experiences.page.html`, selector `pk-experiences-page`, OnPush. Route `/p/:popkinId/experiences`
-  with route data `{ shell: 'app', page: 'experiences' }`, behind `signedInGuard` and
-  `memberGuard`. The page holds the current filter in a signal read from the route query
-  `filter` (`all` when absent), so a filtered list survives a reload. It requests the list
-  through `EXPERIENCES_API`, shows skeletons when the answer takes longer than 300 ms, and
-  renders one of four outcomes: cards, the empty state, the no-results state or the error
-  state. "Share one" opens `ShareExperienceDialog` (the floating button and the empty states).
-  "Show all" sets the filter back to `all`.
-- **`ExperiencesApi`**, **`EXPERIENCES_API`**, **`HttpExperiencesApi`** — `api/src/lib/api/`.
-  Contract, injection token and HTTP implementation. `list(popkinId, filter)` maps each
-  `ExperienceCardDto` to an `ExperienceCardView`. Later slices add methods to the same contract.
-- **`ExperienceCardView`** — `api/src/lib/models/`. The card's view model: kind label, title,
-  picture address or the Popkin's emoji and colour, the byline ("Mara · Sat morning"), the
-  average formatted to one decimal with its count ("4.8 (11)"), or the keen count ("7 keen").
-- **`ExperienceFilterKey`** — `'all' | 'did' | 'want'`, with the chip labels "All", "We did" and
-  "Want to do".
-- **Components** (`components` library): `pk-chip` for the filter chips (`role="group"`,
-  `aria-label="Filter"`, `aria-pressed` on the chosen one, L2-037 AC4); `pk-card` in its
-  experience variant (`exp-card`) for each card, one whole-card link with a picture, a kind tag,
-  a title and a foot; `pk-avatar` in the foot; `pk-rating` in its inline variant for the score;
-  `pk-empty-state` for the empty, no-results and error states; `pk-skeleton` for loading;
-  `pk-button` in its floating variant (`fab`) for "Share one"; `pk-popkin-nav` for the tabs. The
-  mocks draw the page heading with a `tab-header` block that has no design-system page; its
-  component name is `<TO SUPPLY>`.
+  `experiences.page.html`, selector `pk-experiences-page`, OnPush. Route
+  `/p/:popkinId/experiences` with route data `{ shell: 'app', page: 'experiences' }`, behind
+  `signedInGuard`; a `404` from the API opens the not-found screen, so a person who is not a
+  member cannot tell the Popkin exists (L2-051 AC1). The page is a container. It reads the
+  filter from the address (`?filter=did` or `?filter=want`; anything else is "All"), so a
+  filtered list is the same after a reload. Choosing a chip, or "Show all", writes the address
+  and the list follows it. "Share one" opens `ShareExperienceDialog`: in the header from
+  768 px, floating below it, and in the empty states.
+- **`ExperiencesStore`** — `api/src/lib/api/experiences/experiences-store.ts`, one per screen,
+  provided by the route. It holds the logic, not the page (ADR 0011). `open(popkinId, filter)`
+  reads the list; a filter chosen later cancels the read of an earlier one. `state` is
+  `loading`, `ready`, `empty` (no experiences under "All"), `no-results` (none under a filter),
+  `error` or `not-found`. `cards` maps each `ExperienceCardView` to what a card draws, and
+  `nothing` is the heading and text of an empty list. `added(card)` puts a newly shared
+  experience first and answers false when the filter leaves it out; `removed(id)` takes one
+  away.
+- **`ExperiencesApi`**, **`EXPERIENCES_API`**, **`HttpExperiencesApi`** —
+  `api/src/lib/api/experiences/experiences-api.ts`. Contract, injection token and HTTP
+  implementation: `getSummary`, `list`, `get`, `rate`, `comment`, `share`, `edit` and `remove`.
+- **`ExperienceCardView`** and **`ExperienceFilter`** (`'all' | 'did' | 'want'`) —
+  `api/src/lib/models/experiences.ts`. The view is the API's answer as it is; the kind is
+  `'Did' | 'Restaurant' | 'Want'`.
+- **`experience-text.ts`** — the words, as pure helpers with unit tests: `kindLabel`, the chip
+  labels "All", "We did" and "Want to do" (`EXPERIENCE_FILTERS`), `filterOf`, `nothingHere`,
+  `averageText` ("5.0" included) and `byline`. A byline is "Mara · Sat morning". Without a
+  "when", a "Want to do" card says "Ellie · Idea", as the mock does, and any other card says
+  the day it was shared ("Sam · Nov 13").
+- **Components** (`components` library): `pk-tab-header` for the heading, its lead "What we
+  did, and what we want to do next.", the filter chips and "Share one"; `pk-chip` for each
+  filter (`aria-pressed` on the chosen one, in a group named "Filter", L2-037 AC4);
+  `pk-experiences` for the body and its loading state; `pk-experience-grid` and
+  `pk-experience-card` for the cards, each one whole-card link with a picture or the Popkin's
+  emoji, a kind tag, a title and a foot with `pk-avatar` and `pk-rating` ("4.7 (11)") or the
+  keen count; `pk-empty-state` for the empty, no-results and error states; `pk-fab` for the
+  floating "Share one"; `pk-popkin-nav` for the tabs.
 
 ### Backend (`backend/src/`)
 
 - **`ExperiencesController`** (`Popkin.Api`) — route `/api/popkins/{popkinId}/experiences`.
-  The `List` action binds `filter`, refuses an unknown value with `400` `invalid_filter`, and
-  sends `GetExperiencesQuery`. The controller holds no business rule.
+  `List` passes `filter` as text to `GetExperiencesQuery`. The controller holds no business
+  rule.
 - **`GetExperiencesQuery`** and **`GetExperiencesQueryHandler`** (`Popkin.Application`) — the
-  handler calls `IMembershipGuard.RequireMemberAsync(popkinId)`, which throws not-found for a
-  non-member so the API answers `404` `popkin_not_found`. It reads the Popkin's experiences in
-  one query through `IAppDbContext`, newest `SharedAt` first. The filter `WeDid` keeps kinds
-  `Did` and `Restaurant`; `WantToDo` keeps kind `WantToDo` (L2-037 AC4). For each experience
-  the query projects the star values (for `Did` and `Restaurant`) and the keen count (for
-  `WantToDo`) without loading the rating rows into memory.
-- **`ExperienceScore`** (`Popkin.Domain`) — value object computed from a set of star values:
-  `Average` rounded to one decimal (`MidpointRounding.AwayFromZero`), `null` when there are no
-  ratings, and `Count`. [View an experience](../view-experience/README.md) extends it with the
-  count per star value.
-- **`ExperienceCardDto`** — the card: id, kind, title, picture address, the Popkin's emoji and
-  colour (shown in the picture's place when there is no picture, L2-040 AC5), the sharer's first
-  name and avatar, the free-text "when", `SharedAt`, average, rating count and keen count. The
-  sharer's first name is the part of `Membership.DisplayName` before its first space.
-- **`IPhotoStore`** / **`ObjectStoragePhotoStore`** — returns an expiring, unguessable address
-  for the picture's thumbnail (L2-051 AC2, L2-055 AC4). The web app loads thumbnails lazily.
-- **Entities** — `Experience`, `ExperienceRating` and `ExperienceKeen` as in the shared model.
-  This subsystem adds two optional fields to `Experience`: `When` (free text such as "Sat
-  morning"; length limit `<TO SUPPLY>`, the specs give none) and `Place` (at most 80 characters,
-  L2-040 AC3). `IAppDbContext` gains `DbSet<Experience>`, `DbSet<ExperienceRating>` and
-  `DbSet<ExperienceKeen>`; `ExperienceConfiguration` indexes `(PopkinId, SharedAt)`.
+  handler calls `IMembershipGuard.RequireMemberAsync(popkinId)`, which answers `404`
+  `popkin_not_found` for a non-member. It refuses an unknown filter with `400`
+  `invalid_filter`. It reads the Popkin's experiences in one query, newest `SharedAt` first,
+  then by id. `did` keeps every kind but `Want`, so restaurants are in it; `want` keeps `Want`
+  (L2-037 AC4).
+- **`ExperienceCards`** and **`ExperienceScores`** — build the cards. The sharers are read in
+  one query, whether or not they are still members. The database counts the ratings per
+  experience and star value in one query, so no rating is read into memory.
+- **`ExperienceScore`** (`Popkin.Domain`) — value object built from the count per star value:
+  `Count`, `Average` rounded to one decimal with halfway rounding up (4.25 is 4.3), `null` when
+  there are no ratings, and `CountFor(stars)`. A "Want to do" experience has no score.
+- **`ExperienceCardDto`** — id, `Kind`, `Title`, `PictureUrl`, the Popkin's `Emoji` and
+  `Colour` (shown in the picture's place when there is no picture, L2-040 AC5), `SharedBy`
+  (membership id, first name and avatar), `When`, `SharedAt`, `Average`, `RatingCount` and
+  `KeenCount`. The first name is the part of `Membership.DisplayName` before its first space.
+  `KeenCount` is 0 until journey 20.
+- **`IPhotoStore`** — answers an expiring, unguessable address for the picture's thumbnail
+  (L2-051 AC2, L2-055 AC4).
+- **Entities** — `Experience` (`PopkinId`, `SharerMembershipId`, `Kind`, `Title`, `When`,
+  `Place`, `PictureKey`, `PictureThumbnailKey`, `SharedAt`) and `ExperienceRating`.
+  `ExperienceKind` is `Did`, `Restaurant` or `Want`, stored as text. `When` is free text of at
+  most 40 characters and `Place` at most 80 (L2-040 AC3). `IAppDbContext` gains
+  `DbSet<Experience>` and `DbSet<ExperienceRating>`; `ExperienceConfiguration` indexes
+  `(PopkinId, SharedAt)`. The migration is `AddExperiences`. There is no `ExperienceKeen`
+  yet.
 
-### Open points
+### Tests
 
-- The byline of a card without a "when": the mock shows "Ellie · Idea" for a "Want to do" card;
-  the text for other kinds is `<TO SUPPLY>`.
-- Whether the list updates live when another member shares or rates an experience
-  (`IPopkinNotifier`) is `<TO SUPPLY>`; L2-037 does not require it.
-- Paging for a Popkin with a long list is `<TO SUPPLY>`.
+- API integration tests on InMemory, in `Popkin.Api.Tests/Experiences/`: `ListExperiencesTests`
+  and, for the home, `ExperiencesSummaryTests`. `ExperienceScoreTests`
+  (`Popkin.Application.Tests`) has one case per row of the score's rule.
+- Unit tests of `ExperiencesStore` and of `experience-text.ts`.
+- Playwright: `e2e/tests/experiences.spec.ts`, against the recorded answers.
+
+### Built in journey 8
+
+Everything above. Decided in the build:
+
+- The filter is in the address, and the store, not the page, holds the list.
+- The byline of a card without a "when": "Idea" for a "Want to do" card, the day it was shared
+  otherwise.
+- An empty "We did" reads "Nothing done yet".
+- The block the mocks call `tab-header` is `pk-tab-header`.
+- The list is not sent over the hub. `IPopkinNotifier` gained no event, and L2-037 asks for
+  none.
+
+Gaps found, each in [the register](../../README.md#known-gaps):
+
+- The list does not change when another member shares, rates, edits or deletes; it is read
+  again when the screen opens (gap 38).
+- The list has no paging: one answer carries every experience of the Popkin (gap 39).
+- A "Want to do" card reads "0 keen": nobody can say they are keen until journey 20 (gap 42).
+- "Share one" is still offered in a wrapped-up Popkin (gap 36).
+- The skeletons show at once, not after the 300 ms of
+  [Loading, failure and offline](../../reliability/loading-failure-offline/README.md).
+- The seeder adds no experiences (gap 40).
+
+The diagrams below were not redrawn (gap 44). They show `ExperienceKeen`, a filter the page
+holds, a filter the controller checks and `ObjectStoragePhotoStore`, where there are now
+`ExperiencesStore`, a filter the handler checks and no keen record.
 
 ## Requirements
 

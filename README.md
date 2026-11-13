@@ -51,7 +51,11 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > chat, and each mutes, turns the camera off, leaves, or minimises the call and returns to it;
 > whoever is speaking has a ring round their tile.
 > [Watch it](docs/videos/07-journey-07-group-call/07-journey-07-group-call.mp4)
-> (2 min 16 s, with sound).
+> (2 min 16 s, with sound). Journey 8, Rate an experience, is built too: members share what
+> the group did, where it ate and what it wants to do next, with a picture, filter the list, rate
+> each one from one to five stars, add a few words to their rating and see the group's score;
+> whoever shared an experience edits or deletes it.
+> <!-- Watch it: the video of journey 8 goes here when it exists. -->
 > The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 

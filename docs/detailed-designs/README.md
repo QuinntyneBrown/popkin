@@ -119,7 +119,7 @@ is never one (L2-054 AC3).
 Built so far: `popkin.hub.send.duration` and, beside it, `popkin.hub.send.failures`, both by
 event name (`PopkinMetrics`). The other instruments of the table, and the exporter set-up of
 ADR 0012, are not built. Calls have no instrument of their own: nothing counts the calls
-started, the people on them or the signals refused (known gap 33).
+started, the people on them or the signals refused (known gap 33). Experiences added none either.
 
 ## Conflicts between the mocks and the specs
 
@@ -128,7 +128,9 @@ Each design follows the source named below and marks the conflict in its own REA
 - The reactions dialog shows six quick reactions, while L2-024 asks for five
   ([React to a message](chat/react-to-message/README.md)).
 - The score bars scale to the largest count, while L2-038 AC2 asks for each value's share
-  ([View an experience](experiences/view-experience/README.md)). The design follows the mock.
+  ([View an experience](experiences/view-experience/README.md)). The design follows the mock, and
+  journey 8 built it so: each bar is drawn against the largest count, and the count beside it
+  says the share exactly.
 - The album thumbnails carry empty `alt` text, while L2-032 AC7 names the text
   ([Browse the album](photos/browse-album/README.md)). The design follows the requirement.
 - The invite dialog, the created screen and "Got a code?" show the short link `popk.in/lakeside`,
@@ -251,6 +253,15 @@ or design that settled it.
 | 33 | Calls have no instrument on the `Popkin` meter, and a refused signal is not counted by `popkin.rate_limit.rejections`, which is not built ([ADR 0012](../adr/0012-opentelemetry.md), [Abuse limits](security/abuse-limits/README.md)) | None | |
 | 34 | The diagrams of [Group call](calls/group-call/README.md) and [Call controls](calls/call-controls/README.md) were not redrawn after journey 7. They show `CALL_SESSION` and `WebRtcCallSession`, a `threadId` and a `Kind`, and events without the Popkin's id; each design says so above its diagrams | None | |
 | 35 | Alone on a call on a phone shorter than about 980 px, "Invite to call" under "Waiting for the others" starts beneath the controls and shows only after scrolling. The mock (`video-call/empty.html`) draws it so: the tile and the message each keep the call's minimum height. "Invite to call" in the top bar is always in view ([Group call](calls/group-call/README.md)); found in journey 7 | None | |
+| 36 | "Share one" is still offered in a wrapped-up Popkin. The API refuses with `409` `popkin_wrapped_up`, and the dialog shows it as the general failure, "We couldn’t share that." ([Share an experience](experiences/share-experience/README.md), [Read-only Popkin](wrap-up/read-only-popkin/README.md)) | Journey 9 | |
+| 37 | An experience edited from "Something we did" or "Restaurant" to "Want to do" keeps its ratings and comments, hidden: it has no score and no rating panel, and they show again if it is edited back. Whether the edit should be refused, or the ratings removed, is not decided ([Share an experience](experiences/share-experience/README.md), [Rate an experience](experiences/rate-experience/README.md)) | None; found in journey 8. Journey 20 decides the same for "We did this" | |
+| 38 | The list of experiences, the score and the comments do not update live. Nothing about an experience is sent over the hub, so another member sees a share, a rating, a comment, an edit or a delete when they next open the screen. L2-037 to L2-041 ask for nothing more ([List experiences](experiences/list-experiences/README.md), [View an experience](experiences/view-experience/README.md)) | None | |
+| 39 | The list of experiences has no paging: one answer carries every experience of the Popkin, and the home's summary reads them all to rank them ([List experiences](experiences/list-experiences/README.md)) | None; a Popkin with hundreds of experiences | |
+| 40 | The seeder adds no experiences, so a seeded Popkin opens on "Nothing shared yet" ([List experiences](experiences/list-experiences/README.md)) | None | |
+| 41 | A HEIC picture has no preview in the Share an experience dialog in a browser that cannot draw HEIC. The picture is still sent, and is stored as a JPEG ([Share an experience](experiences/share-experience/README.md)) | None; found in journey 8 | |
+| 42 | Keen and "We did this" are not built. A "Want to do" card reads "0 keen", and its page shows the experience with no keen panel; there is no `ExperienceKeen` and no `CanMarkDone` ([Say you are keen](experiences/say-keen/README.md)) | Journey 20 | |
+| 43 | How a member comments on a "Want to do" experience. `docs/mocks/pages/experience-detail/want.html` draws comments without stars, and a comment belongs to a rating, which such an experience does not have. Nothing is built: the page lists none and the API answers `409` `rating_required` ([Comment on an experience](experiences/comment-on-experience/README.md), [Say you are keen](experiences/say-keen/README.md)) | Journey 20 | |
+| 44 | The diagrams of the five built designs of Experiences were not redrawn after journey 8. They show validator classes, `ExperienceKeen`, kind `WantToDo`, a `Photo` row for the picture, bars computed by the API and pages that hold the logic the stores now hold; each design says so above its diagrams | None | |
 
 Settled so far:
 
@@ -294,6 +305,19 @@ Settled so far:
 | How a minimised call is heard | [Call controls](calls/call-controls/README.md): an audio element per link that belongs to no screen; tiles play pictures without sound |
 | The copy of a call that cannot be joined, the line under the list of who is on a call, and where "Leave" returns | [Group call](calls/group-call/README.md) and [Call controls](calls/call-controls/README.md): "We couldn’t connect you to the call"; "Everyone in {Popkin} is on the call." or "{n} others in {Popkin} can join anytime."; the screen the member came from, else the Popkin home |
 | The limiter of call signals | [Abuse limits](security/abuse-limits/README.md): an exact sliding log of 600 a minute per hub connection |
+| The kinds of an experience, and the limit on its "when" | [Share an experience](experiences/share-experience/README.md): `Did`, `Restaurant` or `Want`; at most 40 characters |
+| Whether the picture of an experience is a photo of the album | [Share an experience](experiences/share-experience/README.md): no; it uses the photo store and the processing of a photo, and adds no `Photo` |
+| The limits on sharing, rating and commenting | [Abuse limits](security/abuse-limits/README.md): sharing and editing under `photos`, rating and commenting under `messages`, each 60 a minute per person |
+| Whether experiences update live over the hub | [List experiences](experiences/list-experiences/README.md): no; no event was added (known gap 38) |
+| Where the filter of Experiences lives, and where the logic of its screens lives | [List experiences](experiences/list-experiences/README.md) and [View an experience](experiences/view-experience/README.md): in the address, `?filter=did` or `?filter=want`; in `ExperiencesStore` and `ExperienceStore` of the `api` library |
+| The byline of a card without a "when", and the copy of an empty "We did" and of an unrated score card | [List experiences](experiences/list-experiences/README.md) and [View an experience](experiences/view-experience/README.md): "Idea" for "Want to do", the day it was shared otherwise; "Nothing done yet"; "Nobody has rated it yet" |
+| Whether a score bar scales to the largest count or to the total, and the wording for one rating | [View an experience](experiences/view-experience/README.md): the largest count, computed in the web app; "1 rating". The mocks' averages were corrected to what their counts give: 4.7, 4.6 and 4.3 |
+| How a rating that does not save is shown, and what a toast can offer | [Rate an experience](experiences/rate-experience/README.md): the stars show at once and are put back, with a danger toast offering "Try again"; a toast has one action |
+| What "Undo" on "Experience shared" does | [Share an experience](experiences/share-experience/README.md): it deletes what was shared |
+| Where edit and delete of an experience open, and their mocks | [Share an experience](experiences/share-experience/README.md): "Experience actions" over the picture opens a menu; edit reuses the share dialog as "Edit experience" with "Save changes"; delete asks "Delete this experience?" first. `pages/experience-detail/own.html`, `dialogs/experience-actions/`, `dialogs/delete-experience/` and `dialogs/share-experience/edit.html` |
+| The `pk-*` homes of the tab header, the picture block, the comment row and "Add a picture" | [List experiences](experiences/list-experiences/README.md), [View an experience](experiences/view-experience/README.md) and [Share an experience](experiences/share-experience/README.md): `pk-tab-header`, `pk-experience-detail`, `pk-comment` in `pk-comments`, and `pk-picture-field` |
+| Where "Edit your comment" is offered, the copy of a comment that does not save, and whether a comment can be cleared | [Comment on an experience](experiences/comment-on-experience/README.md): in the rating panel; "We couldn’t post that."; no |
+| The tie-break of the home's highest-rated experiences | [Popkin home](popkins/popkin-home/README.md): the one more members rated, then the newer; an experience nobody has rated is not named |
 
 ## Diagrams
 
