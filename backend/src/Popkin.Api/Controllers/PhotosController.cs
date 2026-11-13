@@ -17,6 +17,15 @@ public sealed class PhotosController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetPhotosSummaryQuery(popkinId), cancellationToken));
 
     /// <summary>
+    /// A page of the album, latest taken first, at most 60 photos (L2-032): everyone's or the
+    /// caller's own, from the start or from the cursor the page before gave.
+    /// </summary>
+    [HttpGet]
+    public async Task<ActionResult<AlbumPageDto>> GetAlbum(
+        Guid popkinId, [FromQuery] string? filter, [FromQuery] string? cursor, [FromQuery] int? limit, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetAlbumQuery(popkinId, filter, cursor, limit), cancellationToken));
+
+    /// <summary>
     /// Adds one photo to the album, with a caption when given (L2-031). The body may be up to
     /// twice the largest photo, so a photo over 10 MB is refused with its own message and not by
     /// the server's size limit.
