@@ -1,0 +1,81 @@
+/* Below XL there is no room for a third pane, so it is not there at all (L2-058 AC13). */
+:host {
+  display: none;
+}
+
+@media (min-width: 80rem) {
+  :host {
+    position: fixed;
+    inset: 0 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: var(--pk-detail-width);
+    padding: var(--space-6);
+    border-left: var(--border-width-hairline) solid var(--color-border-default);
+    background: var(--color-bg-surface);
+    overflow-y: auto;
+  }
+
+  .detail-pane__title {
+    margin-top: var(--space-4);
+    font: var(--text-h2);
+  }
+
+  .detail-pane__time {
+    margin-top: var(--space-3);
+  }
+
+  .detail-pane__label {
+    align-self: flex-start;
+    margin-top: var(--space-8);
+    font: var(--font-weight-bold) var(--font-size-sm) / var(--line-height-normal)
+      var(--font-family-sans);
+    color: var(--color-fg-muted);
+  }
+
+  .detail-pane__list {
+    align-self: stretch;
+    margin-top: var(--space-2);
+  }
+
+  /* A short row: the person's avatar, with the dot that says they are here, and their name. */
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--space-14);
+  }
+
+  .row__main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .row__title {
+    font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+      var(--font-family-sans);
+  }
+
+  .presence {
+    position: relative;
+    display: inline-grid;
+    flex: none;
+  }
+
+  .presence__dot {
+    position: absolute;
+    right: calc(-1 * var(--space-0-5));
+    bottom: calc(-1 * var(--space-0-5));
+    width: var(--space-3);
+    height: var(--space-3);
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    box-shadow: 0 0 0 var(--border-width-thick) var(--color-bg-surface);
+  }
+
+  .detail-pane__more {
+    font: var(--text-body-sm);
+    color: var(--color-fg-muted);
+  }
+}

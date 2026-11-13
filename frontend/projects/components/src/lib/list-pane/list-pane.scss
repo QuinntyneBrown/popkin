@@ -1,0 +1,22 @@
+/* Below L the list is a screen of its own, so the pane is not there at all (L2-058 AC13). */
+:host {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  :host {
+    position: fixed;
+    inset: 0 auto 0 var(--pk-nav-width);
+    display: flex;
+    flex-direction: column;
+    width: var(--pk-list-width);
+    border-right: var(--border-width-hairline) solid var(--color-border-default);
+    background: var(--color-bg-canvas);
+    overflow-y: auto;
+  }
+
+  .list-pane__title {
+    font: var(--text-h1-compact);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+}
