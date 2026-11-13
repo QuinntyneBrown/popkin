@@ -24,5 +24,14 @@ public sealed class InMemoryPhotoStore(PhotoUrlSigner signer) : IPhotoStore
         return Task.CompletedTask;
     }
 
+    public async Task SaveAsync(string key, Stream content, string contentType, CancellationToken cancellationToken)
+    {
+        using var bytes = new MemoryStream();
+        await content.CopyToAsync(bytes, cancellationToken);
+        Files[key] = (bytes.ToArray(), contentType);
+    }
+
     public string GetReadUrl(string key) => signer.ReadUrl(key);
+
+    public string GetDownloadUrl(string key, string fileName) => signer.DownloadUrl(key, fileName);
 }

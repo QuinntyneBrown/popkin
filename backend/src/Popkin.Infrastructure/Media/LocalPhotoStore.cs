@@ -14,7 +14,16 @@ public sealed class LocalPhotoStore(string root, PhotoUrlSigner signer) : IPhoto
         [".jpg"] = "image/jpeg",
         [".png"] = "image/png",
         [".webp"] = "image/webp",
+        [".zip"] = "application/zip",
     };
+
+    public async Task SaveAsync(string key, Stream content, string contentType, CancellationToken cancellationToken)
+    {
+        var path = PathOf(key) ?? throw new ArgumentException("The key is not a file name.", nameof(key));
+        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        await using var file = File.Create(path);
+        await content.CopyToAsync(file, cancellationToken);
+    }
 
     public async Task SaveAsync(string key, ReadOnlyMemory<byte> content, string contentType, CancellationToken cancellationToken)
     {
@@ -42,6 +51,8 @@ public sealed class LocalPhotoStore(string root, PhotoUrlSigner signer) : IPhoto
 
     public string GetReadUrl(string key) => signer.ReadUrl(key);
 
+    public string GetDownloadUrl(string key, string fileName) => signer.DownloadUrl(key, fileName);
+
     /// <summary>The file of a key, or null for a key that would leave the root folder.</summary>
     private string? PathOf(string key)
     {
@@ -61,5 +72,10 @@ public sealed class UnconfiguredPhotoStore : IPhotoStore
 
     public Task DeleteAsync(string key, CancellationToken cancellationToken) => Task.CompletedTask;
 
+    public Task SaveAsync(string key, Stream content, string contentType, CancellationToken cancellationToken) =>
+        throw new InvalidOperationException("No photo store is configured.");
+
     public string GetReadUrl(string key) => throw new InvalidOperationException("No photo store is configured.");
+
+    public string GetDownloadUrl(string key, string fileName) => throw new InvalidOperationException("No photo store is configured.");
 }
