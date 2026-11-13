@@ -97,3 +97,4 @@ export * from './lib/rating-panel/rating-panel';
 export * from './lib/comments/comments';
 export * from './lib/comment/comment';
 export * from './lib/choice-chips/choice-chips';
+export * from './lib/textarea/textarea';
