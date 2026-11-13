@@ -80,3 +80,4 @@ export * from './lib/page-screen/page-screen';
 export * from './lib/popkin-grid/popkin-grid';
 export * from './lib/wrapped-list/wrapped-list';
 export * from './lib/popkin-skeleton/popkin-skeleton';
+export * from './lib/scanner/scanner';
