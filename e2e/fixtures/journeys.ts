@@ -230,3 +230,21 @@ export async function theInviteFailing(page: Page): Promise<void> {
   await asVisitor(page);
   await answer(page, previewKey, problem(500, 'server_error'));
 }
+
+/** Joel at the profile step of the invite the mocks draw. */
+export async function joelAtTheMockInvite(page: Page): Promise<void> {
+  await asJoel(page);
+  await lakesideCast(page);
+}
+
+/** Joel at the profile step when joining fails. */
+export async function joelWhoseJoinFails(page: Page): Promise<void> {
+  await joelAtTheMockInvite(page);
+  await answer(page, joinKey, problem(500, 'server_error'));
+}
+
+/** Joel at the profile step while joining never finishes. */
+export async function joelWhoseJoinHangs(page: Page): Promise<void> {
+  await joelAtTheMockInvite(page);
+  await page.route(`**/api/invites/${inviteCode}/join`, () => undefined);
+}

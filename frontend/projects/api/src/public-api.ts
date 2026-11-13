@@ -18,4 +18,5 @@ export * from './lib/api/error-screens';
 export * from './lib/models/invite';
 export * from './lib/api/invites/invite-text';
 export * from './lib/api/invites/invites-api';
+export * from './lib/api/invites/profile-photo';
 export * from './lib/api/invites/join-invite-state';

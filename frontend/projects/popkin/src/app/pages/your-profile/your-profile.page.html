@@ -1,0 +1,66 @@
+<div
+  pk-screen
+  layout="split"
+  body="middle"
+  heading="How should people know you?"
+  [accent]="accent()"
+>
+  <aside
+    pk-split-aside
+    slot="aside"
+    label="Already here"
+    surface="tint"
+    [heading]="preview() ? 'Already in ' + preview()!.name : undefined"
+  >
+    <div pk-people-list [people]="people()" [more]="more()"></div>
+  </aside>
+  <header pk-top-bar slot="header" [back]="inviteUrl">
+    @if (preview(); as preview) {
+      <span pk-popkin-tile slot="title" size="xs" [emoji]="preview.emoji"></span>
+    }
+    @if (preview(); as preview) {
+      <span slot="title" class="truncate">{{ preview.name }}</span>
+    }
+  </header>
+  <form id="your-profile" novalidate (submit)="join($event)">
+    @if (status() === 'failed') {
+      <div pk-alert heading="We couldn’t add you just yet.">
+        Your name and photo are still here. Give it another go.
+      </div>
+    }
+    <div
+      pk-photo-picker
+      [label]="photo() ? 'Change your photo' : 'Add a photo'"
+      [initial]="initial()"
+      [photo]="photoUrl()"
+      [caption]="photo() ? 'Looking good.' : 'A photo is optional'"
+      [error]="photoError()"
+      [accept]="accept"
+      [disabled]="status() === 'joining'"
+      (picked)="pick($event)"
+    ></div>
+    <div
+      pk-text-field
+      fieldId="name"
+      label="Your name"
+      autocomplete="given-name"
+      hint="First name is plenty."
+      [maxlength]="40"
+      [formControl]="name"
+      [readonly]="status() === 'joining'"
+      [error]="ready() ? undefined : 'Enter a name so people know who you are.'"
+    ></div>
+  </form>
+  <button
+    pk-button
+    slot="actions"
+    variant="popkin"
+    type="submit"
+    form="your-profile"
+    [block]="true"
+    [busy]="status() === 'joining'"
+    [disabled]="!ready()"
+  >
+    {{ status() === 'joining' ? 'Joining…' : 'I’m in' }}
+  </button>
+</div>

@@ -42,3 +42,5 @@ export * from './lib/pill/pill';
 export * from './lib/avatar-stack/avatar-stack';
 export * from './lib/skeleton/skeleton';
 export * from './lib/invite-preview/invite-preview';
+export * from './lib/photo-picker/photo-picker';
+export * from './lib/people-list/people-list';

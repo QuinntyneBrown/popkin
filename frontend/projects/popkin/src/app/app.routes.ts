@@ -64,6 +64,14 @@ export const routes: Routes = [
     title: 'Your invite · Popkin',
   },
   {
+    path: 'i/:code/profile',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/your-profile/your-profile.page').then((m) => m.YourProfilePage),
+    data: data({ shell: 'bare', page: 'your-profile' }),
+    title: 'How should people know you? · Popkin',
+  },
+  {
     path: 'error',
     loadComponent: () =>
       import('./pages/server-error/server-error.page').then((m) => m.ServerErrorPage),
