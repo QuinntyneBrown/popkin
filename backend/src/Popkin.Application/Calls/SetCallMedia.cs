@@ -18,7 +18,8 @@ public sealed class SetCallMediaCommandHandler(IAppDbContext db, IMembershipGuar
 {
     public async Task Handle(SetCallMediaCommand request, CancellationToken cancellationToken)
     {
-        var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
+        // A wrap-up ended the call, so nothing of it changes afterwards (L2-045 AC2).
+        var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
         if (request.MicOn is null && request.CameraOn is null)
         {
             throw ProblemException.Invalid("validation_failed", "Say whether the microphone or the camera is on.", "micOn");
