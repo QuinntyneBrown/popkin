@@ -49,10 +49,10 @@
 .sheet-group > h3 { margin-bottom: var(--space-4); font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-muted); }
 .logo-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
 .logo-tile { display: grid; place-items: center; aspect-ratio: 1; border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); }
-.logo-tile--coral { background: var(--palette-coral); color: var(--palette-white); }
+.logo-tile--coral { background: var(--palette-coral); color: var(--palette-ink); }
 .logo-tile--ink { background: var(--palette-ink); color: var(--palette-paper); }
 .logo-tile--sun { background: var(--palette-sun); color: var(--palette-ink); }
-.logo-tile--teal { background: var(--palette-teal); color: var(--palette-white); }
+.logo-tile--teal { background: var(--palette-teal); color: var(--palette-ink); }
 .logo-tile--coral .logo, .logo-tile--ink .logo { color: inherit; }
 .logo-tile--coral .mark, .logo-tile--sun .mark, .logo-tile--teal .mark { color: inherit; }
 .logo-tile--coral .wordmark__i::after { background: currentColor; }

@@ -45,7 +45,7 @@
 }
 
 :host(.btn--popkin:hover) {
-  background: color-mix(in srgb, var(--accent) 85%, var(--color-constant-dark));
+  background: color-mix(in srgb, var(--accent) 85%, var(--color-constant-light));
   color: var(--color-fg-on-popkin);
 }
 
