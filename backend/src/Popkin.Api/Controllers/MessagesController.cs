@@ -42,4 +42,15 @@ public sealed class MessagesController(ISender sender) : ControllerBase
             ? Created($"/api/popkins/{popkinId}/threads/{threadId}/messages/{result.Message.Id}", result.Message)
             : Ok(result.Message);
     }
+
+    /// <summary>
+    /// Deletes the caller's own message with that client message id, if the server holds one:
+    /// 204 either way, so "Delete" on a message that was not sent is always safe (L2-028 AC1).
+    /// </summary>
+    [HttpDelete("client/{clientMessageId:guid}")]
+    public async Task<IActionResult> Discard(Guid popkinId, Guid threadId, Guid clientMessageId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DiscardPendingMessageCommand(popkinId, threadId, clientMessageId), cancellationToken);
+        return NoContent();
+    }
 }
