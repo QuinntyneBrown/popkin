@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { Skeleton } from '../skeleton/skeleton';
 
 /**
- * Your Popkins while it loads (docs/design-system/components/skeleton.html): sand cards in the
- * shape of Popkin cards, hidden from assistive technology, and a status line that says what is
- * loading (L2-017 AC7, L2-056 AC1). It sets its own distance from the page's heading.
+ * Your Popkins while it loads (docs/design-system/components/skeleton.html): sand cards of the
+ * same size as Popkin cards and in the same columns, hidden from assistive technology, and a
+ * status line that says what is loading (L2-017 AC7, L2-056 AC1). It sets its own distance from
+ * the page's heading.
  */
 @Component({
   selector: 'div[pk-popkin-skeleton]',
