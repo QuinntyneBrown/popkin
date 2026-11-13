@@ -1,7 +1,7 @@
 # Estimates
 
 - Overall effort: 185 days
-- Complete: 30%
+- Complete: 36%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
@@ -12,7 +12,7 @@
 | [security](security.md) | 13 days | 57% |
 | [reliability](reliability.md) | 8 days | 39% |
 | [accessibility](accessibility.md) | 11 days | 42% |
-| [photos](photos.md) | 20 days | 3% |
+| [photos](photos.md) | 20 days | 56% |
 | [calls](calls.md) | 13 days | 0% |
 | [experiences](experiences.md) | 17 days | 0% |
 | [wrap-up](wrap-up.md) | 14 days | 0% |
@@ -20,8 +20,8 @@
 
 ## Roadmap
 
-1. Photos: share photos (journey 5).
-2. Accounts and popkins: sign in and come back, with My Popkins (journey 6).
-3. Calls: the group call (journey 7).
-4. Experiences and wrap-up: rate an experience and wrap a Popkin up (journeys 8 and 9).
+1. Accounts and popkins: sign in and come back, with My Popkins (journey 6).
+2. Calls: the group call (journey 7).
+3. Experiences and wrap-up: rate an experience and wrap a Popkin up (journeys 8 and 9).
+4. Photos: react, comment, save and delete (journey 14), and the photo store of a deployed system.
 5. Landing, direct messages, reactions, photos in chat and account management (journeys 10 to 20).

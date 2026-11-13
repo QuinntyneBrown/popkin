@@ -31,7 +31,8 @@ true: a setting added to the code is added here in the same change.
 
 The SMS and email providers are not chosen: outside Development every code request answers 503
 `code_not_sent`. The photo store provider is not chosen either: outside Development a join with
-a photo fails, and a join without one works. This and the other open decisions are in the
+a photo fails, and a join without one works; the same holds for the album, where adding a photo
+fails. No setting was added for the album. This and the other open decisions are in the
 [known gaps](detailed-designs/README.md#known-gaps).
 
 ## Release

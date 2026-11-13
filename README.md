@@ -37,7 +37,11 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > Popkin, how long it has left and the latest chat, with the count of new messages rising as
 > they arrive, and brings someone in with the QR code or the invite link.
 > [Watch it](docs/videos/04-journey-04-popkin-home/04-journey-04-popkin-home.mp4)
-> (2 min 12 s, with sound). The journeys still to build are in
+> (2 min 12 s, with sound). Journey 5, Share photos, is built as well: members add up to 20
+> photos at a time with captions, browse the album by day under Everyone or Mine, and open each
+> photo full screen, and new photos appear for everyone without a reload.
+> <!-- Watch it: the video of journey 5 goes here when it exists. -->
+> The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents

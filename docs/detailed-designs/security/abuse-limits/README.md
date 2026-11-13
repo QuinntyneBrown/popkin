@@ -29,11 +29,15 @@ The limits come from L2-053:
 | Messages | person | 60 | 1 minute |
 | Invite codes tried | client address | 20 | 10 minutes |
 | Call signals | hub connection | 600 | 1 minute |
+| Photo uploads | person | 60 | 1 minute |
 
 The first three limits are L2-053's. The fourth protects one member's browser from another's:
 `SendSignal` relays a payload from one participant to another
 ([Group call](../../calls/group-call/README.md)), and L2-053 says one person cannot flood another.
-Its value is a design value, well above what setting up a call with 12 people needs.
+Its value is a design value, well above what setting up a call with 12 people needs. The fifth
+keeps one person from filling an album or the photo store
+([Add photos](../../photos/add-photos/README.md)). L2-053 names no limit for photos, so its
+value is a design value too: three full selections of 20 photos in a minute.
 
 These limits sit beside the per-destination limits of L2-005 (five codes per phone number or
 email per hour, five wrong attempts per code). Those are counted in the database by
@@ -67,16 +71,17 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
 | `messages` | `POST /api/popkins/{popkinId}/threads/{threadId}/messages` ([Send a message to everyone](../../chat/send-message-to-everyone/README.md), [Direct messages](../../chat/direct-messages/README.md)) |
 | `invite-codes` | `GET /api/invites/{code}` and `POST /api/invites/{code}/join` ([Preview an invite](../../invitations/preview-invite/README.md), [Join by code](../../invitations/join-by-code/README.md)) |
 | `address-checks` | `GET /api/addresses/{address}` ([Choose the address](../../popkins/choose-address/README.md)) |
+| `photos` | `POST /api/popkins/{popkinId}/photos` ([Add photos](../../photos/add-photos/README.md)) |
 
 ### Backend — Popkin API
 
 - **`RateLimitPolicyNames`** (`Popkin.Api/RateLimiting/`) — introduced static class of constant
   policy names: `Codes = "codes"`, `Messages = "messages"`, `InviteCodes = "invite-codes"`, and, for L2-067 AC7,
-  `AddressChecks = "address-checks"`. The
+  `AddressChecks = "address-checks"`, and, for photo uploads, `Photos = "photos"`. The
   shared architecture names this `IRateLimitPolicy`; a static class of constants is the .NET
   convention for policy names, so the design uses it instead.
 - **`RateLimitingSetup.AddPopkinRateLimiting(IServiceCollection)`** — introduced extension called
-  from `Program.cs`. It configures `AddRateLimiter` with four policies:
+  from `Program.cs`. It configures `AddRateLimiter` with five policies:
   - `codes` — `FixedWindowRateLimiter`, `PermitLimit = 10`, `Window = 10 min`, `QueueLimit = 0`,
     partitioned by client address (L2-053 AC1).
   - `messages` — `SlidingLogRateLimiter` (`Popkin.Api/RateLimiting/`), 60 permits in any one
@@ -91,6 +96,10 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
   - `address-checks` — `SlidingWindowRateLimiter`, `PermitLimit = 30`, `Window = 1 min`,
     `SegmentsPerWindow = 6`, `QueueLimit = 0`, partitioned by the person id from the session
     (L2-067 AC7). It also bounds how fast one person can learn which addresses are taken.
+  - `photos` — the same `SlidingLogRateLimiter` as `messages`, 60 permits in any one minute, no
+    queue, partitioned by the person id of the session. Every upload that reaches the limiter
+    is counted, a refused one too (a file too large, a type not allowed), so trying files over
+    and over is bounded as well. One count per person covers every Popkin they are in.
   Values bind from configuration section `RateLimits` to `RateLimitOptions`, with these defaults, so operations can tune
   them without a build.
 - **`OnRejected`** — sets status `429`, reads `MetadataName.RetryAfter` from the lease, writes the
@@ -98,7 +107,8 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
   `IProblemDetailsService`. It logs the policy name and partition kind, never the address or the
   person id in clear (see [Personal data protection](../personal-data-protection/README.md)).
 - **Controllers** — the actions above carry
-  `[EnableRateLimiting(RateLimitPolicyNames.Codes)]`, `…Messages` and `…InviteCodes`.
+  `[EnableRateLimiting(RateLimitPolicyNames.Codes)]`, `…Messages`, `…InviteCodes` and
+  `…Photos`.
 - **Pipeline order** — `UseRateLimiter()` runs after `UseRouting()` (so endpoint metadata is known)
   and after `UseAuthentication()` (so the `messages` partition can read the person id), and before
   `UseAuthorization()`.
@@ -152,7 +162,8 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
 The limits were built with the journeys that needed them, and part of this design waits:
 
 - `codes-per-address` (this design's `codes`) with sign up, journey 1; `invite-codes` with
-  joining, journey 2; `messages` with the Everyone thread, journey 3. The policies and
+  joining, journey 2; `messages` with the Everyone thread, journey 3; `photos` with the album,
+  journey 5. The policies and
   `OnRejected` are registered by `RateLimitPolicyNames.AddPopkinRateLimits`, which stands where
   this design names `RateLimitingSetup`.
 - The values are constants there; binding them from the `RateLimits` section is not built.

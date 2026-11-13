@@ -14,13 +14,15 @@ Escape.
 - **stage** — the dark background of the photo view, from the token `--color-bg-stage`
 - **album order** — order of the album, latest `TakenAt` first, that "previous" and "next"
   follow
-- **display image** — copy of the photo sized for the screen, served through an address that
-  expires
+- **display image** — the stored copy of the photo, a JPEG whose longest edge is at most
+  2048 px, served through an address that expires after one hour
 
 Reacting, commenting and saving happen on this screen, but each has its own design:
 [react to a photo](../react-to-photo/README.md),
 [comment on a photo](../comment-on-photo/README.md) and [save a photo](../save-photo/README.md).
-This feature owns the screen, its loading and failure states, and the navigation.
+This feature owns the screen, its loading and failure states, and the navigation. It is built
+(journey 5); the reactions, the comments, "Save photo" and delete are journey 14, and until then
+the screen shows none of them.
 
 ## Description
 
@@ -38,25 +40,31 @@ This feature owns the screen, its loading and failure states, and the navigation
 ### API
 
 - `GET /api/popkins/{popkinId}/photos/{photoId}` — `200 OK` with `PhotoDetailDto`: uploader
-  (first name, full name and avatar only, L2-054 AC2), `AddedAt`, `Caption`, display image
-  address, `Width`, `Height`, `Reactions` (emoji, count, mine), `CommentCount`,
-  `PreviousPhotoId`, `NextPhotoId` and `CanDelete`. Errors: `404 popkin_not_found` for a
-  non-member (L2-051 AC1), `404 photo_not_found` for a photo that is not in this Popkin.
+  (membership id, first name, display name and avatar only, L2-054 AC2), `AddedAt`, `TakenAt`,
+  `Caption`, display image address, `Width`, `Height`, `Reactions` (emoji, count, mine),
+  `CommentCount`, `PreviousPhotoId` (the newer neighbour), `NextPhotoId` (the older one),
+  `CanDelete` and `IsMine`. Until journey 14, `Reactions` is empty and `CommentCount` is 0.
+  Errors: `404 popkin_not_found` for a non-member (L2-051 AC1), `404 photo_not_found` for a
+  photo that is not in this Popkin.
 
 ### Frontend
 
 - **`PhotoViewPage`** — introduced, `pages/photo-view/photo-view.page.ts`, selector
   `pk-photo-view-page`, route `/p/:popkinId/photos/:photoId`, route data `{ shell: 'bare', page:
-  'photo-view' }`. It loads the photo through `PhotosApi.getPhoto`. Its `state` is `loading`,
-  `ready` or `error`. It handles these inputs:
-  - **Left and Right** — a host `keydown` listener opens the neighbour. Navigation uses
-    `replaceUrl`, so "Close" returns past every photo seen (L2-033 AC3).
-  - **Escape and "Close"** — `Location.back()` when the view opened from another screen in this
-    session. Scroll position restoration (`withInMemoryScrolling`) returns the member to the
-    place they left (L2-033 AC2). Opened directly by address, the view goes to the album
-    instead.
+  'photo-view' }`. It reads `PhotoViewStore`, which loads the photo through
+  `PhotosApi.getPhoto`. Its `state` is `loading`, `ready` or `error`. It handles these inputs:
+  - **Left and Right, and a swipe** — open the neighbour. Navigation uses `replaceUrl`, so
+    "Close" returns past every photo seen (L2-033 AC3). There is no visible previous or next
+    control: the mock draws none (see the open questions).
+  - **Escape and "Close"** — go back when the view opened from another screen of the app.
+    The album route and this route sit under one parent route that provides `AlbumStore`, so
+    the album is still there: it scrolls the photo the member left into view and puts the focus
+    on it (L2-033 AC2). This is the album's own doing, not the router's scroll restoration.
+    Opened directly by address, the view goes to the album instead.
   - **image error** — "Try again" fetches the photo again for a fresh address, because an
     address may have expired (L2-033 AC4).
+- **`PhotoViewStore`** — introduced in the `api` library, with unit tests: the photo, its state
+  and its neighbours.
 - **`pk-photo-viewer`** — introduced in the `components` library
   (`docs/design-system/components/photo-viewer.html`), blocks `photo-stage`, `photo-info`,
   `stage-chip` and `react-bar`. The image uses `object-fit: contain` and reserves its aspect
@@ -64,26 +72,31 @@ This feature owns the screen, its loading and failure states, and the navigation
   nothing moves when it arrives (L2-033 AC1, L2-055 AC5). It emits `swipe` from pointer events
   and `imageError`. The caption is the page's heading. The focus ring is cream so it reads on the
   dark stage.
-- **`pk-top-bar`** — "Close", the uploader's avatar and name, the time label, and "Save photo".
+- **`pk-top-bar`** — "Close", the uploader's avatar and name, and the time label, which reads
+  `AddedAt`. "Save photo" joins it with journey 14.
 - **`PhotosApi`** — gains `getPhoto(popkinId, photoId)`; view model `PhotoDetailView`.
 
 ### Backend
 
 - **`PhotosController`** — gains `GET /api/popkins/{popkinId}/photos/{photoId}`.
 - **`GetPhotoQuery` / `GetPhotoQueryHandler`** — introduced. The handler checks membership through
-  `IMembershipGuard`, loads the `Photo` scoped to `PopkinId`, and groups `PhotoReaction` rows by
-  emoji with the caller's own marked. It counts `PhotoComment` rows and finds the neighbours in
+  `IMembershipGuard`, loads the `Photo` scoped to `PopkinId`, and finds the neighbours in
   album order with two indexed reads on `(PopkinId, TakenAt, Id)`. It asks
   `IPhotoStore.GetReadUrlAsync` for the display image. `CanDelete` is true for the uploader and
-  for the Host (L2-036 AC2).
+  for the Host (L2-036 AC2). Grouping `PhotoReaction` rows by emoji, with the caller's own
+  marked, and counting `PhotoComment` rows come with journey 14; until then the handler answers
+  no reactions and no comments.
 
 ### Open questions
 
-- Whether "previous" and "next" follow the filter the member came from ("Mine") or always the
-  whole album: `<TO SUPPLY>`. The design follows the whole album.
-- Whether the time shown is when the photo was added (`AddedAt`, the wording of L2-033 AC1) or
-  when it was taken: `<TO SUPPLY>`. The design shows `AddedAt`.
-- Size of the display image and lifetime of its address: `<TO SUPPLY>`.
+- The photo view has no visible previous or next control, so a member who uses a pointer and
+  cannot swipe has no way to move between photos (WCAG 2.5.1, L2-057). The mock draws none;
+  whether the mock gains one is `<TO SUPPLY>` (known gap 21).
+
+Settled while building: "previous" and "next" follow the whole album, whichever filter the
+member came from; the time shown is when the photo was added (`AddedAt`, the wording of
+L2-033 AC1), while the album's days follow `TakenAt`; the display image is at most 2048 px on
+its longest edge and its address lasts one hour.
 
 ## Requirements
 
@@ -114,9 +127,9 @@ Photo store through an address that expires.
 
 ### Components
 
-`PhotoViewPage` composes `pk-top-bar` and `pk-photo-viewer` and reads through `PhotosApi`.
-`GetPhotoQueryHandler` reads the photo, its reaction counts, its comment count and its
-neighbours.
+`PhotoViewPage` composes `pk-top-bar` and `pk-photo-viewer` and reads through `PhotoViewStore`
+and `PhotosApi`. `GetPhotoQueryHandler` reads the photo and its neighbours, and from journey 14
+its reaction counts and its comment count.
 
 ![C4 component view for viewing a photo](diagrams/c4-component.png)
 
