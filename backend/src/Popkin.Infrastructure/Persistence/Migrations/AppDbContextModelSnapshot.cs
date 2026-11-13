@@ -91,6 +91,48 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("Memberships", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AuthorMembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ClientMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorMembershipId", "ClientMessageId")
+                        .IsUnique()
+                        .HasFilter("[ClientMessageId] IS NOT NULL");
+
+                    b.HasIndex("ThreadId", "SentAt", "Id");
+
+                    b.ToTable("Messages", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Person", b =>
                 {
                     b.Property<Guid>("Id")
@@ -216,6 +258,30 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("Sessions", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.ThreadReadState", b =>
+                {
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LastReadMessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastReadSentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("ThreadId", "MembershipId");
+
+                    b.HasIndex("MembershipId");
+
+                    b.ToTable("ThreadReadStates", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.VerificationCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -287,6 +353,21 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Popkin.Domain.Message", b =>
+                {
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.ChatThread", null)
+                        .WithMany()
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Popkin.Domain.PopkinSpace", b =>
                 {
                     b.HasOne("Popkin.Domain.Person", null)
@@ -301,6 +382,21 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasOne("Popkin.Domain.Person", null)
                         .WithMany()
                         .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ThreadReadState", b =>
+                {
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.ChatThread", null)
+                        .WithMany()
+                        .HasForeignKey("ThreadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
