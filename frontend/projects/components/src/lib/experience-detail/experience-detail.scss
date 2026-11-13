@@ -1,0 +1,176 @@
+:host {
+  display: block;
+}
+
+/* The picture, with Back over it; the Popkin's colour shows until it arrives. */
+.hero-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--accent-tint);
+}
+
+.hero-media__photo {
+  width: 100%;
+  height: 100%;
+}
+
+/* No picture: the Popkin's emoji on its colour, as on the experience's card. */
+.hero-media__emoji {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font: var(--font-size-7xl) / 1 var(--font-family-emoji);
+}
+
+.hero-media .hero-media__skeleton {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+}
+
+.hero-media__back {
+  position: absolute;
+  left: var(--space-3);
+  top: var(--space-3);
+}
+
+.detail__intro {
+  padding: var(--space-5) var(--space-5) 0;
+}
+
+.detail__kind {
+  font: var(--text-body-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--accent-text);
+}
+
+.detail__title {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-3xl);
+}
+
+.detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-3);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.detail__by,
+.detail__place {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.detail__place {
+  gap: var(--space-1);
+}
+
+.detail__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail__rest {
+  padding: 0 var(--space-5) var(--space-10);
+}
+
+.detail__cards {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.detail__cards:empty {
+  display: none;
+}
+
+/* M: the picture is a band, and the cards sit side by side. */
+@media (min-width: 48rem) {
+  .hero-media {
+    aspect-ratio: 21 / 9;
+  }
+
+  .hero-media__back {
+    left: var(--space-6);
+    top: var(--space-6);
+  }
+
+  .detail__intro {
+    padding: var(--space-7) var(--space-8) 0;
+  }
+
+  .detail__rest {
+    padding-inline: var(--space-8);
+  }
+
+  .detail__cards {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+  }
+}
+
+/* L: the lead beside the rest; it stays in view while the rest scrolls. */
+@media (min-width: 64rem) {
+  :host {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-10);
+    width: 100%;
+    max-width: var(--layout-detail-max);
+    margin-inline: auto;
+    padding: var(--space-8);
+  }
+
+  .detail__lead {
+    position: sticky;
+    top: var(--space-8);
+  }
+
+  .hero-media {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+  }
+
+  /* The skeleton of the picture keeps square corners, as the mock draws it. */
+  .hero-media--loading {
+    border-radius: 0;
+  }
+
+  .hero-media__back {
+    left: var(--space-4);
+    top: var(--space-4);
+  }
+
+  .detail__intro {
+    padding-inline: 0;
+  }
+
+  .detail__rest {
+    padding: 0;
+  }
+
+  .detail__cards {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    margin-top: 0;
+  }
+}
+
+/* XL: more room between the two, further in. */
+@media (min-width: 80rem) {
+  :host {
+    gap: var(--space-14);
+    padding-inline: var(--space-10);
+  }
+}

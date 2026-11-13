@@ -91,3 +91,4 @@ export * from './lib/stars/stars';
 export * from './lib/experiences/experiences';
 export * from './lib/experience-grid/experience-grid';
 export * from './lib/experience-card/experience-card';
+export * from './lib/experience-detail/experience-detail';
