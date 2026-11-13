@@ -1,3 +1,6 @@
+import { DirectMessagePage } from '../../pages/direct-message.page';
+import { ConversationsPage } from '../../pages/conversations.page';
+import { directMessageStates } from '../../fixtures/direct-message-states';
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
@@ -52,5 +55,38 @@ parity('top-bar', [
     ...wrapUpStates.wrapUp,
     name: 'wrap-up',
     region: (page) => new WrapUpPage(page).topBar,
+  },
+  // A call between two: the other member's name in the title, "Just the two of you".
+  {
+    key: 'videoCallTwo',
+    ...callStates.videoCallTwo,
+    name: 'call-two',
+    region: (page) => new VideoCallPage(page).topBar,
+  },
+  // Journey 11: the Chat tab's bar, the head of the thread pane, a direct message's bar.
+  {
+    key: 'conversations',
+    ...directMessageStates.conversations,
+    name: 'list-tab',
+    region: (page) => new ConversationsPage(page).topBar,
+  },
+  {
+    key: 'conversations',
+    ...directMessageStates.conversations,
+    name: 'thread-pane-head',
+    region: (page) => new ConversationsPage(page).threadPaneHead,
+    widths: [1280],
+  },
+  {
+    key: 'directMessage',
+    ...directMessageStates.directMessage,
+    name: 'direct-message',
+    region: (page) => new DirectMessagePage(page).topBar,
+  },
+  {
+    key: 'directMessageReadOnly',
+    ...directMessageStates.directMessageReadOnly,
+    name: 'direct-message-read-only',
+    region: (page) => new DirectMessagePage(page).topBar,
   },
 ]);
