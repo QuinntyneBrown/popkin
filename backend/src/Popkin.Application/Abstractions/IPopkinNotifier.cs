@@ -32,11 +32,11 @@ public interface IPopkinNotifier
     /// <summary>Photos were added to the album. To every member of the Popkin with a connection open.</summary>
     Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds);
 
-    /// <summary>How many are on the group call changed. To every member of the Popkin with a connection open.</summary>
-    Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount);
+    /// <summary>How many are on a call changed. To the call's audience: the Popkin for the group call, the two members for a direct call.</summary>
+    Task CallChanged(Audience audience, Guid callId, long version, int participantCount, Guid? threadId);
 
-    /// <summary>The group call ended. To every member of the Popkin with a connection open.</summary>
-    Task CallEnded(Guid popkinId, Guid callId);
+    /// <summary>A call ended. To the call's audience: the Popkin for the group call, the two members for a direct call.</summary>
+    Task CallEnded(Audience audience, Guid callId, Guid? threadId);
 
     /// <summary>The Popkin wrapped up. To every member of the Popkin with a connection open.</summary>
     Task PopkinWrappedUp(Guid popkinId);

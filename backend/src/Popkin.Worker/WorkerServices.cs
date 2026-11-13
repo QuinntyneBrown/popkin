@@ -24,9 +24,9 @@ public sealed class SilentPopkinNotifier : IPopkinNotifier
 
     public Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds) => Task.CompletedTask;
 
-    public Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount) => Task.CompletedTask;
+    public Task CallChanged(Audience audience, Guid callId, long version, int participantCount, Guid? threadId) => Task.CompletedTask;
 
-    public Task CallEnded(Guid popkinId, Guid callId) => Task.CompletedTask;
+    public Task CallEnded(Audience audience, Guid callId, Guid? threadId) => Task.CompletedTask;
 
     public Task PopkinWrappedUp(Guid popkinId) => Task.CompletedTask;
 

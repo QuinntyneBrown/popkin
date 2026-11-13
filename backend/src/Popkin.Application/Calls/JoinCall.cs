@@ -70,7 +70,8 @@ public sealed class JoinCallCommandHandler(
             // (the tab closed in between) must not hold the call open for ever.
             grace.Start(participant.Id, participant.ConnectionId);
             await notifier.ParticipantJoined(call.Id, joined.Participants.Single(p => p.MembershipId == membership.Id));
-            await notifier.CallChanged(popkin.Id, call.Id, call.Version, joined.Call.ParticipantCount);
+            await notifier.CallChanged(
+                await CallReads.AudienceAsync(db, call, cancellationToken), call.Id, call.Version, joined.Call.ParticipantCount, call.ThreadId);
             return new JoinCallResult(joined, started);
         }
     }

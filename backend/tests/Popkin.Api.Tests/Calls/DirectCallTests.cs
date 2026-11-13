@@ -36,6 +36,7 @@ public sealed class DirectCallTests
         var cast = await MaraAndWaltAsync(api);
 
         var started = await cast.Mara.StartOrJoinDirectCallAsync(cast.PopkinId, cast.ThreadId);
+        api.Clock.Advance(TimeSpan.FromSeconds(5));
         var joined = await cast.Walt.StartOrJoinDirectCallAsync(cast.PopkinId, cast.ThreadId);
 
         Assert.Equal(HttpStatusCode.Created, started.StatusCode);
@@ -65,6 +66,7 @@ public sealed class DirectCallTests
         var cast = await MaraAndWaltAsync(api);
         var group = await cast.Ruth.OnCallAsync(cast.PopkinId);
 
+        api.Clock.Advance(TimeSpan.FromSeconds(5));
         var direct = await cast.Mara.OnDirectCallAsync(cast.PopkinId, cast.ThreadId);
         var both = await cast.Mara.OnCallAsync(cast.PopkinId);
 

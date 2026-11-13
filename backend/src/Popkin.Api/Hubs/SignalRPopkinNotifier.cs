@@ -38,11 +38,13 @@ public sealed class SignalRPopkinNotifier(
     public Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds) =>
         SendAsync(nameof(IPopkinClient.PhotosAdded), () => Group(popkinId).PhotosAdded(popkinId, photoIds));
 
-    public Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount) =>
-        SendAsync(nameof(IPopkinClient.CallChanged), () => Group(popkinId).CallChanged(popkinId, callId, version, participantCount));
+    public Task CallChanged(Audience audience, Guid callId, long version, int participantCount, Guid? threadId) =>
+        SendAsync(
+            nameof(IPopkinClient.CallChanged),
+            () => To(audience).CallChanged(audience.PopkinId, callId, version, participantCount, threadId));
 
-    public Task CallEnded(Guid popkinId, Guid callId) =>
-        SendAsync(nameof(IPopkinClient.CallEnded), () => Group(popkinId).CallEnded(popkinId, callId));
+    public Task CallEnded(Audience audience, Guid callId, Guid? threadId) =>
+        SendAsync(nameof(IPopkinClient.CallEnded), () => To(audience).CallEnded(audience.PopkinId, callId, threadId));
 
     public Task PopkinWrappedUp(Guid popkinId) =>
         SendAsync(nameof(IPopkinClient.PopkinWrappedUp), () => Group(popkinId).PopkinWrappedUp(popkinId));
