@@ -1,13 +1,20 @@
+import path from 'node:path';
 import {
   anAccountWithEmail,
+  anAccountWithoutAPhoto,
+  savedAs,
+  savedWithAPhoto,
   theAccountFailing,
   theAccountFailingOnce,
   theAccountLoading,
   theMockAccount,
 } from '../fixtures/account';
 import { expect, test } from '../fixtures/pk-test';
+import { answer, hold, problem } from '../fixtures/stubs';
 import { AccountPage } from '../pages/account.page';
 import { MyPopkinsPage } from '../pages/my-popkins.page';
+
+const portrait = path.join(__dirname, '../../docs/mocks/assets/images/call3.jpg');
 
 test.describe('the account screen', () => {
   // L2-048 AC1
@@ -94,5 +101,107 @@ test.describe('the account screen', () => {
     await account.tryAgain.click();
 
     await expect(account.name).toHaveValue('Mara Okafor');
+  });
+});
+
+test.describe('saving changes', () => {
+  // L2-048 AC2
+  test('a new name is saved, a message says so, and it shows on My Popkins', async ({
+    page,
+    pk,
+  }) => {
+    await theMockAccount(page);
+    await savedAs(page, 'Mara O.');
+    const release = await hold(page, 'PATCH /api/account');
+    await pk.open('account');
+    const account = new AccountPage(page);
+
+    await account.name.fill('Mara O.');
+    await account.save.click();
+
+    await expect(account.saving).toBeDisabled();
+    await expect(account.name).toHaveAttribute('readonly', '');
+    release();
+    await expect(account.saved).toBeVisible();
+    await expect(account.name).toHaveValue('Mara O.');
+    await account.back.click();
+    await expect(new MyPopkinsPage(page).account).toHaveAccessibleName('Your account, Mara O.');
+  });
+
+  // L2-048 AC2
+  test('a new photo is uploaded and shown', async ({ page, pk }) => {
+    await anAccountWithoutAPhoto(page);
+    await savedWithAPhoto(page);
+    await savedAs(page, 'Mara O.');
+    await pk.open('account');
+    const account = new AccountPage(page);
+    await expect(account.initials).toHaveText('MO');
+
+    await account.choosePhoto(portrait);
+    await expect(account.photoPreview).toBeVisible();
+    const upload = page.waitForRequest('**/api/account/photo');
+    await account.save.click();
+
+    expect((await upload).method()).toBe('PUT');
+    await expect(account.saved).toBeVisible();
+    await expect(account.photoPreview).toBeVisible();
+    let again = false;
+    page.on('request', (request) => {
+      if (request.url().endsWith('/api/account/photo')) again = true;
+    });
+    await account.name.fill('Mara O.');
+    await account.save.click();
+    await expect(account.saved).toBeVisible();
+    expect(again).toBe(false);
+  });
+
+  // L2-048 AC3
+  test('an empty name saves nothing and is marked invalid with a message', async ({ page, pk }) => {
+    await pk.open('account');
+    const account = new AccountPage(page);
+    let sent = false;
+    page.on('request', (request) => {
+      if (request.method() === 'PATCH') sent = true;
+    });
+
+    await account.name.fill('   ');
+    await account.save.click();
+
+    await expect(account.summary).toBeFocused();
+    await expect(account.summary).toContainText('One thing to fix');
+    await expect(account.summary.getByRole('link')).toHaveText(
+      'Your name: enter a name so people know who you are.',
+    );
+    await expect(account.name).toHaveAttribute('aria-invalid', 'true');
+    await expect(account.nameError).toHaveText('Enter a name so people know who you are.');
+    await expect(account.saved).toHaveCount(0);
+    expect(sent).toBe(false);
+  });
+
+  test('a photo the API refuses says why, and keeps the name typed', async ({ page, pk }) => {
+    await answer(page, 'PUT /api/account/photo', problem(400, 'photo_too_large'));
+    await pk.open('account');
+    const account = new AccountPage(page);
+
+    await account.name.fill('Mara O.');
+    await account.choosePhoto(portrait);
+    await account.save.click();
+
+    await expect(account.photoError).toHaveText('That photo is over 10 MB. Choose a smaller one.');
+    await expect(account.name).toHaveValue('Mara O.');
+    await expect(account.save).toBeEnabled();
+  });
+
+  test('a save that fails keeps what was typed and can be tried again', async ({ page, pk }) => {
+    await answer(page, 'PATCH /api/account', problem(500, 'unexpected'));
+    await pk.open('account');
+    const account = new AccountPage(page);
+
+    await account.name.fill('Mara O.');
+    await account.save.click();
+
+    await expect(account.failed).toContainText('We couldn’t save that.');
+    await expect(account.name).toHaveValue('Mara O.');
+    await expect(account.save).toBeEnabled();
   });
 });

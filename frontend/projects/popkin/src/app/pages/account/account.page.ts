@@ -7,6 +7,7 @@ import {
   inject,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -101,6 +102,7 @@ export class AccountPage {
       ? [{ fieldId: 'name', message: `Your name: ${lower(NAME_MESSAGE)}` }]
       : [],
   );
+  private readonly summary = viewChild(FormSummary);
   protected readonly saving = computed(() => this.store.saveState() === 'saving');
 
   constructor() {
@@ -116,6 +118,15 @@ export class AccountPage {
           this.contact.setValue(account.destination);
         });
       }
+    });
+    // A photo once saved is the account's: the next save does not send it again.
+    effect(() => {
+      if (this.store.saveState() !== 'saved' || !untracked(this.photo)) return;
+      untracked(() => {
+        this.photo.set(null);
+        this.releasePreview();
+        this.preview.set(null);
+      });
     });
     this.name.valueChanges.subscribe(() => this.store.edited());
     this.load();
@@ -141,6 +152,8 @@ export class AccountPage {
   protected save(event?: Event): void {
     event?.preventDefault();
     this.store.save(this.name.value, this.photo());
+    // The summary takes focus once it is drawn, so it is read out (L2-048 AC3).
+    if (this.store.nameInvalid()) setTimeout(() => this.summary()?.focus());
   }
 
   protected chooseTheme(choice: string): void {
