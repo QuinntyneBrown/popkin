@@ -10,7 +10,8 @@ import { StepDots } from '../step-dots/step-dots';
  * (`topbar--pad`) that holds the logo, or, on a `div`, the head of a pane. A thread's bar has a
  * `line` under it, is `sticky`, and names the Popkin: its `tile`, its name as the `heading` (the
  * screen's `h1`) and a `sub` line. In a thread screen Back is absent from 1024 px, where the
- * list of threads is beside the thread.
+ * list of threads is beside the thread. In a page screen (`pk-page-screen`) the brand
+ * bar is taller from 768 px, ruled off, and keeps its content in line with the page's.
  */
 @Component({
   selector: 'header[pk-top-bar], div[pk-top-bar]',

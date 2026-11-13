@@ -1,0 +1,7 @@
+<ng-content select="[slot=header]" />
+<ng-content select="[slot=banner]" />
+<main id="main" class="screen__body screen__body--page" tabindex="-1">
+  <h1 class="screen__heading">{{ heading() }}</h1>
+  <ng-content />
+</main>
+<div class="screen__fab screen__fab--low"><ng-content select="[slot=fab]" /></div>
