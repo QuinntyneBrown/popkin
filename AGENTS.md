@@ -17,17 +17,19 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first two journeys are built; the rest is designed.** Journey 1, Start a Popkin, and
-journey 2, Join by invite, run end to end: the backend has sign up with a code, sessions, Popkin
-creation, the invite preview, joining with a name and a photo, and the photo store behind
-avatars, with their migrations; the app has the screens of those journeys, built for the five
-form factors of L2-058, and the not-found and server-error screens; the `components` library
-holds the `pk-*` components they use, each with a parity spec; the `api` library has its first
-unit tests. Everything
+**The first three journeys are built; the rest is designed.** Journey 1, Start a Popkin,
+journey 2, Join by invite, and journey 3, Chat with everyone, run end to end: the backend has
+sign up with a code, sessions, Popkin creation, the invite preview, joining with a name and a
+photo, the photo store behind avatars, the Everyone thread, messages, read points, presence and
+the SignalR hub `PopkinHub`, with their migrations; the app has the screens of those journeys,
+the group chat screen among them, built for the five form factors of L2-058, and the not-found
+and server-error screens; the `components` library holds the `pk-*` components they use, each
+with a parity spec; the `api` library has the chat's stores and the real-time client, with unit
+tests of its stores and pure helpers. Everything
 else exists as documents, not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of
 every screen in every state (`docs/mocks/`), the design system (`docs/design-system/`), a
 detailed design per feature (`docs/detailed-designs/`) and a prompt per journey
-(`docs/prompts/`). There is no SignalR hub yet and the Worker hosts no job. `docs/estimates/`
+(`docs/prompts/`). The Worker hosts no job. `docs/estimates/`
 tracks how far each design is; read it, not this paragraph, for the current figure.
 
 Before building a feature, read its requirement, its detailed design and its mocks: they exist.
@@ -40,7 +42,7 @@ Roles, requirements and the journeys to build are in `docs/specs/L1.md` (each tr
 L0-001), `docs/specs/L2.md` and `docs/journeys.md`. Use the words those documents use in code,
 docs and UI; do not invent synonyms.
 
-Journeys 1 and 2 filled in the layout below; every later feature follows it.
+Journeys 1 to 3 filled in the layout below; every later feature follows it.
 
 ## Prefer best practice
 
@@ -89,7 +91,7 @@ popkin/
 │   │   └── Popkin.Cli/
 │   └── tests/
 │       ├── Popkin.Api.Tests/
-│       ├── Popkin.Application.Tests/      empty until its first test
+│       ├── Popkin.Application.Tests/
 │       ├── Popkin.Infrastructure.Tests/   empty until its first test
 │       ├── Popkin.Worker.Tests/           empty until its first test
 │       └── Popkin.Cli.Tests/
@@ -244,7 +246,7 @@ design system). A further application is added by its own ADR (ADR 0002).
 - **The hub is stubbed too (ADR 0010).** No test opens a connection to a real hub: the `page`
   fixture answers `/hubs/**` and routes the hub's WebSocket (`page.routeWebSocket`), one helper
   (`e2e/fixtures/hub.ts`) speaks the SignalR handshake and lets a spec push an event by name, and
-  an unstubbed hub request fails the test. The helper is added with the first hub feature.
+  an unstubbed hub request fails the test. The helper exists since journey 3, and a spec reaches it as the `hub` fixture.
 - Page Object Model: one page object per screen under `e2e/pages/`, owning the selectors and the
   interactions. Tests state intent; page objects know the DOM. Never put a selector in a test.
 - Specs import `test` and `expect` from `e2e/fixtures/pk-test.ts`; routes are keyed in
