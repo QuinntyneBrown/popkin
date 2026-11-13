@@ -23,14 +23,18 @@ request the former member makes in that Popkin is answered as if it did not exis
   photos stay. To come back you'll need a new invite.", "Leave" and "Stay".
 - `docs/mocks/dialogs/leave-popkin/busy.html` — "Leaving…".
 - `docs/mocks/dialogs/popkin-settings/member.html` — the entry point.
-- The mocks draw no failure state for this dialog; its presentation is described below and its
-  copy is `<TO SUPPLY>`.
+- `docs/mocks/dialogs/leave-popkin/failed.html` — a danger `pk-alert` in the dialog's body,
+  "We couldn't take you out." and "You're still in Lakeside Weekend. Try again.", drawn in
+  journey 18 as `delete-experience/failed.html` draws its own ([Open questions](#open-questions)).
 
 ### API
 
 - `DELETE /api/popkins/{popkinId}/members/me` — `204 No Content`. Failures: `403`
   `host_cannot_leave`; `404` `popkin_not_found`; `401` without a session.
-- Real time: `MemberLeft` to group `popkin:{popkinId}`.
+- Real time: `MemberLeft(popkinId, membershipId)` to group `popkin:{popkinId}`, sent once the
+  former member's connections are out of that group, so they are not told of their own
+  leaving. A fact: the home and My Popkins read the count again, and the chat header counts
+  one member fewer.
 
 ### Frontend (Popkin web app)
 
@@ -39,7 +43,7 @@ request the former member makes in that Popkin is answered as if it did not exis
   to return (L2-047 AC1), with `pk-button` "Leave" (danger) and "Stay". "Leave" sets `busy`,
   reads "Leaving…" and disables both buttons (L2-056 AC3), then calls `PopkinsApi.leave`. On
   `204` it closes and navigates to `/popkins` (L2-047 AC2). On failure it re-enables the buttons
-  and shows a danger `pk-toast` through `Toaster`, which stays until dismissed (L2-056 AC7).
+  and shows a danger `pk-alert` in its body, as "Delete this experience?" does.
   "Stay", Escape or the backdrop close it and return focus to "Popkin settings".
 - **`PopkinsApi.leave(popkinId)`** — `HttpPopkinsApi` sends the `DELETE`.
 - **My Popkins** — reloads on arrival, so the left Popkin is absent; the snapshot of
@@ -61,12 +65,24 @@ request the former member makes in that Popkin is answered as if it did not exis
   request from the former member in that Popkin is refused with `404` `popkin_not_found`
   (L2-047 AC4, L2-051 AC1). Joining again through an invite creates a new `Membership`
   (`invitations/join-popkin`).
+- **After the save** — the handler takes the former member off the Popkin's call if they are on
+  it (`CallLeaver`, as "Leave" on the call does), releases them from the Popkin's "here now"
+  (`PresenceTracker.Leave`), removes the connections they hold from `popkin:{popkinId}`
+  (`IPopkinConnections.RemoveFromPopkinAsync`), and then calls
+  `IPopkinNotifier.MemberLeft`, so no further event of that Popkin reaches them.
 - **`SignalRPopkinNotifier.MemberLeft`** — sends `MemberLeft` to `popkin:{popkinId}`, so the
-  other members' home updates its count (L2-047 AC2), and removes the former member's
-  connections from `popkin:{popkinId}` and from the `thread:` and `call:` groups of that Popkin,
-  so no further event reaches them.
-- Whether leaving during a live group call also ends the person's call participation at once is
-  `<TO SUPPLY>`.
+  other members' home updates its count (L2-047 AC2).
+- A wrapped-up Popkin does not refuse leaving: like leaving a call, it adds nothing to the
+  Popkin, so `RequireMemberAsync` is the check, not `RequireActiveMemberAsync`.
+
+### Open questions
+
+- Leaving during a live group call ends the person's place on the call at once (decided in
+  journey 18): a former member may hear nothing of the Popkin, and the call is one of its
+  parts. The others see them go as if they had chosen "Leave" on the call.
+- The failure copy of the dialog, which the mocks did not draw until journey 18, is "We couldn't take you out."
+  with "You're still in {name}. Try again." (decided in journey 18), in the danger `pk-alert`
+  the other confirm dialogs use, where this design first named a `pk-toast`.
 
 ## Requirements
 

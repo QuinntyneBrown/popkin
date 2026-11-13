@@ -777,7 +777,7 @@
         "busy": "The dialog sends nothing until a choice is made; the screen it leads to has its own busy state.",
         "invalid": "The dialog has no field to fill in."
       },
-      "notes": "host-now and member-now draw the menu as journey 9 builds it: Invite people and, for the Host, Wrap up. Journey 16 adds Edit name and look and Change how long it lasts, journey 18 adds Leave this Popkin; default and member draw the whole menu."
+      "notes": "host-now and member-now draw the menu as journey 9 built it: Invite people and, for the Host, Wrap up. Journey 16 adds Edit name and look and Change how long it lasts, journey 18 adds Leave this Popkin; default and member draw the whole menu, and member is the member's menu from journey 18 on."
     },
     {
       "id": "edit-popkin",
@@ -823,7 +823,8 @@
       ],
       "states": [
         "default",
-        "busy"
+        "busy",
+        "failed"
       ],
       "not_applicable": {
         "invalid": "The dialog has no field to fill in."
