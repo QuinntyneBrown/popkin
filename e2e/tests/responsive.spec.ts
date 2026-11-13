@@ -3,7 +3,8 @@ import { screenStates } from '../fixtures/screens';
 
 /**
  * Responsive fit (L2-058 AC1, AC3, L2-057 AC4): at 360 px nothing scrolls sideways and every
- * control is a 44 px target; from 576 px the app is a centred column no wider than 30 rem.
+ * control is a 44 px target; at 1280 px the screen fills the width and a form's fields and
+ * actions stay in a column no wider than 36 rem.
  * A sweep: only `npm run sweeps` runs it (ADR 0006).
  */
 for (const state of screenStates) {
@@ -28,14 +29,37 @@ for (const state of screenStates) {
     expect(small, 'controls under 44 px tall').toEqual([]);
   });
 
-  test(`${state.key} is a centred column at 1280 px`, async ({ page, pk }) => {
+  test(`${state.key} fills the width at 1280 px`, async ({ page, pk }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await state.before?.(page);
     await pk.open(state.key);
     await state.app?.(page);
 
-    const box = await page.locator('.screen').first().boundingBox();
-    expect(box?.width).toBeLessThanOrEqual(30 * 16);
-    expect(Math.abs((box?.x ?? 0) * 2 + (box?.width ?? 0) - 1280)).toBeLessThanOrEqual(1);
+    const screen = await page.locator('.screen').first().boundingBox();
+    expect(screen?.x).toBe(0);
+    expect(screen?.width).toBe(1280);
+    const wide = await page
+      .locator('main :is(input, .btn), .screen__footer .btn')
+      .evaluateAll((elements) =>
+        elements.map((e) => e.getBoundingClientRect().width).filter((width) => width > 36 * 16),
+      );
+    expect(wide, 'fields and actions wider than 36 rem').toEqual([]);
   });
+
+  // L2-058 AC1, AC3 at the form factors between: S, M and L.
+  for (const width of [640, 768, 1024]) {
+    test(`${state.key} fits ${width} px`, async ({ page, pk }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await state.before?.(page);
+      await pk.open(state.key);
+      await state.app?.(page);
+
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+      const screen = await page.locator('.screen').first().boundingBox();
+      expect(screen?.width).toBe(width);
+    });
+  }
 }

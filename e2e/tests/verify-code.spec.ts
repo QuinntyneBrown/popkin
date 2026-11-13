@@ -201,3 +201,26 @@ test.describe('sending a new code', () => {
     await expect(verify.codeError).toHaveText('That’s a lot of codes. Try again in 20 minutes.');
   });
 });
+
+test.describe('confirming the code on a wider screen', () => {
+  // L2-058 AC10, AC13
+  test('from 768 px the code sits beside the same picture as sign up', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    const verify = new VerifyCodePage(page);
+    await verify.reach();
+
+    await expect(verify.picture).toBeVisible();
+    await expect(verify.picture).toContainText('Everyone around the same fire.');
+    await expect(verify.code).toBeVisible();
+  });
+
+  // L2-058 AC2, AC13
+  test('on a phone the picture is not there to reach', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    const verify = new VerifyCodePage(page);
+    await verify.reach();
+
+    await expect(verify.code).toBeVisible();
+    await expect(verify.picture).toHaveCount(0);
+  });
+});

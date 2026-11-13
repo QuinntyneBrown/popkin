@@ -1,0 +1,14 @@
+<div class="popkin-card__top">
+  <span pk-popkin-tile size="lg" [emoji]="emoji()"></span>
+  <div class="preview-card__titles">
+    <p class="popkin-card__name truncate">{{ name().trim() || placeholder() }}</p>
+    <p class="popkin-card__last">{{ message() }}</p>
+  </div>
+</div>
+<div class="popkin-card__foot">
+  <span class="cluster">
+    <span pk-avatar size="xs" data-accent="coral" [name]="host()" [photo]="hostPhoto()"></span>
+    {{ members() }}
+  </span>
+  <span pk-time-left>{{ timeLeft() }}</span>
+</div>

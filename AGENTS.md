@@ -19,8 +19,9 @@ run by hand, visual parity with the design reference).
 
 **The first journey is built; the rest is designed.** Journey 1, Start a Popkin, runs end to
 end: the backend has sign up with a code, sessions and Popkin creation, with their migrations;
-the app has the screens of that journey and the not-found and server-error screens; the
-`components` library holds the `pk-*` components they use, each with a parity spec. Everything
+the app has the screens of that journey, built for the five form factors of L2-058, and the
+not-found and server-error screens; the `components` library holds the `pk-*` components they
+use, each with a parity spec. Everything
 else exists as documents, not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of
 every screen in every state (`docs/mocks/`), the design system (`docs/design-system/`), a
 detailed design per feature (`docs/detailed-designs/`) and a prompt per journey

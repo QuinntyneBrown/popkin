@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
   margin-bottom: var(--space-7);
 }
 
@@ -70,5 +71,12 @@
 @media (prefers-reduced-motion: reduce) {
   .pop__dot {
     display: none;
+  }
+}
+
+/* In a split screen from M the QR card is in the aside, so nothing follows the lead closely. */
+@media (min-width: 48rem) {
+  :host-context(.screen--split) {
+    margin-bottom: 0;
   }
 }

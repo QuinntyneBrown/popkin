@@ -2,7 +2,7 @@
   <svg
     class="qr"
     role="img"
-    [attr.viewBox]="'0 0 ' + size() + ' ' + size()"
+    [attr.viewBox]="'0 0 ' + count() + ' ' + count()"
     [attr.aria-label]="'QR code for ' + link()"
   >
     <svg:path class="qr__cells" [attr.d]="cells()" />

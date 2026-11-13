@@ -1,4 +1,24 @@
-<div pk-screen heading="Name your Popkin" [accent]="accent()" [footer]="true">
+<div pk-screen layout="split" heading="Name your Popkin" [accent]="accent()" [footer]="true">
+  <aside
+    pk-split-aside
+    slot="aside"
+    label="Preview"
+    surface="tint"
+    justify="center"
+    kicker="How it’ll look to everyone"
+  >
+    <div
+      pk-preview-card
+      placeholder="Your Popkin"
+      message="You: Welcome, everyone! 👋"
+      members="Just you, for now"
+      timeLeft="Just started"
+      [name]="draft().name"
+      [emoji]="draft().emoji"
+      [host]="host()?.name ?? ''"
+      [hostPhoto]="host()?.photoUrl"
+    ></div>
+  </aside>
   <header pk-top-bar slot="header" back="/popkins" [step]="2" [steps]="3"></header>
   <div
     pk-name-preview

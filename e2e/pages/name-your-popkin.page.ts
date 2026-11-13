@@ -17,6 +17,14 @@ export class NameYourPopkinPage {
   readonly emojiGrid: Locator;
   readonly swatches: Locator;
   readonly footerButton: Locator;
+  /** The picture half of the split screen, from 768 px (L2-058 AC10). */
+  readonly picture: Locator;
+  readonly previewCard: Locator;
+  readonly previewName: Locator;
+  readonly previewTile: Locator;
+  readonly previewHost: Locator;
+  readonly previewAvatar: Locator;
+  readonly previewTimeLeft: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="name-your-popkin"]');
@@ -33,6 +41,13 @@ export class NameYourPopkinPage {
     this.emojiGrid = page.locator('.emoji-grid');
     this.swatches = page.locator('.swatches');
     this.footerButton = page.locator('.screen__footer .btn');
+    this.picture = page.getByRole('complementary', { name: 'Preview' });
+    this.previewCard = page.locator('.preview-card');
+    this.previewName = page.locator('.preview-card .popkin-card__name');
+    this.previewTile = page.locator('.preview-card .popkin-tile');
+    this.previewHost = page.locator('.preview-card .popkin-card__foot');
+    this.previewAvatar = page.locator('.preview-card .avatar');
+    this.previewTimeLeft = page.locator('.preview-card .time-left');
   }
 
   emojiNamed(label: string): Locator {

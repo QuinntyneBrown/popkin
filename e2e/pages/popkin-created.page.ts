@@ -19,14 +19,24 @@ export class PopkinCreatedPage {
   readonly footerButton: Locator;
   readonly pop: Locator;
   readonly textItRegion: Locator;
+  readonly qrCard: Locator;
+  /** The picture half of the split screen, from 768 px (L2-058 AC10). */
+  readonly picture: Locator;
+  readonly pictureQr: Locator;
+  readonly bodyQr: Locator;
 
   constructor(page: Page) {
     this.root = page.locator('body[data-page="popkin-created"]');
     this.heading = page.getByRole('heading', { level: 1 });
     this.tile = page.locator('.pop .popkin-tile');
     this.confetti = page.locator('.pop__dot');
-    this.qr = page.locator('svg.qr');
-    this.link = page.locator('.qr-card__link');
+    // The code is on the screen once: in the body on a phone, in the picture from 768 px.
+    this.qr = page.locator('svg.qr').filter({ visible: true });
+    this.link = page.locator('.qr-card__link').filter({ visible: true });
+    this.picture = page.getByRole('complementary', { name: 'Invite code' });
+    this.pictureQr = this.picture.getByRole('img', { name: /^QR code for / });
+    this.bodyQr = page.getByRole('main').getByRole('img', { name: /^QR code for / });
+    this.qrCard = page.locator('.qr-card').filter({ visible: true });
     this.copyLink = page.getByRole('button', { name: /Copy link|Copied/ });
     this.textIt = page.getByRole('link', { name: 'Text it' });
     this.share = page.getByRole('button', { name: 'Share' });

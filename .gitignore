@@ -13,3 +13,7 @@ node_modules/
 
 # macOS
 .DS_Store
+
+# Videos: the voice alone, before the mix (docs/videos/README.md)
+narration.wav
+*.partial.mp4

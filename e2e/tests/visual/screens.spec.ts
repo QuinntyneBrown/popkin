@@ -2,10 +2,10 @@ import { BASELINE, expect, test } from '../../fixtures/pk-test';
 import { screenStates } from '../../fixtures/screens';
 
 /**
- * Visual parity with docs/mocks, region by region (ADR 0003). A sweep: only `npm run sweeps`
- * runs it, by hand (ADR 0006).
+ * Visual parity with docs/mocks, region by region (ADR 0003), at the five form factors of
+ * L2-058: XS, S, M, L and XL. A sweep: only `npm run sweeps` runs it, by hand (ADR 0006).
  */
-const widths = [360, 768, 1280] as const;
+const widths = [360, 640, 768, 1024, 1280] as const;
 const themes = ['light', 'dark'] as const;
 
 for (const state of screenStates) {
@@ -21,7 +21,11 @@ for (const state of screenStates) {
           await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
         }
         await page.evaluate(() => document.fonts.ready);
-        for (const [name, region] of Object.entries(state.regions(page))) {
+        const regions = {
+          ...state.regions(page),
+          ...(width >= 768 ? state.wideRegions?.(page) : undefined),
+        };
+        for (const [name, region] of Object.entries(regions)) {
           await expect(region).toHaveScreenshot(
             `visual/${state.key}/${name}-${width}-${theme}.png`,
           );

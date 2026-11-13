@@ -1,0 +1,5 @@
+@if (photo()) {
+  <img class="avatar__photo" alt="" [src]="photo()" />
+} @else {
+  {{ initials() }}
+}

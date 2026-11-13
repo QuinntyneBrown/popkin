@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type { Page } from '@playwright/test';
 import responses from './api/responses.json';
 import { answer, answerOnce, problem } from './stubs';
@@ -31,6 +32,20 @@ export async function howLongForLakeside(page: Page, today = mockToday): Promise
   await step.chooseLakeside();
   await step.looksGood.click();
   await page.locator('body[data-page="how-long"]').waitFor();
+}
+
+/**
+ * Mara with the photograph the mocks give her, so parity compares the same avatar. The recorded
+ * session has no photo: there the avatar shows her initials.
+ */
+export async function maraWithPhoto(page: Page): Promise<void> {
+  await answer(page, 'GET /api/auth/session', {
+    status: 200,
+    body: { ...responses['GET /api/auth/session'].body, photoUrl: '/photos/mara.jpg' },
+  });
+  await page.route('**/photos/mara.jpg', (route) =>
+    route.fulfill({ path: path.join(__dirname, '../../docs/mocks/assets/images/call1.jpg') }),
+  );
 }
 
 const created = responses['POST /api/popkins'].body;

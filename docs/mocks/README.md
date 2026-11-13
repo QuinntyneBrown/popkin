@@ -55,6 +55,8 @@ The mocks are built on the design system, so a change there shows here:
 - **Wide layouts the designs do not draw.** Sign in, the code screens and join with a code split like
   sign up, with the same photograph. The account screen and the full-page errors keep one centred
   column. A Popkin's error screens have no sidebar, as they have no tabs on a phone.
+- **The timeline's emoji.** The emoji above the How long timeline is `split-aside__icon`, not
+  `timeline__icon`: it sits outside the `timeline` block and is an element of the aside.
 
 - **Colour scheme.** On 12 November 2026 the designs moved to the Straight palette: white paper,
   black ink, coral `#EA7671`, sun `#DCC573` and green `#5C8F57`, with black text on every colour

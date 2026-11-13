@@ -890,7 +890,8 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .preview-card .popkin-card__name { font-size: var(--font-size-2xl); }
   .preview-card .popkin-card__foot { margin-top: var(--space-6); }
   .timeline { max-width: var(--layout-measure-lg); margin-top: var(--space-10); }
-  .timeline__icon { font: var(--font-size-7xl) / 1 var(--font-family-emoji); }
+  .split-aside__icon { font: var(--font-size-7xl) / 1 var(--font-family-emoji); }
+  .split-aside__icon + .split-aside__title { margin-top: var(--space-4); }
   .timeline__bar { height: var(--space-3); overflow: hidden; border-radius: var(--radius-full); background: var(--color-bg-surface); }
   .timeline__bar span { display: block; height: 100%; border-radius: var(--radius-full); background: var(--accent); }
   .timeline__bar--day span { width: 30%; }

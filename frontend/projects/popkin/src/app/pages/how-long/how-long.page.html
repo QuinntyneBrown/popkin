@@ -1,10 +1,22 @@
 <div
   pk-screen
+  layout="split"
   heading="How long should it last?"
   lead="You can change this later. When it ends, everyone gets a recap."
   [accent]="accent()"
   [footer]="true"
 >
+  <aside
+    pk-split-aside
+    slot="aside"
+    label="What happens"
+    surface="tint"
+    [icon]="picture().icon"
+    [heading]="picture().title"
+    [text]="picture().text"
+  >
+    <div pk-timeline start="Now" [span]="picture().span" [end]="picture().end"></div>
+  </aside>
   <header pk-top-bar slot="header" back="/new" [step]="3" [steps]="3"></header>
   @if (status() === 'failed') {
     <div pk-alert heading="We couldn’t pop it up.">

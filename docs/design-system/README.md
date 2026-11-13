@@ -50,7 +50,7 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Composer](components/composer.html) | Chat | Replying to Ruth. Closed: a wrapped-up Popkin. | Empty, With text, Focus | pages/group-chat/default, pages/group-chat/read-only |
 | [Photo grid](components/photo-grid.html) | Media | Saturday, featured. Strip on the home. | Default, Focus, Uploading | pages/photo-album/default, pages/popkin-home/default, dialogs/add-photos/busy |
 | [Photo viewer](components/photo-viewer.html) | Media | Reactions and the react bar. | Default, Pressed, Focus | pages/photo-view/default |
-| [QR card](components/qr-card.html) | Media | With the name. Without the name (just created). | Static (both themes) | pages/popkin-created/default, dialogs/invite/default |
+| [QR card](components/qr-card.html) | Media | With the name. Without the name (just created). Large, in the aside of the created screen. | Static (both themes) | pages/popkin-created/default, dialogs/invite/default |
 | [Call tile and controls](components/call-tile.html) | Media | Speaking, muted, camera off. Controls: Mute, Camera (off, pressed), Leave. | Static (both themes) | pages/video-call/default, pages/video-call/muted, pages/video-call/two |
 | [Top bar](components/top-bar.html) | Navigation | Onboarding: back and step dots. Thread: tile, title, subline, call. Root: logo and actions. | Static (both themes) | pages/sign-up/default, pages/group-chat/default, pages/my-popkins/default |
 | [Popkin tabs](components/popkin-nav.html) | Navigation | Chat is current. | Static (both themes) | pages/popkin-home/default, pages/conversations/default |
@@ -64,7 +64,10 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Skeleton](components/skeleton.html) | Feedback | A Popkin card loading. Media, bubble, button. | Static (both themes) | pages/my-popkins/loading, pages/popkin-home/loading, pages/group-chat/loading |
 | [Empty state](components/empty-state.html) | Feedback | First use. Filtered to nothing. Error, with a reference code for server errors. | Static (both themes) | pages/photo-album/empty, pages/experiences/no-results, pages/not-found/default |
 | [Progress and spinner](components/progress.html) | Feedback | Determinate bar. Spinner on the stage. | Static (both themes) | dialogs/add-photos/busy, pages/video-call/loading |
-| [Screen and layout](components/screen.html) | Layout | A step screen. Stack (16px vertical) and cluster (8px wrapping row). Washed screen. | Static (both themes) | pages/how-long/default, pages/join-invite/default |
+| [Screen and layout](components/screen.html) | Layout | A step screen. Stack (16px vertical) and cluster (8px wrapping row). Washed screen. Split screen. | Static (both themes) | pages/how-long/default, pages/join-invite/default, pages/sign-up/default, pages/popkin-created/default |
+| [Split aside](components/split-aside.html) | Layout | Photograph with a caption. Tint with a preview card. Tint with an icon, a title, a timeline and text. | Static (both themes) | pages/sign-up/default, pages/name-your-popkin/default, pages/how-long/default |
+| [Preview card](components/preview-card.html) | Identity | With a name. No name yet. A 40-character name. | Static (both themes) | pages/name-your-popkin/default, pages/name-your-popkin/blank, pages/name-your-popkin/edge |
+| [Timeline](components/timeline.html) | Content | Day, weekend, custom, forever. | Static (both themes) | pages/how-long/default, pages/how-long/custom, pages/how-long/forever |
 
 Not built, because no screen needs them yet: dropdown menu (Popkin settings is a sheet with menu rows), select, checkbox, radio buttons (choice cards and the segmented control cover the choices),
 side navigation, breadcrumb, pagination and table. Add one from the extracting-design-systems catalog when a mock first needs it.

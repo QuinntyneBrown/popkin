@@ -27,6 +27,7 @@ requires (L2-006 AC2). The code-issuing command introduced here is shared with s
   - `docs/mocks/pages/sign-up/invalid.html` — the form summary "One thing to fix" and "That number looks a digit short." under the field.
   - `docs/mocks/pages/sign-up/submitting.html` — the button reads "Sending your code…" and is disabled.
   - `docs/mocks/pages/sign-up/error.html` — the alert "We couldn't send your code. Check your connection and try again. Nothing you typed was lost."
+  - From 768 px every state is split: the form in one part and, beside it, a photograph with the caption "Everyone around the same fire." (L2-058 AC10).
 - **API**
   - `POST /api/auth/codes` — anonymous (L2-050 AC1), rate-limited by `CodesPerAddressPolicy`. Body `{ purpose: "SignUp" | "SignIn", channel: "Phone" | "Email", destination }`. 202 `CodeSentDto`. Problems: 400 `phone_invalid`, 400 `email_invalid`, 400 `validation_failed` (unknown channel or purpose), 429 `rate_limited` (per address, L2-053 AC1), 429 `code_limit_reached` (per destination, L2-005 AC4), 503 `code_not_sent`. Each 429 carries `Retry-After` and a `retryAfterSeconds` extension.
 
@@ -43,7 +44,7 @@ requires (L2-006 AC2). The code-issuing command introduced here is shared with s
   - The legal line "By continuing you agree to the Terms and Privacy." renders both words as `pk-link` links (L2-003 AC7). The Terms and Privacy pages do not exist yet; the links lead to the not-found screen until they do.
 - **`PendingVerificationStore`** — `api` library service (`lib/api/auth/pending-verification.store.ts`). It holds a `PendingVerificationView { verificationId, purpose, channel, displayDestination, resendAvailableAt, name?, returnUrl? }` in a signal, in memory only, so no phone number, email or name is written to browser storage. A reload of `/verify` with no pending verification returns to the screen the flow started on.
 - **`AuthApi` / `AUTH_API` / `HttpAuthApi`** — `api` library (`lib/api/auth/`). This slice adds `requestCode(request): Observable<CodeSentView>`. Errors are mapped by a shared helper `toApiProblem(error): ApiProblem { status, code, field?, retryAfterSeconds? }`.
-- **Components** — `pk-top-bar` (back to `/welcome`, step dots), `pk-text-field`, `pk-segmented-control`, `pk-form-summary`, `pk-alert`, `pk-button`, `pk-link`, `pk-skip-link`.
+- **Components** — `pk-screen` (`layout="split"`, `body="middle"`), `pk-split-aside`, `pk-top-bar` (back to `/welcome`, step dots), `pk-text-field`, `pk-segmented-control`, `pk-form-summary`, `pk-alert`, `pk-button`, `pk-legal`, `pk-link`, `pk-skip-link`.
 
 ### Back end (introduced)
 
@@ -81,6 +82,25 @@ requires (L2-006 AC2). The code-issuing command introduced here is shared with s
   ([ADR 0012](../../../adr/0012-opentelemetry.md)). It is what shows that codes are not arriving
   (L2-003).
 - **Hash key** — `Auth:CodeHashKey`; required outside Development. Its storage stays `<TO SUPPLY>`.
+
+### Settled when the wide layouts were built
+
+Sign up is built for the five form factors of L2-058
+([Responsive layout](../../accessibility/responsive-layout/README.md)).
+
+- **The split** — the screen fills the width. The form stays in a column of 28 rem, 32 rem from
+  640 px and 36 rem from 1024 px (L2-058 AC3). From 768 px the short form sits in the middle of
+  its part with "Continue" right under it, and `pk-split-aside`, labelled "Popkin", shows the
+  picture beside it (L2-058 AC10).
+- **The picture** — the photograph `/images/bonfire.jpg`, which the app serves itself, under the
+  caption "Everyone around the same fire." and "One link, one QR code, and your whole group is
+  in." The photograph is decoration with empty `alt` text; the caption carries the words. It
+  repeats nothing a person needs to sign up.
+- **Below 768 px** — the aside is `display: none`, not drawn and then covered, so it is out of
+  the tab order and the accessibility tree (L2-058 AC13).
+- **Tests** — behaviour specs prove the picture beside the form at 768 px and its absence at
+  360 px. The parity spec of `pk-split-aside` runs at 1280 px only, as the part does not exist at
+  360 px.
 
 ## Requirements
 

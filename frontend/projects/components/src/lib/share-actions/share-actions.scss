@@ -7,3 +7,9 @@
   max-width: var(--layout-qr-card-max);
   margin: var(--space-5) auto 0;
 }
+
+@media (min-width: 48rem) {
+  :host-context(.screen--split) {
+    max-width: var(--layout-action-max);
+  }
+}

@@ -1,4 +1,17 @@
-<div pk-screen surface="wash" body="hero" [accent]="accent()" [footer]="!!invite()">
+<div
+  pk-screen
+  layout="split"
+  surface="wash"
+  body="hero"
+  [middle]="true"
+  [accent]="accent()"
+  [footer]="!!invite()"
+>
+  <aside pk-split-aside slot="aside" label="Invite code" surface="tint" justify="center">
+    @if (invite()) {
+      <div pk-qr-card size="lg" [modules]="modules()" [link]="shownLink()"></div>
+    }
+  </aside>
   @if (invite(); as invite) {
     <div
       pk-pop
@@ -6,7 +19,7 @@
       [emoji]="invite.emoji"
       [heading]="'Pop! ' + invite.popkinName + ' is up.'"
     ></div>
-    <div pk-qr-card [modules]="modules()" [link]="shownLink()"></div>
+    <div pk-qr-card class="only-below-m" [modules]="modules()" [link]="shownLink()"></div>
     <div pk-share-actions>
       <button pk-share-action type="button" [icon]="copied() ? 'check' : 'copy'" (click)="copy()">
         {{ copied() ? 'Copied' : 'Copy link' }}

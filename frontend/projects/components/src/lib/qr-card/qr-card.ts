@@ -11,7 +11,7 @@ let nextId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './qr-card.html',
   styleUrl: './qr-card.scss',
-  host: { class: 'qr-card' },
+  host: { class: 'qr-card', '[class.qr-card--lg]': "size() === 'lg'" },
 })
 export class QrCard {
   readonly modules = input.required<boolean[][]>();
@@ -19,19 +19,21 @@ export class QrCard {
   readonly link = input.required<string>();
   readonly name = input<string>();
   readonly emoji = input<string>();
+  /** `lg` is the card as the picture of a split screen, from 768 px. */
+  readonly size = input<'base' | 'lg'>('base');
 
   protected readonly maskId = `qr-bite-${++nextId}`;
-  protected readonly size = computed(() => this.modules().length);
+  protected readonly count = computed(() => this.modules().length);
   /** The mark sits on a square of about a quarter of the code, over modules error correction restores. */
   protected readonly logo = computed(() => {
-    const n = this.size();
+    const n = this.count();
     let side = Math.round(n * 0.24);
     if ((n - side) % 2 !== 0) side += 1;
     const at = (n - side) / 2;
     return { at, side };
   });
   protected readonly cells = computed(() => {
-    const n = this.size();
+    const n = this.count();
     const { at, side } = this.logo();
     const finder = (r: number, c: number) =>
       (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
@@ -46,7 +48,7 @@ export class QrCard {
     return path;
   });
   protected readonly finders = computed(() => {
-    const n = this.size();
+    const n = this.count();
     return [
       [0, 0],
       [n - 7, 0],

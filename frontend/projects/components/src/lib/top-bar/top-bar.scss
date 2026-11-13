@@ -32,3 +32,10 @@
   gap: var(--space-1);
   min-width: var(--target-comfortable);
 }
+
+/* In a split screen the bar sits a little lower and further in, over the form's part. */
+@media (min-width: 48rem) {
+  :host-context(.screen--split) {
+    padding: var(--space-2) var(--space-4) 0;
+  }
+}

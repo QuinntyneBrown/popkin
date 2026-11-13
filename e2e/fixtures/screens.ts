@@ -4,6 +4,7 @@ import {
   howLongForLakeside,
   inviteFailsOnTheServer,
   lakesideInvite,
+  maraWithPhoto,
   withShareSheet,
 } from './journeys';
 import type { RouteKey } from './routes';
@@ -30,9 +31,16 @@ export interface ScreenState {
   /** After it opens: the steps that reach the state. */
   app?: (page: Page) => Promise<void>;
   regions: (page: Page) => Record<string, Locator>;
+  /** Regions that exist from 768 px only: the picture half of a split screen (L2-058 AC10). */
+  wideRegions?: (page: Page) => Record<string, Locator>;
 }
 
 const verificationId = responses['POST /api/auth/codes'].body.verificationId;
+
+const signUpPicture = (page: Page) => ({ picture: new SignUpPage(page).picture });
+const codePicture = (page: Page) => ({ picture: new VerifyCodePage(page).picture });
+const namePicture = (page: Page) => ({ picture: new NameYourPopkinPage(page).picture });
+const lengthPicture = (page: Page) => ({ picture: new HowLongPage(page).picture });
 
 const signUpRegions = (page: Page) => {
   const s = new SignUpPage(page);
@@ -56,11 +64,13 @@ export const screenStates: ScreenState[] = [
     key: 'signUp',
     app: (page) => new SignUpPage(page).fill('Mara', '(415) 555-0148'),
     regions: signUpRegions,
+    wideRegions: signUpPicture,
   },
   {
     key: 'signUpEmail',
     app: (page) => new SignUpPage(page).fill('Mara', 'mara@hey.com', 'email'),
     regions: (page) => ({ ...signUpRegions(page), segmented: new SignUpPage(page).segmented }),
+    wideRegions: signUpPicture,
   },
   {
     key: 'signUpInvalid',
@@ -70,6 +80,7 @@ export const screenStates: ScreenState[] = [
       await s.submit();
     },
     regions: (page) => ({ ...signUpRegions(page), summary: new SignUpPage(page).summary }),
+    wideRegions: signUpPicture,
   },
   {
     key: 'signUpSubmitting',
@@ -80,6 +91,7 @@ export const screenStates: ScreenState[] = [
       await s.submit();
     },
     regions: signUpRegions,
+    wideRegions: signUpPicture,
   },
   {
     key: 'signUpError',
@@ -90,6 +102,7 @@ export const screenStates: ScreenState[] = [
       await s.submit();
     },
     regions: (page) => ({ ...signUpRegions(page), alert: new SignUpPage(page).alert }),
+    wideRegions: signUpPicture,
   },
   {
     key: 'verifyCode',
@@ -98,6 +111,7 @@ export const screenStates: ScreenState[] = [
       const v = new VerifyCodePage(page);
       return { heading: v.heading, field: v.codeField, button: v.primaryButton };
     },
+    wideRegions: codePicture,
   },
   {
     key: 'verifyCodeInvalid',
@@ -112,6 +126,7 @@ export const screenStates: ScreenState[] = [
       await new VerifyCodePage(page).type('111111');
     },
     regions: (page) => ({ field: new VerifyCodePage(page).codeField }),
+    wideRegions: codePicture,
   },
   {
     key: 'verifyCodeExpired',
@@ -122,6 +137,7 @@ export const screenStates: ScreenState[] = [
       await new VerifyCodePage(page).type('482913');
     },
     regions: (page) => ({ field: new VerifyCodePage(page).codeField }),
+    wideRegions: codePicture,
   },
   {
     key: 'verifyCodeSubmitting',
@@ -132,9 +148,11 @@ export const screenStates: ScreenState[] = [
       await new VerifyCodePage(page).type('482913');
     },
     regions: (page) => ({ button: new VerifyCodePage(page).primaryButton }),
+    wideRegions: codePicture,
   },
   {
     key: 'nameYourPopkin',
+    before: maraWithPhoto,
     regions: (page) => {
       const n = new NameYourPopkinPage(page);
       return {
@@ -144,9 +162,11 @@ export const screenStates: ScreenState[] = [
         button: n.footerButton,
       };
     },
+    wideRegions: namePicture,
   },
   {
     key: 'nameYourPopkinFilled',
+    before: maraWithPhoto,
     app: (page) => new NameYourPopkinPage(page).chooseLakeside(),
     regions: (page) => {
       const n = new NameYourPopkinPage(page);
@@ -157,15 +177,18 @@ export const screenStates: ScreenState[] = [
         button: n.footerButton,
       };
     },
+    wideRegions: namePicture,
   },
   {
     key: 'nameYourPopkinEdge',
+    before: maraWithPhoto,
     app: async (page) => {
       const n = new NameYourPopkinPage(page);
       await n.chooseLakeside();
       await n.name.fill('The Brennan–Okafor Lakeside Reunion 2026');
     },
     regions: (page) => ({ preview: new NameYourPopkinPage(page).previewRow }),
+    wideRegions: namePicture,
   },
   {
     key: 'howLong',
@@ -174,6 +197,7 @@ export const screenStates: ScreenState[] = [
       heading: new HowLongPage(page).heading,
       group: new HowLongPage(page).group,
     }),
+    wideRegions: lengthPicture,
   },
   {
     key: 'howLongCustom',
@@ -185,6 +209,7 @@ export const screenStates: ScreenState[] = [
       group: new HowLongPage(page).group,
       date: new HowLongPage(page).dateButton,
     }),
+    wideRegions: lengthPicture,
   },
   {
     key: 'howLongForever',
@@ -193,6 +218,7 @@ export const screenStates: ScreenState[] = [
       await new HowLongPage(page).option('Keep it going').click();
     },
     regions: (page) => ({ group: new HowLongPage(page).group }),
+    wideRegions: lengthPicture,
   },
   {
     key: 'howLongSubmitting',
@@ -202,6 +228,7 @@ export const screenStates: ScreenState[] = [
       await new HowLongPage(page).popItUp.click();
     },
     regions: (page) => ({ button: new HowLongPage(page).footerButton }),
+    wideRegions: lengthPicture,
   },
   {
     key: 'howLongError',
@@ -211,6 +238,7 @@ export const screenStates: ScreenState[] = [
       await new HowLongPage(page).popItUp.click();
     },
     regions: (page) => ({ alert: new HowLongPage(page).alert, group: new HowLongPage(page).group }),
+    wideRegions: lengthPicture,
   },
   {
     key: 'endDate',

@@ -1,0 +1,45 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: var(--layout-measure-lg);
+  margin-top: var(--space-10);
+}
+
+.timeline__bar {
+  height: var(--space-3);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+}
+
+.timeline__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+}
+
+.timeline__bar--day .timeline__fill {
+  width: 30%;
+}
+
+.timeline__bar--weekend .timeline__fill {
+  width: 65%;
+}
+
+.timeline__bar--custom .timeline__fill {
+  width: 85%;
+}
+
+.timeline__bar--forever .timeline__fill {
+  width: 100%;
+}
+
+.timeline__ends {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  font: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+}

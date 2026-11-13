@@ -61,3 +61,14 @@
 .qr__mark {
   color: var(--color-fg-on-accent);
 }
+
+/* The large card: the picture half of the created screen, from M. */
+@media (min-width: 48rem) {
+  :host(.qr-card--lg) {
+    max-width: var(--layout-qr-card-max-lg);
+  }
+
+  :host(.qr-card--lg) .qr {
+    width: var(--layout-qr-size-lg);
+  }
+}

@@ -215,3 +215,48 @@ test.describe('popping it up', () => {
     await expect(page).toHaveURL(/\/new\/length$/);
   });
 });
+
+test.describe('choosing how long on a wider screen', () => {
+  // L2-058 AC10
+  test('from 768 px a timeline beside the choices shows the length chosen', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await howLongForLakeside(page);
+    const step = new HowLongPage(page);
+
+    await expect(step.picture).toBeVisible();
+    await expect(step.pictureTitle).toHaveText('The weekend');
+    await expect(step.timelineEnds).toHaveText(['Now', 'Sunday, 6 pm']);
+    await expect(step.picture).toContainText('Then it wraps up on its own');
+    await expect(step.popItUp).toBeVisible();
+  });
+
+  // L2-058 AC10
+  test('the timeline follows the length as it changes', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await howLongForLakeside(page);
+    const step = new HowLongPage(page);
+
+    await step.option('Just today').click();
+    await expect(step.pictureTitle).toHaveText('Just today');
+    await expect(step.timelineEnds).toHaveText(['Now', 'Midnight']);
+
+    await step.option('Until a date').click();
+    await expect(step.pictureTitle).toHaveText('Until a date');
+    await expect(step.timelineEnds).toHaveText(['Now', 'Sun, 13 Sep · 6:00 pm']);
+
+    await step.option('Keep it going').click();
+    await expect(step.pictureTitle).toHaveText('Keep it going');
+    await expect(step.timelineEnds).toHaveText(['Now', 'Whenever you say']);
+    await expect(step.picture).toContainText('It stays open until you wrap it up.');
+  });
+
+  // L2-058 AC2, AC13
+  test('on a phone the timeline is not there to reach', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await howLongForLakeside(page);
+    const step = new HowLongPage(page);
+
+    await expect(step.options).toHaveCount(4);
+    await expect(step.picture).toHaveCount(0);
+  });
+});

@@ -135,3 +135,34 @@ test.describe('the created screen', () => {
     await expect(done.confetti.first()).toBeAttached();
   });
 });
+
+test.describe('the created screen on a wider screen', () => {
+  // L2-058 AC10, AC13, L2-011 AC6
+  test('from 768 px the QR code is the picture beside the headline, once, and still scans', async ({
+    page,
+    pk,
+  }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await pk.open('popkinCreated');
+    const done = new PopkinCreatedPage(page);
+
+    await expect(done.picture).toBeVisible();
+    await expect(done.pictureQr).toBeVisible();
+    await expect(done.bodyQr).toHaveCount(0);
+    expect(await scan(done.qr)).toBe(invite.url);
+    await expect(done.link).toHaveText(invite.url.replace('https://', ''));
+    await expect(done.copyLink).toBeVisible();
+    await expect(done.goTo).toBeVisible();
+  });
+
+  // L2-058 AC2, AC13
+  test('on a phone the QR code is in the one column, once', async ({ page, pk }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await pk.open('popkinCreated');
+    const done = new PopkinCreatedPage(page);
+
+    await expect(done.bodyQr).toBeVisible();
+    await expect(done.picture).toHaveCount(0);
+    await expect(done.goTo).toBeVisible();
+  });
+});

@@ -20,9 +20,13 @@ export class VerifyCodePage {
   readonly toastIcon: Locator;
   readonly toastDismiss: Locator;
 
+  /** The picture half of the split screen, from 768 px (L2-058 AC10). */
+  readonly picture: Locator;
+
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="verify-code"]');
     this.heading = page.getByRole('heading', { level: 1 });
+    this.picture = page.getByRole('complementary', { name: 'Popkin' });
     this.sentTo = page.locator('main p').first();
     this.code = page.getByLabel('6-digit code');
     this.codeError = page.locator('#code-err');

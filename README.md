@@ -24,7 +24,9 @@ Popkin is a free platform for pop-up communities. Spin up a private space in sec
 people by QR code, then chat, video call, share photos and rate experiences together.
 
 > **Status: in progress.** Journey 1, Start a Popkin, is built: sign up with a code, name a
-> Popkin, choose how long it lasts and get its QR invite. The journeys still to build are in
+> Popkin, choose how long it lasts and get its QR invite, on every screen size from a phone to a
+> desktop. [Watch it](docs/videos/01-journey-01-start-a-popkin/01-journey-01-start-a-popkin.mp4)
+> (1 min 48 s, with sound). The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents
@@ -66,6 +68,16 @@ in [`AGENTS.md`](AGENTS.md) and the [architecture decision records](docs/adr/REA
 
 The quick start runs on SQLite, and the tests need no database at all
 ([ADR 0005](docs/adr/0005-tests-without-a-backend-or-database.md)).
+
+Making a video ([`docs/videos/README.md`](docs/videos/README.md)) also needs ffmpeg with libx264
+and libmp3lame on the path (`FFMPEG_PATH` overrides) and Python 3.10 or later with `kokoro-onnx`
+and `numpy` in a virtual environment. The Kokoro voice model (about 310 MB) is downloaded once
+into `.cache/kokoro`; Playwright and Chromium are the copies in `e2e/`.
+
+```shell
+python3.12 -m venv .cache/video-venv
+.cache/video-venv/bin/pip install kokoro-onnx numpy
+```
 
 ### Quick start
 
@@ -125,6 +137,11 @@ proxy and the release steps are in [`docs/deployment.md`](docs/deployment.md).
 | Refresh the recorded API answers | `npm run record-api` | `e2e/`, with `pwsh eng/Start-E2eApi.ps1` running |
 | Check the token copy against the design system | `npm run design:check` | `frontend/` |
 | Visual, responsive and accessibility sweeps | `npm run sweeps` | `e2e/` (repository owner, by hand only) |
+| Save a video's screenshots (not a test, not a sweep) | `node tools/video-record/record.mjs docs/videos/<folder>` | repository root |
+| Measure a music track's tempo | `.cache/video-venv/bin/python tools/video-audio/tempo.py docs/videos/assets/music/<slug>.mp3` | repository root |
+| Speak and mix a video's soundtrack (MP3, `captions.vtt`, `timing.js`) | `.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/<folder>` | repository root |
+| Print a video's schedule, or save one frame | `node tools/video-build/build.mjs docs/videos/<folder> --check` (or `--frame <seconds> <png>`) | repository root |
+| Render a video (MP4; `--captions` burns captions in) | `node tools/video-build/build.mjs docs/videos/<folder>` | repository root |
 
 - The backend tests run on EF Core InMemory and need no database.
 - The end-to-end suite runs in Chromium only; run `npx playwright install chromium` in `e2e/`

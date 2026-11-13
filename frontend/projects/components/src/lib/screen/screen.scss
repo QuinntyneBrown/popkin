@@ -3,16 +3,9 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: var(--layout-app-max);
   min-height: 100dvh;
   margin-inline: auto;
   background: var(--color-bg-canvas);
-}
-
-@media (min-width: 36rem) {
-  :host {
-    border-inline: var(--border-width-hairline) solid var(--color-border-default);
-  }
 }
 
 :host(.screen--wash) {
@@ -49,6 +42,12 @@
   min-width: 0;
 }
 
+/* A hero's content spans the body, so what it centres sits on whole pixels. */
+.screen__body--hero .screen__content {
+  align-self: stretch;
+  align-items: center;
+}
+
 .screen__content--headed {
   margin-top: var(--space-8);
 }
@@ -71,27 +70,94 @@
   background: linear-gradient(to top, var(--color-bg-canvas) 70%, transparent);
 }
 
-:host(.screen--wash) .screen__content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.screen__content--headed {
-  margin-top: var(--space-8);
-}
-
-/* The main action at the end of the body, pushed to the bottom of the screen. */
-.screen__actions {
-  margin-top: auto;
-  padding-top: var(--space-6);
-}
-
-.screen__actions:empty {
-  display: none;
-}
-
-.screen__footer {
+:host(.screen--wash) .screen__footer {
   background: linear-gradient(to top, var(--accent-wash) 70%, transparent);
+}
+
+/*
+ * Form factors. A split screen keeps its form in a readable column: 28 rem, 32 rem from S and
+ * 36 rem from L (L2-058 AC3). From M the picture of what the step makes (pk-split-aside) takes
+ * the start of the screen and the form the rest (AC10).
+ */
+:host(.screen--split) .screen__body,
+:host(.screen--split) .screen__footer {
+  width: 100%;
+  max-width: var(--layout-app-max);
+  margin-inline: auto;
+}
+
+@media (min-width: 40rem) {
+  :host(.screen--split) .screen__body,
+  :host(.screen--split) .screen__footer {
+    max-width: var(--layout-form-max-s);
+  }
+}
+
+@media (min-width: 64rem) {
+  :host(.screen--split) .screen__body,
+  :host(.screen--split) .screen__footer {
+    max-width: var(--layout-form-max-l);
+  }
+}
+
+@media (min-width: 48rem) {
+  :host(.screen--split) {
+    --pk-aside-width: var(--layout-split-aside);
+
+    padding-left: var(--pk-aside-width);
+  }
+
+  :host(.screen--split) .screen__body,
+  :host(.screen--split) .screen__footer {
+    padding-inline: var(--space-10);
+  }
+
+  /* A short form sits in the middle of its part, its action right under it. */
+  .screen__body--middle {
+    justify-content: center;
+  }
+
+  .screen__body--middle .screen__content {
+    flex: none;
+  }
+
+  .screen__body--middle .screen__actions {
+    margin-top: var(--space-4);
+  }
+
+  /* A celebration: the body and its one action sit together in the middle. */
+  :host(.screen--middle) {
+    justify-content: center;
+  }
+
+  :host(.screen--middle) .screen__body {
+    flex: none;
+  }
+
+  :host(.screen--middle) .screen__content {
+    flex: none;
+  }
+
+  :host(.screen--middle) .screen__footer {
+    position: static;
+    max-width: calc(var(--layout-action-max) + 2 * var(--space-10));
+    background: none;
+  }
+}
+
+@media (min-width: 64rem) {
+  :host(.screen--split) {
+    --pk-aside-width: var(--layout-split-aside-l);
+  }
+
+  :host(.screen--split) .screen__body,
+  :host(.screen--split) .screen__footer {
+    padding-inline: var(--space-14);
+  }
+}
+
+@media (min-width: 80rem) {
+  :host(.screen--split) {
+    --pk-aside-width: var(--layout-split-aside-xl);
+  }
 }

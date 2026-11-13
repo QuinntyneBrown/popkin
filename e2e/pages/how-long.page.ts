@@ -16,6 +16,11 @@ export class HowLongPage {
   readonly firstCard: Locator;
   readonly dateButton: Locator;
   readonly footerButton: Locator;
+  /** The picture half of the split screen, from 768 px (L2-058 AC10). */
+  readonly picture: Locator;
+  readonly pictureTitle: Locator;
+  readonly timeline: Locator;
+  readonly timelineEnds: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="how-long"]');
@@ -31,6 +36,10 @@ export class HowLongPage {
     this.firstCard = page.locator('.option-card').first();
     this.dateButton = page.locator('.date-btn');
     this.footerButton = page.locator('.screen__footer .btn');
+    this.picture = page.getByRole('complementary', { name: 'What happens' });
+    this.pictureTitle = page.locator('.split-aside__title');
+    this.timeline = page.locator('.timeline');
+    this.timelineEnds = page.locator('.timeline__ends span');
   }
 
   option(name: string): Locator {

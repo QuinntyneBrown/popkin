@@ -10,13 +10,23 @@ import {
   formatEnd,
   resolveEndsAt,
 } from 'api';
-import { Alert, Button, ChoiceCard, ChoiceOption, DateButton, Screen, TopBar } from 'components';
+import {
+  Alert,
+  Button,
+  ChoiceCard,
+  ChoiceOption,
+  DateButton,
+  Screen,
+  SplitAside,
+  Timeline,
+  TopBar,
+} from 'components';
 import { EndDateData, EndDateDialog } from '../../dialogs/end-date/end-date.dialog';
 
 /** The second step of starting a Popkin: when it wraps up (L2-009). */
 @Component({
   selector: 'pk-how-long-page',
-  imports: [Alert, Button, ChoiceCard, DateButton, Screen, TopBar],
+  imports: [Alert, Button, ChoiceCard, DateButton, Screen, SplitAside, Timeline, TopBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './how-long.page.html',
 })
@@ -48,6 +58,25 @@ export class HowLongPage {
     return picked ? new Date(picked) : comingSundayEvening(new Date());
   });
   protected readonly customEndText = computed(() => `Ends ${formatEnd(this.customEnd())}`);
+
+  /** The picture beside the choices from 768 px: the chosen length as a timeline (L2-058 AC10). */
+  protected readonly picture = computed(() => {
+    const length = this.draft().length;
+    const option = this.lengths.find((o) => o.value === length)!;
+    const wrapsUp =
+      'Then it wraps up on its own and everyone gets the recap: the people, the photos, the best moment.';
+    const pictures = {
+      JustToday: { span: 'day', end: 'Midnight', text: wrapsUp },
+      TheWeekend: { span: 'weekend', end: 'Sunday, 6 pm', text: wrapsUp },
+      UntilDate: { span: 'custom', end: formatEnd(this.customEnd()), text: wrapsUp },
+      KeepItGoing: {
+        span: 'forever',
+        end: 'Whenever you say',
+        text: 'It stays open until you wrap it up. Then everyone gets the recap.',
+      },
+    } as const;
+    return { icon: option.icon, title: option.title, ...pictures[length] };
+  });
 
   protected choose(length: string): void {
     this.store.update({ length: length as PopkinLength });
