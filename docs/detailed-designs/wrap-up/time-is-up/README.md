@@ -50,20 +50,37 @@ left (for example "42 min left.") is `<TO SUPPLY>`; the mocks draw only "1 hour 
 
 - `GET /api/popkins/{popkinId}` — existing in [Popkin home](../../popkins/popkin-home/README.md);
   this slice relies on its `endsAt` (nullable), `status` and `isHost` fields.
-- Hub event `popkinWrappedUp { popkinId }` on group `popkin:{popkinId}` of `PopkinHub` — sent
+- Hub event `PopkinWrappedUp { popkinId }` on group `popkin:{popkinId}` of `PopkinHub` — sent
   after a Popkin wraps up, by either path.
-- Hub event `popkinLengthChanged { popkinId, endsAt }` — sent by
+- Hub event `PopkinLengthChanged { popkinId, version, endsAt }` — sent by
   [Popkin settings](../../popkins/popkin-settings/README.md); the clock here re-reads `endsAt`
-  from it (L2-020 AC4).
+  from it (L2-020 AC4). It is a state event: `version` is the Popkin's concurrency counter, and
+  the store drops an event whose version is not above the one it holds.
+- On `reconnected$`, `CurrentPopkinStore` reloads the Popkin, which recovers both events.
 
 ### Backend — Popkin Worker
 
 - **`WrapUpDuePopkinsJob`** (`backend/src/Popkin.Worker/Jobs/WrapUpDuePopkinsJob.cs`) —
   introduced; the first job the Worker hosts. A `BackgroundService` that runs a `PeriodicTimer`
-  every 30 seconds. Each tick opens a DI scope and sends `WrapUpDuePopkinsCommand` through
-  MediatR. A 30-second period keeps the delay between an end date and its wrap-up under one
-  minute (L2-044 AC1), with one tick of slack for a slow run. An exception in one tick is logged
-  and the next tick runs.
+  every 30 seconds. The timer is built from the injected `TimeProvider`
+  (`new PeriodicTimer(period, timeProvider)`), so a test advances `FakeTimeProvider` and the job
+  ticks at once; a timer built without it ticks in real time, and a test of "within one minute"
+  would have to wait for it. Each tick opens a DI scope and sends `WrapUpDuePopkinsCommand`
+  through MediatR. A 30-second period keeps the delay between an end date and its wrap-up under
+  one minute (L2-044 AC1), with one tick of slack for a slow run. An exception in one tick is
+  logged and the next tick runs.
+- **The job is the loop alone.** It decides nothing: what is due, what happens to it and who is
+  told all belong to the handler, which the acceptance tests reach through MediatR without a
+  timer.
+- **Heartbeat** — a Worker that stops ticking fails silently: Popkins stop wrapping up and the
+  Worker has no HTTP surface to probe. After each tick the job records the time it finished in
+  the gauge `popkin.wrap_up.last_tick` (seconds since the Unix epoch), and for each Popkin
+  wrapped up it records the lateness, now minus `EndsAt`, in the histogram
+  `popkin.wrap_up.lateness` ([ADR 0012](../../../adr/0012-opentelemetry.md)). A lateness over
+  one minute is also logged as a warning with the Popkin's id, because it breaks L2-044 AC1.
+- **Clean stop** — on shutdown the job finishes the batch in hand, then stops, and logs that it
+  stopped; it starts no new batch once stopping is asked. Popkins are saved one at a time, so
+  finishing a batch is short.
 - **`Program.cs`** (Worker) — registers the job with `AddHostedService<WrapUpDuePopkinsJob>()`
   next to the existing `AddApplication()` and `AddInfrastructure(...)`.
 
@@ -87,7 +104,11 @@ left (for example "42 min left.") is `<TO SUPPLY>`; the mocks draw only "1 hour 
 - **`IPopkinNotifier`** in the Worker — the Worker runs in its own process and holds no SignalR
   connections. It sends hub events through the same `IHubContext<PopkinHub>` as the API, over a
   SignalR scale-out backplane shared by both processes. The backplane (Redis or a hosted SignalR
-  service) is `<TO SUPPLY>`. The web app's clock fallback below covers a missed event.
+  service) is `<TO SUPPLY>`, and so is whether a backplane is the path at all: the API is one
+  instance ([ADR 0009](../../../adr/0009-one-api-instance.md)) and needs none for itself. Until
+  this is settled the Worker's `IPopkinNotifier` does nothing, and the web app's clock check
+  below carries the wrap-up to open screens
+  ([known gaps](../../README.md#known-gaps), row 13).
 
 ### Frontend — Popkin web app
 
@@ -109,11 +130,19 @@ left (for example "42 min left.") is `<TO SUPPLY>`; the mocks draw only "1 hour 
   up at {time}." For the Host, the banner carries the action "Change", which opens
   `ChangeLengthDialog` with CDK `Dialog` (L2-044 AC2). Dismiss hides the banner for that Popkin
   until the app is reloaded.
-- **Wrap-up redirect** — `CurrentPopkinStore` subscribes to `popkinWrappedUp` through
+- **Wrap-up redirect** — `CurrentPopkinStore` subscribes to `PopkinWrappedUp` through
   `POPKIN_REALTIME`. On the event, and also when `TimeLeftClock.now` passes `endsAt`, it reloads
   the Popkin; when `status` reads `wrappedUp` it navigates to `/p/:popkinId/recap` with
   `replaceUrl` (L2-044 AC4). The clock check covers a hub event lost while the connection was
   down.
+
+### Tests
+
+- API-level acceptance tests send `WrapUpDuePopkinsCommand` through MediatR with
+  `FakeTimeProvider` set before and after an end date (L2-044 AC1, AC3).
+- `Popkin.Worker.Tests` hosts the job with `FakeTimeProvider`: advancing 30 seconds sends one
+  command; a tick that throws is followed by the next; stopping the host ends the loop. No test
+  sleeps ([ADR 0010](../../../adr/0010-the-hub-in-tests.md)).
 
 ### Open points
 
@@ -161,7 +190,8 @@ provider, the shared wrap-up service and the notifier. On the web app side, `Tim
 ### Behaviour — the end date arrives
 
 A tick finds the due Popkin, wraps it up with the album kept (L2-044 AC1) and sends
-`popkinWrappedUp`; a member with the Popkin open moves to the recap without a reload (L2-044 AC4).
+`PopkinWrappedUp`, a fact event whose recovery read is `GET /api/popkins/{popkinId}`
+([Live messages](../../chat/live-messages/README.md#events-and-their-recovery-reads)); a member with the Popkin open moves to the recap without a reload (L2-044 AC4).
 
 ![Sequence diagram for the Worker wrapping up a due Popkin](diagrams/sequence-time-is-up.png)
 

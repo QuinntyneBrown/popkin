@@ -14,7 +14,9 @@ window
 **partition** — the key a rate limit counts by: the client address or the member
 
 **client address** — IP address of the person's device as seen by the Popkin API after the
-trusted reverse proxy, `<TO SUPPLY>`, has forwarded it
+trusted reverse proxy has forwarded it. The proxy is the one of
+[ADR 0013](../../../adr/0013-deployment-shape.md), named to the API by `Proxy:KnownProxies` and
+`Proxy:KnownNetworks`
 
 **retry delay** — number of seconds until the partition may try again, sent in the `Retry-After`
 header
@@ -26,6 +28,12 @@ The limits come from L2-053:
 | Code requests | client address | 10 | 10 minutes |
 | Messages | member (person in one Popkin) | 60 | 1 minute |
 | Invite codes tried | client address | 20 | 10 minutes |
+| Call signals | hub connection | 600 | 1 minute |
+
+The first three limits are L2-053's. The fourth protects one member's browser from another's:
+`SendSignal` relays a payload from one participant to another
+([Group call](../../calls/group-call/README.md)), and L2-053 says one person cannot flood another.
+Its value is a design value, well above what setting up a call with 12 people needs.
 
 These limits sit beside the per-destination limits of L2-005 (five codes per phone number or
 email per hour, five wrong attempts per code). Those are counted in the database by
@@ -85,14 +93,30 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
   `[EnableRateLimiting(RateLimitPolicyNames.Codes)]`, `…Messages` and `…InviteCodes`.
 - **Pipeline order** — `UseRateLimiter()` runs after `UseRouting()` (so endpoint metadata is known)
   and after `UseAuthentication()` (so the `messages` partition can read the person id), and before
-  `UseAuthorization()`. `UseForwardedHeaders()` runs first, with the reverse proxy as the only
-  known proxy, so a client cannot choose its own address through `X-Forwarded-For`.
-- **Scale-out** — ASP.NET Core's limiters count in process memory. With more than one Popkin API
-  instance, each counts alone and the effective limit multiplies. The instance count and, if it
-  is more than one, a shared counter store are `<TO SUPPLY>`.
+  `UseAuthorization()`.
+- **`ForwardedHeadersSetup.AddPopkinForwardedHeaders` / `UsePopkinForwardedHeaders`**
+  (`Popkin.Api/Proxy/`) — `UseForwardedHeaders()` runs first in the pipeline, before the request
+  log, HSTS and the HTTPS redirect. It reads `X-Forwarded-For` and `X-Forwarded-Proto`, one hop,
+  and only from the addresses in `Proxy:KnownProxies` and the networks in `Proxy:KnownNetworks`
+  (CIDR); the framework's default trust of loopback is removed. A request from any other address
+  keeps the address of its connection, so a client cannot choose its own address through
+  `X-Forwarded-For`. With neither setting, forwarded headers are ignored altogether, which is
+  right for the local API and wrong behind a proxy: there every person would share the proxy's
+  address and one allowance of 10 codes, and the HTTPS redirect would loop. The deployment
+  document names both settings as required ([`docs/deployment.md`](../../../deployment.md)).
+- **Scale-out** — ASP.NET Core's limiters count in process memory. Popkin runs one API instance
+  ([ADR 0009](../../../adr/0009-one-api-instance.md)), so each limit is the limit. More than one
+  instance needs a shared counter store first, by the record that supersedes ADR 0009.
 - **Real-time messages** — messages are sent over HTTP, not through `PopkinHub`, so the
   `messages` policy covers every message. Should a hub method ever accept messages, it applies
   the same limiter through `PartitionedRateLimiter` in the hub filter.
+- **Call signals** — `SignalRateLimitFilter`, an `IHubFilter`, applies a token bucket of 600
+  signals a minute per connection to `SendSignal`. A refused signal fails the hub call with
+  `rate_limited`; it is never dropped silently, because a signal is an edge that must arrive or
+  fail visibly.
+- **Measurement** — `OnRejected` and the hub filter add one to the counter
+  `popkin.rate_limit.rejections`, with the policy name as its only dimension
+  ([ADR 0012](../../../adr/0012-opentelemetry.md)). The partition is never a dimension.
 
 ### Frontend — Popkin web app
 

@@ -14,5 +14,5 @@ Rel(host, spa, "Uses", "HTTPS")
 Rel(member, spa, "Uses", "HTTPS")
 Rel(spa, api, "POST /api/popkins/{popkinId}/wrap-up", "JSON/HTTPS")
 Rel(api, db, "Reads and writes", "EF Core")
-Rel(api, spa, "Pushes popkinWrappedUp", "SignalR/WSS")
+Rel(api, spa, "Pushes PopkinWrappedUp", "SignalR/WSS")
 @enduml

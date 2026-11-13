@@ -10,7 +10,7 @@ Container_Boundary(api, "Popkin API") {
   Component(guard, "IMembershipGuard", "Application abstraction", "404 for non-members, 403 for non-Hosts")
   Component(service, "PopkinWrapUpService", "Application service", "Wraps up and ends open calls")
   Component(entity, "PopkinSpace", "Domain entity", "Owns Status, WrappedUpAt, KeepPhotos")
-  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Sends popkinWrappedUp to popkin:{popkinId}")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Sends PopkinWrappedUp to popkin:{popkinId}")
   Component(errors, "ProblemDetailsExceptionHandler", "IExceptionHandler", "Maps refusals to ProblemDetails")
   ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace, Call")
 }
@@ -21,6 +21,6 @@ Rel(handler, service, "WrapUp(popkin, keepPhotos)")
 Rel(service, entity, "Calls WrapUp(at, keepPhotos)")
 Rel(handler, db, "Saves changes", "EF Core")
 Rel(handler, notifier, "PopkinWrappedUpAsync")
-Rel(notifier, spa, "popkinWrappedUp", "SignalR")
+Rel(notifier, spa, "PopkinWrappedUp", "SignalR")
 Rel(errors, spa, "403 / 404 / 409 ProblemDetails", "JSON/HTTPS")
 @enduml

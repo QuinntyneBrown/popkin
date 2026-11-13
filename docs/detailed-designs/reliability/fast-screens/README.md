@@ -98,8 +98,9 @@ everything else is introduced by this design.
   `Cache-Control: public, max-age=31536000, immutable`; `index.html` and `ngsw.json` with
   `Cache-Control: no-cache`. API responses carry `Cache-Control: private, no-store`, because they
   hold personal data (L2-054); the web app's own `ResponseCache` keeps what the offline mode
-  needs. Whether the web app is served by the Popkin API or a separate static host is
-  `<TO SUPPLY>`.
+  needs. The web app is served by the reverse proxy in front of the API, on the same origin
+  ([ADR 0013](../../../adr/0013-deployment-shape.md)); the proxy sets the `Cache-Control` and
+  compression of its files.
 - **Read queries** — every `Get…Query` handler in `Popkin.Application` reads with `AsNoTracking`,
   projects straight to its `…Dto` with `Select`, and loads one page at a time. Each entity
   configuration in `Popkin.Infrastructure` declares the indexes its queries filter and order by,
@@ -108,7 +109,9 @@ everything else is introduced by this design.
 - **Latency measurement (introduced)** — ASP.NET Core's built-in `http.server.request.duration`
   metric is exported through OpenTelemetry (`AddOpenTelemetry().WithMetrics(...)`), with the
   route template as a dimension, so the 95th and 99th percentiles of each `GET` endpoint are
-  observable (L2-055 AC3). The metrics backend and its alert thresholds are `<TO SUPPLY>`.
+  observable (L2-055 AC3). The set-up is `AddPopkinTelemetry`
+  ([ADR 0012](../../../adr/0012-opentelemetry.md)). The metrics backend and its alert
+  thresholds are `<TO SUPPLY>`.
 
 ### Photo store
 

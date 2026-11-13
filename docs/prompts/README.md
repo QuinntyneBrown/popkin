@@ -3,7 +3,13 @@
 One ready-to-run implementation prompt per journey in [`docs/journeys.md`](../journeys.md), in the
 same order. Run them one at a time, in order: each prompt assumes every earlier journey is merged.
 Each one takes its journey from the requirement, design and mocks through test-first slices to a
-pull request.
+narrated video and a pull request.
+
+Every prompt builds its screens for the five form factors the mocks draw (XS, S, M, L and XL,
+L2-058) and says what its own screens do with the room. Every prompt ends with a narrated video
+of the journey, made from the running app to the standard in
+[`docs/videos/README.md`](../videos/README.md): a warm Kokoro voice from Hugging Face, soca from
+Pixabay under it, designed transitions, and no captions burned in.
 
 | # | Journey | Requirements | Effort (days) |
 |---|---------|--------------|---------------|

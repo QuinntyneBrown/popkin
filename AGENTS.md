@@ -17,18 +17,27 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The repository is a scaffold.** It holds the layout, the conventions, a backend that answers
-`GET /api/health`, an app with one placeholder screen and one behaviour spec. There are no
-requirements, mocks or design system yet: the folders under `docs/` are empty. The rules below
-apply from the first feature on; where a rule names something that does not exist yet (a
-command, a fixture, a stylesheet), the first change that needs it adds it.
+**The first journey is built; the rest is designed.** Journey 1, Start a Popkin, runs end to
+end: the backend has sign up with a code, sessions and Popkin creation, with their migrations;
+the app has the screens of that journey and the not-found and server-error screens; the
+`components` library holds the `pk-*` components they use, each with a parity spec. Everything
+else exists as documents, not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of
+every screen in every state (`docs/mocks/`), the design system (`docs/design-system/`), a
+detailed design per feature (`docs/detailed-designs/`) and a prompt per journey
+(`docs/prompts/`). There is no SignalR hub yet and the Worker hosts no job. `docs/estimates/`
+tracks how far each design is; read it, not this paragraph, for the current figure.
 
-Roles, requirements and the journeys to build will be in `docs/specs/L1.md` (each traces to
-L0-001), `docs/specs/L2.md` and `docs/journey.md`. Use the words those documents use in code,
+Before building a feature, read its requirement, its detailed design and its mocks: they exist.
+`docs/detailed-designs/README.md` holds the shared architecture, the shared real-time rules and
+the register of known gaps, the decisions still open and the journeys each one blocks. Where a
+rule below names something that does not exist yet (a command, a fixture, a helper), the first
+change that needs it adds it.
+
+Roles, requirements and the journeys to build are in `docs/specs/L1.md` (each traces to
+L0-001), `docs/specs/L2.md` and `docs/journeys.md`. Use the words those documents use in code,
 docs and UI; do not invent synonyms.
 
-The first journey to be implemented fills in the layout below; every later feature follows it.
-`docs/estimates/` tracks how far each design is.
+Journey 1 filled in the layout below; every later feature follows it.
 
 ## Prefer best practice
 
@@ -51,9 +60,11 @@ say so and propose the correction; do not work around it silently.
 - `docs/adr/` — architecture decisions; read relevant ADRs before changing the areas they cover
 - `docs/estimates/` — effort and percent complete per design
 - `docs/audits/` — audits of the codebase against its rules, each with the fixes it calls for
+- `docs/deployment.md` — how Popkin is deployed: the images, every setting, the proxy and a smoke
+  test (ADR 0013)
 - `docs/personas/` — invented people who come across Popkin, one folder each: who they are,
   their journeys, and their feedback
-- `docs/journey.md`, `docs/prompts/` — the user journeys and one implementation prompt per journey
+- `docs/journeys.md`, `docs/prompts/` — the user journeys and one implementation prompt per journey
 - `eng/` — local engineering scripts (`Test-Backend.ps1`, `Start-E2eApi.ps1`)
 - `docs/videos/` — narrated videos, one folder each; `tools/` holds the scripts that build them
 
@@ -78,7 +89,7 @@ popkin/
 │       ├── Popkin.Application.Tests/      empty until its first test
 │       ├── Popkin.Infrastructure.Tests/   empty until its first test
 │       ├── Popkin.Worker.Tests/           empty until its first test
-│       └── Popkin.Cli.Tests/              empty until its first test
+│       └── Popkin.Cli.Tests/
 ├── frontend/
 │   ├── angular.json
 │   ├── package.json
@@ -121,7 +132,12 @@ Layer dependency direction (strict):
 
 Non-obvious rules:
 
-- Business rules live in handlers/domain services, not controllers.
+- Business rules live in handlers/domain services, not controllers or hubs. A hub is a
+  transport: each hub method checks nothing itself and sends one MediatR request, exactly as a
+  controller does. The shared real-time rules are in `docs/detailed-designs/README.md`.
+- The API runs as one instance (ADR 0009). State kept in the API's memory (hub groups, presence,
+  rate limits) is written for one instance; do not add a second instance without the record that
+  supersedes that ADR.
 - The API does **not** apply EF migrations on startup. Run `popkin migrate` explicitly. SQLite
   (the local API) and InMemory (tests) have no migrations: the schema comes from the model.
 - Seed data is idempotent and safe to re-run.
@@ -129,6 +145,14 @@ Non-obvious rules:
   `[AllowAnonymous]` access and keep Swagger above `UseAuthentication` when changing API auth.
 - Keep request logging outside the exception-handling middleware so handled response statuses
   are logged correctly.
+- Forwarded headers are read first in the pipeline and trusted only from the configured proxy
+  (`Proxy:KnownProxies`, `Proxy:KnownNetworks`). Nothing else reads `X-Forwarded-*`.
+- Telemetry is OpenTelemetry (ADR 0012). Measure with instruments on the `Popkin` meter
+  (`PopkinMetrics`), never with hand-rolled counters. No log line, metric dimension or span
+  carries a contact detail, a code, a session token, message text, a query string or a body; a
+  route is recorded as its template.
+- A setting a deployed system needs is added to `docs/deployment.md` in the same change
+  (ADR 0013).
 - Owned data must stay scoped to its owner: a person sees and changes only their own data and
   the spaces they belong to.
 - Errors are ProblemDetails with a `code` extension where a client needs to branch on them.
@@ -140,6 +164,16 @@ the EF Core InMemory provider (`Database:Provider=InMemory`, one store per fixtu
 SQLite, LocalDB, SQL Server or a database file. Inject database faults through `IAppDbContext`.
 API tests run sequentially (`xunit.runner.json`). Follow the existing test-project patterns when
 adding coverage; `pwsh eng/Test-Backend.ps1` runs the suite as CI does.
+
+**A backend test never sleeps** (ADR 0010). It awaits an event, with a timeout that fails naming
+what did arrive, or it advances `FakeTimeProvider`; no `Task.Delay` and no `Thread.Sleep`. Hub
+tests connect a real SignalR client to `ApiFactory` in memory.
+
+The acceptance test through the API is the proof of each slice. Where a rule has a table of
+cases (a read point that never moves back, the units of the time left), add a direct test of the
+domain type or handler in the matching test project, one case per row, and keep the API test to
+one or two representative paths. That is a behaviour test of a rule, not a test of the
+codebase's shape.
 
 ## Frontend architecture
 
@@ -183,6 +217,8 @@ design system). A further application is added by its own ADR (ADR 0002).
   condition puts its slots in one `<ng-template>` and renders it with `ngTemplateOutlet` in both
   branches; slots repeated per `@if` branch project into one branch only. On the consumer side, a
   `@if` wrapping several `[slot=…]` nodes loses the slot (NG8011): one `@if` per node.
+- Logic with many cases (a store, a tracker, a pure helper) lives in the `api` library, where its
+  unit tests are (ADR 0011), never in a page.
 - API services have a contract and injection token; app pages depend on the token, not the
   concrete implementation. `app.config.ts` is the composition root.
 - **No inline forms in pages.** Button-triggered editing always opens a CDK Dialog
@@ -201,14 +237,19 @@ design system). A further application is added by its own ADR (ADR 0002).
   a request without an answer fails the test. States the recording lacks are stubbed in
   `e2e/fixtures/stubs.ts`. When an endpoint's answer changes, refresh the recording against the
   local API (`eng/Start-E2eApi.ps1`) in the same change; recording is maintenance, never part of
-  a test run. The recorder (`npm run record-api` in `e2e/`) is added with the first endpoint the
-  app calls.
+  a test run. The recorder is `npm run record-api` in `e2e/`.
+- **The hub is stubbed too (ADR 0010).** No test opens a connection to a real hub: the `page`
+  fixture answers `/hubs/**` and routes the hub's WebSocket (`page.routeWebSocket`), one helper
+  (`e2e/fixtures/hub.ts`) speaks the SignalR handshake and lets a spec push an event by name, and
+  an unstubbed hub request fails the test. The helper is added with the first hub feature.
 - Page Object Model: one page object per screen under `e2e/pages/`, owning the selectors and the
   interactions. Tests state intent; page objects know the DOM. Never put a selector in a test.
 - Specs import `test` and `expect` from `e2e/fixtures/pk-test.ts`; routes are keyed in
   `e2e/fixtures/routes.ts` so one spec serves the mocks (`PK_BASELINE=1`) and the app.
-- **Mandatory (ADR 0006): only behaviour Playwright tests run.** `npm test` and CI run the
-  behaviour specs and nothing else. The sweeps, visual parity (`e2e/tests/visual/`), responsive
+- **Mandatory (ADR 0006): only behaviour Playwright tests run.** `npm test` in `e2e/` and the
+  CI e2e job run the behaviour specs and nothing else. (The stores and pure helpers of the `api`
+  library also have unit tests, `npm test` in `frontend/`, by ADR 0011; pages, dialogs and
+  components do not.) The sweeps, visual parity (`e2e/tests/visual/`), responsive
   fit (`responsive.spec.ts`) and automated accessibility (`accessibility.spec.ts`), are still
   written and kept current: give every new screen state its `routes.ts` entry and page-object
   regions, and add a sweep where a requirement calls for one. **Never run them**: no agent or CI

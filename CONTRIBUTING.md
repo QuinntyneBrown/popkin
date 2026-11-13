@@ -24,7 +24,7 @@ By taking part you agree to follow the [code of conduct](CODE_OF_CONDUCT.md).
   which journey it belongs to, if any.
 - **Improve the documentation.** Requirements, designs, mocks and the design system are all in
   `docs/` and welcome corrections.
-- **Implement a journey.** Once the journeys are written (`docs/journey.md`), pick the next one;
+- **Implement a journey.** The journeys are in `docs/journeys.md`; pick the next one;
   its ready-to-run prompt will be in `docs/prompts/`.
 
 Security vulnerabilities are never reported in a public issue; see [`SECURITY.md`](SECURITY.md).
@@ -41,7 +41,7 @@ Every change serves what Popkin is for: a free platform for pop-up communities, 
 up a private space in seconds, invite others by QR code, then chat, video call, share photos and
 rate experiences together. A change that cannot be traced back to that does not belong here.
 
-Use the words the requirements use (`docs/specs/` and `docs/journey.md`, once they are written) in
+Use the words the requirements use (`docs/specs/` and `docs/journeys.md`) in
 code, docs and UI; do not invent synonyms.
 
 ## How a change is made

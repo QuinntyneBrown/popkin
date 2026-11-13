@@ -6,7 +6,8 @@ something else: a new record supersedes it and both say so.
 
 Records 0001 to 0008 are the practices Popkin starts with. They were first decided, and proved,
 in Jubilee, whose stack and conventions Popkin
-shares.
+shares. Records 0009 to 0013 come from the audit
+[Learnings from BombRMan](../audits/learnings-from-bombrman.md).
 
 | No. | Decision | Status |
 |---|---|---|
@@ -18,6 +19,11 @@ shares.
 | [0006](0006-behaviour-tests-only-by-default.md) | Only behaviour tests run; the visual, responsive and accessibility sweeps run by hand | Accepted |
 | [0007](0007-presentation-in-the-components-library.md) | Prefer best practice; presentation only in `components`, one encapsulated `.scss` per component, BEM names | Accepted |
 | [0008](0008-component-parity-specs.md) | Component parity specs: `npm run parity`, against the mocks | Accepted |
+| [0009](0009-one-api-instance.md) | Popkin runs one API instance; what depends on that and what would end it | Accepted |
+| [0010](0010-the-hub-in-tests.md) | The hub in tests: stubbed in Playwright, in memory in the backend; a backend test never sleeps | Accepted |
+| [0011](0011-unit-tests-for-frontend-logic.md) | Unit tests for the `api` library's stores and helpers, run in CI | Accepted |
+| [0012](0012-opentelemetry.md) | Telemetry: OpenTelemetry for logs, metrics and traces, exported by configuration alone | Accepted |
+| [0013](0013-deployment-shape.md) | Deployment: two container images behind one reverse proxy, one origin | Accepted |
 
 ## Format
 

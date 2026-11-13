@@ -107,8 +107,9 @@ The API never changes the database schema on startup. The `popkin` tool
 | `dotnet run --project backend/src/Popkin.Cli -- seed` | Adds the starting data; safe to re-run |
 | `dotnet run --project backend/src/Popkin.Cli -- reset` | Deletes the database, then migrates and seeds it |
 
-A deployed API also needs `Auth:CodeHashKey` (the key codes are hashed with) and
-`Invites:BaseUrl` (the address invite links start with).
+A deployed API also needs `Auth:CodeHashKey` (the key codes are hashed with), `Invites:BaseUrl`
+(the address invite links start with) and `App:Origin` (the web app's origin). Every setting, the
+proxy and the release steps are in [`docs/deployment.md`](docs/deployment.md).
 
 ## Building and testing
 
@@ -177,7 +178,7 @@ popkin/
 └── README.md
 ```
 
-Most folders under `docs/` are empty for now; each fills in as its documents are written.
+`docs/personas/` is empty for now; the other folders hold their documents.
 
 ## Documentation
 
@@ -185,6 +186,8 @@ Most folders under `docs/` are empty for now; each fills in as its documents are
 |---|---|
 | [Architecture decisions](docs/adr/README.md) | The decisions that shape the code, one record each |
 | [AGENTS.md](AGENTS.md) | Repository layout, architecture rules and the required workflow |
+| [Detailed designs](docs/detailed-designs/README.md) | The shared architecture, the real-time rules, the known gaps and one design per feature |
+| [Deployment](docs/deployment.md) | The images, every setting, the proxy and a smoke test |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How a change is proposed, made and tested |
 
 ## Contributing

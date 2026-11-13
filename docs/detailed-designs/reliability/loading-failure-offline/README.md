@@ -193,8 +193,19 @@ The feature composes these design-system components and relies on their contract
 - **`ReferenceCode` (introduced, `Popkin.Api.Errors`)** — value type; `New()` takes eight hex
   digits from `RandomNumberGenerator` and formats them `PK-XXXX-XXXX`, the format the mocks show.
 - **Request logging** — sits before `UseExceptionHandler` in `Program.cs`, outside it, so the
-  logged status of a handled failure is the 500 the person received (AGENTS.md). The logging sink
-  and retention are `<TO SUPPLY>`.
+  logged status of a handled failure is the 500 the person received (AGENTS.md). It is
+  `RequestLoggingMiddleware`
+  ([Personal data protection](../../security/personal-data-protection/README.md)). Logs leave
+  through OpenTelemetry ([ADR 0012](../../../adr/0012-opentelemetry.md)), and the reference code
+  of a failure is also set on the active span as `popkin.reference`, so the code a person reads
+  out finds the trace. The telemetry backend and its retention are `<TO SUPPLY>`.
+- **`HealthController` (existing, changed)** — two anonymous endpoints. `GET /api/health` is
+  liveness: it answers a constant and touches nothing, which is what the browser's
+  `Connectivity` probe needs. `GET /api/health/ready` is readiness, for the platform that routes
+  traffic: it sends `CheckReadinessQuery`, whose handler asks the database one cheap question
+  through `IAppDbContext`, and answers 200 `{ status: "ready" }` or 503
+  `{ status: "unavailable" }`. Neither says anything but a status: no version, no dependency
+  name, no exception (L2-050 AC5, L2-052 AC5). A failed check is logged at `Warning`.
 
 ### Screens and states
 
@@ -214,6 +225,9 @@ The feature composes these design-system components and relies on their contract
 ### API
 
 - `GET /api/health` — 200 `{ status: "ok" }`, anonymous (existing); probed by `Connectivity`.
+- `GET /api/health/ready` — 200 `{ status: "ready" }` when the database can be reached, 503
+  `{ status: "unavailable" }` when it cannot; anonymous (L2-050 AC5). Called by the platform,
+  never by the web app.
 - Every endpoint — on an unhandled exception, 500 ProblemDetails with `code` `server_error` and a
   `reference` extension.
 - Codes the web app branches on through `ApiError`: `popkin_not_found` (404, `L2-051`) and
