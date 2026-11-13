@@ -10,6 +10,8 @@ export class ExperienceDetailPage {
   readonly rest: Locator;
   readonly picture: Locator;
   readonly back: Locator;
+  /** "Experience actions", over the picture: its sharer's and the Host's only (L2-040 AC6). */
+  readonly actions: Locator;
   readonly intro: Locator;
   readonly kind: Locator;
   readonly title: Locator;
@@ -53,6 +55,8 @@ export class ExperienceDetailPage {
     this.rest = this.detail.locator('.detail__rest');
     this.picture = this.lead.locator('.hero-media');
     this.back = page.getByRole('link', { name: 'Back', exact: true });
+    // A link in the mock, which goes on to the dialog; a button in the app.
+    this.actions = this.picture.locator('.icon-btn[aria-label="Experience actions"]');
     this.intro = this.lead.locator('.detail__intro');
     this.title = page.getByRole('heading', { level: 1 });
     this.kind = this.intro.locator('p').first();

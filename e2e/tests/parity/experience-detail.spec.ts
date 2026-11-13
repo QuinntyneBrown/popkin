@@ -19,6 +19,12 @@ parity('experience-detail', [
     name: 'cards',
     region: (page) => new ExperienceDetailPage(page).cards,
   },
+  // For its sharer and the Host: the actions over the picture, opposite Back.
+  {
+    key: 'experienceDetailOwn',
+    name: 'own-picture',
+    region: (page) => new ExperienceDetailPage(page).picture,
+  },
   {
     key: 'experienceDetailRated',
     name: 'rated',

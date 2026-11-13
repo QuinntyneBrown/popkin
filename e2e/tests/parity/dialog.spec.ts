@@ -1,4 +1,6 @@
 import { AddCommentDialog } from '../../pages/add-comment.dialog';
+import { DeleteExperienceDialog } from '../../pages/delete-experience.dialog';
+import { ExperienceActionsDialog } from '../../pages/experience-actions.dialog';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { openTheScanner, withACamera } from '../../fixtures/my-popkins';
 import { ScanToJoinDialog } from '../../pages/scan-to-join.dialog';
@@ -16,6 +18,12 @@ const openEndDate = async (page: Page, today?: Date) => {
   await step.option('Until a date').click();
   await step.endDate.click();
   await new EndDateDialog(page).panel.waitFor();
+};
+
+const keepInFocus = async (page: Page) => {
+  // A key first, so the browser draws the ring it draws for the keyboard, as the mock has.
+  await page.keyboard.press('Shift');
+  await new DeleteExperienceDialog(page).keep.focus();
 };
 
 parity('dialog', [
@@ -100,6 +108,36 @@ parity('dialog', [
     name: 'share-experience-failed',
     region: (page) => new ShareExperienceDialog(page).panel,
     prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'shareExperienceEdit',
+    name: 'share-experience-edit',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'experienceActions',
+    name: 'experience-actions',
+    region: (page) => new ExperienceActionsDialog(page).panel,
+  },
+  {
+    key: 'deleteExperience',
+    name: 'delete-experience',
+    region: (page) => new DeleteExperienceDialog(page).panel,
+    // The mock's "Keep it" has autofocus; the dialog focuses it on open.
+    prepare: (page) => keepInFocus(page),
+  },
+  {
+    key: 'deleteExperienceBusy',
+    name: 'delete-experience-busy',
+    region: (page) => new DeleteExperienceDialog(page).panel,
+    prepare: (page) => keepInFocus(page),
+  },
+  {
+    key: 'deleteExperienceFailed',
+    name: 'delete-experience-failed',
+    region: (page) => new DeleteExperienceDialog(page).panel,
+    prepare: (page) => keepInFocus(page),
   },
   {
     key: 'addComment',

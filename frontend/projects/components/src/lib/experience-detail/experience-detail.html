@@ -16,6 +16,17 @@
       [label]="backLabel()"
       [routerLink]="back()"
     ></a>
+    @if (actions(); as label) {
+      <button
+        pk-icon-button
+        class="hero-media__actions"
+        type="button"
+        variant="card"
+        icon="more"
+        [label]="label"
+        (click)="actionsOpened.emit()"
+      ></button>
+    }
   </div>
   <div class="detail__intro">
     @if (loading()) {

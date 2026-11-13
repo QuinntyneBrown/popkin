@@ -34,6 +34,13 @@
   top: var(--space-3);
 }
 
+/* The experience's actions, at the end opposite Back. */
+.hero-media__actions {
+  position: absolute;
+  right: var(--space-3);
+  top: var(--space-3);
+}
+
 .detail__intro {
   padding: var(--space-5) var(--space-5) 0;
 }
@@ -102,6 +109,11 @@
     top: var(--space-6);
   }
 
+  .hero-media__actions {
+    right: var(--space-6);
+    top: var(--space-6);
+  }
+
   .detail__intro {
     padding: var(--space-7) var(--space-8) 0;
   }
@@ -149,6 +161,11 @@
 
   .hero-media__back {
     left: var(--space-4);
+    top: var(--space-4);
+  }
+
+  .hero-media__actions {
+    right: var(--space-4);
     top: var(--space-4);
   }
 

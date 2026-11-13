@@ -2,7 +2,13 @@ import type { Locator, Page } from '@playwright/test';
 
 type Chosen = { name: string; mimeType: string; buffer: Buffer };
 
-/** "Share an experience": its title, kind, when, place and picture (L2-040). */
+/** What the dialog is called when it shares, and when it edits. */
+const heading = /^(Share an experience|Edit experience)$/;
+
+/**
+ * "Share an experience": its title, kind, when, place and picture (L2-040). The same dialog
+ * edits one, as "Edit experience", with "Save changes" as its action (L2-040 AC6).
+ */
 export class ShareExperienceDialog {
   readonly root: Locator;
   readonly panel: Locator;
@@ -28,12 +34,13 @@ export class ShareExperienceDialog {
   readonly whenField: Locator;
   readonly placeField: Locator;
   readonly kindField: Locator;
+  readonly pictureField: Locator;
   private readonly picker: Locator;
 
   constructor(page: Page) {
-    this.root = page.getByRole('dialog', { name: 'Share an experience' });
+    this.root = page.getByRole('dialog', { name: heading });
     this.panel = this.root.locator('.dialog__panel');
-    this.heading = this.root.getByRole('heading', { level: 2, name: 'Share an experience' });
+    this.heading = this.root.getByRole('heading', { level: 2, name: heading });
     this.close = this.root.getByRole('button', { name: 'Close' });
     this.body = this.root.locator('.dialog__body');
     this.footer = this.root.locator('.dialog__footer');
@@ -52,6 +59,7 @@ export class ShareExperienceDialog {
     this.addPicture = this.root.locator('.date-btn');
     this.picture = this.root.getByRole('img', { name: 'The picture you chose' });
     this.removePicture = this.root.getByRole('button', { name: 'Remove picture' });
+    this.pictureField = this.body.locator('.picture-field');
     this.pictureError = this.root.locator('.picture-field .field__error');
     this.summary = this.root.locator('.form-summary');
     this.failed = this.root.locator('.alert--danger');

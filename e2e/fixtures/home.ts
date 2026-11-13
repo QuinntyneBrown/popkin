@@ -119,7 +119,7 @@ export class Home {
         id: '00000000-0000-4000-b000-000000000001',
         name: 'Sunrise canoe to Heron Point',
         photoUrl: '/photos/lake.jpg' as string | null,
-        average: 4.8,
+        average: 4.7,
         ratingCount: 11,
       },
       {
