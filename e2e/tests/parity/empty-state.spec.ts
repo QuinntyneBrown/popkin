@@ -12,6 +12,7 @@ import { JoinInvitePage } from '../../pages/join-invite.page';
 import { ServerErrorPage } from '../../pages/server-error.page';
 import { parity } from '../../fixtures/parity';
 import { NotFoundPage } from '../../pages/not-found.page';
+import { PhotoAlbumPage } from '../../pages/photo-album.page';
 
 parity('empty-state', [
   { key: 'notFound', region: (page) => new NotFoundPage(page).emptyState },
@@ -75,5 +76,11 @@ parity('empty-state', [
     ...experienceStates.experienceDetailError,
     name: 'experience-error',
     region: (page) => new ExperienceDetailPage(page).error,
+  },
+  // The album was not kept and its 30 days are over.
+  {
+    key: 'photoAlbumRemoved',
+    name: 'photos-removed',
+    region: (page) => new PhotoAlbumPage(page).empty,
   },
 ]);

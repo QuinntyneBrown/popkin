@@ -12,6 +12,7 @@ import { howLongForLakeside } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { EndDateDialog } from '../../pages/end-date.dialog';
 import { HowLongPage } from '../../pages/how-long.page';
+import { PopkinSettingsDialog } from '../../pages/popkin-settings.dialog';
 
 const openEndDate = async (page: Page, today?: Date) => {
   await howLongForLakeside(page, today);
@@ -170,5 +171,10 @@ parity('dialog', [
     name: 'add-comment-invalid',
     region: (page) => new AddCommentDialog(page).panel,
     prepare: (page) => new AddCommentDialog(page).comment.focus(),
+  },
+  {
+    key: 'popkinSettings',
+    name: 'popkin-settings',
+    region: (page) => new PopkinSettingsDialog(page).panel,
   },
 ]);

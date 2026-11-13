@@ -61,6 +61,41 @@
   margin-top: var(--space-8);
 }
 
+/* What went wrong, between the lead and the content. It takes no room while it is empty. */
+.screen__notice:empty {
+  display: none;
+}
+
+.screen__notice {
+  margin-top: var(--space-5);
+}
+
+/* A screen about one Popkin: its tile above the heading, right under the top bar. */
+.screen__body--tiled {
+  padding-top: 0;
+}
+
+.screen__body--tiled .screen__heading {
+  margin-top: var(--space-5);
+}
+
+.screen__body--tiled .screen__lead {
+  line-height: var(--line-height-relaxed);
+}
+
+.screen__body--tiled .screen__notice {
+  display: block;
+}
+
+.screen__body--tiled .screen__content--headed {
+  margin-top: var(--space-2);
+}
+
+/* The recap: right under the top bar, a little wider, with more room at the end. */
+.screen__body--recap {
+  padding: 0 var(--space-5) var(--space-8);
+}
+
 /* The main action at the end of the body, pushed to the bottom of the screen. */
 .screen__actions {
   margin-top: auto;

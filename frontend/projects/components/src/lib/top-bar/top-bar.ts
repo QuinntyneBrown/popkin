@@ -48,6 +48,8 @@ export class TopBar {
   readonly sticky = input(false);
   /** The emoji of the Popkin, on a small tile before the heading. */
   readonly tile = input<string>();
+  /** Greys the tile: the Popkin has wrapped up. The `sub` line says so in words. */
+  readonly tileMuted = input(false);
   /** The emoji of the Popkin, in the line of the title: the bar of a call. */
   readonly emoji = input<string>();
   /** The title as the screen's `h1`. */

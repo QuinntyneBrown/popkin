@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { PopkinTile } from '../popkin-tile/popkin-tile';
 
 /**
  * Split aside (docs/design-system/components/split-aside.html): the picture half of a split
@@ -8,10 +9,13 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
  * `[slot=aside]`.
  *
  * With `photo` it is a photograph under a caption (`heading` and `text`). Without one it is a
- * body: an `icon`, a `kicker`, a `heading`, the projected picture, then `text`.
+ * body: an `icon`, a `kicker`, a `heading`, the projected picture, then `text`. With `photos`
+ * the body is a mosaic of them, the first one large, over the Popkin it is about (`tile`,
+ * `name`, `line`): the recap that wrapping up will make.
  */
 @Component({
   selector: 'aside[pk-split-aside]',
+  imports: [PopkinTile],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './split-aside.html',
   styleUrl: './split-aside.scss',
@@ -31,6 +35,12 @@ export class SplitAside {
   readonly photo = input<string>();
   /** Greys the photograph: the Popkin has wrapped up. The screen says so in words. */
   readonly muted = input(false);
+  /** Photos as a mosaic, the first one large. Decoration. */
+  readonly photos = input<readonly string[]>([]);
+  /** The Popkin under the mosaic: its emoji on a tile, its `name` and a `line` about it. */
+  readonly tile = input<string>();
+  readonly name = input<string>();
+  readonly line = input<string>();
   /** An emoji above the heading. */
   readonly icon = input<string>();
   /** A quiet line above the picture. */

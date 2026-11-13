@@ -47,4 +47,10 @@ parity('experience-detail', [
     name: 'loading',
     region: (page) => new ExperienceDetailPage(page).detail,
   },
+  // A wrapped-up Popkin: the score alone, with no panel to rate it beside it.
+  {
+    key: 'experienceDetailWrapped',
+    name: 'wrapped-cards',
+    region: (page) => new ExperienceDetailPage(page).cards,
+  },
 ]);
