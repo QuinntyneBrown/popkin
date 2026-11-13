@@ -9,6 +9,7 @@ import { HowLongPage } from '../../pages/how-long.page';
 import { howLongForLakeside } from '../../fixtures/journeys';
 import { codeScreenAt24Seconds } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
+import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { VerifyCodePage } from '../../pages/verify-code.page';
 import { NameYourPopkinPage } from '../../pages/name-your-popkin.page';
 import { hold } from '../../fixtures/stubs';
@@ -18,6 +19,13 @@ import { LandingPage } from '../../pages/landing.page';
 import { WelcomePage } from '../../pages/welcome.page';
 
 parity('button', [
+  // A Popkin toggle, pressed: "You're keen" (L2-042 AC2).
+  {
+    key: 'experienceDetailWantKeen',
+    ...experienceStates.experienceDetailWantKeen,
+    name: 'popkin-pressed',
+    region: (page) => new ExperienceDetailPage(page).keenButton,
+  },
   { key: 'notFound', name: 'primary-md', region: (page) => new NotFoundPage(page).primaryButton },
   {
     key: 'notFound',

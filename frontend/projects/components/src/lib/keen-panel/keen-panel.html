@@ -1,0 +1,23 @@
+<h2 class="keen-panel__heading">{{ heading() }}</h2>
+<div class="keen-panel__who">
+  @if (avatars().length) {
+    <span pk-avatar-stack [avatars]="avatars()" [more]="more()"></span>
+  }
+  <span class="keen-panel__count">{{ count() }}</span>
+</div>
+<div class="keen-panel__actions">
+  @if (pressed() !== null) {
+    <button
+      pk-button
+      type="button"
+      variant="popkin"
+      size="md"
+      [pressed]="pressed()"
+      [attr.aria-disabled]="busy() ? 'true' : null"
+      (click)="press()"
+    >
+      <svg pk-icon name="keen" size="md"></svg>{{ label() }}
+    </button>
+  }
+  <ng-content />
+</div>

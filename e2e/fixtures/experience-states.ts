@@ -6,7 +6,7 @@ import { ExperienceDetailPage } from '../pages/experience-detail.page';
 import { ExperiencesPage } from '../pages/experiences.page';
 import { ShareExperienceDialog } from '../pages/share-experience.dialog';
 import { people } from './chat';
-import { type Experiences, canoeId, theMockExperienceScreens } from './experiences';
+import { type Experiences, beachId, canoeId, theMockExperienceScreens } from './experiences';
 import type { RouteKey } from './routes';
 
 /*
@@ -22,6 +22,17 @@ const at = (arrange?: Arrange) => (page: Page) => theMockExperienceScreens(page,
 const asRuth: Arrange = (all) => {
   all.viewer = people.ruth;
   all.host = false;
+};
+/** Joel neither shared the beach day nor is the Host, and is not keen on it yet (L2-042). */
+const asJoel: Arrange = (all) => {
+  all.viewer = people.joel;
+  all.host = false;
+};
+/** Ellie shared the beach day and is keen on it: she may say "We did this" (L2-042 AC4). */
+const asEllie: Arrange = (all) => {
+  all.viewer = people.ellie;
+  all.host = false;
+  all.find(beachId).iAmKeen = true;
 };
 /** Ruth has given the canoe five stars, as the rated mock and the comment dialog draw. */
 const rated: Arrange = (all) => {
@@ -83,6 +94,14 @@ export const experienceStates = {
       await expect(experiences.titles).toHaveCount(3);
     },
   },
+  experiencesWant: {
+    before: at(),
+    app: async (page) => {
+      const experiences = new ExperiencesPage(page);
+      await experiences.wantToDo.click();
+      await expect(experiences.titles).toHaveCount(1);
+    },
+  },
   experiencesNoResults: {
     before: at((all) => (all.shared = all.shared.filter((s) => s.kind !== 'Want'))),
     app: async (page) => {
@@ -127,6 +146,16 @@ export const experienceStates = {
   experienceDetail: { before: at(asRuth) },
   experienceDetailRated: { before: at(rated) },
   experienceDetailOwn: { before: at() },
+  experienceDetailWant: { before: at(asJoel) },
+  experienceDetailWantKeen: {
+    before: at(asJoel),
+    app: async (page) => {
+      const detail = new ExperienceDetailPage(page);
+      await detail.keenButton.click();
+      await expect(detail.keenButton).toHaveAttribute('aria-pressed', 'true');
+    },
+  },
+  experienceDetailWantOwn: { before: at(asEllie) },
   experienceDetailLoading: {
     before: at((all) => {
       asRuth(all);

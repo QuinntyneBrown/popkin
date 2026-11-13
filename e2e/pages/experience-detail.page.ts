@@ -25,6 +25,19 @@ export class ExperienceDetailPage {
   readonly bars: Locator;
   readonly meters: Locator;
   readonly ratingPanel: Locator;
+  /** "Keen to do this?", in the rating panel's place on an idea (L2-042). */
+  readonly keenPanel: Locator;
+  readonly keenHeading: Locator;
+  /** The keen toggle: "I'm keen", or "You're keen" pressed. */
+  readonly keenButton: Locator;
+  /** "7 keen". */
+  readonly keenCount: Locator;
+  /** The faces of the first four who are keen, hidden from assistive technology. */
+  readonly keenFaces: Locator;
+  /** "+3": how many more are keen. */
+  readonly keenMore: Locator;
+  /** "We did this": the sharer's and the Host's only (L2-042 AC4). */
+  readonly weDidThis: Locator;
   readonly ratingHeading: Locator;
   readonly starButtons: Locator;
   readonly checkedStars: Locator;
@@ -69,7 +82,16 @@ export class ExperienceDetailPage {
     this.count = this.scoreCard.locator('.score-card__count');
     this.bars = this.scoreCard.getByRole('list', { name: 'Ratings by stars' });
     this.meters = this.bars.locator('.meter');
-    this.ratingPanel = this.rest.locator('.card--tint');
+    this.ratingPanel = this.rest.locator('.card--tint:has(.star-btns)');
+    this.keenPanel = this.rest.locator('.card--tint', {
+      has: page.getByRole('heading', { name: 'Keen to do this?' }),
+    });
+    this.keenHeading = this.keenPanel.getByRole('heading', { level: 2 });
+    this.keenButton = this.keenPanel.locator('.btn[aria-pressed]');
+    this.keenCount = this.keenPanel.getByText(/^\d+ keen$/);
+    this.keenFaces = this.keenPanel.locator('.avatar-stack .avatar');
+    this.keenMore = this.keenPanel.locator('.avatar-stack__more');
+    this.weDidThis = this.keenPanel.getByRole('button', { name: 'We did this' });
     this.ratingHeading = this.ratingPanel.getByRole('heading', { level: 2 });
     this.starGroup = this.ratingPanel.getByRole('radiogroup');
     this.starButtons = this.starGroup.getByRole('radio');

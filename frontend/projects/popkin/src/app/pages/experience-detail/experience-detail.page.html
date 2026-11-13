@@ -56,6 +56,19 @@
             }
           </div>
         }
+        @if (view.keen; as keen) {
+          <div
+            pk-keen-panel
+            slot="cards"
+            [count]="keen.count"
+            [avatars]="keen.faces"
+            [more]="keen.more"
+            [pressed]="keen.pressed"
+            [label]="keen.label"
+            [busy]="keen.busy"
+            (toggled)="store.toggleKeen()"
+          ></div>
+        }
         @if (view.comments.length) {
           <section pk-comments heading="What people said">
             @for (said of view.comments; track said.id) {
