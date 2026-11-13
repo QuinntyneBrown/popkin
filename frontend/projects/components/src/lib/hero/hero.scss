@@ -1,0 +1,158 @@
+:host {
+  display: grid;
+  align-items: center;
+  gap: var(--space-12);
+  padding-block: var(--space-8) var(--space-20);
+}
+
+.hero__heading {
+  font: var(--text-hero);
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.hero__lead {
+  margin-top: var(--space-6);
+  max-width: var(--layout-measure);
+  font: var(--text-body-lg);
+  font-size: var(--font-size-lg);
+  color: var(--color-fg-muted);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-9);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / 1 var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+/* The preview: a Popkin as its members see it, with the QR code that lets them in. */
+.hero__art {
+  position: relative;
+  width: 100%;
+  max-width: var(--layout-hero-art-max);
+  margin-inline: auto;
+}
+
+.hero__card {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-2);
+}
+
+.hero__id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.hero__id-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero__name {
+  font: var(--text-title);
+}
+
+.hero__members {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.hero__time {
+  margin-top: var(--space-2);
+}
+
+.hero__photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.hero__photo {
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: var(--radius-md);
+}
+
+.hero__bubbles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  color: var(--color-fg-muted);
+}
+
+.hero__bubble {
+  width: fit-content;
+  max-width: 85%;
+  padding: var(--space-2-5) var(--space-4);
+  border-radius: var(--radius-lg);
+  border-bottom-left-radius: var(--radius-xs);
+  background: var(--color-bg-subtle);
+  font-size: var(--font-size-md-minus);
+}
+
+.hero__bubble--mine {
+  margin-left: auto;
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-xs);
+  background: var(--accent);
+  color: var(--color-fg-on-popkin);
+}
+
+/* A phone has no room for the code beside the card; it is not rendered there at all. */
+.hero__qr {
+  display: none;
+  position: absolute;
+  left: calc(-1 * var(--space-4));
+  bottom: calc(-1 * var(--space-8));
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-2);
+  rotate: -4deg;
+}
+
+@media (min-width: 36rem) {
+  .hero__heading {
+    font-size: var(--font-size-7xl);
+  }
+
+  .hero__card {
+    padding: var(--space-6);
+  }
+
+  .hero__qr {
+    display: block;
+  }
+}
+
+@media (min-width: 48rem) {
+  :host {
+    padding-top: var(--space-16);
+  }
+}
+
+/* The text beside the preview (L2-001 AC6). */
+@media (min-width: 62rem) {
+  :host {
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--space-16);
+    padding-bottom: var(--space-28);
+  }
+
+  .hero__heading {
+    font-size: var(--font-size-8xl);
+  }
+}
