@@ -27,8 +27,16 @@ network. Every mock has a bar at the bottom that lists its sibling states and sw
 
 - `?theme=dark` or `?theme=light` forces a theme; `t` toggles it.
 - `?chrome=0` hides the mock bar and the notes, leaving exactly what the product shows.
-- The app is one phone-width column at every width (designs draw it that way); from 576 px it is
-  centred on the page background. The landing page and the brand sheet use the full width.
+- Every screen fills the width it is given, as the designs draw it for five form factors: XS (under
+  640 px), S (640), M (768), L (1024) and XL (1280 and up).
+  - XS and S: one column, with the Popkin's tabs along the bottom. From S, cards, photos and paired
+    actions take a second column.
+  - M: the tabs become a side rail. Onboarding, joining and wrapping up split in two: the form on one
+    side and a picture of what it makes on the other.
+  - L: the rail becomes a sidebar with the Popkin's name and time left. Chat shows the thread list
+    beside the open thread, the home and an experience use two columns, and a photo gets a side
+    panel with its comments.
+  - XL: a third pane opens: who is here in a thread, who is on a call.
 - Dialogs are shown over the page they open from, which stays visible but inert. Under 640 px they
   are bottom sheets.
 
@@ -43,6 +51,10 @@ The mocks are built on the design system, so a change there shows here:
 - `assets/mock.css`, `assets/mock.js`: the mock bar, the notes and the brand sheet's own layout; not product UI.
 
 ## Where the mocks differ from the designs
+
+- **Wide layouts the designs do not draw.** Sign in, the code screens and join with a code split like
+  sign up, with the same photograph. The account screen and the full-page errors keep one centred
+  column. A Popkin's error screens have no sidebar, as they have no tabs on a phone.
 
 - **Colour scheme.** On 12 November 2026 the designs moved to the Straight palette: white paper,
   black ink, coral `#EA7671`, sun `#DCC573` and green `#5C8F57`, with black text on every colour

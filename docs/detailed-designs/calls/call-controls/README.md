@@ -29,7 +29,7 @@ Speaking is detected in each browser from the audio it receives; the server play
 - `docs/mocks/pages/video-call/default.html` — six people in two columns, "Walt, speaking" with
   the speaking ring, Ruth and Sam with avatars, Sam muted, controls "Mute", "Camera", "Leave",
   and "Minimise call" in the top bar.
-- `docs/mocks/pages/video-call/two.html` — two people in one column (L2-030 AC1, AC8).
+- `docs/mocks/pages/video-call/two.html` — two people in one column, side by side from 640 px (L2-030 AC1, AC8).
 - `docs/mocks/pages/video-call/muted.html` — the member muted: the control reads "Unmute",
   `aria-pressed="true"`, and the member's tile shows the muted icon (L2-030 AC3, AC5).
 - `docs/mocks/pages/video-call/camera-off.html` — the member's camera off: the control reads
@@ -154,7 +154,7 @@ server then records the change and tells the other participants (L2-030 AC2, AC3
 
 ### Behaviour — lay out tiles and mark who is speaking
 
-The page picks one or two columns from the participant count (L2-030 AC1). Each browser measures
+The page picks its columns from the participant count and the width: one for two people (two from 640 px), two for three or four, two for five or six (three from 640 px) (L2-030 AC1). Each browser measures
 audio levels and rings the tile of a person who is speaking (L2-030 AC4).
 
 ![Sequence diagram for tiles and speaking](diagrams/sequence-tiles-and-speaking.png)
