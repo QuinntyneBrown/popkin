@@ -118,6 +118,87 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("ChatThreads", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.Experience", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PictureKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("PictureThumbnailKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Place")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("SharedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("SharerMembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("When")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SharerMembershipId");
+
+                    b.HasIndex("PopkinId", "SharedAt");
+
+                    b.ToTable("Experiences", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ExperienceRating", b =>
+                {
+                    b.Property<Guid>("ExperienceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset?>("CommentedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("RatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Stars")
+                        .HasColumnType("int");
+
+                    b.HasKey("ExperienceId", "MembershipId");
+
+                    b.HasIndex("MembershipId");
+
+                    b.ToTable("ExperienceRatings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ExperienceRatings_Stars", "[Stars] BETWEEN 1 AND 5");
+                        });
+                });
+
             modelBuilder.Entity("Popkin.Domain.Membership", b =>
                 {
                     b.Property<Guid>("Id")
@@ -483,6 +564,36 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("PopkinId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.Experience", b =>
+                {
+                    b.HasOne("Popkin.Domain.PopkinSpace", null)
+                        .WithMany()
+                        .HasForeignKey("PopkinId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("SharerMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ExperienceRating", b =>
+                {
+                    b.HasOne("Popkin.Domain.Experience", null)
+                        .WithMany()
+                        .HasForeignKey("ExperienceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
