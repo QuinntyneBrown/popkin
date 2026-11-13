@@ -6,7 +6,7 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
 /**
  * Empty state (docs/design-system/components/empty-state.html): an icon or a Popkin's tile, a
  * heading, a line of text and the actions that move on. Also the not-found, error and offline
- * screens.
+ * screens. `compact` is the empty state of one section of a screen, inside a card.
  */
 @Component({
   selector: 'div[pk-empty-state]',
@@ -14,15 +14,21 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './empty-state.html',
   styleUrl: './empty-state.scss',
-  host: { class: 'empty', '[attr.role]': "alert() ? 'alert' : null" },
+  host: {
+    class: 'empty',
+    '[class.empty--compact]': 'compact()',
+    '[attr.role]': "alert() ? 'alert' : null",
+  },
 })
 export class EmptyState {
   readonly icon = input<IconName>();
   /** The emoji of a Popkin, on its tile, in place of the icon: an empty thread. */
   readonly tile = input<string>();
   readonly heading = input.required<string>();
-  /** `1` when the state is the whole screen, else `2`. */
-  readonly level = input<1 | 2>(2);
+  /** `1` when the state is the whole screen, `3` under a section's `h2`, else `2`. */
+  readonly level = input<1 | 2 | 3>(2);
+  /** The empty state of one section, inside a card: less room, a smaller heading and tile. */
+  readonly compact = input(false);
   readonly text = input<string>();
   /** Announces the state when it replaces content that failed to load (L2-056 AC2). */
   readonly alert = input(false);

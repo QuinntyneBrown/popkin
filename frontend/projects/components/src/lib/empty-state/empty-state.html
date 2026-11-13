@@ -1,12 +1,18 @@
 @if (tile(); as emoji) {
-  <span pk-popkin-tile size="xl" [emoji]="emoji"></span>
+  <span pk-popkin-tile [size]="compact() ? 'lg' : 'xl'" [emoji]="emoji"></span>
 } @else if (icon(); as name) {
   <span class="empty__icon"><svg pk-icon [name]="name" size="xl"></svg></span>
 }
-@if (level() === 1) {
-  <h1>{{ heading() }}</h1>
-} @else {
-  <h2 class="empty__heading">{{ heading() }}</h2>
+@switch (level()) {
+  @case (1) {
+    <h1>{{ heading() }}</h1>
+  }
+  @case (3) {
+    <h3 class="empty__heading empty__heading--sub">{{ heading() }}</h3>
+  }
+  @default {
+    <h2 class="empty__heading">{{ heading() }}</h2>
+  }
 }
 @if (text()) {
   <p class="empty__text">{{ text() }}</p>
