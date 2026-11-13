@@ -55,7 +55,8 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > the group did, where it ate and what it wants to do next, with a picture, filter the list, rate
 > each one from one to five stars, add a few words to their rating and see the group's score;
 > whoever shared an experience edits or deletes it.
-> <!-- Watch it: the video of journey 8 goes here when it exists. -->
+> [Watch it](docs/videos/08-journey-08-rate-an-experience/08-journey-08-rate-an-experience.mp4)
+> (2 min 12 s, with sound).
 > The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 

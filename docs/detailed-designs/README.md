@@ -262,6 +262,8 @@ or design that settled it.
 | 42 | Keen and "We did this" are not built. A "Want to do" card reads "0 keen", and its page shows the experience with no keen panel; there is no `ExperienceKeen` and no `CanMarkDone` ([Say you are keen](experiences/say-keen/README.md)) | Journey 20 | |
 | 43 | How a member comments on a "Want to do" experience. `docs/mocks/pages/experience-detail/want.html` draws comments without stars, and a comment belongs to a rating, which such an experience does not have. Nothing is built: the page lists none and the API answers `409` `rating_required` ([Comment on an experience](experiences/comment-on-experience/README.md), [Say you are keen](experiences/say-keen/README.md)) | Journey 20 | |
 | 44 | The diagrams of the five built designs of Experiences were not redrawn after journey 8. They show validator classes, `ExperienceKeen`, kind `WantToDo`, a `Photo` row for the picture, bars computed by the API and pages that hold the logic the stores now hold; each design says so above its diagrams | None | |
+| 45 | Experience cards in one row have pictures of different heights between 640 px and the widest layouts (168 and 224 px at 1024 px), and a long byline is cut ("Mara · Sat mo…"). The mock (`experiences/default.html`) draws both, and the app matches it: the mock changes first ([List experiences](experiences/list-experiences/README.md)); found in journey 8 | None | |
+| 46 | Choosing a picture in Share an experience on a phone scrolls the dialog's heading and the "Title" label out of view, as the dialog grows taller than the screen ([Share an experience](experiences/share-experience/README.md)); found in journey 8 | None | |
 
 Settled so far:
 
