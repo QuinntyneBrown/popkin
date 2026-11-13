@@ -86,4 +86,88 @@ public sealed class LeavePopkinTests
         var call = await (await lakeside.Host.CurrentCallAsync(lakeside.Id)).Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(1, call.GetProperty("participantCount").GetInt32());
     }
+
+    // Given the Host of Lakeside Weekend,
+    // when they ask to leave, by a request made by hand,
+    // then it is refused with 403 host_cannot_leave, and they are still its Host.
+    [Fact]
+    public async Task The_Host_cannot_leave()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+
+        await (await LeaveAsync(lakeside.Host, lakeside.Id)).AssertProblem(HttpStatusCode.Forbidden, "host_cannot_leave");
+
+        var home = await lakeside.Host.GetFromJsonAsync<JsonElement>($"/api/popkins/{lakeside.Id}");
+        Assert.Equal("Host", home.GetProperty("viewerRole").GetString());
+        Assert.Equal(1, home.GetProperty("memberCount").GetInt32());
+    }
+
+    // Given Joel, who has left Lakeside Weekend,
+    // when he asks for anything in it (its home, its thread, its members, its album, its
+    // experiences, its call, or to leave again),
+    // then each is refused with 404 popkin_not_found, as for a stranger.
+    [Fact]
+    public async Task A_person_who_left_is_refused_everything_in_the_Popkin_with_404()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var threadId = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
+        var joel = await api.SignedUpAsync("Joel Ferreira", "(415) 555-0123");
+        await joel.JoinAsync(lakeside.Code, "Joel Ferreira");
+        await LeaveAsync(joel, lakeside.Id);
+
+        var popkin = $"/api/popkins/{lakeside.Id}";
+        foreach (var path in new[]
+        {
+            popkin,
+            $"{popkin}/members",
+            $"{popkin}/threads/everyone",
+            $"{popkin}/threads/{threadId}/messages",
+            $"{popkin}/photos",
+            $"{popkin}/experiences",
+            $"{popkin}/calls/current",
+        })
+        {
+            await (await joel.GetAsync(path)).AssertProblem(HttpStatusCode.NotFound, "popkin_not_found");
+        }
+
+        await (await joel.SendMessageAsync(lakeside.Id, threadId, "Still here?")).AssertProblem(HttpStatusCode.NotFound, "popkin_not_found");
+        await (await LeaveAsync(joel, lakeside.Id)).AssertProblem(HttpStatusCode.NotFound, "popkin_not_found");
+    }
+
+    // Given a stranger, and no session,
+    // when they ask to leave, then it is 404 popkin_not_found, and 401.
+    [Fact]
+    public async Task Only_a_member_leaves()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var stranger = await api.SignedUpAsync("Sam Ortega", "(415) 555-0177");
+
+        await (await LeaveAsync(stranger, lakeside.Id)).AssertProblem(HttpStatusCode.NotFound, "popkin_not_found");
+        await (await LeaveAsync(stranger, Guid.NewGuid())).AssertProblem(HttpStatusCode.NotFound, "popkin_not_found");
+        Assert.Equal(HttpStatusCode.Unauthorized, (await LeaveAsync(api.CreateBrowserClient(), lakeside.Id)).StatusCode);
+    }
+
+    // Given Joel, who has left Lakeside Weekend,
+    // when he joins again with its invite,
+    // then he is a member again, as a new membership, and his Popkins list it.
+    [Fact]
+    public async Task A_person_who_left_comes_back_with_a_new_invite()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var joel = await api.SignedUpAsync("Joel Ferreira", "(415) 555-0123");
+        var first = await (await joel.JoinAsync(lakeside.Code, "Joel Ferreira")).Content.ReadFromJsonAsync<JsonElement>();
+        await LeaveAsync(joel, lakeside.Id);
+
+        var again = await joel.JoinAsync(lakeside.Code, "Joel");
+
+        Assert.Equal(HttpStatusCode.Created, again.StatusCode);
+        var rejoined = await again.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.NotEqual(first.GetProperty("membershipId").GetGuid(), rejoined.GetProperty("membershipId").GetGuid());
+        var home = await joel.GetFromJsonAsync<JsonElement>($"/api/popkins/{lakeside.Id}");
+        Assert.Equal(2, home.GetProperty("memberCount").GetInt32());
+    }
 }

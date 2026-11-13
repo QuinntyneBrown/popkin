@@ -3,6 +3,7 @@ import { aMemberAtHome, openLeave } from '../fixtures/leaving';
 import { popkinsUrl } from '../fixtures/my-popkins';
 import { expect, test } from '../fixtures/pk-test';
 import { MyPopkinsPage } from '../pages/my-popkins.page';
+import { NotFoundPage } from '../pages/not-found.page';
 import { PopkinHomePage } from '../pages/popkin-home.page';
 
 // Journey 18, Leave a Popkin: L2-047.
@@ -104,5 +105,20 @@ test.describe('Leave a Popkin', () => {
     await expect(dialog.leave).toBeEnabled();
     await expect(dialog.leave).toHaveText('Leave');
     await expect(page).toHaveURL(homeUrl);
+  });
+
+  // L2-047 AC4: after leaving, the Popkin is not there for them, as for a stranger.
+  test('finds the Popkin is not there once the member has left and goes back to it', async ({
+    page,
+  }) => {
+    await aMemberAtHome(page);
+    await page.goto(homeUrl);
+    const dialog = await openLeave(page);
+    await dialog.leave.click();
+    await expect(page).toHaveURL(popkinsUrl);
+
+    await page.goBack();
+
+    await expect(new NotFoundPage(page).root).toBeVisible();
   });
 });

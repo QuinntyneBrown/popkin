@@ -1,8 +1,10 @@
 using MediatR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Calls;
+using Popkin.Application.Problems;
 using Popkin.Application.Realtime;
 using Popkin.Application.Security;
+using Popkin.Domain;
 
 namespace Popkin.Application.Members;
 
@@ -26,6 +28,12 @@ public sealed class LeavePopkinCommandHandler(
     {
         // Leaving adds nothing to the Popkin, so a wrapped-up one does not refuse it.
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
+        // The Host wraps the Popkin up instead, even when the request is made by hand (L2-047 AC3).
+        if (membership.Role == MembershipRole.Host)
+        {
+            throw HostCannotLeave();
+        }
+
         membership.Leave(clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
 
@@ -44,4 +52,7 @@ public sealed class LeavePopkinCommandHandler(
 
         await notifier.MemberLeft(popkin.Id, membership.Id);
     }
+
+    public static ProblemException HostCannotLeave() =>
+        new(403, "host_cannot_leave", "The Host can't leave. Wrap the Popkin up instead.");
 }
