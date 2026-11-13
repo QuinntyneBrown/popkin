@@ -33,3 +33,4 @@ export * from './lib/api/chat/unread-tracker';
 export * from './lib/api/realtime/hub-events';
 export * from './lib/api/realtime/popkin-realtime';
 export * from './lib/api/realtime/signalr-popkin-realtime';
+export * from './lib/api/popkins/time-left';

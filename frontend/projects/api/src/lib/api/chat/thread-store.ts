@@ -155,18 +155,23 @@ export class ThreadStore {
       });
   }
 
-  /** Loads the page before the oldest message shown (L2-027 AC5). */
-  loadEarlier(): Promise<void> {
+  /**
+   * Loads the page before the oldest message shown (L2-027 AC5). The rows are added inside
+   * `within`, so the page can hold the view still around the change.
+   */
+  loadEarlier(within: (change: () => void) => void = (change) => change()): Promise<void> {
     const thread = this.header();
     const oldest = this.messages()[0];
     if (!thread || !oldest || !this.earlier()) return Promise.resolve();
     this.loadingEarlier ??= firstValueFrom(
       this.chat.getMessages(thread.popkinId, thread.id, { before: oldest.id }),
     )
-      .then((page) => {
-        this.messages.update((shown) => mergeMessages(shown, page.items));
-        this.earlier.set(page.hasMore);
-      })
+      .then((page) =>
+        within(() => {
+          this.messages.update((shown) => mergeMessages(shown, page.items));
+          this.earlier.set(page.hasMore);
+        }),
+      )
       .catch(() => undefined)
       .finally(() => (this.loadingEarlier = undefined));
     return this.loadingEarlier;

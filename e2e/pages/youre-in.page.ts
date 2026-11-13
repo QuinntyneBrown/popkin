@@ -36,9 +36,4 @@ export class YoureInPage {
     const second = await this.seeThePhotos.boundingBox();
     return !!first && !!second && Math.abs(first.y - second.y) < 1;
   }
-
-  /** What the last navigation handed the next screen. */
-  async handedOn(): Promise<unknown> {
-    return this.page.evaluate(() => history.state);
-  }
 }
