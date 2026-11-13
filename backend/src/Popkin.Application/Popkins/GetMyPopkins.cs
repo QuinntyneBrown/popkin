@@ -72,9 +72,35 @@ public sealed class GetMyPopkinsQueryHandler(IAppDbContext db, ICurrentPerson cu
             .ToLookup(m => m.PopkinId);
 
         var active = popkins.Where(p => p.Status == PopkinStatus.Active).ToList();
+        var wrappedUp = popkins.Where(p => p.Status == PopkinStatus.WrappedUp).ToList();
         return new MyPopkinsDto(
             active.Count == 0 ? [] : await CardsAsync(active, mine, members, cancellationToken),
-            []);
+            wrappedUp.Count == 0 ? [] : await WrappedUpAsync(wrappedUp, members, cancellationToken));
+    }
+
+    private async Task<IReadOnlyList<WrappedUpPopkinDto>> WrappedUpAsync(
+        List<PopkinSpace> popkins, ILookup<Guid, Membership> members, CancellationToken cancellationToken)
+    {
+        var popkinIds = popkins.Select(p => p.Id).ToList();
+        var photoCounts = await db.Photos
+            .Where(p => popkinIds.Contains(p.PopkinId))
+            .GroupBy(p => p.PopkinId)
+            .Select(g => new { PopkinId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(g => g.PopkinId, g => g.Count, cancellationToken);
+
+        // A wrapped-up Popkin always has the time it wrapped up (PopkinSpace.WrapUp).
+        return popkins
+            .OrderByDescending(p => p.WrappedUpAt)
+            .ThenBy(p => p.Id)
+            .Select(p => new WrappedUpPopkinDto(
+                p.Id,
+                p.Name,
+                p.Emoji,
+                p.Colour,
+                p.WrappedUpAt.GetValueOrDefault(),
+                members[p.Id].Count(),
+                photoCounts.GetValueOrDefault(p.Id)))
+            .ToList();
     }
 
     private async Task<IReadOnlyList<ActivePopkinCardDto>> CardsAsync(

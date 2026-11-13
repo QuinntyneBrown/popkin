@@ -211,4 +211,66 @@ public sealed class MyPopkinsTests
         Assert.Equal(["Book Club"], Names(joelsAfterLeaving.GetProperty("active")));
         Assert.Equal(HttpStatusCode.Unauthorized, anonymous.StatusCode);
     }
+
+    // Given a member of three Popkins, of which Lakeside wrapped up and then Book Club did,
+    // (wrapped up straight in the store: wrapping up is journey 9)
+    // when they read My Popkins,
+    // then the two are listed as wrapped up, the latest first, each with its look, when it
+    // wrapped up and how many people and photos it has, and only the third is active;
+    // a member of Lakeside alone reads no active Popkin, and a stranger reads nothing.
+    [Fact]
+    public async Task Wrapped_up_Popkins_are_listed_apart_the_most_recently_wrapped_up_first()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var joel = await api.SignedUpAsync("Joel Ferreira", "(415) 555-0123");
+        await joel.JoinAsync(lakeside.Code, "Joel Ferreira");
+        var bookClubId = await StartAsync(lakeside.Host, "Book Club", "📚", "Plum");
+        await StartAsync(lakeside.Host, "Beach Day", "🏖️", "Sky");
+        await api.AddPhotosAsync(lakeside.Id, "Joel Ferreira", 3, TimeSpan.FromMinutes(1));
+        await api.AddPhotosAsync(bookClubId, "Mara Okafor", 1, TimeSpan.FromMinutes(1));
+        api.Clock.Advance(TimeSpan.FromHours(1));
+        await api.WrapUpAsync(lakeside.Id);
+        var lakesideWrappedUpAt = api.Clock.GetUtcNow();
+        api.Clock.Advance(TimeSpan.FromHours(1));
+        await api.WrapUpAsync(bookClubId);
+        var sam = await api.SignedUpAsync("Sam Ortega", "(415) 555-0177");
+
+        var maras = await MyPopkinsAsync(lakeside.Host);
+        var joels = await MyPopkinsAsync(joel);
+        var sams = await MyPopkinsAsync(sam);
+
+        Assert.Equal(["Beach Day"], Names(maras.GetProperty("active")));
+        Assert.Equal(["Book Club", "Lakeside Weekend"], Names(maras.GetProperty("wrappedUp")));
+        var row = maras.GetProperty("wrappedUp")[1];
+        Assert.Equal(
+            ["colour", "emoji", "id", "name", "peopleCount", "photoCount", "wrappedUpAt"],
+            row.EnumerateObject().Select(p => p.Name).Order());
+        Assert.Equal(lakeside.Id, row.GetProperty("id").GetGuid());
+        Assert.Equal("🏕️", row.GetProperty("emoji").GetString());
+        Assert.Equal("Teal", row.GetProperty("colour").GetString());
+        Assert.Equal(lakesideWrappedUpAt, row.GetProperty("wrappedUpAt").GetDateTimeOffset());
+        Assert.Equal(2, row.GetProperty("peopleCount").GetInt32());
+        Assert.Equal(3, row.GetProperty("photoCount").GetInt32());
+        Assert.Equal(1, maras.GetProperty("wrappedUp")[0].GetProperty("peopleCount").GetInt32());
+        Assert.Equal(1, maras.GetProperty("wrappedUp")[0].GetProperty("photoCount").GetInt32());
+        Assert.Equal(0, joels.GetProperty("active").GetArrayLength());
+        Assert.Equal(["Lakeside Weekend"], Names(joels.GetProperty("wrappedUp")));
+        Assert.Equal(0, sams.GetProperty("wrappedUp").GetArrayLength());
+    }
+
+    // Given a wrapped-up Popkin with no photo,
+    // when its member reads My Popkins, then it counts 0 photos.
+    [Fact]
+    public async Task A_wrapped_up_Popkin_without_photos_counts_none()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        await api.WrapUpAsync(lakeside.Id);
+
+        var mine = await MyPopkinsAsync(lakeside.Host);
+
+        Assert.Equal(0, mine.GetProperty("active").GetArrayLength());
+        Assert.Equal(0, Assert.Single(mine.GetProperty("wrappedUp").EnumerateArray()).GetProperty("photoCount").GetInt32());
+    }
 }
