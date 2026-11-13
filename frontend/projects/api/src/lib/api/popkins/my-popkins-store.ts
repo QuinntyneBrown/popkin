@@ -164,9 +164,9 @@ export class MyPopkinsStore {
   private show(view: MyPopkinsView): void {
     this.now.set(new Date());
     for (const popkin of view.active) {
-      this.unread.set({
+      this.unread.setPopkin({
         popkinId: popkin.id,
-        threadId: popkin.everyoneThreadId,
+        everyoneThreadId: popkin.everyoneThreadId,
         viewerMembershipId: popkin.viewerMembershipId,
         count: popkin.unreadCount,
       });

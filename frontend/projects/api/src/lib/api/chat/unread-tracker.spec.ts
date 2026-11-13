@@ -52,6 +52,30 @@ describe('UnreadTracker (L2-027 AC3, AC4)', () => {
     expect(tracker.forPopkin('p')).toBe(2);
   });
 
+  it('counts a message of a thread it was not told of, in a Popkin it knows', () => {
+    messageAdded$.next({ ...message('new', 'walt'), popkinId: 'p' });
+    expect(tracker.forThread('new')).toBe(1);
+    expect(tracker.forPopkin('p')).toBe(3);
+
+    messageAdded$.next({ ...message('new', 'me'), popkinId: 'p' });
+    expect(tracker.forThread('new')).toBe(1);
+  });
+
+  it('ignores a thread of a Popkin it does not know', () => {
+    messageAdded$.next({ ...message('new', 'walt'), popkinId: 'q' });
+    expect(tracker.forPopkin('q')).toBe(0);
+  });
+
+  it('takes a Popkin’s total, giving Everyone what its other threads do not account for', () => {
+    tracker.set({ popkinId: 'p', threadId: 'd', viewerMembershipId: 'me', count: 1 });
+    tracker.setPopkin({ popkinId: 'p', everyoneThreadId: 't', viewerMembershipId: 'me', count: 5 });
+    expect(tracker.forThread('t')).toBe(4);
+    expect(tracker.forPopkin('p')).toBe(5);
+
+    tracker.setPopkin({ popkinId: 'p', everyoneThreadId: 't', viewerMembershipId: 'me', count: 0 });
+    expect(tracker.forThread('t')).toBe(0);
+  });
+
   it('is zero once the thread is read, here or on another device', () => {
     threadRead$.next('t');
     expect(tracker.forThread('t')).toBe(0);

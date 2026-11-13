@@ -21,10 +21,10 @@ export class UnreadTracker {
   constructor() {
     const realtime = inject(POPKIN_REALTIME);
     realtime.messageAdded$.subscribe((message) => {
-      const thread = this.threads().get(message.threadId);
+      const thread = this.threads().get(message.threadId) ?? this.begun(message);
       if (!thread || thread.reading) return;
       if (message.author.membershipId === thread.viewerMembershipId) return;
-      this.change(message.threadId, { count: thread.count + 1 });
+      this.put(message.threadId, { ...thread, count: thread.count + 1 });
     });
     realtime.threadRead$.subscribe((threadId) => this.read(threadId));
   }
@@ -42,6 +42,30 @@ export class UnreadTracker {
       viewerMembershipId: thread.viewerMembershipId,
       count: thread.count,
       reading,
+    });
+  }
+
+  /**
+   * Takes the count the API answered for a whole Popkin, its direct messages included: what
+   * the threads already known do not account for is the Everyone thread's.
+   */
+  setPopkin(popkin: {
+    popkinId: string;
+    everyoneThreadId: string;
+    viewerMembershipId: string;
+    count: number;
+  }): void {
+    let others = 0;
+    for (const [threadId, thread] of this.threads()) {
+      if (thread.popkinId === popkin.popkinId && threadId !== popkin.everyoneThreadId) {
+        others += thread.count;
+      }
+    }
+    this.set({
+      popkinId: popkin.popkinId,
+      threadId: popkin.everyoneThreadId,
+      viewerMembershipId: popkin.viewerMembershipId,
+      count: Math.max(0, popkin.count - others),
     });
   }
 
@@ -63,6 +87,17 @@ export class UnreadTracker {
       if (thread.popkinId === popkinId) total += thread.count;
     }
     return total;
+  }
+
+  /**
+   * A thread nobody told the tracker of, in a Popkin it knows: a direct message someone has
+   * just begun with the member.
+   */
+  private begun(message: { popkinId: string }): Tracked | undefined {
+    for (const thread of this.threads().values()) {
+      if (thread.popkinId === message.popkinId) return { ...thread, count: 0, reading: false };
+    }
+    return undefined;
   }
 
   private change(threadId: string, change: Partial<Tracked>): void {
