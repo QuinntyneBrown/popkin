@@ -90,6 +90,8 @@ export class Album {
   photoCount: number | null = 48;
   contributorCount: number | null = 11;
   canAdd = true;
+  /** The latest people to add a photo, as the header shows them; the mocks' four. */
+  contributors: Person[] = [people.mara, people.walt, people.dev, people.ellie];
 
   /** What was asked of the album, in order. */
   readonly asked: { filter: string; cursor: string | null }[] = [];
@@ -100,6 +102,7 @@ export class Album {
   private readonly held = new Map<Read, Promise<void>>();
   private readonly uploadEnds = new Map<string, UploadEnd>();
   private uploadsHeld?: Promise<void>;
+  private uploadsFree = 0;
   private brokenImages = false;
   private next = 100;
 
@@ -152,9 +155,10 @@ export class Album {
     this.uploadEnds.clear();
   }
 
-  /** No upload answers until the returned function is called. */
-  holdUploads(): () => void {
+  /** No upload after the first `after` answers until the returned function is called. */
+  holdUploads(after = 0): () => void {
     let release: () => void = () => undefined;
+    this.uploadsFree = after;
     this.uploadsHeld = new Promise((resolve) => (release = resolve));
     return release;
   }
@@ -219,13 +223,14 @@ export class Album {
       const all = filter === 'mine' ? this.shots.filter((s) => s.by === people.mara) : this.shots;
       const from = cursor ? all.findIndex((s) => s.id === cursor) + 1 : 0;
       const items = all.slice(from, from + PAGE);
-      const people_ = [...new Set(this.shots.map((s) => s.by))];
+      const adders = [...new Set(this.shots.map((s) => s.by))];
       return {
         photoCount: this.photoCount ?? this.shots.length,
-        contributorCount: this.contributorCount ?? people_.length,
-        contributors: people_
-          .slice(0, 4)
-          .map((p) => ({ firstName: p.firstName, avatar: p.avatar })),
+        contributorCount: this.contributorCount ?? adders.length,
+        contributors: (this.shots.length ? this.contributors : []).map((p) => ({
+          firstName: p.firstName,
+          avatar: p.avatar,
+        })),
         items: items.map((s) => this.summary(s)),
         nextCursor: from + PAGE < all.length ? items[items.length - 1].id : null,
         canAdd: this.canAdd,
@@ -268,7 +273,7 @@ export class Album {
     const name = /name="file"; filename="([^"]*)"/.exec(form)?.[1] ?? '';
     const sent = /name="caption"\r\n\r\n([\s\S]*?)\r\n--/.exec(form)?.[1];
     const caption = sent ? Buffer.from(sent, 'latin1').toString('utf8') : null;
-    await this.uploadsHeld;
+    if (this.uploadsFree-- <= 0) await this.uploadsHeld;
     const end = this.uploadEnds.get(name);
     if (end) {
       const refusal =
@@ -306,6 +311,13 @@ export function aFileOf(megabytes: number, name = 'huge.jpg', mimeType = 'image/
   return { name, mimeType, buffer: Buffer.alloc(megabytes * 1024 * 1024, 1) };
 }
 
+/** A real photo padded to this many megabytes: it still draws, and is too large to add. */
+export function aBigPhoto(megabytes: number, name: string) {
+  const photo = fs.readFileSync(path.join(images, name));
+  const padding = Buffer.alloc(megabytes * 1024 * 1024 - photo.length);
+  return { name, mimeType: 'image/jpeg', buffer: Buffer.concat([photo, padding]) };
+}
+
 /** The three photos the Add photos mocks draw. */
 export const theThree = () => [aPhoto('lake.jpg'), aPhoto('bonfire.jpg'), aPhoto('hike.jpg')];
 
@@ -314,6 +326,14 @@ const albums = new WeakMap<Page, Album>();
 export function albumOf(page: Page): Album {
   const album = albums.get(page);
   if (!album) throw new Error('This page has no album.');
+  return album;
+}
+
+/** The album answering for whoever is signed in on this page. */
+export async function withTheAlbum(page: Page): Promise<Album> {
+  const album = new Album(page);
+  await album.install();
+  albums.set(page, album);
   return album;
 }
 
@@ -363,4 +383,42 @@ export async function someoneAddsAPhoto(
 ): Promise<Shot> {
   const album = albumOf(page);
   return album.added(hubOf(page), people.walt, caption, album.justNow());
+}
+
+/*
+ * The states of the Add photos mocks, each opened from the album that is on screen.
+ */
+
+const dockCaption = 'First light on the dock. Worth the 6 am alarm.';
+
+async function chooseFor(page: Page, files: ReturnType<typeof aPhoto>[]): Promise<void> {
+  await page.locator('input[type="file"]').setInputFiles(files);
+  const dialog = page.getByRole('dialog', { name: 'Add photos' });
+  await dialog.getByLabel('Caption for photo 1').fill(dockCaption);
+}
+
+const theAction = (page: Page) =>
+  page.getByRole('dialog', { name: 'Add photos' }).locator('.dialog__footer').getByRole('button');
+
+/** Three photos chosen, the first with its caption. */
+export const chooseTheThree = (page: Page) => chooseFor(page, theThree());
+
+/** The third is 14 MB. */
+export const chooseOneTooLarge = (page: Page) =>
+  chooseFor(page, [aPhoto('lake.jpg'), aPhoto('bonfire.jpg'), aBigPhoto(14, 'hike.jpg')]);
+
+/** The three are on their way; `sent` of them have arrived. */
+export async function addTheThreeSlowly(page: Page, sent = 0): Promise<void> {
+  albumOf(page).holdUploads(sent);
+  await chooseTheThree(page);
+  await theAction(page).click();
+  await page.getByText(`Uploading ${sent + 1} of 3`).waitFor();
+}
+
+/** The third did not upload; the other two are in the album. */
+export async function addTheThreeWithOneFailing(page: Page): Promise<void> {
+  albumOf(page).failUpload('hike.jpg');
+  await chooseTheThree(page);
+  await theAction(page).click();
+  await page.getByRole('button', { name: 'Done' }).waitFor();
 }

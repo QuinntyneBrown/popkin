@@ -95,6 +95,7 @@ describe('albumLine', () => {
     [48, 11, '48 photos from 11 people'],
     [1, 1, '1 photo from 1 person'],
     [5, 1, '5 photos from 1 person'],
+    [0, 0, 'No photos yet'],
   ])('%i from %i reads "%s"', (photos, people, text) => {
     expect(albumLine(photos, people)).toBe(text);
   });

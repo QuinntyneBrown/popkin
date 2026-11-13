@@ -62,8 +62,9 @@ export function groupPhotosByDay(
   return days;
 }
 
-/** "48 photos from 11 people" (L2-032 AC1). */
+/** "48 photos from 11 people" (L2-032 AC1), or that there are none yet. */
 export function albumLine(photoCount: number, contributorCount: number): string {
+  if (photoCount === 0) return 'No photos yet';
   const photos = `${photoCount} ${photoCount === 1 ? 'photo' : 'photos'}`;
   return `${photos} from ${contributorCount} ${contributorCount === 1 ? 'person' : 'people'}`;
 }

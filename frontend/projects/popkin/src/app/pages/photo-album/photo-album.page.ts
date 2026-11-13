@@ -96,12 +96,14 @@ export class PhotoAlbumPage {
       })),
     })),
   );
-  /** The filters stay while there is an album to filter. */
+  /** The filters show while the album loads and while there is an album to filter. */
   protected readonly filtering = computed(() =>
-    ['ready', 'no-results'].includes(this.store.state()) ? 'Filter' : undefined,
+    ['loading', 'ready', 'no-results'].includes(this.store.state()) ? 'Filter' : undefined,
   );
-  /** "Add photos" in the header and floating: where photos show and may be added. */
-  protected readonly adding = computed(() => this.store.canAdd() && this.store.state() === 'ready');
+  /** "Add photos" in the header and floating: where photos show, or are about to. */
+  protected readonly adding = computed(
+    () => this.store.canAdd() && ['loading', 'ready'].includes(this.store.state()),
+  );
   protected readonly unreadCount = computed(() => this.unread.forPopkin(this.popkinId()));
 
   constructor() {

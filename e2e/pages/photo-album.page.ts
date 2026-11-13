@@ -37,6 +37,9 @@ export class PhotoAlbumPage {
   readonly firstGrid: Locator;
   readonly firstDay: Locator;
   readonly fab: Locator;
+  readonly faces: Locator;
+  readonly headerAction: Locator;
+  readonly albumSkeleton: Locator;
   private readonly picker: Locator;
 
   constructor(page: Page) {
@@ -70,6 +73,9 @@ export class PhotoAlbumPage {
     this.nav = page.getByRole('navigation', { name: 'Popkin' });
     this.currentTab = this.nav.locator('[aria-current="page"]');
     this.picker = page.locator('input[type="file"]');
+    this.faces = this.header.locator('.avatar-stack');
+    this.headerAction = this.header.locator('.tab-header__action');
+    this.albumSkeleton = this.album.locator('[aria-hidden="true"]').first();
   }
 
   thumbnail(name: string): Locator {

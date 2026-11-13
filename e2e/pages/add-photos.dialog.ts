@@ -16,6 +16,8 @@ export class AddPhotosDialog {
   readonly body: Locator;
   readonly footer: Locator;
   readonly list: Locator;
+  readonly header: Locator;
+  readonly description: Locator;
 
   constructor(page: Page) {
     this.root = page.getByRole('dialog', { name: 'Add photos' });
@@ -25,10 +27,12 @@ export class AddPhotosDialog {
     this.body = this.root.locator('.dialog__body');
     this.footer = this.root.locator('.dialog__footer');
     this.list = this.body.getByRole('list');
+    this.header = this.root.locator('.dialog__header');
+    this.description = this.root.locator('.dialog__desc');
     this.rows = this.root.locator('.upload-item');
     this.action = this.footer.getByRole('button');
     this.progress = this.root.getByRole('progressbar', { name: 'Uploading' });
-    this.progressText = this.root.locator('.progress__text');
+    this.progressText = this.root.getByText(/^Uploading \d+ of \d+$/);
     this.outcome = this.root.locator('.alert--danger');
     this.notice = this.root.locator('.alert--info');
   }

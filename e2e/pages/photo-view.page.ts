@@ -21,6 +21,9 @@ export class PhotoViewPage {
   readonly error: Locator;
   readonly errorHeading: Locator;
   readonly tryAgain: Locator;
+  /** Regions for the sweeps and the parity specs. */
+  readonly titles: Locator;
+  readonly captionRegion: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="photo-view"]');
@@ -40,6 +43,8 @@ export class PhotoViewPage {
     this.error = this.screen.getByRole('alert');
     this.errorHeading = this.error.getByRole('heading');
     this.tryAgain = this.error.getByRole('button', { name: 'Try again' });
+    this.titles = this.bar.locator('.topbar__titles');
+    this.captionRegion = this.panel.getByRole('heading', { level: 1 });
   }
 
   /** Whether the whole photo shows: nothing of it is cropped away. */

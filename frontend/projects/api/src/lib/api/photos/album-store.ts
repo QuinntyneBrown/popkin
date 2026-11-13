@@ -42,8 +42,8 @@ export class AlbumStore {
   });
   readonly contributors = computed(() => this.album()?.contributors ?? []);
   readonly contributorCount = computed(() => this.album()?.contributorCount ?? 0);
-  /** False until the album says so, and once the Popkin has wrapped up (L2-045 AC3). */
-  readonly canAdd = computed(() => this.album()?.canAdd ?? false);
+  /** False once the album says the Popkin has wrapped up (L2-045 AC3). */
+  readonly canAdd = computed(() => this.album()?.canAdd ?? true);
 
   constructor() {
     const mine = takeUntilDestroyed(inject(DestroyRef));
