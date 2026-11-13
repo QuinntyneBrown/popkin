@@ -40,8 +40,8 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > (2 min 12 s, with sound). Journey 5, Share photos, is built as well: members add up to 20
 > photos at a time with captions, browse the album by day under Everyone or Mine, and open each
 > photo full screen, and new photos appear for everyone without a reload.
-> <!-- Watch it: the video of journey 5 goes here when it exists. -->
-> The journeys still to build are in
+> [Watch it](docs/videos/05-journey-05-share-photos/05-journey-05-share-photos.mp4)
+> (2 min 16 s, with sound). The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents
