@@ -108,8 +108,7 @@ export class ThreadStore {
 
     mine(this.realtime.messageAdded$).subscribe((message) => this.onAdded(message));
     mine(this.realtime.messageDeleted$).subscribe(({ threadId, messageId }) => {
-      if (threadId !== this.header()?.id) return;
-      this.messages.update((shown) => shown.filter((message) => message.id !== messageId));
+      if (threadId === this.header()?.id) this.removeMessage(messageId);
     });
     mine(this.realtime.reactionsChanged$).subscribe(({ threadId, messageId, reactions }) => {
       if (threadId === this.header()?.id) this.setReactions(messageId, reactions);
@@ -281,12 +280,48 @@ export class ThreadStore {
       });
   }
 
+  /**
+   * Deletes the member's own message for everyone; it goes once the server has deleted it, and
+   * the replies to it read "Message deleted" (L2-025 AC4).
+   */
+  deleteMessage(messageId: string): void {
+    const thread = this.header();
+    const message = this.messages().find((shown) => shown.id === messageId);
+    if (!thread || thread.readOnly || message?.author.membershipId !== thread.viewer.membershipId) {
+      return;
+    }
+    this.chat
+      .deleteMessage(thread.popkinId, thread.id, messageId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.removeMessage(messageId),
+        error: () =>
+          this.failed.next({ kind: 'delete', retry: () => this.deleteMessage(messageId) }),
+      });
+  }
+
   retry(clientMessageId: string): void {
     this.outbox.retry(clientMessageId);
   }
 
   discard(clientMessageId: string): void {
     this.outbox.discard(clientMessageId);
+  }
+
+  private removeMessage(messageId: string): void {
+    this.messages.update((shown) =>
+      shown
+        .filter((message) => message.id !== messageId)
+        .map((message) =>
+          message.quote?.messageId === messageId
+            ? {
+                ...message,
+                quote: { messageId, authorFirstName: null, snippet: null, deleted: true },
+              }
+            : message,
+        ),
+    );
+    if (this.reply()?.messageId === messageId) this.reply.set(null);
   }
 
   private setReactions(messageId: string, reactions: ReactionSummary[]): void {

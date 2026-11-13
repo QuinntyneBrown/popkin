@@ -712,4 +712,64 @@ describe('ThreadStore', () => {
       expect(chips()).toEqual(['🥞1']);
     });
   });
+
+  describe('deleting the member’s own message', () => {
+    beforeEach(() => {
+      chat.stored = [
+        message(1, 'Mara', { text: 'Paddles are in the shed' }),
+        message(2, 'Walt', {
+          text: 'Thanks',
+          quote: {
+            messageId: 'id-0001',
+            authorFirstName: 'Mara',
+            snippet: 'Paddles',
+            deleted: false,
+          },
+        }),
+      ];
+      store.open('p');
+    });
+
+    const quoteOf = (n: number) => {
+      const row = store.rows().find((r) => r.kind === 'message' && r.id === `id-000${n}`);
+      return row?.kind === 'message' ? row.quote : undefined;
+    };
+
+    it('takes it away and reads "Message deleted" in the replies to it (L2-025 AC4)', () => {
+      store.deleteMessage('id-0001');
+      expect(chat.deleted).toEqual(['id-0001']);
+      expect(shown()).toEqual(['Thanks']);
+      expect(quoteOf(2)).toMatchObject({ messageId: 'id-0001', deleted: true });
+    });
+
+    it('does the same when someone deletes a message elsewhere', () => {
+      realtime.messageDeleted$.next({ threadId: 't', messageId: 'id-0001' });
+      expect(quoteOf(2)).toMatchObject({ deleted: true });
+    });
+
+    it('stops a reply to a message that is deleted', () => {
+      store.startReply('id-0001');
+      realtime.messageDeleted$.next({ threadId: 't', messageId: 'id-0001' });
+      expect(store.replyingTo()).toBeNull();
+    });
+
+    it('keeps the message and says so when the deletion fails, with a way to try again', () => {
+      chat.deleteFails = true;
+      const failures: string[] = [];
+      store.failures$.subscribe((failure) => {
+        failures.push(failure.kind);
+        chat.deleteFails = false;
+        failure.retry();
+      });
+      store.deleteMessage('id-0001');
+      expect(failures).toEqual(['delete']);
+      expect(chat.deleted).toEqual(['id-0001', 'id-0001']);
+      expect(shown()).toEqual(['Thanks']);
+    });
+
+    it('deletes only the member’s own messages', () => {
+      store.deleteMessage('id-0002');
+      expect(chat.deleted).toEqual([]);
+    });
+  });
 });
