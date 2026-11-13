@@ -8,6 +8,9 @@ public enum ExperienceKind
     Want,
 }
 
+/// <summary>The photo store keys of an experience's picture: its display image and its thumbnail.</summary>
+public sealed record ExperiencePicture(string Key, string ThumbnailKey);
+
 /// <summary>
 /// Something the group did, a restaurant, or something the group wants to do, shared in a Popkin
 /// by one member, which members rate and comment on (L2-037 to L2-041).
@@ -42,10 +45,26 @@ public sealed class Experience
 
     public string? Place { get; private set; }
 
+    /// <summary>The photo store key of the picture's display image; null shows the Popkin's emoji on its colour (L2-040 AC5).</summary>
+    public string? PictureKey { get; private set; }
+
+    /// <summary>The photo store key of the picture's thumbnail.</summary>
+    public string? PictureThumbnailKey { get; private set; }
+
     public DateTimeOffset SharedAt { get; private set; }
 
+    public ExperiencePicture? Picture =>
+        PictureKey is { } key && PictureThumbnailKey is { } thumbnailKey ? new ExperiencePicture(key, thumbnailKey) : null;
+
     public static Experience Share(
-        Guid popkinId, Guid sharerMembershipId, ExperienceKind kind, string title, string? when, string? place, DateTimeOffset now) => new()
+        Guid popkinId,
+        Guid sharerMembershipId,
+        ExperienceKind kind,
+        string title,
+        string? when,
+        string? place,
+        ExperiencePicture? picture,
+        DateTimeOffset now) => new()
     {
         Id = Guid.NewGuid(),
         PopkinId = popkinId,
@@ -54,6 +73,8 @@ public sealed class Experience
         Title = title,
         When = when,
         Place = place,
+        PictureKey = picture?.Key,
+        PictureThumbnailKey = picture?.ThumbnailKey,
         SharedAt = now,
     };
 }

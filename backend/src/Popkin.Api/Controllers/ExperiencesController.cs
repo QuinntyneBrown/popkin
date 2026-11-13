@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Popkin.Application.Experiences;
+using Popkin.Application.Invites;
+using Popkin.Domain;
 
 namespace Popkin.Api.Controllers;
 
@@ -14,14 +16,22 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
     public async Task<ActionResult<ExperiencesSummaryDto>> GetSummary(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetExperiencesSummaryQuery(popkinId), cancellationToken));
 
-    /// <summary>Shares an experience: a title, a kind and, when given, a when and a place (L2-040).</summary>
+    /// <summary>
+    /// Shares an experience: a title, a kind and, when given, a when, a place and a picture
+    /// (L2-040). The body may be up to twice the largest picture, so a picture over 10 MB is
+    /// refused with its own message and not by the server's size limit.
+    /// </summary>
     [HttpPost]
     [Consumes("multipart/form-data")]
+    [RequestSizeLimit(2 * Photo.MaxFileBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 2 * Photo.MaxFileBytes)]
     public async Task<ActionResult<ExperienceCardDto>> Share(
-        Guid popkinId, [FromForm] string? title, [FromForm] string? kind, [FromForm] string? when, [FromForm] string? place,
+        Guid popkinId, [FromForm] string? title, [FromForm] string? kind, [FromForm] string? when, [FromForm] string? place, IFormFile? picture,
         CancellationToken cancellationToken)
     {
-        var card = await sender.Send(new ShareExperienceCommand(popkinId, title, kind, when, place), cancellationToken);
+        await using var content = picture?.OpenReadStream();
+        var upload = picture is null ? null : new PhotoUpload(content!, picture.Length);
+        var card = await sender.Send(new ShareExperienceCommand(popkinId, title, kind, when, place, upload), cancellationToken);
         return Created($"/api/popkins/{popkinId}/experiences/{card.Id}", card);
     }
 }

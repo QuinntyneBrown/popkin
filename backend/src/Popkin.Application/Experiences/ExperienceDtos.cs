@@ -13,7 +13,8 @@ public sealed record ExperienceSharerDto(Guid MembershipId, string FirstName, Av
 
 /// <summary>
 /// An experience as its card shows it (L2-037): the Popkin's emoji and colour stand in the
-/// picture's place when it has none (L2-040 AC5); the average is null until someone rates it.
+/// picture's place when it has none (L2-040 AC5), and a picture is its thumbnail at an expiring
+/// address (L2-051 AC2); the average is null until someone rates it.
 /// Nobody can say they are keen until journey 20, so the keen count is 0.
 /// </summary>
 public sealed record ExperienceCardDto(
@@ -35,7 +36,7 @@ public sealed record ExperienceCardDto(
             experience.Id,
             experience.Kind,
             experience.Title,
-            PictureUrl: null,
+            experience.PictureThumbnailKey is { } thumbnailKey ? store.GetReadUrl(thumbnailKey) : null,
             popkin.Emoji,
             popkin.Colour,
             ExperienceSharerDto.Of(sharer, store),
