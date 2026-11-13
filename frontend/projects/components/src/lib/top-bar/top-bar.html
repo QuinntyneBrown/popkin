@@ -13,7 +13,7 @@
         <div pk-step-dots [step]="step()!" [steps]="steps()!"></div>
       }
       @if (tile(); as emoji) {
-        <span pk-popkin-tile size="xs" [emoji]="emoji"></span>
+        <span pk-popkin-tile size="xs" [emoji]="emoji" [muted]="tileMuted()"></span>
       }
       @if (emoji(); as symbol) {
         <span class="topbar__emoji" aria-hidden="true">{{ symbol }}</span>

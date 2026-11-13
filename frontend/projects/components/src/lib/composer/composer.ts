@@ -20,6 +20,9 @@ import { IconButton } from '../icon-button/icon-button';
  * `send` carries the trimmed text. The composer does not empty itself: the consumer sets `value`
  * once the message is taken. `[slot=start]` (before the field) and `[slot=tools]` (inside it,
  * after the text) are for the buttons of later features.
+ *
+ * With `closed` it is the closed form: no field and no Send, only the line that says why
+ * nobody can post (L2-045 AC1).
  */
 @Component({
   selector: 'div[pk-composer]',
@@ -32,17 +35,20 @@ import { IconButton } from '../icon-button/icon-button';
 export class Composer {
   readonly value = model('');
   /** The accessible name of the field and its placeholder: "Message everyone". */
-  readonly label = input.required<string>();
+  readonly label = input('');
   /** The longest text the field takes. */
   readonly maxLength = input(2000);
   /** The length from which the count shows. */
   readonly countFrom = input(1800);
   readonly disabled = input(false);
+  /** Why nobody can post: "This Popkin has wrapped up. Messages stay, but nobody can post new
+   * ones." It stands in place of the field. */
+  readonly closed = input<string>();
 
   /** The trimmed text to send. */
   readonly send = output<string>();
 
-  private readonly field = viewChild.required<ElementRef<HTMLTextAreaElement>>('field');
+  private readonly field = viewChild<ElementRef<HTMLTextAreaElement>>('field');
 
   protected readonly canSend = computed(() => !this.disabled() && this.value().trim() !== '');
 
@@ -57,7 +63,8 @@ export class Composer {
     // The field is as tall as its text; its stylesheet stops it at five lines.
     afterRenderEffect(() => {
       this.value();
-      const field = this.field().nativeElement;
+      const field = this.field()?.nativeElement;
+      if (!field) return;
       field.style.height = 'auto';
       // One line keeps its own height; more lines get theirs, rounded up so nothing scrolls.
       if (field.scrollHeight > field.clientHeight) {
@@ -68,7 +75,7 @@ export class Composer {
 
   /** Moves focus to the field. */
   focus(): void {
-    this.field().nativeElement.focus();
+    this.field()?.nativeElement.focus();
   }
 
   /** Enter sends; Shift+Enter, and Enter while an input method is composing, do not. */

@@ -72,3 +72,11 @@
 .composer__count--shown {
   margin-top: var(--space-1);
 }
+
+/* The closed form: the line that says why nobody can post, in place of the field. */
+.composer__closed {
+  padding: var(--space-2) var(--space-3);
+  text-align: center;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
