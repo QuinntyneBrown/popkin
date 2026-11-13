@@ -103,3 +103,5 @@ export * from './lib/menu-list/menu-list';
 export * from './lib/menu-item/menu-item';
 export * from './lib/switch/switch';
 export * from './lib/setting-row/setting-row';
+export * from './lib/facts/facts';
+export * from './lib/fact/fact';

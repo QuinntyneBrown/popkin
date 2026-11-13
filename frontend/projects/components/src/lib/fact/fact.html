@@ -1,0 +1,7 @@
+<span class="fact__icon"><svg pk-icon size="md" [name]="icon()"></svg></span>
+<div>
+  <div class="fact__title">{{ heading() }}</div>
+  @if (text()) {
+    <div class="fact__body">{{ text() }}</div>
+  }
+</div>
