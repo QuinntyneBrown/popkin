@@ -2,8 +2,8 @@
 
 | Design | Effort | Complete |
 |---|---|---|
-| conversations | 3 days | 10% |
-| direct-messages | 3 days | 0% |
+| conversations | 3 days | 90% |
+| direct-messages | 3 days | 70% |
 | failed-messages | 4 days | 90% |
 | live-messages | 6 days | 90% |
 | react-to-message | 4 days | 0% |
