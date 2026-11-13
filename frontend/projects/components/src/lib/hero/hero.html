@@ -1,0 +1,45 @@
+<div class="hero__text">
+  <h1 class="hero__heading">{{ heading() }}</h1>
+  <p class="hero__lead">{{ lead() }}</p>
+  <div class="hero__actions">
+    <ng-content select="[slot=action]" />
+    @if (note()) {
+      <span class="hero__note">{{ note() }}</span>
+    }
+  </div>
+</div>
+<div class="hero__art" [attr.data-accent]="preview().accent">
+  <div class="hero__card">
+    <div class="hero__id">
+      <span pk-popkin-tile size="lg" [emoji]="preview().emoji"></span>
+      <div class="hero__id-text">
+        <div class="hero__name truncate">{{ preview().name }}</div>
+        <div class="hero__members">
+          <span
+            pk-avatar-stack
+            size="2xs"
+            [avatars]="preview().avatars"
+            [more]="preview().more"
+          ></span>
+          <span>{{ preview().members }}</span>
+        </div>
+      </div>
+    </div>
+    <p class="hero__time">
+      <span pk-time-left>{{ preview().timeLeft }}</span>
+    </p>
+    <div class="hero__photos">
+      @for (photo of preview().photos; track $index) {
+        <img class="hero__photo" alt="" [src]="photo" />
+      }
+    </div>
+    <div class="hero__bubbles">
+      @for (message of preview().messages; track $index) {
+        <p class="hero__bubble" [class.hero__bubble--mine]="message.mine">{{ message.text }}</p>
+      }
+    </div>
+  </div>
+  <div class="hero__qr">
+    <svg pk-qr size="sm" [modules]="preview().qr.modules" [link]="preview().qr.link"></svg>
+  </div>
+</div>

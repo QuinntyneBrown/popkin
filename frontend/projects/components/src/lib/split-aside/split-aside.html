@@ -39,6 +39,9 @@
         </div>
       </div>
     }
+    @if (mark(); as picture) {
+      <svg pk-mark-picture class="split-aside__mark" [picture]="picture"></svg>
+    }
     <ng-content />
     @if (text()) {
       <p class="split-aside__text">{{ text() }}</p>

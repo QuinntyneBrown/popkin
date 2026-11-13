@@ -1,0 +1,36 @@
+<svg:defs>
+  <svg:clipPath [attr.id]="bubbleId">
+    <svg:circle cx="26" cy="38" r="22" />
+    <svg:path d="M11 47 L4.5 60.5 L20 56 Z" />
+  </svg:clipPath>
+  <svg:clipPath [attr.id]="dotId">
+    <svg:circle cx="49" cy="15" r="9.5" />
+  </svg:clipPath>
+</svg:defs>
+<svg:rect
+  class="mark-picture__fill"
+  x="3"
+  y="16"
+  width="46"
+  height="46"
+  [attr.clip-path]="'url(#' + bubbleId + ')'"
+/>
+<svg:image
+  x="4"
+  y="16"
+  width="44"
+  height="44"
+  preserveAspectRatio="xMidYMid slice"
+  [attr.href]="picture().group"
+  [attr.clip-path]="'url(#' + bubbleId + ')'"
+/>
+<svg:image
+  x="39.5"
+  y="5.5"
+  width="19"
+  height="19"
+  preserveAspectRatio="xMidYMid slice"
+  [attr.href]="picture().person"
+  [attr.clip-path]="'url(#' + dotId + ')'"
+/>
+<svg:circle class="mark-picture__ring" cx="49" cy="15" r="10.25" />

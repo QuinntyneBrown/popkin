@@ -1,0 +1,26 @@
+:host {
+  display: none;
+  align-items: center;
+  min-height: var(--target-comfortable);
+  padding: 0 var(--space-2);
+  color: var(--color-fg-muted);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+  text-decoration: none;
+}
+
+:host(:hover) {
+  color: var(--color-fg-default);
+}
+
+/* Sign in joins the navigation from S; below it, it is in the footer (L2-002 AC4). */
+@media (min-width: 40rem) {
+  :host(.only-sm) {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 48rem) {
+  :host(.only-md) {
+    display: inline-flex;
+  }
+}

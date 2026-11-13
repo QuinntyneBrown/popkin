@@ -654,7 +654,6 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .site-footer__legal { padding-bottom: var(--space-10); font: var(--font-weight-regular) var(--font-size-sm-plus) / 1 var(--font-family-sans); color: var(--color-fg-subtle); }
 @media (min-width: 36rem) {
   .site-nav__links { gap: var(--space-4); }
-  .site-nav__links a.only-sm { display: inline-flex; }
   .hero h1 { font-size: var(--font-size-7xl); }
   .hero__card { padding: var(--space-6); }
   .hero__qr { display: block; }
@@ -664,6 +663,10 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .compare th, .compare td { padding: var(--space-4) var(--space-6); }
   .compare tbody th { font-size: var(--font-size-md); }
   .site-footer__links { grid-template-columns: repeat(3, auto); }
+}
+/* Sign in joins the navigation from S; below it, it is in the footer (L2-002 AC4). */
+@media (min-width: 40rem) {
+  .site-nav__links a.only-sm { display: inline-flex; }
 }
 @media (min-width: 48rem) {
   .site-nav__links a.only-md { display: inline-flex; }
@@ -971,6 +974,20 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
   .screen--split { --pk-aside-width: var(--layout-split-aside-xl); }
   .action-pair { flex-direction: row; }
   .action-pair > * { flex: 1; }
+}
+
+/* The welcome screen: the wordmark, the mark as a picture, the headline and the ways in. Below M
+   the picture is in the column; from M it is the brand aside's, and the column sits in the middle. */
+.welcome { flex: 1; display: flex; flex-direction: column; }
+.welcome__picture { width: var(--layout-welcome-picture); height: auto; margin: auto auto 0; }
+.welcome__heading { margin-top: auto; font: var(--text-display); letter-spacing: var(--letter-spacing-tight); }
+.welcome__lead { margin-top: var(--space-2); font: var(--text-body-lg); color: var(--color-fg-muted); }
+.welcome__actions { margin-top: var(--space-8); }
+.welcome__link { display: flex; flex-direction: column; margin-top: var(--space-4); }
+@media (min-width: 48rem) {
+  .screen__body--middle > .welcome { flex: none; }
+  .welcome__picture { display: none; }
+  .welcome__heading { margin-top: var(--space-12); }
 }
 
 /* The arrival and the recap: centred, then two columns for the recap from L. */

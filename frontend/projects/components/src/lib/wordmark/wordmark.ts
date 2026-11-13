@@ -11,6 +11,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   styleUrl: './wordmark.scss',
   host: {
     class: 'wordmark',
+    '[class.wordmark--lg]': "size() === 'lg'",
     '[class.wordmark--coral]': "tone() === 'coral'",
     role: 'img',
     'aria-label': 'popkin',
@@ -18,4 +19,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class Wordmark {
   readonly tone = input<'ink' | 'coral'>('ink');
+  /** `lg` signs a screen of its own: the welcome screen. */
+  readonly size = input<'base' | 'lg'>('base');
 }

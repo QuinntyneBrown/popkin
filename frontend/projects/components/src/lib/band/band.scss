@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+:host(.band) {
+  border-block: var(--border-width-hairline) solid var(--color-border-default);
+  background: var(--color-bg-surface);
+}
+
+:host(.band--sand) {
+  border: 0;
+  background: var(--color-bg-subtle);
+}
+
+.section {
+  padding-block: var(--space-20);
+}
+
+.container--narrow {
+  max-width: var(--layout-container-narrow);
+}
+
+.section__title {
+  font: var(--font-weight-black) var(--font-size-5xl) / var(--line-height-tight)
+    var(--font-family-display);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* The heading with its lead at the end of the line; the lead drops under it on a phone. */
+.section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.section__head .section__title {
+  max-width: var(--layout-measure);
+}
+
+.section__aside {
+  max-width: var(--layout-measure-md);
+  color: var(--color-fg-muted);
+}
+
+.section__lead {
+  margin-top: var(--space-2);
+  font: var(--text-body-lg);
+  color: var(--color-fg-muted);
+}
+
+@media (min-width: 62rem) {
+  .section {
+    padding-block: var(--space-24);
+  }
+}

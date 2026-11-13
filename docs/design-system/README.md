@@ -60,6 +60,14 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Home header](components/home-header.html) | Layout | A Popkin with an end date. A Popkin with one member. A section head with a count and a link, and with a count alone. | Static (both themes); loading | pages/popkin-home/default, pages/popkin-home/loading, pages/popkin-home/empty |
 | [Skip link](components/skip-link.html) | Navigation | Shown as it looks when focused. | Static (both themes) | pages/landing/default |
 | [Site header and footer](components/site-navigation.html) | Navigation | Header at 768px and wider. Footer. | Static (both themes) | pages/landing/default |
+| [Hero](components/hero.html) | Layout | Text over the preview. Text beside the preview from 992px. | Static (both themes) | pages/landing/default |
+| [Band and section](components/band.html) | Layout | On the canvas. Surface band, ruled off. Sand band. Narrow. Head with the lead beside the heading. | Static (both themes) | pages/landing/default |
+| [Steps](components/steps.html) | Data display | Three numbered steps. | Static (both themes) | pages/landing/default |
+| [Idea cards](components/uses.html) | Data display | One card per Popkin colour. | Static (both themes) | pages/landing/default |
+| [Comparison table](components/compare.html) | Data display | Group chat beside Popkin. | Static (both themes) | pages/landing/default |
+| [Closing band](components/cta-band.html) | Layout | Heading, paragraph and the white button on coral. | Static (both themes) | pages/landing/default |
+| [Welcome](components/welcome.html) | Layout | Picture in the column (phone). Picture in the brand aside (from 768px). | Static (both themes) | pages/welcome/default |
+| [Action pair](components/action-pair.html) | Actions | Stacked. Side by side. | Static (both themes) | pages/welcome/default |
 | [Dialog and sheet](components/dialog.html) | Overlays | Confirmation: danger and a safe default. Form. | Default, Busy, Invalid, Failed | dialogs/invite/default, dialogs/leave-popkin/default, dialogs/edit-popkin/invalid |
 | [Toast](components/toast.html) | Overlays | Success, info, warning, danger. | Static (both themes) | notifications/toast/success, notifications/toast/stacked |
 | [Banner](components/banner.html) | Overlays | Popkin (call), success, warning, danger. | Static (both themes) | notifications/banner/info, notifications/banner/warning, notifications/banner/danger |

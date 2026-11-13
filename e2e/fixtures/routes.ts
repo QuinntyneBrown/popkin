@@ -28,6 +28,8 @@ const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
 
 export const routes = {
   home: { app: '/' },
+  landing: { app: '/', mock: 'pages/landing/default.html' },
+  welcome: { app: '/welcome', mock: 'pages/welcome/default.html' },
   signIn: { app: '/sign-in', mock: 'pages/sign-in/default.html' },
   signInInvalid: { app: '/sign-in', mock: 'pages/sign-in/invalid.html' },
   signInSubmitting: { app: '/sign-in', mock: 'pages/sign-in/submitting.html' },
