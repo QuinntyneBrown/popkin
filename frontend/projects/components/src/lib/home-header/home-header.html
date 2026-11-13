@@ -1,0 +1,72 @@
+<div class="home-header__bar">
+  <a pk-icon-button icon="back" size="lg" [label]="backLabel()" [routerLink]="back()"></a>
+  @if (settings(); as label) {
+    <button
+      pk-icon-button
+      type="button"
+      icon="more"
+      [label]="label"
+      (click)="settingsOpened.emit()"
+    ></button>
+  }
+</div>
+<div class="home-header__body">
+  @if (loading()) {
+    <h1 class="visually-hidden">{{ loadingHeading() }}</h1>
+    <p class="visually-hidden" role="status">{{ loadingText() }}</p>
+    <div class="home-header__skeleton" aria-hidden="true">
+      <div class="home-header__skeleton-id">
+        <span pk-skeleton shape="tile"></span>
+        <div class="home-header__skeleton-titles">
+          <span pk-skeleton shape="title"></span>
+          <span pk-skeleton shape="text" [width]="40"></span>
+        </div>
+      </div>
+      <span pk-skeleton shape="pill"></span>
+      <div class="home-header__actions home-header__actions--skeleton">
+        <span pk-skeleton class="home-header__skeleton-action" shape="btn"></span>
+        <span pk-skeleton class="home-header__skeleton-action" shape="btn"></span>
+      </div>
+    </div>
+  } @else {
+    <div class="home-header__id">
+      <span pk-popkin-tile size="lg" [emoji]="emoji()"></span>
+      <div class="home-header__titles">
+        <h1 class="home-header__name truncate">{{ name() }}</h1>
+        <div class="home-header__members">
+          @if (avatars().length === 1 && more() === 0) {
+            <span
+              pk-avatar
+              size="xs"
+              [initials]="avatars()[0].initials"
+              [photo]="avatars()[0].photo"
+              [attr.data-accent]="avatars()[0].accent"
+            ></span>
+          } @else if (avatars().length) {
+            <span pk-avatar-stack size="xs" [avatars]="avatars()" [more]="more()"></span>
+          }
+          <span>{{ members() }}</span>
+        </div>
+      </div>
+    </div>
+    @if (timeLeft()) {
+      <div class="home-header__time">
+        <span pk-time-left>{{ timeLeft() }}</span>
+      </div>
+    }
+    <div class="home-header__actions">
+      <ng-content select="[slot=actions]" />
+      @if (settings(); as label) {
+        <button
+          pk-icon-button
+          class="home-header__more"
+          type="button"
+          variant="card"
+          icon="more"
+          [label]="label"
+          (click)="settingsOpened.emit()"
+        ></button>
+      }
+    </div>
+  }
+</div>

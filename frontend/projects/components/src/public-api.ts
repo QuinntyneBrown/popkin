@@ -66,3 +66,4 @@ export * from './lib/photo-strip/photo-strip';
 export * from './lib/member-list/member-list';
 export * from './lib/section/section';
 export * from './lib/home/home';
+export * from './lib/home-header/home-header';
