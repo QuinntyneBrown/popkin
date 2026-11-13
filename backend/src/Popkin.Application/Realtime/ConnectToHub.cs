@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Calls;
 
 namespace Popkin.Application.Realtime;
 
@@ -31,14 +32,27 @@ public sealed class ConnectToHubCommandHandler(IAppDbContext db, IPopkinConnecti
     }
 }
 
-/// <summary>A connection to the hub closed; its person is released after the grace (see <see cref="PresenceTracker"/>).</summary>
+/// <summary>
+/// A connection to the hub closed. Its person is released from "here now" after the grace
+/// (see <see cref="PresenceTracker"/>), and a participant who was on a call with it leaves
+/// that call after theirs, unless they come back (see <see cref="CallDisconnectGrace"/>).
+/// </summary>
 public sealed record DisconnectFromHubCommand(string ConnectionId) : IRequest;
 
-public sealed class DisconnectFromHubCommandHandler(PresenceTracker presence) : IRequestHandler<DisconnectFromHubCommand>
+public sealed class DisconnectFromHubCommandHandler(PresenceTracker presence, IAppDbContext db, CallDisconnectGrace callGrace)
+    : IRequestHandler<DisconnectFromHubCommand>
 {
-    public Task Handle(DisconnectFromHubCommand request, CancellationToken cancellationToken)
+    public async Task Handle(DisconnectFromHubCommand request, CancellationToken cancellationToken)
     {
         presence.Disconnect(request.ConnectionId);
-        return Task.CompletedTask;
+
+        var onCalls = await db.CallParticipants.AsNoTracking()
+            .Where(p => p.ConnectionId == request.ConnectionId && p.LeftAt == null)
+            .Select(p => p.Id)
+            .ToListAsync(cancellationToken);
+        foreach (var participantId in onCalls)
+        {
+            callGrace.Start(participantId, request.ConnectionId);
+        }
     }
 }

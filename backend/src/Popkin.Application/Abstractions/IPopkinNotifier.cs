@@ -1,3 +1,4 @@
+using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
 
@@ -27,4 +28,22 @@ public interface IPopkinNotifier
 
     /// <summary>Photos were added to the album. To every member of the Popkin with a connection open.</summary>
     Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds);
+
+    /// <summary>How many are on the group call changed. To every member of the Popkin with a connection open.</summary>
+    Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount);
+
+    /// <summary>The group call ended. To every member of the Popkin with a connection open.</summary>
+    Task CallEnded(Guid popkinId, Guid callId);
+
+    /// <summary>Someone came onto the call. To the connections on the call.</summary>
+    Task ParticipantJoined(Guid callId, CallParticipantDto participant);
+
+    /// <summary>Someone left the call. To the connections on the call.</summary>
+    Task ParticipantLeft(Guid callId, Guid membershipId);
+
+    /// <summary>A participant's microphone or camera changed. To the connections on the call.</summary>
+    Task ParticipantMediaChanged(Guid callId, Guid membershipId, long mediaVersion, bool micOn, bool cameraOn);
+
+    /// <summary>A participant's signal. To the one connection the participant it is for is on the call with.</summary>
+    Task Signal(string connectionId, Guid callId, Guid fromMembershipId, CallSignalDto signal);
 }

@@ -38,6 +38,10 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<Photo> Photos => inner.Photos;
 
+    public DbSet<Call> Calls => inner.Calls;
+
+    public DbSet<CallParticipant> CallParticipants => inner.CallParticipants;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

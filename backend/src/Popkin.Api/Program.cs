@@ -47,8 +47,17 @@ builder.Services.AddPopkinRateLimits();
 
 // The hub speaks the JSON of the controllers: camelCase, enums as their names. Detailed hub
 // errors are for Development only (L2-052 AC5). Its state lives in this one instance (ADR 0009).
+// A refused hub call fails with the ProblemDetails `code` of the refusal.
 builder.Services
-    .AddSignalR(options => options.EnableDetailedErrors = builder.Environment.IsDevelopment())
+    .AddSignalR(options =>
+    {
+        options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+        // A session description of 32 KB and its envelope pass the default of 32 KB; nothing
+        // larger than 64 KB is read.
+        options.MaximumReceiveMessageSize = 64 * 1024;
+        options.AddFilter<ProblemHubFilter>();
+        options.AddFilter<SignalRateLimitFilter>();
+    })
     .AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddSingleton<IUserIdProvider, PersonUserIdProvider>();
 builder.Services.AddSingleton<IPopkinNotifier, SignalRPopkinNotifier>();

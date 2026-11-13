@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
 using Popkin.Application.Telemetry;
@@ -33,6 +34,28 @@ public sealed class SignalRPopkinNotifier(
 
     public Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds) =>
         SendAsync(nameof(IPopkinClient.PhotosAdded), () => Group(popkinId).PhotosAdded(popkinId, photoIds));
+
+    public Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount) =>
+        SendAsync(nameof(IPopkinClient.CallChanged), () => Group(popkinId).CallChanged(popkinId, callId, version, participantCount));
+
+    public Task CallEnded(Guid popkinId, Guid callId) =>
+        SendAsync(nameof(IPopkinClient.CallEnded), () => Group(popkinId).CallEnded(popkinId, callId));
+
+    public Task ParticipantJoined(Guid callId, CallParticipantDto participant) =>
+        SendAsync(nameof(IPopkinClient.ParticipantJoined), () => Call(callId).ParticipantJoined(callId, participant));
+
+    public Task ParticipantLeft(Guid callId, Guid membershipId) =>
+        SendAsync(nameof(IPopkinClient.ParticipantLeft), () => Call(callId).ParticipantLeft(callId, membershipId));
+
+    public Task ParticipantMediaChanged(Guid callId, Guid membershipId, long mediaVersion, bool micOn, bool cameraOn) =>
+        SendAsync(
+            nameof(IPopkinClient.ParticipantMediaChanged),
+            () => Call(callId).ParticipantMediaChanged(callId, membershipId, mediaVersion, micOn, cameraOn));
+
+    public Task Signal(string connectionId, Guid callId, Guid fromMembershipId, CallSignalDto signal) =>
+        SendAsync(nameof(IPopkinClient.Signal), () => hub.Clients.Client(connectionId).Signal(callId, fromMembershipId, signal));
+
+    private IPopkinClient Call(Guid callId) => hub.Clients.Group(PopkinHub.CallGroupOf(callId));
 
     private IPopkinClient Group(Guid popkinId) => hub.Clients.Group(PopkinHub.GroupOf(popkinId));
 
