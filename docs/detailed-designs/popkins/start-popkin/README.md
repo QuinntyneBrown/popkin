@@ -123,6 +123,24 @@ the product term.
   `InviteCode` index; `IAppDbContext` gains `DbSet<PopkinSpace>`, `DbSet<Membership>` and
   `DbSet<ChatThread>`.
 
+### Open questions settled in journey 1
+
+- **Back from Name your Popkin** — leads to My Popkins (`/popkins`), not to sign up: the person
+  is signed in by then. The step dots still read "Step 2 of 3" and "Step 3 of 3".
+- **The count** — shows only at the limit ("40 of 40"), as the `edge` mock draws it, and becomes
+  the field's description.
+- **The weekend near its end** — when Sunday at 6 pm is less than an hour away, "The weekend"
+  resolves to the next Sunday.
+- **Until a date** — before a date is picked, it shows the weekend's end.
+- **The date control** — `pk-date-button` (`button[pk-date-button]`, the mocks' `date-btn`); the
+  share row is `pk-share-actions` with `pk-share-action`; the celebration is `pk-pop`, which owns
+  the screen's heading so its spacing matches the mock.
+- **Text it** — `sms:?&body={link}`, the form both phone platforms read.
+- **Share** — `navigator.share({ title, url })`; closing the sheet is not a failure.
+- **Reduced motion** — the confetti dots are not drawn at all (the design system now says so).
+- **Created screen data** — it reads `GET /api/popkins/{id}/invite` every time, not only after a
+  reload, so a direct link and a reload behave the same; a 5xx opens the server-error screen.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

@@ -1,0 +1,14 @@
+<h2 class="picker__heading">{{ heading() }}</h2>
+<div class="emoji-grid" role="group" aria-label="Emoji">
+  @for (option of options(); track option.emoji) {
+    <button
+      class="emoji-btn"
+      type="button"
+      [attr.aria-label]="option.label"
+      [attr.aria-pressed]="option.emoji === value()"
+      (click)="value.set(option.emoji)"
+    >
+      {{ option.emoji }}
+    </button>
+  }
+</div>

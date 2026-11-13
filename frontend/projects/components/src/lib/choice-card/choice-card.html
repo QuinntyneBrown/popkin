@@ -1,0 +1,19 @@
+@for (option of options(); track option.value; let i = $index) {
+  <button
+    #card
+    class="option-card"
+    type="button"
+    role="radio"
+    [attr.aria-checked]="option.value === value()"
+    [tabIndex]="option.value === value() ? 0 : -1"
+    (click)="value.set(option.value)"
+    (keydown)="move($event, i)"
+  >
+    <span class="option-card__icon" aria-hidden="true">{{ option.icon }}</span>
+    <span class="option-card__text">
+      <span class="option-card__title">{{ option.title }}</span>
+      <span class="option-card__sub">{{ option.sub }}</span>
+    </span>
+    <span class="option-card__radio" aria-hidden="true"></span>
+  </button>
+}

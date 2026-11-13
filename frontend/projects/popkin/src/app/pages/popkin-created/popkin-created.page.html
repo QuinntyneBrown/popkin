@@ -1,0 +1,32 @@
+<div pk-screen surface="wash" body="hero" [accent]="accent()" [footer]="!!invite()">
+  @if (invite(); as invite) {
+    <div
+      pk-pop
+      lead="Hold up this code and let people scan their way in."
+      [emoji]="invite.emoji"
+      [heading]="'Pop! ' + invite.popkinName + ' is up.'"
+    ></div>
+    <div pk-qr-card [modules]="modules()" [link]="shownLink()"></div>
+    <div pk-share-actions>
+      <button pk-share-action type="button" [icon]="copied() ? 'check' : 'copy'" (click)="copy()">
+        {{ copied() ? 'Copied' : 'Copy link' }}
+      </button>
+      <a pk-share-action icon="message" [href]="textHref()">Text it</a>
+      @if (canShare) {
+        <button pk-share-action type="button" icon="share" (click)="share()">Share</button>
+      }
+    </div>
+    <p class="visually-hidden" role="status">{{ copied() ? 'Invite link copied' : '' }}</p>
+  } @else if (failed()) {
+    <h1>Your Popkin is up</h1>
+    <div pk-alert heading="We couldn’t load the invite.">
+      Check your connection and try again.
+      <button pk-link type="button" variant="accent" (click)="load()">Try again</button>
+    </div>
+  }
+  @if (invite(); as invite) {
+    <a pk-button slot="footer" variant="popkin" [block]="true" [routerLink]="['/p', popkinId()]">
+      Go to {{ invite.popkinName }}
+    </a>
+  }
+</div>

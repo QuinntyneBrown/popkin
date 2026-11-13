@@ -74,6 +74,15 @@ to `invitations/preview-invite`.
 - **Lookups by code** — the code is matched exactly after lower-casing; the anonymous lookup and
   its rate limit live in `invitations/preview-invite`.
 
+### Open questions settled in journey 1
+
+- **QR encoding library** — `qrcode-generator` (MIT), at error correction H so the mark over the
+  centre does not stop a camera reading it. `encodeQr()` in the `api` library wraps it.
+- **Quiet zone** — the QR code's own padding is white in both themes (the design system's `.qr`
+  now carries it), and a behaviour spec decodes the code from its pixels in both themes.
+- **`Invites:BaseUrl`** — configuration; `https://popk.in/` locally and in tests. How the
+  production address reaches `/i/:code` stays `<TO SUPPLY>`.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

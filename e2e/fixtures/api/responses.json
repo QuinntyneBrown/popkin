@@ -1,1 +1,62 @@
-{}
+{
+  "POST /api/auth/codes": {
+    "status": 202,
+    "body": {
+      "verificationId": "3ab614b7-dd88-4c64-ab0f-6fcf45235429",
+      "channel": "Phone",
+      "displayDestination": "(•••) •••-••48",
+      "resendAvailableAt": "2026-11-12T23:37:28.9829379+00:00"
+    }
+  },
+  "POST /api/auth/codes/3ab614b7-dd88-4c64-ab0f-6fcf45235429/confirm": {
+    "status": 200,
+    "body": {
+      "outcome": "SignedIn",
+      "session": {
+        "personId": "a232d9ac-53b6-477d-ae4e-d2a5accc36a0",
+        "name": "Mara Okafor",
+        "photoUrl": null
+      },
+      "isNewPerson": false
+    }
+  },
+  "GET /api/auth/session": {
+    "status": 200,
+    "body": {
+      "personId": "a232d9ac-53b6-477d-ae4e-d2a5accc36a0",
+      "name": "Mara Okafor",
+      "photoUrl": null
+    }
+  },
+  "POST /api/auth/codes/3ab614b7-dd88-4c64-ab0f-6fcf45235429/resend": {
+    "status": 202,
+    "body": {
+      "verificationId": "00f96d0c-4099-417c-b5a7-5c5c0f784c62",
+      "channel": "Phone",
+      "displayDestination": "(•••) •••-••48",
+      "resendAvailableAt": "2026-11-12T23:38:01.3498765+00:00"
+    }
+  },
+  "POST /api/popkins": {
+    "status": 201,
+    "body": {
+      "id": "10290aab-caa2-479b-8e4c-d1d12c1cf43a",
+      "name": "Lakeside Weekend",
+      "emoji": "🏕️",
+      "colour": "Teal",
+      "endsAt": "2026-11-15T18:00:00+00:00",
+      "inviteCode": "kv939k6zkc",
+      "inviteUrl": "https://popk.in/kv939k6zkc"
+    }
+  },
+  "GET /api/popkins/10290aab-caa2-479b-8e4c-d1d12c1cf43a/invite": {
+    "status": 200,
+    "body": {
+      "code": "kv939k6zkc",
+      "url": "https://popk.in/kv939k6zkc",
+      "popkinName": "Lakeside Weekend",
+      "emoji": "🏕️",
+      "colour": "Teal"
+    }
+  }
+}

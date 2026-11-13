@@ -1,0 +1,22 @@
+:host(.text-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: var(--target-comfortable);
+  padding: 0 var(--space-4);
+  border: 0;
+  background: none;
+  color: var(--color-fg-muted);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+  text-decoration: none;
+}
+
+:host(.text-btn--accent) {
+  color: var(--color-fg-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+:host(.text-btn:disabled) {
+  cursor: default;
+}

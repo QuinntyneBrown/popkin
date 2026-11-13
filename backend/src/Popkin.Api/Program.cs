@@ -1,41 +1,64 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Popkin.Api.Auth;
+using Popkin.Api.Problems;
+using Popkin.Api.RateLimiting;
+using Popkin.Api.Security;
 using Popkin.Application;
 using Popkin.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddControllers();
-builder.Services.AddProblemDetails();
+builder.Services.AddApplication(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // A field that breaks its rule (type, length, allowed values) is 400 with a `code` and
+        // the field it names (L2-052 AC1).
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var field = context.ModelState.FirstOrDefault(e => e.Value?.Errors.Count > 0).Key?.TrimStart('$', '.');
+            var details = new ProblemDetails { Status = 400, Title = "A field is not valid." };
+            details.Extensions["code"] = "validation_failed";
+            if (!string.IsNullOrEmpty(field))
+            {
+                details.Extensions["field"] = char.ToLowerInvariant(field[0]) + field[1..];
+            }
+
+            return new ObjectResult(details) { StatusCode = 400, ContentTypes = { "application/problem+json" } };
+        };
+    });
+// No exception detail, stack trace or internal name ever reaches a response (L2-052 AC5).
+builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+{
+    context.ProblemDetails.Detail = null;
+    context.ProblemDetails.Extensions.Remove("exception");
+});
+builder.Services.AddExceptionHandler<ProblemExceptionHandler>();
+builder.Services.AddExceptionHandler<UnexpectedExceptionHandler>();
+builder.Services.AddPopkinRateLimits();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// The API answers with a status code, never a redirect to a sign-in page.
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.Events.OnRedirectToLogin = context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return Task.CompletedTask;
-        };
-        options.Events.OnRedirectToAccessDenied = context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            return Task.CompletedTask;
-        };
-    });
+// The session cookie and the server-side session behind it; 401 and 403, never a redirect.
+builder.Services.AddPopkinSessions();
 
 // Every endpoint requires a signed-in caller unless it opts out with [AllowAnonymous].
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
 var app = builder.Build();
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
@@ -47,7 +70,9 @@ if (!app.Environment.IsProduction())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<SameSiteRequestMiddleware>();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

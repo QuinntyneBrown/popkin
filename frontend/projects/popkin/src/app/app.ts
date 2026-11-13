@@ -2,17 +2,20 @@ import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { SkipLink, Toast, ToastRegion } from 'components';
 import { filter, map } from 'rxjs';
 import { PkRouteData } from './app.routes';
+import { Toaster } from './toasts/toaster';
 
-/** AppShell: the routed page in `main`, with the route's `page` stamped on `<body data-page>`. */
+/** AppShell: the skip link and the routed page (which owns `main`), with the route's `page` stamped on `<body data-page>`. */
 @Component({
   selector: 'pk-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, SkipLink, Toast, ToastRegion],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './app.html',
 })
 export class App {
+  protected readonly toaster = inject(Toaster);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly document = inject(DOCUMENT);

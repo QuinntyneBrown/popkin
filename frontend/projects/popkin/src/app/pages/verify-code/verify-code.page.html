@@ -1,0 +1,46 @@
+<div pk-screen heading="Enter your code" [lead]="sentTo()">
+  <header pk-top-bar slot="header" [back]="startedOn()" [step]="1" [steps]="3"></header>
+  <div class="stack">
+    <form id="verify-code" novalidate (submit)="submit($event)">
+      <div
+        pk-text-field
+        fieldId="code"
+        label="6-digit code"
+        variant="code"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        [maxlength]="6"
+        [announceError]="true"
+        [digitsOnly]="true"
+        [formControl]="code"
+        [readonly]="status() === 'checking'"
+        [error]="error() ?? undefined"
+        (changed)="changed($event)"
+      ></div>
+    </form>
+    <div class="cluster cluster--center">
+      <button
+        pk-link
+        type="button"
+        [variant]="canResend() ? 'accent' : 'text'"
+        [disabled]="!canResend()"
+        (click)="resend()"
+      >
+        {{ resendLabel() }}
+      </button>
+    </div>
+  </div>
+  <div slot="actions" class="stack stack--sm">
+    <button
+      pk-button
+      variant="primary"
+      type="submit"
+      form="verify-code"
+      [block]="true"
+      [busy]="status() === 'checking'"
+    >
+      {{ status() === 'checking' ? 'Checking…' : 'Confirm' }}
+    </button>
+    <a pk-link variant="text" [routerLink]="startedOn()">{{ differentLabel() }}</a>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+<div pk-screen>
+  <header pk-top-bar slot="header"><a pk-logo routerLink="/popkins"></a></header>
+  <div
+    pk-empty-state
+    icon="not-found"
+    [level]="1"
+    heading="This page popped off somewhere"
+    text="The link is broken or the page has moved. Your Popkins are right where you left them."
+  >
+    <a pk-button variant="primary" size="md" routerLink="/popkins">My Popkins</a>
+    <a pk-button variant="secondary" size="md" routerLink="/">Popkin home page</a>
+  </div>
+</div>

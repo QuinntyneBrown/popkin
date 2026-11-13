@@ -1,0 +1,26 @@
+@for (shape of shapes(); track $index) {
+  @if ('path' in shape) {
+    <svg:path [attr.d]="shape.path" />
+  } @else if ('circle' in shape) {
+    <svg:circle
+      [attr.cx]="shape.circle[0]"
+      [attr.cy]="shape.circle[1]"
+      [attr.r]="shape.circle[2]"
+    />
+  } @else if ('line' in shape) {
+    <svg:line
+      [attr.x1]="shape.line[0]"
+      [attr.x2]="shape.line[1]"
+      [attr.y1]="shape.line[2]"
+      [attr.y2]="shape.line[3]"
+    />
+  } @else if ('rect' in shape) {
+    <svg:rect
+      [attr.width]="shape.rect[0]"
+      [attr.height]="shape.rect[1]"
+      [attr.x]="shape.rect[2]"
+      [attr.y]="shape.rect[3]"
+      [attr.rx]="shape.rect[4]"
+    />
+  }
+}

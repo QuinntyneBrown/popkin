@@ -1,0 +1,63 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: var(--layout-qr-card-max);
+  margin-inline: auto;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-2);
+  text-align: center;
+}
+
+.qr-card__frame {
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--accent-tint);
+}
+
+.qr-card__name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  font: var(--font-weight-extrabold) var(--font-size-md-plus) / var(--line-height-snug)
+    var(--font-family-display);
+}
+
+.qr-card__link {
+  margin-top: var(--space-1);
+  font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+/* Dark on white with a quiet zone, in both themes, so it scans (L2-059 AC4). */
+.qr {
+  width: var(--layout-qr-size);
+  height: auto;
+  aspect-ratio: 1;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-constant-light);
+  overflow: visible;
+}
+
+.qr__cells {
+  fill: var(--color-constant-dark);
+}
+
+.qr__hole {
+  fill: var(--color-constant-light);
+}
+
+.qr__logo {
+  fill: var(--color-accent);
+}
+
+.qr__mark {
+  color: var(--color-fg-on-accent);
+}

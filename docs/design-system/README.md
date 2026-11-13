@@ -69,6 +69,22 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 Not built, because no screen needs them yet: dropdown menu (Popkin settings is a sheet with menu rows), select, checkbox, radio buttons (choice cards and the segmented control cover the choices),
 side navigation, breadcrumb, pagination and table. Add one from the extracting-design-systems catalog when a mock first needs it.
 
+### In the components library
+
+The `pk-*` components in `frontend/projects/components` carry these blocks, one stylesheet each
+(ADR 0007). A few blocks the mocks draw inside a larger block became components of their own, or
+gained a part, as journey 1 built them; `assets/components.css` records the additions:
+
+- `step-dots` is `pk-step-dots`, composed by `pk-top-bar`.
+- The display text field and its `preview-row` are `pk-name-preview`, with the `field__count`
+  right-aligned (it was floated, which a flex column ignores).
+- `date-btn` is `pk-date-button`; `share-actions` and `share-action` are `pk-share-actions` and
+  `pk-share-action`; the `pop` celebration is `pk-pop`, which hides its confetti under reduced
+  motion.
+- `screen` gains `screen__body--hero`, `screen__lead`, `screen__content--headed` and
+  `screen__actions` (the mocks' `push`), and `icon` gains `icon--xl` (the empty state's icon).
+- `.qr` carries its own white padding, the quiet zone a camera needs.
+
 ## Patterns
 
 | Pattern | Covers |

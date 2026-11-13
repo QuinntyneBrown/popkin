@@ -62,6 +62,22 @@ requires (L2-006 AC2). The code-issuing command introduced here is shared with s
 - API integration tests (InMemory provider, ADR 0005) replace `ICodeSender` with a capturing fake and `ICodeGenerator` with a fixed generator. They cover 202 for a new and an existing destination with identical bodies, each 400 code, the 6th request in an hour (429 `code_limit_reached`) and a send failure (503).
 - Playwright specs drive `e2e/pages/sign-up.page.ts`; the recording answers `POST /api/auth/codes`, and `stubs.ts` adds the 503 and 429 answers.
 
+### Open questions settled in journey 1
+
+- **Validation library** — none. Each handler checks its fields and throws `ProblemException`
+  with the field and `code`; `Directory.Packages.props` adds no validation package.
+- **Phone numbers** — read as North American: ten digits, or eleven with a leading 1, stored as
+  E.164 (`+1…`). International numbers stay `<TO SUPPLY>`.
+- **Empty name** — "Enter a name so people know who you are.", the account mock's copy.
+- **Rate-limit copy** — the alert reads "That’s a lot of codes." with "Try again in N minutes."
+  from `retryAfterSeconds`.
+- **Providers** — still `<TO SUPPLY>`. In Development `DevelopmentCodeSender` writes the code to
+  the log (never the destination); elsewhere, until a provider is configured,
+  `UnconfiguredCodeSender` fails every send with 503 `code_not_sent`. `Auth:DevelopmentCode`
+  (Development only) makes every code the configured digits, so the API recorder can confirm a
+  code it never sees; `eng/Start-E2eApi.ps1` sets it to 482913.
+- **Hash key** — `Auth:CodeHashKey`; required outside Development. Its storage stays `<TO SUPPLY>`.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

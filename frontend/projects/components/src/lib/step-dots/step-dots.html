@@ -1,0 +1,6 @@
+@for (dot of dots(); track $index) {
+  <span
+    [attr.aria-current]="dot === 'current' ? 'step' : null"
+    [attr.data-step]="dot === 'done' ? 'done' : null"
+  ></span>
+}

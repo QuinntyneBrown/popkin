@@ -1,0 +1,9 @@
+:host {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: var(--layout-qr-card-max);
+  margin: var(--space-5) auto 0;
+}

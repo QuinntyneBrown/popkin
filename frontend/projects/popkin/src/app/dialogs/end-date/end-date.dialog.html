@@ -1,0 +1,20 @@
+<form
+  pk-dialog
+  novalidate
+  heading="When does it wrap up?"
+  description="Everyone gets a recap at this time."
+  [accent]="data.accent"
+  (submit)="setTheEnd($event)"
+>
+  <div pk-text-field fieldId="day" label="Day" type="date" [formControl]="day"></div>
+  <div
+    pk-text-field
+    fieldId="time"
+    label="Time"
+    type="time"
+    [announceError]="true"
+    [formControl]="time"
+    [error]="error() ?? undefined"
+  ></div>
+  <button pk-button slot="footer" variant="popkin" type="submit" [block]="true">Set the end</button>
+</form>

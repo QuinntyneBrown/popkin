@@ -1,0 +1,16 @@
+<div pk-screen>
+  <header pk-top-bar slot="header"><a pk-logo routerLink="/popkins"></a></header>
+  <div
+    pk-empty-state
+    icon="server-error"
+    [level]="1"
+    heading="That one’s on us"
+    text="Something went wrong on Popkin’s side. Nothing of yours was lost. Try again in a moment."
+    [code]="reference ? 'Reference ' + reference : undefined"
+  >
+    <a pk-button variant="primary" size="md" [routerLink]="retryUrl"
+      ><svg pk-icon name="retry" size="md"></svg>Try again</a
+    >
+    <a pk-button variant="secondary" size="md" routerLink="/popkins">My Popkins</a>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+<svg:defs>
+  <svg:mask [attr.id]="maskId" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+    <svg:rect width="64" height="64" fill="#fff" />
+    <svg:circle cx="49" cy="15" r="14.5" fill="#000" />
+  </svg:mask>
+</svg:defs>
+<svg:g [attr.mask]="'url(#' + maskId + ')'" fill="currentColor" stroke="currentColor">
+  <svg:circle cx="26" cy="38" r="22" stroke="none" />
+  <svg:path d="M11 47 L4.5 60.5 L20 56 Z" stroke-width="3" stroke-linejoin="round" />
+</svg:g>
+<svg:circle cx="49" cy="15" r="9.5" fill="currentColor" />

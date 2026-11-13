@@ -1,3 +1,13 @@
-<main>
-  <router-outlet />
-</main>
+<a pk-skip-link>Skip to content</a>
+<router-outlet />
+<div pk-toast-region>
+  @for (toast of toaster.toasts(); track toast.id) {
+    <div
+      pk-toast
+      [variant]="toast.variant"
+      [heading]="toast.heading"
+      [text]="toast.text"
+      (dismissed)="toaster.dismiss(toast.id)"
+    ></div>
+  }
+</div>

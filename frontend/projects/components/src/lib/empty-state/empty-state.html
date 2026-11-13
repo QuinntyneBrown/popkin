@@ -1,0 +1,13 @@
+<span class="empty__icon"><svg pk-icon [name]="icon()" size="xl"></svg></span>
+@if (level() === 1) {
+  <h1>{{ heading() }}</h1>
+} @else {
+  <h2 class="empty__heading">{{ heading() }}</h2>
+}
+@if (text()) {
+  <p class="empty__text">{{ text() }}</p>
+}
+<div class="empty__actions"><ng-content /></div>
+@if (code()) {
+  <p class="empty__code">{{ code() }}</p>
+}

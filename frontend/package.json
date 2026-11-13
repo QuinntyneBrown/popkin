@@ -9,7 +9,9 @@
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "cd .. && husky frontend/.husky || true"
+    "prepare": "cd .. && husky frontend/.husky || true",
+    "design:sync": "node scripts/design-tokens.mjs sync",
+    "design:check": "node scripts/design-tokens.mjs check"
   },
   "private": true,
   "packageManager": "npm@10.9.9",
@@ -21,6 +23,7 @@
     "@angular/forms": "^22.2.0",
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
+    "qrcode-generator": "^1.4.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

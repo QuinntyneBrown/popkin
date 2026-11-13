@@ -21,7 +21,8 @@ export class Pk {
     const route: ScreenRoute = routes[key];
     if (BASELINE) {
       if (!route.mock) throw new Error(`Screen "${key}" has no mock yet.`);
-      await this.page.goto(route.mock);
+      // ?chrome=0 hides the mock bar and the notes, leaving what the product shows.
+      await this.page.goto(`${route.mock}${route.mock.includes('?') ? '&' : '?'}chrome=0`);
       return;
     }
     await this.page.goto(route.app);

@@ -1,0 +1,14 @@
+@if (back() !== undefined) {
+  <a pk-icon-button icon="back" label="Back" size="lg" [routerLink]="back()"></a>
+  <div class="topbar__titles">
+    <div class="topbar__title">
+      @if (steps() && step()) {
+        <div pk-step-dots [step]="step()!" [steps]="steps()!"></div>
+      }
+      <ng-content select="[slot=title]" />
+    </div>
+  </div>
+  <div class="topbar__end"><ng-content select="[slot=end]" /></div>
+} @else {
+  <ng-content />
+}

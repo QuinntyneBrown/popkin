@@ -44,6 +44,8 @@ export default defineConfig({
   // The parity specs run under `npm run parity` only, the sweeps under `npm run sweeps` only.
   testIgnore: parity ? [] : sweeps ? [paritySpecs] : [paritySpecs, ...sweepSpecs],
   fullyParallel: true,
+  // A few workers: each runs a browser, and the app's dev server shares the machine.
+  workers: ci ? 2 : 3,
   forbidOnly: ci,
   retries: ci ? 1 : 0,
   reporter: ci ? [['list'], ['html', { open: 'never' }]] : 'list',

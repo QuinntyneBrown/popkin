@@ -1,0 +1,16 @@
+<svg pk-icon [name]="icons[variant()]" size="md"></svg>
+<div class="toast__body">
+  <div class="toast__title">{{ heading() }}</div>
+  @if (text()) {
+    <div class="toast__text">{{ text() }}</div>
+  }
+</div>
+<button
+  pk-icon-button
+  class="toast__dismiss"
+  type="button"
+  icon="close"
+  size="sm"
+  label="Dismiss"
+  (click)="dismissed.emit()"
+></button>

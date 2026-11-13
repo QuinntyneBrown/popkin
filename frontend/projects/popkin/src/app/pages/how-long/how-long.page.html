@@ -1,0 +1,35 @@
+<div
+  pk-screen
+  heading="How long should it last?"
+  lead="You can change this later. When it ends, everyone gets a recap."
+  [accent]="accent()"
+  [footer]="true"
+>
+  <header pk-top-bar slot="header" back="/new" [step]="3" [steps]="3"></header>
+  @if (status() === 'failed') {
+    <div pk-alert heading="We couldn’t pop it up.">
+      Something went wrong on our side. Your choices are still here.
+    </div>
+  }
+  <div
+    pk-choice-card
+    label="How long it lasts"
+    [options]="lengths"
+    [value]="draft().length"
+    (valueChange)="choose($event)"
+  ></div>
+  @if (draft().length === 'UntilDate') {
+    <button pk-date-button (click)="pickEnd()">{{ customEndText() }}</button>
+  }
+  <button
+    pk-button
+    slot="footer"
+    variant="popkin"
+    type="button"
+    [block]="true"
+    [busy]="status() === 'popping'"
+    (click)="popItUp()"
+  >
+    {{ status() === 'popping' ? 'Popping it up…' : 'Pop it up' }}
+  </button>
+</div>

@@ -1,0 +1,59 @@
+<div pk-screen heading="First, what should we call you?" lead="That’s all we need. No passwords.">
+  <header pk-top-bar slot="header" back="/welcome" [step]="1" [steps]="3"></header>
+  <form id="sign-up" class="stack stack--lg" novalidate (submit)="submit($event)">
+    @if (problems().length) {
+      <div pk-form-summary [problems]="problems()"></div>
+    }
+    @if (status() === 'failed') {
+      <div pk-alert heading="We couldn’t send your code.">
+        Check your connection and try again. Nothing you typed was lost.
+      </div>
+    } @else if (status() === 'limited') {
+      <div pk-alert heading="That’s a lot of codes.">{{ tryAgain() }}</div>
+    }
+    <div
+      pk-text-field
+      fieldId="name"
+      label="Your name"
+      autocomplete="given-name"
+      [formControl]="name"
+      [readonly]="status() === 'sending'"
+      [error]="nameError() ?? undefined"
+    ></div>
+    <div
+      pk-text-field
+      fieldId="contact"
+      labelLayout="row"
+      hint="We’ll send a 6-digit code to confirm it’s you."
+      [label]="contactLabel()"
+      [type]="channel() === 'phone' ? 'tel' : 'email'"
+      [inputmode]="channel() === 'phone' ? 'tel' : 'email'"
+      [autocomplete]="channel() === 'phone' ? 'tel' : 'email'"
+      [formControl]="contact"
+      [readonly]="status() === 'sending'"
+      [error]="contactError() ?? undefined"
+    >
+      <div
+        pk-segmented-control
+        slot="label-end"
+        label="How to reach you"
+        [options]="channels"
+        [value]="channel()"
+        (valueChange)="switchChannel($event)"
+      ></div>
+    </div>
+  </form>
+  <ng-container slot="actions">
+    <button
+      pk-button
+      variant="primary"
+      type="submit"
+      form="sign-up"
+      [block]="true"
+      [busy]="status() === 'sending'"
+    >
+      {{ status() === 'sending' ? 'Sending your code…' : 'Continue' }}
+    </button>
+    <p pk-legal></p>
+  </ng-container>
+</div>
