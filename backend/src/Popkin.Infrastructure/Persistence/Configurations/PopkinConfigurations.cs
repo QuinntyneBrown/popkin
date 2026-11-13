@@ -51,6 +51,13 @@ public sealed class ChatThreadConfiguration : IEntityTypeConfiguration<ChatThrea
         builder.HasKey(t => t.Id);
         builder.Property(t => t.Kind).HasConversion<string>().HasMaxLength(10);
         builder.HasIndex(t => t.PopkinId);
+        // One direct message per pair of members per Popkin: the pair is stored lowest first,
+        // and two opens at the same moment cannot both be saved. Everyone names no pair.
+        builder.HasIndex(t => new { t.PopkinId, t.MemberAId, t.MemberBId }).IsUnique().HasFilter("[Kind] = 'Direct'");
+        // A member finds the direct messages they are the second of.
+        builder.HasIndex(t => t.MemberBId);
         builder.HasOne<PopkinSpace>().WithMany().HasForeignKey(t => t.PopkinId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Membership>().WithMany().HasForeignKey(t => t.MemberAId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Membership>().WithMany().HasForeignKey(t => t.MemberBId).OnDelete(DeleteBehavior.Restrict);
     }
 }

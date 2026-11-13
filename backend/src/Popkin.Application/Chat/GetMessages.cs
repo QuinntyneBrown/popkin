@@ -23,8 +23,8 @@ public sealed class GetMessagesQueryHandler(IAppDbContext db, IMembershipGuard g
 
     public async Task<MessagePageDto> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
     {
-        var (popkin, _) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
-        var thread = await ChatThreads.RequireAsync(db, popkin.Id, request.ThreadId, cancellationToken);
+        var (_, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
+        var thread = await ChatThreads.RequireAsync(db, membership, request.ThreadId, cancellationToken);
         var messages = db.Messages.AsNoTracking().Where(m => m.ThreadId == thread.Id && m.DeletedAt == null);
         var limit = request.Limit is > 0 and <= PageSize ? request.Limit.Value : PageSize;
 

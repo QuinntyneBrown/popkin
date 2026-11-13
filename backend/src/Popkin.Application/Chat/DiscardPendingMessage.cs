@@ -19,7 +19,7 @@ public sealed class DiscardPendingMessageCommandHandler(IAppDbContext db, IMembe
     public async Task Handle(DiscardPendingMessageCommand request, CancellationToken cancellationToken)
     {
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
-        var thread = await ChatThreads.RequireAsync(db, popkin.Id, request.ThreadId, cancellationToken);
+        var thread = await ChatThreads.RequireAsync(db, membership, request.ThreadId, cancellationToken);
         if (popkin.Status == PopkinStatus.WrappedUp)
         {
             return;
@@ -36,6 +36,6 @@ public sealed class DiscardPendingMessageCommandHandler(IAppDbContext db, IMembe
 
         message.Delete(clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
-        await notifier.MessageDeleted(popkin.Id, thread.Id, message.Id);
+        await notifier.MessageDeleted(await ChatThreads.AudienceAsync(db, thread, cancellationToken), thread.Id, message.Id);
     }
 }

@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Calls;
 using Popkin.Domain;
 
 namespace Popkin.Application.WrapUp;
 
 /// <summary>
 /// Wraps a Popkin up, whether its Host chose to (L2-043) or its time is up (L2-044): the Popkin
-/// and every call under way in it end in one unit of work, saved here, and the members with the
+/// and every call under way in it, the group call and each direct call, end in one unit of work, saved here, and the members with the
 /// Popkin open are told after the commit.
 /// </summary>
 public sealed class PopkinWrapUpService(IAppDbContext db, TimeProvider clock, IPopkinNotifier notifier)
@@ -78,9 +79,10 @@ public sealed class PopkinWrapUpService(IAppDbContext db, TimeProvider clock, IP
     /// </summary>
     public async Task AnnounceAsync(PopkinSpace popkin, IReadOnlyList<Call> endedCalls)
     {
+        // A direct call's end goes to its two members only (L2-023 AC2).
         foreach (var call in endedCalls)
         {
-            await notifier.CallEnded(popkin.Id, call.Id);
+            await notifier.CallEnded(await CallReads.AudienceAsync(db, call, CancellationToken.None), call.Id, call.ThreadId);
         }
 
         await notifier.PopkinWrappedUp(popkin.Id);

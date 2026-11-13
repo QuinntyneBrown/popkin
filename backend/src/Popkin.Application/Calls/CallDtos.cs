@@ -6,12 +6,13 @@ using Popkin.Domain;
 namespace Popkin.Application.Calls;
 
 /// <summary>
-/// A group call under way: when it started, how many are on it, and the version that count was
-/// reached at. The running time counts from `StartedAt` (L2-029 AC5).
+/// A call under way: when it started, how many are on it, and the version that count was
+/// reached at; `ThreadId` names the direct message of a direct call and is null for the group
+/// call. The running time counts from `StartedAt` (L2-029 AC5).
 /// </summary>
-public sealed record CallDto(Guid Id, DateTimeOffset StartedAt, long Version, int ParticipantCount)
+public sealed record CallDto(Guid Id, Guid? ThreadId, DateTimeOffset StartedAt, long Version, int ParticipantCount)
 {
-    public static CallDto Of(Call call, int participantCount) => new(call.Id, call.StartedAt, call.Version, participantCount);
+    public static CallDto Of(Call call, int participantCount) => new(call.Id, call.ThreadId, call.StartedAt, call.Version, participantCount);
 }
 
 /// <summary>

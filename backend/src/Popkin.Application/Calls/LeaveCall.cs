@@ -72,13 +72,14 @@ public sealed class CallLeaver(IAppDbContext db, TimeProvider clock, IPopkinNoti
             }
 
             await notifier.ParticipantLeft(call.Id, participant.MembershipId);
+            var audience = await CallReads.AudienceAsync(db, call, CancellationToken.None);
             if (call.EndedAt is null)
             {
-                await notifier.CallChanged(call.PopkinId, call.Id, call.Version, remaining);
+                await notifier.CallChanged(audience, call.Id, call.Version, remaining, call.ThreadId);
             }
             else
             {
-                await notifier.CallEnded(call.PopkinId, call.Id);
+                await notifier.CallEnded(audience, call.Id, call.ThreadId);
             }
 
             return true;

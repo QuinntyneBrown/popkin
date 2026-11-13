@@ -9,6 +9,11 @@ namespace Popkin.Api.Controllers;
 [Route("api/popkins/{popkinId:guid}/threads")]
 public sealed class ThreadsController(ISender sender) : ControllerBase
 {
+    /// <summary>The Chat tab: Everyone, then the caller's direct messages, the most recent first (L2-022).</summary>
+    [HttpGet]
+    public async Task<ActionResult<ThreadListDto>> List(Guid popkinId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetThreadsQuery(popkinId), cancellationToken));
+
     /// <summary>The Everyone thread, which every member shares (L2-021).</summary>
     [HttpGet("everyone")]
     public async Task<ActionResult<ThreadDto>> GetEveryone(Guid popkinId, CancellationToken cancellationToken) =>
@@ -18,6 +23,17 @@ public sealed class ThreadsController(ISender sender) : ControllerBase
     [HttpGet("everyone/preview")]
     public async Task<ActionResult<ChatPreviewDto>> GetEveryonePreview(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetEveryonePreviewQuery(popkinId), cancellationToken));
+
+    /// <summary>
+    /// The direct message with another member, named by their membership id (L2-023): 200 with
+    /// the one the two have, 201 when this opens it. Only the two of them can read it.
+    /// </summary>
+    [HttpPut("direct/{memberId:guid}")]
+    public async Task<ActionResult<ThreadDto>> OpenDirect(Guid popkinId, Guid memberId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new OpenDirectThreadCommand(popkinId, memberId), cancellationToken);
+        return result.Created ? Created($"/api/popkins/{popkinId}/threads/direct/{memberId}", result.Thread) : Ok(result.Thread);
+    }
 
     public sealed record MarkReadRequest(Guid? LastReadMessageId);
 

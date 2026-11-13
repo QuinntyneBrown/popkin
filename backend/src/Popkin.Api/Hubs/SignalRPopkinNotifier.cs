@@ -17,11 +17,11 @@ namespace Popkin.Api.Hubs;
 public sealed class SignalRPopkinNotifier(
     IHubContext<PopkinHub, IPopkinClient> hub, PopkinMetrics metrics, ILogger<SignalRPopkinNotifier> logger) : IPopkinNotifier
 {
-    public Task MessageAdded(Guid popkinId, MessageDto message) =>
-        SendAsync(nameof(IPopkinClient.MessageAdded), () => Group(popkinId).MessageAdded(message));
+    public Task MessageAdded(Audience audience, MessageDto message) =>
+        SendAsync(nameof(IPopkinClient.MessageAdded), () => To(audience).MessageAdded(message));
 
-    public Task MessageDeleted(Guid popkinId, Guid threadId, Guid messageId) =>
-        SendAsync(nameof(IPopkinClient.MessageDeleted), () => Group(popkinId).MessageDeleted(threadId, messageId));
+    public Task MessageDeleted(Audience audience, Guid threadId, Guid messageId) =>
+        SendAsync(nameof(IPopkinClient.MessageDeleted), () => To(audience).MessageDeleted(threadId, messageId));
 
     public Task ThreadRead(Guid personId, Guid threadId) =>
         SendAsync(nameof(IPopkinClient.ThreadRead), () => hub.Clients.User(personId.ToString()).ThreadRead(threadId));
@@ -38,11 +38,13 @@ public sealed class SignalRPopkinNotifier(
     public Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds) =>
         SendAsync(nameof(IPopkinClient.PhotosAdded), () => Group(popkinId).PhotosAdded(popkinId, photoIds));
 
-    public Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount) =>
-        SendAsync(nameof(IPopkinClient.CallChanged), () => Group(popkinId).CallChanged(popkinId, callId, version, participantCount));
+    public Task CallChanged(Audience audience, Guid callId, long version, int participantCount, Guid? threadId) =>
+        SendAsync(
+            nameof(IPopkinClient.CallChanged),
+            () => To(audience).CallChanged(audience.PopkinId, callId, version, participantCount, threadId));
 
-    public Task CallEnded(Guid popkinId, Guid callId) =>
-        SendAsync(nameof(IPopkinClient.CallEnded), () => Group(popkinId).CallEnded(popkinId, callId));
+    public Task CallEnded(Audience audience, Guid callId, Guid? threadId) =>
+        SendAsync(nameof(IPopkinClient.CallEnded), () => To(audience).CallEnded(audience.PopkinId, callId, threadId));
 
     public Task PopkinWrappedUp(Guid popkinId) =>
         SendAsync(nameof(IPopkinClient.PopkinWrappedUp), () => Group(popkinId).PopkinWrappedUp(popkinId));
@@ -62,6 +64,12 @@ public sealed class SignalRPopkinNotifier(
         SendAsync(nameof(IPopkinClient.Signal), () => hub.Clients.Client(connectionId).Signal(callId, fromMembershipId, signal));
 
     private IPopkinClient Call(Guid callId) => hub.Clients.Group(PopkinHub.CallGroupOf(callId));
+
+    /// <summary>The Popkin's group, or the people named on every connection they hold, never the group (L2-023 AC2).</summary>
+    private IPopkinClient To(Audience audience) =>
+        audience.PersonIds is { } people
+            ? hub.Clients.Users(people.Select(p => p.ToString()).ToList())
+            : Group(audience.PopkinId);
 
     private IPopkinClient Group(Guid popkinId) => hub.Clients.Group(PopkinHub.GroupOf(popkinId));
 

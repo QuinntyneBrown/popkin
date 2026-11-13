@@ -22,6 +22,9 @@ const experiences = `${home}/experiences`;
 // The experience the mocks open: the sunrise canoe to Heron Point.
 const experience = `${experiences}/00000000-0000-4000-a000-000000000081`;
 const wrapUp = `${home}/wrap-up`;
+const conversations = `${home}/chat`;
+// The direct message the mocks open: with Walt, by his membership (`people.walt` in chat.ts).
+const directMessage = `${conversations}/00000000-0000-4000-8000-walt00000000`;
 const recap = `${home}/recap`;
 // One the signed-in Host did not share: Ellie's idea, a beach day next summer.
 const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
@@ -97,7 +100,7 @@ export const routes = {
   popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
   bannerInfo: { app: home, mock: 'notifications/banner/info.html' },
   videoCall: { app: call, mock: 'pages/video-call/default.html' },
-  videoCallTwo: { app: call, mock: 'pages/video-call/two.html' },
+  videoCallTwo: { app: `${directMessage}/call`, mock: 'pages/video-call/two.html' },
   videoCallMuted: { app: call, mock: 'pages/video-call/muted.html' },
   videoCallCameraOff: { app: call, mock: 'pages/video-call/camera-off.html' },
   videoCallLoading: { app: call, mock: 'pages/video-call/loading.html' },
@@ -185,6 +188,19 @@ export const routes = {
   photoAlbumRemoved: { app: photos, mock: 'pages/photo-album/removed.html' },
   experiencesWrapped: { app: experiences, mock: 'pages/experiences/wrapped.html' },
   experienceDetailWrapped: { app: experience, mock: 'pages/experience-detail/wrapped.html' },
+  // Journey 11, Direct message.
+  conversations: { app: conversations, mock: 'pages/conversations/default.html' },
+  conversationsLoading: { app: conversations, mock: 'pages/conversations/loading.html' },
+  conversationsEmpty: { app: conversations, mock: 'pages/conversations/empty.html' },
+  conversationsError: { app: conversations, mock: 'pages/conversations/error.html' },
+  newMessage: { app: conversations, mock: 'dialogs/new-message/default.html' },
+  newMessageNoResults: { app: conversations, mock: 'dialogs/new-message/no-results.html' },
+  directMessage: { app: directMessage, mock: 'pages/direct-message/default.html' },
+  directMessageLoading: { app: directMessage, mock: 'pages/direct-message/loading.html' },
+  directMessageEmpty: { app: directMessage, mock: 'pages/direct-message/empty.html' },
+  directMessageError: { app: directMessage, mock: 'pages/direct-message/error.html' },
+  directMessageReadOnly: { app: directMessage, mock: 'pages/direct-message/read-only.html' },
+  directMessageCall: { app: directMessage, mock: 'pages/direct-message/call.html' },
 } satisfies Record<string, ScreenRoute>;
 
 export type RouteKey = keyof typeof routes;

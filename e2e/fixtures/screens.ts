@@ -1,3 +1,7 @@
+import { ConversationsPage } from '../pages/conversations.page';
+import { DirectMessagePage } from '../pages/direct-message.page';
+import { NewMessageDialog } from '../pages/new-message.dialog';
+import { directMessageStates } from './direct-message-states';
 import { LandingPage } from '../pages/landing.page';
 import { WelcomePage } from '../pages/welcome.page';
 import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
@@ -1070,4 +1074,38 @@ export const screenStates: ScreenState[] = [
     regions: (page) => ({ welcome: new WelcomePage(page).welcome }),
     wideRegions: (page) => ({ aside: new WelcomePage(page).aside }),
   },
+  ...(
+    ['conversations', 'conversationsLoading', 'conversationsEmpty', 'conversationsError'] as const
+  ).map((key) => ({
+    key,
+    ...directMessageStates[key],
+    regions: (page: Page) => {
+      const chat = new ConversationsPage(page);
+      return { topBar: chat.topBar, list: chat.list };
+    },
+    wideRegions: (page: Page) => ({ thread: new ConversationsPage(page).threadPaneHead }),
+  })),
+  ...(['newMessage', 'newMessageNoResults'] as const).map((key) => ({
+    key,
+    ...directMessageStates[key],
+    regions: (page: Page) => ({ panel: new NewMessageDialog(page).panel }),
+  })),
+  ...(
+    [
+      'directMessage',
+      'directMessageLoading',
+      'directMessageEmpty',
+      'directMessageError',
+      'directMessageReadOnly',
+      'directMessageCall',
+    ] as const
+  ).map((key) => ({
+    key,
+    ...directMessageStates[key],
+    regions: (page: Page) => {
+      const direct = new DirectMessagePage(page);
+      return { topBar: direct.topBar, composer: direct.composer };
+    },
+    wideRegions: (page: Page) => ({ list: new DirectMessagePage(page).listPane }),
+  })),
 ];

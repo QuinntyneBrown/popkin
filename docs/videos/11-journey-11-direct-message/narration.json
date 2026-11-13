@@ -1,0 +1,25 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Some things are for one person, not the whole group. This is the direct message."] },
+    { "id": "list", "bars": 9, "lines": ["Open the Chat tab of a Popkin. Everyone comes first, in the Popkin's colour, with its latest message, its time and three unread.", "Under Direct messages, your chats with one member each, the most recent first. Walt's is unread: his name in bold, and a dot."] },
+    { "id": "newmsg", "bars": 7, "lines": ["New message lists the Popkin's other members, with a search.", "It ignores case and accents: tomas finds Tomás, and Bren in capitals finds both Brennans. Choose Walt."] },
+    { "id": "dm", "bars": 5, "lines": ["The direct message opens: Walt's avatar and name, and From Lakeside Weekend.", "The thread starts with one line: Only you two can see this."] },
+    { "id": "talk", "bars": 5, "lines": ["You write: Deal. See you at eight. Only Walt can read it.", "His answer arrives at once, without reloading."] },
+    { "id": "grow", "bars": 10, "lines": [
+      { "text": "On a phone and a tablet, the direct message fills the screen.", "at": 0 },
+      { "text": "From ten twenty-four pixels, the list sits beside the thread.", "at": 14 },
+      { "text": "And from twelve eighty, a pane about Walt, with Call Walt.", "at": 26 }
+    ] },
+    { "id": "call", "bars": 6, "lines": ["Call Walt, at the top of the thread, opens a call between the two of you, and nobody else.", "Just you, until he answers, with the same controls: Mute, Camera and Leave."] },
+    { "id": "answer", "bars": 6, "lines": ["When one of you calls, the other sees it in the direct message: Call, one on the call, and Join.", "Join, and it is just the two of you. Only you and Walt can join this call."] },
+    { "id": "readonly", "bars": 4, "lines": ["Once the Popkin wraps up, its direct messages stay, read-only. Nobody can post new ones."] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: a third member cannot read, post to, or join any of it. Asking is refused, as not found.", "Still to come: reactions, replies and photos in a direct message."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey eleven. Popkin is a free platform for pop-up communities."] }
+  ]
+}

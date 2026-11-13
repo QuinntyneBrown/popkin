@@ -1,0 +1,108 @@
+<div
+  pk-app-screen
+  [accent]="accent()"
+  [layout]="state() === 'ready' ? 'list' : 'tab'"
+  [body]="state() === 'error' ? 'plain' : 'flush'"
+>
+  <header pk-top-bar slot="header" heading="Chat">
+    <button
+      pk-icon-button
+      type="button"
+      icon="new-message"
+      label="New message"
+      (click)="newMessage()"
+    ></button>
+  </header>
+
+  <div
+    pk-conversations
+    [state]="state() === 'ready' ? 'ready' : state() === 'error' ? 'error' : 'loading'"
+    [everyone]="list.everyone()"
+    [direct]="list.direct()"
+    (newMessage)="newMessage()"
+    (retry)="reload()"
+  ></div>
+
+  @if (header(); as header) {
+    <nav
+      pk-popkin-nav
+      slot="nav"
+      current="chat"
+      [popkinId]="header.popkinId"
+      [name]="header.popkinName"
+      [emoji]="header.emoji"
+      [members]="members()"
+      [timeLeft]="timeLeft()"
+      [unread]="unreadCount()"
+    ></nav>
+  }
+
+  @if (state() === 'ready' && header(); as header) {
+    <section pk-thread-pane slot="thread" label="Everyone" bodyLabel="Messages">
+      <div
+        pk-top-bar
+        slot="header"
+        [pane]="true"
+        [line]="true"
+        [tile]="header.emoji"
+        heading="Everyone"
+        [sub]="sub()"
+      >
+        <a
+          pk-icon-button
+          slot="end"
+          icon="open"
+          size="md"
+          label="Open thread"
+          [routerLink]="['/p', header.popkinId, 'chat', 'everyone']"
+        ></a>
+        @if (!header.readOnly) {
+          <a
+            pk-icon-button
+            slot="end"
+            variant="popkin"
+            icon="video"
+            label="Start group call"
+            [routerLink]="['/p', header.popkinId, 'call']"
+          ></a>
+        }
+      </div>
+      <div pk-thread (latestInView)="thread.setLatestInView($event)">
+        @for (row of thread.rows(); track row.key) {
+          @switch (row.kind) {
+            @case ('day') {
+              <div pk-day-divider [label]="row.label"></div>
+            }
+            @case ('note') {
+              <p pk-system-note [name]="row.name" [text]="row.text"></p>
+            }
+            @case ('message') {
+              <div
+                pk-message
+                [mine]="row.mine"
+                [lead]="row.lead"
+                [name]="row.name"
+                [avatar]="avatarOf(row)"
+                [text]="row.text"
+                [time]="row.time"
+                [state]="row.state"
+              ></div>
+            }
+          }
+        }
+      </div>
+      <div
+        pk-composer
+        slot="composer"
+        label="Message everyone"
+        [(value)]="text"
+        [closed]="
+          header.readOnly
+            ? 'This Popkin has wrapped up. Messages stay, but nobody can post new ones.'
+            : undefined
+        "
+        (send)="send($event)"
+      ></div>
+    </section>
+  }
+</div>

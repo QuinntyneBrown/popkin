@@ -1,0 +1,77 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-18);
+  padding: 0 var(--space-5);
+  color: inherit;
+  text-decoration: none;
+}
+
+:host(:hover) {
+  background: color-mix(in srgb, var(--color-bg-subtle) 60%, transparent);
+  color: inherit;
+}
+
+/* The thread that is open beside the list. */
+:host([aria-current='page']) {
+  background: var(--color-bg-subtle);
+}
+
+/* The name and the line, over the hairline that parts the row from the next. */
+.row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__main--line {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+/* One line of the row: its words, and what stands at its end. */
+.row__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.row__title--unread {
+  font-weight: var(--font-weight-bold);
+}
+
+.row__text {
+  flex: 1;
+  min-width: 0;
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.row__text--unread {
+  color: var(--color-fg-default);
+}
+
+.row__meta {
+  flex: none;
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+}
+
+/* Not yet read. Its name says so: the colour is not the only sign. */
+.unread-dot {
+  flex: none;
+  width: var(--space-2-5);
+  height: var(--space-2-5);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+}

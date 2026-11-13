@@ -6,7 +6,7 @@
     backLabel="Minimise call"
     backIcon="chevron-down"
     [emoji]="popkin()?.emoji"
-    [heading]="popkin()?.name ?? 'Group call'"
+    [heading]="heading()"
     [sub]="session.subtitle()"
   >
     <button
@@ -38,7 +38,13 @@
           <li pk-call-tile [rest]="counted"></li>
         }
       </ul>
-      @if (session.alone()) {
+      @if (session.alone() && session.other(); as other) {
+        <div
+          pk-stage-message
+          [heading]="'Waiting for ' + other.firstName"
+          [text]="other.firstName + ' sees the call in your chat and can join with one tap.'"
+        ></div>
+      } @else if (session.alone()) {
         <div
           pk-stage-message
           heading="Waiting for the others"

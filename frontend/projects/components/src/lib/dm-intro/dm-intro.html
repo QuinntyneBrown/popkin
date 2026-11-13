@@ -1,0 +1,9 @@
+<span
+  pk-avatar
+  size="xl"
+  [initials]="avatar().initials"
+  [photo]="avatar().photoUrl"
+  [attr.data-accent]="avatar().accent"
+></span>
+<div class="dm-intro__name">{{ name() }}</div>
+<div class="dm-intro__text">{{ text() }}</div>

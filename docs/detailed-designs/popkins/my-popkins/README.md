@@ -104,7 +104,8 @@ Popkins.
 - **`PopkinsController.List`** — `GET /api/popkins`; sends `GetMyPopkinsQuery`.
 - **`GetMyPopkinsQueryHandler`** (`Popkins/GetMyPopkins.cs`) — reads the caller from
   `ICurrentPerson` and, through `IAppDbContext`, the caller's memberships with `LeftAt` null and
-  their `PopkinSpace`s. It makes up to nine queries, each for the whole list and none per
+  their `PopkinSpace`s. It makes up to ten queries (nine until journey 11 added the read of the
+  direct messages), each for the whole list and none per
   Popkin; the design asked for one, which the latest message per thread and the counts do not
   fit.
   - active cards, the most recently active first (L2-017): by the later of
@@ -115,10 +116,11 @@ Popkins.
     author has left; the active member count, up to 3 avatars, the unread count, the id of the
     Everyone thread and the caller's own membership id, which the web app needs to count live;
   - per wrapped-up row the people count and the `Photo` count.
-- **Unread count** — messages of the Everyone thread sent after the member's read point and not
-  authored by them, counted by `ThreadUnread.CountsAsync`, the rule the Popkin home and the
-  thread use. The design counts every thread the member can read; direct messages are added
-  when they are built (journey 11).
+- **Unread count** — messages sent after the member's read point and not authored by them, in
+  the Everyone thread and, since journey 11, in the member's direct messages of that Popkin
+  whose other member has not left (`DirectThreads.Of`), counted by `ThreadUnread.CountsAsync`,
+  the rule the Popkin home and the thread use. The direct messages of every Popkin are read in
+  one query. The web app hands each Popkin's count to `UnreadTracker.setPopkin`.
 - **Avatars** — `AvatarDto` carries initials, an accent from `AvatarAccent.For(personId)` (the
   colour that stays the same for a person, L2-013 AC6) and, for a member with a photo, an
   expiring URL from `IPhotoStore` (L2-051 AC2).
@@ -141,8 +143,8 @@ Popkins.
 
 Everything above except what it names as waiting: `AddressUrl` and the full page load to an
 address (the addresses rework), the recap behind a wrapped-up row (built since, in journey 9), the account
-screen behind the avatar (journey 17), direct messages in the unread count (journey 11) and the
-clearing of the snapshot at sign out (journey 17).
+screen behind the avatar (journey 17), direct messages in the unread count (built since, in
+journey 11) and the clearing of the snapshot at sign out (journey 17).
 
 One gap was found: `CreatePopkinCommandHandler` does not add the connections the creator
 already holds to the new Popkin's group, as `JoinPopkinCommandHandler` does for a new member.

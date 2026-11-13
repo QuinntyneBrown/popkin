@@ -80,3 +80,10 @@
   font: var(--text-body-sm);
   color: var(--color-fg-muted);
 }
+
+/* In the thread pane the messages scroll above it: it stays where the pane puts it. */
+@media (min-width: 64rem) {
+  :host-context(.thread-pane) {
+    position: static;
+  }
+}

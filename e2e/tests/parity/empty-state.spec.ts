@@ -1,3 +1,6 @@
+import { NewMessageDialog } from '../../pages/new-message.dialog';
+import { ConversationsPage } from '../../pages/conversations.page';
+import { directMessageStates } from '../../fixtures/direct-message-states';
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { ExperienceDetailPage } from '../../pages/experience-detail.page';
@@ -84,5 +87,23 @@ parity('empty-state', [
     ...wrapUpStates.photoAlbumRemoved,
     name: 'photos-removed',
     region: (page) => new PhotoAlbumPage(page).empty,
+  },
+  {
+    key: 'conversationsEmpty',
+    ...directMessageStates.conversationsEmpty,
+    name: 'no-direct-messages',
+    region: (page) => new ConversationsPage(page).empty,
+  },
+  {
+    key: 'conversationsError',
+    ...directMessageStates.conversationsError,
+    name: 'chats-error',
+    region: (page) => new ConversationsPage(page).error,
+  },
+  {
+    key: 'newMessageNoResults',
+    ...directMessageStates.newMessageNoResults,
+    name: 'nobody-by-that-name',
+    region: (page) => new NewMessageDialog(page).noResults,
   },
 ]);

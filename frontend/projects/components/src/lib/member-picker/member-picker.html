@@ -1,0 +1,27 @@
+<div pk-search-field [label]="searchLabel()" [(value)]="query"></div>
+@if (members().length) {
+  <ul class="divided">
+    @for (member of members(); track member.key) {
+      <li>
+        <button class="row row--short" type="button" (click)="chosen.emit(member.key)">
+          <span
+            pk-avatar
+            [initials]="member.avatar.initials"
+            [photo]="member.avatar.photoUrl"
+            [attr.data-accent]="member.avatar.accent"
+          ></span>
+          <span class="row__main row__title truncate">{{ member.name }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+} @else {
+  <div
+    pk-empty-state
+    icon="not-found"
+    heading="Nobody by that name"
+    [text]="'Only members of ' + popkinName() + ' can be messaged here.'"
+    [level]="3"
+    [compact]="true"
+  ></div>
+}

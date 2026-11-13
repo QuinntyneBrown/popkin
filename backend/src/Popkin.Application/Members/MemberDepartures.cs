@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Calls;
 using Popkin.Application.Realtime;
@@ -18,8 +19,13 @@ public sealed class MemberDepartures(
     /// </summary>
     public async Task AnnounceAsync(Guid popkinId, Membership membership, CancellationToken cancellationToken)
     {
-        if (await CallReads.UnderWayAsync(db, popkinId, cancellationToken) is { } call
-            && await CallReads.ParticipantIdAsync(db, popkinId, call.Id, membership.Id, cancellationToken) is { } participantId)
+        // Every call they are on: the group call, and a direct call of theirs beside it.
+        var onCalls = await db.CallParticipants.AsNoTracking()
+            .Where(p => p.MembershipId == membership.Id && p.LeftAt == null)
+            .Where(p => db.Calls.Any(c => c.Id == p.CallId && c.PopkinId == popkinId && c.EndedAt == null))
+            .Select(p => p.Id)
+            .ToListAsync(cancellationToken);
+        foreach (var participantId in onCalls)
         {
             await calls.LeaveAsync(participantId, CancellationToken.None);
         }

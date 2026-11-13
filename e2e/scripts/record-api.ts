@@ -135,6 +135,20 @@ await call('POST', messages, {
 });
 await call('GET', `/api/popkins/${created.id}/presence`);
 
+// Direct messages: Mara writes to Walt alone, then lists her threads; neither is on a call.
+const members = await call('GET', `/api/popkins/${created.id}/members`);
+const waltsId = members.find(
+  (m: { displayName: string }) => m.displayName === 'Walt Brennan',
+).membershipId;
+const direct = await call('PUT', `/api/popkins/${created.id}/threads/direct/${waltsId}`);
+await call('POST', `/api/popkins/${created.id}/threads/${direct.id}/messages`, {
+  clientMessageId: '7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e03',
+  text: 'Walt, your pancakes were unreal. Is that your mum’s recipe?',
+});
+await call('GET', `/api/popkins/${created.id}/threads/${direct.id}/messages`);
+await call('GET', `/api/popkins/${created.id}/calls/current?threadId=${direct.id}`);
+await call('GET', `/api/popkins/${created.id}/threads`);
+
 // The Popkin home: Mara reads the header and its four sections. Photos and experiences are
 // empty until their journeys.
 await call('GET', `/api/popkins/${created.id}`);

@@ -12,8 +12,8 @@ public sealed record LatestMessageDto(string FirstName, string Text);
 
 /// <summary>
 /// An active Popkin as a card of My Popkins: its look, its end, how many members it has with
-/// the first few as avatars, the latest message of Everyone and how many are unread by the
-/// reader (L2-017 AC1, AC2). `ViewerMembershipId` is the reader's own membership.
+/// the first few as avatars, the latest message of Everyone and how many messages are unread by
+/// the reader, in Everyone and in their direct messages of it (L2-017 AC1, AC2, L2-022 AC3). `ViewerMembershipId` is the reader's own membership.
 /// </summary>
 public sealed record ActivePopkinCardDto(
     Guid Id,
@@ -131,8 +131,15 @@ public sealed class GetMyPopkinsQueryHandler(IAppDbContext db, ICurrentPerson cu
             .GroupBy(m => m.ThreadId)
             .Select(g => new { ThreadId = g.Key, At = g.Max(m => m.SentAt) })
             .ToDictionaryAsync(g => g.ThreadId, g => g.At, cancellationToken);
-        var unread = await ThreadUnread.CountsAsync(
-            db, threadIds, mine.Values.Select(m => m.Id).ToList(), cancellationToken);
+        var membershipIds = mine.Values.Select(m => m.Id).ToList();
+        var direct = await DirectThreads.Of(db, membershipIds).AsNoTracking()
+            .Where(t => popkinIds.Contains(t.PopkinId))
+            .Select(t => new { t.Id, t.PopkinId })
+            .ToListAsync(cancellationToken);
+        var unread = await ThreadUnread.CountsAsync(db, [.. threadIds, .. direct.Select(t => t.Id)], membershipIds, cancellationToken);
+        var directOf = direct.ToLookup(t => t.PopkinId, t => t.Id);
+        int UnreadOf(Guid popkinId) =>
+            unread.GetValueOrDefault(everyone[popkinId]) + directOf[popkinId].Sum(id => unread.GetValueOrDefault(id));
 
         // Most recently active first: a Popkin was last active when it was started, when someone
         // last joined it or when its latest message was written, whichever is later.
@@ -157,7 +164,7 @@ public sealed class GetMyPopkinsQueryHandler(IAppDbContext db, ICurrentPerson cu
                     latest.TryGetValue(threadId, out var message)
                         ? new LatestMessageDto(PersonName.FirstName(authors[message.AuthorMembershipId]), message.Text)
                         : null,
-                    unread.GetValueOrDefault(threadId),
+                    UnreadOf(p.Id),
                     threadId,
                     mine[p.Id].Id);
             })

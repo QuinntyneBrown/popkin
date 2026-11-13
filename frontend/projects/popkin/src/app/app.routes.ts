@@ -104,11 +104,35 @@ export const routes: Routes = [
     title: 'Popkin home · Popkin',
   },
   {
+    path: 'p/:popkinId/chat',
+    pathMatch: 'full',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/conversations/conversations.page').then((m) => m.ConversationsPage),
+    data: data({ shell: 'app', page: 'conversations' }),
+    title: 'Chat · Popkin',
+  },
+  {
     path: 'p/:popkinId/chat/everyone',
     canActivate: [signedInGuard],
     loadComponent: () => import('./pages/group-chat/group-chat.page').then((m) => m.GroupChatPage),
     data: data({ shell: 'app', page: 'group-chat' }),
     title: 'Everyone · Popkin',
+  },
+  {
+    path: 'p/:popkinId/chat/:memberId/call',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/video-call/video-call.page').then((m) => m.VideoCallPage),
+    data: data({ shell: 'bare', page: 'video-call' }),
+    title: 'Call · Popkin',
+  },
+  {
+    path: 'p/:popkinId/chat/:memberId',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/direct-message/direct-message.page').then((m) => m.DirectMessagePage),
+    data: data({ shell: 'app', page: 'direct-message' }),
+    title: 'Direct message · Popkin',
   },
   {
     path: 'p/:popkinId/wrap-up',
@@ -181,8 +205,6 @@ export const routes: Routes = [
       },
     ],
   },
-  // Until the list of conversations is built (journey 11), Chat is the Everyone thread.
-  { path: 'p/:popkinId/chat', redirectTo: 'p/:popkinId/chat/everyone', pathMatch: 'full' },
   {
     path: 'popkins',
     canActivate: [signedInGuard],

@@ -24,7 +24,7 @@ public sealed class StartCallTests
         var joined = await response.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(["call", "iceServers", "participants", "viewerMembershipId"], joined.EnumerateObject().Select(p => p.Name).Order());
         var call = joined.GetProperty("call");
-        Assert.Equal(["id", "participantCount", "startedAt", "version"], call.EnumerateObject().Select(p => p.Name).Order());
+        Assert.Equal(["id", "participantCount", "startedAt", "threadId", "version"], call.EnumerateObject().Select(p => p.Name).Order());
         Assert.NotEqual(Guid.Empty, call.GetProperty("id").GetGuid());
         Assert.Equal(api.Clock.GetUtcNow(), call.GetProperty("startedAt").GetDateTimeOffset());
         Assert.Equal(1, call.GetProperty("version").GetInt64());

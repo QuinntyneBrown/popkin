@@ -7,14 +7,15 @@ whole Popkin. The feature [start or join a group call](../group-call/README.md) 
 onto a call. This feature covers what the member sees and controls once there: the tiles of the
 people on the call, their own microphone and camera, leaving, and minimising the call to keep it
 running while using the rest of the Popkin. A call between the two members of a direct message
-uses the same screen and is not built (journey 11).
+uses the same screen and the same controls (L2-030 AC8), built in journey 11.
 
 - **tile** — square on the call screen for one participant. It shows their video, or their
   avatar when the camera is off, and carries their first name.
 - **speaking ring** — outline of at least 3 px in the Popkin's colour round the tile of a person
   who is speaking
 - **control** — button in the bar at the foot of the call screen: "Mute", "Camera" or "Leave"
-- **minimise** — leaving the call screen for the Popkin home while the call keeps running
+- **minimise** — leaving the call screen for the Popkin home, or for the direct message of a
+  direct call, while the call keeps running
 - **pane** — list of who is on the call, at the end of the screen from 1280 px (L2-058 AC12)
 
 Each person controls only their own microphone and camera. The browser turns the local track off
@@ -145,14 +146,17 @@ the tile that counts the people not shown, which the design system draws
   the screen of the app the member came from, or the Popkin home when the call was opened by
   its address (L2-030 AC6). A failed leave request leaves the participant row to the hub's
   disconnect grace period.
-- "Minimise call" opens the Popkin home, whatever screen the call was opened from. The call
-  keeps running in `CallSession`, and the banner there offers "Return" (L2-030 AC7).
+- "Minimise call" opens the Popkin home, whatever screen the call was opened from, and on a
+  direct call the direct message. The call keeps running in `CallSession`, and the banner there
+  offers "Return" (L2-030 AC7).
 - When the `PATCH` fails, the local track stays as the member set it; the device never resumes
   sending after a failure. The failure is not shown, and the request is not made again until
   the member next changes the microphone or the camera; until then the others see the earlier
   state (gap 29 in [the register](../../README.md#known-gaps)).
-- The direct call would use the same page and controls (L2-030 AC8). It is not built
-  (journey 11).
+- The direct call uses the same page, tiles, pane and controls (L2-030 AC8). Its heading is the
+  other member's name, its subtitle "Just the two of you · 12:48" (`directCallSubtitle`), and
+  the line under the pane "Only you and {first name} can join this call." (`directCallNote`).
+  "Leave" returns to the direct message it was opened from.
 
 ### Tests
 
@@ -168,7 +172,9 @@ the tile that counts the people not shown, which the design system draws
 
 ### Built in journey 7
 
-Everything above except the direct call (L2-030 AC8), which waits for journey 11.
+Everything above except the direct call (L2-030 AC8), which journey 11 built: the same controls
+on a call between two, its heading, subtitle and line under the pane, and "Minimise call" to the
+direct message. Its specs are in `e2e/tests/direct-message.spec.ts`.
 
 Decided in the build:
 
@@ -196,8 +202,8 @@ tile that counts the rest, and with the direct call.
 | `L2-057` | `L1-014` | Accessible to WCAG 2.2 AA: Everyone can use every screen. |
 | `L2-059` | `L1-014` | Light and dark themes: Popkin follows the device and the person. |
 
-From `L2-029` this feature realises AC7 (at most 12 tiles). `L2-030` AC8, the direct call, is
-not built (journey 11). From `L2-057` it realises AC4 and AC5 for the call screen, and from
+From `L2-029` this feature realises AC7 (at most 12 tiles). `L2-030` AC8, the direct call, was
+built in journey 11 ([Group call](../group-call/README.md)). From `L2-057` it realises AC4 and AC5 for the call screen, and from
 `L2-059` AC3 (dark in both themes). The pane realises `L2-058` AC12 for this screen
 ([Responsive layout](../../accessibility/responsive-layout/README.md)).
 

@@ -2,5 +2,5 @@
 
 | Design | Effort | Complete |
 |---|---|---|
-| call-controls | 6 days | 90% |
-| group-call | 7 days | 80% |
+| call-controls | 6 days | 100% |
+| group-call | 7 days | 90% |

@@ -66,7 +66,10 @@ What waits:
 - the IndexedDB store, photo blobs in the outbox and the reuse of an uploaded `photoId` on
   "Try again": journey 13, Photos in chat;
 - `replyToMessageId` on an entry: journey 12, React and reply;
-- the same states in a direct message: journey 11;
+- the same states in a direct message were built in journey 11: a direct message uses the same
+  `ThreadStore` and outbox, with "Not sent", "Try again" and "Delete" as in Everyone. No
+  behaviour spec covers them there; `DirectMessageTests` covers discarding a message of a
+  direct message in the API;
 - the read-only line when a send finds the Popkin wrapped up was built in journey 9: the
   composer closes with the line in its place, and the member is then moved to the recap
   ([Read-only Popkin](../../wrap-up/read-only-popkin/README.md));

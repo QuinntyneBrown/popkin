@@ -188,16 +188,23 @@
     }
     @if (thread(); as thread) {
       <aside pk-list-pane slot="list" label="Chat" heading="Chat">
-        <a
-          pk-conversation-card
-          title="Everyone"
-          [emoji]="thread.emoji"
-          [time]="latest().time"
-          [preview]="latest().preview"
-          [unread]="unreadCount() > 0"
-          [current]="true"
-          [routerLink]="['/p', thread.popkinId, 'chat', 'everyone']"
-        ></a>
+        <button
+          pk-icon-button
+          slot="action"
+          type="button"
+          icon="new-message"
+          label="New message"
+          (click)="newMessage()"
+        ></button>
+        <div
+          pk-conversations
+          [level]="3"
+          [state]="list.store.state() === 'ready' ? 'ready' : 'loading'"
+          [everyone]="list.everyoneOpen()"
+          [direct]="list.direct()"
+          current="everyone"
+          (newMessage)="newMessage()"
+        ></div>
       </aside>
     }
     @if (thread(); as thread) {

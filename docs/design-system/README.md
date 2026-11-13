@@ -79,6 +79,7 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Status note](components/status-note.html) | Feedback | Success. | Static (both themes) | pages/account/success |
 | [Screen and layout](components/screen.html) | Layout | A step screen. Stack (16px vertical) and cluster (8px wrapping row). Washed screen. Split screen. | Static (both themes) | pages/how-long/default, pages/join-invite/default, pages/sign-up/default, pages/popkin-created/default |
 | [Split aside](components/split-aside.html) | Layout | Photograph with a caption. Tint with a preview card. Tint with an icon, a title, a timeline and text. | Static (both themes) | pages/sign-up/default, pages/name-your-popkin/default, pages/how-long/default |
+| [Panes](components/panes.html) | Layout | List pane beside a thread. Thread pane beside the list. Detail pane: the Popkin, or the other member of a direct message with the photos shared between you. | Static (both themes) | pages/conversations/default, pages/direct-message/default, pages/group-chat/default |
 | [Preview card](components/preview-card.html) | Identity | With a name. No name yet. A 40-character name. | Static (both themes) | pages/name-your-popkin/default, pages/name-your-popkin/blank, pages/name-your-popkin/edge |
 | [Timeline](components/timeline.html) | Content | Day, weekend, custom, forever. | Static (both themes) | pages/how-long/default, pages/how-long/custom, pages/how-long/forever |
 

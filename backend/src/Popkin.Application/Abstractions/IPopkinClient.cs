@@ -43,17 +43,20 @@ public interface IPopkinClient
     Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds);
 
     /// <summary>
-    /// How many are on the Popkin's group call changed. A state: it carries the whole count and
-    /// the call's version, which only rises, and an event whose version is not above the one
-    /// held is dropped. `GET …/calls/current` recovers it.
+    /// How many are on a call of the Popkin changed: its group call, or the direct call of the
+    /// direct message `threadId` names, which only its two members are told of. A state: it
+    /// carries the whole count and the call's version, which only rises, and an event whose
+    /// version is not above the one held is dropped. `GET …/calls/current`, with the
+    /// `threadId` of a direct call, recovers it.
     /// </summary>
-    Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount);
+    Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount, Guid? threadId);
 
     /// <summary>
-    /// The last person left and the call ended (L2-029 AC6). A fact, and final: a
-    /// `CallChanged` of that call that arrives after it is ignored.
+    /// The last person left, or the Popkin wrapped up, and the call ended (L2-029 AC6). A fact,
+    /// and final: a `CallChanged` of that call that arrives after it is ignored. `threadId` is
+    /// that of a direct call, and null for the group call.
     /// </summary>
-    Task CallEnded(Guid popkinId, Guid callId);
+    Task CallEnded(Guid popkinId, Guid callId, Guid? threadId);
 
     /// <summary>
     /// The Popkin wrapped up and is read-only from now on (L2-044 AC4). A fact, and final;

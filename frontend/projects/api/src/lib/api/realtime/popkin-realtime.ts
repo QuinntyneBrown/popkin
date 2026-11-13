@@ -24,15 +24,20 @@ export interface PopkinRealtime {
   readonly popkinWrappedUp$: Observable<string>;
   /** Photos were added to a Popkin's album (L2-031 AC7). */
   readonly photosAdded$: Observable<{ popkinId: string; photoIds: string[] }>;
-  /** Who is on a Popkin's group call changed; `version` orders these (L2-029 AC2). */
+  /**
+   * Who is on a call changed; `version` orders these (L2-029 AC2). `threadId` is the direct
+   * message of a call between two members, which only those two hear of (L2-030 AC8), and
+   * null for the Popkin's group call.
+   */
   readonly callChanged$: Observable<{
     popkinId: string;
     callId: string;
     version: number;
     participantCount: number;
+    threadId: string | null;
   }>;
-  /** The last person left a Popkin's group call (L2-029 AC6). */
-  readonly callEnded$: Observable<{ popkinId: string; callId: string }>;
+  /** The last person left a call (L2-029 AC6). */
+  readonly callEnded$: Observable<{ popkinId: string; callId: string; threadId: string | null }>;
   /** Heard only by those on the call, once `joinCall` succeeded. */
   readonly participantJoined$: Observable<{ callId: string; participant: CallParticipantView }>;
   readonly participantLeft$: Observable<{ callId: string; membershipId: string }>;

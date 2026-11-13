@@ -16,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import {
   CallBannerStore,
+  ConversationsStore,
   DraftStore,
   ErrorScreens,
   MessageOutbox,
@@ -37,7 +38,7 @@ import {
   Button,
   Chip,
   Composer,
-  ConversationCard,
+  Conversations,
   DayDivider,
   DetailPane,
   EmptyState,
@@ -53,6 +54,7 @@ import {
   TopBar,
 } from 'components';
 import { Toaster } from '../../toasts/toaster';
+import { ConversationList } from '../conversations/conversation-list';
 
 /** How long "Back online. 2 messages sent." stays. */
 const BACK_ONLINE_MS = 5_000;
@@ -71,7 +73,7 @@ const BACK_ONLINE_MS = 5_000;
     Button,
     Chip,
     Composer,
-    ConversationCard,
+    Conversations,
     DayDivider,
     DetailPane,
     EmptyState,
@@ -85,7 +87,7 @@ const BACK_ONLINE_MS = 5_000;
     Thread,
     TopBar,
   ],
-  providers: [ThreadStore, CallBannerStore, PopkinFrame],
+  providers: [ThreadStore, CallBannerStore, PopkinFrame, ConversationsStore, ConversationList],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './group-chat.page.html',
 })
@@ -94,6 +96,7 @@ export class GroupChatPage {
   readonly popkinId = input.required<string>();
 
   protected readonly store = inject(ThreadStore);
+  protected readonly list = inject(ConversationList);
   /** The group call under way, if there is one (L2-029 AC2). */
   protected readonly call = inject(CallBannerStore).banner;
   private readonly calls = inject(CallBannerStore);
@@ -163,17 +166,6 @@ export class GroupChatPage {
     this.state() === 'empty' ? 'Say hello…' : 'Message everyone',
   );
 
-  /** The line of the Everyone card: who wrote last, and what. */
-  protected readonly latest = computed(() => {
-    const last = this.store
-      .rows()
-      .filter((row): row is MessageRow => row.kind === 'message' && row.state === 'sent')
-      .at(-1);
-    if (!last) return { preview: 'No messages yet', time: '' };
-    const who = last.mine ? (this.thread()?.viewer.firstName ?? 'You') : last.name;
-    return { preview: `${who}: ${last.text}`, time: last.time };
-  });
-
   protected readonly hereNow = computed(() => {
     const me = this.thread()?.viewer.membershipId;
     return this.store.hereNow().map((member) => ({
@@ -203,9 +195,14 @@ export class GroupChatPage {
       untracked(() => {
         this.store.open(popkinId);
         this.calls.open(popkinId);
+        this.list.open(popkinId);
       });
     });
 
+    effect(() => {
+      const emoji = this.thread()?.emoji;
+      if (emoji) untracked(() => this.list.setEmoji(emoji));
+    });
     effect(() => {
       if (this.state() === 'not-found') untracked(() => this.errors.showNotFound());
     });
@@ -305,6 +302,10 @@ export class GroupChatPage {
 
   protected dismissWarning(): void {
     this.watch.dismissWarning(this.popkinId());
+  }
+
+  protected newMessage(): void {
+    this.list.newMessage(this.thread()?.popkinName ?? 'this Popkin', this.accent());
   }
 
   protected reload(): void {

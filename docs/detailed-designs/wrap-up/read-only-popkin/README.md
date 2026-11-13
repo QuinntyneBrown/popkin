@@ -60,7 +60,7 @@ No endpoint is added. Every write endpoint below, owned by the feature named, an
 | Endpoint | Owner |
 |----------|-------|
 | `POST /api/popkins/{popkinId}/threads/{threadId}/messages` | [Send a message to everyone](../../chat/send-message-to-everyone/README.md) |
-| `POST /api/popkins/{popkinId}/threads` (open a direct thread) | [Direct messages](../../chat/direct-messages/README.md) |
+| `PUT /api/popkins/{popkinId}/threads/direct/{memberId}` (open a direct message none of the two has yet; one that exists opens read-only) | [Direct messages](../../chat/direct-messages/README.md) |
 | `PUT`/`DELETE .../messages/{messageId}/reactions/{emoji}` | [React to a message](../../chat/react-to-message/README.md) |
 | `POST /api/popkins/{popkinId}/photos` | [Add photos](../../photos/add-photos/README.md) |
 | `PUT`/`DELETE .../photos/{photoId}/reactions/{emoji}` | [React to a photo](../../photos/react-to-photo/README.md) |
@@ -69,7 +69,7 @@ No endpoint is added. Every write endpoint below, owned by the feature named, an
 | `PUT .../experiences/{experienceId}/rating` | [Rate an experience](../../experiences/rate-experience/README.md) |
 | `POST .../experiences/{experienceId}/comments` | [Comment on an experience](../../experiences/comment-on-experience/README.md) |
 | `PUT .../experiences/{experienceId}/keen` | [Say you are keen](../../experiences/say-keen/README.md) |
-| `POST /api/popkins/{popkinId}/calls` and joining a call | [Group call](../../calls/group-call/README.md) |
+| `POST /api/popkins/{popkinId}/calls` and joining a call, the group call or a direct call | [Group call](../../calls/group-call/README.md) |
 | `POST /api/invites/{code}/join` | [Join a Popkin](../../invitations/join-popkin/README.md) |
 | `PATCH /api/popkins/{popkinId}` (name, look, length) | [Popkin settings](../../popkins/popkin-settings/README.md) |
 | `POST /api/popkins/{popkinId}/wrap-up` | [The Host wraps up](../host-wraps-up/README.md) |
@@ -194,8 +194,11 @@ Everything above. What differs from the design as it first stood, and what waits
 - "Save" on the notice in Photos opens the recap; the album is saved there
   ([Recap](../recap/README.md)).
 - Waiting for their journeys: the photo view's "Save" (journey 14), the message actions sheet
-  with "Copy" only (journey 12), `DirectMessagePage` (journey 11), and the refusals of the
-  writes not built yet.
+  with "Copy" only (journey 12), and the refusals of the writes not built yet.
+  `DirectMessagePage` came with journey 11: a direct message of a wrapped-up Popkin opens
+  read-only, with the wrapped-up line in place of the composer and no "Call {first name}", a new
+  one is refused with `409` `popkin_wrapped_up`, and a wrap-up ends every direct call with the
+  group call ([Direct messages](../../chat/direct-messages/README.md), known gap 63).
 - Photo reactions and comments have no rows to delete with the album, because they are not
   built.
 

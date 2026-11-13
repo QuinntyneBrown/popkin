@@ -24,6 +24,7 @@ const me = 'm-mara';
 function message(n: number, author = 'Walt', extra: Partial<MessageView> = {}): MessageView {
   return {
     id: `id-${String(n).padStart(4, '0')}`,
+    popkinId: 'p',
     threadId: 't',
     clientMessageId: `c-${n}`,
     kind: 'Member',
@@ -53,6 +54,21 @@ const thread: ThreadView = {
   unreadCount: 3,
   lastReadMessageId: null,
   viewer: { membershipId: me, firstName: 'Mara' },
+  other: null,
+};
+
+const withWalt: ThreadView = {
+  ...thread,
+  id: 't-walt',
+  kind: 'Direct',
+  memberCount: 2,
+  unreadCount: 1,
+  other: {
+    membershipId: 'm-walt',
+    displayName: 'Walt Brennan',
+    firstName: 'Walt',
+    avatar: { initials: 'WB', accent: 'Sky', photoUrl: null },
+  },
 };
 
 class FakeChat implements ChatApi {
@@ -65,12 +81,35 @@ class FakeChat implements ChatApi {
   readonly sends: string[] = [];
   failMessages = false;
   notFound = false;
+  /** The members a direct message was asked for with. */
+  readonly direct: string[] = [];
+  presenceAsked = 0;
+  selfRefused = false;
 
   getEveryone(): Observable<ThreadView> {
     if (this.thread) return of(this.thread);
     return throwError(() =>
       this.notFound ? new HttpErrorResponse({ status: 404 }) : new Error('down'),
     );
+  }
+
+  listThreads(): Observable<never> {
+    return throwError(() => new Error('not asked here'));
+  }
+
+  openDirect(_p: string, memberId: string): Observable<ThreadView> {
+    this.direct.push(memberId);
+    if (this.selfRefused) {
+      return throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { status: 400, code: 'cannot_message_self' },
+          }),
+      );
+    }
+    if (this.notFound) return throwError(() => new HttpErrorResponse({ status: 404 }));
+    return of(withWalt);
   }
 
   getEveryonePreview(): Observable<never> {
@@ -109,6 +148,7 @@ class FakeChat implements ChatApi {
   }
 
   getPresence(): Observable<PresenceView> {
+    this.presenceAsked++;
     return of(this.presence);
   }
 }
@@ -413,6 +453,54 @@ describe('ThreadStore', () => {
     it('sends nothing for white space', () => {
       store.send('   ');
       expect(chat.sends).toEqual([]);
+    });
+  });
+
+  describe('opened out of view', () => {
+    it('is not read until its latest message comes into view', () => {
+      store.open('p', undefined, { inView: false });
+      expect(chat.read).toEqual([]);
+      expect(unread.forThread('t')).toBe(3);
+
+      store.setLatestInView(true);
+      expect(chat.read).toEqual(['id-0003']);
+      expect(unread.forThread('t')).toBe(0);
+    });
+  });
+
+  describe('a direct message', () => {
+    it('opens the thread with the member, and reads its messages', () => {
+      chat.stored = [message(1, 'Walt', { threadId: 't-walt' })];
+      store.open('p', 'm-walt');
+      expect(chat.direct).toEqual(['m-walt']);
+      expect(store.thread()).toMatchObject({ id: 't-walt', kind: 'Direct' });
+      expect(store.state()).toBe('ready');
+      expect(shown()).toEqual(['message 1']);
+    });
+
+    it('does not ask who is here', () => {
+      store.open('p', 'm-walt');
+      expect(chat.presenceAsked).toBe(0);
+    });
+
+    it('is not found with the member themself', () => {
+      chat.selfRefused = true;
+      store.open('p', me);
+      expect(store.state()).toBe('not-found');
+    });
+
+    it('is not found for a member the Popkin does not have', () => {
+      chat.notFound = true;
+      store.open('p', 'm-nobody');
+      expect(store.state()).toBe('not-found');
+    });
+
+    it('shows a message that arrives in it, and not one of another thread', () => {
+      chat.stored = [];
+      store.open('p', 'm-walt');
+      realtime.messageAdded$.next(message(7, 'Walt', { threadId: 't-walt' }));
+      realtime.messageAdded$.next(message(8, 'Dev'));
+      expect(shown()).toEqual(['message 7']);
     });
   });
 });

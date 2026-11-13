@@ -221,6 +221,7 @@ export class Home {
     this.newCount++;
     await hub.push('MessageAdded', {
       id: added.id,
+      popkinId,
       threadId,
       clientMessageId: null,
       kind: 'Member',
@@ -291,7 +292,10 @@ export function homeOf(page: Page): Home {
 export async function maraAtHome(page: Page, change?: (home: Home) => void): Promise<Home> {
   const chat = await maraInTheChat(page);
   const home = new Home(page, chat);
+  // The home of the mocks counts Everyone's three alone: Mara has read her direct messages.
+  chat.directs.forEach((direct) => (direct.unreadCount = 0));
   change?.(home);
+  chat.members = home.members;
   await home.install();
   await lakesideInvite(page);
   homes.set(page, home);

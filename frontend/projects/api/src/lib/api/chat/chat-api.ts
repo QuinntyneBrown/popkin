@@ -1,7 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MessagePageView, MessageView, PresenceView, ThreadView } from '../../models/chat';
+import {
+  ConversationsView,
+  MessagePageView,
+  MessageView,
+  PresenceView,
+  ThreadView,
+} from '../../models/chat';
 import { ChatPreviewView } from '../../models/home';
 
 /** Which page of a thread to read; none is the latest. Pages hold 50 messages (L2-027 AC5). */
@@ -14,6 +20,14 @@ export interface ChatApi {
   getEveryone(popkinId: string): Observable<ThreadView>;
   /** The latest of the Everyone thread, for the Popkin's home (L2-019 AC3). */
   getEveryonePreview(popkinId: string): Observable<ChatPreviewView>;
+  /** The member's threads in a Popkin: Everyone, and their direct messages (L2-022). */
+  listThreads(popkinId: string): Observable<ConversationsView>;
+  /**
+   * The direct message with another member, made if there is none yet (L2-023). 400
+   * `cannot_message_self`; 404 `popkin_not_found`, `member_not_found`; 409 `popkin_wrapped_up`
+   * when there is none yet and the Popkin has wrapped up.
+   */
+  openDirect(popkinId: string, memberId: string): Observable<ThreadView>;
   getMessages(
     popkinId: string,
     threadId: string,
@@ -49,6 +63,17 @@ export class HttpChatApi implements ChatApi {
 
   getEveryonePreview(popkinId: string): Observable<ChatPreviewView> {
     return this.http.get<ChatPreviewView>(`${popkin(popkinId)}/threads/everyone/preview`);
+  }
+
+  listThreads(popkinId: string): Observable<ConversationsView> {
+    return this.http.get<ConversationsView>(`${popkin(popkinId)}/threads`);
+  }
+
+  openDirect(popkinId: string, memberId: string): Observable<ThreadView> {
+    return this.http.put<ThreadView>(
+      `${popkin(popkinId)}/threads/direct/${encodeURIComponent(memberId)}`,
+      null,
+    );
   }
 
   getMessages(

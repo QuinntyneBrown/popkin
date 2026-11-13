@@ -1,3 +1,5 @@
+import { DirectMessagePage } from '../../pages/direct-message.page';
+import { directMessageStates } from '../../fixtures/direct-message-states';
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { theMockChat } from '../../fixtures/chat';
 import { parity } from '../../fixtures/parity';
@@ -18,5 +20,11 @@ parity('composer', [
     ...wrapUpStates.groupChatReadOnly,
     name: 'closed',
     region: (page) => new GroupChatPage(page).composer,
+  },
+  {
+    key: 'directMessageReadOnly',
+    ...directMessageStates.directMessageReadOnly,
+    name: 'direct-closed',
+    region: (page) => new DirectMessagePage(page).composer,
   },
 ]);

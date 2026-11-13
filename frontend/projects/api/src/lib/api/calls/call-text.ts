@@ -17,6 +17,16 @@ export function callSubtitle(onCall: number, elapsed: string): string {
   return onCall <= 1 ? `Just you · ${elapsed}` : `${onCall} on the call · ${elapsed}`;
 }
 
+/** Under the other member's name, on a call from a direct message (L2-030 AC8). */
+export function directCallSubtitle(onCall: number, elapsed: string): string {
+  return onCall <= 1 ? `Just you · ${elapsed}` : `Just the two of you · ${elapsed}`;
+}
+
+/** Under the list of who is on a direct call: nobody else can join it. */
+export function directCallNote(firstName: string): string {
+  return `Only you and ${firstName} can join this call.`;
+}
+
 /** What the banner of a call under way says after "Group call" (L2-029 AC2). */
 export function callBannerText(onCall: number): string {
   return `${onCall} on the call`;

@@ -17,6 +17,13 @@
     overflow-y: auto;
   }
 
+  /* The other member of a direct message: everything centred, a little lower. */
+  :host(.detail-pane--person) {
+    align-items: center;
+    padding-top: var(--space-8);
+    text-align: center;
+  }
+
   .detail-pane__title {
     margin-top: var(--space-4);
     font: var(--text-h2);
@@ -77,5 +84,39 @@
   .detail-pane__more {
     font: var(--text-body-sm);
     color: var(--color-fg-muted);
+  }
+
+  .detail-pane__place {
+    font: var(--text-body-sm);
+    color: var(--color-fg-muted);
+  }
+
+  .detail-pane__emoji {
+    font-family: var(--font-family-emoji);
+    font-style: normal;
+  }
+
+  .detail-pane__action {
+    margin-top: var(--space-5);
+  }
+
+  .detail-pane__action:empty {
+    display: none;
+  }
+
+  /* The photos shared between the two, three across. */
+  .detail-pane__shared {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-1-5);
+    align-self: stretch;
+    margin-top: var(--space-2);
+  }
+
+  .detail-pane__shared img {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: var(--radius-xs);
+    object-fit: cover;
   }
 }

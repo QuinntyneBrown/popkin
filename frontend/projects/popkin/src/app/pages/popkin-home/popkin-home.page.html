@@ -89,7 +89,7 @@
             @case ('ready') {
               <a
                 pk-chat-card
-                [routerLink]="['/p', popkinId(), 'chat']"
+                [routerLink]="['/p', popkinId(), 'chat', 'everyone']"
                 [messages]="latest()"
                 [newCount]="store.newCount()"
               ></a>

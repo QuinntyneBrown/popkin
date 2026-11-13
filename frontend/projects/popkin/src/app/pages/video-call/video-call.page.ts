@@ -51,12 +51,24 @@ import { InviteData, InviteDialog } from '../../dialogs/invite/invite.dialog';
 export class VideoCallPage {
   /** The route's `:popkinId`. */
   readonly popkinId = input.required<string>();
+  /** The route's `:memberId`: the member a call from a direct message is with (L2-030 AC8). */
+  readonly memberId = input<string>();
 
   protected readonly session = inject(CallSession);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
 
-  protected readonly home = computed(() => `/p/${this.popkinId()}`);
+  /** Where "Minimise call" goes: the Popkin's home, or the direct message of a direct call. */
+  protected readonly home = computed(() => {
+    const memberId = this.memberId();
+    return memberId ? `/p/${this.popkinId()}/chat/${memberId}` : `/p/${this.popkinId()}`;
+  });
+  /** A direct call is named after the other member (L2-030 AC8). */
+  protected readonly heading = computed(
+    () =>
+      this.session.other()?.displayName ??
+      (this.memberId() ? 'Call' : (this.popkin()?.name ?? 'Group call')),
+  );
   protected readonly popkin = this.session.popkin;
   protected readonly status = this.session.status;
   /** What the stage holds: a message, the member alone, or the tiles of a call with others. */
@@ -89,7 +101,8 @@ export class VideoCallPage {
     const from = this.router.getCurrentNavigation()?.previousNavigation?.finalUrl?.toString();
     effect(() => {
       const popkinId = this.popkinId();
-      untracked(() => this.session.start(popkinId, from ?? `/p/${popkinId}`));
+      const memberId = this.memberId();
+      untracked(() => this.session.start(popkinId, from ?? this.home(), memberId));
     });
   }
 

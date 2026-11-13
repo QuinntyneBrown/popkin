@@ -2,6 +2,7 @@ import { expect, type Page } from '@playwright/test';
 import { VideoCallPage } from '../pages/video-call.page';
 import { type Call, callers, maraWithACall, theMocksCall } from './call';
 import type { DeviceAnswer } from './call-device';
+import { directThreadId } from './chat';
 import { says } from './far-end';
 import { homeNow } from './home';
 import type { RouteKey } from './routes';
@@ -23,7 +24,9 @@ const six = (call: Call): void => {
   theMocksCall(call);
   call.maraAt = 3;
 };
+/** Walt and Mara on the call of their direct message (L2-030 AC8), as `two.html` draws it. */
 const two = (call: Call): void => {
+  call.threadId = directThreadId(1);
   call.underWay = true;
   call.others = [callers.walt];
 };

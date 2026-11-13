@@ -109,7 +109,11 @@ Every endpoint answers `401` without a session. A wrapped-up Popkin is still rea
   `Colour`, `Status` (`Active` or `WrappedUp`), `EndsAt`, `MemberCount`, up to 4 `Avatars` (Host
   first, then by join time), `ViewerRole` (`Host` or `Member`), `Viewer` (`MembershipId`,
   `FirstName`) and `UnreadCount`. `UnreadCount` is the unread count of the Everyone thread, by
-  the rule `ThreadDto` uses (`ThreadUnread.OfAsync`).
+  the rule `ThreadDto` uses (`ThreadUnread.OfAsync`), and since journey 11 that of the viewer's
+  direct messages of the Popkin with it (`DirectThreads.Of`, L2-022 AC3). The web app counts
+  the same: `PopkinHomeStore` seeds `UnreadTracker` with the Everyone preview's `NewCount`, which
+  the Chat card shows, and with each direct message's count from `ChatApi.listThreads`, so the
+  Chat tab's count on the home holds both. The Chat card still opens the Everyone thread.
 - **`GetEveryonePreviewQueryHandler`** (`ThreadsController`) — `ChatPreviewDto`: `ThreadId`, the
   four latest messages that members wrote, oldest first (`Id`, `Author` with `MembershipId`,
   `FirstName` and `Avatar`, `Text`, `SentAt`), and `NewCount`. System notes and deleted messages

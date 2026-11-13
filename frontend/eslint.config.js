@@ -36,7 +36,7 @@ module.exports = defineConfig([
       // pk-logo renders its own named content, and pk-icon-button names itself from `label`.
       '@angular-eslint/template/elements-content': [
         'error',
-        { allowList: ['pk-logo', 'pk-chat-card', 'label'] },
+        { allowList: ['pk-logo', 'pk-chat-card', 'pk-conversation-row', 'label'] },
       ],
     },
   },

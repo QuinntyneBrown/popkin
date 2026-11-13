@@ -12,6 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Icon } from '../icon/icon';
+import { ThreadPane } from '../thread-pane/thread-pane';
 
 /** How far above the screen the top of the thread is when earlier messages are asked for. */
 const AHEAD = '240px 0px 0px 0px';
@@ -19,7 +20,8 @@ const AHEAD = '240px 0px 0px 0px';
 /**
  * Thread (docs/design-system/components/message.html): the rows of a thread, in a column, inside
  * the `main` of the app screen. It owns how the thread scrolls, which is the document scrolling
- * under the sticky top bar and composer:
+ * under the sticky top bar and composer, or, in a thread pane (`pk-thread-pane`), the pane's
+ * messages scrolling between its head and its composer:
  *
  * - `reachedTop` fires when the top of the thread comes near the screen: load earlier messages;
  * - `keepPlace` adds them without the view jumping (L2-027 AC5);
@@ -53,6 +55,8 @@ export class Thread {
   private readonly bottom = viewChild.required<ElementRef<HTMLElement>>('bottom');
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
+  /** The pane the thread is in, where the list of threads is the screen. */
+  private readonly pane = inject(ThreadPane, { optional: true });
   private topObserver?: IntersectionObserver;
 
   constructor() {
@@ -62,13 +66,16 @@ export class Thread {
         (entries) => {
           if (entries.some((entry) => entry.isIntersecting)) this.reachedTop.emit();
         },
-        { rootMargin: AHEAD },
+        { root: this.pane?.scroller ?? null, rootMargin: AHEAD },
       );
       this.topObserver.observe(this.top().nativeElement);
 
-      const bottomObserver = new IntersectionObserver((entries) => {
-        this.latestInView.emit(entries[entries.length - 1].isIntersecting);
-      });
+      const bottomObserver = new IntersectionObserver(
+        (entries) => {
+          this.latestInView.emit(entries[entries.length - 1].isIntersecting);
+        },
+        { root: this.pane?.scroller ?? null },
+      );
       bottomObserver.observe(this.bottom().nativeElement);
 
       destroyRef.onDestroy(() => {
@@ -78,18 +85,23 @@ export class Thread {
     });
   }
 
-  /** Scrolls the document to the end of the thread: at once by default, or `smooth`. */
+  /** What scrolls the thread: the pane it is in, or the document. */
+  private get scroller(): Element | null {
+    return this.pane?.scroller ?? this.document.scrollingElement;
+  }
+
+  /** Scrolls to the end of the thread: at once by default, or `smooth`. */
   scrollToLatest(behaviour: ScrollBehavior = 'instant'): void {
-    const scroller = this.document.scrollingElement;
+    const scroller = this.scroller;
     scroller?.scrollTo({ top: scroller.scrollHeight, behavior: behaviour });
   }
 
   /**
    * Runs a change that adds rows above the ones on screen, and keeps those where they are: the
-   * distance from the end of the document is the same after the rows are drawn as before.
+   * distance from the end of what scrolls is the same after the rows are drawn as before.
    */
   keepPlace(change: () => void): void {
-    const scroller = this.document.scrollingElement;
+    const scroller = this.scroller;
     const fromEnd = scroller ? scroller.scrollHeight - scroller.scrollTop : 0;
     change();
     afterNextRender(

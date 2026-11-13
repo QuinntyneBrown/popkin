@@ -12,9 +12,13 @@ public sealed class CallConfiguration : IEntityTypeConfiguration<Call>
         builder.HasKey(c => c.Id);
         // Two changes to who is on a call cannot both be saved from the same version.
         builder.Property(c => c.Version).IsConcurrencyToken();
-        // One call under way per Popkin.
-        builder.HasIndex(c => c.PopkinId).IsUnique().HasFilter("[EndedAt] IS NULL");
+        // One group call under way per Popkin, and one direct call under way per direct message;
+        // the two kinds run at once.
+        builder.HasIndex(c => c.PopkinId).IsUnique().HasFilter("[EndedAt] IS NULL AND [ThreadId] IS NULL");
+        builder.HasIndex(c => c.ThreadId).IsUnique().HasFilter("[EndedAt] IS NULL AND [ThreadId] IS NOT NULL");
         builder.HasOne<PopkinSpace>().WithMany().HasForeignKey(c => c.PopkinId).OnDelete(DeleteBehavior.Cascade);
+        // A thread goes with its Popkin, which takes its calls already.
+        builder.HasOne<ChatThread>().WithMany().HasForeignKey(c => c.ThreadId).OnDelete(DeleteBehavior.NoAction);
     }
 }
 

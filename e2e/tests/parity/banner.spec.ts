@@ -1,3 +1,5 @@
+import { DirectMessagePage } from '../../pages/direct-message.page';
+import { directMessageStates } from '../../fixtures/direct-message-states';
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { theMockPopkins, thePopkinsGoOffline } from '../../fixtures/my-popkins';
 import { MyPopkinsPage } from '../../pages/my-popkins.page';
@@ -67,5 +69,11 @@ parity('banner', [
     ...wrapUpStates.recapGoing,
     name: 'photos-go-recap',
     region: (page) => new WrapUpBanner(page).root,
+  },
+  {
+    key: 'directMessageCall',
+    ...directMessageStates.directMessageCall,
+    name: 'direct-call',
+    region: (page) => new DirectMessagePage(page).callBanner,
   },
 ]);

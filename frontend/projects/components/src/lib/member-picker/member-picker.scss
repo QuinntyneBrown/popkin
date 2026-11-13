@@ -1,0 +1,41 @@
+/* The search, then the members, as far apart as the parts of a dialog's body. */
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.divided {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A hairline between two members. */
+.divided > li + li {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+/* A short row that is a button: the member's avatar and name, across the dialog. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--space-14);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+
+.row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}

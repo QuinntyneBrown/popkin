@@ -83,8 +83,11 @@ journey:
 - the read-only line of `group-chat/read-only` was built in journey 9, Wrap up: the composer of
   a thread whose `readOnly` is true is closed, with the line in its place
   ([Read-only Popkin](../../wrap-up/read-only-popkin/README.md));
-- the list of conversations: journey 11, Direct message. Until then `/p/:popkinId/chat`
-  redirects to the Everyone thread, and the list pane holds the Everyone card alone;
+- the list of conversations was built in journey 11, Direct message: `/p/:popkinId/chat` is
+  the Chat tab, no longer a redirect to the Everyone thread, and from 1024 px the Everyone
+  thread's list pane is `pk-conversations`, with the member's direct messages under the
+  Everyone card, which shows no count beside the open thread
+  ([Conversations](../conversations/README.md));
 - the screens the Home, Photos and Experiences tabs lead to: journeys 4, 5 and 8.
 
 The `components` library gained `pk-badge`, `pk-chip`, `pk-banner`, `pk-popkin-nav`,

@@ -9,7 +9,9 @@ import {
   CallSignal,
   JoinedCallView,
 } from '../../models/calls';
+import { ThreadView } from '../../models/chat';
 import { PopkinHomeView } from '../../models/home';
+import { CHAT_API } from '../chat/chat-api';
 import { ErrorScreens } from '../error-screens';
 import { POPKINS_API } from '../popkins/popkins-api';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
@@ -71,7 +73,8 @@ describe('CallSession', () => {
   let asked: number;
   let onCall: CallParticipantView[];
   let joinFails: number | null;
-  let joins: { popkinId: string; media: CallMediaState }[];
+  let joins: { popkinId: string; media: CallMediaState; threadId?: string }[];
+  let directFails: number | null;
   let leaves: string[];
   let patches: CallMediaState[];
   let patch: Subject<void>;
@@ -112,6 +115,7 @@ describe('CallSession', () => {
       startedAt: started.toISOString(),
       version: 1,
       participantCount: onCall.length,
+      threadId: joins.at(-1)?.threadId ?? null,
     },
     viewerMembershipId: 'm-mara',
     participants: onCall,
@@ -130,6 +134,7 @@ describe('CallSession', () => {
     onCall = [walt, mara];
     joinFails = null;
     joins = [];
+    directFails = null;
     leaves = [];
     patches = [];
     patch = new Subject();
@@ -172,9 +177,13 @@ describe('CallSession', () => {
         {
           provide: CALLS_API,
           useValue: {
-            join: (popkinId: string, state: CallMediaState): Observable<JoinedCallView> => {
+            join: (
+              popkinId: string,
+              state: CallMediaState,
+              threadId?: string,
+            ): Observable<JoinedCallView> => {
               if (joinFails) return throwError(() => new HttpErrorResponse({ status: joinFails! }));
-              joins.push({ popkinId, media: state });
+              joins.push({ popkinId, media: state, ...(threadId ? { threadId } : {}) });
               return of(joined());
             },
             leave: (_: string, callId: string) => {
@@ -188,6 +197,25 @@ describe('CallSession', () => {
           },
         },
         { provide: POPKINS_API, useValue: { getHome: () => of(lakeside) } },
+        {
+          provide: CHAT_API,
+          useValue: {
+            openDirect: (popkinId: string, memberId: string): Observable<ThreadView> =>
+              directFails
+                ? throwError(() => new HttpErrorResponse({ status: directFails! }))
+                : of({
+                    id: `t-${memberId}`,
+                    popkinId,
+                    kind: 'Direct',
+                    other: {
+                      membershipId: memberId,
+                      displayName: 'Walt Brennan',
+                      firstName: 'Walt',
+                      avatar: { initials: 'WB', accent: 'Sky', photoUrl: null },
+                    },
+                  } as ThreadView),
+          },
+        },
         {
           provide: POPKIN_REALTIME,
           useValue: {
@@ -551,6 +579,57 @@ describe('CallSession', () => {
       session.leave();
       emit('participantJoined', { callId: 'call-lakeside', participant: dev });
       expect(session.tiles()).toEqual([]);
+    });
+  });
+
+  describe('a direct call (L2-030 AC8)', () => {
+    const call = async () => {
+      session.start('lakeside', '/p/lakeside/chat/m-walt', 'm-walt');
+      await settle();
+    };
+
+    it('joins the call of the direct message with that member', async () => {
+      await call();
+      expect(joins).toEqual([
+        { popkinId: 'lakeside', media: { micOn: true, cameraOn: true }, threadId: 't-m-walt' },
+      ]);
+      expect(session.status()).toBe('connected');
+    });
+
+    it('is named after the other member, and says who is on it and who may join', async () => {
+      await call();
+      expect(session.other()).toMatchObject({ displayName: 'Walt Brennan', firstName: 'Walt' });
+      expect(session.subtitle()).toBe('Just the two of you · 0:12');
+      expect(session.others()).toBe('Only you and Walt can join this call.');
+    });
+
+    it('is another call than the group call of the same Popkin', async () => {
+      await call();
+      session.start('lakeside', '/p/lakeside');
+      await settle();
+      expect(leaves).toEqual(['call-lakeside']);
+      expect(joins).toHaveLength(2);
+      expect(joins[1].threadId).toBeUndefined();
+      expect(session.other()).toBeNull();
+    });
+
+    it('is returned to, not begun again, when it is under way', async () => {
+      await call();
+      await call();
+      expect(joins).toHaveLength(1);
+    });
+
+    it('is not found for a member the Popkin does not have', async () => {
+      directFails = 404;
+      await call();
+      expect(notFound).toBe(1);
+      expect(joins).toEqual([]);
+    });
+
+    it('says the call failed when the direct message could not be read', async () => {
+      directFails = 500;
+      await call();
+      expect(session.status()).toBe('failed');
     });
   });
 });
