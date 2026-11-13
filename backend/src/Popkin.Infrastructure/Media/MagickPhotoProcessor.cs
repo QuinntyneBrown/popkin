@@ -1,5 +1,6 @@
 using ImageMagick;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Photos;
 
 namespace Popkin.Infrastructure.Media;
 
@@ -32,12 +33,16 @@ public sealed class MagickPhotoProcessor : IPhotoProcessor
         try
         {
             using var image = new MagickImage(upload.Span);
+            // When it was taken is read first: it is in the data about to be removed.
+            var exif = image.GetExifProfile();
+            var capturedAt = CaptureTime.Parse(
+                exif?.GetValue(ExifTag.DateTimeOriginal)?.Value, exif?.GetValue(ExifTag.OffsetTimeOriginal)?.Value);
             image.AutoOrient();
             // The display image first, then the thumbnail from it: each step only makes it smaller.
             var display = Rendition(image, IPhotoProcessor.DisplaySide);
             var (width, height) = ((int)image.Width, (int)image.Height);
             var thumbnail = Rendition(image, IPhotoProcessor.ThumbnailSide);
-            return new ProcessedAlbumPhoto(display, thumbnail, width, height, CapturedAt: null);
+            return new ProcessedAlbumPhoto(display, thumbnail, width, height, capturedAt);
         }
         catch (MagickException)
         {

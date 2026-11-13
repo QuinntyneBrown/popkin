@@ -54,7 +54,17 @@ public sealed class AddPhotoCommandHandler(
             processed.Height,
             processed.Display.ContentType);
         db.Photos.Add(photo);
-        await db.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch
+        {
+            // No photo was added, so the files belong to nothing.
+            await store.DeleteAsync(displayKey, CancellationToken.None);
+            await store.DeleteAsync(thumbnailKey, CancellationToken.None);
+            throw;
+        }
 
         return PhotoSummaryDto.Of(photo, membership, membership.Id, store);
     }
