@@ -1,0 +1,27 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Before anyone joins a Popkin, they find it. Here is the front door."] },
+    { "id": "hero", "bars": 8, "lines": ["A visitor opens the landing page and reads: Your people, popped up in seconds. One button, Start a Popkin. Free. Takes about a minute.", "With it, a preview of a Popkin: Lakeside Weekend, fourteen here, wraps up Sunday."] },
+    { "id": "how", "bars": 5, "lines": ["Scan. Join. You're in. Three steps: Pop one up. Share the QR code. You're together."] },
+    { "id": "ideas", "bars": 7, "lines": ["Then four ideas, for every group that forms around a table.", "A Small group that keeps going. A Hackathon, for one weekend. A Team, for one season. A Family trip, for ten days."] },
+    { "id": "compare", "bars": 6, "lines": ["Better than a group chat. Five rows say why: joining, photos, plans, video, and the end.", "Muted forever, or a proper send-off and recap."] },
+    { "id": "free", "bars": 4, "lines": ["Free. Like, actually free. No ads, no premium tier.", "And under it, the footer."] },
+    { "id": "jump", "bars": 4, "lines": ["In the navigation, How it works and Ideas jump to their sections, and focus moves to the heading."] },
+    { "id": "phonenav", "bars": 4, "lines": ["On a phone, the navigation keeps Start a Popkin. Sign in is in the footer."] },
+    { "id": "actions", "bars": 6, "lines": ["Start a Popkin opens sign-up. Sign in opens sign-in.", "And a person who is already signed in skips the page: they get My Popkins."] },
+    { "id": "welcome", "bars": 6, "lines": ["Then the welcome screen. The same promise, and three ways on: Start a Popkin, Join with a code, and: Already have an account? Sign in."] },
+    { "id": "grow", "bars": 9, "lines": [
+      { "text": "On a phone, the landing page is one column.", "at": 0 },
+      { "text": "From ten twenty-four pixels, the hero sits beside its preview, and the four ideas run across.", "at": 8 },
+      { "text": "And from seven sixty-eight, the welcome screen is split.", "at": 24 }
+    ] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: the page loads nothing from anywhere but Popkin, and its links work from the keyboard.", "Still to come: the Join with a code screen, and Safety, Privacy and Help."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey ten. Popkin is a free platform for pop-up communities."] }
+  ]
+}
