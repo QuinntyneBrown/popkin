@@ -234,6 +234,10 @@ or design that settled it.
 | 20 | Mocks for the address field, the not-here screen, the address on the created screen and in Edit name and look, and the invite link on the address ([Choose the address](popkins/choose-address/README.md)) | Building addresses | |
 | 21 | Whether the photo view gains a visible previous and next control. It has none, as the mock draws none, so a member who uses a pointer and cannot swipe cannot move between photos (WCAG 2.5.1, L2-057) ([View a photo](photos/view-photo/README.md)) | Nothing built; L2-057 for the photo view | |
 | 22 | Whether "Save photo" must save the photo at the size it was added (L2-036 AC1). The file a member chooses is not kept: the stored display image is at most 2048 px on its longest edge, and that is what would be saved ([Add photos](photos/add-photos/README.md), [Save a photo](photos/save-photo/README.md)) | Journey 14 | |
+| 23 | Whether starting a Popkin adds the connections its creator already holds to the new Popkin's hub group. `CreatePopkinCommandHandler` does not, so a person who starts a Popkin in one tab gets no event for it in another until the hub reconnects ([My Popkins](popkins/my-popkins/README.md), [Live messages](chat/live-messages/README.md)) | Nothing; found in journey 6 | |
+| 24 | How the app opens without a connection, and whether every screen keeps a saved answer. There is no service worker, so the app does not open offline from cold, and only My Popkins keeps a saved list; the `ResponseCache`, `screenLoad()` and `httpErrorInterceptor` of the design are not built ([Loading, failure and offline](reliability/loading-failure-offline/README.md)) | L2-056 AC4 for every screen but My Popkins | |
+| 25 | Clearing the saved list of My Popkins at sign out and at account deletion (L2-054). Only a 401 clears it today ([My Popkins](popkins/my-popkins/README.md)) | Journeys 17 and 19 | |
+| 26 | Screens My Popkins and the scanner link to that are not built: Join with a code (`/join`, journey 15), the recap (`/p/:popkinId/recap`, journey 9) and the account (`/account`, journey 17). Each link reaches the not-found screen until its journey | Journeys 9, 15 and 17 | |
 
 Settled so far:
 
@@ -262,6 +266,11 @@ Settled so far:
 | The message when more than 20 photos are chosen, and the failed load of a later album page | [Add photos](photos/add-photos/README.md) and [Browse the album](photos/browse-album/README.md); neither state has a mock |
 | Which day an album's day group follows, and in which time zone | [Browse the album](photos/browse-album/README.md): the capture day (`TakenAt`), as the member's device counts days |
 | Whether previous and next follow the filter, and which time the photo view shows | [View a photo](photos/view-photo/README.md): the whole album; when the photo was added |
+| Where the name step of sign in lives, and the busy label of "Send my code" | [Sign in](accounts/sign-in/README.md): a step of the code screen, `docs/mocks/pages/verify-code/name.html`; "Sending your code…" |
+| From what distance a card of My Popkins says "Until {date}" | [My Popkins](popkins/my-popkins/README.md): from 7 days away; "Wrapping up" once the end has passed |
+| Where the saved list of My Popkins is kept | [My Popkins](popkins/my-popkins/README.md): the browser's local storage, keyed to the person, without photo addresses |
+| How many queries the list of My Popkins takes, and which threads its unread count covers | [My Popkins](popkins/my-popkins/README.md): up to nine, none per Popkin; the Everyone thread, until direct messages are built |
+| The scanner's fallback decoding library, its design-system page and what a device with no camera is shown | [Join by scanning or typing a code](invitations/join-by-code/README.md): `jsqr`, loaded on demand; `scanner.html`; the denied state and its copy |
 
 ## Diagrams
 

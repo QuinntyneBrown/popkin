@@ -250,6 +250,31 @@ InMemory provider cover `UnexpectedExceptionHandler` by injecting a fault throug
   server-error page. The created screen is the first screen to hand a 5xx read to it. The rest of
   this design (offline cache, `screenLoad()`, drafts) arrives with the screens that need it.
 
+### Built in journey 6
+
+- **The offline screen** — `OfflinePage` at `/offline`, as designed, with the logo linking to
+  My Popkins. It is part of the first download, not a lazy route, so it can open with no
+  connection. "Try again" opens `retryUrl` once the device is online; still offline, it stays
+  and moves focus to the heading (`focusHeading()` of `pk-empty-state`).
+- **`ErrorScreens.showOffline(retryUrl)`** — as designed: `/offline` with `skipLocationChange`.
+- **`offlineNavigation`** (`guards/offline-navigation.ts`) — the router's navigation error
+  handler. A navigation that fails while the device is offline, such as a lazy chunk that
+  cannot be fetched, is sent to the offline screen with the screen asked for as `retryUrl`. A
+  failure while online is not sent to the server-error screen, as the design has it.
+- **My Popkins** — the one screen with a saved answer. It keeps its own `PopkinsSnapshot` in
+  the browser's local storage, not the `ResponseCache` in IndexedDB, and shows it under the
+  offline banner; with nothing saved it opens the offline screen
+  ([My Popkins](../../popkins/my-popkins/README.md)). The banner there is the warning variant,
+  as `docs/mocks/pages/my-popkins/offline.html` draws it, not the danger variant named above.
+- **The device's connection** is read from `NETWORK_STATUS`, which the chat introduced in
+  journey 3; `Connectivity` and its probe of `GET /api/health` are not built.
+
+Not built, deliberately: `ResponseCache`, `offlineCacheInterceptor`, `screenLoad()`,
+`httpErrorInterceptor` and `ApiError`. No other screen keeps a saved
+answer, so offline it shows its own failed state. There is no service worker, so the app itself
+does not open from cold without a connection: the offline screen is reached only from an app
+that is already loaded (open decision 24 in [the register](../../README.md#known-gaps)).
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

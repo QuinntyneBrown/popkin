@@ -54,7 +54,7 @@ front-end guard and interceptor.
 
 - **`SessionStore`** — `api` library service. Its `session` signal is `undefined` until loaded, then a `SessionView` or `null`. `ensureLoaded()` calls `AuthApi.getSession()` once and shares the result; a 401 resolves to `null`. `set()` is called after a confirmation; `clear()` after sign out, deletion or a 401.
 - **`signedInGuard`** — `guards/signed-in.guard.ts`, `CanActivateFn` on every route except the public screens. Without a session it returns a `UrlTree` for `/sign-in?returnUrl=<requested path>` (L2-007 AC2, AC3). Whether `/join` (join with a code) is public is decided by the invites design and is `<TO SUPPLY>` here.
-- **`unauthorizedInterceptor`** — `guards/unauthorized.interceptor.ts`, `HttpInterceptorFn` registered in `app.config.ts` through `provideHttpClient(withInterceptors([...]))`. On a 401 from any request except `GET /api/auth/session` and the `/api/auth/codes` calls, it clears `SessionStore` and navigates to `/sign-in?returnUrl=<current URL>`. Any unsaved input on the screen is lost in that case; keeping it is `<TO SUPPLY>`.
+- **`unauthorizedInterceptor`** — `guards/unauthorized.interceptor.ts`, `HttpInterceptorFn` registered in `app.config.ts` through `provideHttpClient(withInterceptors([...]))`. On a 401 from any request except `GET /api/auth/session` and the `/api/auth/codes` calls, it clears `SessionStore` and the saved list of My Popkins (`PopkinsSnapshot`, L2-054) and navigates to `/sign-in?returnUrl=<current URL>`. Any unsaved input on the screen is lost in that case; keeping it is `<TO SUPPLY>`.
 - **`safeReturnUrl(url)`** — `api` library helper. It accepts a path that starts with one `/`, not `//`, and contains no scheme; anything else yields `null`, which prevents open redirects.
 - **Route data** — public routes carry no guard; private routes carry `signedInGuard`. The route table's `shell` and `page` data are unchanged.
 
@@ -71,7 +71,7 @@ front-end guard and interceptor.
 - **Same-site proof** — `SameSiteRequestMiddleware` as designed; a request with neither
   `Sec-Fetch-Site` nor `Origin` (a non-browser client) is accepted, because only a browser carries
   the cookie into a cross-site request, and browsers send one of the two.
-- **`/join`** — decided by the join-by-code journey.
+- **`/join`** — decided by the join-by-code journey (journey 15); journey 6 built the scanner and not that screen.
 
 ## Requirements
 

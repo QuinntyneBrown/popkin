@@ -17,19 +17,21 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first five journeys are built; the rest is designed.** Journey 1, Start a Popkin,
-journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin home, and journey 5,
-Share photos, run end to end: the backend has sign up with a code, sessions, Popkin creation, the invite preview, joining
+**The first six journeys are built; the rest is designed.** Journey 1, Start a Popkin,
+journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin home, journey 5,
+Share photos, and journey 6, Come back, run end to end: the backend has sign up and sign in
+with a code, sessions, Popkin creation, the list of a person's Popkins, the invite preview, joining
 with a name and a photo, the photo store behind avatars, the Everyone thread, messages, read
 points, presence, the SignalR hub `PopkinHub` and the reads of the Popkin home (the header, the
 chat preview, the members, the photos summary, and the experiences summary, which answers empty
 until journey 8), adding a photo, the album and one photo, with their migrations; the app has
 the screens of those journeys, the group chat screen, the Popkin home, the photo album and the
-photo view among them, built for the five form factors of L2-058, the invite dialog, the Add
-photos dialog, and the not-found and server-error screens; the `components` library holds the
+photo view, the sign-in screen and My Popkins among them, built for the five form factors of
+L2-058, the invite dialog, the Add photos dialog, the Scan to join dialog, and the not-found,
+server-error and offline screens; the `components` library holds the
 `pk-*` components they use, each with a parity spec; the `api` library has the chat's stores,
-the home's store, the album's stores and the real-time client, with unit tests of its stores and
-pure helpers. Everything
+the home's store, the album's stores, the store of My Popkins and its saved list, the QR
+scanner and the real-time client, with unit tests of its stores and pure helpers. Everything
 else exists as documents, not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of
 every screen in every state (`docs/mocks/`), the design system (`docs/design-system/`), a
 detailed design per feature (`docs/detailed-designs/`) and a prompt per journey

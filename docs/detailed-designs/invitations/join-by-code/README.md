@@ -44,25 +44,37 @@ The scanner calls no endpoint: it opens the invite link on the Popkin's address,
 
 ### Frontend (Popkin web app)
 
-- **`ScanToJoinDialog`** (`dialogs/scan-to-join/scan-to-join.dialog.ts`) — CDK dialog in
-  `pk-dialog`, opened from My Popkins and from `JoinCodePage`. On open it starts `QrScanner`; the
-  camera view and frame are the mock's `scanner` block, which has no design-system component page
-  yet (`<TO SUPPLY>`). States:
+- **`ScanToJoinDialog`** (`dialogs/scan-to-join/scan-to-join.dialog.ts`, built in journey 6) —
+  CDK dialog in `pk-dialog`, opened from My Popkins, by the "Scan to join" button of its top bar
+  and of its empty state; `JoinCodePage` will open it too. It provides `ScanToJoin`. The camera
+  view and frame are `pk-scanner`, the `scanner` block of the mock
+  (`docs/design-system/components/scanner.html`); when its video is ready the dialog starts the
+  scan on it. States:
   - **starting / scanning** — the camera with the frame (L2-015 AC1);
-  - **denied** — on `NotAllowedError`, `pk-alert` explaining how to allow the camera, with "Type
-    the code instead" (to `/join`) and "Try the camera again" (L2-015 AC4);
+  - **denied** — `pk-alert` with the `camera-off` icon explaining how to allow the camera, with
+    "Type the code instead" (to `/join`) and "Try the camera again" (L2-015 AC4). Every way the
+    camera does not start shows this state with this copy: a refusal, a device with no camera,
+    and a camera that fails;
   - **invalid** — decoded text that `parseInviteInput` rejects shows "That's not a Popkin code"
     while scanning continues (L2-015 AC3);
-  - **found** — a Popkin invite shows "Found it. Opening your invite…", stops the camera, closes
-    and opens the invite: the decoded link itself when it is on an address, as a full page load,
-    or the apex `/i/{code}` for a bare code (L2-015 AC2).
+  - **found** — a Popkin invite shows "Found it. Opening your invite…", stops the camera, opens
+    `/i/{code}` in the app and then closes (L2-015 AC2). The design opens the decoded link itself
+    as a full page load when it is on an address; that arrives when addresses are built.
   Closing by Escape, "Close" or the backdrop stops every camera track and returns focus to the
-  opener. A device with no camera is shown the denied state; its own copy is `<TO SUPPLY>`.
-- **`QrScanner`** (`api` library service) — `start(video)` calls
-  `navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })` and emits each
-  decoded text; `stop()` stops the tracks. It decodes with the browser's `BarcodeDetector` where
-  present; the fallback decoding library is `<TO SUPPLY>`. Frames are decoded on the device and
-  never sent anywhere.
+  opener. "Type the code instead" closes the dialog and goes to `/join`, the screen of
+  journey 15; until that journey the link reaches the not-found screen.
+- **`ScanToJoin`** (`api` library, `invites/scan-to-join.ts`, with unit tests) — one per dialog.
+  Its `state` is `starting`, `scanning`, `invalid`, `found` or `denied`, and `code` holds the
+  invite code that was found. `retry()` goes back to waiting for the camera; `stop()` stops it,
+  and so does the end of the dialog.
+- **`QrScanner`** / **`QR_SCANNER`** / **`BrowserQrScanner`** (`api` library,
+  `invites/qr-scanner.ts`) — `start(video)` returns an observable: subscribing calls
+  `navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })`,
+  shows the camera in the video and emits `started`, then each decoded text; unsubscribing stops
+  every track. It fails with `denied`, `no-camera` or `failed`. It reads a frame every 200 ms
+  with the browser's `BarcodeDetector` where present; elsewhere it draws the frame, at most
+  640 px on its longest side, and reads it with the `jsqr` package (`invites/qr-pixels.ts`),
+  loaded only when it is needed. Frames are decoded on the device and never sent anywhere.
 - **`JoinCodePage`** (`pages/join-code/join-code.page.ts`, route `/join`,
   `data-page="join-code"`, public) — composes `pk-top-bar`, `pk-text-field` "Invite code or
   link" with its hint, `pk-button` "Find my Popkin" and `pk-link` "Scan a QR code instead"
@@ -77,6 +89,12 @@ The scanner calls no endpoint: it opens the invite link on the Popkin's address,
     keeps what was typed (L2-015 AC6);
   - on `429` says when the person may try again (L2-053 AC4); the copy is `<TO SUPPLY>`.
   What a blank submit shows is `<TO SUPPLY>`; the design sends nothing for it.
+- **`parseInviteInput` as built in journey 6** (`invites/invite-input.ts`, with unit tests) —
+  `parseInviteInput(text, origin)` returns the invite code, or `null`. It accepts a bare code
+  and an invite link of the app itself, `{origin}/i/{code}`, with or without the scheme, and
+  nothing else: a link on any other host is refused, `popk.in` included. Links on a Popkin's
+  address are not accepted yet, because addresses are not built; the form below is the design
+  for when they are.
 - **`parseInviteInput(text, baseDomain)`** (pure helper, `api` library, changed) — trims and
   lower-cases the text and returns `{ code, address? }` from a bare code, from an invite link on
   an address (`{address}.{baseDomain}/i/{code}`, with or without a scheme), or from the apex path

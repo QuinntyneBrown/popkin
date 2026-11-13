@@ -24,6 +24,7 @@ name after confirming, and an account is made (L2-006 AC2).
   - `docs/mocks/pages/sign-in/submitting.html` — "Send my code" busy and disabled.
   - `docs/mocks/pages/sign-up/error.html` — the failed-send alert; the manifest states sign in shows the same message.
   - `docs/mocks/pages/verify-code/*` — the code screen that follows.
+  - `docs/mocks/pages/verify-code/name.html` — the name step: "What should we call you?", "Your code checked out. This is the name people in your Popkins will see.", the "Your name" field and "Continue".
 - **API**
   - `POST /api/auth/codes` with `purpose: "SignIn"` — 202 `CodeSentDto`; problems as in the sign-up design: 400 `phone_invalid`, 400 `email_invalid`, 429 `rate_limited`, 429 `code_limit_reached`, 503 `code_not_sent`.
   - `POST /api/auth/codes/{verificationId}/confirm` — 200 with `outcome: "NameRequired"` when no account exists and no name was sent; 200 `SignedIn` once the name is sent. Problems as in the confirm-code design.
@@ -33,11 +34,12 @@ name after confirming, and an account is made (L2-006 AC2).
 - **Route** — `/sign-in`, `SignInPage`, data `{ shell: 'bare', page: 'sign-in' }`, public (L2-007 AC3). It reads an optional `returnUrl` query parameter, set by `signedInGuard` and the 401 interceptor (sessions design).
 - **`SignInPage`** — `pages/sign-in/sign-in.page.ts` and `.html`, selector `pk-sign-in-page`, OnPush.
   - The single field uses `type="text"`, `autocomplete="username"` and autofocus, as in the mock.
-  - `parseContact(raw)` (`api` library helper, `lib/api/auth/parse-contact.ts`) classifies the input: text with `@` is an email, otherwise a phone number. It returns the channel, the cleaned destination and an error key. The same rules as sign up apply, with the same messages (L2-006 AC4).
-  - "Send my code" is disabled and busy while the request runs (L2-056 AC3). The busy label is `<TO SUPPLY>`; the mock shows only the busy state of the button.
-  - On 202 the page stores the pending verification with `purpose: 'SignIn'` and the `returnUrl`, then opens `/verify` (L2-006 AC1). On a 503 or a network failure it shows the alert from `sign-up/error.html` and keeps the input. On 429 it states when to try again (L2-053 AC4).
+  - `parseContact(raw)` (`api` library helper, `lib/api/auth/parse-contact.ts`, with unit tests) classifies the input: text with `@` is an email, otherwise a phone number. It returns the channel, the destination without the spaces around it and the message to show, or none. The same rules as sign up apply, with the same messages (L2-006 AC4); an empty field says "Enter your phone number or email."
+  - "Send my code" is disabled and busy while the request runs (L2-056 AC3). The busy label is "Sending your code…".
+  - On 202 the page stores the pending verification with `purpose: 'SignIn'` and the `returnUrl`, then opens `/verify` (L2-006 AC1). On a 503 or a network failure it shows the alert from `sign-up/error.html` and keeps the input. On 429 it says "That’s a lot of codes." and when to try again (L2-053 AC4). The way back from the code screen returns here with what was typed.
   - "New here? Start a Popkin" links to `/sign-up`, passing `returnUrl` on (L2-006 AC3). The back button in `pk-top-bar` returns to `/welcome`.
-- **Name step** — when confirm answers `NameRequired`, `VerifyCodePage` asks "Your name" and confirms again with the same code and the name. Which screen or state holds this step, and its copy, are `<TO SUPPLY>`: no mock draws it. A reasonable source is the name field of `docs/mocks/pages/sign-up/default.html`. The name is validated as 1 to 40 characters.
+- **Name step** — when confirm answers `NameRequired`, `VerifyCodePage` stays on `/verify` and shows its name step in place of the code field, as `docs/mocks/pages/verify-code/name.html` draws it: the heading "What should we call you?", the field "Your name" and "Continue", which reads "Signing you in…" while busy. It confirms again with the same code and the name. The name is validated as 1 to 40 characters, by the rule sign up uses.
+- **After signing in** — the screen in `returnUrl` opens, or My Popkins (`/popkins`) when there is none.
 - **Components** — `pk-top-bar`, `pk-text-field`, `pk-button`, `pk-link`, `pk-alert`.
 
 ### Back end (reused)
@@ -48,8 +50,12 @@ name after confirming, and an account is made (L2-006 AC2).
 
 ### Tests
 
-- API integration tests compare the 202 body for a known and an unknown destination, and cover `NameRequired` followed by a confirm with a name that creates exactly one `Person`.
+- API integration tests (`Auth/SignInTests.cs`) compare the 202 body for a known and an unknown destination, and cover `NameRequired` followed by a confirm with a name that creates exactly one `Person`. They also cover a name sent for an existing account, which does not rename the person, and the code limits, which count sign in and sign up together.
 - Playwright specs drive `e2e/pages/sign-in.page.ts`: valid phone, valid email, invalid email, the failure alert, and the link to sign up.
+
+### Built in journey 6
+
+The screen, the name step and the tests above. The back end needed no new code: `RequestCodeCommand` and `ConfirmCodeCommand` already served the purpose `SignIn`. Nothing in this design is open.
 
 ## Requirements
 

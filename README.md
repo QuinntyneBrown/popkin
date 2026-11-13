@@ -41,7 +41,12 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > photos at a time with captions, browse the album by day under Everyone or Mine, and open each
 > photo full screen, and new photos appear for everyone without a reload.
 > [Watch it](docs/videos/05-journey-05-share-photos/05-journey-05-share-photos.mp4)
-> (2 min 16 s, with sound). The journeys still to build are in
+> (2 min 16 s, with sound). Journey 6, Come back, is built too: a person signs in again with
+> a new code, sees every Popkin they belong to on My Popkins, with the latest message and the
+> count of unread messages on each, opens any of them, and scans a QR code to join another;
+> offline, My Popkins shows the list it saved last time.
+> <!-- Watch it: the video of journey 6 goes here when it exists. -->
+> The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents

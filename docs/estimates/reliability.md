@@ -3,4 +3,4 @@
 | Design | Effort | Complete |
 |---|---|---|
 | fast-screens | 3 days | 20% |
-| loading-failure-offline | 5 days | 50% |
+| loading-failure-offline | 5 days | 60% |
