@@ -50,6 +50,28 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
     }
 
     /// <summary>
+    /// Changes an experience, for its sharer only (L2-040 AC6): each field is optional, a field
+    /// that is not sent stays as it is, and `removePicture` leaves it without a picture.
+    /// </summary>
+    [HttpPatch("{experienceId:guid}")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(2 * Photo.MaxFileBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 2 * Photo.MaxFileBytes)]
+    public async Task<ActionResult<ExperienceCardDto>> Edit(
+        Guid popkinId, Guid experienceId, IFormFile? picture, [FromForm] bool removePicture, CancellationToken cancellationToken)
+    {
+        // Read from the form itself: a field sent empty is not a field that was not sent.
+        var form = await Request.ReadFormAsync(cancellationToken);
+        string? Sent(string field) => form.TryGetValue(field, out var value) ? value.ToString() : null;
+
+        await using var content = picture?.OpenReadStream();
+        var upload = picture is null ? null : new PhotoUpload(content!, picture.Length);
+        return Ok(await sender.Send(
+            new EditExperienceCommand(popkinId, experienceId, Sent("title"), Sent("kind"), Sent("when"), Sent("place"), upload, removePicture),
+            cancellationToken));
+    }
+
+    /// <summary>
     /// Sets the caller's one rating of an experience, from one to five stars, and answers the
     /// group's score with it (L2-039). At most 60 a minute per person, counted with their messages.
     /// </summary>

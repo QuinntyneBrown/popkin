@@ -65,6 +65,22 @@ public sealed class Experience
     /// <summary>Its sharer deletes an experience, and the Host deletes any (L2-040 AC6).</summary>
     public bool CanBeDeletedBy(Membership member) => CanBeEditedBy(member) || member.Role == MembershipRole.Host;
 
+    /// <summary>Its sharer changes what it says; who shared it, and when, stay.</summary>
+    public void Edit(ExperienceKind kind, string title, string? when, string? place)
+    {
+        Kind = kind;
+        Title = title;
+        When = when;
+        Place = place;
+    }
+
+    /// <summary>Gives it another picture, or none.</summary>
+    public void SetPicture(ExperiencePicture? picture)
+    {
+        PictureKey = picture?.Key;
+        PictureThumbnailKey = picture?.ThumbnailKey;
+    }
+
     /// <summary>A member's first rating of this experience, from one to five stars (L2-039).</summary>
     public ExperienceRating Rate(Guid membershipId, int stars, DateTimeOffset now) =>
         IsRateable
