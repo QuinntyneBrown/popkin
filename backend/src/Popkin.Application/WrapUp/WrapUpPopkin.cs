@@ -24,7 +24,12 @@ public sealed class WrapUpPopkinCommandHandler(IMembershipGuard guard, PopkinWra
             throw ProblemException.Invalid("validation_failed", "Say whether to keep the photo album.", "keepPhotos");
         }
 
-        await wrapUp.WrapUpAsync(popkin, keepPhotos, cancellationToken);
+        if (!await wrapUp.WrapUpAsync(popkin, keepPhotos, cancellationToken))
+        {
+            // Its time ran out in the same moment: it has wrapped up, though not by this request.
+            throw MembershipGuard.WrappedUp();
+        }
+
         return new WrapUpResultDto(popkin.Id, popkin.WrappedUpAt!.Value);
     }
 }

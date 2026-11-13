@@ -35,6 +35,9 @@ public interface IPopkinNotifier
     /// <summary>The group call ended. To every member of the Popkin with a connection open.</summary>
     Task CallEnded(Guid popkinId, Guid callId);
 
+    /// <summary>The Popkin wrapped up. To every member of the Popkin with a connection open.</summary>
+    Task PopkinWrappedUp(Guid popkinId);
+
     /// <summary>Someone came onto the call. To the connections on the call.</summary>
     Task ParticipantJoined(Guid callId, CallParticipantDto participant);
 

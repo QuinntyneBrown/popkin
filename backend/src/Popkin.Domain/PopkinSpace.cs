@@ -43,6 +43,12 @@ public sealed class PopkinSpace
 
     public DateTimeOffset LastActivityAt { get; private set; }
 
+    /// <summary>
+    /// Rises when the Popkin wraps up. Two wrap-ups at once, the Host's and the clock's, cannot
+    /// both be saved from the same version.
+    /// </summary>
+    public long Version { get; private set; }
+
     public IReadOnlyCollection<Membership> Memberships => _memberships;
 
     /// <summary>
@@ -94,5 +100,6 @@ public sealed class PopkinSpace
         Status = PopkinStatus.WrappedUp;
         WrappedUpAt = at;
         KeepPhotos = keepPhotos;
+        Version++;
     }
 }

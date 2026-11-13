@@ -50,6 +50,12 @@ public interface IPopkinClient
     Task CallEnded(Guid popkinId, Guid callId);
 
     /// <summary>
+    /// The Popkin wrapped up and is read-only from now on (L2-044 AC4). A fact, and final;
+    /// `GET /api/popkins/{popkinId}` recovers it.
+    /// </summary>
+    Task PopkinWrappedUp(Guid popkinId);
+
+    /// <summary>
     /// Someone came onto the call. A fact, sent to the connections on the call; the one who
     /// joined has the participants from the answer to their join.
     /// </summary>

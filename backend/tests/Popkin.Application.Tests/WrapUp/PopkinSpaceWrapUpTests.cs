@@ -48,6 +48,17 @@ public sealed class PopkinSpaceWrapUpTests
     }
 
     [Fact]
+    public void Wrapping_up_raises_the_version_so_two_at_once_cannot_both_be_saved()
+    {
+        var popkin = Lakeside();
+        var before = popkin.Version;
+
+        popkin.WrapUp(Now, keepPhotos: true);
+
+        Assert.Equal(before + 1, popkin.Version);
+    }
+
+    [Fact]
     public void A_Popkin_that_has_wrapped_up_does_not_wrap_up_again()
     {
         var popkin = Lakeside();
