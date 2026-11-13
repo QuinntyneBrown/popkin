@@ -1,0 +1,12 @@
+<span #top class="thread__edge thread__edge--top" aria-hidden="true"></span>
+<ng-content />
+<span #bottom class="thread__edge thread__edge--bottom" aria-hidden="true"></span>
+@if (newMessages()) {
+  <div class="thread__float">
+    <button class="thread__new" type="button" (click)="jump.emit()">
+      New messages
+      <svg pk-icon name="chevron-down" size="sm"></svg>
+    </button>
+  </div>
+}
+<p class="visually-hidden" aria-live="polite">{{ announcement() }}</p>

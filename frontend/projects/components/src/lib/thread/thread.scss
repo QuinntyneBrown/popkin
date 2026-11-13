@@ -1,0 +1,67 @@
+/* The rows, in the column and with the gap of the design system's thread. */
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The two ends of the thread, watched as they come on screen. They take no room. */
+.thread__edge {
+  position: absolute;
+  left: 0;
+  width: var(--border-width-hairline);
+  height: var(--border-width-hairline);
+  pointer-events: none;
+}
+
+.thread__edge--top {
+  top: 0;
+}
+
+.thread__edge--bottom {
+  bottom: 0;
+}
+
+/*
+ * "New messages" floats in the middle of the thread, above the composer. Its holder has no
+ * height and takes back the gap of the column, so showing it moves no message.
+ */
+.thread__float {
+  position: sticky;
+  bottom: calc(var(--pk-composer-height, var(--space-20)) + var(--space-3));
+  z-index: var(--z-raised);
+  display: flex;
+  justify-content: center;
+  height: 0;
+  margin-top: calc(-1 * var(--space-3));
+  pointer-events: none;
+}
+
+.thread__new {
+  position: absolute;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  height: var(--target-comfortable);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+  white-space: nowrap;
+  box-shadow: var(--shadow-2);
+  pointer-events: auto;
+  transition: scale var(--duration-fast) var(--ease-pop);
+}
+
+.thread__new:hover {
+  background: var(--color-bg-inverse-hover);
+}
+
+.thread__new:active {
+  scale: var(--scale-press);
+}
