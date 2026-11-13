@@ -45,7 +45,8 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > a new code, sees every Popkin they belong to on My Popkins, with the latest message and the
 > count of unread messages on each, opens any of them, and scans a QR code to join another;
 > offline, My Popkins shows the list it saved last time.
-> <!-- Watch it: the video of journey 6 goes here when it exists. -->
+> [Watch it](docs/videos/06-journey-06-come-back/06-journey-06-come-back.mp4)
+> (2 min 22 s, with sound).
 > The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
