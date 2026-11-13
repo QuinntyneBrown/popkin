@@ -71,6 +71,14 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
             cancellationToken));
     }
 
+    /// <summary>Deletes an experience with its ratings and comments, for its sharer or the Host (L2-040 AC6).</summary>
+    [HttpDelete("{experienceId:guid}")]
+    public async Task<IActionResult> Delete(Guid popkinId, Guid experienceId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeleteExperienceCommand(popkinId, experienceId), cancellationToken);
+        return NoContent();
+    }
+
     /// <summary>
     /// Sets the caller's one rating of an experience, from one to five stars, and answers the
     /// group's score with it (L2-039). At most 60 a minute per person, counted with their messages.
