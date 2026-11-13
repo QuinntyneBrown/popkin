@@ -98,6 +98,13 @@
 
     padding-left: calc(var(--pk-nav-width) + var(--pk-list-width));
   }
+
+  /* The list is the screen: it keeps to its column, and the thread pane has the rest. */
+  :host(.screen--list) {
+    --pk-list-width: var(--layout-list-pane);
+
+    padding-right: calc(100% - var(--pk-nav-width) - var(--pk-list-width));
+  }
 }
 
 /* XL: wider parts, and a thread's detail pane at the end. */
@@ -111,5 +118,9 @@
     --pk-detail-width: var(--layout-detail-pane);
 
     padding-right: var(--pk-detail-width);
+  }
+
+  :host(.screen--list) {
+    --pk-list-width: var(--layout-list-pane-xl);
   }
 }

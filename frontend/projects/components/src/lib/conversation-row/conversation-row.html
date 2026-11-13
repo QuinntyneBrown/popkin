@@ -1,0 +1,21 @@
+<span
+  pk-avatar
+  size="lg"
+  [initials]="avatar().initials"
+  [photo]="avatar().photoUrl"
+  [attr.data-accent]="avatar().accent"
+></span>
+<span class="row__main row__main--line">
+  <span class="row__line">
+    <span class="row__title truncate" [class.row__title--unread]="unread()">{{ name() }}</span>
+    @if (time()) {
+      <span class="row__meta">{{ time() }}</span>
+    }
+  </span>
+  <span class="row__line">
+    <span class="row__text truncate" [class.row__text--unread]="unread()">{{ latest() }}</span>
+    @if (unread()) {
+      <span class="unread-dot" role="img" aria-label="Unread"></span>
+    }
+  </span>
+</span>

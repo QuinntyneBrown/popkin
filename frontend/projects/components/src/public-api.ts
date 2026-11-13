@@ -125,5 +125,6 @@ export * from './lib/cta-band/cta-band';
 export * from './lib/action-pair/action-pair';
 export * from './lib/mark-picture/mark-picture';
 export * from './lib/welcome/welcome';
-export * from './lib/status-note/status-note';
-export * from './lib/field-label/field-label';
+export * from './lib/conversation-row/conversation-row';
+export * from './lib/conversations/conversations';
+export * from './lib/thread-pane/thread-pane';

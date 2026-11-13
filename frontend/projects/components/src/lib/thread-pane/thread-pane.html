@@ -1,0 +1,12 @@
+<ng-content select="[slot=header]" />
+<div
+  #scroller
+  [class.thread]="body() !== 'plain'"
+  [class.thread--end]="body() === 'thread-end'"
+  [class.thread-pane__body]="body() === 'plain'"
+  [attr.role]="bodyLabel() ? 'group' : null"
+  [attr.aria-label]="bodyLabel() || null"
+>
+  <ng-content />
+</div>
+<ng-content select="[slot=composer]" />

@@ -1,33 +1,56 @@
-@if (back() !== undefined) {
-  <a
-    pk-icon-button
-    class="topbar__back"
-    [icon]="backIcon()"
-    [label]="backLabel()"
-    size="lg"
-    [routerLink]="back()"
-  ></a>
+@if (back() !== undefined || pane()) {
+  @if (back() !== undefined) {
+    <a
+      pk-icon-button
+      class="topbar__back"
+      [icon]="backIcon()"
+      [label]="backLabel()"
+      size="lg"
+      [routerLink]="back()"
+    ></a>
+  }
+  @if (pane()) {
+    @if (tile(); as emoji) {
+      <span pk-popkin-tile size="xs" [emoji]="emoji" [muted]="tileMuted()"></span>
+    }
+  }
   <div class="topbar__titles">
-    <div class="topbar__title">
-      @if (steps() && step()) {
-        <div pk-step-dots [step]="step()!" [steps]="steps()!"></div>
-      }
-      @if (tile(); as emoji) {
-        <span pk-popkin-tile size="xs" [emoji]="emoji" [muted]="tileMuted()"></span>
-      }
-      @if (emoji(); as symbol) {
-        <span class="topbar__emoji" aria-hidden="true">{{ symbol }}</span>
-      }
-      @if (heading()) {
-        <h1 class="topbar__heading truncate">{{ heading() }}</h1>
-      }
-      <ng-content select="[slot=title]" />
-    </div>
+    @if (pane()) {
+      <h2 class="topbar__title truncate">{{ heading() }}</h2>
+    } @else {
+      <div class="topbar__title">
+        @if (steps() && step()) {
+          <div pk-step-dots [step]="step()!" [steps]="steps()!"></div>
+        }
+        @if (tile(); as emoji) {
+          <span pk-popkin-tile size="xs" [emoji]="emoji" [muted]="tileMuted()"></span>
+        }
+        @if (avatar(); as person) {
+          <span
+            pk-avatar
+            size="sm"
+            [initials]="person.initials"
+            [photo]="person.photoUrl"
+            [attr.data-accent]="person.accent"
+          ></span>
+        }
+        @if (emoji(); as symbol) {
+          <span class="topbar__emoji" aria-hidden="true">{{ symbol }}</span>
+        }
+        @if (heading()) {
+          <h1 class="topbar__heading truncate">{{ heading() }}</h1>
+        }
+        <ng-content select="[slot=title]" />
+      </div>
+    }
     @if (sub()) {
       <div class="topbar__sub truncate">{{ sub() }}</div>
     }
   </div>
   <div class="topbar__end"><ng-content select="[slot=end]" /></div>
 } @else {
+  @if (heading()) {
+    <h1 class="topbar__heading topbar__heading--display">{{ heading() }}</h1>
+  }
   <ng-content />
 }

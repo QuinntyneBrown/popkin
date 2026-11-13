@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Avatar, PersonAvatar } from '../avatar/avatar';
 import { IconName } from '../icon/icons';
 import { IconButton } from '../icon-button/icon-button';
 import { PopkinTile } from '../popkin-tile/popkin-tile';
@@ -14,6 +15,12 @@ import { StepDots } from '../step-dots/step-dots';
  * list of threads is beside the thread. In a page screen (`pk-page-screen`) the brand
  * bar is taller from 768 px, ruled off, and keeps its content in line with the page's.
  *
+ * A direct message's bar names the other member in place of the Popkin: their `avatar`, their
+ * name as the `heading` and "From 🏕️ Lakeside Weekend" as the `sub` line. The bar of a tab that
+ * is a list, such as Chat, has no Back: its `heading` is the screen's `h1` in display type and
+ * its content is the tab's action ("New message"). As the head of the thread `pane` beside that
+ * list it has no Back either: the tile stands before the titles and the heading is an `h2`.
+ *
  * On the stage of a call (`pk-call-screen`) the start is "Minimise call" (`backIcon`,
  * `backLabel`), the title carries the Popkin's `emoji` and is a little smaller, the `sub` line
  * says how many are on the call and for how long, and from 640 px the bar is taller where
@@ -21,13 +28,13 @@ import { StepDots } from '../step-dots/step-dots';
  */
 @Component({
   selector: 'header[pk-top-bar], div[pk-top-bar]',
-  imports: [IconButton, PopkinTile, RouterLink, StepDots],
+  imports: [Avatar, IconButton, PopkinTile, RouterLink, StepDots],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './top-bar.html',
   styleUrl: './top-bar.scss',
   host: {
     class: 'topbar',
-    '[class.topbar--pad]': 'back() === undefined',
+    '[class.topbar--pad]': 'back() === undefined && !pane()',
     '[class.topbar--line]': 'line()',
     '[class.topbar--sticky]': 'sticky()',
   },
@@ -50,9 +57,13 @@ export class TopBar {
   readonly tile = input<string>();
   /** Greys the tile: the Popkin has wrapped up. The `sub` line says so in words. */
   readonly tileMuted = input(false);
+  /** The other member of a direct message, as a small avatar before the heading. */
+  readonly avatar = input<PersonAvatar>();
+  /** The head of the thread pane (`pk-thread-pane`): no Back, and the heading is an `h2`. */
+  readonly pane = input(false);
   /** The emoji of the Popkin, in the line of the title: the bar of a call. */
   readonly emoji = input<string>();
-  /** The title as the screen's `h1`. */
+  /** The title as the screen's `h1`; with no Back and no `pane`, in display type. */
   readonly heading = input<string>();
   /** The muted line under the title: "14 members · 5 here now". */
   readonly sub = input<string>();

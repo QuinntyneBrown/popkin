@@ -8,14 +8,17 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
  *
  * As a `thread` (`screen--thread`) it also has the sticky composer, the list of threads, which
  * opens beside the thread from 1024 px, and the detail pane, which opens from 1280 px. As a
- * `tab`, such as the Popkin home, the screen is the tab's alone: nothing opens beside it.
+ * `tab`, such as the Popkin home, the screen is the tab's alone: nothing opens beside it. As a
+ * `list` (`screen--list`), the list of threads is the screen itself; from 1024 px it keeps to the
+ * list's column and the thread pane (`pk-thread-pane`) fills the rest (L2-058 AC11).
  *
  * It makes the room for the three fixed parts and tells them their widths through
  * `--pk-nav-width`, `--pk-list-width` and `--pk-detail-width`.
  *
  * Slots: `[slot=header]`, `[slot=banner]`, the default slot inside `main`, `[slot=fab]` (the
  * floating action of a phone, a `pk-fab`; absent from 768 px, where the header holds the action,
- * L2-058 AC9), `[slot=composer]`, `[slot=nav]`, `[slot=list]` and `[slot=detail]`.
+ * L2-058 AC9), `[slot=composer]`, `[slot=nav]`, `[slot=list]`, `[slot=thread]` (the thread pane of a `list`)
+ * and `[slot=detail]`.
  */
 @Component({
   selector: 'div[pk-app-screen]',
@@ -25,6 +28,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   host: {
     class: 'screen screen--app',
     '[class.screen--thread]': "layout() === 'thread'",
+    '[class.screen--list]': "layout() === 'list'",
     '[attr.data-accent]': 'accent()',
   },
 })
@@ -33,9 +37,10 @@ export class AppScreen {
   readonly accent = input.required<string>();
   /**
    * `thread` leaves room for the list of threads and the detail pane beside it; `tab` is one of
-   * the Popkin's four places and has the navigation alone at its side.
+   * the Popkin's four places and has the navigation alone at its side; `list` is the list of
+   * threads, with the thread pane beside it from 1024 px.
    */
-  readonly layout = input<'thread' | 'tab'>('thread');
+  readonly layout = input<'thread' | 'tab' | 'list'>('thread');
   /**
    * What `main` is: a `thread` of messages from the top, a thread whose content sits at its end
    * (`thread-end`, while it loads), a `plain` body for an empty state or an error, or a `flush`

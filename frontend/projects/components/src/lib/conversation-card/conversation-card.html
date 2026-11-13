@@ -3,11 +3,14 @@
   <span class="card__top">
     <span class="row__title row__title--display truncate">{{ title() }}</span>
     @if (time()) {
-      <span class="card__time" [class.text-accent]="unread()">{{ time() }}</span>
+      <span class="card__time" [class.text-accent]="standsOut()">{{ time() }}</span>
     }
   </span>
-  <span class="row__text truncate" [class.row__text--unread]="unread()">{{ preview() }}</span>
-  @if (unread()) {
+  <span class="row__text truncate" [class.row__text--unread]="standsOut()">{{ preview() }}</span>
+  @if (unread() && !unreadCount()) {
     <span class="visually-hidden">Unread</span>
   }
 </span>
+@if (unreadCount()) {
+  <span pk-badge variant="popkin" [count]="unreadCount()" [label]="countLabel()"></span>
+}

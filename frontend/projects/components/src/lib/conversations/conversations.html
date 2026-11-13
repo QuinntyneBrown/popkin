@@ -1,0 +1,85 @@
+@switch (state()) {
+  @case ('loading') {
+    <p class="visually-hidden" role="status">Loading your chats…</p>
+    <div class="conversations__loading" aria-hidden="true">
+      <div class="conversations__card">
+        <span pk-skeleton shape="card"></span>
+      </div>
+      <div>
+        @for (row of skeletons; track row) {
+          <div class="conversations__row">
+            <span pk-skeleton shape="circle"></span>
+            <div class="conversations__lines">
+              <span pk-skeleton shape="text" [width]="40"></span>
+              <span pk-skeleton shape="text" [width]="70"></span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+  @case ('error') {
+    <div
+      pk-empty-state
+      icon="offline"
+      heading="We couldn’t load your chats"
+      text="Your messages are safe. Check your connection and try again."
+      [level]="level()"
+      [alert]="true"
+    >
+      <button pk-button type="button" variant="primary" size="md" (click)="retry.emit()">
+        <svg pk-icon name="retry" size="md"></svg>Try again
+      </button>
+    </div>
+  }
+  @default {
+    @if (everyone(); as thread) {
+      <a
+        pk-conversation-card
+        title="Everyone"
+        [emoji]="thread.emoji"
+        [time]="thread.time"
+        [preview]="thread.latest"
+        [unreadCount]="thread.unread"
+        [current]="current() === everyoneKey"
+        [routerLink]="thread.link"
+      ></a>
+    }
+    @if (level() === 3) {
+      <h3 pk-group-label>Direct messages</h3>
+    } @else {
+      <h2 pk-group-label>Direct messages</h2>
+    }
+    @if (direct().length) {
+      <ul class="conversations__list">
+        @for (row of direct(); track row.key) {
+          <li>
+            <a
+              pk-conversation-row
+              [name]="row.name"
+              [avatar]="row.avatar"
+              [time]="row.time"
+              [latest]="row.latest"
+              [unread]="row.unread"
+              [current]="current() === row.key"
+              [routerLink]="row.link"
+            ></a>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div
+        pk-empty-state
+        icon="message"
+        heading="No direct messages yet"
+        text="A direct message is between you and one other member. Nobody else can see it."
+        [level]="3"
+        [compact]="true"
+      >
+        <button pk-button type="button" variant="secondary" size="md" (click)="newMessage.emit()">
+          <svg pk-icon name="new-message" size="md"></svg>New message
+        </button>
+      </div>
+    }
+  }
+}

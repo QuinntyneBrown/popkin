@@ -1,0 +1,40 @@
+/* A column that fills the screen's body or the list pane, so an error sits in its middle. */
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.conversations__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Loading: the shape of the card, then of four rows. */
+.conversations__loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.conversations__card {
+  padding: 0 var(--space-4);
+}
+
+.conversations__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-18);
+  padding: 0 var(--space-5);
+}
+
+.conversations__lines {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--space-3);
+  min-width: 0;
+}

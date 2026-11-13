@@ -258,10 +258,23 @@ export const ICONS = {
     { path: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' },
     { path: 'm7 10 5 5 5-5' },
   ],
-  'log-out': [
-    { path: 'm16 17 5-5-5-5' },
-    { path: 'M21 12H9' },
-    { path: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' },
+  /* Chat: start a direct message, call the other member, find a member, open the thread. */
+  'new-message': [
+    { path: 'M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7' },
+    {
+      path: 'M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z',
+    },
+  ],
+  phone: [
+    {
+      path: 'M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384',
+    },
+  ],
+  search: [{ path: 'm21 21-4.34-4.34' }, { circle: [11, 11, 8] }],
+  open: [
+    { path: 'M15 3h6v6' },
+    { path: 'M10 14 21 3' },
+    { path: 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' },
   ],
 } satisfies Record<string, IconShape[]>;
 

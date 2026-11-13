@@ -41,6 +41,12 @@
   font: inherit;
 }
 
+/* The name of a tab that is a list, with the tab's action at the end of the bar. */
+.topbar__heading--display {
+  font: var(--text-h1-compact);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
 .topbar__sub {
   font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-normal)
     var(--font-family-sans);
@@ -81,6 +87,12 @@
   /* The head of a pane beside the thread keeps the padding of a padded bar. */
   :host(.topbar--pad) {
     padding-inline: var(--space-5);
+  }
+
+  /* The head of the thread pane: the tile, then the titles, further from each other. */
+  :host-context(.thread-pane) {
+    gap: var(--space-3);
+    padding-inline: var(--space-6) var(--space-4);
   }
 }
 
