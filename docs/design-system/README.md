@@ -10,7 +10,7 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Color](foundations/color.html) | Primitives, roles, status colours, both themes, live contrast pairs |
 | [Typography](foundations/typography.html) | Nunito, Inter, Rubik; the type roles |
 | [Spacing](foundations/spacing.html) | The 4px scale and how to use it |
-| [Layout](foundations/layout.html) | Breakpoints, the app column, the landing grid, screen templates |
+| [Layout](foundations/layout.html) | Breakpoints, the app's form factors, the landing grid, screen templates |
 | [Elevation](foundations/elevation.html) | Three shadows, surfaces, z-order |
 | [Shape](foundations/shape.html) | Radii and borders |
 | [Motion](foundations/motion.html) | Durations, easing, the pop, reduced motion |

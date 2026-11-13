@@ -104,6 +104,7 @@
   --font-family-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   --font-family-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
+  --font-size-2xs: 0.6875rem;  /* 11px  tab labels in the side rail */
   --font-size-xs: 0.75rem;     /* 12px  times, tab labels */
   --font-size-sm-plus: 0.8125rem; /* 13px  pills, meta text */
   --font-size-sm: 0.875rem;    /* 14px  secondary text */
@@ -283,14 +284,42 @@
   --space-55: 13.75rem;  /* 220px  the welcome circle, the big mark */
 
   /* ---------- Semantic: layout ----------------------------------------- */
-  --layout-breakpoint-sm: 36rem;    /* 576px   app column centres; landing two-up */
+  --layout-breakpoint-sm: 36rem;    /* 576px   landing two-up */
   --layout-breakpoint-sheet: 40rem; /* 640px   dialogs stop being bottom sheets */
   --layout-breakpoint-md: 48rem;    /* 768px   landing steps three-up */
   --layout-breakpoint-lg: 62rem;    /* 992px   landing hero side by side, ideas four-up */
   --layout-breakpoint-xl: 75rem;    /* 1200px  container reaches its maximum */
   --layout-columns: 4;
   --layout-gutter: var(--space-4);
-  --layout-app-max: 28rem;         /* the app's single column */
+  /* The app's form factors. XS is everything below S; each step up adds room, never a new app. */
+  --layout-breakpoint-app-s: 40rem;   /* 640px   S: cards and photos gain a column, actions sit side by side */
+  --layout-breakpoint-app-m: 48rem;   /* 768px   M: the tabs become a side rail, onboarding splits in two */
+  --layout-breakpoint-app-l: 64rem;   /* 1024px  L: the rail becomes a sidebar, a second pane opens */
+  --layout-breakpoint-app-xl: 80rem;  /* 1280px  XL: a third pane opens */
+  --layout-app-max: 28rem;         /* a form's column on XS */
+  --layout-form-max-s: 32rem;      /* a form's column from S */
+  --layout-form-max-l: 36rem;      /* a form's column from L */
+  --layout-action-max: 25rem;      /* a lone action under a centred screen */
+  --layout-page-max: 100rem;       /* the widest a top-level page grows */
+  --layout-detail-max: 93.75rem;   /* the widest a two-column detail grows */
+  --layout-recap-max-xl: 80rem;    /* the recap on XL */
+  --layout-rail-width: 5.25rem;    /* M: the Popkin tabs as an icon rail */
+  --layout-sidebar-width-xl: 18rem;/* XL: the Popkin sidebar */
+  --layout-list-pane: 23.75rem;    /* L: the thread list beside a thread, the photo's side panel */
+  --layout-list-pane-xl: 25rem;
+  --layout-detail-pane: 20rem;     /* XL: who is here, who is on the call */
+  --layout-split-aside: 44%;       /* M: the picture half of a split screen */
+  --layout-split-aside-l: 50%;
+  --layout-split-aside-xl: 55%;
+  --layout-preview-max: 26.25rem;  /* the Popkin preview card in a split screen */
+  --layout-bubble-max-wide: 32.5rem; /* a message never grows wider than this */
+  --layout-viewer-info-max: 42rem; /* M: the caption under a photo */
+  --layout-qr-card-max-lg: 23.75rem;
+  --layout-qr-size-lg: 16.25rem;
+  --layout-polaroids-width-l: 27.5rem;
+  --layout-polaroids-height-l: 20rem;
+  --layout-polaroid-l: 14rem;
+  --layout-polaroid-centre-l: 16rem;
   --layout-container-max: 72rem;   /* the landing page */
   --layout-container-narrow: 56rem;
   --layout-dialog-max: 28rem;

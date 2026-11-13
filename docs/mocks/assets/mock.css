@@ -35,7 +35,7 @@
 .mock-note::before { content: "Note"; display: block; font-weight: var(--font-weight-semibold); text-transform: uppercase; letter-spacing: var(--letter-spacing-wide); }
 [data-chrome="off"] .mock-note { display: none; }
 @media (max-width: 39.99rem) { .mock-bar__states { max-width: 40vw; } }
-/* Popkin's app is one centred column: on wide screens the bar moves to the corner so it never covers the tabs. */
+/* On wide screens the bar moves to the corner, under the Popkin's sidebar, so it covers no content. */
 @media (min-width: 64rem) { .mock-bar { left: var(--space-3); translate: 0 0; max-width: calc(50vw - 16rem); } }
 
 /* ---------- Brand sheet (pages/brand-components only; documentation, not product UI) ---------- */
