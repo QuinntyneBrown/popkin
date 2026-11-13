@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Chat;
 using Popkin.Domain;
 
 namespace Popkin.Application.Calls;
@@ -7,9 +8,40 @@ namespace Popkin.Application.Calls;
 /// <summary>What the call handlers read alike: the call under way and who is on a call.</summary>
 internal static class CallReads
 {
-    /// <summary>The Popkin's group call under way, tracked, or null.</summary>
-    public static Task<Call?> UnderWayAsync(IAppDbContext db, Guid popkinId, CancellationToken cancellationToken) =>
-        db.Calls.FirstOrDefaultAsync(c => c.PopkinId == popkinId && c.EndedAt == null, cancellationToken);
+    /// <summary>
+    /// The call under way, tracked, or null: the Popkin's group call, or with a thread the
+    /// direct call of that direct message.
+    /// </summary>
+    public static Task<Call?> UnderWayAsync(IAppDbContext db, Guid popkinId, Guid? threadId, CancellationToken cancellationToken) =>
+        db.Calls.FirstOrDefaultAsync(c => c.PopkinId == popkinId && c.ThreadId == threadId && c.EndedAt == null, cancellationToken);
+
+    /// <summary>
+    /// The thread a call is asked for, as the call stores it: null for the group call, and for
+    /// Everyone, whose call is the group call; a direct message only its two members may name,
+    /// and anyone else gets 404 `thread_not_found`, as for a thread that does not exist (L2-023 AC2).
+    /// </summary>
+    public static async Task<Guid?> CallThreadIdAsync(IAppDbContext db, Membership membership, Guid? threadId, CancellationToken cancellationToken)
+    {
+        if (threadId is not { } id)
+        {
+            return null;
+        }
+
+        var thread = await ChatThreads.RequireAsync(db, membership, id, cancellationToken);
+        return thread.Kind == ChatThreadKind.Direct ? thread.Id : null;
+    }
+
+    /// <summary>Who is told how many are on a call: the Popkin for its group call, the two members for a direct call.</summary>
+    public static async Task<Audience> AudienceAsync(IAppDbContext db, Call call, CancellationToken cancellationToken)
+    {
+        if (call.ThreadId is not { } threadId)
+        {
+            return Audience.Popkin(call.PopkinId);
+        }
+
+        var thread = await db.ChatThreads.AsNoTracking().FirstAsync(t => t.Id == threadId, cancellationToken);
+        return await ChatThreads.AudienceAsync(db, thread, cancellationToken);
+    }
 
     public static Task<int> CountOnAsync(IAppDbContext db, Guid callId, CancellationToken cancellationToken) =>
         db.CallParticipants.CountAsync(p => p.CallId == callId && p.LeftAt == null, cancellationToken);

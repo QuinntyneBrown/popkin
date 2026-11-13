@@ -10,10 +10,11 @@ namespace Popkin.Application.Calls;
 public sealed record JoinCallResult(JoinedCallDto Joined, bool Started);
 
 /// <summary>
-/// Puts the member on the Popkin's group call, with the microphone and camera as they arrive:
-/// it starts the call when none is under way and joins the one that is (L2-029 AC1, AC2).
+/// Puts the member on the Popkin's group call, or with a thread on the direct call of that
+/// direct message, with the microphone and camera as they arrive: it starts the call when none
+/// is under way and joins the one that is (L2-029 AC1, AC2, L2-030 AC8).
 /// </summary>
-public sealed record JoinCallCommand(Guid PopkinId, bool MicOn, bool CameraOn) : IRequest<JoinCallResult>;
+public sealed record JoinCallCommand(Guid PopkinId, bool MicOn, bool CameraOn, Guid? ThreadId = null) : IRequest<JoinCallResult>;
 
 public sealed class JoinCallCommandHandler(
     IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos, IMediaRelayCredentials relay, IPopkinNotifier notifier, CallDisconnectGrace grace)
@@ -26,14 +27,16 @@ public sealed class JoinCallCommandHandler(
     {
         // No call starts, and nobody joins one, in a Popkin that has wrapped up (L2-045 AC1).
         var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
+        // Only the two members of a direct message start or join its call (L2-023 AC2).
+        var threadId = await CallReads.CallThreadIdAsync(db, membership, request.ThreadId, cancellationToken);
 
         for (var attempt = 1; ; attempt++)
         {
-            var call = await CallReads.UnderWayAsync(db, popkin.Id, cancellationToken);
+            var call = await CallReads.UnderWayAsync(db, popkin.Id, threadId, cancellationToken);
             var started = call is null;
             if (call is null)
             {
-                call = Call.Start(popkin.Id, clock.GetUtcNow());
+                call = Call.Start(popkin.Id, clock.GetUtcNow(), threadId);
                 db.Calls.Add(call);
             }
 

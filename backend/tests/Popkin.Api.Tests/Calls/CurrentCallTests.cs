@@ -39,7 +39,7 @@ public sealed class CurrentCallTests
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var call = await response.Content.ReadFromJsonAsync<JsonElement>();
-        Assert.Equal(["id", "participantCount", "startedAt", "version"], call.EnumerateObject().Select(p => p.Name).Order());
+        Assert.Equal(["id", "participantCount", "startedAt", "threadId", "version"], call.EnumerateObject().Select(p => p.Name).Order());
         Assert.Equal(joined.GetProperty("call").GetRawText(), call.GetRawText());
         Assert.Equal(2, call.GetProperty("participantCount").GetInt32());
     }

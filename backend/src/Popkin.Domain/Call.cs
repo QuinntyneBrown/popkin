@@ -1,9 +1,11 @@
 namespace Popkin.Domain;
 
 /// <summary>
-/// A group call: a video call open to every member of one Popkin (L2-029). It is under way
-/// while <see cref="EndedAt"/> is empty, and a Popkin has at most one under way. The API keeps
-/// who is on it and never carries its media.
+/// A video call of one Popkin: its group call, open to every member (L2-029), or the direct
+/// call of one direct message, open to its two members only (L2-030 AC8). It is under way while
+/// <see cref="EndedAt"/> is empty; a Popkin has at most one group call under way, and a direct
+/// message at most one direct call, and the two kinds run at once. The API keeps who is on it
+/// and never carries its media.
 /// </summary>
 public sealed class Call
 {
@@ -15,6 +17,9 @@ public sealed class Call
 
     public Guid PopkinId { get; private set; }
 
+    /// <summary>The direct message whose call this is; null for the Popkin's group call.</summary>
+    public Guid? ThreadId { get; private set; }
+
     public DateTimeOffset StartedAt { get; private set; }
 
     public DateTimeOffset? EndedAt { get; private set; }
@@ -25,11 +30,15 @@ public sealed class Call
     /// </summary>
     public long Version { get; private set; }
 
-    /// <summary>Starts a call with nobody on it yet; whoever starts it joins it next.</summary>
-    public static Call Start(Guid popkinId, DateTimeOffset now) => new()
+    /// <summary>
+    /// Starts a call with nobody on it yet: the group call, or with a thread the direct call of
+    /// that direct message. Whoever starts it joins it next.
+    /// </summary>
+    public static Call Start(Guid popkinId, DateTimeOffset now, Guid? threadId = null) => new()
     {
         Id = Guid.NewGuid(),
         PopkinId = popkinId,
+        ThreadId = threadId,
         StartedAt = now,
     };
 

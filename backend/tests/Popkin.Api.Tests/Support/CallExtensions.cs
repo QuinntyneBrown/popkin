@@ -31,6 +31,22 @@ public static class CallExtensions
     public static Task<HttpResponseMessage> CurrentCallAsync(this HttpClient member, Guid popkinId) =>
         member.GetAsync($"/api/popkins/{popkinId}/calls/current");
 
+    /// <summary>The direct call of that direct message under way, or 204.</summary>
+    public static Task<HttpResponseMessage> CurrentDirectCallAsync(this HttpClient member, Guid popkinId, Guid threadId) =>
+        member.GetAsync($"/api/popkins/{popkinId}/calls/current?threadId={threadId}");
+
+    /// <summary>Starts the direct call of a direct message, or joins the one under way.</summary>
+    public static Task<HttpResponseMessage> StartOrJoinDirectCallAsync(this HttpClient member, Guid popkinId, Guid threadId) =>
+        member.PostAsJsonAsync($"/api/popkins/{popkinId}/calls", new { micOn = true, cameraOn = true, threadId });
+
+    /// <summary>Starts or joins a direct call that must be answered, and returns the `JoinedCallDto`.</summary>
+    public static async Task<JsonElement> OnDirectCallAsync(this HttpClient member, Guid popkinId, Guid threadId)
+    {
+        var response = await member.StartOrJoinDirectCallAsync(popkinId, threadId);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<JsonElement>();
+    }
+
     /// <summary>Invokes the hub's `JoinCall`, so the connection is sent the call's events and its participant's signals.</summary>
     public static Task JoinCallAsync(this HubEvents hub, Guid callId) => hub.Connection.InvokeAsync("JoinCall", callId);
 
