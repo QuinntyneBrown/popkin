@@ -1,3 +1,4 @@
+import { ExperienceDetailPage } from '../../pages/experience-detail.page';
 import { SignInPage } from '../../pages/sign-in.page';
 import { theMockChat } from '../../fixtures/chat';
 import { callStates } from '../../fixtures/call-states';
@@ -29,5 +30,10 @@ parity('top-bar', [
     ...callStates.videoCallLoading,
     name: 'joining',
     region: (page) => new VideoCallPage(page).topBar,
+  },
+  {
+    key: 'experienceDetailError',
+    name: 'experience-error',
+    region: (page) => new ExperienceDetailPage(page).bar,
   },
 ]);

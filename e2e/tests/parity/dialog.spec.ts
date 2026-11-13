@@ -1,3 +1,5 @@
+import { AddCommentDialog } from '../../pages/add-comment.dialog';
+import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { openTheScanner, withACamera } from '../../fixtures/my-popkins';
 import { ScanToJoinDialog } from '../../pages/scan-to-join.dialog';
 import { copyTheInvite, openTheInvite, theMockHome } from '../../fixtures/home';
@@ -73,5 +75,49 @@ parity('dialog', [
       await page.keyboard.press('Shift');
       await new ScanToJoinDialog(page).typeTheCode.focus();
     },
+  },
+  {
+    key: 'shareExperience',
+    name: 'share-experience',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    // The mock's Title has autofocus; the dialog focuses it on open.
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'shareExperienceBusy',
+    name: 'share-experience-busy',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'shareExperienceInvalid',
+    name: 'share-experience-invalid',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'shareExperienceFailed',
+    name: 'share-experience-failed',
+    region: (page) => new ShareExperienceDialog(page).panel,
+    prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'addComment',
+    name: 'add-comment',
+    region: (page) => new AddCommentDialog(page).panel,
+    // The mock's field has autofocus; the dialog focuses it on open.
+    prepare: (page) => new AddCommentDialog(page).comment.focus(),
+  },
+  {
+    key: 'addCommentBusy',
+    name: 'add-comment-busy',
+    region: (page) => new AddCommentDialog(page).panel,
+    prepare: (page) => new AddCommentDialog(page).comment.focus(),
+  },
+  {
+    key: 'addCommentInvalid',
+    name: 'add-comment-invalid',
+    region: (page) => new AddCommentDialog(page).panel,
+    prepare: (page) => new AddCommentDialog(page).comment.focus(),
   },
 ]);

@@ -1,3 +1,4 @@
+import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { openTheScanner, scanSomethingElse, withACamera } from '../../fixtures/my-popkins';
 import { ScanToJoinDialog } from '../../pages/scan-to-join.dialog';
 import { addTheThreeWithOneFailing, theMockPhotos } from '../../fixtures/photos';
@@ -61,5 +62,10 @@ parity('alert', [
     region: (page) => new ScanToJoinDialog(page).alert,
     before: withACamera('denied'),
     app: openTheScanner,
+  },
+  {
+    key: 'shareExperienceFailed',
+    name: 'share-experience-failed',
+    region: (page) => new ShareExperienceDialog(page).failed,
   },
 ]);
