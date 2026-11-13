@@ -206,7 +206,7 @@ await call('GET', `/api/popkins/${created.id}/recap`);
 const zip = await call('POST', `/api/popkins/${created.id}/recap/album-exports`);
 await call('GET', `/api/popkins/${created.id}/recap/album-exports/${zip.id}`);
 
-// Leave a Popkin: Dev leaves Lakeside Weekend (journey 18). It comes after everything else, so
+// Leave a Popkin: Dev leaves Lakeside Weekend (journey 18). It comes after the recap, so
 // every answer above counts him; only his leave is recorded.
 person = dev;
 dev.record = true;
@@ -214,6 +214,7 @@ await call('DELETE', `/api/popkins/${created.id}/members/me`);
 
 // The account: Mara gives her full name, reads her account, then saves a photo (journey 17).
 // It comes after the wrap-up, so every answer above keeps the name she signed up with.
+person = mara;
 await call('PATCH', '/api/account', { name: 'Mara Okafor' });
 await call('GET', '/api/account');
 const portrait = new FormData();
