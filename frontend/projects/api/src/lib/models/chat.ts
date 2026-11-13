@@ -71,6 +71,25 @@ export interface MessageView {
   text: string;
   /** ISO date-time. */
   sentAt: string;
+  /** Who chose each emoji, grouped by emoji in the order they were first chosen (L2-024). */
+  reactions: ReactionSummary[];
+  /** The message this one replies to; null when it replies to none (L2-025). */
+  quote: QuoteView | null;
+}
+
+/** One emoji on a message and the members who chose it. */
+export interface ReactionSummary {
+  emoji: string;
+  membershipIds: string[];
+}
+
+/** What a reply shows of the message it answers; a deleted one keeps only its id. */
+export interface QuoteView {
+  messageId: string;
+  authorFirstName: string | null;
+  /** The first line of its text, at most 120 characters. */
+  snippet: string | null;
+  deleted: boolean;
 }
 
 /** A page of messages, oldest first. */

@@ -1,6 +1,7 @@
-import { MessageView } from '../../models/chat';
+import { MessageView, QuoteView } from '../../models/chat';
 import { AvatarView } from '../../models/invite';
 import type { OutboxEntry } from './message-outbox';
+import { ReactionChip, reactionChips } from './reactions';
 import { dayLabel, messageTime, noteParts } from './thread-text';
 
 /** A row of a thread as its screen draws it: a day's divider, a note, or a message. */
@@ -23,6 +24,27 @@ export interface MessageRow {
   text: string;
   time: string;
   state: 'sent' | 'sending' | 'waiting' | 'failed';
+  reactions: ReactionChip[];
+  /** What it quotes of the message it replies to (L2-025). */
+  quote: ReplyQuote | null;
+}
+
+/** The quote in a reply: a deleted message keeps its id only and reads "Message deleted". */
+export interface ReplyQuote {
+  messageId: string;
+  firstName: string;
+  snippet: string;
+  deleted: boolean;
+}
+
+function replyQuote(quote: QuoteView | null): ReplyQuote | null {
+  if (!quote) return null;
+  return {
+    messageId: quote.messageId,
+    firstName: quote.authorFirstName ?? '',
+    snippet: quote.snippet ?? '',
+    deleted: quote.deleted,
+  };
 }
 
 const SHOWN_AS = { Sending: 'sending', Waiting: 'waiting', Failed: 'failed' } as const;
@@ -86,6 +108,8 @@ export function threadRows(
       text: message.text,
       time: messageTime(sentAt),
       state: 'sent',
+      reactions: reactionChips(message.reactions, viewerMembershipId),
+      quote: replyQuote(message.quote),
     });
     lastAuthor = author;
   }
@@ -107,6 +131,8 @@ export function threadRows(
       text: entry.text,
       time: messageTime(createdAt),
       state: SHOWN_AS[entry.state],
+      reactions: [],
+      quote: null,
     });
     lastAuthor = viewerMembershipId;
   }

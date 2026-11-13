@@ -7,6 +7,7 @@ import {
   MessageView,
   PresenceView,
   ThreadView,
+  ReactionSummary,
 } from '../../models/chat';
 import { ChatPreviewView } from '../../models/home';
 
@@ -43,7 +44,28 @@ export interface ChatApi {
     threadId: string,
     clientMessageId: string,
     text: string,
+    replyToMessageId?: string,
   ): Observable<MessageView>;
+  /**
+   * Adds the member's reaction with this emoji, if it is not there yet, and answers the
+   * message's reactions (L2-024). 400 `reaction_invalid`; 404 `message_not_found`; 409
+   * `popkin_wrapped_up`.
+   */
+  react(
+    popkinId: string,
+    threadId: string,
+    messageId: string,
+    emoji: string,
+  ): Observable<ReactionSummary[]>;
+  /** Removes the member's reaction with this emoji, if it is there, and answers the rest. */
+  unreact(
+    popkinId: string,
+    threadId: string,
+    messageId: string,
+    emoji: string,
+  ): Observable<ReactionSummary[]>;
+  /** Deletes the member's own message for everyone. 403 `not_message_author`. */
+  deleteMessage(popkinId: string, threadId: string, messageId: string): Observable<void>;
   /** Removes the member's own message of that name, if the server holds one. */
   discard(popkinId: string, threadId: string, clientMessageId: string): Observable<void>;
   /** Moves the member's read point forward to this message; it never moves back. */
@@ -91,11 +113,37 @@ export class HttpChatApi implements ChatApi {
     threadId: string,
     clientMessageId: string,
     text: string,
+    replyToMessageId?: string,
   ): Observable<MessageView> {
     return this.http.post<MessageView>(`${thread(popkinId, threadId)}/messages`, {
       clientMessageId,
       text,
+      ...(replyToMessageId ? { replyToMessageId } : {}),
     });
+  }
+
+  react(
+    popkinId: string,
+    threadId: string,
+    messageId: string,
+    emoji: string,
+  ): Observable<ReactionSummary[]> {
+    return this.http.put<ReactionSummary[]>(reaction(popkinId, threadId, messageId, emoji), null);
+  }
+
+  unreact(
+    popkinId: string,
+    threadId: string,
+    messageId: string,
+    emoji: string,
+  ): Observable<ReactionSummary[]> {
+    return this.http.delete<ReactionSummary[]>(reaction(popkinId, threadId, messageId, emoji));
+  }
+
+  deleteMessage(popkinId: string, threadId: string, messageId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${thread(popkinId, threadId)}/messages/${encodeURIComponent(messageId)}`,
+    );
   }
 
   discard(popkinId: string, threadId: string, clientMessageId: string): Observable<void> {
@@ -119,4 +167,8 @@ function popkin(popkinId: string): string {
 
 function thread(popkinId: string, threadId: string): string {
   return `${popkin(popkinId)}/threads/${encodeURIComponent(threadId)}`;
+}
+
+function reaction(popkinId: string, threadId: string, messageId: string, emoji: string): string {
+  return `${thread(popkinId, threadId)}/messages/${encodeURIComponent(messageId)}/reactions/${encodeURIComponent(emoji)}`;
 }

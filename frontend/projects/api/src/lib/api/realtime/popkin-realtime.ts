@@ -1,7 +1,7 @@
 import { InjectionToken, Signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CallParticipantView, CallSignal } from '../../models/calls';
-import { MemberJoinedView, MessageView } from '../../models/chat';
+import { MemberJoinedView, MessageView, ReactionSummary } from '../../models/chat';
 
 export type RealtimeState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
 
@@ -14,6 +14,12 @@ export interface PopkinRealtime {
   readonly state: Signal<RealtimeState>;
   readonly messageAdded$: Observable<MessageView>;
   readonly messageDeleted$: Observable<{ threadId: string; messageId: string }>;
+  /** A message's reactions changed: all of them, as they now stand (L2-024). */
+  readonly reactionsChanged$: Observable<{
+    threadId: string;
+    messageId: string;
+    reactions: ReactionSummary[];
+  }>;
   /** The member read this thread, here or on another device. */
   readonly threadRead$: Observable<string>;
   readonly presenceChanged$: Observable<{ popkinId: string; version: number; hereNow: number }>;

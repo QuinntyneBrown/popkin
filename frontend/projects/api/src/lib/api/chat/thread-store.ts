@@ -13,7 +13,13 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { MessagePageView, MessageView, PresenceView, ThreadView } from '../../models/chat';
+import {
+  MessagePageView,
+  MessageView,
+  PresenceView,
+  ReactionSummary,
+  ThreadView,
+} from '../../models/chat';
 import { toApiProblem } from '../problem';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { CHAT_API } from './chat-api';
@@ -21,6 +27,12 @@ import { MessageOutbox } from './message-outbox';
 import { ThreadRow, mergeMessages, threadRows } from './thread-rows';
 import { announcement } from './thread-text';
 import { UnreadTracker } from './unread-tracker';
+
+/** Something the member did that did not save; `retry` does it again (L2-056 AC7). */
+export interface ThreadFailure {
+  kind: 'reaction' | 'delete';
+  retry: () => void;
+}
 
 /** `not-found` is a Popkin the person is not a member of, or one that does not exist. */
 export type ThreadState = 'loading' | 'ready' | 'empty' | 'error' | 'not-found';
@@ -49,6 +61,7 @@ export class ThreadStore {
   private readonly here = signal<PresenceView['members']>([]);
   private readonly today = signal(new Date());
   private readonly addedTo = new Subject<'mine' | 'theirs'>();
+  private readonly failed = new Subject<ThreadFailure>();
 
   /** The other member of the direct message that is open; none for Everyone. */
   private memberId?: string;
@@ -66,6 +79,8 @@ export class ThreadStore {
   readonly hereNow = this.here.asReadonly();
   /** A message was added at the end: the member's own, or someone else's. */
   readonly added$: Observable<'mine' | 'theirs'> = this.addedTo.asObservable();
+  /** A reaction or a deletion that did not save, after what it changed is put back. */
+  readonly failures$: Observable<ThreadFailure> = this.failed.asObservable();
 
   readonly rows = computed<ThreadRow[]>(() => {
     const thread = this.header();
@@ -92,6 +107,9 @@ export class ThreadStore {
     mine(this.realtime.messageDeleted$).subscribe(({ threadId, messageId }) => {
       if (threadId !== this.header()?.id) return;
       this.messages.update((shown) => shown.filter((message) => message.id !== messageId));
+    });
+    mine(this.realtime.reactionsChanged$).subscribe(({ threadId, messageId, reactions }) => {
+      if (threadId === this.header()?.id) this.setReactions(messageId, reactions);
     });
     mine(this.realtime.presenceChanged$).subscribe((presence) => {
       const thread = this.header();
@@ -214,12 +232,46 @@ export class ThreadStore {
     this.addedTo.next('mine');
   }
 
+  /**
+   * Adds the member's reaction with this emoji, or takes it away if they already chose it
+   * (L2-024 AC2 to AC4). The chips change at once; what the server answers replaces them, and a
+   * failure puts back what was there.
+   */
+  toggleReaction(messageId: string, emoji: string): void {
+    const thread = this.header();
+    const message = this.messages().find((shown) => shown.id === messageId);
+    if (!thread || !message || thread.readOnly) return;
+    const me = thread.viewer.membershipId;
+    const before = message.reactions;
+    const adding = !before.some((r) => r.emoji === emoji && r.membershipIds.includes(me));
+    this.setReactions(messageId, toggled(before, emoji, me, adding));
+    (adding ? this.chat.react : this.chat.unreact)
+      .call(this.chat, thread.popkinId, thread.id, messageId, emoji)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (reactions) => this.setReactions(messageId, reactions),
+        error: () => {
+          this.setReactions(messageId, before);
+          this.failed.next({
+            kind: 'reaction',
+            retry: () => this.toggleReaction(messageId, emoji),
+          });
+        },
+      });
+  }
+
   retry(clientMessageId: string): void {
     this.outbox.retry(clientMessageId);
   }
 
   discard(clientMessageId: string): void {
     this.outbox.discard(clientMessageId);
+  }
+
+  private setReactions(messageId: string, reactions: ReactionSummary[]): void {
+    this.messages.update((shown) =>
+      shown.map((message) => (message.id === messageId ? { ...message, reactions } : message)),
+    );
   }
 
   private onAdded(message: MessageView): void {
@@ -324,4 +376,26 @@ export class ThreadStore {
       .markRead(thread.popkinId, thread.id, latest.id)
       .subscribe({ error: () => (this.reported = null) });
   }
+}
+
+/** The reactions with the member added to, or taken from, one emoji; a chip at zero goes. */
+function toggled(
+  reactions: readonly ReactionSummary[],
+  emoji: string,
+  me: string,
+  adding: boolean,
+): ReactionSummary[] {
+  const found = reactions.some((r) => r.emoji === emoji);
+  const changed = reactions.map((r) =>
+    r.emoji !== emoji
+      ? r
+      : {
+          emoji,
+          membershipIds: adding
+            ? [...r.membershipIds, me]
+            : r.membershipIds.filter((id) => id !== me),
+        },
+  );
+  if (adding && !found) changed.push({ emoji, membershipIds: [me] });
+  return changed.filter((r) => r.membershipIds.length > 0);
 }
