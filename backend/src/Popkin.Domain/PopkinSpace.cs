@@ -40,6 +40,9 @@ public sealed class PopkinSpace
     /// <summary>When the photos were removed; null while the album is there.</summary>
     public DateTimeOffset? PhotosRemovedAt { get; private set; }
 
+    /// <summary>How many photos the album held when it was removed, so the recap still counts them (L2-046 AC2).</summary>
+    public int? PhotosRemovedCount { get; private set; }
+
     public string InviteCode { get; private set; } = "";
 
     public DateTimeOffset CreatedAt { get; private set; }
@@ -104,5 +107,17 @@ public sealed class PopkinSpace
         WrappedUpAt = at;
         KeepPhotos = keepPhotos;
         Version++;
+    }
+
+    /// <summary>Records that the photos of a Popkin wrapped up without its album were removed (L2-045 AC4).</summary>
+    public void RemovePhotos(DateTimeOffset at, int photoCount)
+    {
+        if (PhotosRemoveAt is null)
+        {
+            throw new InvalidOperationException("The photos of this Popkin are kept.");
+        }
+
+        PhotosRemovedAt = at;
+        PhotosRemovedCount = photoCount;
     }
 }

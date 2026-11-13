@@ -59,6 +59,27 @@ public sealed class PopkinSpaceWrapUpTests
     }
 
     [Fact]
+    public void Once_its_photos_were_removed_the_Popkin_says_when_and_how_many_there_were()
+    {
+        var popkin = Lakeside();
+        popkin.WrapUp(Now, keepPhotos: false);
+
+        popkin.RemovePhotos(Now.AddDays(30), photoCount: 48);
+
+        Assert.Equal(Now.AddDays(30), popkin.PhotosRemovedAt);
+        Assert.Equal(48, popkin.PhotosRemovedCount);
+    }
+
+    [Fact]
+    public void The_photos_of_a_kept_album_are_never_removed()
+    {
+        var popkin = Lakeside();
+        popkin.WrapUp(Now, keepPhotos: true);
+
+        Assert.Throws<InvalidOperationException>(() => popkin.RemovePhotos(Now.AddDays(30), photoCount: 48));
+    }
+
+    [Fact]
     public void A_Popkin_that_has_wrapped_up_does_not_wrap_up_again()
     {
         var popkin = Lakeside();

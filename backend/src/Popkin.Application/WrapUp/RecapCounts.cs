@@ -21,7 +21,10 @@ public static class RecapCounts
                 && db.ChatThreads.Any(t => t.Id == m.ThreadId && t.PopkinId == popkinId && t.Kind == ChatThreadKind.Everyone),
             cancellationToken);
 
-    /// <summary>The photos of the album.</summary>
-    public static Task<int> PhotosAsync(IAppDbContext db, PopkinSpace popkin, CancellationToken cancellationToken) =>
-        db.Photos.AsNoTracking().CountAsync(p => p.PopkinId == popkin.Id, cancellationToken);
+    /// <summary>
+    /// The photos of the album; once the album was removed (L2-045 AC4), the number it held
+    /// then, because they were shared all the same.
+    /// </summary>
+    public static async Task<int> PhotosAsync(IAppDbContext db, PopkinSpace popkin, CancellationToken cancellationToken) =>
+        popkin.PhotosRemovedCount ?? await db.Photos.AsNoTracking().CountAsync(p => p.PopkinId == popkin.Id, cancellationToken);
 }

@@ -31,6 +31,17 @@ public static class WrapUpExtensions
     public static Task<JsonElement> ReadRecapAsync(this HttpClient member, Guid popkinId) =>
         member.GetFromJsonAsync<JsonElement>($"/api/popkins/{popkinId}/recap");
 
+    /// <summary>
+    /// Signs the person in again with a code, as they must after 30 days: a test of what happens
+    /// 30 days after a wrap-up outlives the session it began with.
+    /// </summary>
+    public static async Task SignInAgainAsync(this HttpClient client, ApiFactory api, string phone)
+    {
+        var verificationId = await client.RequestCodeAsync(phone, purpose: "SignIn");
+        var response = await client.PostAsJsonAsync($"/api/auth/codes/{verificationId}/confirm", new { code = api.Codes.Sent.Last().Code });
+        response.EnsureSuccessStatusCode();
+    }
+
     /// <summary>The Popkin as the store holds it, read through a fresh context.</summary>
     public static PopkinSpace StoredPopkin(this ApiFactory api, Guid popkinId)
     {
