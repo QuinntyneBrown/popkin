@@ -54,3 +54,4 @@ export * from './lib/day-divider/day-divider';
 export * from './lib/system-note/system-note';
 export * from './lib/message/message';
 export * from './lib/thread/thread';
+export * from './lib/composer/composer';
