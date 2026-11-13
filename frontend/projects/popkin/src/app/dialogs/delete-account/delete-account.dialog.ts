@@ -1,3 +1,4 @@
+import { ViewportScroller } from '@angular/common';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -37,6 +38,7 @@ export class DeleteAccountDialog {
   private readonly snapshot = inject(POPKINS_SNAPSHOT);
   private readonly toaster = inject(Toaster);
   private readonly router = inject(Router);
+  private readonly scroller = inject(ViewportScroller);
 
   protected readonly hosted = hostedLine(this.impact.hostedActivePopkins.map((p) => p.name));
   protected readonly confirmation = new FormControl('', { nonNullable: true });
@@ -58,15 +60,15 @@ export class DeleteAccountDialog {
         // Nothing of the person stays on the device (L2-054).
         this.snapshot.clear();
         this.ref.close();
-        void this.router
-          .navigateByUrl('/')
-          .then(() =>
-            this.toaster.show(
-              'success',
-              'Your account is deleted',
-              'Your personal data is erased within 30 days.',
-            ),
+        void this.router.navigateByUrl('/').then(() => {
+          // The landing page opens at its top, not where the account was scrolled to.
+          this.scroller.scrollToPosition([0, 0]);
+          this.toaster.show(
+            'success',
+            'Your account is deleted',
+            'Your personal data is erased within 30 days.',
           );
+        });
       },
       error: () => {
         this.ref.disableClose = false;

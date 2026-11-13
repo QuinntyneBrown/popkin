@@ -115,6 +115,21 @@ test.describe('deleting the account', () => {
     expect(await page.evaluate(() => localStorage.getItem('popkin.my-popkins'))).toBeNull();
   });
 
+  // L2-049 AC4: the landing page opens at its top, where its heading is
+  test('on a phone the landing page opens at its top', async ({ page, pk }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await pk.open('account');
+    const account = new AccountPage(page);
+    await account.deleteAccount.click();
+    const dialog = new DeleteAccountDialog(page);
+
+    await dialog.confirm.fill('delete');
+    await dialog.delete.click();
+
+    await expect(new LandingPage(page).root).toBeVisible();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
   test('a deletion that fails keeps the dialog and the word, and says so', async ({ page, pk }) => {
     await answer(page, 'DELETE /api/account', problem(500, 'unexpected'));
     await pk.open('account');

@@ -55,6 +55,18 @@ test.describe('signing out', () => {
     expect(await page.evaluate(() => localStorage.getItem('popkin.my-popkins'))).toBeNull();
   });
 
+  // L2-048 AC5: the welcome screen opens at its top
+  test('on a phone the welcome screen opens at its top', async ({ page, pk }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await pk.open('account');
+    await new AccountPage(page).signOut.click();
+
+    await new SignOutDialog(page).signOut.click();
+
+    await expect(new WelcomePage(page).root).toBeVisible();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  });
+
   // L2-048 AC5: the session had already ended
   test('a session that had already ended still opens the welcome screen', async ({ page, pk }) => {
     await answer(page, 'POST /api/auth/sign-out', { status: 401 });

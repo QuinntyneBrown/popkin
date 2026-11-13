@@ -43,9 +43,13 @@ export async function anAccountWithoutAPhoto(page: Page): Promise<void> {
   await answer(page, 'GET /api/account', { status: 200, body: account });
 }
 
-/** Saving the name answers with `name`, as the API does. */
+/** Saving the name answers with `name` and Mara's photograph, as the API does. */
 export async function savedAs(page: Page, name: string): Promise<void> {
-  await answer(page, 'PATCH /api/account', { status: 200, body: { ...account, name } });
+  await answer(page, 'PATCH /api/account', {
+    status: 200,
+    body: { ...account, name, photoUrl: '/photos/mara.jpg' },
+  });
+  await page.route('**/photos/mara.jpg', (route) => route.fulfill({ path: call1 }));
 }
 
 /** Saving a photo answers with one the suite can show. */

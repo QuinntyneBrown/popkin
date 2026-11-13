@@ -1,3 +1,4 @@
+import { ViewportScroller } from '@angular/common';
 import { DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
@@ -22,6 +23,7 @@ export class SignOutDialog {
   private readonly sessions = inject(SessionStore);
   private readonly snapshot = inject(POPKINS_SNAPSHOT);
   private readonly router = inject(Router);
+  private readonly scroller = inject(ViewportScroller);
 
   protected readonly busy = signal(false);
   protected readonly failed = signal(false);
@@ -57,6 +59,7 @@ export class SignOutDialog {
     // Nothing of the person stays on a device they are signed out of (L2-054).
     this.snapshot.clear();
     this.ref.close();
-    void this.router.navigateByUrl('/welcome');
+    // The welcome screen opens at its top, not where the account was scrolled to.
+    void this.router.navigateByUrl('/welcome').then(() => this.scroller.scrollToPosition([0, 0]));
   }
 }
