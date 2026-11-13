@@ -27,12 +27,20 @@ public sealed class InvitesController(ISender sender) : ControllerBase
     public async Task<ActionResult<InviteMembersDto>> GetMembers(string code, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetInviteMembersQuery(code), cancellationToken));
 
-    /// <summary>Joins as a member under a display name (L2-013). 200 when the caller already belongs.</summary>
+    /// <summary>
+    /// Joins as a member under a display name and, when given, a photo (L2-013). 200 when the
+    /// caller already belongs. The body may be a little larger than the largest photo, so a photo
+    /// over 10 MB is refused with its own message and not by the server's size limit.
+    /// </summary>
     [HttpPost("{code}/join")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<JoinedDto>> Join(string code, [FromForm] string? displayName, CancellationToken cancellationToken)
+    [RequestSizeLimit(2 * JoinPopkinCommandHandler.MaxPhotoBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 2 * JoinPopkinCommandHandler.MaxPhotoBytes)]
+    public async Task<ActionResult<JoinedDto>> Join(string code, [FromForm] string? displayName, IFormFile? photo, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new JoinPopkinCommand(code, displayName), cancellationToken);
+        await using var content = photo?.OpenReadStream();
+        var upload = photo is null ? null : new PhotoUpload(content!, photo.Length);
+        var result = await sender.Send(new JoinPopkinCommand(code, displayName, upload), cancellationToken);
         return result.Created ? Created($"/api/popkins/{result.Joined.PopkinId}", result.Joined) : Ok(result.Joined);
     }
 }

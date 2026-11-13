@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Photos;
 using Popkin.Application.Problems;
 using Popkin.Domain;
 
@@ -23,13 +24,20 @@ public sealed record JoinedDto(
 /// <summary>`Created` is false when the caller already belonged, so a retried join does not fail.</summary>
 public sealed record JoinResult(JoinedDto Joined, bool Created);
 
-/// <summary>Joins the Popkin behind an invite code under a display name (L2-013).</summary>
-public sealed record JoinPopkinCommand(string Code, string? DisplayName) : IRequest<JoinResult>;
+/// <summary>An uploaded file: its bytes and how many there are, before anything is read.</summary>
+public sealed record PhotoUpload(Stream Content, long Length);
 
-public sealed class JoinPopkinCommandHandler(IAppDbContext db, ICurrentPerson current, TimeProvider clock)
+/// <summary>Joins the Popkin behind an invite code under a display name and, when given, a photo (L2-013).</summary>
+public sealed record JoinPopkinCommand(string Code, string? DisplayName, PhotoUpload? Photo = null) : IRequest<JoinResult>;
+
+public sealed class JoinPopkinCommandHandler(
+    IAppDbContext db, ICurrentPerson current, TimeProvider clock, IPhotoProcessor processor, IPhotoStore photos)
     : IRequestHandler<JoinPopkinCommand, JoinResult>
 {
     public const int NamedMembers = 2;
+
+    /// <summary>A photo is at most 10 MB (L2-013 AC2).</summary>
+    public const long MaxPhotoBytes = 10 * 1024 * 1024;
 
     public async Task<JoinResult> Handle(JoinPopkinCommand request, CancellationToken cancellationToken)
     {
@@ -43,6 +51,8 @@ public sealed class JoinPopkinCommandHandler(IAppDbContext db, ICurrentPerson cu
         {
             throw ProblemException.Invalid("display_name_too_long", "A name is at most 40 characters.", "displayName");
         }
+
+        var avatar = request.Photo is null ? null : await ReadAvatarAsync(request.Photo, cancellationToken);
 
         var popkin = await db.Popkins.FirstOrDefaultAsync(p => p.InviteCode == request.Code, cancellationToken)
             ?? throw InviteProblems.NotFound();
@@ -59,8 +69,42 @@ public sealed class JoinPopkinCommandHandler(IAppDbContext db, ICurrentPerson cu
 
         var membership = popkin.Join(current.PersonId, displayName, members[0].Id, clock.GetUtcNow());
         db.Memberships.Add(membership);
-        await db.SaveChangesAsync(cancellationToken);
+        if (avatar is null)
+        {
+            await db.SaveChangesAsync(cancellationToken);
+            return new JoinResult(Joined(popkin, membership, members), Created: true);
+        }
+
+        // The photo is not added to the album: it is kept under its own random key.
+        var key = $"avatars/{Guid.NewGuid():N}{avatar.Extension}";
+        await photos.SaveAsync(key, avatar.Content, avatar.ContentType, cancellationToken);
+        membership.SetPhoto(key);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch
+        {
+            // Nobody joined, so the file belongs to no one.
+            await photos.DeleteAsync(key, CancellationToken.None);
+            throw;
+        }
+
         return new JoinResult(Joined(popkin, membership, members), Created: true);
+    }
+
+    private async Task<ProcessedPhoto> ReadAvatarAsync(PhotoUpload upload, CancellationToken cancellationToken)
+    {
+        if (upload.Length > MaxPhotoBytes)
+        {
+            throw ProblemException.Invalid("photo_too_large", "A photo is at most 10 MB.", "photo");
+        }
+
+        using var buffer = new MemoryStream();
+        await upload.Content.CopyToAsync(buffer, cancellationToken);
+        var bytes = buffer.ToArray();
+        var avatar = ImageSniffer.Sniff(bytes) is null ? null : processor.MakeAvatar(bytes);
+        return avatar ?? throw ProblemException.Invalid("photo_type_not_allowed", "A photo must be a JPEG, PNG, WebP or HEIC image.", "photo");
     }
 
     private static JoinedDto Joined(PopkinSpace popkin, Membership joiner, List<Membership> members)

@@ -22,6 +22,9 @@ public sealed class Membership
 
     public DateTimeOffset? LeftAt { get; private set; }
 
+    /// <summary>The photo store key of the member's avatar; null shows their initials (L2-013 AC6).</summary>
+    public string? PhotoKey { get; private set; }
+
     /// <summary>The member credited with the invite; null for the Host, who started the Popkin.</summary>
     public Guid? InvitedByMembershipId { get; private set; }
 
@@ -36,4 +39,6 @@ public sealed class Membership
         JoinedAt = now,
         InvitedByMembershipId = invitedByMembershipId,
     };
+
+    public void SetPhoto(string photoKey) => PhotoKey = photoKey;
 }

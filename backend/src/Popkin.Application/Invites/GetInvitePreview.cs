@@ -36,7 +36,7 @@ public sealed record InvitePreviewDto(
 /// <summary>The preview behind an invite code, for anyone who holds it (L2-012, L2-016).</summary>
 public sealed record GetInvitePreviewQuery(string Code) : IRequest<InvitePreviewDto>;
 
-public sealed class GetInvitePreviewQueryHandler(IAppDbContext db, ICurrentPerson current)
+public sealed class GetInvitePreviewQueryHandler(IAppDbContext db, ICurrentPerson current, IPhotoStore photos)
     : IRequestHandler<GetInvitePreviewQuery, InvitePreviewDto>
 {
     public const int MaxAvatars = 5;
@@ -58,8 +58,8 @@ public sealed class GetInvitePreviewQueryHandler(IAppDbContext db, ICurrentPerso
             members.Count,
             popkin.EndsAt,
             popkin.WrappedUpAt,
-            members.Take(MaxAvatars).Select(AvatarDto.Of).ToList(),
-            new InviterDto(PersonName.FirstName(host.DisplayName), AvatarDto.Of(host)),
+            members.Take(MaxAvatars).Select(m => AvatarDto.Of(m, photos)).ToList(),
+            new InviterDto(PersonName.FirstName(host.DisplayName), AvatarDto.Of(host, photos)),
             new InviteViewerDto(isMember, isMember ? popkin.Id : null));
     }
 }

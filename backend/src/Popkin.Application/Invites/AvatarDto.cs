@@ -1,3 +1,4 @@
+using Popkin.Application.Abstractions;
 using Popkin.Domain;
 
 namespace Popkin.Application.Invites;
@@ -8,6 +9,9 @@ namespace Popkin.Application.Invites;
 /// </summary>
 public sealed record AvatarDto(string Initials, PopkinColour Accent, string? PhotoUrl)
 {
-    public static AvatarDto Of(Membership membership) =>
-        new(PersonName.Initials(membership.DisplayName), AvatarAccent.For(membership.PersonId), null);
+    public static AvatarDto Of(Membership membership, IPhotoStore photos) =>
+        new(
+            PersonName.Initials(membership.DisplayName),
+            AvatarAccent.For(membership.PersonId),
+            membership.PhotoKey is { } key ? photos.GetReadUrl(key) : null);
 }

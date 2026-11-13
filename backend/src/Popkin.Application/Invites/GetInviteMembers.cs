@@ -15,7 +15,7 @@ public sealed record InviteMembersDto(IReadOnlyList<InviteMemberDto> Members, in
 /// </summary>
 public sealed record GetInviteMembersQuery(string Code) : IRequest<InviteMembersDto>;
 
-public sealed class GetInviteMembersQueryHandler(IAppDbContext db) : IRequestHandler<GetInviteMembersQuery, InviteMembersDto>
+public sealed class GetInviteMembersQueryHandler(IAppDbContext db, IPhotoStore photos) : IRequestHandler<GetInviteMembersQuery, InviteMembersDto>
 {
     public const int MaxMembers = 8;
 
@@ -29,7 +29,7 @@ public sealed class GetInviteMembersQueryHandler(IAppDbContext db) : IRequestHan
         }
 
         var members = await InviteMembers.OfAsync(db, popkin, cancellationToken);
-        var shown = members.Take(MaxMembers).Select(m => new InviteMemberDto(m.DisplayName, AvatarDto.Of(m))).ToList();
+        var shown = members.Take(MaxMembers).Select(m => new InviteMemberDto(m.DisplayName, AvatarDto.Of(m, photos))).ToList();
         return new InviteMembersDto(shown, members.Count - shown.Count);
     }
 }
