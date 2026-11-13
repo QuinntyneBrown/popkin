@@ -132,10 +132,13 @@ export class ThreadStore {
 
   /**
    * Reads a thread of a Popkin and its latest messages, and starts listening: the Everyone
-   * thread, or the direct message with a member when one is named (L2-023).
+   * thread, or the direct message with a member when one is named (L2-023). A thread opened
+   * where it cannot be seen yet, such as a pane hidden on a phone, says `inView: false`: it is
+   * not read until its latest message is on screen.
    */
-  open(popkinId: string, memberId?: string): void {
+  open(popkinId: string, memberId?: string, options: { inView?: boolean } = {}): void {
     this.memberId = memberId;
+    if (options.inView !== undefined) this.latestInView = options.inView;
     this.phase.set('loading');
     (memberId ? this.chat.openDirect(popkinId, memberId) : this.chat.getEveryone(popkinId))
       .pipe(

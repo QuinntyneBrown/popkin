@@ -446,6 +446,18 @@ describe('ThreadStore', () => {
     });
   });
 
+  describe('opened out of view', () => {
+    it('is not read until its latest message comes into view', () => {
+      store.open('p', undefined, { inView: false });
+      expect(chat.read).toEqual([]);
+      expect(unread.forThread('t')).toBe(3);
+
+      store.setLatestInView(true);
+      expect(chat.read).toEqual(['id-0003']);
+      expect(unread.forThread('t')).toBe(0);
+    });
+  });
+
   describe('a direct message', () => {
     it('opens the thread with the member, and reads its messages', () => {
       chat.stored = [message(1, 'Walt', { threadId: 't-walt' })];
