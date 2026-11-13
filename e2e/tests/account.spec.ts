@@ -205,3 +205,36 @@ test.describe('saving changes', () => {
     await expect(account.save).toBeEnabled();
   });
 });
+
+test.describe('the theme', () => {
+  // L2-048 AC4, L2-059 AC1
+  test('a chosen theme is taken at once and remembered on the device', async ({ page, pk }) => {
+    await pk.open('account');
+    const account = new AccountPage(page);
+    expect(await account.drawnTheme()).toBeNull();
+
+    await account.themeOption('Dark').click();
+
+    await expect(account.themeOption('Dark')).toHaveAttribute('aria-checked', 'true');
+    await expect(account.themeOption('Match my device')).toHaveAttribute('aria-checked', 'false');
+    expect(await account.drawnTheme()).toBe('dark');
+    await page.reload();
+    await expect(account.themeOption('Dark')).toHaveAttribute('aria-checked', 'true');
+    expect(await account.drawnTheme()).toBe('dark');
+    await account.themeOption('Match my device').click();
+    expect(await account.drawnTheme()).toBeNull();
+  });
+
+  // L2-048 AC4: with the keyboard
+  test('the arrow keys move through the themes and choose them', async ({ page, pk }) => {
+    await pk.open('account');
+    const account = new AccountPage(page);
+
+    await account.themeOption('Match my device').focus();
+    await page.keyboard.press('ArrowRight');
+
+    await expect(account.themeOption('Light')).toBeFocused();
+    await expect(account.themeOption('Light')).toHaveAttribute('aria-checked', 'true');
+    expect(await account.drawnTheme()).toBe('light');
+  });
+});
