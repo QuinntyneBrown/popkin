@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   MemberJoinedView,
   MessagePageView,
@@ -770,6 +770,33 @@ describe('ThreadStore', () => {
     it('deletes only the member’s own messages', () => {
       store.deleteMessage('id-0002');
       expect(chat.deleted).toEqual([]);
+    });
+  });
+
+  describe('going to a quoted message (L2-025 AC3)', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      chat.stored = Array.from({ length: 120 }, (_, i) => message(i + 1, 'Walt'));
+      store.open('p');
+    });
+    afterEach(() => vi.useRealTimers());
+
+    it('marks a message already shown, briefly', async () => {
+      await expect(store.jumpTo('id-0100')).resolves.toBe(true);
+      expect(store.marked()).toBe('id-0100');
+      vi.advanceTimersByTime(2_000);
+      expect(store.marked()).toBeNull();
+    });
+
+    it('loads earlier pages until it has the message', async () => {
+      await expect(store.jumpTo('id-0005')).resolves.toBe(true);
+      expect(shown()).toContain('message 5');
+      expect(store.marked()).toBe('id-0005');
+    });
+
+    it('finds nothing for a message the thread no longer has', async () => {
+      await expect(store.jumpTo('id-gone')).resolves.toBe(false);
+      expect(store.marked()).toBeNull();
     });
   });
 });

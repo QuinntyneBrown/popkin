@@ -28,6 +28,9 @@ import { ReplyQuote, ThreadRow, mergeMessages, threadRows } from './thread-rows'
 import { announcement } from './thread-text';
 import { UnreadTracker } from './unread-tracker';
 
+/** How long a message a quote led to stays marked. */
+export const MARKED_MS = 2_000;
+
 /** Something the member did that did not save; `retry` does it again (L2-056 AC7). */
 export interface ThreadFailure {
   kind: 'reaction' | 'delete';
@@ -63,6 +66,8 @@ export class ThreadStore {
   private readonly addedTo = new Subject<'mine' | 'theirs'>();
   private readonly failed = new Subject<ThreadFailure>();
   private readonly reply = signal<ReplyQuote | null>(null);
+  private readonly mark = signal<string | null>(null);
+  private unmark?: ReturnType<typeof setTimeout>;
 
   /** The other member of the direct message that is open; none for Everyone. */
   private memberId?: string;
@@ -80,6 +85,8 @@ export class ThreadStore {
   readonly hereNow = this.here.asReadonly();
   /** A message was added at the end: the member's own, or someone else's. */
   readonly added$: Observable<'mine' | 'theirs'> = this.addedTo.asObservable();
+  /** The message a quote led to, marked for a moment (L2-025 AC3). */
+  readonly marked = this.mark.asReadonly();
   /** The message the member is replying to, for the bar above the field (L2-025 AC1). */
   readonly replyingTo = this.reply.asReadonly();
   /** A reaction or a deletion that did not save, after what it changed is put back. */
@@ -144,6 +151,7 @@ export class ThreadStore {
     const visibility = (): void => this.reportRead();
     this.document.addEventListener('visibilitychange', visibility);
     this.destroyRef.onDestroy(() => {
+      clearTimeout(this.unmark);
       this.document.removeEventListener('visibilitychange', visibility);
       const thread = this.header();
       if (thread) this.unread.setReading(thread.id, false);
@@ -216,6 +224,24 @@ export class ThreadStore {
       .catch(() => undefined)
       .finally(() => (this.loadingEarlier = undefined));
     return this.loadingEarlier;
+  }
+
+  /**
+   * Finds a quoted message, loading earlier pages until the thread shows it, and marks it for
+   * two seconds (L2-025 AC3). Answers whether it was found, so the page can scroll to it.
+   */
+  async jumpTo(messageId: string): Promise<boolean> {
+    const has = () => this.messages().some((message) => message.id === messageId);
+    while (!has() && this.earlier()) {
+      const count = this.messages().length;
+      await this.loadEarlier();
+      if (this.messages().length === count) break;
+    }
+    if (!has()) return false;
+    clearTimeout(this.unmark);
+    this.mark.set(messageId);
+    this.unmark = setTimeout(() => this.mark.set(null), MARKED_MS);
+    return true;
   }
 
   /** The page says whether the latest message is in view; reading it moves the read point. */
