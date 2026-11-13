@@ -97,7 +97,8 @@ Every endpoint answers `404` `popkin_not_found` to someone who is not a member (
     showed up.
   - `MessageCount` — the messages members wrote in the Everyone thread and did not delete
     (`RecapCounts.MessagesAsync`). The notes Popkin writes itself, such as "popped in", are not
-    counted. Direct messages are not built; whether they count is decided with them.
+    counted. Journey 11 built direct messages and left this count as it was: a direct message
+    is private to its two members, and nothing of it reaches the recap.
   - `PhotoCount` — the photos of the album (`RecapCounts.PhotosAsync`). Once the album was
     removed it stays as it was: the number the album held then, kept on the Popkin as
     `PhotosRemovedCount`, because the photos were shared all the same.

@@ -80,7 +80,11 @@ caller's memberships ([My Popkins](../../popkins/my-popkins/README.md)).
   which closes insecure direct object references (OWASP A01).
 - **Direct threads** — `ChatThread` of kind `Direct` is loaded with
   `MemberAId == access.Membership.Id || MemberBId == access.Membership.Id`; otherwise
-  `ThreadNotFoundException` (`404 thread_not_found`).
+  `ThreadNotFoundException` (`404 thread_not_found`). As built in journey 11,
+  `ChatThreads.RequireAsync` loads the thread of the caller's Popkin and applies
+  `ChatThread.CanRead`, throwing `ProblemException` 404 `thread_not_found`; every chat handler,
+  and the direct call's join and read, call it
+  ([Direct messages](../../chat/direct-messages/README.md)).
 - **Photo file addresses** — photo DTOs carry read URLs from `IPhotoStore.GetReadUrl(storageKey,
   lifetime)`, issued only after the guard. Storage keys are random 128-bit values, never derived
   from names or sequence numbers, and the URLs are signed and expire (L2-051 AC2). The lifetime
@@ -99,9 +103,10 @@ caller's memberships ([My Popkins](../../popkins/my-popkins/README.md)).
   connection opens, `ConnectToHubCommandHandler` adds it to `popkin:{popkinId}` for each Popkin
   the person is an active member of, and to no other; `JoinPopkinCommandHandler` adds the
   connections a new member already holds ([Live messages](../../chat/live-messages/README.md)).
-  A person who is not a member therefore receives nothing from a Popkin. The checks for a direct
-  thread and a call, and removing the connections of a membership that ends (leave, account
-  deletion), arrive with those features.
+  A person who is not a member therefore receives nothing from a Popkin. The events of a direct
+  thread and of its call go to its two members alone, never to the Popkin's group (journey 11);
+  removing the connections of a membership that ends (leave, account deletion) arrives with
+  those features.
 - **Invite preview** — `InvitesController` keeps `[AllowAnonymous]` on `GET /api/invites/{code}`
   and returns `InvitePreviewDto` with only the fields L2-012 shows: inviter's first name and
   avatar, emoji, colour, name, member count, up to five avatars and the end time (L2-051 AC5).
