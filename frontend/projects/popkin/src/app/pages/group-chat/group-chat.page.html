@@ -200,7 +200,7 @@
           pk-conversations
           [level]="3"
           [state]="list.store.state() === 'ready' ? 'ready' : 'loading'"
-          [everyone]="list.everyone()"
+          [everyone]="list.everyoneOpen()"
           [direct]="list.direct()"
           current="everyone"
           (newMessage)="newMessage()"

@@ -100,7 +100,7 @@ export const routes = {
   popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
   bannerInfo: { app: home, mock: 'notifications/banner/info.html' },
   videoCall: { app: call, mock: 'pages/video-call/default.html' },
-  videoCallTwo: { app: call, mock: 'pages/video-call/two.html' },
+  videoCallTwo: { app: `${directMessage}/call`, mock: 'pages/video-call/two.html' },
   videoCallMuted: { app: call, mock: 'pages/video-call/muted.html' },
   videoCallCameraOff: { app: call, mock: 'pages/video-call/camera-off.html' },
   videoCallLoading: { app: call, mock: 'pages/video-call/loading.html' },

@@ -30,6 +30,12 @@ export class ConversationList {
       : null;
   });
 
+  /** The Everyone card beside the Everyone thread: it is being read, so it counts nothing. */
+  readonly everyoneOpen = computed<EveryoneConversation | null>(() => {
+    const card = this.everyone();
+    return card ? { ...card, unread: 0 } : null;
+  });
+
   readonly direct = computed<DirectConversation[]>(() =>
     this.store.rows().map((row) => ({
       key: row.memberId,

@@ -622,6 +622,8 @@ export async function theChatUnread(page: Page): Promise<void> {
   );
   await theMockChat(page, (chat) => {
     chat.thread.unreadCount = 3;
+    // The three are Everyone's: Mara has read her direct messages.
+    chat.directs.forEach((direct) => (direct.unreadCount = 0));
     chat.messages = [
       ...theMockThread().slice(0, 4),
       message(people.mara, 'last call for the canoe sign-up 🛶', saturday(9, 24)),

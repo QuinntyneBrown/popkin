@@ -8,11 +8,15 @@ parity('search-field', [
     ...directMessageStates.newMessage,
     name: 'empty',
     region: (page) => new NewMessageDialog(page).searchField,
+    // The mock's field has `autofocus`, so its focus ring shows.
+    prepare: (page) => new NewMessageDialog(page).search.focus(),
   },
   {
     key: 'newMessageNoResults',
     ...directMessageStates.newMessageNoResults,
     name: 'typed',
     region: (page) => new NewMessageDialog(page).searchField,
+    // The mock's field has `autofocus`, so its focus ring shows.
+    prepare: (page) => new NewMessageDialog(page).search.focus(),
   },
 ]);
