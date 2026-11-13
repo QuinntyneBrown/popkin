@@ -1,0 +1,24 @@
+:host {
+  display: block;
+  padding: var(--space-6) var(--space-5) var(--space-1);
+  font: var(--font-weight-bold) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+:host(.group-label--first) {
+  padding-top: 0;
+}
+
+/* M: in the album, in line with the grid. */
+@media (min-width: 48rem) {
+  :host-context(.album) {
+    padding-inline: var(--space-8);
+  }
+}
+
+@media (min-width: 80rem) {
+  :host-context(.album) {
+    padding-inline: var(--space-10);
+  }
+}

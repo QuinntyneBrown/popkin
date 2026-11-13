@@ -68,3 +68,4 @@ export * from './lib/section/section';
 export * from './lib/home/home';
 export * from './lib/home-header/home-header';
 export * from './lib/fab/fab';
+export * from './lib/group-label/group-label';
