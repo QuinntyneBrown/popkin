@@ -1,0 +1,51 @@
+/* Kept at the bottom of the stage while the tiles scroll under it. */
+:host {
+  position: sticky;
+  bottom: 0;
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6) var(--space-8);
+  background: var(--color-bg-stage);
+}
+
+.call-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1-5);
+  font: var(--text-meta);
+  color: var(--color-fg-on-stage-muted);
+}
+
+.call-control__button {
+  display: grid;
+  place-items: center;
+  width: var(--space-16);
+  height: var(--space-16);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-stage-control);
+  color: var(--color-fg-on-stage);
+}
+
+/* Pressed: the microphone or the camera is off, and the fill is inverted. */
+.call-control__button[aria-pressed='true'] {
+  background: var(--color-constant-light);
+  color: var(--color-constant-dark);
+}
+
+.call-control--leave .call-control__button {
+  width: var(--space-20);
+  background: var(--color-accent);
+  color: var(--color-fg-on-accent);
+}
+
+@media (min-width: 40rem) {
+  :host-context(.screen--call) {
+    gap: var(--space-8);
+    padding-bottom: var(--space-6);
+  }
+}

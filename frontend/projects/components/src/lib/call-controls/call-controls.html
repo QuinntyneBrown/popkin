@@ -1,0 +1,35 @@
+<div class="call-control">
+  <button
+    class="call-control__button"
+    type="button"
+    [attr.aria-pressed]="muted()"
+    [attr.aria-label]="muted() ? unmuteLabel() : muteLabel()"
+    (click)="muteToggled.emit()"
+  >
+    <svg pk-icon [name]="muted() ? 'mic-off' : 'mic'"></svg>
+  </button>
+  <span aria-hidden="true">{{ muted() ? unmuteLabel() : muteLabel() }}</span>
+</div>
+<div class="call-control">
+  <button
+    class="call-control__button"
+    type="button"
+    [attr.aria-pressed]="cameraOff()"
+    [attr.aria-label]="cameraOff() ? cameraOffLabel() : cameraLabel()"
+    (click)="cameraToggled.emit()"
+  >
+    <svg pk-icon [name]="cameraOff() ? 'video-off' : 'video'"></svg>
+  </button>
+  <span aria-hidden="true">{{ cameraOff() ? cameraOffLabel() : cameraLabel() }}</span>
+</div>
+<div class="call-control call-control--leave">
+  <button
+    class="call-control__button"
+    type="button"
+    [attr.aria-label]="leaveName()"
+    (click)="left.emit()"
+  >
+    <svg pk-icon name="phone-off" size="lg"></svg>
+  </button>
+  <span aria-hidden="true">{{ leaveLabel() }}</span>
+</div>
