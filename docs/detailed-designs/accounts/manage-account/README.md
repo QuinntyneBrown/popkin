@@ -67,6 +67,44 @@ The specs list account settings and signing out as assumptions the designs do no
 - API integration tests on InMemory: `GET /api/account` returns only the caller's data; `PATCH` with an empty and a 41-character name answers 400 `name_invalid`; a file with a `.jpg` name but other bytes answers 400 `photo_type_not_allowed`; after `POST /api/auth/sign-out` the same cookie gets 401.
 - Playwright specs drive `e2e/pages/account.page.ts` and `e2e/pages/sign-out.dialog.ts`: each account state, theme switching (asserting `data-theme` on `html`), and sign out to the welcome screen.
 
+### Built in journey 17
+
+Each `<TO SUPPLY>` above is settled here, as the simplest choice that fits; the bullets above keep
+the question so its history reads.
+
+- **Form factors** — the screen keeps one centred column at every width, as
+  `docs/mocks/README.md` says of the account screen: `pk-screen layout="column"` (`screen--column`),
+  28 rem wide on XS and 32 rem from S (L2-058 AC2, AC3).
+- **Name and photo in each Popkin** — an account change overwrites the name and the photo of every
+  membership the person has not left, so a new name or photo shows wherever they appear
+  (L2-048 AC2). Nothing is sent over the hub: another member sees it when their screen next reads
+  the members or the messages (`MemberUpdated` is not built; the open point below).
+- **Profile photo record** — `Person.PhotoKey`, a photo store key, as `Membership.PhotoKey` is. It
+  replaces `Person.PhotoId`, which pointed nowhere. The file is made as the avatar of joining is
+  (`IPhotoProcessor.MakeAvatar`), under `avatars/`, and the photo replaced is deleted after the save.
+  `SessionDto.PhotoUrl` and `AccountDto.PhotoUrl` read it.
+- **`Destination`** — a phone number reads "(415) 555-0148", as it was typed; an email reads as
+  stored.
+- **Copy** — a save that fails: "We couldn’t save that." / "Your changes are still here. Give it
+  another go." A refused photo: the reasons of joining (`photoProblemText`). A sign out that fails:
+  "We couldn’t sign you out." / "You’re still signed in. Try again."
+- **Sign out on the device** — the dialog stops the real-time connection, clears `SessionStore`
+  and forgets the saved list of My Popkins (`POPKINS_SNAPSHOT.clear()`, known gap 25). A 401 from
+  `POST /api/auth/sign-out` is not sent to the sign-in screen by the interceptor: it means the
+  session had already ended, and the welcome screen opens as on 204.
+- **The mock's menu, aligned** — the account mocks drew Sign out and Delete my account as bare
+  icons under an inline rule, unlike every other `menu-list`. They now use the design system's
+  rows, an icon on a tile (`pk-menu-item`), and the new `menu-list--separated` modifier for the
+  rule and the space above (`docs/design-system/components/list-row.html`).
+- **The theme at start** — `provideAppInitializer` applies the stored choice before the first
+  screen draws.
+
+### Open points
+
+- Telling the members with a Popkin open that a member's name or photo changed (`MemberUpdated`).
+  L2-048 AC2 is met on the next read; no criterion asks for it live.
+- Ending the other open hub connections of a revoked session on the server (known gap 8).
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

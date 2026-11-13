@@ -62,6 +62,50 @@ revocation of the sessions design.
 - Worker tests run `PurgeDeletedAccountsJob` against InMemory with `TimeProvider` advanced and assert the erased fields and deleted direct messages.
 - Playwright specs drive `e2e/pages/delete-account.dialog.ts`: the disabled button until "delete" is typed, the hosted-Popkins alert, and the landing page with the message after success.
 
+### Built in journey 19
+
+Each `<TO SUPPLY>` above is settled here; the bullets above keep the question.
+
+- **Form factors** — the dialog is `pk-dialog`: a bottom sheet under 640 px and a centred panel
+  from 640 px (L2-058 AC4). The landing page the person lands on is already full width.
+- **"You host N active Popkins"** — "You host 1 active Popkin" for one; the names join as a list
+  does ("A", "A and B", "A, B and C"), then "will be wrapped up when your account goes."
+- **Copy** — the impact cannot be read: a danger toast "We couldn’t open that." / "Check your
+  connection and try again.", which stays until dismissed. The deletion fails: an alert in the
+  dialog, "We couldn’t delete your account." / "It’s still here. Try again." The deletion
+  succeeds: a success toast on the landing page, "Your account is deleted" / "Your personal data
+  is erased within 30 days."
+- **The photos of a Popkin wrapped up by a deletion** — kept, as when its time is up: the Host made
+  no choice, and nothing the group shared is lost (`keepPhotos: true`). The calls under way in it
+  end, as in every wrap-up; the wrap-up and the rest of the deletion are one save
+  (`PopkinWrapUpService.PrepareAsync`, then one `SaveChangesAsync`), and `CallEnded` and
+  `PopkinWrappedUp` are sent after it.
+- **The neutral label** — "Former member". Each membership the person has not left is
+  anonymised: `DisplayName` becomes "Former member", `PhotoKey` is cleared and `LeftAt` is set.
+  The avatar files of those memberships are deleted after the save; a file that cannot be deleted
+  then is logged by count only and stays unreferenced.
+- **What is erased, and what is anonymised** (L2-049 AC1, AC4, L2-054):
+
+  | Data | At deletion | By `PurgeDeletedAccountsJob` |
+  |---|---|---|
+  | `Person.Name`, `Phone`, `Email` | kept, behind `DeletedAt` | cleared; `ErasedAt` set |
+  | `Person.PhotoKey` and its file | kept, behind `DeletedAt` | the file deleted, the key cleared |
+  | Each `Membership` not left: name and photo | "Former member", photo cleared, file deleted | — |
+  | `Session` rows | revoked | deleted |
+  | `VerificationCode` rows for the phone number or email | — | deleted |
+  | Direct messages | — | none exist until journey 11, which adds their deletion to this job |
+  | Messages, photos, experiences, ratings and comments in Popkins | kept, shown as "Former member" | kept |
+  | Hosted active Popkins | wrapped up, album kept | — |
+
+- **Schedule** — `PurgeDeletedAccountsJob` ticks every 24 hours and erases every deleted account
+  not yet erased, so erasure comes within a day of deletion, inside the 30 days of L2-049 AC4. It
+  sends `PurgeDeletedAccountsCommand`; the handler holds the rules (ADR 0015).
+- **Direct messages of the other member** — not deleted: L2-049 AC1 names only the person's own.
+- **Backups** — whether backups keep erased data, and how long, stays open (known gap 59 of
+  `docs/detailed-designs/README.md`).
+- **Live updates** — no `MemberUpdated` event: the other members see "Former member" on their next
+  read (manage-account open point, known gap 60).
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |
