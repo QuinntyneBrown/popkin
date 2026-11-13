@@ -1,0 +1,79 @@
+/*
+ * The widths of the fixed parts around the thread. The navigation, the list pane and the detail
+ * pane read them; the screen leaves that much room at its sides.
+ */
+:host {
+  --pk-nav-width: 0rem;
+  --pk-list-width: 0rem;
+  --pk-detail-width: 0rem;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+  margin-inline: auto;
+  background: var(--color-bg-canvas);
+}
+
+/* The screen's main as a plain body: an empty state or an error. */
+.screen__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  min-width: 0;
+}
+
+/* The screen's main as a thread: a column of messages (pk-thread holds the rows). */
+.thread {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-3);
+  min-width: 0;
+}
+
+.thread--end {
+  justify-content: flex-end;
+}
+
+.screen__body:focus,
+.thread:focus {
+  outline: none;
+}
+
+/* M: room for the rail. */
+@media (min-width: 48rem) {
+  :host {
+    --pk-nav-width: var(--layout-rail-width);
+
+    padding-left: var(--pk-nav-width);
+  }
+
+  .thread {
+    padding-inline: var(--space-6);
+  }
+}
+
+/* L: the rail is a sidebar and the list of threads opens beside the thread. */
+@media (min-width: 64rem) {
+  :host {
+    --pk-nav-width: var(--layout-sidebar-width);
+    --pk-list-width: var(--layout-list-pane);
+
+    padding-left: calc(var(--pk-nav-width) + var(--pk-list-width));
+  }
+}
+
+/* XL: wider parts, and the detail pane at the end. */
+@media (min-width: 80rem) {
+  :host {
+    --pk-nav-width: var(--layout-sidebar-width-xl);
+    --pk-list-width: var(--layout-list-pane-xl);
+    --pk-detail-width: var(--layout-detail-pane);
+
+    padding-right: var(--pk-detail-width);
+  }
+}
