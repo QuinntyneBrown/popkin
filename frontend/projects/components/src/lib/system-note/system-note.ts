@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /**
  * System note (docs/design-system/components/message.html): a line the Popkin itself says in a
- * thread, such as who popped in. The `name` is in ink; `text` is the rest of the line and brings
- * its own leading space.
+ * thread, such as who popped in. The `name` is in ink; `text` is the rest of the line, set one
+ * space after the name.
  */
 @Component({
   selector: 'p[pk-system-note]',
