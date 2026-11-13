@@ -1,0 +1,14 @@
+<div
+  class="progress"
+  role="progressbar"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  [attr.aria-label]="label()"
+  [attr.aria-valuenow]="percent()"
+  [attr.aria-valuetext]="text() || null"
+>
+  <span class="progress__fill" [style.width.%]="percent()"></span>
+</div>
+@if (text()) {
+  <p class="progress__text">{{ text() }}</p>
+}
