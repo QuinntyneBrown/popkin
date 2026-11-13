@@ -16,7 +16,8 @@ export interface CallBanner {
 
 /**
  * Whether a Popkin has a group call under way, for the screens that show its banner: the
- * Popkin home and the Everyone thread. It follows the hub, so the banner appears when a call
+ * Popkin home and the Everyone thread; or whether a direct message has a call under way, for
+ * that direct message (L2-030 AC8). It follows the hub, so the banner appears when a call
  * starts and goes for everyone when the last person leaves (L2-029 AC6). One per screen.
  */
 @Injectable()
@@ -26,6 +27,8 @@ export class CallBannerStore {
   private readonly session = inject(CallSession);
 
   private popkinId = '';
+  /** The direct message whose call this is; null for the group call. */
+  private threadId: string | null = null;
   private reading?: Subscription;
   private listening?: Subscription;
   /** Calls that ended, so a change that arrives late does not bring one back. */
@@ -49,13 +52,15 @@ export class CallBannerStore {
     });
   }
 
-  open(popkinId: string): void {
+  /** Follows the Popkin's group call, or the call of a direct message when its thread is named. */
+  open(popkinId: string, threadId?: string): void {
     this.popkinId = popkinId;
+    this.threadId = threadId ?? null;
     this.listening?.unsubscribe();
     const listening = new Subscription();
     listening.add(
       this.realtime.callChanged$.subscribe((event) => {
-        if (event.popkinId !== this.popkinId || this.over.has(event.callId)) return;
+        if (!this.mine(event) || this.over.has(event.callId)) return;
         const held = this.call();
         if (held?.id === event.callId && event.version <= held.version) return;
         this.call.set({ id: event.callId, version: event.version, count: event.participantCount });
@@ -63,7 +68,7 @@ export class CallBannerStore {
     );
     listening.add(
       this.realtime.callEnded$.subscribe((event) => {
-        if (event.popkinId !== this.popkinId) return;
+        if (!this.mine(event)) return;
         this.over.add(event.callId);
         if (this.call()?.id === event.callId) this.call.set(null);
       }),
@@ -73,9 +78,13 @@ export class CallBannerStore {
     this.read();
   }
 
+  private mine(event: { popkinId: string; threadId: string | null }): boolean {
+    return event.popkinId === this.popkinId && (event.threadId ?? null) === this.threadId;
+  }
+
   private read(): void {
     this.reading?.unsubscribe();
-    this.reading = this.api.getCurrent(this.popkinId).subscribe({
+    this.reading = this.api.getCurrent(this.popkinId, this.threadId ?? undefined).subscribe({
       next: (call) =>
         this.call.set(
           call ? { id: call.id, version: call.version, count: call.participantCount } : null,

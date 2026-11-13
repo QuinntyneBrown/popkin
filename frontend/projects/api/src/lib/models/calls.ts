@@ -7,6 +7,8 @@ export interface CallView {
   /** Rises with every change of who is on the call; an event with an older one is dropped. */
   version: number;
   participantCount: number;
+  /** The direct message this call belongs to (L2-030 AC8); null for the group call. */
+  threadId: string | null;
 }
 
 /** Someone on a call, as the API gives them: never a phone number or an email. */

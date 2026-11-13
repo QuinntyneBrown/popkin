@@ -91,11 +91,25 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
     );
     connection.on(
       HUB_EVENTS.callChanged,
-      (popkinId: string, callId: string, version: number, participantCount: number) =>
-        this.callChange.next({ popkinId, callId, version, participantCount }),
+      (
+        popkinId: string,
+        callId: string,
+        version: number,
+        participantCount: number,
+        threadId?: string | null,
+      ) =>
+        this.callChange.next({
+          popkinId,
+          callId,
+          version,
+          participantCount,
+          threadId: threadId ?? null,
+        }),
     );
-    connection.on(HUB_EVENTS.callEnded, (popkinId: string, callId: string) =>
-      this.callEnd.next({ popkinId, callId }),
+    connection.on(
+      HUB_EVENTS.callEnded,
+      (popkinId: string, callId: string, threadId?: string | null) =>
+        this.callEnd.next({ popkinId, callId, threadId: threadId ?? null }),
     );
     connection.on(
       HUB_EVENTS.participantJoined,

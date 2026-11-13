@@ -4,6 +4,8 @@ import {
   callElapsed,
   callGrid,
   callSubtitle,
+  directCallNote,
+  directCallSubtitle,
   micWords,
   othersLine,
   shownOnCall,
@@ -36,6 +38,18 @@ describe('callSubtitle', () => {
   });
   it('counts everyone on the call', () => {
     expect(callSubtitle(6, '12:48')).toBe('6 on the call · 12:48');
+  });
+});
+
+describe('a direct call (L2-030 AC8)', () => {
+  it('says the member is alone until the other joins', () => {
+    expect(directCallSubtitle(1, '0:12')).toBe('Just you · 0:12');
+  });
+  it('says it is the two of them', () => {
+    expect(directCallSubtitle(2, '12:48')).toBe('Just the two of you · 12:48');
+  });
+  it('says who may join', () => {
+    expect(directCallNote('Walt')).toBe('Only you and Walt can join this call.');
   });
 });
 

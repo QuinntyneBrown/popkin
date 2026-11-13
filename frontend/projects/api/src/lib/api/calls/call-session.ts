@@ -7,9 +7,11 @@ import {
   CallSignal,
   JoinedCallView,
 } from '../../models/calls';
+import { ThreadMemberView } from '../../models/chat';
 import { PopkinHomeView } from '../../models/home';
 import { AvatarView } from '../../models/invite';
 import { accentOf } from '../../models/popkin';
+import { CHAT_API } from '../chat/chat-api';
 import { ErrorScreens } from '../error-screens';
 import { POPKINS_API } from '../popkins/popkins-api';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
@@ -19,6 +21,8 @@ import {
   callElapsed,
   callGrid,
   callSubtitle,
+  directCallNote,
+  directCallSubtitle,
   micWords,
   othersLine,
   shownOnCall,
@@ -67,6 +71,7 @@ export interface CallRosterRow {
 export class CallSession {
   private readonly api = inject(CALLS_API);
   private readonly popkins = inject(POPKINS_API);
+  private readonly chat = inject(CHAT_API);
   private readonly realtime = inject(POPKIN_REALTIME);
   private readonly media = inject(CALL_MEDIA);
   private readonly links = inject(PEER_LINKS);
@@ -83,6 +88,8 @@ export class CallSession {
   private readonly begunAgain = new Set<string>();
   private telling = false;
   private told: CallMediaState | null = null;
+  /** The direct message of the call; none for the group call. */
+  private threadId?: string;
 
   private readonly home = signal<PopkinHomeView | null>(null);
   private readonly people = signal<CallParticipantView[]>([]);
@@ -95,6 +102,10 @@ export class CallSession {
   readonly status = signal<CallStatus>('idle');
   /** The Popkin whose call this is, from the moment it is asked for. */
   readonly popkinId = signal<string | null>(null);
+  /** The member a direct call is with, by membership id (L2-030 AC8); null for the group call. */
+  readonly memberId = signal<string | null>(null);
+  /** That member, once the direct message is read. */
+  readonly other = signal<ThreadMemberView | null>(null);
   /** The call the member is on; null until it is joined. */
   readonly callId = signal<string | null>(null);
   /** The screen the member came from, which "Leave" opens (L2-030 AC6). */
@@ -112,7 +123,10 @@ export class CallSession {
     const startedAt = this.startedAt();
     if (this.status() === 'connecting') return 'Connecting…';
     if (this.status() !== 'connected' || !startedAt) return 'Not connected';
-    return callSubtitle(this.people().length, callElapsed(startedAt, this.now()));
+    const elapsed = callElapsed(startedAt, this.now());
+    return this.memberId()
+      ? directCallSubtitle(this.people().length, elapsed)
+      : callSubtitle(this.people().length, elapsed);
   });
 
   private readonly shown = computed(() =>
@@ -164,17 +178,24 @@ export class CallSession {
   });
   /** "8 others in Lakeside Weekend can join anytime." */
   readonly others = computed(() => {
+    const other = this.other();
+    if (this.memberId()) return other ? directCallNote(other.firstName) : '';
     const home = this.home();
     return home ? othersLine(home.name, home.memberCount, this.people().length) : '';
   });
 
-  /** Starts the Popkin's group call or joins it; returns to it if the member is on it already. */
-  start(popkinId: string, returnUrl: string): void {
+  /**
+   * Starts the Popkin's group call or joins it, or, when a member is named, the call of the
+   * direct message with them (L2-030 AC8); returns to it if the member is on it already.
+   */
+  start(popkinId: string, returnUrl: string, memberId?: string): void {
     this.returnUrl.set(returnUrl);
     const busy = this.status() === 'connected' || this.status() === 'connecting';
-    if (busy && this.popkinId() === popkinId) return;
+    if (busy && this.popkinId() === popkinId && this.memberId() === (memberId ?? null)) return;
     if (this.status() !== 'idle') this.leave();
     this.popkinId.set(popkinId);
+    this.memberId.set(memberId ?? null);
+    this.other.set(null);
     this.micOn.set(true);
     this.cameraOn.set(true);
     this.begin();
@@ -204,6 +225,8 @@ export class CallSession {
     this.end();
     this.status.set('idle');
     this.popkinId.set(null);
+    this.memberId.set(null);
+    this.other.set(null);
     this.home.set(null);
     // A leave that does not arrive is caught by the hub, which drops a connection that is gone.
     if (popkinId && callId) this.api.leave(popkinId, callId).subscribe({ error: () => undefined });
@@ -237,7 +260,18 @@ export class CallSession {
     this.local.set(local);
     this.switchTracks();
     try {
-      const joined = await firstValueFrom(this.api.join(popkinId, this.mediaState()));
+      const memberId = this.memberId();
+      if (memberId) {
+        const thread = await firstValueFrom(this.chat.openDirect(popkinId, memberId));
+        if (run !== this.run) return;
+        this.threadId = thread.id;
+        this.other.set(thread.other);
+      } else {
+        this.threadId = undefined;
+      }
+      const joined = await firstValueFrom(
+        this.api.join(popkinId, this.mediaState(), this.threadId),
+      );
       if (run !== this.run) return;
       this.callId.set(joined.call.id);
       this.viewer.set(joined.viewerMembershipId);
@@ -346,7 +380,9 @@ export class CallSession {
     const popkinId = this.popkinId();
     if (!popkinId || this.status() !== 'connected') return;
     try {
-      const joined = await firstValueFrom(this.api.join(popkinId, this.mediaState()));
+      const joined = await firstValueFrom(
+        this.api.join(popkinId, this.mediaState(), this.threadId),
+      );
       if (run !== this.run) return;
       if (joined.call.id !== callId) return this.fail(false);
       const viewer = joined.viewerMembershipId;
@@ -452,6 +488,8 @@ export class CallSession {
     this.end();
     this.status.set('idle');
     this.popkinId.set(null);
+    this.memberId.set(null);
+    this.other.set(null);
     this.home.set(null);
     this.errors.showNotFound();
   }
