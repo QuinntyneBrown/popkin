@@ -4,6 +4,7 @@ import { type Home, homeUrl, maraAtHome } from '../fixtures/home';
 import { albumUrl, maraInTheAlbum } from '../fixtures/photos';
 import { expect, test } from '../fixtures/pk-test';
 import { PopkinHomePage } from '../pages/popkin-home.page';
+import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
 import { WrapUpBanner } from '../pages/wrap-up-banner';
 
 /** Lakeside Weekend wraps up on Sunday 13 September 2026 at 6 pm. */
@@ -75,6 +76,29 @@ test.describe('The last hour of a Popkin', () => {
       await expect(new WrapUpBanner(page).lead).toHaveText('42 min left.');
     });
   }
+
+  test('offers the Host "Change", which opens Popkin settings until its dialog is built', async ({
+    page,
+  }) => {
+    await page.clock.install({ time: sunday(17, 17, 30) });
+    await maraAtHome(page);
+    await page.goto(homeUrl);
+    const banner = new WrapUpBanner(page);
+
+    await banner.action.click();
+
+    await expect(new PopkinSettingsDialog(page).heading).toBeVisible();
+  });
+
+  test('offers a member who is not the Host nothing to change', async ({ page }) => {
+    await page.clock.install({ time: sunday(17, 17, 30) });
+    await maraAtHome(page, asMember);
+    await page.goto(homeUrl);
+    const banner = new WrapUpBanner(page);
+
+    await expect(banner.lead).toBeVisible();
+    await expect(banner.action).toHaveCount(0);
+  });
 
   // L2-044 AC3
   test('never comes for a Popkin that keeps going', async ({ page }) => {

@@ -198,6 +198,12 @@ export class PopkinHomePage {
     });
   }
 
+  /**
+   * The Host's banner offers to change how long the Popkin lasts (L2-044 AC2). Until that
+   * dialog is built (journey 16), "Change" opens Popkin settings, where it will be.
+   */
+  protected readonly isHost = computed(() => this.popkin()?.viewerRole === 'Host');
+
   /** "Popkin settings" (L2-020): what a member, or the Host, may do with the Popkin. */
   protected settings(): void {
     const popkin = this.popkin();

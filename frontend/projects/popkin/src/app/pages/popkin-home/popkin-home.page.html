@@ -59,7 +59,9 @@
         variant="warning"
         [heading]="warning.lead"
         [text]="warning.text"
+        [action]="isHost() ? 'Change' : undefined"
         [dismissible]="true"
+        (acted)="settings()"
         (dismissed)="store.dismissWarning()"
       ></div>
     }
