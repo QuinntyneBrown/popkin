@@ -1,0 +1,212 @@
+@if (state() === 'error') {
+  <div pk-screen>
+    <header
+      pk-top-bar
+      slot="header"
+      [back]="'/p/' + popkinId() + '/chat'"
+      [line]="true"
+      [sticky]="true"
+      heading="Chat"
+    ></header>
+    <div
+      pk-empty-state
+      icon="offline"
+      heading="We couldn’t load this chat"
+      text="Your messages are safe. Check your connection and try again."
+      [alert]="true"
+    >
+      <button pk-button type="button" variant="primary" size="md" (click)="reload()">
+        <svg pk-icon name="retry" size="md"></svg>Try again
+      </button>
+      <a pk-button variant="secondary" size="md" [routerLink]="['/p', popkinId(), 'chat']">
+        Back to Chat
+      </a>
+    </div>
+  </div>
+} @else {
+  <div
+    pk-app-screen
+    [accent]="accent()"
+    [body]="state() === 'ready' ? 'thread' : 'thread-end'"
+    [mainLabel]="state() === 'ready' ? 'Messages' : undefined"
+  >
+    <header
+      pk-top-bar
+      slot="header"
+      [back]="'/p/' + popkinId() + '/chat'"
+      [line]="true"
+      [sticky]="true"
+      [avatar]="other()?.avatar"
+      [heading]="other()?.name ?? 'Chat'"
+      [sub]="state() === 'loading' ? 'Loading…' : from()"
+    >
+      @if (other() && !readOnly()) {
+        <a
+          pk-icon-button
+          slot="end"
+          icon="phone"
+          [label]="callLabel()"
+          [routerLink]="['/p', popkinId(), 'chat', memberId(), 'call']"
+        ></a>
+      }
+    </header>
+
+    @if (warning(); as warning) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="warning"
+        [heading]="warning.lead"
+        [text]="warning.text"
+        [dismissible]="true"
+        (dismissed)="dismissWarning()"
+      ></div>
+    }
+    @if (call(); as call) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="popkin"
+        icon="video"
+        heading="Call"
+        [text]="'· ' + call.text"
+        [action]="call.action"
+        [actionLink]="['/p', popkinId(), 'chat', memberId(), 'call']"
+      ></div>
+    }
+    @if (offline()) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="danger"
+        heading="You’re offline."
+        text="Messages will send when you’re back."
+      ></div>
+    }
+
+    @switch (state()) {
+      @case ('loading') {
+        <p class="visually-hidden" role="status">Loading messages…</p>
+        <div aria-hidden="true" class="stack">
+          @for (row of skeletons; track $index) {
+            <div pk-message [skeleton]="true" [mine]="row.mine" [width]="row.width"></div>
+          }
+        </div>
+      }
+      @case ('empty') {
+        @if (other(); as other) {
+          <div pk-dm-intro [name]="other.name" [avatar]="other.avatar"></div>
+          <p pk-system-note [text]="hello()"></p>
+        }
+      }
+      @case ('ready') {
+        <div
+          pk-thread
+          [newMessages]="store.newMessagesBelow()"
+          [announcement]="store.announcement()"
+          (reachedTop)="loadEarlier()"
+          (latestInView)="store.setLatestInView($event)"
+          (jump)="jumpToLatest()"
+        >
+          @if (other(); as other) {
+            <div pk-dm-intro [name]="other.name" [avatar]="other.avatar"></div>
+          }
+          @for (row of store.rows(); track row.key) {
+            @switch (row.kind) {
+              @case ('day') {
+                <div pk-day-divider [label]="row.label"></div>
+              }
+              @case ('note') {
+                <p pk-system-note [name]="row.name" [text]="row.text"></p>
+              }
+              @case ('message') {
+                <div
+                  pk-message
+                  [mine]="row.mine"
+                  [lead]="row.lead"
+                  [name]="row.name"
+                  [avatar]="avatarOf(row)"
+                  [text]="row.text"
+                  [time]="row.time"
+                  [state]="row.state"
+                  (retry)="retry(row)"
+                  (discard)="discard(row)"
+                ></div>
+              }
+            }
+          }
+        </div>
+      }
+    }
+
+    <div
+      pk-composer
+      slot="composer"
+      [(value)]="text"
+      [label]="fieldLabel()"
+      [closed]="readOnly() ? closedLine : undefined"
+      [disabled]="state() === 'loading'"
+      (send)="send($event)"
+    ></div>
+
+    @if (thread(); as thread) {
+      <nav
+        pk-popkin-nav
+        slot="nav"
+        current="chat"
+        [wide]="true"
+        [popkinId]="thread.popkinId"
+        [name]="thread.popkinName"
+        [emoji]="thread.emoji"
+        [members]="members()"
+        [timeLeft]="timeLeft()"
+        [unread]="unreadCount()"
+      ></nav>
+    }
+    <aside pk-list-pane slot="list" label="Chat" heading="Chat">
+      <button
+        pk-icon-button
+        slot="action"
+        type="button"
+        icon="new-message"
+        label="New message"
+        (click)="newMessage()"
+      ></button>
+      <div
+        pk-conversations
+        [level]="3"
+        [state]="list.store.state() === 'ready' ? 'ready' : 'loading'"
+        [everyone]="list.everyone()"
+        [direct]="list.direct()"
+        [current]="memberId()"
+        (newMessage)="newMessage()"
+      ></div>
+    </aside>
+    @if (thread(); as thread) {
+      @if (other(); as other) {
+        <aside
+          pk-detail-pane
+          slot="detail"
+          [label]="'About ' + other.firstName"
+          [person]="other.avatar"
+          [name]="other.name"
+          [emoji]="thread.emoji"
+          [place]="thread.popkinName"
+          listLabel="Shared between you"
+        >
+          @if (!readOnly()) {
+            <a
+              pk-button
+              slot="action"
+              variant="secondary"
+              size="sm"
+              [routerLink]="['/p', popkinId(), 'chat', memberId(), 'call']"
+            >
+              <svg pk-icon name="phone" size="md"></svg>{{ callLabel() }}
+            </a>
+          }
+        </aside>
+      }
+    }
+  </div>
+}

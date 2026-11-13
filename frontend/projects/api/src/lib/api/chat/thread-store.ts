@@ -167,8 +167,12 @@ export class ThreadStore {
           this.readPresence();
           this.reportRead();
         },
-        error: (error: unknown) =>
-          this.phase.set(toApiProblem(error).status === 404 ? 'not-found' : 'error'),
+        error: (error: unknown) => {
+          const problem = toApiProblem(error);
+          // A direct message with oneself is no thread at all (L2-023).
+          const gone = problem.status === 404 || problem.code === 'cannot_message_self';
+          this.phase.set(gone ? 'not-found' : 'error');
+        },
       });
   }
 

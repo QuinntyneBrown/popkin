@@ -84,6 +84,7 @@ class FakeChat implements ChatApi {
   /** The members a direct message was asked for with. */
   readonly direct: string[] = [];
   presenceAsked = 0;
+  selfRefused = false;
 
   getEveryone(): Observable<ThreadView> {
     if (this.thread) return of(this.thread);
@@ -98,6 +99,15 @@ class FakeChat implements ChatApi {
 
   openDirect(_p: string, memberId: string): Observable<ThreadView> {
     this.direct.push(memberId);
+    if (this.selfRefused) {
+      return throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { status: 400, code: 'cannot_message_self' },
+          }),
+      );
+    }
     if (this.notFound) return throwError(() => new HttpErrorResponse({ status: 404 }));
     return of(withWalt);
   }
@@ -471,6 +481,12 @@ describe('ThreadStore', () => {
     it('does not ask who is here', () => {
       store.open('p', 'm-walt');
       expect(chat.presenceAsked).toBe(0);
+    });
+
+    it('is not found with the member themself', () => {
+      chat.selfRefused = true;
+      store.open('p', me);
+      expect(store.state()).toBe('not-found');
     });
 
     it('is not found for a member the Popkin does not have', () => {

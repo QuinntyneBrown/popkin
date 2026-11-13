@@ -32,6 +32,8 @@ test.describe('the Chat tab', () => {
         sentAt: saturday(9, 24).toISOString(),
       };
     });
+    // On a phone the list is the screen; from 1024 px the Everyone thread beside it is read.
+    await page.setViewportSize({ width: 360, height: 780 });
     await page.goto(conversationsUrl);
     const chat = new ConversationsPage(page);
 
@@ -39,7 +41,7 @@ test.describe('the Chat tab', () => {
     await expect(chat.heading).toHaveText('Chat');
     await expect(chat.everyoneLatest).toHaveText('Mara: last call for the canoe sign-up 🛶');
     await expect(chat.everyoneTime).toHaveText('9:24');
-    await expect(chat.everyoneUnread).toHaveAccessibleName('3 unread messages');
+    await expect(chat.everyoneUnread).toContainText('3 unread messages');
   });
 
   // L2-022 AC1
@@ -129,6 +131,7 @@ test.describe('the Chat tab', () => {
   // L2-022 AC1
   test('counts a message to everyone that arrives', async ({ page, hub }) => {
     await maraAtHome(page);
+    await page.setViewportSize({ width: 360, height: 780 });
     await page.goto(conversationsUrl);
     const chat = new ConversationsPage(page);
     await expect(chat.everyone).toBeVisible();
@@ -136,7 +139,7 @@ test.describe('the Chat tab', () => {
     await chatOf(page).arrives(hub, message(people.walt, 'Kettle is on', new Date()));
 
     await expect(chat.everyoneLatest).toHaveText('Walt: Kettle is on');
-    await expect(chat.everyoneUnread).toHaveAccessibleName('1 unread message');
+    await expect(chat.everyoneUnread).toContainText('1 unread message');
   });
 
   // L2-022 AC5
@@ -154,7 +157,7 @@ test.describe('the Chat tab', () => {
       'A direct message is between you and one other member. Nobody else can see it.',
     );
     await chat.emptyNewMessage.click();
-    await expect(new NewMessageDialog(page).root).toBeVisible();
+    await expect(new NewMessageDialog(page).heading).toBeVisible();
   });
 
   // L2-056

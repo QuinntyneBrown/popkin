@@ -425,9 +425,13 @@ test.describe('a long thread', () => {
 test.describe('unread messages and the Popkin’s tabs', () => {
   test.use({ viewport: { width: 820, height: 900 } });
 
+  /** The counts here are the Everyone thread's: Mara has read her direct messages. */
+  const noDirectUnread = (chat: { directs: { unreadCount: number }[] }) =>
+    chat.directs.forEach((direct) => (direct.unreadCount = 0));
+
   // L2-019 AC7
   test('shows the tabs Home, Chat, Photos and Experiences, with Chat current', async ({ page }) => {
-    await maraInTheChat(page);
+    await maraInTheChat(page, noDirectUnread);
     await page.goto(chatUrl);
     const chat = new GroupChatPage(page);
 
@@ -442,7 +446,10 @@ test.describe('unread messages and the Popkin’s tabs', () => {
     page,
     hub,
   }) => {
-    const thread = await maraInTheChat(page, (chat) => (chat.messages = aLongThread(40)));
+    const thread = await maraInTheChat(page, (chat) => {
+      noDirectUnread(chat);
+      chat.messages = aLongThread(40);
+    });
     await page.goto(chatUrl);
     const chat = new GroupChatPage(page);
     await expect(chat.message('Message 40')).toBeInViewport();
@@ -462,7 +469,10 @@ test.describe('unread messages and the Popkin’s tabs', () => {
 
   // L2-027 AC4
   test('tells the API the thread is read once its latest message is in view', async ({ page }) => {
-    const thread = await maraInTheChat(page, (chat) => (chat.thread.unreadCount = 3));
+    const thread = await maraInTheChat(page, (chat) => {
+      noDirectUnread(chat);
+      chat.thread.unreadCount = 3;
+    });
     await page.goto(chatUrl);
     const chat = new GroupChatPage(page);
 

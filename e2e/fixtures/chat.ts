@@ -391,6 +391,10 @@ export class Chat {
       if (this.failReads) return route.fulfill(asProblem(problem(500, 'server_error')));
       return route.fulfill({ json: { ...this.thread, other: null } });
     }
+    // No call in a direct message, unless a spec's call fixture says otherwise.
+    if (method === 'GET' && rest === 'calls/current' && url.searchParams.has('threadId')) {
+      return route.fulfill({ status: 204, body: '' });
+    }
     if (method === 'GET' && rest === 'threads') {
       this.listAsked++;
       await this.holdList;

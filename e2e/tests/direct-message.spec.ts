@@ -81,7 +81,7 @@ test.describe('a direct message', () => {
 
     await chatOf(page).writes(hub, people.dev, 'Heron again!');
 
-    await expect(direct.root).not.toContainText('Heron again!');
+    await expect(direct.thread).not.toContainText('Heron again!');
     await expect(direct.messages).toHaveCount(5);
   });
 

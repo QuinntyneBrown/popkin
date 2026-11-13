@@ -1,0 +1,9 @@
+<div pk-dialog heading="New message" [accent]="data.accent">
+  <div
+    pk-member-picker
+    [popkinName]="data.popkinName"
+    [members]="matches()"
+    [(query)]="query"
+    (chosen)="ref.close($event)"
+  ></div>
+</div>
