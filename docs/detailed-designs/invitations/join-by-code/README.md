@@ -8,7 +8,7 @@ code with the device camera, and a screen to type the code or paste the link. Bo
 invite preview (`invitations/preview-invite`), which handles everything after.
 
 - **scanner** — dialog that streams the device camera and decodes QR codes in a frame
-- **Popkin invite text** — decoded or typed text that yields an invite code: a bare code, an invite link or an app URL `/i/{code}`
+- **Popkin invite text** — decoded or typed text that yields an invite code: a bare code, an invite link on a Popkin's address (`lakeside-weekend.popkin.community/i/{code}`) or an apex URL `/i/{code}`
 - **camera permission** — browser grant that lets a site read the camera
 
 A signed-in member reaches the scanner from My Popkins ("Scan to join"). A visitor reaches the
@@ -38,7 +38,9 @@ instead" and "Scan a QR code instead".
   `invite-codes` rate limit. `200` `InvitePreviewDto`; `404` `invite_not_found`; `429` with
   `Retry-After`.
 
-The scanner calls no endpoint: it navigates to `/i/{code}`, whose preview does the lookup.
+The scanner calls no endpoint: it opens the invite link on the Popkin's address, or the apex
+`/i/{code}` for a bare code, and the preview there does the lookup
+([Preview an invite](../preview-invite/README.md)).
 
 ### Frontend (Popkin web app)
 
@@ -52,7 +54,8 @@ The scanner calls no endpoint: it navigates to `/i/{code}`, whose preview does t
   - **invalid** — decoded text that `parseInviteInput` rejects shows "That's not a Popkin code"
     while scanning continues (L2-015 AC3);
   - **found** — a Popkin invite shows "Found it. Opening your invite…", stops the camera, closes
-    and navigates to `/i/{code}` (L2-015 AC2).
+    and opens the invite: the decoded link itself when it is on an address, as a full page load,
+    or the apex `/i/{code}` for a bare code (L2-015 AC2).
   Closing by Escape, "Close" or the backdrop stops every camera track and returns focus to the
   opener. A device with no camera is shown the denied state; its own copy is `<TO SUPPLY>`.
 - **`QrScanner`** (`api` library service) — `start(video)` calls
@@ -66,17 +69,23 @@ The scanner calls no endpoint: it navigates to `/i/{code}`, whose preview does t
   (opens `ScanToJoinDialog`) (L2-015 AC5). "Find my Popkin":
   - parses the text with `parseInviteInput`; text that yields no code is shown as not found;
   - reads "Finding your Popkin…" and is disabled while the lookup runs (L2-056 AC3);
-  - on `200` navigates to `/i/{code}`;
+  - sends the address with the lookup when the text carried one, so a code pasted on another
+    Popkin's address is not found (L2-065 AC4);
+  - on `200` loads `InvitePreviewDto.InviteUrl`, the link on the Popkin's address, as a full page
+    load (L2-065 AC6);
   - on `404` marks the field `aria-invalid` with "We can't find a Popkin with that code." and
     keeps what was typed (L2-015 AC6);
   - on `429` says when the person may try again (L2-053 AC4); the copy is `<TO SUPPLY>`.
   What a blank submit shows is `<TO SUPPLY>`; the design sends nothing for it.
-- **`parseInviteInput(text)`** (pure helper, `api` library) — trims and lower-cases the text and
-  returns a code from a bare code, `popk.in/{code}` with or without a scheme, or an app URL whose
-  path is `/i/{code}`; it returns `null` for any other host or path and for a code outside the
-  invite alphabet. The invite host it accepts follows `InviteOptions.BaseUrl`
-  (`invitations/invite-people`, `<TO SUPPLY>`).
-- **`InvitesApi.getPreview(code)`** — shared with `invitations/preview-invite`.
+- **`parseInviteInput(text, baseDomain)`** (pure helper, `api` library, changed) — trims and
+  lower-cases the text and returns `{ code, address? }` from a bare code, from an invite link on
+  an address (`{address}.{baseDomain}/i/{code}`, with or without a scheme), or from the apex path
+  `/i/{code}`. A pasted invite link on an address is accepted as the code alone is
+  (L2-065 AC6). It returns `null` for any other host or path, for a host more than one label deep,
+  for a label `addressProblem` refuses, and for a code outside the invite alphabet. The short
+  form `popk.in/{code}` is no longer accepted: L2-065 replaced it before any link was given out.
+  The hint "It looks like popk.in/lakeside." needs new copy in the mock, `<TO SUPPLY>`.
+- **`InvitesApi.getPreview(code, address?)`** — shared with `invitations/preview-invite`.
 
 ### Backend
 
@@ -90,6 +99,7 @@ The scanner calls no endpoint: it navigates to `/i/{code}`, whose preview does t
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-015` | `L1-004` | Join by scanning or typing a code: A person without the link joins by scanning the QR code inside Popkin or typing its code. |
+| `L2-065` | `L1-016` | Invites carry the address: The invite link and the QR code are built on the Popkin's address, so the person invited sees where they are going. The address shows which Popkin; the code is what lets a person in. This feature realises AC6. |
 | `L2-053` | `L1-012` | Abuse is limited: One person cannot flood the system or another person. |
 
 ## Diagrams

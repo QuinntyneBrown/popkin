@@ -21,6 +21,7 @@ title Class structure — Preview an invite
 package "Popkin.Application" {
   class GetInvitePreviewQuery {
     +string Code
+    +string? Address
   }
   class GetInvitePreviewQueryHandler {
     +Handle(query, ct): Task<InvitePreviewDto>
@@ -38,6 +39,7 @@ package "Popkin.Application" {
     +int MemberCount
     +DateTimeOffset? EndsAt
     +DateTimeOffset? WrappedUpAt
+    +string InviteUrl
     +IReadOnlyList<AvatarDto> Avatars (max 5)
     +InviterDto InvitedBy
     +ViewerDto Viewer
@@ -75,7 +77,7 @@ package "Frontend (popkin app + api library)" {
     +preview: Signal<InvitePreviewView | null>
   }
   interface InvitesApi {
-    +getPreview(code): Observable<InvitePreviewView>
+    +getPreview(code, address?): Observable<InvitePreviewView>
   }
   class HttpInvitesApi
 }

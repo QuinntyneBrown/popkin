@@ -28,15 +28,16 @@ package "Popkin.Application" {
   class InviteDto {
     +string Code
     +string Url
+    +string Address
     +string PopkinName
     +string Emoji
     +PopkinColour Colour
   }
-  class InviteLinkBuilder {
-    +Build(code): string
+  class PopkinUrlBuilder {
+    +InviteUrl(address, code): string
   }
-  class InviteOptions {
-    +string BaseUrl
+  class AddressOptions {
+    +string BaseDomain
   }
   interface IMembershipGuard
   interface IInviteCodeGenerator {
@@ -73,10 +74,10 @@ package "Frontend (popkin app + api library)" {
 }
 GetInviteQueryHandler ..> GetInviteQuery : handles
 GetInviteQueryHandler --> IMembershipGuard
-GetInviteQueryHandler --> InviteLinkBuilder
+GetInviteQueryHandler --> PopkinUrlBuilder
 GetInviteQueryHandler ..> PopkinSpace : reads
 GetInviteQueryHandler ..> InviteDto : returns
-InviteLinkBuilder --> InviteOptions
+PopkinUrlBuilder --> AddressOptions
 RandomInviteCodeGenerator ..|> IInviteCodeGenerator
 PopkinSpaceConfiguration ..> PopkinSpace
 InviteDialog --> PopkinsApi

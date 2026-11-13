@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Choose the address
+
+Person(host, "Host", "Starts a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular SPA", "name-your-popkin with the address field; suggests the address on the device")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/addresses/{address}; POST /api/popkins claims the address")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "PopkinSpace.Address, AddressClaim")
+}
+Rel(host, spa, "Uses", "HTTPS")
+Rel(spa, api, "Checks the address; creates the Popkin", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads claims; inserts the Popkin and its claim in one unit of work", "EF Core")
+@enduml

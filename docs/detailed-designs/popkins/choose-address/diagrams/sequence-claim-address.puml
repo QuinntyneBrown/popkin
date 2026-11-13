@@ -1,0 +1,76 @@
+@startuml
+title UML sequence behaviour — Claim the address when the Popkin is created
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "HowLongPage" as page
+  participant "HttpPopkinsApi" as client
+  participant "AddressCheck" as check
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "CreatePopkinCommandHandler" as handler
+  participant "AddressAvailability" as avail
+  participant "PopkinSpace" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Pop it up"
+page -> client : createPopkin(name, emoji, colour, length, endsAt, address)
+client -> ctrl : POST /api/popkins
+ctrl -> handler : Send CreatePopkinCommand
+handler -> handler : Validate name, emoji, colour, length, end
+handler -> handler : PopkinAddress.TryParse(address)
+alt missing or broken rule (L2-063 AC6, AC7)
+  handler --> ctrl : ProblemException address_required | address_too_short | address_too_long | address_malformed
+  ctrl --> client : 400 ProblemDetails, field address
+else well formed
+  handler -> avail : IsTakenAsync(address)
+  alt reserved or claimed (L2-063 AC2, AC5, AC8)
+    handler -> avail : SuggestAsync(address)
+    handler --> ctrl : AddressTakenException(suggestions)
+    ctrl --> client : 409 address_taken, suggestions
+  else free
+    handler -> entity : Start(host, …, address, inviteCode, now)
+    entity --> handler : PopkinSpace with Address, Host membership, Everyone thread
+    handler -> db : Insert PopkinSpace and AddressClaim in one SaveChanges
+    alt another request claimed it first (L2-063 AC3)
+      db --> handler : DbUpdateException on AddressClaim key
+      handler -> avail : SuggestAsync(address)
+      handler --> ctrl : AddressTakenException(suggestions)
+      ctrl --> client : 409 address_taken, suggestions
+    else committed
+      db --> handler : Committed
+      handler --> ctrl : PopkinCreatedDto with Address and AddressUrl
+      ctrl --> client : 201 Created
+    end
+  end
+end
+alt 201
+  client --> page : PopkinCreatedView
+  page --> actor : navigate /p/(id)/created
+else 409 address_taken (L2-063 AC4)
+  client --> page : AddressTaken(suggestions)
+  page -> check : taken(suggestions)
+  page --> actor : navigate /new, every choice kept, address marked taken
+else other failure
+  client --> page : Error
+  page --> actor : pk-alert, choices kept (L2-009 AC5)
+end
+@enduml

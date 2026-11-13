@@ -44,9 +44,12 @@ Popkins the caller belongs to (L2-051 AC3).
   `pk-popkin-tile` (emoji), the name, the latest Everyone message as "{first name}: {text}",
   `pk-avatar` stack of up to 3 with "+N", "{n} members", and `pk-time-left` (L2-017 AC1).
   `pk-badge` shows the unread count, "99+" above 99, with an accessible name such as "3 unread
-  messages" (L2-017 AC2). Choosing the card opens `/p/:popkinId` (AC3).
+  messages" (L2-017 AC2). The card is an `<a href>` to the Popkin's `AddressUrl`, so choosing it
+  opens the Popkin at its address as a full page load (AC3, L2-064 AC9,
+  [Open a Popkin by its address](../open-by-address/README.md)).
 - **Wrapped-up row** — muted `pk-popkin-tile`, the name, "Wrapped {Mon d} · {n} people · {n}
-  photos" and a "Recap" label (L2-018 AC1); choosing it opens `/p/:popkinId/recap` (AC2). The
+  photos" and a "Recap" label (L2-018 AC1); choosing it opens `/recap` on the Popkin's address
+  (AC2, L2-064 AC9). The
   section is rendered only when the list is not empty (AC3).
 - **Empty state** — `pk-empty-state` explains what a Popkin is, with "Start a Popkin" (`/new`)
   and "Scan to join" (opens `ScanToJoinDialog`, `invitations/join-by-code`) (L2-017 AC6).
@@ -81,7 +84,8 @@ Popkins the caller belongs to (L2-051 AC3).
   colour that stays the same for a person, L2-013 AC6) and, for a member with a photo, an
   expiring URL from `IPhotoStore` (L2-051 AC2).
 - **DTOs** — `MyPopkinsDto { Active, WrappedUp }`, `ActivePopkinCardDto`,
-  `WrappedUpPopkinDto`, `LatestMessageDto`, `AvatarDto`.
+  `WrappedUpPopkinDto`, `LatestMessageDto`, `AvatarDto`. `ActivePopkinCardDto` and
+  `WrappedUpPopkinDto` carry `AddressUrl`, built by `PopkinUrlBuilder` (L2-064 AC9).
 
 ## Requirements
 
@@ -91,6 +95,7 @@ Popkins the caller belongs to (L2-051 AC3).
 | `L2-018` | `L1-005` | List my wrapped-up Popkins: Wrapped-up Popkins stay within reach under the active ones. |
 | `L2-051` | `L1-012` | Popkins are private to their members: Membership decides everything a person sees. |
 | `L2-056` | `L1-013` | Loading, failure and offline are always explained: A person is never left guessing. |
+| `L2-064` | `L1-016` | Open a Popkin by its address: The address is the Popkin's front door for its members and a closed door for everyone else. This feature realises AC9. |
 
 ## Diagrams
 

@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Choose the address
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(page, "NameYourPopkinPage", "Angular page", "Name, emoji, colour and the address field")
+  Component(field, "pk-address-field", "components library", "Input, .popkin.community suffix, status line, suggestions")
+  Component(draft, "NewPopkinDraft", "Signal store", "name, address, addressEdited")
+  Component(check, "AddressCheck", "Signal store", "Debounced check state machine")
+  Component(helpers, "suggestAddress / addressProblem", "Pure helpers", "L2-062 AC1, AC3, AC4")
+  Component(client, "HttpAddressesApi", "ADDRESSES_API", "check(address)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AddressesController", "ASP.NET Core controller", "GET /api/addresses/{address}, address-checks limit")
+  Component(query, "CheckAddressQueryHandler", "MediatR handler", "Parses and answers free or taken")
+  Component(create, "CreatePopkinCommandHandler", "MediatR handler", "Claims the address with the Popkin")
+  Component(avail, "AddressAvailability", "Application service", "Reserved words, claims, suggestions")
+  Component(addr, "PopkinAddress", "Domain value object", "Address rules")
+  ComponentDb(db, "Popkin database", "SQL Server", "AddressClaim, PopkinSpace")
+}
+Rel(page, field, "Composes")
+Rel(page, draft, "Reads and writes")
+Rel(draft, helpers, "Suggests with")
+Rel(page, check, "Feeds the address to")
+Rel(check, client, "Calls after 500 ms")
+Rel(client, ctrl, "GET", "JSON/HTTPS")
+Rel(ctrl, query, "Sends CheckAddressQuery")
+Rel(query, addr, "Parses with")
+Rel(query, avail, "Asks")
+Rel(create, addr, "Parses with")
+Rel(create, avail, "Asks")
+Rel(avail, db, "Reads claims", "EF Core")
+Rel(create, db, "Inserts PopkinSpace and AddressClaim", "EF Core")
+@enduml

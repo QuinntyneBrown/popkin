@@ -35,10 +35,10 @@ package "Frontend (popkin app + api library)" {
     +stop(): void
   }
   class InviteInput <<helper>> {
-    +parseInviteInput(text): string | null
+    +parseInviteInput(text, baseDomain): { code, address? } | null
   }
   interface InvitesApi {
-    +getPreview(code): Observable<InvitePreviewView>
+    +getPreview(code, address?): Observable<InvitePreviewView>
   }
   class HttpInvitesApi
 }

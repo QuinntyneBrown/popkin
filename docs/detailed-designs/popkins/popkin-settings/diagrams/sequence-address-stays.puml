@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — The address stays when the Popkin is renamed
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "EditPopkinDialog" as dialog
+  participant "HttpPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "UpdatePopkinLookCommandHandler" as handler
+  participant "PopkinSpace" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : Open "Edit name and look"
+dialog --> actor : Name field, pickers, "lakeside-weekend.popkin.community" as read-only text and why it stays (L2-066 AC2)
+actor -> dialog : Rename to "Lakeside Long Weekend", Save
+dialog -> client : updateLook(popkinId, name, emoji, colour)
+client -> ctrl : PATCH /api/popkins/(id)
+alt body carries address (L2-066 AC3)
+  ctrl --> client : 400 address_cannot_change
+else name, emoji and colour only
+  ctrl -> handler : Send UpdatePopkinLookCommand
+  handler -> entity : ChangeLook(name, emoji, colour)
+  entity --> handler : Address untouched (L2-066 AC1)
+  handler -> db : Save
+  handler --> ctrl : PopkinDto with the same Address
+  ctrl --> client : 200
+  client --> dialog : PopkinView
+  dialog --> actor : New name, same address; invites unchanged
+end
+@enduml

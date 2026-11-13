@@ -34,7 +34,7 @@ end box
 actor -> page : Choose "Pop it up"
 page -> page : Resolve endsAt in device time zone (resolveEndsAt)
 page --> actor : Button disabled, "Popping it up…" (L2-009 AC4)
-page -> client : createPopkin(name, emoji, colour, length, endsAt)
+page -> client : createPopkin(name, emoji, colour, length, endsAt, address)
 client -> ctrl : POST /api/popkins
 ctrl -> ctrl : Authenticate session cookie, anti-forgery (L2-050)
 ctrl -> handler : Send CreatePopkinCommand
@@ -42,25 +42,31 @@ handler -> val : Validate (L2-008, L2-009 AC3, L2-052)
 alt invalid field
   val --> handler : Failures
   handler --> ctrl : ValidationException
-  ctrl --> client : 400 ProblemDetails, code name_required | name_too_long | emoji_not_allowed | colour_not_allowed | length_not_allowed | ends_at_out_of_range
+  ctrl --> client : 400 ProblemDetails, code name_required | name_too_long | emoji_not_allowed | colour_not_allowed | length_not_allowed | ends_at_out_of_range | address_*
+else address reserved or claimed (L2-063, see choose-address)
+  handler --> ctrl : AddressTakenException
+  ctrl --> client : 409 address_taken, suggestions
 else valid
   handler -> gen : NewCode()
   gen --> handler : invite code
-  handler -> entity : Start(host, name, emoji, colour, endsAt, code, now)
+  handler -> entity : Start(host, name, emoji, colour, endsAt, address, code, now)
   entity --> handler : PopkinSpace + Host Membership (L2-010 AC6) + Everyone ChatThread
-  handler -> db : Insert in one unit of work
+  handler -> db : Insert PopkinSpace and AddressClaim in one unit of work
   alt invite code already taken (unique index)
     db --> handler : DbUpdateException
     handler -> gen : NewCode() and retry
   end
   db --> handler : Committed
-  handler --> ctrl : PopkinCreatedDto
+  handler --> ctrl : PopkinCreatedDto with Address, AddressUrl and InviteUrl on the address
   ctrl --> client : 201 Created, Location /api/popkins/(id)
 end
 alt 201
   client --> page : PopkinCreatedView
   page -> page : draft.created.set(view)
   page --> actor : navigate /p/(id)/created
+else 409 address_taken (L2-063 AC4)
+  client --> page : AddressTaken(suggestions)
+  page --> actor : navigate /new, choices kept, address marked taken
 else failure (4xx, 5xx, network)
   client --> page : Error
   page --> actor : pk-alert "We couldn't pop it up." choices kept, "Pop it up" enabled (L2-009 AC5)

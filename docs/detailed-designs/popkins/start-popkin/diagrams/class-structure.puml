@@ -47,9 +47,10 @@ package "Popkin.Domain" {
     +DateTimeOffset? WrappedUpAt
     +bool KeepPhotos
     +string InviteCode
+    +PopkinAddress Address
     +DateTimeOffset CreatedAt
     +DateTimeOffset LastActivityAt
-    +{static} Start(host: Person, name, emoji, colour, endsAt, inviteCode, now): PopkinSpace
+    +{static} Start(host: Person, name, emoji, colour, endsAt, address, inviteCode, now): PopkinSpace
   }
   class Membership {
     +Guid Id
@@ -66,6 +67,11 @@ package "Popkin.Domain" {
     +Guid Id
     +Guid PopkinId
     +ThreadKind Kind
+  }
+  class PopkinAddress <<value object>>
+  class AddressClaim {
+    +string Address
+    +Guid PopkinId
   }
   class PopkinRules <<static>> {
     +int NameMaxLength = 40
@@ -87,6 +93,7 @@ package "Popkin.Application" {
     +PopkinColour Colour
     +PopkinLength Length
     +DateTimeOffset? EndsAt
+    +string Address
   }
   class CreatePopkinCommandValidator
   class CreatePopkinCommandHandler {
@@ -100,6 +107,12 @@ package "Popkin.Application" {
     +DateTimeOffset? EndsAt
     +string InviteCode
     +string InviteUrl
+    +string Address
+    +string AddressUrl
+  }
+  class PopkinUrlBuilder {
+    +AddressUrl(address): string
+    +InviteUrl(address, code): string
   }
   interface IInviteCodeGenerator {
     +NewCode(): string
@@ -121,6 +134,8 @@ package "Frontend (popkin app + api library)" {
     +name: Signal<string>
     +emoji: Signal<string>
     +colour: Signal<PopkinColour>
+    +address: Signal<string>
+    +addressEdited: Signal<boolean>
     +length: Signal<PopkinLength>
     +customEndsAt: Signal<Date | null>
     +created: Signal<PopkinCreatedView | null>
@@ -146,6 +161,9 @@ PopkinSpace "1" *-- "1..*" Membership : members
 PopkinSpace "1" *-- "1" ChatThread : Everyone
 Membership --> MemberRole
 PopkinSpace ..> PopkinRules : enforces
+PopkinSpace --> PopkinAddress
+CreatePopkinCommandHandler ..> AddressClaim : inserts
+CreatePopkinCommandHandler --> PopkinUrlBuilder
 PopkinsController ..> CreatePopkinCommand : sends
 CreatePopkinCommandHandler ..> CreatePopkinCommand : handles
 CreatePopkinCommandValidator ..> CreatePopkinCommand : validates

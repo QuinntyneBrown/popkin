@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Open a Popkin by its address
+
+Person(member, "Member", "Opens the Popkin's address")
+System_Boundary(popkin, "Popkin") {
+  Container(proxy, "Reverse proxy", "<TO SUPPLY>", "Ends TLS for the apex and *.popkin.community; serves the web app; forwards /api and /hubs")
+  Container(spa, "Popkin web app", "Angular SPA", "Picks apex or address routes from the host name")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/popkins/at/{address}")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Membership, PopkinSpace.Address")
+}
+Rel(member, proxy, "Opens the address", "HTTPS")
+Rel(proxy, spa, "Serves index.html and assets on every host")
+Rel(spa, proxy, "Calls /api on the same host", "JSON/HTTPS, session cookie")
+Rel(proxy, api, "Forwards /api", "HTTP")
+Rel(api, db, "Reads the caller's membership by address", "EF Core")
+@enduml

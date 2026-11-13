@@ -13,7 +13,7 @@ Container_Boundary(spa, "Popkin web app") {
 Container_Boundary(api, "Popkin API") {
   Component(ctrl, "PopkinsController", "Controller", "GET /api/popkins/(id)/invite")
   Component(handler, "GetInviteQueryHandler", "MediatR handler", "Member only")
-  Component(link, "InviteLinkBuilder", "Application service", "Invites:BaseUrl + code")
+  Component(link, "PopkinUrlBuilder", "Application service", "https://{address}.{BaseDomain}/i/{code}")
   Component(guard, "IMembershipGuard", "Abstraction", "404 for non-members")
   ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
 }

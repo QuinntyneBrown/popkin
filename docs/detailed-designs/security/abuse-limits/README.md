@@ -66,15 +66,17 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
 | `codes` | the sign-up, sign-in and resend endpoints under `/api/auth` that send a code ([Sign up](../../accounts/sign-up/README.md), [Sign in](../../accounts/sign-in/README.md), [Confirm the code](../../accounts/confirm-code/README.md)) |
 | `messages` | `POST /api/popkins/{popkinId}/threads/{threadId}/messages` ([Send a message to everyone](../../chat/send-message-to-everyone/README.md), [Direct messages](../../chat/direct-messages/README.md)) |
 | `invite-codes` | `GET /api/invites/{code}` and `POST /api/invites/{code}/join` ([Preview an invite](../../invitations/preview-invite/README.md), [Join by code](../../invitations/join-by-code/README.md)) |
+| `address-checks` | `GET /api/addresses/{address}` ([Choose the address](../../popkins/choose-address/README.md)) |
 
 ### Backend — Popkin API
 
 - **`RateLimitPolicyNames`** (`Popkin.Api/RateLimiting/`) — introduced static class of constant
-  policy names: `Codes = "codes"`, `Messages = "messages"`, `InviteCodes = "invite-codes"`. The
+  policy names: `Codes = "codes"`, `Messages = "messages"`, `InviteCodes = "invite-codes"`, and, for L2-067 AC7,
+  `AddressChecks = "address-checks"`. The
   shared architecture names this `IRateLimitPolicy`; a static class of constants is the .NET
   convention for policy names, so the design uses it instead.
 - **`RateLimitingSetup.AddPopkinRateLimiting(IServiceCollection)`** — introduced extension called
-  from `Program.cs`. It configures `AddRateLimiter` with three policies:
+  from `Program.cs`. It configures `AddRateLimiter` with four policies:
   - `codes` — `FixedWindowRateLimiter`, `PermitLimit = 10`, `Window = 10 min`, `QueueLimit = 0`,
     partitioned by client address (L2-053 AC1).
   - `messages` — `SlidingWindowRateLimiter`, `PermitLimit = 60`, `Window = 1 min`,
@@ -83,6 +85,9 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
     across the boundary of two fixed windows.
   - `invite-codes` — `FixedWindowRateLimiter`, `PermitLimit = 20`, `Window = 10 min`,
     `QueueLimit = 0`, partitioned by client address (L2-053 AC3).
+  - `address-checks` — `SlidingWindowRateLimiter`, `PermitLimit = 30`, `Window = 1 min`,
+    `SegmentsPerWindow = 6`, `QueueLimit = 0`, partitioned by the person id from the session
+    (L2-067 AC7). It also bounds how fast one person can learn which addresses are taken.
   Values bind from configuration section `RateLimits` to `RateLimitOptions`, with these defaults, so operations can tune
   them without a build.
 - **`OnRejected`** — sets status `429`, reads `MetadataName.RetryAfter` from the lease, writes the
@@ -140,6 +145,7 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-053` | `L1-012` | Abuse is limited: One person cannot flood the system or another person. |
+| `L2-067` | `L1-012` | Addresses are safe: An address per Popkin must not weaken the privacy of a Popkin or the session of a person. This feature realises AC7. |
 
 ## Diagrams
 

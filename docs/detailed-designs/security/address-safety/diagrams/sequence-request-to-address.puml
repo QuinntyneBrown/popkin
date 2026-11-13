@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — A request reaches an address host
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Browser and web app" as spa
+end box
+box "Backend — Reverse proxy" #D1FADF
+  participant "Reverse proxy" as proxy
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "HostCheckMiddleware" as hostcheck
+  participant "SameSiteRequestMiddleware" as samesite
+  participant "SessionCookieEvents" as cookie
+  participant "Controller" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Handler with IMembershipGuard" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> spa : Open http://lakeside-weekend.popkin.community/
+spa -> proxy : GET over HTTP
+proxy --> spa : Redirect to https at the same host (L2-067 AC2)
+spa -> proxy : TLS handshake
+proxy --> spa : *.popkin.community certificate, already issued (L2-067 AC1)
+proxy --> spa : index.html with the L2-054 headers (L2-067 AC2)
+spa -> proxy : POST /api/... on the same host, cookie __Secure-popkin (L2-067 AC3, AC4)
+proxy -> hostcheck : Forward with X-Forwarded-Host and -Proto
+alt host neither the apex nor one well-formed label (L2-067 AC5)
+  hostcheck --> spa : 400 host_not_allowed, host not repeated
+else allowed
+  hostcheck -> samesite : Next
+  alt Sec-Fetch-Site not same-origin, or Origin not the apex or an address (L2-067 AC6)
+    samesite --> spa : 403 cross_site_request
+  else same-site proof holds
+    samesite -> cookie : Authenticate
+    cookie -> db : Session live?
+    alt not live
+      cookie --> spa : 401
+    else live
+      cookie -> ctrl : Principal
+      ctrl -> handler : Send request with the Popkin id
+      handler -> db : Membership of the caller (L2-051)
+      alt not a member (L2-067 AC9)
+        handler --> spa : 404 popkin_not_found, as without the address
+      else member
+        handler --> spa : 200, text rendered as text (L2-067 AC10)
+      end
+    end
+  end
+end
+@enduml

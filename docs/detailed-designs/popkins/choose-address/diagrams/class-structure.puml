@@ -1,0 +1,129 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Choose the address
+
+package "Popkin.Domain" {
+  class PopkinAddress <<value object>> {
+    -string value
+    +{static} TryParse(text, out address, out problem): bool
+    +ToString(): string
+  }
+  enum AddressProblem {
+    TooShort
+    TooLong
+    Malformed
+  }
+  class AddressRules <<static>> {
+    +int MinLength = 3
+    +int MaxLength = 40
+    +int SuggestionCount = 3
+  }
+  class AddressClaim {
+    +string Address
+    +Guid PopkinId
+    +DateTimeOffset ClaimedAt
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +PopkinAddress Address
+    +string InviteCode
+    +{static} Start(host, name, emoji, colour, endsAt, address, inviteCode, now): PopkinSpace
+  }
+}
+package "Popkin.Application" {
+  class AddressOptions {
+    +string BaseDomain
+    +string[] Reserved
+  }
+  interface IAddressAvailability {
+    +IsTakenAsync(address, ct): Task<bool>
+    +SuggestAsync(address, ct): Task<string[]>
+  }
+  class AddressAvailability
+  class CheckAddressQuery {
+    +string Address
+  }
+  class CheckAddressQueryHandler {
+    +Handle(query, ct): Task<AddressCheckDto>
+  }
+  class AddressCheckDto {
+    +string Address
+    +string Status
+    +string[] Suggestions
+  }
+  class CreatePopkinCommand {
+    +string Name
+    +string Emoji
+    +string Colour
+    +string Length
+    +DateTimeOffset? EndsAt
+    +string Address
+  }
+  class CreatePopkinCommandHandler {
+    +Handle(command, ct): Task<PopkinCreatedDto>
+  }
+  class AddressTakenException {
+    +string[] Suggestions
+  }
+}
+package "Popkin.Api" {
+  class AddressesController {
+    +Check(address, ct): Task<AddressCheckDto>
+  }
+}
+package "Frontend (popkin app + api library)" {
+  class NewPopkinDraft {
+    +name: Signal<string>
+    +address: Signal<string>
+    +addressEdited: Signal<boolean>
+  }
+  class AddressCheck {
+    +state: Signal<AddressCheckState>
+    +canContinue: Signal<boolean>
+    +update(address): void
+    +retry(): void
+  }
+  class NameYourPopkinPage
+  interface AddressesApi {
+    +check(address): Observable<AddressCheckView>
+  }
+  class HttpAddressesApi
+}
+PopkinSpace --> PopkinAddress
+PopkinAddress ..> AddressRules
+PopkinAddress ..> AddressProblem
+AddressClaim "1" --> "1" PopkinSpace : claimed by
+AddressAvailability ..|> IAddressAvailability
+AddressAvailability --> AddressOptions : reserved words
+AddressAvailability ..> AddressClaim : reads
+AddressesController ..> CheckAddressQuery : sends
+CheckAddressQueryHandler ..> CheckAddressQuery : handles
+CheckAddressQueryHandler --> IAddressAvailability
+CheckAddressQueryHandler ..> AddressCheckDto : returns
+CreatePopkinCommandHandler ..> CreatePopkinCommand : handles
+CreatePopkinCommandHandler --> IAddressAvailability
+CreatePopkinCommandHandler ..> AddressClaim : inserts
+CreatePopkinCommandHandler ..> PopkinSpace : creates
+CreatePopkinCommandHandler ..> AddressTakenException : throws
+HttpAddressesApi ..|> AddressesApi
+NameYourPopkinPage --> NewPopkinDraft
+NameYourPopkinPage --> AddressCheck
+AddressCheck --> AddressesApi : ADDRESSES_API
+@enduml

@@ -33,14 +33,14 @@ end box
 actor -> page : Choose "Join with a code" on welcome, open /join (L2-015 AC5)
 page --> actor : "Got a code?" field "Invite code or link", hint "It looks like popk.in/lakeside."
 actor -> page : Type or paste, choose "Find my Popkin"
-page -> parse : parseInviteInput(text)
+page -> parse : parseInviteInput(text, baseDomain): code and address, if any
 alt nothing usable
   parse --> page : null
   page --> actor : Field invalid "We can't find a Popkin with that code." text kept
 else code
   parse --> page : code
   page --> actor : "Finding your Popkin…", disabled
-  page -> client : getPreview(code)
+  page -> client : getPreview(code, address)
   client -> ctrl : GET /api/invites/(code)
   ctrl -> ctrl : invite-codes rate limit (L2-053 AC3)
   alt over limit
@@ -59,7 +59,7 @@ else code
       handler --> ctrl : InvitePreviewDto
       ctrl --> client : 200
       client --> page : preview
-      page -> router : navigate /i/(code)
+      page -> router : load InviteUrl on the Popkin's address (L2-065 AC6)
     end
   end
 end

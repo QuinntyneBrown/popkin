@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Open a Popkin by its address
+
+Person(member, "Member", "Opens the Popkin's address")
+Person(other, "Visitor or non-member", "Opens an address without belonging to the Popkin")
+System(popkin, "Popkin", "Answers on popkin.community and on every address under it")
+System_Ext(dns, "DNS", "popkin.community and *.popkin.community records")
+Rel(member, popkin, "Opens https://lakeside-weekend.popkin.community", "HTTPS")
+Rel(other, popkin, "Opens an address; learns nothing of the Popkin", "HTTPS")
+Rel(member, dns, "Resolves the address host")
+@enduml

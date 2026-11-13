@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Address safety
+
+Person(person, "Person", "Signed in, or a visitor")
+System(popkin, "Popkin", "Serves popkin.community and *.popkin.community")
+System_Ext(dns, "DNS provider", "<TO SUPPLY>; apex and wildcard records")
+System_Ext(ca, "Certificate authority", "<TO SUPPLY>; ACME, DNS-01 challenge")
+System_Ext(other, "Any other site", "May try to send requests to Popkin")
+Rel(person, popkin, "Opens the apex and addresses", "HTTPS")
+Rel(person, dns, "Resolves hosts")
+Rel(popkin, ca, "Renews the wildcard certificate ahead of need", "ACME")
+Rel(popkin, dns, "Answers the DNS-01 challenge", "Provider API")
+Rel(other, popkin, "Cross-site requests: no cookie, refused changes")
+@enduml

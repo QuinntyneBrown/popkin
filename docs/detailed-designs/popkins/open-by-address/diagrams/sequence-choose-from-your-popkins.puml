@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — Choose a Popkin on Your Popkins
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app on popkin.community" #E0F2FE
+  participant "MyPopkinsPage" as page
+end box
+box "Frontend — Popkin web app on the address host" #E0F2FE
+  participant "popkinAtAddressResolver" as resolver
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetMyPopkinsQueryHandler" as list
+  participant "PopkinUrlBuilder" as urls
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /popkins
+page -> ctrl : GET /api/popkins
+ctrl -> list : Send GetMyPopkinsQuery
+list -> db : Caller's Popkins
+db --> list : Rows with Address
+list -> urls : AddressUrl(address)
+urls --> list : https://lakeside-weekend.popkin.community/
+list --> ctrl : MyPopkinsDto with AddressUrl per card
+ctrl --> page : 200
+page --> actor : Cards, each an <a href> to its address
+actor -> page : Choose "Lakeside Weekend" (L2-064 AC9)
+page -> resolver : Full page load on the address host
+resolver -> ctrl : GET /api/popkins/at/lakeside-weekend
+ctrl --> resolver : 200 PopkinAtAddressView
+resolver --> actor : Popkin home, or its recap when wrapped up
+@enduml

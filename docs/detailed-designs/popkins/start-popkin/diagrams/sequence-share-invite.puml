@@ -34,7 +34,7 @@ else page reloaded
   client --> page : InviteView
 end
 page -> qr : link and QR modules
-page --> actor : "Pop! (name) is up." tile in colour, QR code, link (L2-010 AC1)
+page --> actor : "Pop! (name) is up." tile in colour, QR code, link on the address, address as text and why (L2-010 AC1, L2-065 AC2)
 opt prefers-reduced-motion: no-preference (L2-010 AC7, L2-060)
   page --> actor : Tile springs in, confetti burst once
 end
