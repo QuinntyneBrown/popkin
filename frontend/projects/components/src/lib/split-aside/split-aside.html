@@ -19,6 +19,26 @@
     @if (heading()) {
       <p class="split-aside__title">{{ heading() }}</p>
     }
+    @if (photos().length) {
+      <div class="split-aside__photos">
+        @for (item of photos(); track $index) {
+          <img class="split-aside__photos-item" alt="" [src]="item" />
+        }
+      </div>
+    }
+    @if (name()) {
+      <div class="split-aside__id">
+        @if (tile(); as emoji) {
+          <span pk-popkin-tile size="md" [emoji]="emoji"></span>
+        }
+        <div class="split-aside__id-text">
+          <p class="split-aside__name truncate">{{ name() }}</p>
+          @if (line()) {
+            <p class="split-aside__line">{{ line() }}</p>
+          }
+        </div>
+      </div>
+    }
     <ng-content />
     @if (text()) {
       <p class="split-aside__text">{{ text() }}</p>
