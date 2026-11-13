@@ -1,3 +1,4 @@
+using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
 
@@ -33,4 +34,10 @@ public interface IPopkinNotifier
 
     /// <summary>The group call ended. To every member of the Popkin with a connection open.</summary>
     Task CallEnded(Guid popkinId, Guid callId);
+
+    /// <summary>Someone came onto the call. To the connections on the call.</summary>
+    Task ParticipantJoined(Guid callId, CallParticipantDto participant);
+
+    /// <summary>Someone left the call. To the connections on the call.</summary>
+    Task ParticipantLeft(Guid callId, Guid membershipId);
 }

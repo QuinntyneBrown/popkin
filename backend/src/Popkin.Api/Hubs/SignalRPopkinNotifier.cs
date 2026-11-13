@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
 using Popkin.Application.Telemetry;
@@ -39,6 +40,14 @@ public sealed class SignalRPopkinNotifier(
 
     public Task CallEnded(Guid popkinId, Guid callId) =>
         SendAsync(nameof(IPopkinClient.CallEnded), () => Group(popkinId).CallEnded(popkinId, callId));
+
+    public Task ParticipantJoined(Guid callId, CallParticipantDto participant) =>
+        SendAsync(nameof(IPopkinClient.ParticipantJoined), () => Call(callId).ParticipantJoined(callId, participant));
+
+    public Task ParticipantLeft(Guid callId, Guid membershipId) =>
+        SendAsync(nameof(IPopkinClient.ParticipantLeft), () => Call(callId).ParticipantLeft(callId, membershipId));
+
+    private IPopkinClient Call(Guid callId) => hub.Clients.Group(PopkinHub.CallGroupOf(callId));
 
     private IPopkinClient Group(Guid popkinId) => hub.Clients.Group(PopkinHub.GroupOf(popkinId));
 

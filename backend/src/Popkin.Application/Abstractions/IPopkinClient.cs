@@ -1,3 +1,4 @@
+using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
 
@@ -47,4 +48,13 @@ public interface IPopkinClient
     /// `CallChanged` of that call that arrives after it is ignored.
     /// </summary>
     Task CallEnded(Guid popkinId, Guid callId);
+
+    /// <summary>
+    /// Someone came onto the call. A fact, sent to the connections on the call; the one who
+    /// joined has the participants from the answer to their join.
+    /// </summary>
+    Task ParticipantJoined(Guid callId, CallParticipantDto participant);
+
+    /// <summary>Someone left the call. A fact: applying it twice, or for someone not held, ends the same.</summary>
+    Task ParticipantLeft(Guid callId, Guid membershipId);
 }

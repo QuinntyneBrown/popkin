@@ -40,5 +40,8 @@ public sealed class CallParticipant
         CameraOn = cameraOn,
     };
 
+    /// <summary>The connection the participant is on the call with from now on.</summary>
+    public void Connect(string connectionId) => ConnectionId = connectionId;
+
     internal void Leave(DateTimeOffset now) => LeftAt = now;
 }

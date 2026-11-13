@@ -60,9 +60,10 @@ public sealed class JoinCallCommandHandler(
                 continue;
             }
 
-            // Told after the commit, in the same request: the banner of every member with Popkin
-            // open shows the new count (L2-029 AC2).
+            // Told after the commit, in the same request: those on the call learn who came, and
+            // the banner of every member with Popkin open shows the new count (L2-029 AC2).
             var joined = await JoinedAsync(call, membership, cancellationToken);
+            await notifier.ParticipantJoined(call.Id, joined.Participants.Single(p => p.MembershipId == membership.Id));
             await notifier.CallChanged(popkin.Id, call.Id, call.Version, joined.Call.ParticipantCount);
             return new JoinCallResult(joined, started);
         }

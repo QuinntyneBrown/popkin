@@ -26,6 +26,17 @@ internal static class CallReads
         return ids.Count == 0 ? null : ids[0];
     }
 
+    /// <summary>
+    /// The person's participant on that call, tracked, or null when they are not on it. For the
+    /// hub, where the person comes from the connection and no Popkin is named.
+    /// </summary>
+    public static Task<CallParticipant?> OnCallAsync(IAppDbContext db, Guid personId, Guid callId, CancellationToken cancellationToken) =>
+        db.CallParticipants.FirstOrDefaultAsync(
+            p => p.CallId == callId
+                && p.LeftAt == null
+                && db.Memberships.Any(m => m.Id == p.MembershipId && m.PersonId == personId && m.LeftAt == null),
+            cancellationToken);
+
     /// <summary>Everyone on the call, in the order they joined.</summary>
     public static async Task<List<CallParticipantDto>> ParticipantsAsync(
         IAppDbContext db, Guid callId, IPhotoStore photos, CancellationToken cancellationToken)

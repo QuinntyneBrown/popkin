@@ -31,7 +31,7 @@ public static class CallProblems
 /// Takes a participant off their call, whether they chose "Leave" or their connection dropped
 /// and did not come back.
 /// </summary>
-public sealed class CallLeaver(IAppDbContext db, TimeProvider clock, IPopkinNotifier notifier)
+public sealed class CallLeaver(IAppDbContext db, TimeProvider clock, IPopkinNotifier notifier, IPopkinConnections connections)
 {
     /// <summary>How often a leave that lost to another change of the same call is tried again.</summary>
     private const int Attempts = 3;
@@ -63,8 +63,15 @@ public sealed class CallLeaver(IAppDbContext db, TimeProvider clock, IPopkinNoti
                 continue;
             }
 
-            // Told after the commit: the banner shows the lower count, or goes for everyone
-            // when the call has ended (L2-029 AC6).
+            // After the commit: the connection they were on the call with hears no more of it,
+            // those still on it learn who left, and the banner shows the lower count, or goes
+            // for everyone when the call has ended (L2-029 AC6).
+            if (participant.ConnectionId is { } connectionId)
+            {
+                await connections.RemoveFromCallAsync(connectionId, call.Id, CancellationToken.None);
+            }
+
+            await notifier.ParticipantLeft(call.Id, participant.MembershipId);
             if (call.EndedAt is null)
             {
                 await notifier.CallChanged(call.PopkinId, call.Id, call.Version, remaining);
