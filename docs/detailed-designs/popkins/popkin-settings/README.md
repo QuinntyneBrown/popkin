@@ -17,9 +17,9 @@ Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
 `popkins/leave-popkin`.
 
 Journey 9, Wrap up, built the menu with the two rows it needed: "Invite people" for every
-member and "Wrap up" for the Host. "Edit name and look" and "Change how long it lasts" are
-journey 16 and "Leave this Popkin" is journey 18; nothing else of this design is built
-([Built in journey 9](#built-in-journey-9)).
+member and "Wrap up" for the Host. Journey 18 added "Leave this Popkin", so a member's menu is
+whole. "Edit name and look" and "Change how long it lasts" are journey 16; nothing else of this
+design is built ([Built in journey 9](#built-in-journey-9), [Built in journey 18](#built-in-journey-18)).
 
 A Popkin's address ([Choose the address](../choose-address/README.md)) is not part of its look.
 Renaming the Popkin leaves the address as it was, so printed QR codes and saved links keep
@@ -33,7 +33,8 @@ that cannot be edited, and no endpoint changes it.
 - `docs/mocks/dialogs/popkin-settings/default.html` (Host menu) and `member.html` (member menu),
   the whole menu.
 - `docs/mocks/dialogs/popkin-settings/host-now.html` and `member-now.html` — the menu as
-  journey 9 built it: "Invite people", with the hint "QR code and link", and, for the Host,
+  journey 9 built it (`host-now.html` is still the Host's, until journey 16; a member's is
+  `member.html` from journey 18 on): "Invite people", with the hint "QR code and link", and, for the Host,
   "Wrap up", with the hint "End it now and send the recap".
 - `docs/mocks/dialogs/edit-popkin/default.html`, `busy.html` ("Saving…"), `invalid.html` ("Give
   your Popkin a name."), `failed.html` ("We couldn't save that. Your changes are still here. Try
@@ -131,9 +132,18 @@ that cannot be edited, and no endpoint changes it.
   `menu-list` variant.
 - Playwright: `e2e/tests/popkin-settings.spec.ts`, with `e2e/pages/popkin-settings.dialog.ts`.
 - Not built: `EditPopkinDialog`, `ChangeLengthDialog`, `PATCH /api/popkins/{popkinId}`,
-  `PUT …/length`, `PopkinChanged`, and the "Leave this Popkin" row
-  ([Leave a Popkin](../leave-popkin/README.md)). Settings cannot be reached in a wrapped-up
+  `PUT …/length` and `PopkinChanged`. Settings cannot be reached in a wrapped-up
   Popkin, whose home opens its recap (known gap 52).
+
+### Built in journey 18
+
+- **"Leave this Popkin"** — the danger `pk-menu-item` with the `log-out` icon and the hint "You
+  can come back with a new invite", for a member who is not the Host only, so a member's menu
+  is "Invite people" and "Leave this Popkin" (L2-020 AC2) and the Host's has no way to leave
+  (L2-047 AC3). The dialog closes with `leave`, and the home opens "Leave {name}?"
+  ([Leave a Popkin](../leave-popkin/README.md)).
+- Playwright: the member's menu in `e2e/tests/popkin-settings.spec.ts`, and its row in the
+  parity spec of `pk-menu-item`; the route `popkinSettingsMember` opens `member.html`.
 
 The diagrams below were not redrawn (gap 53). They show the whole menu, four rows for the Host
 and two for any other member.

@@ -85,6 +85,29 @@ request the former member makes in that Popkin is answered as if it did not exis
   with "You're still in {name}. Try again." (decided in journey 18), in the danger `pk-alert`
   the other confirm dialogs use, where this design first named a `pk-toast`.
 
+### Built in journey 18
+
+Everything above is built, with these choices:
+
+- **Backend** — `MembersController.LeaveMe` sends `LeavePopkinCommand`
+  (`Application/Members/LeavePopkin.cs`). The Host is refused with `403` `host_cannot_leave`;
+  `HostCannotLeave()` on the handler stands for the `HostCannotLeaveException` named above, as
+  every other refusal is a `ProblemException`. `IPopkinConnections.RemoveFromPopkinAsync` and
+  `PresenceTracker.Leave` are new. No migration: `LeftAt` was in the schema since journey 1.
+- **Frontend** — `LeavePopkinDialog` (`dialogs/leave-popkin/`), `PopkinsApi.leave`, and
+  `PopkinRealtime.memberLeft$`, on which `PopkinHomeStore` reads the header and the members
+  again, `MyPopkinsStore` reads the list again and `ThreadStore` counts one member fewer.
+- **Tests** — `backend/tests/Popkin.Api.Tests/Members/LeavePopkinTests.cs` (leaving, the
+  others told, off the call, the Host refused, `404` for everything afterwards, a stranger and
+  no session, back with a new invite); `PresenceTrackerTests` for leaving "here now"; the
+  store unit tests of `memberLeft$`; `e2e/tests/leave-popkin.spec.ts` (the dialog, Stay and
+  Escape, leaving at 360 and 1280 px, busy, failed, not found afterwards), with
+  `e2e/pages/leave-popkin.dialog.ts` and `e2e/fixtures/leaving.ts`, and the live count in
+  `popkin-home.spec.ts` and `group-chat.spec.ts`. The parity spec of `pk-dialog` covers the
+  default, busy and failed states, and the sweeps list them (`fixtures/leave-states.ts`).
+- The diagrams were not redrawn: they still show `HostCannotLeaveException` and a toast on
+  failure.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |
