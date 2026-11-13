@@ -1,0 +1,16 @@
+<span
+  pk-avatar
+  [initials]="avatar()?.initials ?? ''"
+  [photo]="avatar()?.photoUrl"
+  [blank]="!avatar()"
+  [attr.data-accent]="avatar()?.accent"
+></span>
+<div class="comment__main">
+  <div class="comment__head">
+    <span class="comment__name">{{ name() }}</span>
+    @if (stars()) {
+      <span pk-rating [value]="stars()" [prefix]="ratedText()"></span>
+    }
+  </div>
+  <p class="comment__text">{{ text() }}</p>
+</div>

@@ -1,0 +1,34 @@
+:host {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+}
+
+/* A row of a divided list: a hairline between it and the comment before. */
+:host(:not(:first-child)) {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.comment__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.comment__name {
+  font: var(--font-weight-bold) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.comment__text {
+  margin-top: var(--space-1);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed)
+    var(--font-family-sans);
+  overflow-wrap: anywhere;
+}
