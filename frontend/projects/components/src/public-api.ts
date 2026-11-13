@@ -101,3 +101,5 @@ export * from './lib/textarea/textarea';
 export * from './lib/picture-field/picture-field';
 export * from './lib/menu-list/menu-list';
 export * from './lib/menu-item/menu-item';
+export * from './lib/switch/switch';
+export * from './lib/setting-row/setting-row';

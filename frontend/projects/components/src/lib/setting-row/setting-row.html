@@ -1,0 +1,14 @@
+<span class="setting-row__icon"><svg pk-icon size="md" [name]="icon()"></svg></span>
+<span class="setting-row__words">
+  <span class="setting-row__title">{{ heading() }}</span>
+  @if (text()) {
+    <span class="setting-row__sub" [id]="id + '-text'">{{ text() }}</span>
+  }
+</span>
+<button
+  pk-switch
+  [attr.aria-label]="heading()"
+  [attr.aria-describedby]="text() ? id + '-text' : null"
+  [disabled]="disabled()"
+  [(checked)]="checked"
+></button>

@@ -1,0 +1,38 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--space-16);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+/* The tile the icon sits on (the design system's icon tile). */
+.setting-row__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+}
+
+.setting-row__words {
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-row__title {
+  display: block;
+  font-weight: var(--font-weight-bold);
+}
+
+.setting-row__sub {
+  display: block;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
