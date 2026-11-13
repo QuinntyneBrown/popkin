@@ -164,7 +164,10 @@ describe('PhotoUploads', () => {
       api.finish(1);
       expect(uploads.phase()).toBe('finished');
       expect(uploads.items()[0].problem).toBe('Didn’t upload.');
-      expect(uploads.outcome()).toBe('One photo didn’t upload. The other one is in the album.');
+      expect(uploads.outcome()).toEqual({
+        heading: 'One photo didn’t upload.',
+        text: 'The other one is in the album.',
+      });
       expect(uploads.action()).toEqual({ label: 'Done', disabled: false });
     });
 
@@ -205,7 +208,10 @@ describe('PhotoUploads', () => {
       expect(uploads.phase()).toBe('finished');
       expect(api.sent).toHaveLength(1);
       expect(states()).toEqual(['failed', 'invalid', 'failed']);
-      expect(uploads.outcome()).toBe('This Popkin has wrapped up, so photos can’t be added.');
+      expect(uploads.outcome()).toEqual({
+        heading: 'This Popkin has wrapped up.',
+        text: 'Photos can’t be added to it any more.',
+      });
     });
   });
 });

@@ -50,11 +50,19 @@ export function captionCount(caption: string): string | null {
 }
 
 /** The alert over the rows once the uploads end; null when every photo went up (L2-031 AC5). */
-export function uploadOutcome(failed: number, added: number): string | null {
+export function uploadOutcome(
+  failed: number,
+  added: number,
+): { heading: string; text: string } | null {
   if (failed <= 0) return null;
-  if (added <= 0) return failed === 1 ? 'The photo didn’t upload.' : 'None of the photos uploaded.';
-  const lost = `${capital(word(failed))} ${failed === 1 ? 'photo' : 'photos'} didn’t upload.`;
-  return `${lost} The other ${word(added)} ${added === 1 ? 'is' : 'are'} in the album.`;
+  if (added <= 0) {
+    const heading = failed === 1 ? 'The photo didn’t upload.' : 'None of the photos uploaded.';
+    return { heading, text: '' };
+  }
+  return {
+    heading: `${capital(word(failed))} ${failed === 1 ? 'photo' : 'photos'} didn’t upload.`,
+    text: `The other ${word(added)} ${added === 1 ? 'is' : 'are'} in the album.`,
+  };
 }
 
 function word(n: number): string {

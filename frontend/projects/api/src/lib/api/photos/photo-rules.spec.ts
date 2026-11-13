@@ -89,15 +89,18 @@ describe('captionCount', () => {
 });
 
 describe('uploadOutcome', () => {
+  it('says nothing when every photo went up', () => {
+    expect(uploadOutcome(0, 3)).toBeNull();
+  });
+
   it.each([
-    [0, 3, null],
-    [1, 2, 'One photo didn’t upload. The other two are in the album.'],
-    [2, 1, 'Two photos didn’t upload. The other one is in the album.'],
-    [3, 9, 'Three photos didn’t upload. The other nine are in the album.'],
-    [1, 0, 'The photo didn’t upload.'],
-    [3, 0, 'None of the photos uploaded.'],
-    [2, 15, 'Two photos didn’t upload. The other 15 are in the album.'],
-  ])('%i failed and %i added: %s', (failed, added, text) => {
-    expect(uploadOutcome(failed, added)).toBe(text);
+    [1, 2, 'One photo didn’t upload.', 'The other two are in the album.'],
+    [2, 1, 'Two photos didn’t upload.', 'The other one is in the album.'],
+    [3, 9, 'Three photos didn’t upload.', 'The other nine are in the album.'],
+    [2, 15, 'Two photos didn’t upload.', 'The other 15 are in the album.'],
+    [1, 0, 'The photo didn’t upload.', ''],
+    [3, 0, 'None of the photos uploaded.', ''],
+  ])('%i failed and %i added: %s %s', (failed, added, heading, text) => {
+    expect(uploadOutcome(failed, added)).toEqual({ heading, text });
   });
 });

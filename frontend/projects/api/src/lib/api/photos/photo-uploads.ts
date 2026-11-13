@@ -40,7 +40,10 @@ const REFUSED: Record<string, string> = {
   photo_too_large: 'This file is too large. Photos can be up to 10 MB.',
   caption_too_long: 'This caption is longer than 200 characters.',
 };
-const WRAPPED_UP = 'This Popkin has wrapped up, so photos can’t be added.';
+const WRAPPED_UP = {
+  heading: 'This Popkin has wrapped up.',
+  text: 'Photos can’t be added to it any more.',
+};
 
 /**
  * The photos a member chose to add (docs/detailed-designs/photos/add-photos): which will go,
