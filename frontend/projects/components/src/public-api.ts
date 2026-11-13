@@ -46,3 +46,4 @@ export * from './lib/photo-picker/photo-picker';
 export * from './lib/people-list/people-list';
 export * from './lib/arrival/arrival';
 export * from './lib/badge/badge';
+export * from './lib/chip/chip';

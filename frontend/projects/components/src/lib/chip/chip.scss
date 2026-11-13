@@ -1,0 +1,26 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  height: var(--space-10);
+  min-width: var(--target-comfortable);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+:host([aria-pressed='true']) {
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+}
+
+:host(.chip--outline) {
+  height: var(--target-comfortable);
+  border: var(--border-width-thick) solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+}
