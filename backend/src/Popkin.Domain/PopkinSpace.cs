@@ -63,4 +63,16 @@ public sealed class PopkinSpace
     }
 
     public void ChangeInviteCode(string inviteCode) => InviteCode = inviteCode;
+
+    /// <summary>Wraps the Popkin up: from now on it is read-only (L2-045). Wrapping up twice changes nothing.</summary>
+    public void WrapUp(DateTimeOffset now)
+    {
+        if (Status == PopkinStatus.WrappedUp)
+        {
+            return;
+        }
+
+        Status = PopkinStatus.WrappedUp;
+        WrappedUpAt = now;
+    }
 }

@@ -10,19 +10,15 @@ public static class RateLimitPolicyNames
     /// <summary>10 code requests per address per 10 minutes (L2-053 AC1).</summary>
     public const string CodesPerAddress = "codes-per-address";
 
+    /// <summary>20 invite codes tried per address per 10 minutes (L2-053 AC3).</summary>
+    public const string InviteCodes = "invite-codes";
+
     public static IServiceCollection AddPopkinRateLimits(this IServiceCollection services)
     {
         services.AddRateLimiter(options =>
         {
-            options.AddPolicy(CodesPerAddress, context =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                    _ => new FixedWindowRateLimiterOptions
-                    {
-                        PermitLimit = 10,
-                        Window = TimeSpan.FromMinutes(10),
-                        QueueLimit = 0,
-                    }));
+            options.AddPolicy(CodesPerAddress, context => PerAddress(context, permits: 10));
+            options.AddPolicy(InviteCodes, context => PerAddress(context, permits: 20));
 
             options.OnRejected = async (context, cancellationToken) =>
             {
@@ -41,4 +37,14 @@ public static class RateLimitPolicyNames
         });
         return services;
     }
+
+    private static RateLimitPartition<string> PerAddress(HttpContext context, int permits) =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = permits,
+                Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0,
+            });
 }
