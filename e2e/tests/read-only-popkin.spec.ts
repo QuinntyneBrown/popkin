@@ -1,12 +1,14 @@
-import { chatUrl } from '../fixtures/chat';
+import { chatUrl, popkinId } from '../fixtures/chat';
 import {
   canoeId,
   experienceUrl,
   experiencesUrl,
   maraWithExperiences,
 } from '../fixtures/experiences';
+import { previewKey, recordedPreview } from '../fixtures/journeys';
 import { albumUrl, maraInTheAlbum } from '../fixtures/photos';
 import { expect, test } from '../fixtures/pk-test';
+import { answer } from '../fixtures/stubs';
 import { maraWithWrapUp, photosRemoved, recapUrl, wrappedUp } from '../fixtures/wrap-up';
 import { ExperienceDetailPage } from '../pages/experience-detail.page';
 import { ExperiencesPage } from '../pages/experiences.page';
@@ -124,5 +126,24 @@ test.describe('The experiences of a wrapped-up Popkin', () => {
     await expect(detail.commentsHeading).toBeVisible();
     await expect(detail.ratingPanel).toHaveCount(0);
     await expect(detail.actions).toHaveCount(0);
+  });
+});
+
+// L2-016 AC3
+test.describe('The invite link of a wrapped-up Popkin', () => {
+  test('opens the recap for someone who is a member', async ({ page, pk }) => {
+    await maraWithWrapUp(page, (wrapUp) => wrapUp.wrap());
+    await answer(page, previewKey, {
+      status: 200,
+      body: {
+        ...recordedPreview,
+        state: 'WrappedUp',
+        viewer: { isMember: true, popkinId },
+      },
+    });
+
+    await pk.open('joinInvite');
+
+    await expect(page).toHaveURL(recapUrl);
   });
 });

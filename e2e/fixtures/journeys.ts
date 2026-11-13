@@ -92,7 +92,7 @@ export const previewKey = `GET /api/invites/${inviteCode}`;
 export const membersKey = `GET /api/invites/${inviteCode}/members`;
 export const joinKey = `POST /api/invites/${inviteCode}/join`;
 
-const recordedPreview = recordedBody<InvitePreview>(previewKey);
+export const recordedPreview = recordedBody<InvitePreview>(previewKey);
 
 interface Avatar {
   initials: string;
