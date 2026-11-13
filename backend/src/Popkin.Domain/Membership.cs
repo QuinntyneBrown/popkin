@@ -47,4 +47,7 @@ public sealed class Membership
     /// added stays under the name it held. Coming back is a new membership.
     /// </summary>
     public void Leave(DateTimeOffset now) => LeftAt ??= now;
+
+    /// <summary>The name the other members see changed with the account's (L2-048 AC2).</summary>
+    public void Rename(string displayName) => DisplayName = displayName;
 }

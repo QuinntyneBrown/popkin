@@ -33,4 +33,7 @@ public sealed class Person
         Email = channel == ContactChannel.Email ? destination : null,
         CreatedAt = now,
     };
+
+    /// <summary>A new name of 1 to 40 characters, already trimmed (L2-048 AC2).</summary>
+    public void Rename(string name) => Name = name;
 }

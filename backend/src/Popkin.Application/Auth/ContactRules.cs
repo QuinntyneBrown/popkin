@@ -38,6 +38,15 @@ public static partial class ContactRules
         return email;
     }
 
+    /// <summary>
+    /// A stored phone number as it is typed, "(415) 555-0148"; an email as it is kept. Shown to
+    /// the person whose it is, on their account (L2-048 AC1).
+    /// </summary>
+    public static string Format(ContactChannel channel, string destination) =>
+        channel == ContactChannel.Phone && destination.Length == 12 && destination.StartsWith("+1", StringComparison.Ordinal)
+            ? $"({destination[2..5]}) {destination[5..8]}-{destination[8..]}"
+            : destination;
+
     /// <summary>All but the last two digits of a phone number are masked (L2-004 AC1).</summary>
     public static string Display(ContactChannel channel, string destination) =>
         channel == ContactChannel.Phone ? $"(•••) •••-••{destination[^2..]}" : destination;
