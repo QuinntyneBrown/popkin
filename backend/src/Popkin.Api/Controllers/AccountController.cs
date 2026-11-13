@@ -18,6 +18,11 @@ public sealed class AccountController(ISender sender) : ControllerBase
     public async Task<ActionResult<AccountDto>> Get(CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetAccountQuery(), cancellationToken));
 
+    /// <summary>The active Popkins the caller hosts, which wrap up with the account (L2-049 AC3).</summary>
+    [HttpGet("deletion-impact")]
+    public async Task<ActionResult<DeletionImpactDto>> GetDeletionImpact(CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetDeletionImpactQuery(), cancellationToken));
+
     public sealed record UpdateAccountRequest(string? Name);
 
     /// <summary>A new name (L2-048 AC2); 400 `name_invalid` unless it is 1 to 40 characters (AC3).</summary>
