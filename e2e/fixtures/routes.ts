@@ -13,6 +13,7 @@ export interface ScreenRoute {
 const created = responses['POST /api/popkins'].body;
 const invite = `/i/${created.inviteCode}`;
 const chat = `/p/${created.id}/chat/everyone`;
+const home = `/p/${created.id}`;
 
 export const routes = {
   home: { app: '/' },
@@ -51,6 +52,13 @@ export const routes = {
   yourProfileSubmitting: { app: `${invite}/profile`, mock: 'pages/your-profile/submitting.html' },
   yourProfileError: { app: `${invite}/profile`, mock: 'pages/your-profile/error.html' },
   youreIn: { app: `${invite}/welcome`, mock: 'pages/youre-in/default.html' },
+  popkinHome: { app: home, mock: 'pages/popkin-home/default.html' },
+  popkinHomeLoading: { app: home, mock: 'pages/popkin-home/loading.html' },
+  popkinHomeEmpty: { app: home, mock: 'pages/popkin-home/empty.html' },
+  popkinHomeError: { app: home, mock: 'pages/popkin-home/error.html' },
+  popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
+  inviteDialog: { app: home, mock: 'dialogs/invite/default.html' },
+  inviteDialogCopied: { app: home, mock: 'dialogs/invite/copied.html' },
   groupChat: { app: chat, mock: 'pages/group-chat/default.html' },
   groupChatLoading: { app: chat, mock: 'pages/group-chat/loading.html' },
   groupChatEmpty: { app: chat, mock: 'pages/group-chat/empty.html' },

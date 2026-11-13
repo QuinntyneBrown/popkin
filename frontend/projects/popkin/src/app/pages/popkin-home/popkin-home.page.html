@@ -1,0 +1,228 @@
+@if (store.state() === 'error') {
+  <div pk-screen [accent]="accent()">
+    <header pk-top-bar slot="header" back="/popkins" backLabel="My Popkins"></header>
+    <h1 class="visually-hidden">Popkin home</h1>
+    <div
+      pk-empty-state
+      icon="offline"
+      heading="We couldn’t open this Popkin"
+      text="It’s still there. Check your connection and try again."
+      [alert]="true"
+    >
+      <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+        <svg pk-icon name="retry" size="md"></svg>Try again
+      </button>
+      <a pk-button variant="secondary" size="md" routerLink="/popkins">My Popkins</a>
+    </div>
+  </div>
+} @else {
+  <div pk-app-screen [accent]="accent()" layout="tab" body="flush">
+    <header
+      pk-home-header
+      slot="header"
+      back="/popkins"
+      [loading]="!popkin()"
+      [name]="popkin()?.name ?? ''"
+      [emoji]="popkin()?.emoji ?? ''"
+      [avatars]="avatars()"
+      [more]="more()"
+      [members]="membersLabel()"
+      [timeLeft]="store.timeLeftLine()"
+    >
+      <a
+        pk-button
+        slot="actions"
+        variant="popkin"
+        size="md"
+        [routerLink]="['/p', popkinId(), 'call']"
+      >
+        <svg pk-icon name="video" size="md"></svg>Group call
+      </a>
+      <button
+        pk-button
+        slot="actions"
+        type="button"
+        variant="secondary"
+        size="md"
+        (click)="invite()"
+      >
+        <svg pk-icon name="qr" size="md"></svg>Invite
+      </button>
+    </header>
+
+    @if (!popkin()) {
+      <div pk-home [loading]="true"></div>
+    }
+    @if (popkin(); as popkin) {
+      <div pk-home>
+        <section pk-section [lead]="true">
+          @switch (store.chat().state) {
+            @case ('ready') {
+              <a
+                pk-chat-card
+                [routerLink]="['/p', popkinId(), 'chat']"
+                [messages]="latest()"
+                [newCount]="store.newCount()"
+              ></a>
+            }
+            @case ('empty') {
+              <div pk-card>
+                <div
+                  pk-empty-state
+                  heading="It’s just you so far"
+                  text="Share the QR code so your people can pop in, or say the first hello."
+                  [tile]="popkin.emoji"
+                  [compact]="true"
+                >
+                  <button pk-button type="button" variant="popkin" size="md" (click)="invite()">
+                    <svg pk-icon name="qr" size="md"></svg>Invite people
+                  </button>
+                  <a
+                    pk-button
+                    variant="secondary"
+                    size="md"
+                    [routerLink]="['/p', popkinId(), 'chat', 'everyone']"
+                    [state]="{ focus: 'composer' }"
+                    >Say hello</a
+                  >
+                </div>
+              </div>
+            }
+            @case ('error') {
+              <div pk-alert heading="Chat didn’t load." action="Try again" (acted)="retry('chat')">
+                The rest of the Popkin is fine.
+              </div>
+            }
+          }
+        </section>
+
+        <section
+          pk-section
+          heading="Photos"
+          linkSuffix="photos"
+          [meta]="photosMeta()"
+          [link]="photosMeta() ? ['/p', popkinId(), 'photos'] : undefined"
+        >
+          @if (store.photos().state === 'ready') {
+            <div pk-photo-strip [photos]="thumbnails()"></div>
+          }
+          @if (store.photos().state === 'empty') {
+            <div pk-card slot="inset" [centre]="true">
+              <div
+                pk-empty-state
+                heading="No photos yet"
+                text="The album fills up as people add to it."
+                [compact]="true"
+                [level]="3"
+              >
+                <a
+                  pk-button
+                  variant="secondary"
+                  size="sm"
+                  [routerLink]="['/p', popkinId(), 'photos']"
+                >
+                  <svg pk-icon name="plus" size="md"></svg>Add the first photo
+                </a>
+              </div>
+            </div>
+          }
+          @if (store.photos().state === 'error') {
+            <div
+              pk-alert
+              slot="failure"
+              heading="Photos didn’t load."
+              action="Try again"
+              (acted)="retry('photos')"
+            >
+              The rest of the Popkin is fine.
+            </div>
+          }
+        </section>
+
+        <section
+          pk-section
+          slot="side"
+          heading="Experiences"
+          linkSuffix="experiences"
+          [meta]="experiencesMeta()"
+          [link]="experiencesMeta() ? ['/p', popkinId(), 'experiences'] : undefined"
+        >
+          @if (store.experiences().state === 'ready') {
+            @for (experience of topExperiences(); track experience.title; let first = $first) {
+              <a
+                pk-experience-row
+                [class.only-m-up]="!first"
+                [routerLink]="experience.link"
+                [title]="experience.title"
+                [photo]="experience.photo"
+                [rating]="experience.rating"
+                [ratings]="experience.ratings"
+              ></a>
+            }
+          }
+          @if (store.experiences().state === 'empty') {
+            <div pk-card slot="inset" [centre]="true">
+              <div
+                pk-empty-state
+                heading="Nothing shared yet"
+                text="Things you did, places you ate, ideas for next time."
+                [compact]="true"
+                [level]="3"
+              >
+                <a
+                  pk-button
+                  variant="secondary"
+                  size="sm"
+                  [routerLink]="['/p', popkinId(), 'experiences']"
+                >
+                  <svg pk-icon name="plus" size="md"></svg>Share one
+                </a>
+              </div>
+            </div>
+          }
+          @if (store.experiences().state === 'error') {
+            <div
+              pk-alert
+              slot="failure"
+              heading="Experiences didn’t load."
+              action="Try again"
+              (acted)="retry('experiences')"
+            >
+              The rest of the Popkin is fine.
+            </div>
+          }
+        </section>
+
+        <section pk-section slot="side" heading="Members" [meta]="membersMeta()">
+          @if (store.members().state === 'ready') {
+            <ul pk-member-list [members]="listed()"></ul>
+          }
+          @if (store.members().state === 'error') {
+            <div
+              pk-alert
+              slot="failure"
+              heading="Members didn’t load."
+              action="Try again"
+              (acted)="retry('members')"
+            >
+              The rest of the Popkin is fine.
+            </div>
+          }
+        </section>
+      </div>
+    }
+
+    <nav
+      pk-popkin-nav
+      slot="nav"
+      current="home"
+      [wide]="true"
+      [popkinId]="popkinId()"
+      [name]="popkin()?.name ?? ''"
+      [emoji]="popkin()?.emoji ?? ''"
+      [members]="membersLabel()"
+      [timeLeft]="store.timeLeft()"
+      [unread]="unreadCount()"
+    ></nav>
+  </div>
+}

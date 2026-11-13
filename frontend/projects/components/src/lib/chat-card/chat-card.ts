@@ -17,7 +17,7 @@ export interface ChatPreview {
  * The Chat card of the Popkin home (docs/design-system/components/card.html, `card--link` with
  * `chat-preview` rows): the heading, how many messages are new, and the latest messages, each
  * with who sent it, when, and one line of it. The whole card is one link to Chat: set
- * `routerLink` on it. Give it up to four messages, oldest first; the fourth shows from 1024 px
+ * `routerLink` on it. Give it up to four messages, oldest first; the oldest of four shows from 1024 px
  * (L2-058 AC11).
  */
 @Component({

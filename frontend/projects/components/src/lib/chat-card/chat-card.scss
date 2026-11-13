@@ -70,9 +70,9 @@
   color: var(--color-fg-muted);
 }
 
-/* The fourth message shows where the card has the room: from L. */
+/* A phone shows the three latest; the one before them shows where the card has room, from L. */
 @media (max-width: 63.99rem) {
-  .chat-preview:nth-child(n + 4) {
+  .chat-preview:nth-last-child(n + 4) {
     display: none;
   }
 }

@@ -79,6 +79,15 @@ export const routes: Routes = [
     title: 'You’re in · Popkin',
   },
   {
+    path: 'p/:popkinId',
+    pathMatch: 'full',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/popkin-home/popkin-home.page').then((m) => m.PopkinHomePage),
+    data: data({ shell: 'app', page: 'popkin-home' }),
+    title: 'Popkin home · Popkin',
+  },
+  {
     path: 'p/:popkinId/chat/everyone',
     canActivate: [signedInGuard],
     loadComponent: () => import('./pages/group-chat/group-chat.page').then((m) => m.GroupChatPage),
