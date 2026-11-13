@@ -249,7 +249,7 @@ test.describe('the profile step on a wider screen', () => {
 
     await expect(profile.picture).toContainText('Already in Lakeside Weekend');
     await expect(profile.names).toHaveText(['Mara Okafor', 'Walt Brennan', 'Dev Patel']);
-    await expect(profile.people.locator('.avatar')).toHaveText(['MO', 'WB', 'DP']);
+    await expect(profile.avatars).toHaveText(['MO', 'WB', 'DP']);
     await expect(profile.more).toHaveCount(0);
     await expect(profile.imIn).toBeVisible();
   });

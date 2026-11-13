@@ -78,7 +78,7 @@ test.describe('an invite to an active Popkin', () => {
     const invite = new JoinInvitePage(page);
 
     await expect(invite.heading).toHaveText('<b>Lakeside</b> <img src=x onerror=alert(1)>');
-    await expect(invite.heading.locator('*')).toHaveCount(0);
+    await expect(invite.headingMarkup).toHaveCount(0);
   });
 
   // L2-056 AC1
@@ -94,7 +94,7 @@ test.describe('an invite to an active Popkin', () => {
     await expect(invite.loading).toHaveText('Loading your invite…');
     await expect(invite.heading).toHaveText('Your invite');
     await expect(invite.skeletons.first()).toBeVisible();
-    await expect(page.getByRole('main').locator('[aria-hidden="true"] .skeleton')).toHaveCount(4);
+    await expect(invite.hiddenSkeletons).toHaveCount(4);
     await expect(invite.join).toHaveCount(0);
 
     release();

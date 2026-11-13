@@ -108,6 +108,7 @@ The husky pre-commit hook fixes staged frontend files. To check by hand, run `np
 |---|---|---|
 | Backend tests | `pwsh eng/Test-Backend.ps1` | repository root |
 | Frontend lint and format | `npm run lint` and `npm run format:check` | `frontend/` |
+| Frontend unit tests (the `api` library) | `npm test` | `frontend/` |
 | End-to-end type check | `npm run typecheck` | `e2e/` |
 | End-to-end behaviour tests | `npm test` | `e2e/` |
 

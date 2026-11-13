@@ -4,6 +4,8 @@ import type { Locator, Page } from '@playwright/test';
 export class JoinInvitePage {
   readonly root: Locator;
   readonly heading: Locator;
+  /** Any element inside the heading: there is none when a name is shown as text. */
+  readonly headingMarkup: Locator;
   readonly invitedBy: Locator;
   readonly tile: Locator;
   readonly mutedTile: Locator;
@@ -31,6 +33,8 @@ export class JoinInvitePage {
   readonly preview: Locator;
   readonly avatarStack: Locator;
   readonly skeletons: Locator;
+  /** The skeletons that assistive technology does not meet. */
+  readonly hiddenSkeletons: Locator;
   readonly buttonSkeleton: Locator;
   /** The shapes that stand in for the invite while it loads. */
   readonly skeletonGroup: Locator;
@@ -40,6 +44,7 @@ export class JoinInvitePage {
   constructor(page: Page) {
     this.root = page.locator('body[data-page="join-invite"]');
     this.heading = page.getByRole('heading', { level: 1 });
+    this.headingMarkup = this.heading.locator('*');
     this.invitedBy = page.locator('.pill');
     this.tile = page.getByRole('main').locator('.popkin-tile');
     this.mutedTile = page.locator('.popkin-tile--muted');
@@ -69,6 +74,7 @@ export class JoinInvitePage {
     // The pill's parent is the block that holds the whole preview, in the mock and in the app.
     this.preview = this.invitedBy.locator('..');
     this.skeletons = page.locator('.skeleton');
+    this.hiddenSkeletons = page.getByRole('main').locator('[aria-hidden="true"] .skeleton');
     this.skeletonGroup = page.locator('.skeleton--title').locator('..');
     this.buttonSkeleton = page.locator('.skeleton--btn');
     this.primaryButton = page.locator('.btn--popkin');

@@ -25,6 +25,7 @@ export class YourProfilePage {
   readonly picture: Locator;
   readonly people: Locator;
   readonly names: Locator;
+  readonly avatars: Locator;
   readonly more: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly nameField: Locator;
@@ -57,6 +58,7 @@ export class YourProfilePage {
     this.picture = page.getByRole('complementary', { name: 'Already here' });
     this.peopleList = this.picture.getByRole('list');
     this.people = this.picture.getByRole('listitem');
+    this.avatars = this.people.locator('.avatar');
     this.names = this.people.locator('.avatar + span');
     this.more = this.picture.getByText(/^and \d+ more$/);
     this.file = page.locator('input[type="file"]');
