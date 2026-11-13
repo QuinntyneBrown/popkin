@@ -1,6 +1,8 @@
 using System.Text.Json;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Popkin.Api.RateLimiting;
 using Popkin.Application.Experiences;
 using Popkin.Application.Invites;
 using Popkin.Domain;
@@ -33,9 +35,11 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
     /// <summary>
     /// Shares an experience: a title, a kind and, when given, a when, a place and a picture
     /// (L2-040). The body may be up to twice the largest picture, so a picture over 10 MB is
-    /// refused with its own message and not by the server's size limit.
+    /// refused with its own message and not by the server's size limit. At most 60 a minute per
+    /// person, counted with the photos they add.
     /// </summary>
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicyNames.Photos)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(2 * Photo.MaxFileBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = 2 * Photo.MaxFileBytes)]
@@ -51,9 +55,11 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
 
     /// <summary>
     /// Changes an experience, for its sharer only (L2-040 AC6): each field is optional, a field
-    /// that is not sent stays as it is, and `removePicture` leaves it without a picture.
+    /// that is not sent stays as it is, and `removePicture` leaves it without a picture. Counted
+    /// with sharing.
     /// </summary>
     [HttpPatch("{experienceId:guid}")]
+    [EnableRateLimiting(RateLimitPolicyNames.Photos)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(2 * Photo.MaxFileBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = 2 * Photo.MaxFileBytes)]
@@ -84,6 +90,7 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
     /// group's score with it (L2-039). At most 60 a minute per person, counted with their messages.
     /// </summary>
     [HttpPut("{experienceId:guid}/my-rating")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
     public async Task<ActionResult<RatingResultDto>> Rate(Guid popkinId, Guid experienceId, RateExperienceRequest request, CancellationToken cancellationToken)
     {
         // Anything but a whole number is no stars at all, and the handler says so.
@@ -91,8 +98,9 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
         return Ok(await sender.Send(new RateExperienceCommand(popkinId, experienceId, stars), cancellationToken));
     }
 
-    /// <summary>Adds a few words to the caller's rating, or replaces the ones they had (L2-041).</summary>
+    /// <summary>Adds a few words to the caller's rating, or replaces the ones they had (L2-041), counted with rating.</summary>
     [HttpPut("{experienceId:guid}/my-rating/comment")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
     public async Task<ActionResult<ExperienceCommentDto>> Comment(
         Guid popkinId, Guid experienceId, CommentOnExperienceRequest request, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new CommentOnExperienceCommand(popkinId, experienceId, request.Text), cancellationToken));
