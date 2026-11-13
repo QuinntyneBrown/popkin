@@ -12,7 +12,7 @@ using Popkin.Infrastructure.Persistence;
 namespace Popkin.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261113221330_AddExperienceKeens")]
+    [Migration("20261113234356_AddExperienceKeens")]
     partial class AddExperienceKeens
     {
         /// <inheritdoc />
@@ -394,6 +394,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(254)
                         .HasColumnType("nvarchar(254)");
 
+                    b.Property<DateTimeOffset?>("ErasedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(40)
@@ -403,8 +406,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<Guid?>("PhotoId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("PhotoKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
