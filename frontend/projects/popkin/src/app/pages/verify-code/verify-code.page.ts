@@ -10,7 +10,7 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AUTH_API, PendingVerificationStore, SessionStore, toApiProblem, tryAgainIn } from 'api';
-import { Button, Link, Screen, TextField, TopBar } from 'components';
+import { Button, Link, Screen, SplitAside, TextField, TopBar } from 'components';
 import { Toaster } from '../../toasts/toaster';
 
 const CODE_LENGTH = 6;
@@ -18,7 +18,7 @@ const CODE_LENGTH = 6;
 /** Confirm the six-digit code (L2-004) and send a new one (L2-005). */
 @Component({
   selector: 'pk-verify-code-page',
-  imports: [Button, Link, ReactiveFormsModule, RouterLink, Screen, TextField, TopBar],
+  imports: [Button, Link, ReactiveFormsModule, RouterLink, Screen, SplitAside, TextField, TopBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './verify-code.page.html',
 })

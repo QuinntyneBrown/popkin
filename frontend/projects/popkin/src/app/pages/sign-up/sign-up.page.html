@@ -1,4 +1,18 @@
-<div pk-screen heading="First, what should we call you?" lead="That’s all we need. No passwords.">
+<div
+  pk-screen
+  layout="split"
+  body="middle"
+  heading="First, what should we call you?"
+  lead="That’s all we need. No passwords."
+>
+  <aside
+    pk-split-aside
+    slot="aside"
+    label="Popkin"
+    photo="/images/bonfire.jpg"
+    heading="Everyone around the same fire."
+    text="One link, one QR code, and your whole group is in."
+  ></aside>
   <header pk-top-bar slot="header" back="/welcome" [step]="1" [steps]="3"></header>
   <form id="sign-up" class="stack stack--lg" novalidate (submit)="submit($event)">
     @if (problems().length) {

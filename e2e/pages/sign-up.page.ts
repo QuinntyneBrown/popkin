@@ -26,9 +26,13 @@ export class SignUpPage {
   readonly legal: Locator;
   readonly primaryButton: Locator;
 
+  /** The picture half of the split screen, from 768 px (L2-058 AC10). */
+  readonly picture: Locator;
+
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="sign-up"]');
     this.heading = page.getByRole('heading', { level: 1 });
+    this.picture = page.getByRole('complementary', { name: 'Popkin' });
     this.name = page.getByLabel('Your name');
     this.phone = page.getByRole('textbox', { name: 'Phone number' });
     this.email = page.getByRole('textbox', { name: 'Email' });

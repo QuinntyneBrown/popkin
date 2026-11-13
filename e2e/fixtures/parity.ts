@@ -7,6 +7,8 @@ import type { RouteKey } from './routes';
  * 360 px and 1280 px, in the light and the dark theme. `npm run parity` first renders the
  * baselines from docs/mocks (PK_PARITY=mocks), then compares the app with them (PK_PARITY=app).
  */
+const widths = [360, 1280] as const;
+
 export interface ParityCase {
   /** The screen state that shows the variant. */
   key: RouteKey;
@@ -20,15 +22,16 @@ export interface ParityCase {
   before?: (page: Page) => Promise<void>;
   /** Brings the app into the state the mock draws statically (typed values, a submitted form). */
   app?: (page: Page) => Promise<void>;
+  /** The widths to compare at, for a component that exists at some only; both by default. */
+  widths?: readonly (typeof widths)[number][];
 }
 
-const widths = [360, 1280] as const;
 const themes = ['light', 'dark'] as const;
 
 export function parity(component: string, cases: ParityCase[]): void {
   test.describe(`${component} matches the mock`, () => {
     for (const parityCase of cases) {
-      for (const width of widths) {
+      for (const width of parityCase.widths ?? widths) {
         for (const theme of themes) {
           const name = `${parityCase.name ?? parityCase.key}-${width}-${theme}`;
           test(name, async ({ page, pk }) => {

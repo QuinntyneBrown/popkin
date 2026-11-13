@@ -1,0 +1,99 @@
+/* Below M the picture is not there at all: it adds nothing a person needs (L2-058 AC13). */
+:host {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  :host {
+    position: fixed;
+    inset: 0 auto 0 0;
+    display: flex;
+    width: var(--pk-aside-width);
+    overflow: hidden;
+    background: var(--color-bg-subtle);
+  }
+
+  :host(.split-aside--tint) {
+    background: color-mix(in srgb, var(--accent) 14%, var(--color-bg-canvas));
+  }
+
+  .split-aside__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    padding: var(--space-8);
+    overflow-y: auto;
+  }
+
+  .split-aside__body--center {
+    align-items: center;
+  }
+
+  .split-aside__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .split-aside__caption {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: var(--space-8);
+    background: var(--color-bg-scrim);
+    color: var(--color-fg-on-stage);
+  }
+
+  .split-aside__caption-title {
+    display: block;
+    max-width: var(--layout-measure-lg);
+    font: var(--font-weight-black) var(--font-size-4xl) / var(--line-height-tight)
+      var(--font-family-display);
+  }
+
+  .split-aside__caption-text {
+    display: block;
+    max-width: var(--layout-measure-lg);
+    margin-top: var(--space-2);
+  }
+
+  .split-aside__icon {
+    font: var(--font-size-7xl) / 1 var(--font-family-emoji);
+  }
+
+  .split-aside__icon + .split-aside__title {
+    margin-top: var(--space-4);
+  }
+
+  .split-aside__kicker {
+    margin-bottom: var(--space-4);
+    font: var(--font-weight-semibold) var(--font-size-md-minus) / var(--line-height-normal)
+      var(--font-family-sans);
+    color: var(--color-fg-muted);
+  }
+
+  .split-aside__title {
+    font: var(--text-h1);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+
+  .split-aside__text {
+    max-width: var(--layout-preview-max);
+    margin-top: var(--space-8);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-fg-muted);
+  }
+}
+
+@media (min-width: 64rem) {
+  .split-aside__body,
+  .split-aside__caption {
+    padding: var(--space-14);
+  }
+
+  .split-aside__caption-title,
+  .split-aside__title {
+    font-size: var(--font-size-5xl);
+  }
+}

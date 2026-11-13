@@ -27,6 +27,7 @@ import {
   Screen,
   SegmentedControl,
   SegmentedOption,
+  SplitAside,
   TextField,
   TopBar,
 } from 'components';
@@ -42,6 +43,7 @@ import {
     ReactiveFormsModule,
     Screen,
     SegmentedControl,
+    SplitAside,
     TextField,
     TopBar,
   ],

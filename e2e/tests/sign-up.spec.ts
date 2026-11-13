@@ -187,3 +187,33 @@ test.describe('sending the code', () => {
     await expect(signUp.alert).toContainText('Try again in 35 minutes.');
   });
 });
+
+test.describe('signing up on a wider screen', () => {
+  // L2-058 AC10, AC13
+  test('from 768 px the form sits beside a picture of people around a fire', async ({
+    page,
+    pk,
+  }) => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await pk.open('signUp');
+    const signUp = new SignUpPage(page);
+
+    await expect(signUp.picture).toBeVisible();
+    await expect(signUp.picture).toContainText('Everyone around the same fire.');
+    await expect(signUp.name).toBeVisible();
+    await expect(signUp.continue).toBeVisible();
+  });
+
+  // L2-058 AC2, AC13
+  test('on a phone the screen is the form alone, and the picture is not there to reach', async ({
+    page,
+    pk,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await pk.open('signUp');
+    const signUp = new SignUpPage(page);
+
+    await expect(signUp.name).toBeVisible();
+    await expect(signUp.picture).toHaveCount(0);
+  });
+});
