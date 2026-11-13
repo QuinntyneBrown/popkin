@@ -445,6 +445,19 @@ test.describe('the tabs and the layout of the Popkin home', () => {
     await expect(home.chatTab).toHaveAccessibleName(/3 unread messages/);
   });
 
+  // L2-019 AC7, L2-058 AC8: the tabs are along the bottom of a phone
+  test('shows the tabs on a phone too', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 });
+    await maraAtHome(page);
+    await page.goto(homeUrl);
+    const home = new PopkinHomePage(page);
+
+    await expect(home.tabs).toHaveText(['Home', 'Chat', 'Photos', 'Experiences']);
+    await expect(home.tabs.first()).toBeVisible();
+    await expect(home.currentTab).toHaveText('Home');
+    await expect(home.unreadCount).toHaveText('3');
+  });
+
   // L2-058 AC8
   test('is one column on a phone and two from 1024 px', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 780 });
