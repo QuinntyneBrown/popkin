@@ -1,0 +1,12 @@
+@if (loading()) {
+  <span pk-skeleton shape="card"></span>
+  <div class="home-skeleton__strip">
+    <span pk-skeleton shape="thumb"></span>
+    <span pk-skeleton shape="thumb"></span>
+    <span pk-skeleton shape="thumb"></span>
+  </div>
+  <span pk-skeleton shape="card"></span>
+} @else {
+  <div class="home__main"><ng-content /></div>
+  <div class="home__side"><ng-content select="[slot=side]" /></div>
+}

@@ -1,0 +1,149 @@
+/* The head of the home, on a wash of the Popkin's colour. */
+:host {
+  display: block;
+  flex: none;
+  padding: var(--space-2) var(--space-2) var(--space-5);
+  background: color-mix(in srgb, var(--accent) 10%, var(--color-bg-canvas));
+}
+
+/* XS and S: the way back, and the settings at the end. */
+.home-header__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-header__body {
+  padding: 0 var(--space-4);
+}
+
+.home-header__id {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.home-header__titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-header__name {
+  font: var(--text-h1-compact);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.home-header__members {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.home-header__time {
+  margin-top: var(--space-4);
+}
+
+/* Two equal buttons under the name. */
+.home-header__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* The settings beside the actions: from M, where the bar is gone. */
+.home-header__more {
+  display: none;
+}
+
+/* The header while the Popkin loads: its shapes, a row apart. */
+.home-header__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.home-header__skeleton-id {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.home-header__skeleton-titles {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.home-header__actions--skeleton {
+  margin: 0;
+}
+
+/* M: no bar, the actions in a row with the settings at its end. */
+@media (min-width: 48rem) {
+  :host {
+    padding: var(--space-6);
+  }
+
+  .home-header__bar {
+    display: none;
+  }
+
+  .home-header__body {
+    padding: 0 var(--space-2);
+  }
+
+  .home-header__actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .home-header__more {
+    display: inline-grid;
+  }
+
+  .home-header__skeleton-action {
+    width: var(--space-32);
+  }
+
+  .home-header__name {
+    font: var(--text-h1);
+  }
+}
+
+/* L: the actions beside the name and the time left. */
+@media (min-width: 64rem) {
+  .home-header__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    column-gap: var(--space-6);
+  }
+
+  .home-header__body > * {
+    grid-column: 1;
+  }
+
+  .home-header__body > .home-header__actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-top: 0;
+  }
+}
+
+/* XL: further in, and a larger name. */
+@media (min-width: 80rem) {
+  :host {
+    padding-inline: var(--space-10);
+  }
+
+  .home-header__name {
+    font-size: var(--font-size-5xl);
+  }
+}

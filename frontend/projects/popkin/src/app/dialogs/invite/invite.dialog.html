@@ -1,0 +1,38 @@
+<div
+  pk-dialog
+  heading="Bring someone in"
+  description="They scan, they’re in. No numbers needed."
+  [accent]="data.accent"
+>
+  @if (invite(); as invite) {
+    <div
+      pk-qr-card
+      [modules]="modules()"
+      [link]="shownLink()"
+      [name]="invite.popkinName"
+      [emoji]="invite.emoji"
+    ></div>
+  }
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t load the invite." action="Try again" (acted)="load()">
+      Check your connection and try again.
+    </div>
+  }
+  @if (invite()) {
+    <button
+      #copyButton
+      pk-button
+      slot="footer"
+      type="button"
+      variant="secondary"
+      [block]="true"
+      (click)="copy()"
+    >
+      <svg pk-icon size="md" [name]="copied() ? 'check' : 'copy'"></svg
+      >{{ copied() ? 'Copied' : 'Copy invite link' }}
+    </button>
+  }
+  <p class="visually-hidden" role="status" slot="footer">
+    {{ copied() ? 'Invite link copied' : '' }}
+  </p>
+</div>

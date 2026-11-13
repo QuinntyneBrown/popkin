@@ -66,9 +66,9 @@
 @if (name()) {
   <p class="qr-card__name">
     @if (emoji()) {
-      <span aria-hidden="true">{{ emoji() }}</span>
+      <span class="qr-card__emoji" aria-hidden="true">{{ emoji() }}</span>
     }
-    {{ name() }}
+    <span class="truncate">{{ name() }}</span>
   </p>
 }
 <p class="qr-card__link">{{ link() }}</p>

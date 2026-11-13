@@ -31,8 +31,8 @@ admits nobody ([Open a Popkin by its address](../../popkins/open-by-address/READ
 - `docs/mocks/dialogs/invite/copied.html` — the action reads "Copied", live announcement "Invite
   link copied".
 - The mocks draw no loading or failure state for the dialog (the manifest marks busy and invalid
-  as not applicable); while the invite loads the QR area shows `pk-skeleton`, and the failure
-  copy is `<TO SUPPLY>`.
+  as not applicable). When the invite cannot be read the dialog says "We couldn’t load the
+  invite." with "Try again", which reads it again; this state has no mock.
 
 ### API
 
@@ -101,9 +101,33 @@ admits nobody ([Open a Popkin by its address](../../popkins/open-by-address/READ
   where the QR code is the picture half of the split screen
   ([Start a Popkin](../../popkins/start-popkin/README.md), L2-058 AC10); a behaviour spec scans
   the code from there too (L2-011 AC6). The invite dialog keeps the base size.
-- **Not built yet** — `InviteDialog` and its two entry points wait for the Popkin home
-  (journey 4). Of this design, the endpoint, the invite code rules, `encodeQr()` and
-  `pk-qr-card` exist.
+
+### Built in steps
+
+Journeys 1 and 2 built the endpoint, the invite code rules, `encodeQr()` and `pk-qr-card`.
+Journey 4, Popkin home, built `InviteDialog` (`dialogs/invite/`), opened by "Invite" in the
+home's header and by "Invite people" in the empty Chat card:
+
+- a CDK dialog in `pk-dialog` with its own backdrop, a sheet below 640 px and centred from
+  640 px (L2-011 AC4);
+- it reads `PopkinsApi.getInvite` and shows `pk-qr-card`: the QR code of the full link, the
+  emoji, the name and the link without its scheme (L2-011 AC1, AC6);
+- "Copy invite link" reads "Copied" for 3 s, with "Invite link copied" in a live region
+  (L2-011 AC2);
+- the copy button takes focus once the invite has loaded; Escape, "Close" and the backdrop close
+  the dialog, and focus returns to what opened it (L2-011 AC3, L2-057 AC2);
+- when the invite cannot be read: "We couldn’t load the invite." with "Try again".
+
+What waits, and for what:
+
+- the entry "Invite people" in the Popkin settings menu: journey 9, Wrap up, which adds the menu;
+- the link on the Popkin's address (L2-065 AC1, AC3): `Addresses:BaseDomain` and
+  `PopkinUrlBuilder` are not built. The endpoint still builds the link from `Invites:BaseUrl`,
+  and the dialog shows and copies that link. It waits for addresses (known gaps 18 and 20);
+- the message when the clipboard is refused: still `<TO SUPPLY>`. Until then nothing happens and
+  the link stays selectable.
+
+Tests: `e2e/tests/invite-dialog.spec.ts`.
 
 ## Requirements
 

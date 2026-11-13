@@ -12,7 +12,7 @@ System_Boundary(popkin, "Popkin") {
 }
 Rel(member, spa, "Uses", "HTTPS")
 Rel(spa, api, "Loads header and sections", "JSON/HTTPS")
-Rel(api, spa, "Pushes PopkinChanged, MemberJoined, MemberLeft, MessageSent", "SignalR WebSocket")
+Rel(api, spa, "Pushes PopkinChanged, MemberJoined, MemberLeft, MessageAdded", "SignalR WebSocket")
 Rel(api, db, "Reads", "EF Core")
 Rel(spa, store, "Loads thumbnails", "expiring signed URLs")
 @enduml

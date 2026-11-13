@@ -12,6 +12,15 @@ import {
   writeTwoOffline,
 } from './chat';
 import {
+  copyTheInvite,
+  openTheInvite,
+  theHomeEmpty,
+  theHomeFailing,
+  theHomeLoading,
+  theHomeWithoutPhotos,
+  theMockHome,
+} from './home';
+import {
   asVisitor,
   codeScreenAt24Seconds,
   howLongForLakeside,
@@ -31,6 +40,8 @@ import {
 import type { RouteKey } from './routes';
 import { answer, hold, problem } from './stubs';
 import { EndDateDialog } from '../pages/end-date.dialog';
+import { InviteDialog } from '../pages/invite.dialog';
+import { PopkinHomePage } from '../pages/popkin-home.page';
 import { GroupChatPage } from '../pages/group-chat.page';
 import { HowLongPage } from '../pages/how-long.page';
 import { JoinInvitePage } from '../pages/join-invite.page';
@@ -451,5 +462,62 @@ export const screenStates: ScreenState[] = [
     before: theChatWithManyMessages,
     app: aMessageArrivesBelow,
     regions: (page) => ({ titles: new GroupChatPage(page).titles }),
+  },
+  // The Popkin home. "Popkin settings" is journey 9, so the header is compared by its parts.
+  {
+    key: 'popkinHome',
+    before: theMockHome,
+    regions: (page) => {
+      const home = new PopkinHomePage(page);
+      return {
+        time: home.timeLeft,
+        chat: home.chat,
+        photos: home.photos,
+        experiences: home.experiences,
+        members: home.members,
+      };
+    },
+  },
+  {
+    key: 'popkinHomeLoading',
+    before: theHomeLoading,
+    regions: (page) => {
+      const home = new PopkinHomePage(page);
+      return { header: home.header, skeleton: home.bodySkeleton };
+    },
+  },
+  {
+    key: 'popkinHomeEmpty',
+    before: theHomeEmpty,
+    regions: (page) => {
+      const home = new PopkinHomePage(page);
+      return { chat: home.chat, photos: home.photos, experiences: home.experiences };
+    },
+  },
+  {
+    key: 'popkinHomeError',
+    before: theHomeFailing,
+    regions: (page) => ({ error: new PopkinHomePage(page).error }),
+  },
+  {
+    key: 'popkinHomePartial',
+    before: theHomeWithoutPhotos,
+    regions: (page) => ({ photos: new PopkinHomePage(page).photos }),
+  },
+  // The QR code itself differs from the mock's sample, so the dialog is compared around it.
+  {
+    key: 'inviteDialog',
+    before: theMockHome,
+    app: openTheInvite,
+    regions: (page) => {
+      const dialog = new InviteDialog(page);
+      return { header: dialog.header, name: dialog.name, link: dialog.link, footer: dialog.footer };
+    },
+  },
+  {
+    key: 'inviteDialogCopied',
+    before: theMockHome,
+    app: copyTheInvite,
+    regions: (page) => ({ footer: new InviteDialog(page).footer }),
   },
 ];

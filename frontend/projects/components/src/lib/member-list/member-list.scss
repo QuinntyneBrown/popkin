@@ -1,0 +1,36 @@
+/* Set in from the sides of its section. */
+:host {
+  display: block;
+  padding: 0 var(--space-4);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-14);
+}
+
+.row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+/* What the person is here: "Host". */
+.row__role {
+  flex: none;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+/* The fifth and sixth members show where the list has the room: from L. */
+@media (max-width: 63.99rem) {
+  .row:nth-child(n + 5) {
+    display: none;
+  }
+}

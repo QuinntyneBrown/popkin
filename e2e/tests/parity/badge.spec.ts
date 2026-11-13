@@ -1,3 +1,5 @@
+import { theMockHome } from '../../fixtures/home';
+import { PopkinHomePage } from '../../pages/popkin-home.page';
 import { theChatUnread } from '../../fixtures/chat';
 import { parity } from '../../fixtures/parity';
 import { GroupChatPage } from '../../pages/group-chat.page';
@@ -10,5 +12,11 @@ parity('badge', [
     region: (page) => new GroupChatPage(page).navBadge,
     before: theChatUnread,
     widths: [1280],
+  },
+  {
+    key: 'popkinHome',
+    name: 'words',
+    region: (page) => new PopkinHomePage(page).newCount,
+    before: theMockHome,
   },
 ]);

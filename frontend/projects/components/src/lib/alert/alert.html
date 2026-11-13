@@ -1,4 +1,7 @@
 <svg pk-icon name="alert" size="md"></svg>
 <div>
   <strong>{{ heading() }}</strong><ng-content />
+  @if (action()) {
+    <button class="alert__action" type="button" (click)="acted.emit()">{{ action() }}</button>
+  }
 </div>

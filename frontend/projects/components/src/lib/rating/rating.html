@@ -1,0 +1,7 @@
+@if (value()) {
+  <svg pk-icon class="rating__star" name="star"></svg>
+  <strong class="rating__value">{{ value() }}</strong>
+  {{ rest() }}
+} @else {
+  {{ label() }}
+}

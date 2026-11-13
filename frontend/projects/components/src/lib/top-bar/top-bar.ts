@@ -28,6 +28,8 @@ import { StepDots } from '../step-dots/step-dots';
 export class TopBar {
   /** The route Back leads to. Without it the bar is the brand bar. */
   readonly back = input<string>();
+  /** Where Back leads, in words, when it is not the screen before: "My Popkins". */
+  readonly backLabel = input('Back');
   /** Step dots: the current step (from 1) and the number of steps. */
   readonly step = input<number>();
   readonly steps = input<number>();

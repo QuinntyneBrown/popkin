@@ -28,6 +28,11 @@
     var(--font-family-display);
 }
 
+.qr-card__emoji {
+  font-family: var(--font-family-emoji);
+  font-style: normal;
+}
+
 .qr-card__link {
   margin-top: var(--space-1);
   font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)

@@ -1,0 +1,26 @@
+<div class="card__head">
+  <h2 class="card__title">{{ heading() }}</h2>
+  @if (newCount() > 0) {
+    <span pk-badge [count]="newCount()" [unit]="newUnit()"></span>
+  }
+</div>
+<div class="card__list">
+  @for (message of messages(); track $index) {
+    <div class="chat-preview">
+      <span
+        pk-avatar
+        size="36"
+        [initials]="message.avatar.initials"
+        [photo]="message.avatar.photoUrl"
+        [attr.data-accent]="message.avatar.accent"
+      ></span>
+      <div class="chat-preview__main">
+        <div class="chat-preview__top">
+          <span class="chat-preview__name">{{ message.name }}</span>
+          <span class="chat-preview__time">{{ message.time }}</span>
+        </div>
+        <p class="chat-preview__text truncate">{{ message.text }}</p>
+      </div>
+    </div>
+  }
+</div>

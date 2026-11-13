@@ -19,3 +19,8 @@
   font: var(--font-weight-extrabold) var(--font-size-xs) / 1 var(--font-family-display);
   box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-canvas);
 }
+
+:host(.avatar-stack--xs) .avatar-stack__more {
+  height: var(--space-6);
+  min-width: var(--space-6);
+}

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { MessagePageView, MessageView, PresenceView, ThreadView } from '../../models/chat';
+import { ChatPreviewView } from '../../models/home';
 
 /** Which page of a thread to read; none is the latest. Pages hold 50 messages (L2-027 AC5). */
 export type MessagesCursor =
@@ -11,6 +12,8 @@ export type MessagesCursor =
 export interface ChatApi {
   /** 404 `popkin_not_found` for someone who is not a member. */
   getEveryone(popkinId: string): Observable<ThreadView>;
+  /** The latest of the Everyone thread, for the Popkin's home (L2-019 AC3). */
+  getEveryonePreview(popkinId: string): Observable<ChatPreviewView>;
   getMessages(
     popkinId: string,
     threadId: string,
@@ -42,6 +45,10 @@ export class HttpChatApi implements ChatApi {
 
   getEveryone(popkinId: string): Observable<ThreadView> {
     return this.http.get<ThreadView>(`${popkin(popkinId)}/threads/everyone`);
+  }
+
+  getEveryonePreview(popkinId: string): Observable<ChatPreviewView> {
+    return this.http.get<ChatPreviewView>(`${popkin(popkinId)}/threads/everyone/preview`);
   }
 
   getMessages(

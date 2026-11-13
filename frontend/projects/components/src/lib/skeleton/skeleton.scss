@@ -66,6 +66,13 @@
   border-radius: var(--radius-lg);
 }
 
+/* A photo of a strip that is loading, the size of a thumb. */
+:host(.thumb) {
+  flex: none;
+  width: var(--space-28);
+  height: var(--space-28);
+}
+
 :host(.w-20) {
   width: 20%;
 }

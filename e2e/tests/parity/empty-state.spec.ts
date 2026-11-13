@@ -1,3 +1,5 @@
+import { theHomeEmpty, theHomeFailing } from '../../fixtures/home';
+import { PopkinHomePage } from '../../pages/popkin-home.page';
 import { theChatEmpty, theChatFailing } from '../../fixtures/chat';
 import { inviteFailsOnTheServer, theInviteFailing } from '../../fixtures/journeys';
 import { GroupChatPage } from '../../pages/group-chat.page';
@@ -31,5 +33,23 @@ parity('empty-state', [
     name: 'chat-error',
     region: (page) => new GroupChatPage(page).empty,
     before: theChatFailing,
+  },
+  {
+    key: 'popkinHomeEmpty',
+    name: 'compact-tile',
+    region: (page) => new PopkinHomePage(page).chatEmpty,
+    before: theHomeEmpty,
+  },
+  {
+    key: 'popkinHomeEmpty',
+    name: 'compact-sub',
+    region: (page) => new PopkinHomePage(page).photosEmpty,
+    before: theHomeEmpty,
+  },
+  {
+    key: 'popkinHomeError',
+    name: 'home-error',
+    region: (page) => new PopkinHomePage(page).error,
+    before: theHomeFailing,
   },
 ]);

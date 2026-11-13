@@ -14,6 +14,11 @@ public sealed class ThreadsController(ISender sender) : ControllerBase
     public async Task<ActionResult<ThreadDto>> GetEveryone(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetEveryoneThreadQuery(popkinId), cancellationToken));
 
+    /// <summary>The latest of Everyone and how much of it is new, for the Popkin home (L2-019 AC3).</summary>
+    [HttpGet("everyone/preview")]
+    public async Task<ActionResult<ChatPreviewDto>> GetEveryonePreview(Guid popkinId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetEveryonePreviewQuery(popkinId), cancellationToken));
+
     public sealed record MarkReadRequest(Guid? LastReadMessageId);
 
     /// <summary>Moves the caller's read point forward to a message; it never moves back (L2-027 AC4).</summary>

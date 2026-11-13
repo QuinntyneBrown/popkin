@@ -116,6 +116,28 @@ export const ICONS = {
   ],
   /* Drawn by no mock: the back chevron turned to point down, for the "New messages" control. */
   'chevron-down': [{ path: 'm6 9 6 6 6-6' }],
+  'chevron-right': [{ path: 'm9 18 6-6-6-6' }],
+  more: [{ circle: [12, 12, 1] }, { circle: [19, 12, 1] }, { circle: [5, 12, 1] }],
+  plus: [{ path: 'M5 12h14' }, { path: 'M12 5v14' }],
+  qr: [
+    { rect: [5, 5, 3, 3, 1] },
+    { rect: [5, 5, 16, 3, 1] },
+    { rect: [5, 5, 3, 16, 1] },
+    { path: 'M21 16h-3a2 2 0 0 0-2 2v3' },
+    { path: 'M21 21v.01' },
+    { path: 'M12 7v3a2 2 0 0 1-2 2H7' },
+    { path: 'M3 12h.01' },
+    { path: 'M12 3h.01' },
+    { path: 'M12 16v.01' },
+    { path: 'M16 12h1' },
+    { path: 'M21 12v.01' },
+    { path: 'M12 21v-1' },
+  ],
+  star: [
+    {
+      path: 'M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z',
+    },
+  ],
 } satisfies Record<string, IconShape[]>;
 
 export type IconName = keyof typeof ICONS;

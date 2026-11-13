@@ -1,7 +1,7 @@
 @for (avatar of avatars(); track $index) {
   <span
     pk-avatar
-    size="sm"
+    [size]="size()"
     [ring]="true"
     [initials]="avatar.initials"
     [photo]="avatar.photo"

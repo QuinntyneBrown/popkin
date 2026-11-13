@@ -17,15 +17,18 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first three journeys are built; the rest is designed.** Journey 1, Start a Popkin,
-journey 2, Join by invite, and journey 3, Chat with everyone, run end to end: the backend has
-sign up with a code, sessions, Popkin creation, the invite preview, joining with a name and a
-photo, the photo store behind avatars, the Everyone thread, messages, read points, presence and
-the SignalR hub `PopkinHub`, with their migrations; the app has the screens of those journeys,
-the group chat screen among them, built for the five form factors of L2-058, and the not-found
-and server-error screens; the `components` library holds the `pk-*` components they use, each
-with a parity spec; the `api` library has the chat's stores and the real-time client, with unit
-tests of its stores and pure helpers. Everything
+**The first four journeys are built; the rest is designed.** Journey 1, Start a Popkin,
+journey 2, Join by invite, journey 3, Chat with everyone, and journey 4, Popkin home, run end to
+end: the backend has sign up with a code, sessions, Popkin creation, the invite preview, joining
+with a name and a photo, the photo store behind avatars, the Everyone thread, messages, read
+points, presence, the SignalR hub `PopkinHub` and the reads of the Popkin home (the header, the
+chat preview, the members, and the photos and experiences summaries, which answer empty until
+journeys 5 and 8), with their migrations; the app has the screens of those journeys, the group
+chat screen and the Popkin home among them, built for the five form factors of L2-058, the
+invite dialog, and the not-found and server-error screens; the `components` library holds the
+`pk-*` components they use, each with a parity spec; the `api` library has the chat's stores,
+the home's store and the real-time client, with unit tests of its stores and pure helpers.
+Everything
 else exists as documents, not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of
 every screen in every state (`docs/mocks/`), the design system (`docs/design-system/`), a
 detailed design per feature (`docs/detailed-designs/`) and a prompt per journey

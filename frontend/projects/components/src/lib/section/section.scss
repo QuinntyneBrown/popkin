@@ -1,0 +1,49 @@
+:host {
+  display: block;
+  padding-top: var(--space-7);
+}
+
+/* The first section of the home: a card set in from the sides, close under the header. */
+:host(.section--lead) {
+  padding: var(--space-5) var(--space-4) 0;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--target-comfortable);
+  padding: 0 var(--space-4);
+}
+
+.section-head__title {
+  font: var(--text-h3);
+}
+
+.section-head__meta {
+  margin-left: var(--space-1);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  color: var(--color-fg-subtle);
+}
+
+.section-head__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-comfortable);
+  padding: 0 var(--space-1);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+}
+
+.section__inset,
+.section__failure {
+  padding: 0 var(--space-4);
+}
+
+.section__failure {
+  margin-top: var(--space-1);
+}
+
+.section__inset:empty,
+.section__failure:empty {
+  display: none;
+}

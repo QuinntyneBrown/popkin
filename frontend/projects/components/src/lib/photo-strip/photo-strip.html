@@ -1,0 +1,5 @@
+@for (photo of photos(); track $index) {
+  <a class="thumb" [routerLink]="photo.link">
+    <img class="thumb__photo" [src]="photo.src" [alt]="photo.alt" />
+  </a>
+}

@@ -19,10 +19,17 @@ export interface StackAvatar {
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './avatar-stack.html',
   styleUrl: './avatar-stack.scss',
-  host: { class: 'avatar-stack avatar-stack--sm', 'aria-hidden': 'true' },
+  host: {
+    class: 'avatar-stack',
+    '[class.avatar-stack--sm]': "size() === 'sm'",
+    '[class.avatar-stack--xs]': "size() === 'xs'",
+    'aria-hidden': 'true',
+  },
 })
 export class AvatarStack {
   readonly avatars = input.required<readonly StackAvatar[]>();
+  /** `xs` is the stack of the home header: 28 px faces and a 24 px "+N". */
+  readonly size = input<'sm' | 'xs'>('sm');
   /** How many people are not shown; 0 shows no "+N". */
   readonly more = input(0);
 }

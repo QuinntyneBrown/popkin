@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>04 · Journey 4: Popkin home</title>
+<link rel="stylesheet" href="../../design-system/tokens/tokens.css">
+<link rel="stylesheet" href="../assets/film.css">
+<style>
+/* This film only: a phone drawn without its notch, which would cover the Popkin's name in the
+   top bar; and a close-up that shows only the top of a tall picture. */
+.device--phone[data-notch="off"]::before { display: none; }
+.closeup--top { overflow: hidden; background: var(--palette-white); }
+.closeup--top img { width: 100%; }
+</style>
+</head>
+<body>
+<script src="timing.js"></script>
+<script src="../assets/film-runtime.js"></script>
+<script src="film.js"></script>
+</body>
+</html>

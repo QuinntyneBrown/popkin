@@ -1,0 +1,21 @@
+@if (heading()) {
+  <div class="section-head">
+    <h2 class="section-head__title">
+      {{ title() }}
+      @if (meta()) {
+        <span class="section-head__meta">{{ meta() }}</span>
+      }
+    </h2>
+    @if (link(); as route) {
+      <a class="section-head__link" [routerLink]="route">
+        {{ linkText() }}
+        @if (linkSuffix()) {
+          <span class="visually-hidden">{{ suffix() }}</span>
+        }
+      </a>
+    }
+  </div>
+}
+<ng-content />
+<div class="section__inset"><ng-content select="[slot=inset]" /></div>
+<div class="section__failure"><ng-content select="[slot=failure]" /></div>

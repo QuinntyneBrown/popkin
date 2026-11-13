@@ -23,6 +23,11 @@
   scale: var(--scale-press);
 }
 
+:host(.icon-btn--card) {
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
 :host(.icon-btn--send) {
   background: var(--color-accent);
   color: var(--color-fg-on-accent);

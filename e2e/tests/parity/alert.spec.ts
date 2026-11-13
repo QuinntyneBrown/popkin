@@ -1,3 +1,5 @@
+import { theHomeWithoutPhotos } from '../../fixtures/home';
+import { PopkinHomePage } from '../../pages/popkin-home.page';
 import { HowLongPage } from '../../pages/how-long.page';
 import { howLongForLakeside } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
@@ -28,5 +30,11 @@ parity('alert', [
       await step.popItUp.click();
       await step.alert.waitFor();
     },
+  },
+  {
+    key: 'popkinHomePartial',
+    name: 'with-action',
+    region: (page) => new PopkinHomePage(page).photosFailure,
+    before: theHomeWithoutPhotos,
   },
 ]);

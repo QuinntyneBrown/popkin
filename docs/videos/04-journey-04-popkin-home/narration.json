@@ -1,0 +1,26 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["This is the home of a Popkin: everything in it, at a glance."] },
+    { "id": "header", "bars": 7, "lines": ["The header shows the emoji and name, four avatars with a count, and fourteen members.", "For a Popkin with an end date: the time left, and when it wraps up.", "Group call is in the Popkin's colour, beside Invite."] },
+    { "id": "chat", "bars": 7, "lines": ["The Chat card shows the three latest messages, with sender, time and one line each, and how many are new.", "When a message arrives, the count rises on the card and on the Chat tab, without reloading."] },
+    { "id": "sections", "bars": 7, "lines": ["Photos shows the count, the latest as thumbnails, and See all.", "Experiences shows the highest rated, with its score and number of ratings.", "Members lists the Host first, labelled Host, and marks which one is you."] },
+    { "id": "empty", "bars": 6, "lines": ["A new Popkin is never a blank page. Each section says what it is for, and offers its first action.", "It's just you so far.", "No photos yet.", "Nothing shared yet."] },
+    { "id": "partial", "bars": 5, "lines": ["If one section fails to load, it says so, with Try again. The rest of the Popkin is fine.", "Try again, and the photos are back."] },
+    { "id": "invite", "bars": 6, "lines": ["Invite opens Bring someone in: the QR code and the invite link.", "Copy invite link, and the button reads Copied.", "A sheet on a phone, centred on a wider screen."] },
+    { "id": "grow", "bars": 10, "lines": [
+      { "text": "On a phone, the home is one column, with the tabs along the bottom.", "at": 0 },
+      { "text": "From a tablet, the tabs become a rail.", "at": 10 },
+      { "text": "On a laptop, a sidebar names the Popkin, with its members and the time left, and the home goes to two columns.", "at": 16 },
+      { "text": "Wider still, the same home, with more room.", "at": 32 }
+    ] },
+    { "id": "wide", "bars": 5, "lines": ["A wider screen shows more: a fourth message, three experiences, six members.", "And every screen works in light and in dark."] },
+    { "id": "proof", "bars": 5, "lines": ["What no screen shows, the tests prove: only a member reads the home, and the time left keeps moving.", "The album, experiences and the call come in later journeys."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey four. Popkin is a free platform for pop-up communities."] }
+  ]
+}

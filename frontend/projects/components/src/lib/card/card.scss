@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+:host(.card--link) {
+  color: inherit;
+  text-decoration: none;
+  transition: scale var(--duration-fast) var(--ease-pop);
+}
+
+:host(.card--link:hover) {
+  color: inherit;
+}
+
+:host(.card--link:active) {
+  scale: var(--scale-press);
+}
+
+:host(.card--center) {
+  text-align: center;
+}

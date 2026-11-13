@@ -1,0 +1,20 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+  font: var(--font-weight-regular) var(--font-size-md-minus) / 1 var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.rating__value {
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-bold);
+}
+
+.rating__star {
+  width: var(--space-4);
+  height: var(--space-4);
+  color: var(--color-star);
+  fill: var(--color-star);
+}

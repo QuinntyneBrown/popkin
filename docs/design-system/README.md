@@ -54,6 +54,7 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Call tile and controls](components/call-tile.html) | Media | Speaking, muted, camera off. Controls: Mute, Camera (off, pressed), Leave. | Static (both themes) | pages/video-call/default, pages/video-call/muted, pages/video-call/two |
 | [Top bar](components/top-bar.html) | Navigation | Onboarding: back and step dots. Thread: tile, title, subline, call. Root: logo and actions. | Static (both themes) | pages/sign-up/default, pages/group-chat/default, pages/my-popkins/default |
 | [Popkin tabs](components/popkin-nav.html) | Navigation | Chat is current. | Static (both themes) | pages/popkin-home/default, pages/conversations/default |
+| [Home header](components/home-header.html) | Layout | A Popkin with an end date. A Popkin with one member. A section head with a count and a link, and with a count alone. | Static (both themes); loading | pages/popkin-home/default, pages/popkin-home/loading, pages/popkin-home/empty |
 | [Skip link](components/skip-link.html) | Navigation | Shown as it looks when focused. | Static (both themes) | pages/landing/default |
 | [Site header and footer](components/site-navigation.html) | Navigation | Header at 768px and wider. Footer. | Static (both themes) | pages/landing/default |
 | [Dialog and sheet](components/dialog.html) | Overlays | Confirmation: danger and a safe default. Form. | Default, Busy, Invalid, Failed | dialogs/invite/default, dialogs/leave-popkin/default, dialogs/edit-popkin/invalid |

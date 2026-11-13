@@ -32,7 +32,7 @@ hub -> hub : Check membership, add to group popkin:(id)
 loop every minute (L2-044 AC5)
   page --> actor : pk-time-left re-renders from the client clock
 end
-handler -> notifier : PopkinChanged | MemberJoined | MemberLeft | MessageSent
+handler -> notifier : PopkinChanged | MemberJoined | MemberLeft | MessageAdded
 notifier -> hub : Send to group popkin:(id)
 hub -> rt : Event
 rt --> page : PopkinEvent
@@ -40,7 +40,7 @@ alt PopkinChanged (L2-020 AC3, AC4)
   page --> actor : New name, emoji, colour or time left without reload
 else MemberJoined or MemberLeft (L2-047 AC2)
   page -> page : Reload header and Members section
-else MessageSent
+else MessageAdded
   page -> page : Reload Chat preview and Chat tab count
 end
 @enduml
