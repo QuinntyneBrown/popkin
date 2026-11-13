@@ -12,6 +12,11 @@
   white-space: nowrap;
 }
 
+/* A badge that carries a word beside its count: "3 new". */
+:host(.badge--words) {
+  padding-inline: var(--space-2-5);
+}
+
 :host(.badge--popkin) {
   background: var(--accent);
   color: var(--color-fg-on-popkin);
