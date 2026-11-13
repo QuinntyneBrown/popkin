@@ -10,12 +10,33 @@ import {
 } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { ErrorScreens, InviteView, POPKINS_API, accentOf, encodeQr, toApiProblem } from 'api';
-import { Alert, Button, Link, Pop, QrCard, Screen, ShareAction, ShareActions } from 'components';
+import {
+  Alert,
+  Button,
+  Link,
+  Pop,
+  QrCard,
+  Screen,
+  ShareAction,
+  ShareActions,
+  SplitAside,
+} from 'components';
 
 /** The created screen: the Host gets the new Popkin's invite straight away (L2-010, L2-011 AC6). */
 @Component({
   selector: 'pk-popkin-created-page',
-  imports: [Alert, Button, Link, Pop, QrCard, RouterLink, Screen, ShareAction, ShareActions],
+  imports: [
+    Alert,
+    Button,
+    Link,
+    Pop,
+    QrCard,
+    RouterLink,
+    Screen,
+    ShareAction,
+    ShareActions,
+    SplitAside,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './popkin-created.page.html',
 })

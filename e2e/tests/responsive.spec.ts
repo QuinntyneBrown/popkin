@@ -45,4 +45,21 @@ for (const state of screenStates) {
       );
     expect(wide, 'fields and actions wider than 36 rem').toEqual([]);
   });
+
+  // L2-058 AC1, AC3 at the form factors between: S, M and L.
+  for (const width of [640, 768, 1024]) {
+    test(`${state.key} fits ${width} px`, async ({ page, pk }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await state.before?.(page);
+      await pk.open(state.key);
+      await state.app?.(page);
+
+      const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+      const screen = await page.locator('.screen').first().boundingBox();
+      expect(screen?.width).toBe(width);
+    });
+  }
 }
