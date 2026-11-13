@@ -99,6 +99,9 @@ public static class ExperienceExtensions
         return await response.Content.ReadFromJsonAsync<JsonElement>();
     }
 
+    public static Task<HttpResponseMessage> MarkDoneAsync(this HttpClient member, Guid popkinId, Guid experienceId) =>
+        member.PostAsync($"/api/popkins/{popkinId}/experiences/{experienceId}/done", null);
+
     public static Guid Id(this JsonElement element) => element.GetProperty("id").GetGuid();
 
     public static List<string?> Titles(this JsonElement cards) =>

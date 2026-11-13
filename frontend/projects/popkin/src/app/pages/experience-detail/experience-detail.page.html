@@ -67,7 +67,20 @@
             [label]="keen.label"
             [busy]="keen.busy"
             (toggled)="store.toggleKeen()"
-          ></div>
+          >
+            @if (keen.done; as done) {
+              <button
+                pk-button
+                type="button"
+                variant="secondary"
+                size="md"
+                [busy]="done.busy"
+                (click)="store.markDone()"
+              >
+                <svg pk-icon name="check" size="md"></svg>We did this
+              </button>
+            }
+          </div>
         }
         @if (view.comments.length) {
           <section pk-comments heading="What people said">

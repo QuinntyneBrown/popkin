@@ -203,8 +203,8 @@ await call('PUT', `${experiences}/${shared.id}/my-rating`, { stars: 5 });
 await call('PUT', `${experiences}/${shared.id}/my-rating/comment`, {
   text: 'Would do it every morning if I could.',
 });
-// Mara shares an idea, the beach day, opens it and says she is keen, then takes it back and
-// says so again (journey 20).
+// Mara shares an idea, the beach day, opens it and says she is keen, then takes it back, says
+// so again and, as its sharer, says "We did this" (journey 20).
 const beach = new FormData();
 beach.append('title', 'Beach day next summer?');
 beach.append('kind', 'Want');
@@ -212,6 +212,8 @@ const idea = await call('POST', experiences, beach);
 await call('GET', `${experiences}/${idea.id}`);
 await call('DELETE', `${experiences}/${idea.id}/keen`);
 await call('PUT', `${experiences}/${idea.id}/keen`);
+// They went: Mara, who shared it, says "We did this", and it is something the group did.
+await call('POST', `${experiences}/${idea.id}/done`);
 await call('GET', `${experiences}?filter=all`);
 await call('GET', `${experiences}?filter=did`);
 

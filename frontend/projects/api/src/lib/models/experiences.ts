@@ -70,6 +70,8 @@ export interface ExperienceDetailView extends ExperienceCardView {
   keen: KeenView | null;
   /** True for "Want to do" while the Popkin is active. */
   canKeen: boolean;
+  /** "We did this": for its sharer or the Host, while it is an idea in an active Popkin. */
+  canMarkDone: boolean;
   canEdit: boolean;
   canDelete: boolean;
 }

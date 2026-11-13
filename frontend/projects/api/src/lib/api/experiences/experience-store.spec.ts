@@ -47,6 +47,7 @@ function detail(extra: Partial<ExperienceDetailView> = {}): ExperienceDetailView
     canRate: true,
     keen: null,
     canKeen: false,
+    canMarkDone: false,
     canEdit: false,
     canDelete: false,
     ...extra,
@@ -64,6 +65,8 @@ describe('ExperienceStore', () => {
   let failed: number[];
   let keened: { keen: boolean; reply: Subject<KeenView> }[];
   let keenFailed: number;
+  let marked: Subject<ExperienceDetailView>[];
+  let doneFailed: number;
   let store: ExperienceStore;
 
   beforeEach(() => {
@@ -72,6 +75,13 @@ describe('ExperienceStore', () => {
     failed = [];
     keened = [];
     keenFailed = 0;
+    marked = [];
+    doneFailed = 0;
+    const markDone = (): Observable<ExperienceDetailView> => {
+      const reply = new Subject<ExperienceDetailView>();
+      marked.push(reply);
+      return reply;
+    };
     const setKeen = (_: string, __: string, keen: boolean): Observable<KeenView> => {
       const reply = new Subject<KeenView>();
       keened.push({ keen, reply });
@@ -88,11 +98,15 @@ describe('ExperienceStore', () => {
       return reply;
     };
     TestBed.configureTestingModule({
-      providers: [ExperienceStore, { provide: EXPERIENCES_API, useValue: { get, rate, setKeen } }],
+      providers: [
+        ExperienceStore,
+        { provide: EXPERIENCES_API, useValue: { get, rate, setKeen, markDone } },
+      ],
     });
     store = TestBed.inject(ExperienceStore);
     store.rateFailed$.subscribe((stars) => failed.push(stars));
     store.keenFailed$.subscribe(() => keenFailed++);
+    store.doneFailed$.subscribe(() => doneFailed++);
   });
 
   afterEach(() => TestBed.resetTestingModule());
@@ -371,6 +385,7 @@ describe('ExperienceStore', () => {
         pressed: false,
         label: 'I’m keen',
         busy: false,
+        done: null,
       });
     });
 
@@ -425,6 +440,57 @@ describe('ExperienceStore', () => {
       keened[0].reply.error(new HttpErrorResponse({ status: 500 }));
       expect(keenFailed).toBe(1);
       expect(store.view()?.keen).toMatchObject({ count: '7 keen', pressed: false, busy: false });
+    });
+  });
+
+  describe('"We did this" (L2-042 AC4)', () => {
+    const idea = (extra: Partial<ExperienceDetailView> = {}) =>
+      detail({
+        kind: 'Want',
+        canRate: false,
+        canKeen: true,
+        keen: { count: 2, mine: true, members: [] },
+        ...extra,
+      });
+
+    it('is offered to the sharer and the Host only', () => {
+      answer = idea({ canMarkDone: true });
+      store.open('p', 'beach');
+      expect(store.view()?.keen?.done).toEqual({ busy: false });
+      answer = idea();
+      store.open('p', 'beach');
+      expect(store.view()?.keen?.done).toBeNull();
+    });
+
+    it('turns the idea into something we did, ready to rate', () => {
+      answer = idea({ canMarkDone: true });
+      store.open('p', 'beach');
+      store.markDone();
+      expect(store.view()?.keen?.done).toEqual({ busy: true });
+      store.markDone();
+      expect(marked).toHaveLength(1);
+      marked[0].next(
+        detail({
+          score: { average: null, ratingCount: 0, counts: counts(0, 0, 0, 0, 0) },
+          comments: [],
+        }),
+      );
+      expect(store.view()).toMatchObject({
+        kind: 'Something we did',
+        keen: null,
+        panel: { heading: 'How was it for you?', stars: 0 },
+        score: { count: 'No ratings yet' },
+      });
+    });
+
+    it('stays an idea and says so when it does not save', () => {
+      answer = idea({ canMarkDone: true });
+      store.open('p', 'beach');
+      store.markDone();
+      marked[0].error(new HttpErrorResponse({ status: 500 }));
+      expect(doneFailed).toBe(1);
+      expect(store.view()?.kind).toBe('Want to do');
+      expect(store.view()?.keen?.done).toEqual({ busy: false });
     });
   });
 });

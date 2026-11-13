@@ -71,6 +71,8 @@ export interface ExperiencePage {
     label: string;
     /** A change of keen is on its way. */
     busy: boolean;
+    /** "We did this", for its sharer or the Host (L2-042 AC4); null for anyone else. */
+    done: { busy: boolean } | null;
   } | null;
   canEdit: boolean;
   canDelete: boolean;
@@ -90,6 +92,7 @@ export class ExperienceStore {
   private reading?: Subscription;
   private rating?: Subscription;
   private keening?: Subscription;
+  private marking?: Subscription;
   private readonly experience = signal<ExperienceDetailView | null>(null);
   /** The stars just chosen, shown before the API has answered (L2-039 AC2). */
   private readonly chosen = signal<number | null>(null);
@@ -97,12 +100,17 @@ export class ExperienceStore {
   private readonly keenFailures = new Subject<void>();
   /** A change of keen is on its way (L2-042). */
   private readonly keenBusy = signal(false);
+  private readonly doneFailures = new Subject<void>();
+  /** "We did this" is on its way. */
+  private readonly doneBusy = signal(false);
 
   readonly state = signal<'loading' | 'ready' | 'error' | 'not-found'>('loading');
   /** A rating did not save: the stars that were chosen, to try again with (L2-039 AC5). */
   readonly rateFailed$ = this.failures.asObservable();
   /** A change of keen did not save; the panel is as it was. */
   readonly keenFailed$ = this.keenFailures.asObservable();
+  /** "We did this" did not save; it is still an idea. */
+  readonly doneFailed$ = this.doneFailures.asObservable();
 
   readonly view = computed<ExperiencePage | null>(() => {
     const experience = this.state() === 'ready' ? this.experience() : null;
@@ -154,6 +162,7 @@ export class ExperienceStore {
         pressed: experience.canKeen ? experience.keen.mine : null,
         label: experience.keen.mine ? 'You’re keen' : 'I’m keen',
         busy: this.keenBusy(),
+        done: experience.canMarkDone ? { busy: this.doneBusy() } : null,
       },
       canEdit: experience.canEdit,
       canDelete: experience.canDelete,
@@ -176,6 +185,8 @@ export class ExperienceStore {
     // A change of keen still on its way belongs to the experience that was open.
     this.keening?.unsubscribe();
     this.keenBusy.set(false);
+    this.marking?.unsubscribe();
+    this.doneBusy.set(false);
     this.popkinId = popkinId;
     this.experienceId = experienceId;
     this.read(true);
@@ -244,6 +255,26 @@ export class ExperienceStore {
           this.keenFailures.next();
         },
       });
+  }
+
+  /**
+   * "We did this": the idea becomes something the group did, and the page shows the answer, the
+   * rating panel and an empty score among it (L2-042 AC4). Busy until it answers; a failure
+   * leaves it an idea and says so.
+   */
+  markDone(): void {
+    if (!this.experience()?.canMarkDone || this.doneBusy()) return;
+    this.doneBusy.set(true);
+    this.marking = this.api.markDone(this.popkinId, this.experienceId).subscribe({
+      next: (experience) => {
+        this.experience.set(experience);
+        this.doneBusy.set(false);
+      },
+      error: () => {
+        this.doneBusy.set(false);
+        this.doneFailures.next();
+      },
+    });
   }
 
   /** The member's comment was saved: it goes first, in place of any they had (L2-041 AC3). */

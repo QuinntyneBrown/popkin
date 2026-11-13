@@ -113,6 +113,15 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
     public async Task<ActionResult<KeenDto>> NotKeen(Guid popkinId, Guid experienceId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new SetKeenCommand(popkinId, experienceId, Keen: false), cancellationToken));
 
+    /// <summary>
+    /// "We did this": turns an idea into something the group did, for its sharer or the Host
+    /// (L2-042 AC4), and answers the experience as its page shows it. Counted with rating.
+    /// </summary>
+    [HttpPost("{experienceId:guid}/done")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<ExperienceDetailDto>> MarkDone(Guid popkinId, Guid experienceId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new MarkExperienceDoneCommand(popkinId, experienceId), cancellationToken));
+
     /// <summary>Adds a few words to the caller's rating, or replaces the ones they had (L2-041), counted with rating.</summary>
     [HttpPut("{experienceId:guid}/my-rating/comment")]
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]

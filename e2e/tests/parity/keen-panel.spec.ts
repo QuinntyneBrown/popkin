@@ -17,4 +17,11 @@ parity('keen-panel', [
     name: 'keen',
     region: (page) => new ExperienceDetailPage(page).keenPanel,
   },
+  // Ellie shared it and is keen: "We did this" beside "You're keen" (AC4).
+  {
+    key: 'experienceDetailWantOwn',
+    ...experienceStates.experienceDetailWantOwn,
+    name: 'own',
+    region: (page) => new ExperienceDetailPage(page).keenPanel,
+  },
 ]);

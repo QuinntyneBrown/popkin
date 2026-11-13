@@ -121,6 +121,13 @@ export class ExperienceDetailPage {
         run: () => this.store.toggleKeen(),
       }),
     );
+    // L2-042 AC4: it is still an idea; the toast says so and offers the same again.
+    this.store.doneFailed$.pipe(takeUntilDestroyed()).subscribe(() =>
+      this.toaster.show('danger', 'That didn’t save', 'It’s still something you want to do.', {
+        label: 'Try again',
+        run: () => this.store.markDone(),
+      }),
+    );
   }
 
   /** "Add a comment" and "Edit your comment" (L2-041 AC1, AC4). */

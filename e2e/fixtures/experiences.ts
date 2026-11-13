@@ -158,7 +158,7 @@ export function theMockExperiences(): Shared[] {
 }
 
 type Read = 'list' | 'detail';
-type Change = 'rate' | 'comment' | 'share' | 'edit' | 'delete' | 'keen';
+type Change = 'rate' | 'comment' | 'share' | 'edit' | 'delete' | 'keen' | 'done';
 type End = 'server' | { status: number; code: string; field?: string };
 
 export class Experiences {
@@ -189,6 +189,8 @@ export class Experiences {
   readonly deleted: string[] = [];
   /** What reached the server of keen, in order: true for "I'm keen", false to take it back. */
   readonly keened: boolean[] = [];
+  /** The ideas "We did this" reached the server for. */
+  readonly done: string[] = [];
 
   private readonly failing = new Set<Read>();
   private readonly heldReads = new Map<Read, Promise<void>>();
@@ -218,6 +220,7 @@ export class Experiences {
     });
     await this.page.route(`${base}/*/my-rating`, (route) => this.rate(route));
     await this.page.route(`${base}/*/keen`, (route) => this.keenFor(route));
+    await this.page.route(`${base}/*/done`, (route) => this.markDone(route));
     await this.page.route(`${base}/*/my-rating/comment`, (route) => this.comment(route));
   }
 
@@ -277,7 +280,7 @@ export class Experiences {
       sharedAt: s.sharedAt.toISOString(),
       average: score.average,
       ratingCount: score.ratingCount,
-      keenCount: s.keen,
+      keenCount: s.kind === 'Want' ? s.keen : 0,
     };
   }
 
@@ -341,8 +344,12 @@ export class Experiences {
   private detail(route: Route, experienceId: string): Promise<void> {
     const s = this.shared.find((one) => one.id === experienceId);
     if (!s) return this.refuse(route, 404, 'experience_not_found');
+    return this.read(route, 'detail', () => this.detailOf(s));
+  }
+
+  private detailOf(s: Shared): Record<string, unknown> {
     const own = s.by.membershipId === this.viewer.membershipId;
-    return this.read(route, 'detail', () => ({
+    return {
       ...this.card(s, 'display'),
       place: s.place,
       score: this.score(s),
@@ -351,9 +358,24 @@ export class Experiences {
       keen: s.kind === 'Want' ? this.keenOf(s) : null,
       canRate: s.kind !== 'Want' && !this.wrappedUp,
       canKeen: s.kind === 'Want' && !this.wrappedUp,
+      canMarkDone: s.kind === 'Want' && (own || this.host) && !this.wrappedUp,
       canEdit: own && !this.wrappedUp,
       canDelete: (own || this.host) && !this.wrappedUp,
-    }));
+    };
+  }
+
+  /** "We did this", for its sharer or the Host: the idea becomes something the group did. */
+  private async markDone(route: Route): Promise<void> {
+    const s = this.of(route, 2);
+    if (!s) return this.refuse(route, 404, 'experience_not_found');
+    if (!(await this.goesOn(route, 'done'))) return;
+    if (s.by.membershipId !== this.viewer.membershipId && !this.host) {
+      return this.refuse(route, 403, 'not_experience_sharer');
+    }
+    if (s.kind !== 'Want') return this.refuse(route, 409, 'experience_not_wanted');
+    this.done.push(s.id);
+    s.kind = 'Did';
+    return route.fulfill({ json: this.detailOf(s) });
   }
 
   private of(route: Route, back: number): Shared | undefined {

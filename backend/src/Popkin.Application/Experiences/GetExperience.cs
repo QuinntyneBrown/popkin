@@ -50,6 +50,7 @@ public sealed record ExperienceDetailDto(
     KeenDto? Keen,
     bool CanRate,
     bool CanKeen,
+    bool CanMarkDone,
     bool CanEdit,
     bool CanDelete);
 
@@ -63,6 +64,16 @@ public sealed class GetExperienceQueryHandler(IAppDbContext db, IMembershipGuard
     {
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
         var experience = await Experiences.RequireAsync(db.Experiences.AsNoTracking(), popkin.Id, request.ExperienceId, cancellationToken);
+        return await ExperienceDetails.OfAsync(db, store, popkin, membership, experience, cancellationToken);
+    }
+}
+
+/// <summary>Builds an experience as its page shows it, for the reader given.</summary>
+public static class ExperienceDetails
+{
+    public static async Task<ExperienceDetailDto> OfAsync(
+        IAppDbContext db, IPhotoStore store, PopkinSpace popkin, Membership membership, Experience experience, CancellationToken cancellationToken)
+    {
         // A member who has left still shared their experience.
         var sharer = await db.Memberships.AsNoTracking().FirstAsync(m => m.Id == experience.SharerMembershipId, cancellationToken);
         var active = popkin.Status == PopkinStatus.Active;
@@ -103,6 +114,7 @@ public sealed class GetExperienceQueryHandler(IAppDbContext db, IMembershipGuard
             keen,
             CanRate: active && experience.IsRateable,
             CanKeen: active && experience.IsWanted,
+            CanMarkDone: active && experience.IsWanted && experience.CanBeMarkedDoneBy(membership),
             CanEdit: active && experience.CanBeEditedBy(membership),
             CanDelete: active && experience.CanBeDeletedBy(membership));
     }

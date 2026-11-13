@@ -164,3 +164,72 @@ test.describe('Saying you are keen', () => {
     });
   }
 });
+
+test.describe('We did this', () => {
+  // L2-042 AC4
+  test('turns the sharer’s idea into something we did, which members can then rate', async ({
+    page,
+  }) => {
+    await experienceStates.experienceDetailWantOwn.before(page);
+    await page.goto(beach);
+    const detail = new ExperienceDetailPage(page);
+
+    await detail.weDidThis.click();
+
+    await expect(detail.kind).toHaveText(/^Something we did/);
+    await expect(detail.keenPanel).toHaveCount(0);
+    await expect(detail.ratingHeading).toHaveText('How was it for you?');
+    await expect(detail.scoreCard).toContainText('Nobody has rated it yet');
+    expect(experiencesOf(page).done).toEqual([beachId]);
+
+    await detail.star(4).click();
+
+    await expect(detail.ratingHeading).toHaveText('Thanks! Your rating');
+    await expect(detail.count).toHaveText('1 rating');
+  });
+
+  // L2-042 AC4: the Host may say it of any idea.
+  test('is offered to the Host of an idea someone else shared', async ({ page }) => {
+    await theMockExperienceScreens(page);
+    await page.goto(beach);
+    const detail = new ExperienceDetailPage(page);
+
+    await detail.weDidThis.click();
+
+    await expect(detail.ratingHeading).toHaveText('How was it for you?');
+  });
+
+  test('cannot be sent twice while it saves', async ({ page }) => {
+    await experienceStates.experienceDetailWantOwn.before(page);
+    const release = experiencesOf(page).holdChange('done');
+    await page.goto(beach);
+    const detail = new ExperienceDetailPage(page);
+
+    await detail.weDidThis.click();
+
+    await expect(detail.weDidThis).toBeDisabled();
+    release();
+    await expect(detail.ratingHeading).toHaveText('How was it for you?');
+    expect(experiencesOf(page).done).toEqual([beachId]);
+  });
+
+  test('stays an idea and says so when it does not save', async ({ page }) => {
+    await experienceStates.experienceDetailWantOwn.before(page);
+    experiencesOf(page).break('done');
+    await page.goto(beach);
+    const detail = new ExperienceDetailPage(page);
+    const toasts = new Toasts(page);
+
+    await detail.weDidThis.click();
+
+    await expect(toasts.toast).toContainText('That didn’t save');
+    await expect(toasts.toast).toContainText('It’s still something you want to do.');
+    await expect(detail.keenHeading).toHaveText('Keen to do this?');
+    await expect(detail.weDidThis).toBeEnabled();
+
+    experiencesOf(page).mend('done');
+    await toasts.action('Try again').click();
+
+    await expect(detail.ratingHeading).toHaveText('How was it for you?');
+  });
+});
