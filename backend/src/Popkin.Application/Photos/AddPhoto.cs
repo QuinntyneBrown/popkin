@@ -1,6 +1,7 @@
 using MediatR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Invites;
+using Popkin.Application.Problems;
 using Popkin.Application.Security;
 using Popkin.Domain;
 
@@ -15,11 +16,22 @@ public sealed class AddPhotoCommandHandler(
 {
     public async Task<PhotoSummaryDto> Handle(AddPhotoCommand request, CancellationToken cancellationToken)
     {
-        var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
+        // Nothing new is added to a Popkin that has wrapped up (L2-045 AC2).
+        var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
 
         // The caption is kept as typed, less the white space around it; it is never markup (L2-052 AC2).
         var caption = (request.Caption ?? "").Trim();
-        var processed = await ProcessAsync(request.File!, cancellationToken);
+        if (caption.Length > Photo.MaxCaptionLength)
+        {
+            throw ProblemException.Invalid("caption_too_long", "A caption is at most 200 characters.", "caption");
+        }
+
+        if (request.File is null)
+        {
+            throw ProblemException.Invalid("validation_failed", "Choose a photo to add.", "file");
+        }
+
+        var processed = await ProcessAsync(request.File, cancellationToken);
 
         // Both files go under one random name, so no address can be guessed from another (L2-051 AC2).
         var id = Guid.NewGuid();
@@ -49,8 +61,16 @@ public sealed class AddPhotoCommandHandler(
 
     private async Task<ProcessedAlbumPhoto> ProcessAsync(PhotoUpload upload, CancellationToken cancellationToken)
     {
+        if (upload.Length > Photo.MaxFileBytes)
+        {
+            throw ProblemException.Invalid("photo_too_large", "A photo is at most 10 MB.", "file");
+        }
+
         using var buffer = new MemoryStream();
         await upload.Content.CopyToAsync(buffer, cancellationToken);
-        return processor.MakeAlbumPhoto(buffer.ToArray())!;
+        var bytes = buffer.ToArray();
+        // The type is decided from the file's own bytes, whatever its name or declared type says (L2-052 AC3).
+        var processed = ImageSniffer.Sniff(bytes) is null ? null : processor.MakeAlbumPhoto(bytes);
+        return processed ?? throw ProblemException.Invalid("photo_type_not_allowed", "A photo must be a JPEG, PNG, WebP or HEIC image.", "file");
     }
 }
