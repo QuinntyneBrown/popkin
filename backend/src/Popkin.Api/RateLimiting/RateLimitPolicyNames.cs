@@ -17,6 +17,9 @@ public static class RateLimitPolicyNames
     /// <summary>60 messages per person per minute (L2-053 AC2).</summary>
     public const string Messages = "messages";
 
+    /// <summary>60 photos added per person per minute: three full selections of 20 (L2-031 AC1).</summary>
+    public const string Photos = "photos";
+
     public static IServiceCollection AddPopkinRateLimits(this IServiceCollection services)
     {
         services.AddRateLimiter(options =>
@@ -24,6 +27,7 @@ public static class RateLimitPolicyNames
             options.AddPolicy(CodesPerAddress, context => PerAddress(context, permits: 10));
             options.AddPolicy(InviteCodes, context => PerAddress(context, permits: 20));
             options.AddPolicy(Messages, PerPerson);
+            options.AddPolicy(Photos, PerPerson);
 
             options.OnRejected = async (context, cancellationToken) =>
             {

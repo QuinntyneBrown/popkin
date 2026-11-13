@@ -1,5 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Popkin.Api.RateLimiting;
 using Popkin.Application.Invites;
 using Popkin.Application.Photos;
 using Popkin.Domain;
@@ -33,9 +35,10 @@ public sealed class PhotosController(ISender sender) : ControllerBase
     /// <summary>
     /// Adds one photo to the album, with a caption when given (L2-031). The body may be up to
     /// twice the largest photo, so a photo over 10 MB is refused with its own message and not by
-    /// the server's size limit.
+    /// the server's size limit. At most 60 a minute per person.
     /// </summary>
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicyNames.Photos)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(2 * Photo.MaxFileBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = 2 * Photo.MaxFileBytes)]
