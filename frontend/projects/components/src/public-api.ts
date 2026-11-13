@@ -58,3 +58,4 @@ export * from './lib/composer/composer';
 export * from './lib/list-pane/list-pane';
 export * from './lib/conversation-card/conversation-card';
 export * from './lib/detail-pane/detail-pane';
+export * from './lib/card/card';
