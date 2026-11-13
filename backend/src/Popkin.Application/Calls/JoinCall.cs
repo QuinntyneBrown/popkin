@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Security;
 using Popkin.Domain;
@@ -8,30 +9,64 @@ namespace Popkin.Application.Calls;
 /// <summary>`Started` is true when this request started the call.</summary>
 public sealed record JoinCallResult(JoinedCallDto Joined, bool Started);
 
-/// <summary>Starts the Popkin's group call, with the microphone and camera as the member arrives (L2-029 AC1).</summary>
+/// <summary>
+/// Puts the member on the Popkin's group call, with the microphone and camera as they arrive:
+/// it starts the call when none is under way and joins the one that is (L2-029 AC1, AC2).
+/// </summary>
 public sealed record JoinCallCommand(Guid PopkinId, bool MicOn, bool CameraOn) : IRequest<JoinCallResult>;
 
 public sealed class JoinCallCommandHandler(
     IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos, IMediaRelayCredentials relay)
     : IRequestHandler<JoinCallCommand, JoinCallResult>
 {
+    /// <summary>How often a join that lost to another change of the same call is tried again.</summary>
+    private const int Attempts = 3;
+
     public async Task<JoinCallResult> Handle(JoinCallCommand request, CancellationToken cancellationToken)
     {
-        // No call starts in a Popkin that has wrapped up (L2-045 AC1).
+        // No call starts, and nobody joins one, in a Popkin that has wrapped up (L2-045 AC1).
         var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
 
-        var now = clock.GetUtcNow();
-        var call = Call.Start(popkin.Id, now);
-        var participant = call.Join(membership.Id, request.MicOn, request.CameraOn, now);
-        db.Calls.Add(call);
-        db.CallParticipants.Add(participant);
-        await db.SaveChangesAsync(cancellationToken);
+        for (var attempt = 1; ; attempt++)
+        {
+            var call = await CallReads.UnderWayAsync(db, popkin.Id, cancellationToken);
+            var started = call is null;
+            if (call is null)
+            {
+                call = Call.Start(popkin.Id, clock.GetUtcNow());
+                db.Calls.Add(call);
+            }
 
-        var joined = new JoinedCallDto(
-            CallDto.Of(call, 1),
-            membership.Id,
-            [CallParticipantDto.Of(participant, membership, photos)],
-            relay.IssueFor(membership.Id));
-        return new JoinCallResult(joined, Started: true);
+            // A member who is on the call already stays as they are: the repeat adds nothing.
+            var on = !started && await db.CallParticipants.AnyAsync(
+                p => p.CallId == call.Id && p.MembershipId == membership.Id && p.LeftAt == null, cancellationToken);
+            if (on)
+            {
+                return new JoinCallResult(await JoinedAsync(call, membership, cancellationToken), Started: false);
+            }
+
+            var participant = call.Join(membership.Id, request.MicOn, request.CameraOn, clock.GetUtcNow());
+            db.CallParticipants.Add(participant);
+            try
+            {
+                await db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException) when (attempt < Attempts)
+            {
+                // Someone else started the call, or changed who is on it, at the same moment:
+                // this join is made again on the call as it now stands.
+                db.CallParticipants.Entry(participant).State = EntityState.Detached;
+                db.Calls.Entry(call).State = EntityState.Detached;
+                continue;
+            }
+
+            return new JoinCallResult(await JoinedAsync(call, membership, cancellationToken), started);
+        }
+    }
+
+    private async Task<JoinedCallDto> JoinedAsync(Call call, Membership membership, CancellationToken cancellationToken)
+    {
+        var participants = await CallReads.ParticipantsAsync(db, call.Id, photos, cancellationToken);
+        return new JoinedCallDto(CallDto.Of(call, participants.Count), membership.Id, participants, relay.IssueFor(membership.Id));
     }
 }
