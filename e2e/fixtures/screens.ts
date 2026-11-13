@@ -1,5 +1,8 @@
 import path from 'node:path';
 import type { Locator, Page } from '@playwright/test';
+import { callStates } from './call-states';
+import { CallBanner } from '../pages/call-banner';
+import { VideoCallPage } from '../pages/video-call.page';
 import {
   aMessageArrivesBelow,
   sendTheReplyToRuth,
@@ -785,5 +788,51 @@ export const screenStates: ScreenState[] = [
       const offline = new OfflinePage(page);
       return { empty: offline.emptyState };
     },
+  },
+  {
+    key: 'videoCall',
+    ...callStates.videoCall,
+    regions: (page) => {
+      const call = new VideoCallPage(page);
+      return { topBar: call.topBar, controls: call.controls, aside: call.aside };
+    },
+  },
+  {
+    key: 'videoCallTwo',
+    ...callStates.videoCallTwo,
+    regions: (page) => ({ controls: new VideoCallPage(page).controls }),
+  },
+  {
+    key: 'videoCallMuted',
+    ...callStates.videoCallMuted,
+    regions: (page) => ({ controls: new VideoCallPage(page).controls }),
+  },
+  {
+    key: 'videoCallCameraOff',
+    ...callStates.videoCallCameraOff,
+    regions: (page) => ({ controls: new VideoCallPage(page).controls }),
+  },
+  {
+    key: 'videoCallLoading',
+    ...callStates.videoCallLoading,
+    regions: (page) => ({ screen: new VideoCallPage(page).root }),
+  },
+  {
+    key: 'videoCallEmpty',
+    ...callStates.videoCallEmpty,
+    regions: (page) => {
+      const call = new VideoCallPage(page);
+      return { message: call.message, controls: call.controls };
+    },
+  },
+  {
+    key: 'videoCallError',
+    ...callStates.videoCallError,
+    regions: (page) => ({ screen: new VideoCallPage(page).root }),
+  },
+  {
+    key: 'bannerInfo',
+    ...callStates.bannerInfo,
+    regions: (page) => ({ banner: new CallBanner(page).root }),
   },
 ];

@@ -1,6 +1,7 @@
 import { callOf, callUrl, callers, guest, maraWithACall, theMocksCall } from '../fixtures/call';
 import { devicesAreOff, goQuiet, isSending, speakUp } from '../fixtures/call-device';
 import { chatUrl } from '../fixtures/chat';
+import { says } from '../fixtures/far-end';
 import { homeUrl } from '../fixtures/home';
 import { expect, test } from '../fixtures/pk-test';
 import { CallBanner } from '../pages/call-banner';
@@ -102,14 +103,45 @@ test.describe('the tiles of a call', () => {
     await expect(video.rest).toHaveText('4 more on the call');
   });
 
+  // L2-030 AC2: the links between browsers really carry the picture (ADR 0014)
+  test('someone’s camera arrives and plays in their tile', async ({ page }) => {
+    await maraWithACall(page, theMocksCall);
+    await page.goto(callUrl);
+    const video = new VideoCallPage(page);
+
+    await expect(video.person('Walt').video).toBeVisible();
+    await expect.poll(() => video.isPlaying(video.person('Walt'))).toBe(true);
+    await expect(video.person('Walt').avatar).toHaveCount(0);
+  });
+
+  // L2-030 AC4
+  test('whoever is speaking has a ring in the Popkin’s colour, and the pane says so', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await maraWithACall(page, theMocksCall);
+    await page.goto(callUrl);
+    const video = new VideoCallPage(page);
+    await expect(video.person('Walt').video).toBeVisible();
+
+    await says(page, callers.walt.membershipId);
+
+    await expect(video.person('Walt').name).toHaveText('Walt, speaking');
+    await expect(video.speaking).toHaveCount(1);
+    expect(await video.ringWidth()).toBeGreaterThanOrEqual(3);
+    await expect(video.row('Walt Brennan')).toContainText('Speaking');
+
+    await says(page, callers.walt.membershipId, 0);
+
+    await expect(video.speaking).toHaveCount(0);
+  });
+
   // L2-030 AC4
   test('the member’s tile has a ring of at least 3 px while they speak, and says so', async ({
     page,
   }) => {
     await maraWithACall(page, theMocksCall);
-    await page.goto(homeUrl);
-    // Reached by a press, as a member does: the browser measures sound only after one.
-    await new PopkinHomePage(page).groupCall.click();
+    await page.goto(callUrl);
     const video = new VideoCallPage(page);
     await expect(video.names).toHaveCount(6);
     await expect(video.speaking).toHaveCount(0);

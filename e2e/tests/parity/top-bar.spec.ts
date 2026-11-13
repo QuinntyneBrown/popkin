@@ -1,5 +1,6 @@
 import { SignInPage } from '../../pages/sign-in.page';
 import { theMockChat } from '../../fixtures/chat';
+import { callStates } from '../../fixtures/call-states';
 import { parity } from '../../fixtures/parity';
 import { GroupChatPage } from '../../pages/group-chat.page';
 import { NotFoundPage } from '../../pages/not-found.page';
@@ -17,6 +18,16 @@ parity('top-bar', [
   },
   { key: 'signIn', name: 'back-only', region: (page) => new SignInPage(page).topBar },
   // On the stage: Minimise, the emoji in the title, and the taller bar of a call from 640 px.
-  { key: 'videoCall', name: 'call', region: (page) => new VideoCallPage(page).topBar },
-  { key: 'videoCallLoading', name: 'joining', region: (page) => new VideoCallPage(page).topBar },
+  {
+    key: 'videoCall',
+    ...callStates.videoCall,
+    name: 'call',
+    region: (page) => new VideoCallPage(page).topBar,
+  },
+  {
+    key: 'videoCallLoading',
+    ...callStates.videoCallLoading,
+    name: 'joining',
+    region: (page) => new VideoCallPage(page).topBar,
+  },
 ]);

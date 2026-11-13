@@ -1,6 +1,7 @@
 import type { Page, Route } from '@playwright/test';
 import { aCallDevice, type DeviceAnswer } from './call-device';
 import { people, popkinId } from './chat';
+import { aFarEnd } from './far-end';
 import { type Home, homeNow, maraAtHome } from './home';
 import type { Hub } from './hub';
 import { problem } from './stubs';
@@ -81,6 +82,10 @@ export class Call {
   /** When the call started: 12 minutes 48 seconds before the mocks' moment, as they draw it. */
   startedAt = new Date(homeNow.getTime() - (12 * 60 + 48) * 1000).toISOString();
   version = 1;
+  /** Where Mara stands among the people on the call; last, as the one who just joined. */
+  maraAt: number | null = null;
+  /** How long ago a call Mara starts began, for a state the mocks draw some seconds in. */
+  startedAgo = 0;
 
   /** What the app asked: each join's microphone and camera, each change of them, each leave. */
   readonly joined: { micOn: boolean; cameraOn: boolean }[] = [];
@@ -207,7 +212,10 @@ export class Call {
         json: {
           call: this.dto(),
           viewerMembershipId: people.mara.membershipId,
-          participants: [...this.others, { ...callers.mara, ...state }],
+          participants: this.others.toSpliced(this.maraAt ?? this.others.length, 0, {
+            ...callers.mara,
+            ...state,
+          }),
           iceServers: [],
         },
       });
@@ -246,6 +254,7 @@ export async function maraWithACall(
   await page.clock.install({ time: homeNow });
   await aCallDevice(page, device);
   const home = await maraAtHome(page);
+  await aFarEnd(page, callId);
   const call = new Call(page);
   arrange?.(call, home);
   await call.install();
