@@ -1,0 +1,19 @@
+<div
+  pk-dialog
+  [heading]="'Leave ' + data.name + '?'"
+  description="Your messages and photos stay. To come back you’ll need a new invite."
+  [accent]="data.accent"
+>
+  <button pk-button slot="footer" type="button" variant="danger" [block]="true">Leave</button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="secondary"
+    cdkFocusInitial
+    [block]="true"
+    (click)="stay()"
+  >
+    Stay
+  </button>
+</div>

@@ -2,6 +2,8 @@ import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { AddCommentDialog } from '../../pages/add-comment.dialog';
 import { DeleteExperienceDialog } from '../../pages/delete-experience.dialog';
+import { LeavePopkinDialog } from '../../pages/leave-popkin.dialog';
+import { leaveStates } from '../../fixtures/leave-states';
 import { ExperienceActionsDialog } from '../../pages/experience-actions.dialog';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { openTheScanner, withACamera } from '../../fixtures/my-popkins';
@@ -23,6 +25,10 @@ const openEndDate = async (page: Page, today?: Date) => {
   await new EndDateDialog(page).panel.waitFor();
 };
 
+const stayInFocus = async (page: Page) => {
+  await page.keyboard.press('Shift');
+  await new LeavePopkinDialog(page).stay.focus();
+};
 const keepInFocus = async (page: Page) => {
   // A key first, so the browser draws the ring it draws for the keyboard, as the mock has.
   await page.keyboard.press('Shift');
@@ -150,6 +156,14 @@ parity('dialog', [
     name: 'delete-experience-failed',
     region: (page) => new DeleteExperienceDialog(page).panel,
     prepare: (page) => keepInFocus(page),
+  },
+  {
+    key: 'leavePopkin',
+    ...leaveStates.leavePopkin,
+    name: 'leave-popkin',
+    region: (page) => new LeavePopkinDialog(page).panel,
+    // The mock's "Stay" has autofocus; the dialog focuses it on open.
+    prepare: (page) => stayInFocus(page),
   },
   {
     key: 'addComment',
