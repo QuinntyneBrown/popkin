@@ -23,13 +23,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-top: var(--space-4);
 }
 
+/* The room above is the chips' own: a header with the action alone has no empty row on a phone. */
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  margin-top: var(--space-4);
 }
 
 /* XS and S: the action is the floating one. */
@@ -61,11 +62,11 @@
     grid-row: 1 / span 2;
     flex-wrap: nowrap;
     align-items: center;
-    margin-top: 0;
   }
 
   .chips {
     flex-wrap: nowrap;
+    margin-top: 0;
   }
 
   .tab-header__action {
