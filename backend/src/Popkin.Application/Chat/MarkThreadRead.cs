@@ -17,8 +17,8 @@ public sealed class MarkThreadReadCommandHandler(IAppDbContext db, IMembershipGu
 {
     public async Task Handle(MarkThreadReadCommand request, CancellationToken cancellationToken)
     {
-        var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
-        var thread = await ChatThreads.RequireAsync(db, popkin.Id, request.ThreadId, cancellationToken);
+        var (_, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
+        var thread = await ChatThreads.RequireAsync(db, membership, request.ThreadId, cancellationToken);
         var message = await db.Messages.AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == request.LastReadMessageId && m.ThreadId == thread.Id, cancellationToken)
             ?? throw ChatProblems.MessageNotFound("lastReadMessageId");

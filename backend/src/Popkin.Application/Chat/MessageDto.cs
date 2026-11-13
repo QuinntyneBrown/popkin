@@ -46,12 +46,17 @@ public static class ChatProblems
 public static class ChatThreads
 {
     /// <summary>
-    /// The thread, when it belongs to the Popkin the caller is a member of; otherwise 404
-    /// `thread_not_found`, the same for a thread of another Popkin as for none (L2-051).
+    /// The thread, when it belongs to the Popkin the caller is a member of and that membership
+    /// may read it; otherwise 404 `thread_not_found`, the same for a direct message of two
+    /// other members and a thread of another Popkin as for none, so a thread's existence is
+    /// never disclosed (L2-023 AC2, L2-051).
     /// </summary>
-    public static async Task<ChatThread> RequireAsync(IAppDbContext db, Guid popkinId, Guid threadId, CancellationToken cancellationToken) =>
-        await db.ChatThreads.AsNoTracking().FirstOrDefaultAsync(t => t.Id == threadId && t.PopkinId == popkinId, cancellationToken)
-            ?? throw ChatProblems.ThreadNotFound();
+    public static async Task<ChatThread> RequireAsync(IAppDbContext db, Membership membership, Guid threadId, CancellationToken cancellationToken)
+    {
+        var thread = await db.ChatThreads.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == threadId && t.PopkinId == membership.PopkinId, cancellationToken);
+        return thread is not null && thread.CanRead(membership.Id) ? thread : throw ChatProblems.ThreadNotFound();
+    }
 
     public static async Task<ChatThread> EveryoneAsync(IAppDbContext db, Guid popkinId, CancellationToken cancellationToken) =>
         await db.ChatThreads.AsNoTracking().FirstAsync(t => t.PopkinId == popkinId && t.Kind == ChatThreadKind.Everyone, cancellationToken);

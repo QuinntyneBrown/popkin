@@ -20,7 +20,7 @@ public sealed class SendMessageCommandHandler(
     public async Task<SendMessageResult> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
-        var thread = await ChatThreads.RequireAsync(db, popkin.Id, request.ThreadId, cancellationToken);
+        var thread = await ChatThreads.RequireAsync(db, membership, request.ThreadId, cancellationToken);
 
         if (request.ClientMessageId is not { } clientMessageId || clientMessageId == Guid.Empty)
         {
