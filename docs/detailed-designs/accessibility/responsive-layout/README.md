@@ -129,10 +129,48 @@ than a given height is `<TO SUPPLY>`; the mocks do not draw landscape.
 - Behaviour specs (ADR 0006) prove the parts a person relies on: at 360 px a step screen's main
   action is visible and pressable; under 640 px the invite dialog is attached to the bottom edge
   and at 1280 px it is centred (L2-011 AC4).
-- `e2e/tests/responsive.spec.ts` checks every screen state at 360, 768, 1024 and 1280 px for sideways
-  scroll and clipped controls. It is a sweep: kept current with a `routes.ts` entry per state,
-  never run by agents or CI (ADR 0006).
+- `e2e/tests/responsive.spec.ts` checks every screen state at 360, 640, 768, 1024 and 1280 px
+  for sideways scroll, and at 1280 px that the screen fills the width while fields and actions
+  stay within 36 rem. `e2e/tests/visual/screens.spec.ts` compares each state with its mock at
+  the same five widths. Both are sweeps: kept current with a `routes.ts` entry per state, never
+  run by agents or CI (ADR 0006).
 - Component parity specs (ADR 0008) compare each component at 360 px and 1280 px with the mock.
+  A part that exists from 768 px only is compared at 1280 px only, through the `widths` option
+  of `e2e/fixtures/parity.ts`.
+
+### Built so far
+
+Journey 1's five screens (sign up, the code screen, Name your Popkin, How long and Popkin
+created) are built for the five form factors. The rest of this design is not built yet.
+
+- **`pk-screen`** — fills the width. `layout` is `fill` or `split`; the modifiers `app`, `page`,
+  `column`, `list` and `thread` are added by the journeys that need them. A `split` screen keeps
+  its body and footer in the form column and, from 768 px, leaves `--layout-split-aside` (44 %,
+  50 % from 1024 px, 55 % from 1280 px) at the start of the screen for its `[slot=aside]`.
+  `body="middle"` sets a short form in the middle of its part from 768 px, its action right
+  under it (sign up, the code screen). `[middle]` sets the body and its footer together in the
+  middle from 768 px, where the footer is no longer sticky (Popkin created).
+- **`pk-split-aside`** — the picture half of a split screen, `aside[pk-split-aside]` with a
+  label. It is a photograph under a caption, or a tinted body: an emoji, a quiet line, a
+  heading, the projected picture and a line of text. The pictures built are the photograph (sign
+  up and the code screen), `pk-preview-card` with `pk-avatar` and `pk-time-left` (Name your
+  Popkin), `pk-timeline` (How long) and `pk-qr-card` at `size="lg"` (Popkin created). Each
+  feature's design names its own.
+- **Hidden means not there (AC13)** — below 768 px the aside is `display: none`. It is not drawn
+  and then covered or moved off screen, so it leaves the tab order and the accessibility tree
+  with no further attribute. The utilities `only-s-up`, `only-m-up`, `only-l-up`, `only-xl-up`,
+  `only-below-m` and `only-below-l` do the same for a part of a page. Popkin created uses
+  `only-below-m` on the body's QR card, so the code is on screen once at every width.
+- **Tests** — each of the five screens has behaviour specs that prove the split at 768 px or
+  1024 px and its absence at 360 px. The sweeps cover the five widths and are still run by the
+  repository owner only.
+- **Not built yet** — the shell (`pk-popkin-nav` as tabs, rail and sidebar), the panes, the
+  columns that cards and photos gain, the floating action that moves to the header, the landing
+  grid, and the split of joining, wrapping up, sign in and join with a code. `DialogOpener` does
+  not exist: `pk-dialog` places itself as a sheet below 640 px and centred from 640 px in its own
+  stylesheet, and the one dialog built, `EndDateDialog`, opens through the CDK `Dialog` directly.
+  The viewport meta tag does not carry `interactive-widget=resizes-content` yet. The not-found
+  and server-error screens fill the width with one centred message.
 
 ### Screens and states
 

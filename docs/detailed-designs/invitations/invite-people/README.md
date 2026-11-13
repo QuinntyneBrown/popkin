@@ -83,6 +83,16 @@ to `invitations/preview-invite`.
 - **`Invites:BaseUrl`** — configuration; `https://popk.in/` locally and in tests. How the
   production address reaches `/i/:code` stays `<TO SUPPLY>`.
 
+### Settled when the wide layouts were built
+
+- **`pk-qr-card` sizes** — the card gained `size="lg"`. `PopkinCreatedPage` uses it from 768 px,
+  where the QR code is the picture half of the split screen
+  ([Start a Popkin](../../popkins/start-popkin/README.md), L2-058 AC10); a behaviour spec scans
+  the code from there too (L2-011 AC6). The invite dialog keeps the base size.
+- **Not built yet** — `InviteDialog` and its two entry points wait for the Popkin home
+  (journey 4). Of this design, the endpoint, the invite code rules, `encodeQr()` and
+  `pk-qr-card` exist.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

@@ -56,13 +56,16 @@ the product term.
   preview, and `pk-button` "Looks good". The pickers expose `aria-pressed` and draw a ring or dot,
   so the choice is not carried by colour alone (L2-008 AC2, L2-057 AC5). "Looks good" is disabled
   while the trimmed name is empty (L2-008 AC3). The character count appears at the limit, as in
-  the `edge` mock; whether it shows earlier is `<TO SUPPLY>`.
+  the `edge` mock; whether it shows earlier is `<TO SUPPLY>`. As built, the name field and its
+  tile are one component, `pk-name-preview`. From 768 px the screen is split and
+  `pk-split-aside` holds `pk-preview-card`, the Popkin as others will see it (L2-058 AC10).
 - **`HowLongPage`** (`pages/how-long/how-long.page.ts`, route `/new/length`) — one radio group of
   four `pk-choice-card` options with arrow-key movement (L2-009 AC1, AC7), the line about changing
   later and the recap (AC6), a date control for "Until a date" that opens `EndDateDialog` (AC2),
   `pk-alert` for the failure state and `pk-button` "Pop it up" / "Popping it up…" (AC4, AC5). The
   date control is the mock's `date-btn` block, which has no design-system component page yet;
-  its `pk-*` home is `<TO SUPPLY>`.
+  its `pk-*` home is `<TO SUPPLY>`. From 768 px the screen is split and `pk-split-aside` holds
+  `pk-timeline`, which shows the chosen length (L2-058 AC10).
 - **`EndDateDialog`** (`dialogs/end-date/end-date.dialog.ts`) — CDK dialog inside `pk-dialog` with
   Day and Time `pk-text-field`s. It refuses an end less than 1 hour or more than 1 year ahead
   with the mock's message (L2-009 AC3). Nothing is sent until "Pop it up". The same dialog
@@ -76,7 +79,8 @@ the product term.
   has no `navigator.share` (AC4). "Go to {name}" opens `/p/:popkinId` (AC5). The tile springs in
   and confetti bursts once, within 320 ms, only under `prefers-reduced-motion: no-preference`
   (AC7, L2-060). The share row is the mock's `share-actions` block, which has no design-system
-  component page yet (`<TO SUPPLY>`).
+  component page yet (`<TO SUPPLY>`). From 768 px the screen is split and the QR card, at
+  `size="lg"`, is the picture in `pk-split-aside` (L2-058 AC10).
 - **`NewPopkinDraft`** (`api` library, `providedIn: 'root'`) — signal store holding `name`,
   `emoji`, `colour`, `length`, `customEndsAt` and `created`. Both steps read and write it, so
   going back keeps all three choices (L2-008 AC5); a failed create keeps them too (L2-009 AC5).
@@ -140,6 +144,49 @@ the product term.
 - **Reduced motion** — the confetti dots are not drawn at all (the design system now says so).
 - **Created screen data** — it reads `GET /api/popkins/{id}/invite` every time, not only after a
   reload, so a direct link and a reload behave the same; a 5xx opens the server-error screen.
+
+### Settled when the wide layouts were built
+
+The three screens are built for the five form factors of L2-058
+([Responsive layout](../../accessibility/responsive-layout/README.md)). Each is `pk-screen` with
+`layout="split"`: the form stays in a column of 28 rem, 32 rem from 640 px and 36 rem from
+1024 px (L2-058 AC3), and from 768 px a `pk-split-aside` beside it holds a picture of what the
+step makes (L2-058 AC10). Below 768 px the aside is `display: none`, not drawn and then covered,
+so it is out of the tab order and the accessibility tree (L2-058 AC13).
+
+- **Name your Popkin** — the aside, labelled "Preview", shows `pk-preview-card` under "How it’ll
+  look to everyone". The card reads the same draft as the form, so it follows the name, the
+  emoji and the colour as they change (L2-008 AC2). It shows "Your Popkin" while the name is
+  empty, the emoji tile, "You: Welcome, everyone! 👋", the Host's avatar beside "Just you, for
+  now", and "Just started". The row above the form still previews the Popkin at every width.
+- **The Host's avatar** — the mock's card shows Mara's photograph. A person has no photo until
+  the account screen is built (journey 17), so `pk-avatar` shows the initials of the first and
+  last word of their name on Coral. It shows the photo when the session carries one.
+- **How long** — the aside, labelled "What happens", shows the chosen option's emoji and title,
+  `pk-timeline` from "Now" to the end in words, and a line of text. It follows the choice:
+
+  | Length | Bar | End | Text |
+  |---|---|---|---|
+  | Just today | 30 % | "Midnight" | "Then it wraps up on its own and everyone gets the recap: the people, the photos, the best moment." |
+  | The weekend | 65 % | "Sunday, 6 pm" | The same |
+  | Until a date | 85 % | The end as the date control shows it, such as "Sun, 13 Sep · 6:00 pm" | The same |
+  | Keep it going | 100 % | "Whenever you say" | "It stays open until you wrap it up. Then everyone gets the recap." |
+
+- **Just today** — no mock draws its timeline. The app derives it from the option's own copy
+  ("Wraps up at midnight"): a 30 % bar that ends at "Midnight".
+- **The timeline's emoji** — the mocks first drew it as `timeline__icon`, outside the `timeline`
+  block. It is an element of the aside, so the mocks, the design system and the app name it
+  `split-aside__icon`.
+- **The bar** — decoration, hidden from assistive technology; the two ends say the same in words
+  (L2-057 AC6).
+- **Popkin created** — the aside, labelled "Invite code", shows `pk-qr-card` at `size="lg"`. The
+  QR card in the body carries `only-below-m`, so the code is on screen once at every width and
+  nothing a person needs is at one width only (L2-058 AC13). From 768 px the headline, the share
+  actions and "Go to {name}" sit together in the middle of their part.
+- **Tests** — behaviour specs prove each picture at 768 px, that the card and the timeline
+  follow the choices at 1024 px, that the QR code still scans from the aside, and that no
+  picture is there at 360 px. Parity specs for `pk-split-aside`, `pk-preview-card`, `pk-avatar`,
+  `pk-time-left` and `pk-timeline` run at 1280 px only, as these parts do not exist at 360 px.
 
 ## Requirements
 

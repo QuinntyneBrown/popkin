@@ -1,7 +1,7 @@
 # Estimates
 
 - Overall effort: 185 days
-- Complete: 15%
+- Complete: 16%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
@@ -10,7 +10,7 @@
 | [invitations](invitations.md) | 13 days | 12% |
 | [security](security.md) | 13 days | 37% |
 | [reliability](reliability.md) | 8 days | 22% |
-| [accessibility](accessibility.md) | 11 days | 34% |
+| [accessibility](accessibility.md) | 11 days | 36% |
 | [chat](chat.md) | 29 days | 0% |
 | [photos](photos.md) | 20 days | 0% |
 | [calls](calls.md) | 13 days | 0% |

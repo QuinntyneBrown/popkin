@@ -47,7 +47,7 @@ L2-053).
 - **`PendingVerificationStore`** — introduced by sign up; resend replaces `verificationId` and `resendAvailableAt`.
 - **`AuthApi`** — this slice adds `confirmCode(verificationId, code, name?)` and `resendCode(verificationId)`.
 - **`Toaster`** — `toasts/toaster.ts`; shows `pk-toast` success "new code sent" for 8 seconds (L2-056 AC7). The copy is `<TO SUPPLY>`.
-- **Components** — `pk-top-bar`, `pk-text-field`, `pk-button`, `pk-link`, `pk-toast`.
+- **Components** — `pk-screen` (`layout="split"`, `body="middle"`), `pk-split-aside`, `pk-top-bar`, `pk-text-field`, `pk-button`, `pk-link`, `pk-toast`.
 
 ### Back end (introduced)
 
@@ -82,6 +82,20 @@ L2-053).
   sees the value, so fast typing cannot race the filter.
 - **`NameRequired`** — sign up always sends the name, so journey 1 never meets it; the sign-in
   journey builds the screen that asks for it.
+
+### Settled when the wide layouts were built
+
+The code screen is built for the five form factors of L2-058
+([Responsive layout](../../accessibility/responsive-layout/README.md)).
+
+- **The split** — the code screen splits as sign up does, with the same photograph and caption
+  in a `pk-split-aside` labelled "Popkin" (L2-058 AC10). The form column is 28 rem, 32 rem from
+  640 px and 36 rem from 1024 px (L2-058 AC3). From 768 px the field sits in the middle of its
+  part with "Confirm" right under it.
+- **Below 768 px** — the aside is `display: none`, so it is out of the tab order and the
+  accessibility tree (L2-058 AC13). Focus still opens on the code field at every width.
+- **Tests** — behaviour specs prove the picture beside the code field at 768 px and its absence
+  at 360 px.
 
 ## Requirements
 
