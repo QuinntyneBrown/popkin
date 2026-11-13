@@ -48,3 +48,4 @@ export * from './lib/arrival/arrival';
 export * from './lib/badge/badge';
 export * from './lib/chip/chip';
 export * from './lib/banner/banner';
+export * from './lib/popkin-nav/popkin-nav';
