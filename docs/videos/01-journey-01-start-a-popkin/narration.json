@@ -1,0 +1,21 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["This is how a Popkin starts.", "A name, a code, and a QR code for everyone you want in."] },
+    { "id": "signup", "bars": 5, "lines": ["First, say what to call you, and add a phone number or an email.", "There is no password to make up."] },
+    { "id": "code", "bars": 5, "lines": ["We send you six digits.", "Type them in and you are signed in, for thirty days."] },
+    { "id": "grow", "bars": 5, "lines": ["Open it on something wider and the screen splits in two.", "The form on one side, a picture on the other."] },
+    { "id": "name", "bars": 6, "lines": ["Now name your Popkin, and pick an emoji and a colour.", "The card beside the form shows how it will look to everyone, and follows every choice."] },
+    { "id": "length", "bars": 5, "lines": ["Choose how long it lasts: just today, the weekend, until a date, or keep it going.", "You can change it later."] },
+    { "id": "created", "bars": 6, "lines": ["Pop it up.", "There is the QR code to hold up, and the invite link to copy, text or share.", "You are its Host, and its first member."] },
+    { "id": "themes", "bars": 4, "lines": ["It works by touch on a phone and by keyboard on a desktop, in light and in dark."] },
+    { "id": "proof", "bars": 5, "lines": ["What no screen shows, the tests prove.", "Codes are stored hashed, expire after ten minutes, and work only once."] },
+    { "id": "left", "bars": 5, "lines": ["One thing is left for the owner: choosing who sends the texts and the emails.", "Until then, the code goes to the log."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey one. Popkin is a free platform for pop-up communities."] }
+  ]
+}

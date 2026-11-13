@@ -9,7 +9,7 @@ skill (edge-tts, burned-in captions), this page wins.
 
 | # | Video | Runtime | What it is |
 |---|-------|---------|------------|
-| | *None yet. The first journey run that makes one adds its row and the tools below.* | | |
+| 01 | [Journey 1: Start a Popkin](01-journey-01-start-a-popkin/README.md) | 1:48 | Sign up with a code, name a Popkin while the preview follows, choose how long it lasts and get the QR code; the split screens grow from the phone to the desktop. |
 
 ## What every video is
 
@@ -45,6 +45,7 @@ docs/videos/NN-journey-JJ-topic/
   README.md          what the video shows, its run sheet, what it proves       (written)
   script.md          the transcript                                            (written)
   shots/             the screenshots, PNG at double density                    (generated, committed)
+  timing.js          the scene grid and the lines in film time, read by the deck (generated, committed)
   captions.vtt       captions in film time, a sidecar file                     (generated, committed)
   NN-journey-JJ-topic.mp3   voice and ducked music                             (generated, committed)
   NN-journey-JJ-topic.mp4   the film                                           (generated, committed)
