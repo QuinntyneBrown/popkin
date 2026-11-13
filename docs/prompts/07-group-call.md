@@ -140,7 +140,7 @@ any code, and change them only where they disagree with each other or leave a ga
   2. Alone on the call: waiting for others, with Invite (L2-029 AC3).
   3. Permissions refused: explanation and Back (L2-029 AC4); error state.
   4. Banner: count and Join on the home and in the thread; removed for everyone when the last person leaves (L2-029 AC2, AC6).
-  5. Tiles: one column for two, two columns for three or more, at most 12 shown and the rest counted, names or "You", avatar when the camera is off, muted icon, a 3 px speaking ring in the Popkin's colour (L2-029 AC7, L2-030 AC1 to AC4).
+  5. Tiles: one column for two (side by side from 640 px), two columns for three or four, two for five or six (three from 640 px), at most 12 shown and the rest counted, names or "You", avatar when the camera is off, muted icon, a 3 px speaking ring in the Popkin's colour (L2-029 AC7, L2-030 AC1 to AC4).
   6. Controls: Mute and Camera with pressed state and changing label and icon; Leave returns to the screen you came from; Minimise returns home with a banner to return (L2-030 AC5 to AC7).
 - For each slice:
   - Write the Given-When-Then criteria, taken from the acceptance criteria above.
