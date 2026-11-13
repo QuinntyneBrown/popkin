@@ -13,6 +13,7 @@ import {
   tap,
 } from 'rxjs';
 import { MessagePageView, MessageView, PresenceView, ThreadView } from '../../models/chat';
+import { toApiProblem } from '../problem';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { CHAT_API } from './chat-api';
 import { MessageOutbox } from './message-outbox';
@@ -20,7 +21,8 @@ import { ThreadRow, mergeMessages, threadRows } from './thread-rows';
 import { announcement } from './thread-text';
 import { UnreadTracker } from './unread-tracker';
 
-export type ThreadState = 'loading' | 'ready' | 'empty' | 'error';
+/** `not-found` is a Popkin the person is not a member of, or one that does not exist. */
+export type ThreadState = 'loading' | 'ready' | 'empty' | 'error' | 'not-found';
 
 /**
  * One open thread: its header, the messages loaded so far with those still on the device, and
@@ -38,7 +40,7 @@ export class ThreadStore {
 
   private readonly header = signal<ThreadView | null>(null);
   private readonly messages = signal<MessageView[]>([]);
-  private readonly phase = signal<'loading' | 'ready' | 'error'>('loading');
+  private readonly phase = signal<'loading' | 'ready' | 'error' | 'not-found'>('loading');
   private readonly earlier = signal(false);
   private readonly below = signal(false);
   private readonly said = signal('');
@@ -148,7 +150,8 @@ export class ThreadStore {
           this.readPresence();
           this.reportRead();
         },
-        error: () => this.phase.set('error'),
+        error: (error: unknown) =>
+          this.phase.set(toApiProblem(error).status === 404 ? 'not-found' : 'error'),
       });
   }
 

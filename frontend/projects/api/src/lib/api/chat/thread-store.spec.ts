@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
@@ -61,9 +62,13 @@ class FakeChat implements ChatApi {
   readonly read: string[] = [];
   readonly sends: string[] = [];
   failMessages = false;
+  notFound = false;
 
   getEveryone(): Observable<ThreadView> {
-    return this.thread ? of(this.thread) : throwError(() => new Error('down'));
+    if (this.thread) return of(this.thread);
+    return throwError(() =>
+      this.notFound ? new HttpErrorResponse({ status: 404 }) : new Error('down'),
+    );
   }
 
   getMessages(_p: string, _t: string, cursor?: MessagesCursor): Observable<MessagePageView> {
@@ -162,6 +167,13 @@ describe('ThreadStore', () => {
       else chat.failMessages = true;
       store.open('p');
       expect(store.state()).toBe('error');
+    });
+
+    it('is not found for someone who is not a member (L2-051)', () => {
+      chat.thread = null;
+      chat.notFound = true;
+      store.open('p');
+      expect(store.state()).toBe('not-found');
     });
 
     it('opens again after an error', () => {
