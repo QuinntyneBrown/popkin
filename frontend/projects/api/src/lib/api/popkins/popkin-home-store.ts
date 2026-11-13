@@ -17,6 +17,7 @@ import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { timeLeftLine } from './home-text';
 import { POPKINS_API } from './popkins-api';
 import { timeLeft } from './time-left';
+import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
 
 /** One block of the home, loaded and failing on its own (L2-019 AC8, AC9). */
 export interface Section<T> {
@@ -41,13 +42,17 @@ export class PopkinHomeStore {
   private readonly experiencesApi = inject(EXPERIENCES_API);
   private readonly realtime = inject(POPKIN_REALTIME);
   private readonly unread = inject(UnreadTracker);
+  private readonly watch = inject(WrapUpWatch);
   private readonly destroyRef = inject(DestroyRef);
 
   private popkinId = '';
   private readonly now = signal(new Date());
 
-  /** `error` and `not-found` are the whole screen's; a section has its own. */
-  readonly state = signal<'loading' | 'ready' | 'error' | 'not-found'>('loading');
+  /**
+   * `error` and `not-found` are the whole screen's; a section has its own. `wrapped-up` is a
+   * Popkin that has ended: its recap comes first (L2-045 AC5).
+   */
+  readonly state = signal<'loading' | 'ready' | 'error' | 'not-found' | 'wrapped-up'>('loading');
   readonly popkin = signal<PopkinHomeView | null>(null);
   readonly chat = signal<Section<ChatPreviewView>>(loading);
   readonly photos = signal<Section<PhotosSummaryView>>(loading);
@@ -60,6 +65,11 @@ export class PopkinHomeStore {
   readonly timeLeft = computed(() => {
     const endsAt = this.popkin()?.endsAt;
     return endsAt ? timeLeft(new Date(endsAt), this.now()) : null;
+  });
+  /** The banner of the last hour (L2-044 AC2). */
+  readonly warning = computed(() => {
+    const popkin = this.popkin();
+    return popkin ? this.watch.warningFor(popkin.id, popkin.name, popkin.endsAt) : null;
   });
   /** Messages of the Everyone thread that are new to the member (L2-027 AC3). */
   readonly newCount = computed(() => {
@@ -110,6 +120,10 @@ export class PopkinHomeStore {
     this.readAll(false);
   }
 
+  dismissWarning(): void {
+    this.watch.dismissWarning(this.popkinId);
+  }
+
   retrySection(section: HomeSection): void {
     this.readers[section](false);
   }
@@ -132,7 +146,13 @@ export class PopkinHomeStore {
     this.popkins.getHome(this.popkinId).subscribe({
       next: (popkin) => {
         this.now.set(new Date());
+        if (popkin.status === 'WrappedUp') {
+          this.watch.look(null, null);
+          this.state.set('wrapped-up');
+          return;
+        }
         this.popkin.set(popkin);
+        this.watch.look(popkin.id, popkin.endsAt);
         this.state.set('ready');
       },
       error: (error: unknown) => {

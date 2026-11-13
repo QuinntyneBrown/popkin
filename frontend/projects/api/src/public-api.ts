@@ -70,3 +70,8 @@ export * from './lib/api/calls/browser-speaking-meter';
 export * from './lib/api/calls/sound-level';
 export * from './lib/api/calls/call-session';
 export * from './lib/api/calls/call-banner-store';
+export * from './lib/models/recap';
+export * from './lib/api/wrap-up/recap-api';
+export * from './lib/api/wrap-up/wrap-up-text';
+export * from './lib/api/wrap-up/wrap-up-watch';
+export * from './lib/api/wrap-up/recap-store';
