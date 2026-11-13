@@ -20,7 +20,10 @@ under it, and writes the MP3, `captions.vtt` and `timing.js`. Standard: `docs/vi
 ffmpeg must be on the path (`FFMPEG_PATH` overrides). The model (`onnx/model.onnx`, about 310 MB)
 and the voice are taken from `.cache/kokoro` (`KOKORO_DIR` overrides), else from the Hugging Face
 cache in the home folder, else downloaded once from `onnx-community/Kokoro-82M-v1.0-ONNX` into
-`.cache/kokoro`. Spoken lines are cached in `.cache/kokoro/lines` by voice, speed and text.
+`.cache/kokoro`. Where Hugging Face cannot be reached, the same model is in the `kokoro-onnx`
+project's GitHub release `model-files-v1.0`: save `kokoro-v1.0.onnx` as `.cache/kokoro/kokoro.onnx`,
+and write the voice out of `voices-v1.0.bin` as raw float32,
+`numpy.load("voices-v1.0.bin")["af_heart"].tofile(".cache/kokoro/af_heart.bin")`. Spoken lines are cached in `.cache/kokoro/lines` by voice, speed and text.
 
 ## `narration.json`
 
