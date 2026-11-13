@@ -74,3 +74,4 @@ export * from './lib/album/album';
 export * from './lib/tab-header/tab-header';
 export * from './lib/progress/progress';
 export * from './lib/upload-item/upload-item';
+export * from './lib/photo-viewer/photo-viewer';
