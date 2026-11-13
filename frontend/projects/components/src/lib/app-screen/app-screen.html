@@ -2,9 +2,10 @@
 <ng-content select="[slot=banner]" />
 <main
   id="main"
-  [class.thread]="body() !== 'plain'"
+  [class.thread]="body() === 'thread' || body() === 'thread-end'"
   [class.thread--end]="body() === 'thread-end'"
-  [class.screen__body]="body() === 'plain'"
+  [class.screen__body]="body() === 'plain' || body() === 'flush'"
+  [class.screen__body--flush]="body() === 'flush'"
   [attr.aria-label]="mainLabel() || null"
   tabindex="-1"
 >

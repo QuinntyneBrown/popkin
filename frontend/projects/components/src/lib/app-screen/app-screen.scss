@@ -1,5 +1,5 @@
 /*
- * The widths of the fixed parts around the thread. The navigation, the list pane and the detail
+ * The widths of the fixed parts around the screen's own part. The navigation, the list pane and the detail
  * pane read them; the screen leaves that much room at its sides.
  */
 :host {
@@ -23,6 +23,12 @@
   flex-direction: column;
   padding: var(--space-4) var(--space-6) var(--space-6);
   min-width: 0;
+}
+
+/* A body whose content sets its own distance from the sides and sits right under the header. */
+.screen__body--flush {
+  padding-top: 0;
+  padding-inline: 0;
 }
 
 /* The screen's main as a thread: a column of messages (pk-thread holds the rows). */
@@ -57,20 +63,26 @@
   }
 }
 
-/* L: the rail is a sidebar and the list of threads opens beside the thread. */
+/* L: the rail is a sidebar, and the list of threads opens beside a thread. */
 @media (min-width: 64rem) {
   :host {
     --pk-nav-width: var(--layout-sidebar-width);
+  }
+
+  :host(.screen--thread) {
     --pk-list-width: var(--layout-list-pane);
 
     padding-left: calc(var(--pk-nav-width) + var(--pk-list-width));
   }
 }
 
-/* XL: wider parts, and the detail pane at the end. */
+/* XL: wider parts, and a thread's detail pane at the end. */
 @media (min-width: 80rem) {
   :host {
     --pk-nav-width: var(--layout-sidebar-width-xl);
+  }
+
+  :host(.screen--thread) {
     --pk-list-width: var(--layout-list-pane-xl);
     --pk-detail-width: var(--layout-detail-pane);
 
