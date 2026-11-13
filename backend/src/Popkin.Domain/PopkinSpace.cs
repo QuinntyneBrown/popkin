@@ -37,6 +37,9 @@ public sealed class PopkinSpace
     /// <summary>When the photos go: 30 days after the wrap-up when the album was not kept, never otherwise.</summary>
     public DateTimeOffset? PhotosRemoveAt => WrappedUpAt is { } wrappedUpAt && !KeepPhotos ? wrappedUpAt + PhotosStayFor : null;
 
+    /// <summary>When the photos were removed; null while the album is there.</summary>
+    public DateTimeOffset? PhotosRemovedAt { get; private set; }
+
     public string InviteCode { get; private set; } = "";
 
     public DateTimeOffset CreatedAt { get; private set; }

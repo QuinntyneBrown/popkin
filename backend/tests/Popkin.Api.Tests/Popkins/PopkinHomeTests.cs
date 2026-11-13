@@ -40,7 +40,10 @@ public sealed class PopkinHomeTests
         Assert.Equal(["firstName", "membershipId"], home.GetProperty("viewer").EnumerateObject().Select(p => p.Name).Order());
         Assert.Equal(0, home.GetProperty("unreadCount").GetInt32());
         Assert.Equal(
-            ["avatars", "colour", "emoji", "endsAt", "id", "memberCount", "name", "status", "unreadCount", "viewer", "viewerRole"],
+            [
+                "avatars", "colour", "emoji", "endsAt", "id", "keepPhotos", "memberCount", "name", "photosRemoveAt", "photosRemovedAt",
+                "status", "unreadCount", "viewer", "viewerRole", "wrappedUpAt",
+            ],
             home.EnumerateObject().Select(p => p.Name).Order());
         Assert.Equal("Host", hostHome.GetProperty("viewerRole").GetString());
         Assert.Equal("Mara", hostHome.GetProperty("viewer").GetProperty("firstName").GetString());
@@ -104,6 +107,44 @@ public sealed class PopkinHomeTests
 
         Assert.Equal("WrappedUp", home.GetProperty("status").GetString());
         Assert.Equal(JsonValueKind.Null, home.GetProperty("endsAt").ValueKind);
+    }
+
+    // Given an active Popkin, when a member opens the home,
+    // then it has not wrapped up, its album is kept and no date is set for its photos (L2-045).
+    [Fact]
+    public async Task An_active_Popkin_has_not_wrapped_up()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+
+        var home = await HomeAsync(lakeside.Host, lakeside.Id);
+
+        Assert.Equal("Active", home.GetProperty("status").GetString());
+        Assert.Equal(JsonValueKind.Null, home.GetProperty("wrappedUpAt").ValueKind);
+        Assert.True(home.GetProperty("keepPhotos").GetBoolean());
+        Assert.Equal(JsonValueKind.Null, home.GetProperty("photosRemoveAt").ValueKind);
+        Assert.Equal(JsonValueKind.Null, home.GetProperty("photosRemovedAt").ValueKind);
+    }
+
+    // Given a Popkin its Host wrapped up without keeping the album, when a member opens the home,
+    // then it says when it wrapped up and that its photos go 30 days later (L2-045 AC4).
+    [Fact]
+    public async Task A_Popkin_wrapped_up_without_its_album_says_when_the_photos_go()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var joel = await api.JoinedAsync(lakeside.Code, "Joel F", "(415) 555-0123");
+        var wrappedUpAt = api.Clock.GetUtcNow();
+        await lakeside.Host.WrappedUpAsync(lakeside.Id, keepPhotos: false);
+        api.Clock.Advance(TimeSpan.FromDays(2));
+
+        var home = await HomeAsync(joel, lakeside.Id);
+
+        Assert.Equal("WrappedUp", home.GetProperty("status").GetString());
+        Assert.Equal(wrappedUpAt, home.GetProperty("wrappedUpAt").GetDateTimeOffset());
+        Assert.False(home.GetProperty("keepPhotos").GetBoolean());
+        Assert.Equal(wrappedUpAt.AddDays(30), home.GetProperty("photosRemoveAt").GetDateTimeOffset());
+        Assert.Equal(JsonValueKind.Null, home.GetProperty("photosRemovedAt").ValueKind);
     }
 
     // Given a signed-in person who is not a member,
