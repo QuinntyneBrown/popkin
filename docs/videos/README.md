@@ -14,6 +14,7 @@ skill (edge-tts, burned-in captions), this page wins.
 | 03 | [Journey 3: Chat with everyone](03-journey-03-chat-with-everyone/README.md) | 2:10 | Read the Everyone thread, send a message and see one arrive live; a failed send is tried again and offline messages wait; the list and who is here now open beside the thread as the screen grows. |
 | 04 | [Journey 4: Popkin home](04-journey-04-popkin-home/README.md) | 2:12 | The home of a Popkin at a glance: the time left, the latest of the chat, photos, experiences and members; a new Popkin and a section that fails; Invite opens the QR code; the rail, the sidebar and two columns as the screen grows. |
 | 05 | [Journey 5: Share photos](05-journey-05-share-photos/README.md) | 2:16 | The shared album by day, with Everyone and Mine; Add photos with a caption each, a file that is too large, the upload and one that failed; a new photo arriving live; a photo full screen; the grid from three across to six and the photo's side panel as the screen grows. |
+| 06 | [Journey 6: Come back](06-journey-06-come-back/README.md) | 2:22 | Sign in with a code and see Your Popkins: cards with the latest message, faces, the time left and unread badges, and Wrapped up; a message arriving live moves its card first; someone with no account, and No Popkins yet; Scan to join and a refused camera; loading, failure and offline; the cards from one across to three as the screen grows. |
 
 ## What every video is
 

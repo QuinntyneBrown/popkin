@@ -1,0 +1,27 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["You have an account, and Popkins waiting. This is how you come back."] },
+    { "id": "signin", "bars": 7, "lines": ["Sign in asks one thing: your phone number or email. Choose Send my code. Still no passwords.", "An email that can't be right is marked: That email doesn’t look quite right.", "On a wide display, it is a split screen."] },
+    { "id": "code", "bars": 3, "lines": ["Enter the six digits, and My Popkins opens."] },
+    { "id": "cards", "bars": 9, "lines": ["Each active Popkin is a card in its colour: the latest message and who sent it, faces and a count of the rest, and the time left. One day six hours left, Ongoing, or Until November thirtieth.", "A badge counts unread messages.", "Wrapped up lists the Popkins that have ended, each marked Recap."] },
+    { "id": "live", "bars": 4, "lines": ["When a message arrives, its badge goes up, and its card moves first."] },
+    { "id": "grow", "bars": 7, "lines": [
+      { "text": "On a phone, the cards are one across, and New Popkin floats.", "at": 0 },
+      { "text": "From six hundred and forty pixels, two across.", "at": 9 },
+      { "text": "From seven sixty-eight, New Popkin is in the header.", "at": 15 },
+      { "text": "From ten twenty-four, three across.", "at": 22 }
+    ] },
+    { "id": "newcomer", "bars": 7, "lines": ["Sign in with a number that has no account, and nothing looks different. After the code, Popkin asks: What should we call you?", "Then My Popkins says No Popkins yet, and offers Start a Popkin, and Scan to join."] },
+    { "id": "scan", "bars": 7, "lines": ["Scan to join opens the camera, with a frame to hold the QR code in.", "Another QR code? That’s not a Popkin code, and scanning goes on.", "A Popkin's code: Found it. Opening your invite."] },
+    { "id": "denied", "bars": 4, "lines": ["If the camera is refused, the dialog says how to allow it, and offers Type the code instead, and Try the camera again."] },
+    { "id": "states", "bars": 9, "lines": ["While your Popkins load, cards the size of the real ones hold their place.", "If they can't be loaded, the screen says so, with Try again.", "Lose your connection, and a banner says: You’re offline. Showing what we saved last time.", "And a screen that was never loaded says it needs a connection."] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows, the tests prove: asking for a code answers the same with or without an account, and a session lasts thirty days.", "Still to come: Join with a code, the recap, and your account."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey six. Popkin is a free platform for pop-up communities."] }
+  ]
+}
