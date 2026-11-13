@@ -17,21 +17,24 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first ten journeys, and journeys 17 to 19, are built; the rest is designed.** Journey 1,
-Start a Popkin, journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin home,
-journey 5, Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an
-experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 17, Manage account, journey
-18, Leave a Popkin, and journey 19, Delete account, run end to end: the backend has sign up and sign in
+**The first eleven journeys are built; the rest is designed.** Journey 1, Start a Popkin,
+journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin home, journey 5,
+Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an experience,
+journey 9, Wrap up, journey 10, Discover Popkin, and journey 11, Direct message, run end to
+end: the backend has sign up and sign in
 with a code, sessions, Popkin creation, the list of a person's Popkins, the invite preview, joining with a name and a photo,
 the photo store behind avatars, the Everyone thread, messages, read points, presence, the
 SignalR hub `PopkinHub` and the reads of the Popkin home (the header, the chat preview, the
-members, the photos summary, and the experiences summary), adding a photo, the album and one
-photo, the group call (starting, joining and leaving it, the call under way, each participant's
-microphone and camera, the relay of signals through the hub and the media relay's credentials),
+members, the photos summary, and the experiences summary), the list of a member's threads,
+direct messages (opening one, kept to its two members, its events sent to them alone through an
+`Audience`, and its unread messages in the counts of the Popkin home and My Popkins), adding a
+photo, the album and one photo, the group call (starting, joining and leaving it, the call
+under way, each participant's microphone and camera, the relay of signals through the hub and
+the media relay's credentials) and the direct call of a direct message, which runs beside it,
 experiences (sharing one with a picture, the list and its filter, one experience with the
 group's score, rating it, commenting on it, editing and deleting it), wrapping up (the Host's wrap-up and what it will count, the
 wrap-up of a Popkin whose time is up, the refusal of every write to a wrapped-up Popkin with
-`409` `popkin_wrapped_up`, the end of the call under way, the hub event `PopkinWrappedUp`, the
+`409` `popkin_wrapped_up`, the end of every call under way, the hub event `PopkinWrappedUp`, the
 recap, the album export as a zip, the removal of an album that was not kept, and the crew
 invites), leaving a Popkin (`DELETE …/members/me`, refused to the Host with `403`
 `host_cannot_leave`, and the hub event `MemberLeft`), the account (reading it, a new name or
@@ -42,20 +45,24 @@ their migrations; the Worker hosts four jobs (`WrapUpDuePopkinsJob`,
 sends no hub events
 (ADR 0015); the app has the screens of those journeys, the landing page at `/` (behind
 `signedOutGuard`, which sends a signed-in person to My Popkins), the welcome screen, the group
-chat screen, the Popkin home, the photo album and the photo view, the sign-in screen, My
-Popkins, the call screen, Experiences, the experience page, the wrap-up screen, the recap and
-the account (`/account`, with its theme of the device) among them, and no placeholder screen, built for the
+chat screen, the Chat tab, the direct message, the Popkin home, the photo album and the photo
+view, the sign-in screen, My Popkins, the call screen (for the group call and for a direct
+call), Experiences, the experience page, the wrap-up screen and the recap among them, and no
+placeholder screen, built for the
 five form factors of L2-058, the read-only chat, Photos and Experiences of a wrapped-up Popkin,
-the banner of a Popkin's last hour, the invite dialog, the Add photos dialog, the Scan to join
+the banner of a Popkin's last hour, the invite dialog, the New message dialog, the Add photos
+dialog, the Scan to join
 dialog, the dialogs of an experience (Share an experience, Add a comment, its actions and its
 deletion), the Popkin settings dialog (Invite people, Wrap up for the Host, and Leave this Popkin for any
 other member), the Leave Popkin dialog, the Sign out and Delete account dialogs, and the
 not-found, server-error and offline screens; the `components` library holds the `pk-*`
 components they use, the blocks of the landing page (`pk-site-nav`, `pk-site-main`,
 `pk-site-footer`, `pk-hero`, `pk-band`, `pk-steps`, `pk-uses`, `pk-compare`, `pk-cta-band`) and
-of the welcome screen (`pk-welcome`, `pk-action-pair`, `pk-mark-picture`) among them, each with
-a parity spec but `pk-qr` (known gap 56); the `api` library has the chat's stores, the
-home's store, the album's stores, the store of My Popkins and its saved list, the QR scanner,
+of the welcome screen (`pk-welcome`, `pk-action-pair`, `pk-mark-picture`) and the parts of the
+Chat tab and the direct message (`pk-conversations`, `pk-conversation-row`, `pk-thread-pane`,
+`pk-dm-intro`, `pk-search-field`, `pk-member-picker`) among them, each with a parity spec but
+`pk-qr` (known gap 56); the `api` library has the chat's stores, the store of the Chat tab
+(`ConversationsStore`) and its text (`conversation-text.ts`), the home's store, the album's stores, the store of My Popkins and its saved list, the QR scanner,
 the call session, its peer links (a mesh, ADR 0014) and the call banner's store, the stores of
 Experiences and of one experience, the recap's store (`RecapStore`, behind `RECAP_API`), the
 wrap-up watch (`WrapUpWatch`) and the wrap-up text (`wrap-up-text.ts`), the account's store
