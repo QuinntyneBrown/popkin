@@ -5,8 +5,8 @@
  *
  * The journey below is the cast of the mocks: Mara signs up and starts Lakeside Weekend, Walt
  * and Dev join it, Joel opens its invite and joins, Walt and Mara write in the Everyone
- * thread, Mara opens the Popkin's home, starts a group call and leaves it, and she adds the
- * album's first photo. Each answer is keyed
+ * thread, Mara opens the Popkin's home, starts a group call and leaves it, she adds the
+ * album's first photo, and she shares an experience, rates it and comments on it. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -165,6 +165,30 @@ upload.append('caption', 'First light on the dock. Worth the 6 am alarm.');
 const added = await call('POST', album, upload);
 await call('GET', `${album}?filter=everyone`);
 await call('GET', `${album}/${added.id}`);
+
+// Experiences: Mara has shared none, shares the sunrise canoe with its picture, opens it, rates
+// it, says a few words, then reads the list again and what the home shows (journey 8).
+const experiences = `/api/popkins/${created.id}/experiences`;
+await call('GET', `${experiences}?filter=want`);
+const canoe = new FormData();
+canoe.append('title', 'Sunrise canoe to Heron Point');
+canoe.append('kind', 'Did');
+canoe.append('when', 'Sat morning');
+canoe.append('place', 'Heron Point, Lake Ossia');
+canoe.append(
+  'picture',
+  new Blob([readFileSync(join(mockImages, 'lake.jpg'))], { type: 'image/jpeg' }),
+  'lake.jpg',
+);
+const shared = await call('POST', experiences, canoe);
+await call('GET', `${experiences}/${shared.id}`);
+await call('PUT', `${experiences}/${shared.id}/my-rating`, { stars: 5 });
+await call('PUT', `${experiences}/${shared.id}/my-rating/comment`, {
+  text: 'Would do it every morning if I could.',
+});
+await call('GET', `${experiences}?filter=all`);
+await call('GET', `${experiences}?filter=did`);
+await call('GET', `${experiences}/summary`);
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);
