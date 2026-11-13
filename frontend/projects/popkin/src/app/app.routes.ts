@@ -2,6 +2,7 @@ import { OfflinePage } from './pages/offline/offline.page';
 import { Routes } from '@angular/router';
 import { AlbumStore, ExperienceStore, ExperiencesStore, PopkinFrame } from 'api';
 import { signedInGuard } from './guards/signed-in.guard';
+import { signedOutGuard } from './guards/signed-out.guard';
 
 /**
  * Route data drives the shell: `shell` picks the chrome (`app` or `bare`) and `page` is stamped
@@ -18,6 +19,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    canActivate: [signedOutGuard],
     loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
     data: data({ shell: 'bare', page: 'home' }),
     title: 'Popkin',

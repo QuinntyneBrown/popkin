@@ -1,7 +1,9 @@
+import { asVisitor } from '../fixtures/journeys';
 import { expect, test } from '../fixtures/pk-test';
 import { HomePage } from '../pages/home.page';
 
 test('the app opens on its first screen', async ({ page, pk }) => {
+  await asVisitor(page);
   await pk.open('home');
 
   const home = new HomePage(page);
