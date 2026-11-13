@@ -5,12 +5,14 @@ import { RecapPage } from '../pages/recap.page';
 import { WrapUpPage } from '../pages/wrap-up.page';
 import { WrapUpBanner } from '../pages/wrap-up-banner';
 import { wrapUpStates } from './wrap-up-states';
+import { leaveStates } from './leave-states';
 import path from 'node:path';
 import type { Locator, Page } from '@playwright/test';
 import { callStates } from './call-states';
 import { experienceStates } from './experience-states';
 import { AddCommentDialog } from '../pages/add-comment.dialog';
 import { DeleteExperienceDialog } from '../pages/delete-experience.dialog';
+import { LeavePopkinDialog } from '../pages/leave-popkin.dialog';
 import { ExperienceActionsDialog } from '../pages/experience-actions.dialog';
 import { ExperienceDetailPage } from '../pages/experience-detail.page';
 import { ExperiencesPage } from '../pages/experiences.page';
@@ -150,6 +152,7 @@ const detailRegions = (page: Page) => ({ detail: new ExperienceDetailPage(page).
 const commentRegions = (page: Page) => ({ dialog: new AddCommentDialog(page).panel });
 const actionsRegions = (page: Page) => ({ dialog: new ExperienceActionsDialog(page).panel });
 const deleteRegions = (page: Page) => ({ dialog: new DeleteExperienceDialog(page).panel });
+const leaveRegions = (page: Page) => ({ dialog: new LeavePopkinDialog(page).panel });
 const wrapUpRegions = (page: Page) => {
   const wrapUp = new WrapUpPage(page);
   return { main: wrapUp.main, picture: wrapUp.picture };
@@ -937,6 +940,10 @@ export const screenStates: ScreenState[] = [
     ...wrapUpStates.popkinSettingsMember,
     regions: (page) => ({ dialog: new PopkinSettingsDialog(page).panel }),
   },
+  // Leave a Popkin (journey 18).
+  { key: 'leavePopkin', ...leaveStates.leavePopkin, regions: leaveRegions },
+  { key: 'leavePopkinBusy', ...leaveStates.leavePopkinBusy, regions: leaveRegions },
+  { key: 'leavePopkinFailed', ...leaveStates.leavePopkinFailed, regions: leaveRegions },
   { key: 'wrapUp', ...wrapUpStates.wrapUp, regions: wrapUpRegions },
   { key: 'wrapUpAlbumOff', ...wrapUpStates.wrapUpAlbumOff, regions: wrapUpRegions },
   { key: 'wrapUpSubmitting', ...wrapUpStates.wrapUpSubmitting, regions: wrapUpRegions },

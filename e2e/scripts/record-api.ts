@@ -6,8 +6,8 @@
  * The journey below is the cast of the mocks: Mara signs up and starts Lakeside Weekend, Walt
  * and Dev join it, Joel opens its invite and joins, Walt and Mara write in the Everyone
  * thread, Mara opens the Popkin's home, starts a group call and leaves it, she adds the
- * album's first photo, she shares an experience, rates it and comments on it, and she wraps the
- * Popkin up and reads its recap. Each answer is keyed
+ * album's first photo, she shares an experience, rates it and comments on it, she wraps the
+ * Popkin up and reads its recap, and Dev leaves it. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -102,7 +102,7 @@ await call('GET', `/api/popkins/${created.id}/invite`);
 const invite = `/api/invites/${created.inviteCode}`;
 const walt = await signUp('Walt Brennan', '(415) 555-0177');
 await call('POST', `${invite}/join`, joinForm('Walt Brennan'));
-await signUp('Dev Patel', '(415) 555-0162');
+const dev = await signUp('Dev Patel', '(415) 555-0162');
 await call('POST', `${invite}/join`, joinForm('Dev Patel'));
 person = { cookie: '', record: true };
 await call('GET', invite);
@@ -200,6 +200,12 @@ await call('POST', `/api/popkins/${created.id}/wrap-up`, { keepPhotos: true });
 await call('GET', `/api/popkins/${created.id}/recap`);
 const zip = await call('POST', `/api/popkins/${created.id}/recap/album-exports`);
 await call('GET', `/api/popkins/${created.id}/recap/album-exports/${zip.id}`);
+
+// Leave a Popkin: Dev leaves Lakeside Weekend (journey 18). It comes after everything else, so
+// every answer above counts him; only his leave is recorded.
+person = dev;
+dev.record = true;
+await call('DELETE', `/api/popkins/${created.id}/members/me`);
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

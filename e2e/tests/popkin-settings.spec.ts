@@ -6,7 +6,7 @@ import { PopkinHomePage } from '../pages/popkin-home.page';
 import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
 import { WrapUpPage } from '../pages/wrap-up.page';
 
-// L2-020 AC1, AC2: the items whose actions exist so far.
+// L2-020 AC1, AC2: the items whose actions exist so far (journeys 9 and 18).
 test.describe('Popkin settings', () => {
   test('offers the Host to invite people and to wrap up', async ({ page }) => {
     await maraWithWrapUp(page);
@@ -22,16 +22,29 @@ test.describe('Popkin settings', () => {
     await expect(settings.wrapUp).toContainText('End it now and send the recap');
   });
 
-  test('offers a member who is not the Host to invite people only', async ({ page }) => {
+  // L2-020 AC2, L2-047 AC3: a member may leave; the Host has no way to.
+  test('offers a member who is not the Host to invite people and to leave, only', async ({
+    page,
+  }) => {
     await maraWithWrapUp(page, (wrapUp) => wrapUp.asMember());
     await page.goto(homeUrl);
 
     await new PopkinHomePage(page).settings.click();
 
     const settings = new PopkinSettingsDialog(page);
-    await expect(settings.items).toHaveCount(1);
+    await expect(settings.items).toHaveCount(2);
     await expect(settings.invitePeople).toBeVisible();
+    await expect(settings.leave).toContainText('You can come back with a new invite');
     await expect(settings.wrapUp).toHaveCount(0);
+  });
+
+  test('offers the Host no way to leave', async ({ page }) => {
+    await maraWithWrapUp(page);
+    await page.goto(homeUrl);
+
+    await new PopkinHomePage(page).settings.click();
+
+    await expect(new PopkinSettingsDialog(page).leave).toHaveCount(0);
   });
 
   test('closes on Escape and gives the focus back to its button', async ({ page }) => {

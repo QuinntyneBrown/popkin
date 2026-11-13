@@ -181,7 +181,7 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Popkin settings (`popkin-settings`) | [✅](dialogs/popkin-settings/default.html) | ➖ | ➖ |  |  | [✅](dialogs/popkin-settings/member.html) | [✅](dialogs/popkin-settings/host-now.html) | [✅](dialogs/popkin-settings/member-now.html) |  |  |  |  |  |  |  | `L2-020`, `L2-047` |
 | Edit name and look (`edit-popkin`) | [✅](dialogs/edit-popkin/default.html) | [✅](dialogs/edit-popkin/busy.html) | [✅](dialogs/edit-popkin/invalid.html) |  |  |  |  |  | [✅](dialogs/edit-popkin/failed.html) |  |  |  |  |  |  | `L2-020`, `L2-008` |
 | Change how long it lasts (`change-length`) | [✅](dialogs/change-length/default.html) | [✅](dialogs/change-length/busy.html) | ➖ |  |  |  |  |  | [✅](dialogs/change-length/failed.html) |  |  |  |  |  |  | `L2-020`, `L2-009` |
-| Leave Popkin (`leave-popkin`) | [✅](dialogs/leave-popkin/default.html) | [✅](dialogs/leave-popkin/busy.html) | ➖ |  |  |  |  |  |  |  |  |  |  |  |  | `L2-047` |
+| Leave Popkin (`leave-popkin`) | [✅](dialogs/leave-popkin/default.html) | [✅](dialogs/leave-popkin/busy.html) | ➖ |  |  |  |  |  | [✅](dialogs/leave-popkin/failed.html) |  |  |  |  |  |  | `L2-047` |
 | New message (`new-message`) | [✅](dialogs/new-message/default.html) | ➖ | ➖ |  |  |  |  |  |  | [✅](dialogs/new-message/no-results.html) |  |  |  |  |  | `L2-022` |
 | Message actions (`reactions`) | [✅](dialogs/reactions/default.html) | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  | `L2-024`, `L2-025` |
 | Add photos (`add-photos`) | [✅](dialogs/add-photos/default.html) | [✅](dialogs/add-photos/busy.html) | [✅](dialogs/add-photos/invalid.html) |  |  |  |  |  | [✅](dialogs/add-photos/failed.html) |  |  |  |  |  |  | `L2-031`, `L2-026`, `L2-052` |

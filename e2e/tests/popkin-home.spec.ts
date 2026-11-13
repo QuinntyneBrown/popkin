@@ -183,6 +183,27 @@ test.describe('the members of the Popkin home', () => {
     await expect(home.meta(home.members)).toHaveText('4');
     await expect(home.memberNames.last()).toHaveText('Nia Clarke');
   });
+
+  // L2-047 AC2: someone leaving shows without a reload
+  test('counts one member fewer, and lists them no more, when someone leaves', async ({
+    page,
+    hub,
+  }) => {
+    const fixture = await maraAtHome(page, (home) => {
+      home.members = theFourteen.slice(0, 3);
+      home.popkin.memberCount = 3;
+    });
+    await page.goto(homeUrl);
+    const home = new PopkinHomePage(page);
+    await expect(home.memberCount).toHaveText('3 members');
+    await hub.connected();
+
+    await fixture.leaves(hub, 'Dev Patel');
+
+    await expect(home.memberCount).toHaveText('2 members');
+    await expect(home.meta(home.members)).toHaveText('2');
+    await expect(home.memberNames.filter({ hasText: 'Dev Patel' })).toHaveCount(0);
+  });
 });
 
 test.describe('the Chat card of the Popkin home', () => {

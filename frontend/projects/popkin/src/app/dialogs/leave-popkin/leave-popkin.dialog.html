@@ -1,0 +1,35 @@
+<div
+  pk-dialog
+  [heading]="'Leave ' + data.name + '?'"
+  description="Your messages and photos stay. To come back you’ll need a new invite."
+  [accent]="data.accent"
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t take you out.">
+      You’re still in {{ data.name }}. Try again.
+    </div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="leave()"
+  >
+    {{ busy() ? 'Leaving…' : 'Leave' }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="secondary"
+    cdkFocusInitial
+    [block]="true"
+    (click)="stay()"
+  >
+    Stay
+  </button>
+</div>

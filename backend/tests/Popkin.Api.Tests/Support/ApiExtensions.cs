@@ -92,8 +92,8 @@ public static class ApiExtensions
     }
 
     /// <summary>
-    /// Marks a member as having left now, straight in the store: leaving a Popkin is journey 16,
-    /// and until then the domain has no way to do it.
+    /// Marks a member as having left now, straight in the store, for a test of what a former
+    /// member no longer sees; `DELETE …/members/me` is tested in `LeavePopkinTests`.
     /// </summary>
     public static async Task LeaveAsync(this ApiFactory api, Guid popkinId, string displayName)
     {

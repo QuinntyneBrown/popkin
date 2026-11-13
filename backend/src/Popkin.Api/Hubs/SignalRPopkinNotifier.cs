@@ -32,6 +32,9 @@ public sealed class SignalRPopkinNotifier(
     public Task MemberJoined(Guid popkinId, MemberJoinedDto member) =>
         SendAsync(nameof(IPopkinClient.MemberJoined), () => Group(popkinId).MemberJoined(popkinId, member));
 
+    public Task MemberLeft(Guid popkinId, Guid membershipId) =>
+        SendAsync(nameof(IPopkinClient.MemberLeft), () => Group(popkinId).MemberLeft(popkinId, membershipId));
+
     public Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds) =>
         SendAsync(nameof(IPopkinClient.PhotosAdded), () => Group(popkinId).PhotosAdded(popkinId, photoIds));
 

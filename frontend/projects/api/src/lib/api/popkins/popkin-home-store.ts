@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, filter, interval } from 'rxjs';
+import { Observable, filter, interval, merge } from 'rxjs';
 import {
   ChatPreviewView,
   ExperiencesSummaryView,
@@ -89,9 +89,9 @@ export class PopkinHomeStore {
         mine,
       )
       .subscribe(() => this.readChat(true));
-    this.realtime.memberJoined$
+    merge(this.realtime.memberJoined$, this.realtime.memberLeft$)
       .pipe(
-        filter((joined) => joined.popkinId === this.popkinId),
+        filter((changed) => changed.popkinId === this.popkinId),
         mine,
       )
       .subscribe(() => {

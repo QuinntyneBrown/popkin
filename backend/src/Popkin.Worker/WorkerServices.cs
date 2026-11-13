@@ -34,6 +34,8 @@ public sealed class SilentPopkinNotifier : IPopkinNotifier
 
     public Task ParticipantLeft(Guid callId, Guid membershipId) => Task.CompletedTask;
 
+    public Task MemberLeft(Guid popkinId, Guid membershipId) => Task.CompletedTask;
+
     public Task ParticipantMediaChanged(Guid callId, Guid membershipId, long mediaVersion, bool micOn, bool cameraOn) => Task.CompletedTask;
 
     public Task Signal(string connectionId, Guid callId, Guid fromMembershipId, CallSignalDto signal) => Task.CompletedTask;
@@ -43,6 +45,8 @@ public sealed class SilentPopkinNotifier : IPopkinNotifier
 public sealed class NoPopkinConnections : IPopkinConnections
 {
     public Task AddToPopkinAsync(string connectionId, Guid popkinId, CancellationToken cancellationToken) => Task.CompletedTask;
+
+    public Task RemoveFromPopkinAsync(string connectionId, Guid popkinId, CancellationToken cancellationToken) => Task.CompletedTask;
 
     public Task AddToCallAsync(string connectionId, Guid callId, CancellationToken cancellationToken) => Task.CompletedTask;
 

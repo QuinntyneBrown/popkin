@@ -1,0 +1,18 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Plans change. A member can leave a Popkin they no longer want."] },
+    { "id": "menu", "bars": 5, "lines": ["A member who is not the Host opens Popkin settings. Two choices: Invite people, and Leave this Popkin."] },
+    { "id": "ask", "bars": 6, "lines": ["Leave Lakeside Weekend? Your messages and photos stay. To come back, you'll need a new invite.", "Leave, or Stay. Stay is where the focus starts."] },
+    { "id": "gone", "bars": 6, "lines": ["Leave reads Leaving, while it goes through.", "Then My Popkins opens, and Lakeside Weekend is gone from it."] },
+    { "id": "fewer", "bars": 5, "lines": ["Everyone still in it sees one member fewer, straight away. Fourteen members becomes thirteen."] },
+    { "id": "grow", "bars": 5, "lines": ["My Popkins uses the width it is given: one column on a phone, and more across as the screen grows."] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: the Host has no way to leave, even by hand. And once you have left, everything in the Popkin answers: not found.", "If leaving fails, the dialog says so, and you stay."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey eighteen. Popkin is a free platform for pop-up communities."] }
+  ]
+}

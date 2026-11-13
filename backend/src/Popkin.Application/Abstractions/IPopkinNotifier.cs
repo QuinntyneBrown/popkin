@@ -26,6 +26,9 @@ public interface IPopkinNotifier
     /// <summary>Someone joined the Popkin. The one who joined is not told.</summary>
     Task MemberJoined(Guid popkinId, MemberJoinedDto member);
 
+    /// <summary>Someone left the Popkin. To the members who remain; the one who left is not told.</summary>
+    Task MemberLeft(Guid popkinId, Guid membershipId);
+
     /// <summary>Photos were added to the album. To every member of the Popkin with a connection open.</summary>
     Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds);
 

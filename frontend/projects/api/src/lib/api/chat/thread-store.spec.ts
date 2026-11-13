@@ -124,6 +124,7 @@ describe('ThreadStore', () => {
     threadRead$: new Subject<string>(),
     presenceChanged$: new Subject<{ popkinId: string; version: number; hereNow: number }>(),
     memberJoined$: new Subject<{ popkinId: string; member: MemberJoinedView }>(),
+    memberLeft$: new Subject<{ popkinId: string; membershipId: string }>(),
     reconnected$: new Subject<void>(),
     popkinWrappedUp$: new Subject<string>(),
     started: 0,
@@ -264,6 +265,12 @@ describe('ThreadStore', () => {
       realtime.memberJoined$.next({ popkinId: 'p', member: {} as MemberJoinedView });
       realtime.memberJoined$.next({ popkinId: 'elsewhere', member: {} as MemberJoinedView });
       expect(store.thread()?.memberCount).toBe(15);
+    });
+
+    it('counts one member fewer when someone leaves (L2-047 AC2)', () => {
+      realtime.memberLeft$.next({ popkinId: 'p', membershipId: 'm-joel' });
+      realtime.memberLeft$.next({ popkinId: 'elsewhere', membershipId: 'm-joel' });
+      expect(store.thread()?.memberCount).toBe(13);
     });
   });
 

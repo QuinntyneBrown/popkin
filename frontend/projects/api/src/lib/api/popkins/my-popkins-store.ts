@@ -118,6 +118,7 @@ export class MyPopkinsStore {
       }));
     });
     this.realtime.memberJoined$.pipe(mine).subscribe(() => this.read(true));
+    this.realtime.memberLeft$.pipe(mine).subscribe(() => this.read(true));
     this.realtime.reconnected$.pipe(mine).subscribe(() => this.read(true));
     this.network.backOnline$.pipe(mine).subscribe(() => this.read(true));
   }

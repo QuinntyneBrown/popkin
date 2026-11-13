@@ -10,6 +10,7 @@ export const HUB_EVENTS = {
   threadRead: 'ThreadRead',
   presenceChanged: 'PresenceChanged',
   memberJoined: 'MemberJoined',
+  memberLeft: 'MemberLeft',
   photosAdded: 'PhotosAdded',
   callChanged: 'CallChanged',
   callEnded: 'CallEnded',

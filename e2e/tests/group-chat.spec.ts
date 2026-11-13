@@ -635,6 +635,21 @@ test.describe('someone joining', () => {
   });
 });
 
+test.describe('someone leaving', () => {
+  // L2-047 AC2
+  test('counts one member fewer', async ({ page, hub }) => {
+    await maraInTheChat(page);
+    await page.goto(chatUrl);
+    const chat = new GroupChatPage(page);
+    await expect(chat.sub).toHaveText('14 members · 5 here now');
+    await hub.connected();
+
+    await hub.push('MemberLeft', popkinId, people.joel.membershipId);
+
+    await expect(chat.sub).toHaveText('13 members · 5 here now');
+  });
+});
+
 test.describe('the thread as the screen grows', () => {
   // L2-058 AC8
   test('shows no tabs on a phone, and Back leads to Chat', async ({ page }) => {

@@ -248,6 +248,11 @@ export const ICONS = {
     { path: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' },
     { path: 'm7 10 5 5 5-5' },
   ],
+  'log-out': [
+    { path: 'm16 17 5-5-5-5' },
+    { path: 'M21 12H9' },
+    { path: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' },
+  ],
 } satisfies Record<string, IconShape[]>;
 
 export type IconName = keyof typeof ICONS;

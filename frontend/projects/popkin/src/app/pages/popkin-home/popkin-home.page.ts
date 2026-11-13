@@ -48,6 +48,7 @@ import {
   PopkinSettingsDialog,
 } from '../../dialogs/popkin-settings/popkin-settings.dialog';
 import { InviteData, InviteDialog } from '../../dialogs/invite/invite.dialog';
+import { LeavePopkinData, LeavePopkinDialog } from '../../dialogs/leave-popkin/leave-popkin.dialog';
 
 /** How many of what a section holds the home lists; the layout shows fewer on a narrow screen. */
 const MEMBERS_LISTED = 6;
@@ -217,6 +218,21 @@ export class PopkinHomePage {
     opened.closed.subscribe((setting) => {
       if (setting === 'invite') this.invite();
       if (setting === 'wrap-up') void this.router.navigate(['/p', this.popkinId(), 'wrap-up']);
+      if (setting === 'leave') this.leave(popkin.name);
+    });
+  }
+
+  /** "Leave this Popkin" (L2-047): once the member has left, My Popkins opens without it. */
+  private leave(name: string): void {
+    const opened = this.dialog.open<boolean, LeavePopkinData>(LeavePopkinDialog, {
+      data: { popkinId: this.popkinId(), name, accent: this.accent() },
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((left) => {
+      if (left) void this.router.navigateByUrl('/popkins');
     });
   }
 

@@ -103,6 +103,11 @@ export class ThreadStore {
       if (thread?.popkinId !== popkinId) return;
       this.header.set({ ...thread, memberCount: thread.memberCount + 1 });
     });
+    mine(this.realtime.memberLeft$).subscribe(({ popkinId }) => {
+      const thread = this.header();
+      if (thread?.popkinId !== popkinId) return;
+      this.header.set({ ...thread, memberCount: Math.max(1, thread.memberCount - 1) });
+    });
     mine(this.realtime.reconnected$).subscribe(() => this.catchUp());
     mine(this.outbox.sent$).subscribe((message) => {
       if (message.threadId !== this.header()?.id) return;
