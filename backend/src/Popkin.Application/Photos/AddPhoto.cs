@@ -11,7 +11,7 @@ namespace Popkin.Application.Photos;
 public sealed record AddPhotoCommand(Guid PopkinId, PhotoUpload? File, string? Caption) : IRequest<PhotoSummaryDto>;
 
 public sealed class AddPhotoCommandHandler(
-    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoProcessor processor, IPhotoStore store)
+    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoProcessor processor, IPhotoStore store, IPopkinNotifier notifier)
     : IRequestHandler<AddPhotoCommand, PhotoSummaryDto>
 {
     public async Task<PhotoSummaryDto> Handle(AddPhotoCommand request, CancellationToken cancellationToken)
@@ -66,6 +66,8 @@ public sealed class AddPhotoCommandHandler(
             throw;
         }
 
+        // Told after the commit, in the same request; the event carries the id and the album read gives the photo (L2-031 AC7).
+        await notifier.PhotosAdded(popkin.Id, [photo.Id]);
         return PhotoSummaryDto.Of(photo, membership, membership.Id, store);
     }
 
