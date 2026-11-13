@@ -37,7 +37,7 @@ public sealed record ExperienceCardDto(
     int RatingCount,
     int KeenCount)
 {
-    public static ExperienceCardDto Of(Experience experience, PopkinSpace popkin, Membership sharer, IPhotoStore store) =>
+    public static ExperienceCardDto Of(Experience experience, PopkinSpace popkin, Membership sharer, ExperienceScore score, IPhotoStore store) =>
         new(
             experience.Id,
             experience.Kind,
@@ -48,7 +48,7 @@ public sealed record ExperienceCardDto(
             ExperienceSharerDto.Of(sharer, store),
             experience.When,
             experience.SharedAt,
-            Average: null,
-            RatingCount: 0,
+            score.Average,
+            score.Count,
             KeenCount: 0);
 }

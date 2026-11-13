@@ -17,7 +17,8 @@ public sealed record ExperienceStarCountDto(int Stars, int Count);
 /// </summary>
 public sealed record ExperienceScoreDto(double? Average, int RatingCount, IReadOnlyList<ExperienceStarCountDto> Counts)
 {
-    public static readonly ExperienceScoreDto None = new(null, 0, [new(5, 0), new(4, 0), new(3, 0), new(2, 0), new(1, 0)]);
+    public static ExperienceScoreDto Of(ExperienceScore score) =>
+        new(score.Average, score.Count, [.. new[] { 5, 4, 3, 2, 1 }.Select(stars => new ExperienceStarCountDto(stars, score.CountFor(stars)))]);
 }
 
 /// <summary>The reader's own rating of an experience, and their comment when they wrote one.</summary>
@@ -62,6 +63,9 @@ public sealed class GetExperienceQueryHandler(IAppDbContext db, IMembershipGuard
         // A member who has left still shared their experience.
         var sharer = await db.Memberships.AsNoTracking().FirstAsync(m => m.Id == experience.SharerMembershipId, cancellationToken);
         var active = popkin.Status == PopkinStatus.Active;
+        var score = await ExperienceScores.OfAsync(db, experience, cancellationToken);
+        var mine = await db.ExperienceRatings.AsNoTracking()
+            .FirstOrDefaultAsync(r => r.ExperienceId == experience.Id && r.MembershipId == membership.Id, cancellationToken);
 
         return new ExperienceDetailDto(
             experience.Id,
@@ -74,11 +78,11 @@ public sealed class GetExperienceQueryHandler(IAppDbContext db, IMembershipGuard
             experience.When,
             experience.Place,
             experience.SharedAt,
-            Average: null,
-            RatingCount: 0,
+            score.Average,
+            score.Count,
             KeenCount: 0,
-            ExperienceScoreDto.None,
-            MyRating: null,
+            ExperienceScoreDto.Of(score),
+            mine is null ? null : new MyRatingDto(mine.Stars, Comment: null),
             Comments: [],
             CanRate: active && experience.IsRateable,
             CanEdit: active && experience.CanBeEditedBy(membership),

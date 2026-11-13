@@ -65,6 +65,12 @@ public sealed class Experience
     /// <summary>Its sharer deletes an experience, and the Host deletes any (L2-040 AC6).</summary>
     public bool CanBeDeletedBy(Membership member) => CanBeEditedBy(member) || member.Role == MembershipRole.Host;
 
+    /// <summary>A member's first rating of this experience, from one to five stars (L2-039).</summary>
+    public ExperienceRating Rate(Guid membershipId, int stars, DateTimeOffset now) =>
+        IsRateable
+            ? ExperienceRating.Give(Id, membershipId, stars, now)
+            : throw new InvalidOperationException("Something the group wants to do is not rated.");
+
     public static Experience Share(
         Guid popkinId,
         Guid sharerMembershipId,

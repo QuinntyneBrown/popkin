@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Popkin.Application.Experiences;
@@ -47,4 +48,18 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
         var card = await sender.Send(new ShareExperienceCommand(popkinId, title, kind, when, place, upload), cancellationToken);
         return Created($"/api/popkins/{popkinId}/experiences/{card.Id}", card);
     }
+
+    /// <summary>
+    /// Sets the caller's one rating of an experience, from one to five stars, and answers the
+    /// group's score with it (L2-039). At most 60 a minute per person, counted with their messages.
+    /// </summary>
+    [HttpPut("{experienceId:guid}/my-rating")]
+    public async Task<ActionResult<RatingResultDto>> Rate(Guid popkinId, Guid experienceId, RateExperienceRequest request, CancellationToken cancellationToken)
+    {
+        // Anything but a whole number is no stars at all, and the handler says so.
+        int? stars = request.Stars is { ValueKind: JsonValueKind.Number } value && value.TryGetInt32(out var whole) ? whole : null;
+        return Ok(await sender.Send(new RateExperienceCommand(popkinId, experienceId, stars), cancellationToken));
+    }
 }
+
+public sealed record RateExperienceRequest(JsonElement? Stars);

@@ -13,7 +13,8 @@ public static class ExperienceCards
         // A member who has left still shared their experiences, so sharers are read whether or not they are still in.
         var sharerIds = experiences.Select(e => e.SharerMembershipId).Distinct().ToList();
         var sharers = await db.Memberships.AsNoTracking().Where(m => sharerIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, cancellationToken);
+        var scoreOf = await ExperienceScores.OfAsync(db, experiences, cancellationToken);
 
-        return experiences.Select(e => ExperienceCardDto.Of(e, popkin, sharers[e.SharerMembershipId], store)).ToList();
+        return experiences.Select(e => ExperienceCardDto.Of(e, popkin, sharers[e.SharerMembershipId], scoreOf(e), store)).ToList();
     }
 }
