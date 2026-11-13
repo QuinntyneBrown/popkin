@@ -44,3 +44,4 @@ export * from './lib/api/photos/photo-rules';
 export * from './lib/api/photos/album-days';
 export * from './lib/api/photos/album-store';
 export * from './lib/api/photos/photo-uploads';
+export * from './lib/api/photos/photo-view-store';
