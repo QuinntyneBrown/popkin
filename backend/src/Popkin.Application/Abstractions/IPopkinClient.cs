@@ -34,4 +34,17 @@ public interface IPopkinClient
     /// album read gives the photos (L2-031 AC7).
     /// </summary>
     Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds);
+
+    /// <summary>
+    /// How many are on the Popkin's group call changed. A state: it carries the whole count and
+    /// the call's version, which only rises, and an event whose version is not above the one
+    /// held is dropped. `GET …/calls/current` recovers it.
+    /// </summary>
+    Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount);
+
+    /// <summary>
+    /// The last person left and the call ended (L2-029 AC6). A fact, and final: a
+    /// `CallChanged` of that call that arrives after it is ignored.
+    /// </summary>
+    Task CallEnded(Guid popkinId, Guid callId);
 }

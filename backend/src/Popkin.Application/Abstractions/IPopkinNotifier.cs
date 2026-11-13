@@ -27,4 +27,10 @@ public interface IPopkinNotifier
 
     /// <summary>Photos were added to the album. To every member of the Popkin with a connection open.</summary>
     Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds);
+
+    /// <summary>How many are on the group call changed. To every member of the Popkin with a connection open.</summary>
+    Task CallChanged(Guid popkinId, Guid callId, long version, int participantCount);
+
+    /// <summary>The group call ended. To every member of the Popkin with a connection open.</summary>
+    Task CallEnded(Guid popkinId, Guid callId);
 }

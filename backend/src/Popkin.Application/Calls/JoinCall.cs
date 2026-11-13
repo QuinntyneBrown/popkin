@@ -16,7 +16,7 @@ public sealed record JoinCallResult(JoinedCallDto Joined, bool Started);
 public sealed record JoinCallCommand(Guid PopkinId, bool MicOn, bool CameraOn) : IRequest<JoinCallResult>;
 
 public sealed class JoinCallCommandHandler(
-    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos, IMediaRelayCredentials relay)
+    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos, IMediaRelayCredentials relay, IPopkinNotifier notifier)
     : IRequestHandler<JoinCallCommand, JoinCallResult>
 {
     /// <summary>How often a join that lost to another change of the same call is tried again.</summary>
@@ -60,7 +60,11 @@ public sealed class JoinCallCommandHandler(
                 continue;
             }
 
-            return new JoinCallResult(await JoinedAsync(call, membership, cancellationToken), started);
+            // Told after the commit, in the same request: the banner of every member with Popkin
+            // open shows the new count (L2-029 AC2).
+            var joined = await JoinedAsync(call, membership, cancellationToken);
+            await notifier.CallChanged(popkin.Id, call.Id, call.Version, joined.Call.ParticipantCount);
+            return new JoinCallResult(joined, started);
         }
     }
 
