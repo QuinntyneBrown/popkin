@@ -13,4 +13,15 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
     [HttpGet("summary")]
     public async Task<ActionResult<ExperiencesSummaryDto>> GetSummary(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetExperiencesSummaryQuery(popkinId), cancellationToken));
+
+    /// <summary>Shares an experience: a title, a kind and, when given, a when and a place (L2-040).</summary>
+    [HttpPost]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ExperienceCardDto>> Share(
+        Guid popkinId, [FromForm] string? title, [FromForm] string? kind, [FromForm] string? when, [FromForm] string? place,
+        CancellationToken cancellationToken)
+    {
+        var card = await sender.Send(new ShareExperienceCommand(popkinId, title, kind, when, place), cancellationToken);
+        return Created($"/api/popkins/{popkinId}/experiences/{card.Id}", card);
+    }
 }

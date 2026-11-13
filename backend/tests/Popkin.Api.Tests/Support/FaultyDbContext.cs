@@ -38,6 +38,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<Photo> Photos => inner.Photos;
 
+    public DbSet<Experience> Experiences => inner.Experiences;
+
     public DbSet<Call> Calls => inner.Calls;
 
     public DbSet<CallParticipant> CallParticipants => inner.CallParticipants;
