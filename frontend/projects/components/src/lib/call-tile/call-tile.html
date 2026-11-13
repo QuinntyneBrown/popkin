@@ -1,18 +1,17 @@
 @if (rest(); as counted) {
   <span class="call-tile__rest">{{ counted }}</span>
 } @else {
-  @if (stream(); as media) {
+  @if (shown(); as media) {
     <video
       class="call-tile__video"
       autoplay
       playsinline
       aria-hidden="true"
-      [class.call-tile__video--off]="cameraOff()"
-      [muted]="own()"
+      [muted]="true"
       [srcObject]="media"
     ></video>
   }
-  @if (cameraOff() || !stream()) {
+  @if (!shown()) {
     <span
       pk-avatar
       size="xl"

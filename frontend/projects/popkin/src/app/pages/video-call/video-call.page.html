@@ -1,0 +1,127 @@
+<div pk-call-screen [accent]="popkin()?.accent" [layout]="layout()">
+  <header
+    pk-top-bar
+    slot="header"
+    [back]="home()"
+    backLabel="Minimise call"
+    backIcon="chevron-down"
+    [emoji]="popkin()?.emoji"
+    [heading]="popkin()?.name ?? 'Group call'"
+    [sub]="session.subtitle()"
+  >
+    <button
+      pk-icon-button
+      slot="end"
+      type="button"
+      icon="user-plus"
+      label="Invite to call"
+      text="Invite"
+      (click)="invite()"
+    ></button>
+  </header>
+
+  @switch (status()) {
+    @case ('connected') {
+      <ul pk-call-grid [count]="gridCount()">
+        @for (tile of tiles(); track tile.membershipId) {
+          <li
+            pk-call-tile
+            [name]="tile.name"
+            [avatar]="tile.avatar"
+            [stream]="tile.stream"
+            [cameraOff]="!tile.cameraOn"
+            [muted]="!tile.micOn"
+            [speaking]="tile.speaking"
+          ></li>
+        }
+        @if (rest(); as counted) {
+          <li pk-call-tile [rest]="counted"></li>
+        }
+      </ul>
+      @if (session.alone()) {
+        <div
+          pk-stage-message
+          heading="Waiting for the others"
+          [text]="
+            'Everyone in ' +
+            (popkin()?.name ?? 'the Popkin') +
+            ' can see the call and join with one tap.'
+          "
+        >
+          <button pk-button type="button" variant="on-accent" size="md" (click)="invite()">
+            <svg pk-icon name="user-plus" size="md"></svg>Invite to call
+          </button>
+        </div>
+      }
+    }
+    @case ('denied') {
+      <div
+        pk-stage-message
+        icon="video-off"
+        heading="We can’t reach your camera or microphone"
+        text="Allow them for Popkin in your browser’s site settings, then try again."
+        [alert]="true"
+      >
+        <button
+          pk-button
+          slot="actions"
+          type="button"
+          variant="on-accent"
+          size="md"
+          (click)="session.retry()"
+        >
+          Try again
+        </button>
+        <a pk-button slot="actions" variant="secondary" size="md" [routerLink]="home()">
+          Back to the Popkin
+        </a>
+      </div>
+    }
+    @case ('failed') {
+      <div
+        pk-stage-message
+        icon="video-off"
+        heading="We couldn’t connect you to the call"
+        text="Check your connection, then try again."
+        [alert]="true"
+      >
+        <button
+          pk-button
+          slot="actions"
+          type="button"
+          variant="on-accent"
+          size="md"
+          (click)="session.retry()"
+        >
+          Try again
+        </button>
+        <a pk-button slot="actions" variant="secondary" size="md" [routerLink]="home()">
+          Back to the Popkin
+        </a>
+      </div>
+    }
+    @default {
+      <div
+        pk-stage-message
+        heading="Joining the call…"
+        text="Getting your camera and microphone ready."
+        [busy]="true"
+      ></div>
+    }
+  }
+
+  @if (status() === 'connected' || status() === 'connecting') {
+    <div
+      pk-call-controls
+      slot="controls"
+      [muted]="!session.micOn()"
+      [cameraOff]="!session.cameraOn()"
+      (muteToggled)="session.toggleMic()"
+      (cameraToggled)="session.toggleCamera()"
+      (left)="leave()"
+    ></div>
+  }
+  @if (layout() === 'call') {
+    <aside pk-call-aside slot="aside" [people]="people()" [note]="session.others()"></aside>
+  }
+</div>

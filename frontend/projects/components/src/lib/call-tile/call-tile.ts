@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { Avatar, PersonAvatar } from '../avatar/avatar';
 import { Icon } from '../icon/icon';
 
@@ -9,8 +9,8 @@ import { Icon } from '../icon/icon';
  * beside the name when they are `muted` (AC3); and a ring in the Popkin's colour while they are
  * `speaking` (AC4). Muted and speaking are said in words too, for assistive technology.
  *
- * The `stream` plays in a `<video>` that stays in the page while the camera is off, because it
- * carries the person's voice as well; the member's `own` tile plays without sound.
+ * The `stream` plays in a `<video>` without sound: what people say is played by the call itself,
+ * which goes on while its screen is closed (L2-030 AC7).
  *
  * With `rest` the tile is no person: it counts the people on the call that are not shown
  * (L2-029 AC7), in the consumer's words, and takes no other input.
@@ -34,10 +34,8 @@ export class CallTile {
   readonly avatar = input<PersonAvatar | null>(null);
   /** What the person sends: their camera and their microphone. */
   readonly stream = input<MediaStream | null>(null);
-  /** The camera is off: the avatar shows, and the stream is only heard. */
+  /** The camera is off: the avatar shows in place of the picture. */
   readonly cameraOff = input(false);
-  /** The member's own tile: its stream plays without sound. */
-  readonly own = input(false);
   readonly muted = input(false);
   readonly speaking = input(false);
   /** Before the name of someone muted, for assistive technology. */
@@ -46,4 +44,7 @@ export class CallTile {
   readonly speakingText = input(', speaking');
   /** The people not shown, counted: "3 more on the call". */
   readonly rest = input<string>();
+
+  /** The picture to play: none while the camera is off. */
+  protected readonly shown = computed(() => (this.cameraOff() ? null : this.stream()));
 }

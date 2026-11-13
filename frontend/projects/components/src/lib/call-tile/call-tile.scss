@@ -18,11 +18,6 @@
   object-fit: cover;
 }
 
-/* The camera is off: the stream is still heard, and the avatar shows. */
-.call-tile__video--off {
-  display: none;
-}
-
 /* The ring of who is speaking: the Popkin's colour, lightened towards the stage's text. */
 :host(.call-tile--speaking) {
   border-color: color-mix(in srgb, var(--accent) 60%, var(--color-fg-on-stage));
