@@ -14,8 +14,10 @@ true: a setting added to the code is added here in the same change.
   out: hub groups, presence and the rate limits live in its memory.
 - **One** instance of the Popkin Worker. It must run: it wraps up the Popkins whose time is up
   (every 30 seconds), removes the photos of a Popkin wrapped up without its album after 30 days
-  (every hour) and prepares the zip behind "Save the album" (every 2 seconds). Without it a
-  Popkin with an end date never wraps up by itself and an album export stays "Preparing". It
+  (every hour), prepares the zip behind "Save the album" (every 2 seconds) and erases the
+  personal data of deleted accounts (every day). Without it a Popkin with an end date never wraps
+  up by itself, an album export stays "Preparing" and a deleted account is not erased within the
+  30 days L2-049 promises. It
   reads and writes the same database **and the same photo store** as the API: the zip it writes
   is the file the API hands out. It serves no HTTP and sends no hub events; a screen that is
   open learns of a timed wrap-up from its own clock check
