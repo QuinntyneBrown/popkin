@@ -10,6 +10,7 @@ skill (edge-tts, burned-in captions), this page wins.
 | # | Video | Runtime | What it is |
 |---|-------|---------|------------|
 | 01 | [Journey 1: Start a Popkin](01-journey-01-start-a-popkin/README.md) | 1:48 | Sign up with a code, name a Popkin while the preview follows, choose how long it lasts and get the QR code; the split screens grow from the phone to the desktop. |
+| 02 | [Journey 2: Join by invite](02-journey-02-join-by-invite/README.md) | 2:14 | Open an invite link, see what you are joining, join with a name and an optional photo, and be welcomed; the invite grows from the phone to the desktop. |
 
 ## What every video is
 

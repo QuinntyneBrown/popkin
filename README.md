@@ -26,7 +26,10 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > **Status: in progress.** Journey 1, Start a Popkin, is built: sign up with a code, name a
 > Popkin, choose how long it lasts and get its QR invite, on every screen size from a phone to a
 > desktop. [Watch it](docs/videos/01-journey-01-start-a-popkin/01-journey-01-start-a-popkin.mp4)
-> (1 min 48 s, with sound). The journeys still to build are in
+> (1 min 48 s, with sound). Journey 2, Join by invite, is built too: open an invite link, see
+> what you are joining, join with a name and an optional photo, and be welcomed.
+> [Watch it](docs/videos/02-journey-02-join-by-invite/02-journey-02-join-by-invite.mp4)
+> (2 min 14 s, with sound). The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents
@@ -159,7 +162,7 @@ proxy and the release steps are in [`docs/deployment.md`](docs/deployment.md).
   `components` library, compared with the mocks at 360 px and 1280 px in both themes.
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the backend tests, the token check, the frontend lint,
-format check and build, the behaviour specs and the component parity specs on every push to
+format check, unit tests and build, the behaviour specs and the component parity specs on every push to
 `main` and every pull request.
 
 ## Repository structure
