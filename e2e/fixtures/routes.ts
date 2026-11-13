@@ -152,6 +152,8 @@ export const routes = {
   popkinSettings: { app: home, mock: 'dialogs/popkin-settings/host-now.html' },
   popkinSettingsMember: { app: home, mock: 'dialogs/popkin-settings/member.html' },
   leavePopkin: { app: home, mock: 'dialogs/leave-popkin/default.html' },
+  leavePopkinBusy: { app: home, mock: 'dialogs/leave-popkin/busy.html' },
+  leavePopkinFailed: { app: home, mock: 'dialogs/leave-popkin/failed.html' },
   wrapUp: { app: wrapUp, mock: 'pages/wrap-up/default.html' },
   wrapUpAlbumOff: { app: wrapUp, mock: 'pages/wrap-up/album-off.html' },
   wrapUpSubmitting: { app: wrapUp, mock: 'pages/wrap-up/submitting.html' },

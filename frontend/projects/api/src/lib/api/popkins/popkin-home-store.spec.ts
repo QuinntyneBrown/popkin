@@ -88,6 +88,7 @@ describe('PopkinHomeStore', () => {
     threadRead$: new Subject<string>(),
     presenceChanged$: new Subject<{ popkinId: string; version: number; hereNow: number }>(),
     memberJoined$: new Subject<{ popkinId: string; member: MemberJoinedView }>(),
+    memberLeft$: new Subject<{ popkinId: string; membershipId: string }>(),
     photosAdded$: new Subject<{ popkinId: string; photoIds: string[] }>(),
     reconnected$: new Subject<void>(),
     popkinWrappedUp$: new Subject<string>(),
@@ -302,6 +303,22 @@ describe('PopkinHomeStore', () => {
 
     it('is ignored for another Popkin', () => {
       realtime.memberJoined$.next({ popkinId: 'other', member: {} as MemberJoinedView });
+      expect(api.asked.home).toBe(1);
+    });
+  });
+
+  describe('someone leaving (L2-047 AC2)', () => {
+    beforeEach(() => store.open('p'));
+
+    it('reads the header and the members again', () => {
+      api.home = { ...home, memberCount: 13 };
+      realtime.memberLeft$.next({ popkinId: 'p', membershipId: 'm-joel' });
+      expect(store.popkin()?.memberCount).toBe(13);
+      expect(api.asked).toMatchObject({ home: 2, members: 2, photos: 1 });
+    });
+
+    it('is ignored for another Popkin', () => {
+      realtime.memberLeft$.next({ popkinId: 'other', membershipId: 'm-joel' });
       expect(api.asked.home).toBe(1);
     });
   });

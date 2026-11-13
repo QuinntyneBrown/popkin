@@ -942,6 +942,8 @@ export const screenStates: ScreenState[] = [
   },
   // Leave a Popkin (journey 18).
   { key: 'leavePopkin', ...leaveStates.leavePopkin, regions: leaveRegions },
+  { key: 'leavePopkinBusy', ...leaveStates.leavePopkinBusy, regions: leaveRegions },
+  { key: 'leavePopkinFailed', ...leaveStates.leavePopkinFailed, regions: leaveRegions },
   { key: 'wrapUp', ...wrapUpStates.wrapUp, regions: wrapUpRegions },
   { key: 'wrapUpAlbumOff', ...wrapUpStates.wrapUpAlbumOff, regions: wrapUpRegions },
   { key: 'wrapUpSubmitting', ...wrapUpStates.wrapUpSubmitting, regions: wrapUpRegions },

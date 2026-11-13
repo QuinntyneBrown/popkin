@@ -166,6 +166,20 @@ parity('dialog', [
     prepare: (page) => stayInFocus(page),
   },
   {
+    key: 'leavePopkinBusy',
+    ...leaveStates.leavePopkinBusy,
+    name: 'leave-popkin-busy',
+    region: (page) => new LeavePopkinDialog(page).panel,
+    prepare: (page) => stayInFocus(page),
+  },
+  {
+    key: 'leavePopkinFailed',
+    ...leaveStates.leavePopkinFailed,
+    name: 'leave-popkin-failed',
+    region: (page) => new LeavePopkinDialog(page).panel,
+    prepare: (page) => stayInFocus(page),
+  },
+  {
     key: 'addComment',
     ...experienceStates.addComment,
     name: 'add-comment',

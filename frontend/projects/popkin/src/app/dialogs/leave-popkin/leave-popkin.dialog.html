@@ -4,7 +4,23 @@
   description="Your messages and photos stay. To come back you’ll need a new invite."
   [accent]="data.accent"
 >
-  <button pk-button slot="footer" type="button" variant="danger" [block]="true">Leave</button>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t take you out.">
+      You’re still in {{ data.name }}. Try again.
+    </div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="leave()"
+  >
+    {{ busy() ? 'Leaving…' : 'Leave' }}
+  </button>
   <button
     pk-button
     slot="footer"

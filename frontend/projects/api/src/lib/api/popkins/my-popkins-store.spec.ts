@@ -72,6 +72,7 @@ describe('MyPopkinsStore', () => {
   let backOnline: Subject<void>;
   let messages: Subject<MessageView>;
   let joined: Subject<unknown>;
+  let left: Subject<unknown>;
   let reconnected: Subject<void>;
   let saved: Map<string, MyPopkinsView>;
   let offlineShown: string[];
@@ -92,6 +93,7 @@ describe('MyPopkinsStore', () => {
     backOnline = new Subject();
     messages = new Subject();
     joined = new Subject();
+    left = new Subject();
     reconnected = new Subject();
     saved = new Map();
     offlineShown = [];
@@ -117,6 +119,7 @@ describe('MyPopkinsStore', () => {
             messageAdded$: messages,
             threadRead$: new Subject<string>(),
             memberJoined$: joined,
+            memberLeft$: left,
             reconnected$: reconnected,
             start: vi.fn(),
           },
@@ -255,12 +258,13 @@ describe('MyPopkinsStore', () => {
     });
   });
 
-  it('reads again, keeping what is shown, when someone joins or the connection returns', () => {
+  it('reads again, keeping what is shown, when someone joins or leaves or the connection returns', () => {
     store.open();
     answer = 'down';
     joined.next({ popkinId: 'lakeside' });
+    left.next({ popkinId: 'lakeside', membershipId: 'm-joel' });
     reconnected.next();
-    expect(asked).toBe(3);
+    expect(asked).toBe(4);
     expect(store.state()).toBe('ready');
     expect(store.cards()).toHaveLength(2);
   });

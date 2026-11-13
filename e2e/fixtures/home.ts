@@ -242,6 +242,15 @@ export class Home {
     });
   }
 
+  /** Someone leaves: no longer counted or listed, and told over the hub (L2-047 AC2). */
+  async leaves(hub: Hub, displayName: string): Promise<void> {
+    const left = this.members.find((member) => member.displayName === displayName);
+    if (!left) throw new Error(`${displayName} is not a member.`);
+    this.members = this.members.filter((member) => member !== left);
+    this.popkin = { ...this.popkin, memberCount: this.members.length };
+    await hub.push('MemberLeft', popkinId, left.membershipId);
+  }
+
   private async answer(route: Route, read: HomeRead): Promise<void> {
     this.asked[read]++;
     await this.held.get(read);

@@ -20,6 +20,8 @@ export interface PopkinsApi {
   getWrapUpPreview(popkinId: string): Observable<WrapUpPreviewView>;
   /** Wraps the Popkin up (L2-043). 403 `host_only`; 409 `popkin_wrapped_up`. */
   wrapUp(popkinId: string, keepPhotos: boolean): Observable<WrapUpResult>;
+  /** The caller leaves the Popkin (L2-047). 403 `host_cannot_leave`; 404 `popkin_not_found`. */
+  leave(popkinId: string): Observable<void>;
   /** Sends the new Popkin's invite to every member of a wrapped-up one (L2-046 AC5). */
   inviteCrew(popkinId: string, fromPopkinId: string): Observable<void>;
 }
@@ -58,6 +60,10 @@ export class HttpPopkinsApi implements PopkinsApi {
     return this.http.post<WrapUpResult>(`/api/popkins/${encodeURIComponent(popkinId)}/wrap-up`, {
       keepPhotos,
     });
+  }
+
+  leave(popkinId: string): Observable<void> {
+    return this.http.delete<void>(`/api/popkins/${encodeURIComponent(popkinId)}/members/me`);
   }
 
   inviteCrew(popkinId: string, fromPopkinId: string): Observable<void> {

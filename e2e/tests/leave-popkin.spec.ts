@@ -1,6 +1,8 @@
 import { homeUrl } from '../fixtures/home';
 import { aMemberAtHome, openLeave } from '../fixtures/leaving';
+import { popkinsUrl } from '../fixtures/my-popkins';
 import { expect, test } from '../fixtures/pk-test';
+import { MyPopkinsPage } from '../pages/my-popkins.page';
 import { PopkinHomePage } from '../pages/popkin-home.page';
 
 // Journey 18, Leave a Popkin: L2-047.
@@ -48,5 +50,59 @@ test.describe('Leave a Popkin', () => {
     await expect(dialog.root).toHaveCount(0);
     await expect(new PopkinHomePage(page).settings).toBeFocused();
     expect(leaving.sent).toBe(0);
+  });
+
+  // L2-047 AC2, L2-058 AC7: My Popkins opens without it, one column on a phone, three on a desktop.
+  for (const width of [360, 1280]) {
+    test(`opens My Popkins without the Popkin once the member has left, at ${width} px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const leaving = await aMemberAtHome(page);
+      await page.goto(homeUrl);
+      const dialog = await openLeave(page);
+
+      await dialog.leave.click();
+
+      const popkins = new MyPopkinsPage(page);
+      await expect(page).toHaveURL(popkinsUrl);
+      await expect(popkins.root).toBeVisible();
+      await expect(popkins.cardNames).toHaveText(['Thursday Night Group', 'Tigers U9 Parents']);
+      await expect(popkins.cardNames.filter({ hasText: 'Lakeside Weekend' })).toHaveCount(0);
+      expect(leaving.sent).toBe(1);
+    });
+  }
+
+  // L2-056 AC3
+  test('reads "Leaving…" and is sent once while it goes through', async ({ page }) => {
+    const leaving = await aMemberAtHome(page);
+    const release = leaving.hold();
+    await page.goto(homeUrl);
+    const dialog = await openLeave(page);
+
+    await dialog.leave.click();
+
+    await expect(dialog.leave).toHaveText('Leaving…');
+    await expect(dialog.leave).toBeDisabled();
+    await expect(dialog.leave).toHaveAttribute('aria-busy', 'true');
+    await dialog.leave.click({ force: true });
+    release();
+    await expect(page).toHaveURL(popkinsUrl);
+    expect(leaving.sent).toBe(1);
+  });
+
+  test('says so and keeps the member in the Popkin when leaving fails', async ({ page }) => {
+    const leaving = await aMemberAtHome(page);
+    leaving.answer = 'fails';
+    await page.goto(homeUrl);
+    const dialog = await openLeave(page);
+
+    await dialog.leave.click();
+
+    await expect(dialog.failed).toContainText('We couldn’t take you out.');
+    await expect(dialog.failed).toContainText('You’re still in Lakeside Weekend. Try again.');
+    await expect(dialog.leave).toBeEnabled();
+    await expect(dialog.leave).toHaveText('Leave');
+    await expect(page).toHaveURL(homeUrl);
   });
 });
