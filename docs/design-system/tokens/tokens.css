@@ -342,6 +342,7 @@
   --layout-polaroids-width: 17.5rem;
   --layout-polaroids-height: 12.5rem;
   --layout-hero-art-max: 27.5rem;
+  --layout-welcome-picture: 16rem; /* the mark as a picture on the welcome screen, below M */
   --layout-photo-in-chat: 16rem;
 
   /* ---------- Semantic: shape ------------------------------------------ */
