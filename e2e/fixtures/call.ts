@@ -142,7 +142,10 @@ export class Call {
     to: { micOn: boolean; cameraOn: boolean },
     version = person.mediaVersion + 1,
   ): Promise<void> {
-    Object.assign(person, to, { mediaVersion: version });
+    // The cast is shared by every spec: what changes is this call's copy of the person.
+    this.others = this.others.map((one) =>
+      one.membershipId === person.membershipId ? { ...one, ...to, mediaVersion: version } : one,
+    );
     await hub.push(
       'ParticipantMediaChanged',
       callId,
