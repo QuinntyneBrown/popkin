@@ -45,6 +45,15 @@ public sealed class PresenceTracker(TimeProvider clock)
         }
     }
 
+    /// <summary>The connections a person holds at this moment.</summary>
+    public IReadOnlyList<string> ConnectionsOf(Guid personId)
+    {
+        lock (_gate)
+        {
+            return _connections.Where(c => c.Value.PersonId == personId).Select(c => c.Key).ToList();
+        }
+    }
+
     /// <summary>A person opened a connection: they are here in each of their Popkins.</summary>
     public void Connect(string connectionId, Guid personId, IEnumerable<Guid> popkinIds)
     {

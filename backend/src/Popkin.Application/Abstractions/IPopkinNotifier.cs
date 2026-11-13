@@ -1,4 +1,5 @@
 using Popkin.Application.Chat;
+using Popkin.Application.Invites;
 
 namespace Popkin.Application.Abstractions;
 
@@ -20,4 +21,7 @@ public interface IPopkinNotifier
 
     /// <summary>To every member of the Popkin with a connection open.</summary>
     Task PresenceChanged(Guid popkinId, long version, int hereNow);
+
+    /// <summary>Someone joined the Popkin. The one who joined is not told.</summary>
+    Task MemberJoined(Guid popkinId, MemberJoinedDto member);
 }

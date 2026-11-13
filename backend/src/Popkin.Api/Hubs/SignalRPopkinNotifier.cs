@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Chat;
+using Popkin.Application.Invites;
 using Popkin.Application.Telemetry;
 
 namespace Popkin.Api.Hubs;
@@ -26,6 +27,9 @@ public sealed class SignalRPopkinNotifier(
 
     public Task PresenceChanged(Guid popkinId, long version, int hereNow) =>
         SendAsync(nameof(IPopkinClient.PresenceChanged), () => Group(popkinId).PresenceChanged(popkinId, version, hereNow));
+
+    public Task MemberJoined(Guid popkinId, MemberJoinedDto member) =>
+        SendAsync(nameof(IPopkinClient.MemberJoined), () => Group(popkinId).MemberJoined(popkinId, member));
 
     private IPopkinClient Group(Guid popkinId) => hub.Clients.Group(PopkinHub.GroupOf(popkinId));
 

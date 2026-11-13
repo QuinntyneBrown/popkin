@@ -1,4 +1,5 @@
 using Popkin.Application.Chat;
+using Popkin.Application.Invites;
 
 namespace Popkin.Application.Abstractions;
 
@@ -24,4 +25,7 @@ public interface IPopkinClient
     /// version that only rises, and an event whose version is not above the one held is dropped.
     /// </summary>
     Task PresenceChanged(Guid popkinId, long version, int hereNow);
+
+    /// <summary>Someone joined the Popkin. The one who joined is not told.</summary>
+    Task MemberJoined(Guid popkinId, MemberJoinedDto member);
 }
