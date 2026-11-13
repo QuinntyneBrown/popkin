@@ -45,7 +45,8 @@
   width: 100%;
   max-height: calc(5lh + 2 * var(--pk-composer-pad));
   margin: 0;
-  padding: var(--pk-composer-pad) 0;
+  /* At the sides, the room a browser gives the text of a one-line field. */
+  padding: var(--pk-composer-pad) var(--space-0-5);
   border: 0;
   background: none;
   outline: none;
