@@ -26,6 +26,9 @@ public sealed class Person
 
     public DateTimeOffset? DeletedAt { get; private set; }
 
+    /// <summary>When the personal data of a deleted account was erased (L2-049 AC4).</summary>
+    public DateTimeOffset? ErasedAt { get; private set; }
+
     public static Person Create(string name, ContactChannel channel, string destination, DateTimeOffset now) => new()
     {
         Id = Guid.NewGuid(),
@@ -43,6 +46,19 @@ public sealed class Person
     /// their phone number or email may sign up again at once.
     /// </summary>
     public void MarkDeleted(DateTimeOffset now) => DeletedAt ??= now;
+
+    /// <summary>
+    /// Erases what identifies a deleted person: their name, phone number, email and photo. The
+    /// photo's file is the caller's to delete. The row stays, so what they shared keeps its author.
+    /// </summary>
+    public void Erase(DateTimeOffset now)
+    {
+        Name = "";
+        Phone = null;
+        Email = null;
+        PhotoKey = null;
+        ErasedAt ??= now;
+    }
 
     /// <summary>A new photo, already stored under `photoKey` (L2-048 AC2).</summary>
     public void ChangePhoto(string photoKey) => PhotoKey = photoKey;
