@@ -193,7 +193,7 @@ export class GroupChatPage {
       if (opened || !thread || (state !== 'ready' && state !== 'empty')) return;
       opened = true;
       untracked(() => {
-        this.text.set(this.drafts.get(thread.id));
+        if (!this.text()) this.text.set(this.drafts.get(thread.id));
         afterNextRender(
           () => {
             this.threadView()?.scrollToLatest('instant');

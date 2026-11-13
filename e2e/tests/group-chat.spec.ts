@@ -246,6 +246,7 @@ test.describe('sending a message to everyone', () => {
     await page.goto(chatUrl);
     const chat = new GroupChatPage(page);
 
+    await expect(chat.field).toBeEnabled();
     await chat.field.pressSequentially('Bring:');
     await chat.field.press('Shift+Enter');
     await chat.field.pressSequentially('paddles');
