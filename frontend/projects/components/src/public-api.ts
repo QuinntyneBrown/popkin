@@ -83,3 +83,4 @@ export * from './lib/popkin-skeleton/popkin-skeleton';
 export * from './lib/scanner/scanner';
 export * from './lib/call-screen/call-screen';
 export * from './lib/call-grid/call-grid';
+export * from './lib/call-tile/call-tile';
