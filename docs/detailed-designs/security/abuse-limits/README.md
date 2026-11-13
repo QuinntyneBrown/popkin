@@ -128,10 +128,12 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
 - **Real-time messages** — messages are sent over HTTP, not through `PopkinHub`, so the
   `messages` policy covers every message. Should a hub method ever accept messages, it applies
   the same limiter through `PartitionedRateLimiter` in the hub filter.
-- **Call signals** — `SignalRateLimitFilter`, an `IHubFilter`, applies a token bucket of 600
-  signals a minute per connection to `SendSignal`. A refused signal fails the hub call with
-  `rate_limited`; it is never dropped silently, because a signal is an edge that must arrive or
-  fail visibly.
+- **Call signals** — `SignalRateLimitFilter`, an `IHubFilter`, applies an exact sliding log of
+  600 signals a minute per connection to `SendSignal`, with the `SlidingLogRateLimiter` the
+  `messages` policy uses. The log is kept with the connection and goes with it. A refused signal
+  fails the hub call with `rate_limited`; it is never dropped silently, because a signal is an
+  edge that must arrive or fail visibly. The filter has no `Retry-After` to send and counts
+  nothing on the meter yet.
 - **Measurement** — `OnRejected` and the hub filter add one to the counter
   `popkin.rate_limit.rejections`, with the policy name as its only dimension
   ([ADR 0012](../../../adr/0012-opentelemetry.md)). The partition is never a dimension. The
@@ -173,7 +175,8 @@ The limits were built with the journeys that needed them, and part of this desig
 - The counter `popkin.rate_limit.rejections` is not built.
 - The web app has no `rateLimitInterceptor` and no `formatRetryAfter`: `toApiProblem` reads
   `retryAfterSeconds` from the answer's body and each page words the delay.
-- The call-signal limit: with the group call, journey 7.
+- The call-signal limit was built with the group call, journey 7, as a sliding log where this
+  design first named a token bucket. Its refusals are not counted.
 
 ## Requirements
 

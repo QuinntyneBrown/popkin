@@ -78,7 +78,8 @@ journey:
   address on `MessageDto`): journey 13, Photos in chat;
 - reactions and replies, with the reply bar that `group-chat/default` draws (`ReplyToMessageId`,
   a quote and reactions on `MessageDto`): journey 12, React and reply;
-- "Start group call" in the top bar: journey 7, Group call;
+- "Start group call" in the top bar was built in journey 7, Group call, with the banner of a
+  call under way ([Group call](../../calls/group-call/README.md));
 - the read-only line of `group-chat/read-only`: journey 9, Wrap up. Until then the message field
   of a thread whose `readOnly` is true is disabled;
 - the list of conversations: journey 11, Direct message. Until then `/p/:popkinId/chat`

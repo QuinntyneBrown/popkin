@@ -21,7 +21,10 @@ Popkin is one system of five containers:
 - **Photo store** — object storage for photo files. Provider: `<TO SUPPLY>`.
 
 External systems: an SMS provider and an email provider deliver six-digit codes, and a media
-relay (STUN/TURN) carries WebRTC calls. Each provider is `<TO SUPPLY>`.
+relay (STUN/TURN) helps the browsers on a call reach each other. The SMS and email providers are
+`<TO SUPPLY>`. The media relay is any TURN server that takes shared-secret credentials, and a
+call is a mesh of connections between browsers that Popkin's API signals and never carries
+([ADR 0014](../adr/0014-calls-are-a-mesh.md)).
 
 The domain entity for a Popkin is `PopkinSpace`. A class named `Popkin` would collide with the
 root namespace `Popkin`. Every other entity carries its spec term: `Person`, `Membership`,
@@ -115,7 +118,8 @@ is never one (L2-054 AC3).
 
 Built so far: `popkin.hub.send.duration` and, beside it, `popkin.hub.send.failures`, both by
 event name (`PopkinMetrics`). The other instruments of the table, and the exporter set-up of
-ADR 0012, are not built.
+ADR 0012, are not built. Calls have no instrument of their own: nothing counts the calls
+started, the people on them or the signals refused (known gap 33).
 
 ## Conflicts between the mocks and the specs
 
@@ -221,9 +225,9 @@ or design that settled it.
 | 7 | Load target: concurrent connections and "normal load" ([Fast screens](reliability/fast-screens/README.md), [Live messages](chat/live-messages/README.md)) | Nothing yet; ends [ADR 0009](../adr/0009-one-api-instance.md) when it passes one instance | |
 | 8 | Whether closing a person's open hub connections at sign-out is needed ([Live messages](chat/live-messages/README.md)) | Sign out (journey 17). Journey 3 was built without it: there is no sign-out yet, and nothing closes a connection | |
 | 9 | Photo store provider and the management of its keys ([Add photos](photos/add-photos/README.md)) | First deployment with profile photos (journey 2) or with the album: journey 5 is built, and outside Development no photo can be added, because there is no photo store there; journeys 13 and 14 outside Development | The contract and the address scheme are settled by [Join a Popkin](invitations/join-popkin/README.md): `IPhotoStore`, with addresses the API signs and serves for one hour. The provider behind it stays open |
-| 10 | Media topology for calls, mesh or SFU, and where an SFU would run ([Group call](calls/group-call/README.md)) | Journey 7 | |
-| 11 | Media relay (STUN/TURN) provider and credential lifetime ([Group call](calls/group-call/README.md)) | Journey 7 | |
-| 12 | How the other member learns of a direct call ([Group call](calls/group-call/README.md)) | Journey 11 | |
+| 10 | Media topology for calls, mesh or SFU, and where an SFU would run ([Group call](calls/group-call/README.md)) | Journey 7 | [ADR 0014](../adr/0014-calls-are-a-mesh.md): a mesh, signalled through the hub; no SFU runs |
+| 11 | Media relay (STUN/TURN) provider and credential lifetime ([Group call](calls/group-call/README.md)) | Journey 7 | [ADR 0014](../adr/0014-calls-are-a-mesh.md) and [`docs/deployment.md`](../deployment.md): any TURN server that takes shared-secret (TURN REST) credentials, through the `MediaRelay` settings; one hour unless set. Which relay a deployment runs stays its own choice |
+| 12 | How the other member learns of a direct call ([Group call](calls/group-call/README.md)). Journey 7 built the group call only: the direct call, its `threadId` and its `Kind` wait | Journey 11 | |
 | 13 | How a hub event sent by the Worker reaches clients: a backplane, or another path ([Time is up](wrap-up/time-is-up/README.md), [ADR 0009](../adr/0009-one-api-instance.md)) | Journey 9. Until settled, the web app's clock check carries the wrap-up | |
 | 14 | Number of Worker instances ([Time is up](wrap-up/time-is-up/README.md)) | Journey 9 | |
 | 15 | Whether field measurement of screen speed is wanted, and its collector ([Fast screens](reliability/fast-screens/README.md)) | Nothing | |
@@ -238,6 +242,14 @@ or design that settled it.
 | 24 | How the app opens without a connection, and whether every screen keeps a saved answer. There is no service worker, so the app does not open offline from cold, and only My Popkins keeps a saved list; the `ResponseCache`, `screenLoad()` and `httpErrorInterceptor` of the design are not built ([Loading, failure and offline](reliability/loading-failure-offline/README.md)) | L2-056 AC4 for every screen but My Popkins | |
 | 25 | Clearing the saved list of My Popkins at sign out and at account deletion (L2-054). Only a 401 clears it today ([My Popkins](popkins/my-popkins/README.md)) | Journeys 17 and 19 | |
 | 26 | Screens My Popkins and the scanner link to that are not built: Join with a code (`/join`, journey 15), the recap (`/p/:popkinId/recap`, journey 9) and the account (`/account`, journey 17). Each link reaches the not-found screen until its journey | Journeys 9, 15 and 17 | |
+| 27 | Whether a cap on who may join a call is wanted. There is none: the limit of 12 tiles is a limit of what is shown, and a mesh serves a large call badly, each browser sending its picture once per other person. A cap needs a requirement first; an SFU needs its own record ([ADR 0014](../adr/0014-calls-are-a-mesh.md), [Group call](calls/group-call/README.md)) | None; found in journey 7 | |
+| 28 | A participant who posted the join and never called `JoinCall`, because the tab closed in between, is not taken off the call. They have no connection on it, so no dropped connection starts their grace, and a call they are the last on never ends ([Group call](calls/group-call/README.md)) | None; found in journey 7 | |
+| 29 | A failed `PATCH` of the microphone or camera is not shown and is not made again until the member's next change. The device sends nothing it should not, but the others see the earlier state until then ([Call controls](calls/call-controls/README.md)) | None; found in journey 7 | |
+| 30 | What happens to a call under way when its Popkin wraps up. Nothing ends it: nobody new can join, and it goes on until the last participant leaves ([Group call](calls/group-call/README.md), [Read-only Popkin](wrap-up/read-only-popkin/README.md)) | Journey 9 | |
+| 31 | A member on a call from two devices. The same membership has one participant row, so the second device's join adds nothing; its `JoinCall` then takes the call's events and signals from the first device, which is told nothing ([Group call](calls/group-call/README.md)) | None; found in journey 7 | |
+| 32 | No media relay was exercised by any test. Calls were checked by hand between two browsers on one machine, which connect directly; the credentials are proved by their signature only ([ADR 0014](../adr/0014-calls-are-a-mesh.md), [`docs/deployment.md`](../deployment.md)) | First deployment with calls on the public internet | |
+| 33 | Calls have no instrument on the `Popkin` meter, and a refused signal is not counted by `popkin.rate_limit.rejections`, which is not built ([ADR 0012](../adr/0012-opentelemetry.md), [Abuse limits](security/abuse-limits/README.md)) | None | |
+| 34 | The diagrams of [Group call](calls/group-call/README.md) and [Call controls](calls/call-controls/README.md) were not redrawn after journey 7. They show `CALL_SESSION` and `WebRtcCallSession`, a `threadId` and a `Kind`, and events without the Popkin's id; each design says so above its diagrams | None | |
 
 Settled so far:
 
@@ -271,6 +283,16 @@ Settled so far:
 | Where the saved list of My Popkins is kept | [My Popkins](popkins/my-popkins/README.md): the browser's local storage, keyed to the person, without photo addresses |
 | How many queries the list of My Popkins takes, and which threads its unread count covers | [My Popkins](popkins/my-popkins/README.md): up to nine, none per Popkin; the Everyone thread, until direct messages are built |
 | The scanner's fallback decoding library, its design-system page and what a device with no camera is shown | [Join by scanning or typing a code](invitations/join-by-code/README.md): `jsqr`, loaded on demand; `scanner.html`; the denied state and its copy |
+| Who offers a link on a call, and who gives way when both offer | [ADR 0014](../adr/0014-calls-are-a-mesh.md): the one who arrives offers; the side whose membership id sorts first gives way |
+| Whether `CallSession` has a contract and a token | [Group call](calls/group-call/README.md): no; a concrete class provided in root, with its browser parts behind `CALL_MEDIA`, `PEER_LINKS` and `SPEAKING_METER` |
+| What the call events carry, and how a signal is sent | [Group call](calls/group-call/README.md): `CallChanged` and `CallEnded` carry the Popkin's id; `SendSignal` is invoked, and a refused signal begins that link again once before the call fails |
+| What starting or joining a call sends, and what a client does after a reconnect | [Group call](calls/group-call/README.md): `{ micOn, cameraOn }`, idempotent; it posts again and calls `JoinCall` again |
+| What the call banner offers a member who is on the call | [Group call](calls/group-call/README.md): "Return"; "Join" for everyone else |
+| The "+N more" wording and who has a tile above 12 people | [Call controls](calls/call-controls/README.md): 11 people, the member always, and "{n} more on the call" |
+| The interval, level and hold of speaking detection | [Call controls](calls/call-controls/README.md): every 150 ms, 0.04 on a scale of 0 to 1, 600 ms; measured on the device only |
+| How a minimised call is heard | [Call controls](calls/call-controls/README.md): an audio element per link that belongs to no screen; tiles play pictures without sound |
+| The copy of a call that cannot be joined, the line under the list of who is on a call, and where "Leave" returns | [Group call](calls/group-call/README.md) and [Call controls](calls/call-controls/README.md): "We couldn’t connect you to the call"; "Everyone in {Popkin} is on the call." or "{n} others in {Popkin} can join anytime."; the screen the member came from, else the Popkin home |
+| The limiter of call signals | [Abuse limits](security/abuse-limits/README.md): an exact sliding log of 600 a minute per hub connection |
 
 ## Diagrams
 

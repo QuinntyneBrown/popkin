@@ -81,10 +81,10 @@ are open.
 | `ThreadRead` | fact | Read on another device | `GET …/threads/everyone` (`unreadCount`) when the thread opens; `GET /api/popkins/{popkinId}/threads` and the Popkin lists with those screens | `ThreadStore`; `UnreadTracker` when the lists exist |
 | `PresenceChanged` | state | "5 here now" and who they are | `GET /api/popkins/{popkinId}/presence` | `ThreadStore` and the Popkin home |
 | `MemberJoined` | fact | A new member: the note and the member count | The note is a message: `GET …/messages?after={id}`. The count: `GET …/threads/everyone`, read when the thread opens | `ThreadStore` ([Join a Popkin](../../invitations/join-popkin/README.md)) |
-| `CallChanged` | state | The call banner's count | `GET /api/popkins/{popkinId}/calls/current` | The banner's pages ([Group call](../../calls/group-call/README.md)) |
-| `CallEnded` | fact | The banner should be gone | The same read; `204` removes the banner | The banner's pages |
+| `CallChanged` | state | The call banner's count | `GET /api/popkins/{popkinId}/calls/current` | `CallBannerStore`, for the Popkin home and the Everyone thread ([Group call](../../calls/group-call/README.md)) |
+| `CallEnded` | fact | The banner should be gone | The same read; `204` removes the banner | `CallBannerStore` |
 | `ParticipantJoined`, `ParticipantLeft`, `ParticipantMediaChanged` | fact, fact, state | Who is on the call, and their microphone and camera | `POST …/calls`, which answers the participants, on rejoining | `CallSession` |
-| `Signal` | fact (an edge) | An offer, answer or candidate | None: a lost signal is not recovered; `CallSession` restarts negotiation with that participant | `CallSession` |
+| `Signal` | fact (an edge) | An offer, answer or candidate | None: a lost signal is not recovered; `CallSession` begins the link to that participant again once, then the call fails | `CallSession` |
 | `PhotoAdded` | fact | New photos | The album's first page and the Popkin home's photo strip | The album and home pages |
 | `MemberUpdated` | state | A member's name or photo | `GET /api/popkins/{popkinId}` | `CurrentPopkinStore` |
 | `PopkinWrappedUp` | fact | The Popkin ended; the screen should be the recap | `GET /api/popkins/{popkinId}`; `status` `wrappedUp` opens the recap | `CurrentPopkinStore` ([Time is up](../../wrap-up/time-is-up/README.md)) |

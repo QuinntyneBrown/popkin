@@ -142,8 +142,9 @@ form factors, the live Chat card and Members, and the invite dialog
 - the recap in place of the home of a wrapped-up Popkin (L2-045 AC5): journeys 9 and 10. Until
   then the home of a wrapped-up Popkin still opens;
 - `PopkinChanged` and `MemberLeft`: journeys 9, 16 and 18. No handler sends them yet;
-- the call: journey 7, Group call. "Group call" links to `/p/:popkinId/call`, and the call state
-  that `popkin-home/ongoing.html` draws is not shown;
+- the call was built in journey 7, Group call: "Group call" opens the call screen at
+  `/p/:popkinId/call`, and the home shows the banner of a call under way, read by
+  `CallBannerStore` ([Group call](../../calls/group-call/README.md));
 - My Popkins: journey 6, Come back. The bar and the rail link to `/popkins`;
 - the 300 ms wait before a skeleton shows
   ([Loading, failure and offline](../../reliability/loading-failure-offline/README.md)): the
