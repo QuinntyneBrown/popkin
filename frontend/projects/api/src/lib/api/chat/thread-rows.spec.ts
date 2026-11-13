@@ -1,0 +1,178 @@
+import { describe, expect, it } from 'vitest';
+import { MessageView } from '../../models/chat';
+import { OutboxEntry } from './message-outbox';
+import { mergeMessages, threadRows } from './thread-rows';
+
+const now = new Date(2026, 8, 12, 12, 0);
+const mara = 'm-mara';
+
+function message(
+  id: string,
+  author: string,
+  at: Date,
+  text = id,
+  extra: Partial<MessageView> = {},
+): MessageView {
+  return {
+    id,
+    threadId: 't',
+    clientMessageId: `c-${id}`,
+    kind: 'Member',
+    author: {
+      membershipId: `m-${author.toLowerCase()}`,
+      firstName: author,
+      avatar: { initials: author.slice(0, 2).toUpperCase(), accent: 'Teal', photoUrl: null },
+    },
+    text,
+    sentAt: at.toISOString(),
+    ...extra,
+  };
+}
+
+function pending(id: string, state: OutboxEntry['state'], at: Date): OutboxEntry {
+  return {
+    clientMessageId: id,
+    popkinId: 'p',
+    threadId: 't',
+    text: id,
+    state,
+    createdAt: at.toISOString(),
+  };
+}
+
+const at = (hour: number, minute = 0, day = 12) => new Date(2026, 8, day, hour, minute);
+
+describe('threadRows', () => {
+  it('names each day once, before its first message (L2-021 AC4)', () => {
+    const rows = threadRows(
+      [
+        message('a', 'Walt', at(9, 0, 11)),
+        message('b', 'Walt', at(9)),
+        message('c', 'Dev', at(10)),
+      ],
+      [],
+      mara,
+      now,
+    );
+    expect(rows.map((row) => (row.kind === 'day' ? row.label : row.kind))).toEqual([
+      'Yesterday',
+      'message',
+      'Today',
+      'message',
+      'message',
+    ]);
+  });
+
+  it('shows the name and avatar once for a run from one person (L2-021 AC2)', () => {
+    const rows = threadRows(
+      [
+        message('a', 'Walt', at(9)),
+        message('b', 'Walt', at(9, 1)),
+        message('c', 'Dev', at(9, 2)),
+        message('d', 'Walt', at(9, 3)),
+      ],
+      [],
+      mara,
+      now,
+    );
+    const leads = rows.flatMap((row) => (row.kind === 'message' ? [row.lead] : []));
+    expect(leads).toEqual([true, false, true, true]);
+  });
+
+  it('starts a run again after a note and on a new day', () => {
+    const rows = threadRows(
+      [
+        message('a', 'Walt', at(23, 0, 11)),
+        message('b', 'Walt', at(9)),
+        message('n', 'Joel', at(9, 1), 'Joel Park popped in. Say hi! 👋', {
+          kind: 'System',
+          clientMessageId: null,
+        }),
+        message('c', 'Walt', at(9, 2)),
+      ],
+      [],
+      mara,
+      now,
+    );
+    expect(rows.map((row) => (row.kind === 'message' ? row.lead : row.kind))).toEqual([
+      'day',
+      true,
+      'day',
+      true,
+      'note',
+      true,
+    ]);
+    expect(rows[4]).toMatchObject({ kind: 'note', name: 'Joel Park' });
+  });
+
+  it('marks the viewer’s own messages and gives them their time (L2-021 AC3)', () => {
+    const rows = threadRows(
+      [message('a', 'Mara', at(9, 24)), message('b', 'Walt', at(9, 25))],
+      [],
+      mara,
+      now,
+    );
+    expect(rows[1]).toMatchObject({ kind: 'message', mine: true, time: '9:24', state: 'sent' });
+    expect(rows[2]).toMatchObject({ kind: 'message', mine: false, name: 'Walt' });
+  });
+
+  it.each([
+    ['Sending', 'sending'],
+    ['Waiting', 'waiting'],
+    ['Failed', 'failed'],
+  ] as const)('puts a message that is %s last, as the viewer’s, in state %s', (state, shown) => {
+    const rows = threadRows(
+      [message('a', 'Walt', at(9))],
+      [pending('p1', state, at(9, 5))],
+      mara,
+      now,
+    );
+    expect(rows.at(-1)).toMatchObject({
+      kind: 'message',
+      mine: true,
+      state: shown,
+      clientMessageId: 'p1',
+      text: 'p1',
+    });
+  });
+
+  it('shows a message once when the server already has what the device still holds', () => {
+    const rows = threadRows(
+      [message('a', 'Mara', at(9), 'hello', { clientMessageId: 'p1' })],
+      [pending('p1', 'Sending', at(9))],
+      mara,
+      now,
+    );
+    expect(rows.filter((row) => row.kind === 'message')).toHaveLength(1);
+  });
+
+  it('names the day of a waiting message when the thread has none from that day', () => {
+    const rows = threadRows(
+      [message('a', 'Walt', at(9, 0, 11))],
+      [pending('p1', 'Waiting', at(9))],
+      mara,
+      now,
+    );
+    expect(rows.map((row) => (row.kind === 'day' ? row.label : row.kind))).toEqual([
+      'Yesterday',
+      'message',
+      'Today',
+      'message',
+    ]);
+  });
+});
+
+describe('mergeMessages', () => {
+  it('keeps the order of sending, then of id, whatever order they arrive in', () => {
+    const merged = mergeMessages(
+      [message('b', 'Walt', at(9, 1))],
+      [message('c', 'Dev', at(9, 1)), message('a', 'Dev', at(9))],
+    );
+    expect(merged.map((m) => m.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('drops a message it already shows: an echo or a repeat never doubles', () => {
+    const first = message('a', 'Walt', at(9));
+    expect(mergeMessages([first], [message('a', 'Walt', at(9))])).toHaveLength(1);
+  });
+});

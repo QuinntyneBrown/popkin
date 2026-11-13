@@ -23,19 +23,16 @@ box "Frontend — Popkin web app" #E0F2FE
   participant "Router" as router
 end box
 actor -> page : Type text without sending
-page -> drafts : set(threadId, text) on each change (debounced 300 ms, TO SUPPLY)
+page -> drafts : set(threadId, text) on each change
 actor -> router : Navigate away (Back, nav tab)
-router -> page : ngOnDestroy
-page -> drafts : set(threadId, latest text)
+router -> page : The page is destroyed; the draft is already saved
 actor -> router : Return to the thread in the same session
-router -> page : ngOnInit
+router -> page : The page opens; once the thread is read
 page -> drafts : get(threadId)
 drafts --> page : Saved text
 page --> actor : Message field holds the text (L2-028 AC4)
 opt message sent
-  page -> drafts : clear(threadId)
+  page -> drafts : set(threadId, ""), which removes the draft
 end
-opt sign out
-  drafts -> drafts : clearAll(), and OutboxStorage.clear(personId)
-end
+note over drafts : Drafts and the outbox are not cleared at sign-out yet:\nthat arrives with sign out (journey 17).
 @enduml

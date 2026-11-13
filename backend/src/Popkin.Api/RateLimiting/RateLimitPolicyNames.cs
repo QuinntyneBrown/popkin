@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -13,12 +14,16 @@ public static class RateLimitPolicyNames
     /// <summary>20 invite codes tried per address per 10 minutes (L2-053 AC3).</summary>
     public const string InviteCodes = "invite-codes";
 
+    /// <summary>60 messages per person per minute (L2-053 AC2).</summary>
+    public const string Messages = "messages";
+
     public static IServiceCollection AddPopkinRateLimits(this IServiceCollection services)
     {
         services.AddRateLimiter(options =>
         {
             options.AddPolicy(CodesPerAddress, context => PerAddress(context, permits: 10));
             options.AddPolicy(InviteCodes, context => PerAddress(context, permits: 20));
+            options.AddPolicy(Messages, PerPerson);
 
             options.OnRejected = async (context, cancellationToken) =>
             {
@@ -36,6 +41,22 @@ public static class RateLimitPolicyNames
             };
         });
         return services;
+    }
+
+    /// <summary>
+    /// Counted by the person the session names, never by an address many people may share. A
+    /// request without a session is not counted: authorization refuses it.
+    /// </summary>
+    private static RateLimitPartition<string> PerPerson(HttpContext context)
+    {
+        var personId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(personId))
+        {
+            return RateLimitPartition.GetNoLimiter("");
+        }
+
+        var clock = context.RequestServices.GetRequiredService<TimeProvider>();
+        return RateLimitPartition.Get(personId, _ => new SlidingLogRateLimiter(permitLimit: 60, TimeSpan.FromMinutes(1), clock));
     }
 
     private static RateLimitPartition<string> PerAddress(HttpContext context, int permits) =>

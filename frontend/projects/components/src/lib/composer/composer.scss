@@ -1,0 +1,74 @@
+:host {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-sticky);
+  display: block;
+  flex: none;
+  padding: var(--space-2) var(--space-3) var(--space-6);
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+  background: var(--color-bg-canvas);
+}
+
+.composer__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/*
+ * The pill of the design system's one-line field. It is as tall as that field while the text is
+ * one line and grows with it; its corners are those of the one-line pill at every height.
+ */
+.composer__field {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-1) 0 var(--space-4);
+  border: var(--border-width-thick) solid var(--color-border-strong);
+  border-radius: calc(var(--control-height-md) / 2);
+  background: var(--color-bg-surface);
+}
+
+.composer__field:focus-within {
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+/* One line fills the pill exactly; five lines are the most it shows before it scrolls. */
+.composer__input {
+  --pk-composer-pad: calc((var(--control-height-md) - 2 * var(--border-width-thick) - 1lh) / 2);
+
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-height: calc(5lh + 2 * var(--pk-composer-pad));
+  margin: 0;
+  /* At the sides, the room a browser gives the text of a one-line field. */
+  padding: var(--pk-composer-pad) var(--space-0-5);
+  border: 0;
+  background: none;
+  outline: none;
+  font: var(--text-body);
+  resize: none;
+  overflow-y: auto;
+}
+
+.composer__input::placeholder {
+  color: var(--color-fg-subtle);
+  opacity: 1;
+}
+
+/* How much of the limit is used, from near the limit on. It takes no room while it is empty. */
+.composer__count {
+  padding: 0 var(--space-12) 0 var(--space-4);
+  text-align: right;
+  font: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-fg-muted);
+}
+
+.composer__count--shown {
+  margin-top: var(--space-1);
+}

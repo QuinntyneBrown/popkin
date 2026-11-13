@@ -11,6 +11,7 @@ skill (edge-tts, burned-in captions), this page wins.
 |---|-------|---------|------------|
 | 01 | [Journey 1: Start a Popkin](01-journey-01-start-a-popkin/README.md) | 1:48 | Sign up with a code, name a Popkin while the preview follows, choose how long it lasts and get the QR code; the split screens grow from the phone to the desktop. |
 | 02 | [Journey 2: Join by invite](02-journey-02-join-by-invite/README.md) | 2:14 | Open an invite link, see what you are joining, join with a name and an optional photo, and be welcomed; the invite grows from the phone to the desktop. |
+| 03 | [Journey 3: Chat with everyone](03-journey-03-chat-with-everyone/README.md) | 2:10 | Read the Everyone thread, send a message and see one arrive live; a failed send is tried again and offline messages wait; the list and who is here now open beside the thread as the screen grows. |
 
 ## What every video is
 

@@ -33,6 +33,14 @@ public static class ApiExtensions
         response.EnsureSuccessStatusCode();
     }
 
+    /// <summary>A new person, signed up and signed in.</summary>
+    public static async Task<HttpClient> SignedUpAsync(this ApiFactory api, string name, string phone)
+    {
+        var client = api.CreateBrowserClient();
+        await client.SignUpAsync(api, name, phone);
+        return client;
+    }
+
     /// <summary>Mara signs up and starts Lakeside Weekend, Teal, for the weekend (the cast of the mocks).</summary>
     public static async Task<StartedPopkin> StartLakesideAsync(this ApiFactory api, string length = "TheWeekend")
     {

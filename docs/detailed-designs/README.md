@@ -83,7 +83,12 @@ audit [Learnings from BombRMan](../audits/learnings-from-bombrman.md), improveme
   coalesced, deduplicated by content or dropped under load. When a limit is hit, the action
   fails visibly.
 - **Sends are awaited** in the request that causes them, and every send names a group or users;
-  nothing is sent to all connections (L2-051).
+  nothing is sent to all connections (L2-051). `PresenceChanged` alone is not awaited: a
+  connection or the end of a grace period causes it, `PresenceBroadcaster` sends it, and its
+  version lets a client drop a late one.
+- **A connection that has just started is not yet in its groups**: SignalR answers the handshake
+  before `OnConnectedAsync` has finished. `reconnected$` therefore fires after every start, the
+  first included, and the screens read again.
 - **Hub failures use the ProblemDetails `code` values**, so the client branches on one
   vocabulary, and detailed hub errors are on in Development only (L2-052 AC5).
 - **The client is `@microsoft/signalr` from npm**, in `frontend/package.json`, on the release
@@ -107,6 +112,10 @@ A design that states a number names the instrument that shows it
 
 A dimension is always one of a fixed set of values; an id, an address or anything a person typed
 is never one (L2-054 AC3).
+
+Built so far: `popkin.hub.send.duration` and, beside it, `popkin.hub.send.failures`, both by
+event name (`PopkinMetrics`). The other instruments of the table, and the exporter set-up of
+ADR 0012, are not built.
 
 ## Conflicts between the mocks and the specs
 
@@ -210,7 +219,7 @@ or design that settled it.
 | 5 | Hosting of SQL Server and key management for encryption at rest ([Personal data protection](security/personal-data-protection/README.md)) | First deployment | |
 | 6 | Telemetry backend, log retention and alert thresholds ([ADR 0012](../adr/0012-opentelemetry.md)) | First deployment | |
 | 7 | Load target: concurrent connections and "normal load" ([Fast screens](reliability/fast-screens/README.md), [Live messages](chat/live-messages/README.md)) | Nothing yet; ends [ADR 0009](../adr/0009-one-api-instance.md) when it passes one instance | |
-| 8 | Whether closing a person's open hub connections at sign-out is needed ([Live messages](chat/live-messages/README.md)) | Journey 3 | |
+| 8 | Whether closing a person's open hub connections at sign-out is needed ([Live messages](chat/live-messages/README.md)) | Sign out (journey 17). Journey 3 was built without it: there is no sign-out yet, and nothing closes a connection | |
 | 9 | Photo store provider and the management of its keys ([Add photos](photos/add-photos/README.md)) | First deployment with profile photos (journey 2); journeys 5, 13 and 14 outside Development | The contract and the address scheme are settled by [Join a Popkin](invitations/join-popkin/README.md): `IPhotoStore`, with addresses the API signs and serves for one hour. The provider behind it stays open |
 | 10 | Media topology for calls, mesh or SFU, and where an SFU would run ([Group call](calls/group-call/README.md)) | Journey 7 | |
 | 11 | Media relay (STUN/TURN) provider and credential lifetime ([Group call](calls/group-call/README.md)) | Journey 7 | |
@@ -235,6 +244,13 @@ Settled so far:
 | Reconnect delays and the disconnect grace period | [Live messages](chat/live-messages/README.md) and [Group call](calls/group-call/README.md) |
 | How pure frontend logic is tested | [ADR 0011](../adr/0011-unit-tests-for-frontend-logic.md) |
 | How the hub is stubbed in tests | [ADR 0010](../adr/0010-the-hub-in-tests.md) |
+| The rule that ends a run of messages, the day labels and where the character count first shows | [Send a message to everyone](chat/send-message-to-everyone/README.md): the author, a day or a system note; "Today", "Yesterday", five weekdays, then the date; from 1,800 characters |
+| The validation library for commands | [Send a message to everyone](chat/send-message-to-everyone/README.md): none; a handler checks and throws `ProblemException` |
+| Whether a message DTO says it is the reader's own | [Send a message to everyone](chat/send-message-to-everyone/README.md): no; the client compares the author with the thread's viewer |
+| The send timeout and how long "Back online" stays | [Failed messages](chat/failed-messages/README.md): 15 seconds; 5 seconds or until dismissed |
+| The mock states of "New messages" and "Waiting to send" | `docs/mocks/pages/group-chat/new-messages.html` and `offline.html` |
+| The limiter of the `messages` policy | [Abuse limits](security/abuse-limits/README.md): an exact sliding log per person |
+| How a connection joins its Popkins' groups | [Live messages](chat/live-messages/README.md): a handler adds it from the person's memberships; no client method does |
 
 ## Diagrams
 

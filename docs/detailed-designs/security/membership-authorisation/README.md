@@ -95,10 +95,13 @@ caller's memberships ([My Popkins](../../popkins/my-popkins/README.md)).
   `UseExceptionHandler()`. It maps each exception above to its status and writes ProblemDetails
   through `IProblemDetailsService` with the `code` extension. Its `404` for
   `PopkinNotFoundException` carries no Popkin id, name or hint.
-- **`PopkinHub`** — the hub method `JoinPopkin(popkinId)` calls `RequireMemberAsync` before it
-  adds the connection to `popkin:{popkinId}`; `JoinThread` and `JoinCall` check the thread or call
-  the same way. A refused hub call throws `HubException` with the same `popkin_not_found` code.
-  Memberships that end (leave, account deletion) remove the person's connections from the groups.
+- **`PopkinHub`** — no hub method joins a group, so a client cannot ask for one. When a
+  connection opens, `ConnectToHubCommandHandler` adds it to `popkin:{popkinId}` for each Popkin
+  the person is an active member of, and to no other; `JoinPopkinCommandHandler` adds the
+  connections a new member already holds ([Live messages](../../chat/live-messages/README.md)).
+  A person who is not a member therefore receives nothing from a Popkin. The checks for a direct
+  thread and a call, and removing the connections of a membership that ends (leave, account
+  deletion), arrive with those features.
 - **Invite preview** — `InvitesController` keeps `[AllowAnonymous]` on `GET /api/invites/{code}`
   and returns `InvitePreviewDto` with only the fields L2-012 shows: inviter's first name and
   avatar, emoji, colour, name, member count, up to five avatars and the end time (L2-051 AC5).

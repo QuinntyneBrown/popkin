@@ -349,6 +349,13 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .msg__time { margin-top: var(--space-2); padding: 0 var(--space-1); font: var(--text-caption); color: var(--color-fg-subtle); }
 .msg__status { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: var(--space-1); font: var(--text-meta); color: var(--color-danger-fg); }
 .msg__status button { border: 0; background: none; padding: var(--space-2); color: inherit; font: inherit; text-decoration: underline; }
+/* Waiting for the connection: nothing went wrong, so it is not in the danger colour. */
+.msg__status--waiting { color: var(--color-fg-muted); }
+/* "New messages": floats in the middle of the thread above the composer and moves no message. */
+.thread__float { position: sticky; bottom: calc(var(--space-20) + var(--space-3)); z-index: var(--z-raised); display: flex; justify-content: center; height: 0; margin-top: calc(-1 * var(--space-3)); pointer-events: none; }
+.thread__new { position: absolute; bottom: 0; display: inline-flex; align-items: center; gap: var(--space-1-5); height: var(--target-comfortable); padding: 0 var(--space-4); border: 0; border-radius: var(--radius-full); background: var(--color-bg-inverse); color: var(--color-fg-inverse); font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans); white-space: nowrap; box-shadow: var(--shadow-2); pointer-events: auto; transition: scale var(--duration-fast) var(--ease-pop); }
+.thread__new:hover { background: var(--color-bg-inverse-hover); }
+.thread__new:active { scale: var(--scale-press); }
 .reaction { display: inline-flex; align-items: center; gap: var(--space-1); height: var(--space-7); padding: 0 var(--space-2); border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-full); background: var(--color-bg-surface); color: var(--color-fg-muted); font: var(--text-meta); }
 .reaction[aria-pressed="true"] { border: var(--border-width-thick) solid var(--color-fg-accent); background: var(--color-accent-subtle); color: var(--color-fg-accent); }
 .day-divider { align-self: center; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); background: var(--color-bg-subtle); color: var(--color-fg-muted); font: var(--font-weight-semibold) var(--font-size-xs) / var(--line-height-normal) var(--font-family-sans); margin: var(--space-2) 0; }
@@ -366,6 +373,8 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .composer__reply { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-bg-subtle); font: var(--text-body-sm); }
 .composer__reply::before { content: ""; align-self: stretch; width: var(--space-1); border-radius: var(--radius-full); background: var(--color-accent); }
 .composer__reply strong { display: block; font-weight: var(--font-weight-semibold); }
+/* How much of the 2,000 characters is used, from 1,800 on. */
+.composer__count { margin-top: var(--space-1); padding: 0 var(--space-12) 0 var(--space-4); text-align: right; font: var(--text-caption); font-variant-numeric: tabular-nums; color: var(--color-fg-muted); }
 .composer__closed { padding: var(--space-2) var(--space-3); text-align: center; font: var(--text-body-sm); color: var(--color-fg-muted); }
 
 /* ---------- Invite ------------------------------------------------------------- */

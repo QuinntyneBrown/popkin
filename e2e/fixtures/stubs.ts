@@ -7,6 +7,11 @@ import responses from './api/responses.json';
  */
 export type ApiKey = keyof typeof responses | (string & {});
 
+/** The body the recording holds for `key`; some answers, such as a 204, have none. */
+export function recordedBody<T>(key: ApiKey): T {
+  return (responses as Record<string, { status: number; body?: unknown }>)[key]?.body as T;
+}
+
 interface Answer {
   status: number;
   body?: unknown;

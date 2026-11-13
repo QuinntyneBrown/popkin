@@ -1,5 +1,6 @@
 import { test as base, expect, type Page } from '@playwright/test';
 import responses from './api/responses.json';
+import { Hub } from './hub';
 import { routes, type RouteKey, type ScreenRoute } from './routes';
 
 /** True when the target is the mocks: the sweeps' baseline render, or the parity specs' one. */
@@ -31,15 +32,20 @@ export class Pk {
 
 /**
  * ADR 0005: no test reaches the API. Every /api request is answered from the recording, and a
- * request without an answer fails the test that made it.
+ * request without an answer fails the test that made it. ADR 0010: the same holds for the hub
+ * under /hubs, which `hub` stubs for every page.
  */
-export const test = base.extend<{ pk: Pk; unanswered: string[] }>({
+export const test = base.extend<{ pk: Pk; unanswered: string[]; hub: Hub }>({
   unanswered: async ({}, use) => {
     const requests: string[] = [];
     await use(requests);
-    expect(requests, 'API requests with no recorded answer').toEqual([]);
+    expect(requests, 'API and hub requests with no answer').toEqual([]);
   },
-  page: async ({ page, unanswered }, use) => {
+  hub: async ({}, use) => {
+    await use(new Hub());
+  },
+  page: async ({ page, unanswered, hub }, use) => {
+    await hub.install(page, unanswered);
     await page.route('**/api/**', async (route) => {
       const request = route.request();
       const url = new URL(request.url());

@@ -33,18 +33,18 @@ box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
 actor -> page : Open a thread with more than 50 messages
-page -> store : load: GET .../messages?limit=50
+page -> store : open: GET .../messages
 store --> page : Latest 50, hasMore = true (L2-027 AC5)
 actor -> page : Scroll near the top
-page -> store : loadOlder()
-store -> handler : GET .../messages?before={oldestId}&limit=50
+page -> store : pk-thread reachedTop; loadEarlier(keepPlace)
+store -> handler : GET .../messages?before={oldestId}
 handler -> db : 50 messages before the cursor, ordered by SentAt, Id
 db --> handler : Page
 handler --> store : 200 MessagePageDto {items, hasMore}
-store -> page : Record scrollHeight and scrollTop
-store --> page : Prepend page
-page -> page : Restore scrollTop + height difference, so the view does not jump (L2-055 AC5)
+store -> page : keepPlace records the distance from the end of the document
+store --> page : The page is merged in above the rows on screen
+page -> page : Scroll to the same distance from the end, so the view does not jump (L2-055 AC5)
 alt request fails
-  store --> page : Inline "Couldn't load earlier messages" with Try again (TO SUPPLY: no mock state)
+  store --> page : Nothing changes; the page is asked for again the next time the top comes near
 end
 @enduml

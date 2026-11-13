@@ -1,0 +1,70 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2-5) var(--space-4);
+  border-bottom: var(--border-width-hairline) solid var(--color-info-border);
+  background: var(--color-info-bg);
+  color: var(--color-info-fg);
+  font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.banner__icon {
+  color: var(--color-info-icon);
+}
+
+:host(.banner--popkin) {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--color-fg-on-popkin);
+}
+
+:host(.banner--popkin) .banner__icon {
+  color: inherit;
+}
+
+:host(.banner--success) {
+  border-color: var(--color-success-border);
+  background: var(--color-success-bg);
+  color: var(--color-success-fg);
+}
+
+:host(.banner--success) .banner__icon {
+  color: var(--color-success-icon);
+}
+
+:host(.banner--warning) {
+  border-color: var(--color-warning-border);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-fg);
+}
+
+:host(.banner--warning) .banner__icon {
+  color: var(--color-warning-icon);
+}
+
+:host(.banner--danger) {
+  border-color: var(--color-danger-border);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-fg);
+}
+
+:host(.banner--danger) .banner__icon {
+  color: var(--color-danger-icon);
+}
+
+.banner__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.banner__text strong {
+  font-weight: var(--font-weight-bold);
+}
+
+/* The dismiss button is the 36 px icon button of the design system's banner. */
+.banner__dismiss {
+  width: var(--space-9);
+  height: var(--space-9);
+}

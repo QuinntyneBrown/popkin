@@ -21,6 +21,7 @@ box "Frontend — Popkin web app" #E0F2FE
   participant "JoinInviteState" as state
   participant "Router" as router
   participant "SignalRPopkinRealtime" as rt
+  participant "GroupChatPage\n(other member)" as chat
   participant "Toaster" as toaster
 end box
 box "Backend — Popkin API" #D1FADF
@@ -44,7 +45,9 @@ else "See the photos" (AC3)
   actor -> page : Choose
   page -> router : navigate /p/(id)/photos
 end
-hub -> rt : MemberJoined to popkin:(id)
-rt -> toaster : show(MemberJoinedToast) unless the joiner is the viewer
-toaster --> other : Info toast "Joel popped in" / "Say hi in the chat." / "Say hi", 8 s (L2-056 AC7)
+hub -> rt : MemberJoined to popkin:(id); the joiner is not in the group yet
+rt -> chat : memberJoined$, while the Everyone thread is open
+chat -> toaster : show(info, "Joel popped in", "Say hi! (wave)")
+toaster --> other : Info toast for 8 s (L2-056 AC7)
+hub -> rt : MessageAdded: the note "Joel popped in. Say hi! (wave)" joins the thread
 @enduml

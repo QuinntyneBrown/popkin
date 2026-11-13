@@ -6,9 +6,9 @@ title Components — Messages that cannot be sent
 Container_Boundary(web, "Popkin web app") {
   Component(page, "GroupChatPage / DirectMessagePage", "Angular pages", "Not sent status, Try again, Delete; pk-banner")
   Component(outbox, "MessageOutbox", "api library service", "Per-thread ordered send queue with states")
-  Component(storage, "OutboxStorage", "api library service", "IndexedDB copy of queued messages and photos")
+  Component(storage, "OutboxStorage / LocalOutboxStorage", "api library service", "localStorage copy of queued text messages; IndexedDB with photos (journey 13)")
   Component(drafts, "DraftStore", "api library service", "sessionStorage text per thread")
-  Component(net, "NetworkStatus / BrowserNetworkStatus", "api library service", "online and offline events plus hub state")
+  Component(net, "NetworkStatus / BrowserNetworkStatus", "api library service", "The browser's online and offline events")
 }
 Container_Boundary(api, "Popkin API") {
   Component(ctrl, "MessagesController", "ASP.NET Core controller", "POST messages; DELETE messages/client/{clientMessageId}")

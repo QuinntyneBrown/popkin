@@ -32,22 +32,25 @@ end box
 box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
-actor -> page : Signed-in app starts (shell app)
-page -> rt : start()
+actor -> page : Open a thread
+page -> store : open(popkinId); the thread and its latest page are read
+store -> rt : start()
 rt -> hub : POST /hubs/popkin/negotiate, then WebSocket upgrade with session cookie
-hub -> hub : [Authorize]; Origin must be the app's own origin
+hub -> hub : SameSiteRequestMiddleware: the app's own origin only; [Authorize]
 alt no valid session (L2-050 AC4)
   hub --> rt : 401
-  rt --> page : state disconnected; app follows the sign-in rules
+  rt --> page : The start fails and is tried again after 2, 10, 30 s, then every 30 s
 else valid session
-  hub -> handler : Active memberships of the PersonId
+  hub -> handler : Send ConnectToHubCommand(personId, connectionId)
   handler -> db : Membership where LeftAt is null
   db --> handler : Popkin ids
-  hub -> hub : Groups.AddToGroupAsync(connection, "popkin:{popkinId}") per Popkin
-  hub -> presence : Connected(popkinId, personId, connectionId)
-  presence --> hub : hereNow per Popkin
-  hub -> rt : PresenceChanged(popkinId, hereNow) to each popkin group
-  rt --> page : state connected; header "14 members · 5 here now" (L2-021 AC1)
+  handler -> hub : IPopkinConnections.AddToPopkinAsync(connection, popkinId) per Popkin: group "popkin:{popkinId}"
+  handler -> presence : Connect(connectionId, personId, popkinIds)
+  presence -> hub : Changed; PresenceBroadcaster sends PresenceChanged(popkinId, version, hereNow) to each popkin group
+  hub -> rt : PresenceChanged
+  rt -> store : state connected; reconnected$ after every start
+  store -> handler : Catch-up and GET /api/popkins/{popkinId}/presence
+  store --> page : Header "14 members · 5 here now" (L2-021 AC1)
 end
-note over hub : Direct-message events go to Clients.Users(personA, personB) and need no group.\nA member who joins or leaves a Popkin is added to or removed from its group by that feature's handler.
+note over hub : SignalR answers the handshake before OnConnectedAsync has finished, so a started connection is not yet in its groups:\nthe client reads again after every start.\nDirect-message events go to Clients.Users(personA, personB) and need no group.\nA member who joins a Popkin is added to its group by JoinPopkinCommandHandler.
 @enduml

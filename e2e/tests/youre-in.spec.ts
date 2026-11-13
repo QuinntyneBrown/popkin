@@ -1,6 +1,8 @@
 import responses from '../fixtures/api/responses.json';
 import { asJoel, asVisitor, inviteCode, joelJustJoined, lakesideCast } from '../fixtures/journeys';
+import { maraInTheChat } from '../fixtures/chat';
 import { expect, test } from '../fixtures/pk-test';
+import { GroupChatPage } from '../pages/group-chat.page';
 import { JoinInvitePage } from '../pages/join-invite.page';
 import { YoureInPage } from '../pages/youre-in.page';
 
@@ -43,16 +45,19 @@ test.describe('the welcome after joining', () => {
   });
 
   // L2-014 AC2
-  test('Say hi to everyone opens the Everyone thread, asking for the message field', async ({
+  test('Say hi to everyone opens the Everyone thread with focus in the message field', async ({
     page,
   }) => {
+    await maraInTheChat(page);
     await joelJustJoined(page);
     const welcome = new YoureInPage(page);
 
     await welcome.sayHi.click();
 
     await expect(page).toHaveURL(`/p/${created.id}/chat/everyone`);
-    expect(await welcome.handedOn()).toMatchObject({ focus: 'composer' });
+    const chat = new GroupChatPage(page);
+    await expect(chat.notes).toHaveText(['Joel popped in. Say hi! 👋']);
+    await expect(chat.field).toBeFocused();
   });
 
   // L2-014 AC3

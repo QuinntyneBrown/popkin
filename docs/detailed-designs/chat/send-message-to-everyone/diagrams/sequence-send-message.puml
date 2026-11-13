@@ -34,10 +34,10 @@ box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
 actor -> page : Type text; Send or Enter (Shift+Enter adds a line)
-page -> page : Field capped at 2,000 characters with a count (L2-021 AC7); Send disabled when empty (AC6)
-page -> outbox : enqueue(threadId, text, new ClientMessageId)
+page -> page : Field capped at 2,000 characters, with the count from 1,800 (L2-021 AC7); Send disabled when empty (AC6)
+page -> outbox : ThreadStore.send(text): enqueue(popkinId, threadId, text), which names it with a new ClientMessageId
 outbox --> page : Pending MessageView appended, field emptied (L2-021 AC5)
-outbox -> client : sendMessage(popkinId, threadId, {clientMessageId, text})
+outbox -> client : send(popkinId, threadId, clientMessageId, text)
 client -> controller : POST /api/popkins/{popkinId}/threads/{threadId}/messages
 controller -> controller : Authenticate, rate limiter policy "messages" (L2-053 AC2)
 alt more than 60 messages in a minute
@@ -46,29 +46,28 @@ alt more than 60 messages in a minute
   outbox --> page : Message marked Not sent; toast "Slow down a little"
 else within limit
   controller -> handler : Send SendMessageCommand
-  handler -> handler : Validator: text or photo present, text at most 2,000 (L2-052 AC1)
+  handler -> db : IMembershipGuard.RequireMemberAsync, then the ChatThread of this Popkin
+  handler -> handler : ClientMessageId given; text trimmed, not empty, at most 2,000 (L2-052 AC1)
   alt invalid
-    handler --> controller : ValidationException
-    controller --> client : 400 code message_empty or message_too_long
+    handler --> controller : ProblemException
+    controller --> client : 400 code client_message_id_required, message_empty or message_too_long, naming the field
     client --> outbox : Rejected
     outbox --> page : Message marked Not sent (see failed-messages)
   else valid
-    handler -> db : Load membership, PopkinSpace, ChatThread
-    handler -> entity : EnsureActive()
-    alt Popkin wrapped up (L2-045 AC2)
-      entity --> handler : PopkinWrappedUpException
+    handler -> db : Find Message by AuthorMembershipId and ClientMessageId
+    alt already stored (retry)
+      controller --> client : 200 the stored MessageDto, no event
+      client --> outbox : Sent
+    else Popkin wrapped up (L2-045 AC2)
+      handler --> controller : ProblemException
       controller --> client : 409 code popkin_wrapped_up
-      client --> page : Replace composer with the wrapped-up line
-    else active
-      handler -> db : Find Message by AuthorMembershipId and ClientMessageId
-      alt not stored yet
-        handler -> entity : Message.Create(thread, author, text, clientMessageId, TimeProvider)
-        handler -> db : SaveChangesAsync
-        handler -> notifier : MessageAdded to group popkin:{popkinId}
-        controller --> client : 201 MessageDto
-      else already stored (retry)
-        controller --> client : 200 existing MessageDto
-      end
+      client --> outbox : The Popkin's queue is dropped
+      outbox --> page : Thread marked read-only; the message field is disabled
+    else not stored yet
+      handler -> entity : Message.Send(threadId, authorMembershipId, text, clientMessageId, TimeProvider now)
+      handler -> db : SaveChangesAsync
+      handler -> notifier : MessageAdded to group popkin:{popkinId}
+      controller --> client : 201 MessageDto
       client --> outbox : Sent
       outbox --> page : Pending entry replaced by the stored message, on the right with its time (L2-021 AC3)
     end

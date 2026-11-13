@@ -32,23 +32,24 @@ end box
 box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
-net -> page : offline event (navigator.onLine false or hub disconnected)
+net -> page : The browser's offline event
 page --> actor : Danger banner "You're offline. Messages will send when you're back." stays until online (L2-028 AC3)
 actor -> page : Send two messages
 page -> outbox : enqueue(c2), enqueue(c3)
-outbox -> outbox : OutboxStorage.put each entry (IndexedDB, survives reload)
+outbox -> outbox : OutboxStorage.save (localStorage, survives a reload)
 outbox --> page : Both marked "Waiting to send" in order (L2-028 AC2)
-net -> outbox : backOnline$
+net -> page : backOnline$
+page -> outbox : sendWaiting(), which answers how many
 loop each Waiting entry of the thread, oldest first
-  outbox -> client : sendMessage(..., cN)
+  outbox -> client : send(..., cN)
   client -> controller : POST .../messages
   controller -> handler : SendMessageCommand
   handler -> db : Insert (or return existing)
   controller --> client : 201 or 200 MessageDto
-  client --> outbox : Sent; OutboxStorage.remove(cN)
+  client --> outbox : Sent; the entry leaves the outbox and its storage
 end
 alt a send fails again
-  outbox --> page : Entry becomes "Not sent"; the queue continues for rejected, pauses for network
+  outbox --> page : Entry becomes "Not sent"; the queue continues for rejected, holds for network and rate_limited
 end
-page --> actor : Success banner "Back online. 2 messages sent."
+page --> actor : Success banner "Back online. 2 messages sent." for 5 seconds, or until dismissed
 @enduml

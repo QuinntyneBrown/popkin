@@ -79,6 +79,15 @@ export const routes: Routes = [
     title: 'You’re in · Popkin',
   },
   {
+    path: 'p/:popkinId/chat/everyone',
+    canActivate: [signedInGuard],
+    loadComponent: () => import('./pages/group-chat/group-chat.page').then((m) => m.GroupChatPage),
+    data: data({ shell: 'app', page: 'group-chat' }),
+    title: 'Everyone · Popkin',
+  },
+  // Until the list of conversations is built (journey 11), Chat is the Everyone thread.
+  { path: 'p/:popkinId/chat', redirectTo: 'p/:popkinId/chat/everyone', pathMatch: 'full' },
+  {
     path: 'error',
     loadComponent: () =>
       import('./pages/server-error/server-error.page').then((m) => m.ServerErrorPage),

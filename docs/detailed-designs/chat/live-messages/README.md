@@ -9,7 +9,7 @@ backbone of the chat subsystem and the read-state rules that go with it.
 
 - **hub** — the SignalR endpoint `PopkinHub` at `/hubs/popkin` that keeps one connection open per signed-in browser tab
 - **group** — named set of connections that receive the same event; chat uses `popkin:{popkinId}`
-- **event** — message pushed from the API to clients: `MessageAdded`, `MessageDeleted`, `ReactionsChanged`, `ThreadRead`, `PresenceChanged`
+- **event** — message pushed from the API to clients: `MessageAdded`, `MessageDeleted`, `ReactionsChanged`, `ThreadRead`, `PresenceChanged`, `MemberJoined`
 - **state event** — event that carries the full current value and a version that only rises; an older one is dropped
 - **fact event** — event that is final and idempotent: applying it twice, or before the fact it refers to, ends in the same state
 - **recovery read** — HTTP read that gives a client the state an event would have given it
@@ -32,37 +32,39 @@ member scrolls up. Assistive technology hears each arrival politely with its sen
 - `docs/mocks/pages/group-chat/default.html` and `docs/mocks/pages/direct-message/default.html` — threads that receive live messages; the header "14 members · 5 here now".
 - `docs/mocks/pages/conversations/default.html` — unread badge and dots that rise live (L2-027 AC3).
 - `docs/mocks/notifications/banner/info.html` — "Chat 3 new" on the Popkin home.
-- `docs/mocks/notifications/banner/danger.html` — offline banner shown while the connection is down (failed-messages).
-- No mock draws the "New messages" control (L2-027 AC2) or a failed load of earlier messages; both are `<TO SUPPLY>` mock states.
+- `docs/mocks/notifications/banner/danger.html` — offline banner shown while the device is offline (failed-messages).
+- `docs/mocks/pages/group-chat/new-messages.html` — the "New messages" control above the composer while older messages are read (L2-027 AC2). A failed load of earlier messages has no state: nothing changes, and the page is asked for again the next time the top of the thread comes near.
 
 **API:**
 
-- `GET /hubs/popkin` (negotiate and WebSocket) — requires a session; 401 without one (L2-050 AC4).
-- `GET /api/popkins/{popkinId}/threads/{threadId}/messages?before={id}&limit=50` and `?after={id}&limit=50` — 200 `MessagePageDto { items, hasMore }`; 404 `popkin_not_found`, `thread_not_found`.
-- `PUT /api/popkins/{popkinId}/threads/{threadId}/read` with `{ lastReadMessageId }` — 204; 400 `message_not_found` when the message is not in the thread; 404 `thread_not_found`.
-- Hub events (server to client): `MessageAdded(MessageDto)`, `MessageDeleted(threadId, messageId)`, `ReactionsChanged(threadId, messageId, version, ReactionDto[])`, `ThreadRead(threadId)`, `PresenceChanged(popkinId, version, hereNow)`. `PhotoAdded` and the wrap-up event are owned by the photos and wrap-up designs and travel the same connection. The hub exposes no client-to-server methods for chat.
-- `GET /api/popkins/{popkinId}/presence` — 200 `{ version, hereNow }`; the recovery read of `PresenceChanged`. 404 `popkin_not_found`.
-- `GET /api/popkins/{popkinId}/threads/{threadId}/messages?from={id}&to={id}` — 200 `MessagePageDto` for the window between two messages, both included; the recovery read for messages already on screen. A deleted message is absent from it.
+- `/hubs/popkin` (negotiate and WebSocket) — requires a session; 401 without one (L2-050 AC4). Every request under `/hubs` passes the same-site check of `SameSiteRequestMiddleware`; 403 `cross_site_request` from another origin.
+- `GET /api/popkins/{popkinId}/threads/{threadId}/messages?before={id}` and `?after={id}` — 200 `MessagePageDto { items, hasMore }`, at most 50; 400 `message_not_found`, naming the cursor in `field`; 404 `popkin_not_found`, `thread_not_found`. There is no `around`.
+- `PUT /api/popkins/{popkinId}/threads/{threadId}/read` with `{ lastReadMessageId }` — 204, whether or not the read point moved; 400 `message_not_found` (field `lastReadMessageId`) when the message is not in the thread; 404 `popkin_not_found`, `thread_not_found`.
+- Hub events (server to client): `MessageAdded(MessageDto)`, `MessageDeleted(threadId, messageId)`, `ThreadRead(threadId)`, `PresenceChanged(popkinId, version, hereNow)` and `MemberJoined(popkinId, MemberJoinedDto)` (join-popkin). `ReactionsChanged(threadId, messageId, version, ReactionDto[])` arrives with react-to-message. `PhotoAdded` and the wrap-up event are owned by the photos and wrap-up designs and travel the same connection. The hub exposes no client-to-server methods for chat.
+- `GET /api/popkins/{popkinId}/presence` — 200 `{ version, hereNow, members }`; the recovery read of `PresenceChanged`. `members` names at most 8 of the members who are here now, the Host first, then in the order they joined, each as `{ membershipId, displayName, avatar }`; `hereNow` counts them all. `PresenceChanged` carries the count only, so the client reads this again when the count changes. 404 `popkin_not_found`.
+- `GET /api/popkins/{popkinId}/threads/{threadId}/messages?from={id}&to={id}` — 200 `MessagePageDto` for the window between two messages, both included, whatever its size; the recovery read for messages already on screen. A deleted message is absent from it. A `from` or a `to` alone is ignored.
 
 **Backend (Popkin API):**
 
-- **`PopkinHub`** — `[Authorize]` `Hub<IPopkinClient>` mapped at `/hubs/popkin`, authenticated by the existing session cookie. It is a transport and holds no rule: what it must decide, it asks of a MediatR request, as a controller does (`AGENTS.md`). It accepts a connection only from the app's own origin. `OnConnectedAsync` loads the caller's active memberships and adds the connection to each `popkin:{popkinId}` group, then records presence. `OnDisconnectedAsync` releases presence. A session revoked by sign-out stops the connection at the next request; closing open connections at sign-out is `<TO SUPPLY>`.
-- **`IPopkinClient`** (`Popkin.Application.Abstractions`) — one method per event, each taking DTOs from `Popkin.Application`: `MessageAdded`, `MessageDeleted`, `ReactionsChanged`, `ThreadRead`, `PresenceChanged`, and the methods the other designs add. A renamed event fails the build on the server; on the client the names live in one typed map (`hub-events.ts` in the `api` library) that `SignalRPopkinRealtime` alone reads.
+- **`PopkinHub`** — `[Authorize]` `Hub<IPopkinClient>` mapped at `/hubs/popkin`, authenticated by the existing session cookie. It is a transport and holds no rule: what it must decide, it asks of a MediatR request, as a controller does (`AGENTS.md`). It accepts a connection only from the app's own origin: `SameSiteRequestMiddleware` checks every request under `/hubs`, whatever its method. `OnConnectedAsync` sends `ConnectToHubCommand`, whose handler loads the person's active memberships, adds the connection to each `popkin:{popkinId}` group through `IPopkinConnections` and then records presence. `OnDisconnectedAsync` sends `DisconnectFromHubCommand`, which releases presence. SignalR answers the client's handshake before `OnConnectedAsync` has finished, so a connection that has just started is not yet in its groups; the client therefore reads again after every start. Closing a person's open connections at sign-out is `<TO SUPPLY>` (open decision 8); nothing closes them today.
+- **`IPopkinClient`** (`Popkin.Application.Abstractions`) — one method per event, each taking DTOs from `Popkin.Application`: `MessageAdded`, `MessageDeleted`, `ThreadRead`, `PresenceChanged` and `MemberJoined` today, and the methods the other designs add. A renamed event fails the build on the server; on the client the names live in one typed map (`hub-events.ts` in the `api` library) that `SignalRPopkinRealtime` alone reads.
 - **`PersonUserIdProvider`** — `IUserIdProvider` that returns the `PersonId` claim, so `Clients.User(personId)` reaches every tab and device of one person.
-- **`SignalRPopkinNotifier`** — implementation of `IPopkinNotifier` over `IHubContext<PopkinHub>`. Everyone events go to `popkin:{popkinId}`. Direct-thread events go to `Clients.Users(personA, personB)` only (direct-messages). `ThreadRead` goes to `Clients.User(personId)`. Joining or leaving a Popkin (invite and leave features) adds or removes the person's connections from its group through the same notifier.
-- **`PresenceTracker`** — singleton map of connection ids to Popkins. It returns the here-now count, counting a person once however many tabs they hold, and the hub broadcasts `PresenceChanged` when the count changes. It guards its map with one lock, because many connections read and write it at once. It keeps a version per Popkin that rises with every change of the count, and `PresenceChanged` carries it. A dropped connection releases presence only after a grace period of 20 seconds without a reconnect by the same person, so "here now" does not flicker with every tunnel; the grace is a timer built from `TimeProvider`. The tracker is in-process, which is correct for the one API instance of [ADR 0009](../../../adr/0009-one-api-instance.md).
-- **`MarkThreadReadCommand`** / **`MarkThreadReadCommandHandler`** — membership, `ChatThread.CanRead`, then `ThreadReadState.Advance(message, now)`, which never moves the read point backwards. When it moves, the handler sends `ThreadRead`. Marking read is allowed in a wrapped-up Popkin.
-- **`GetMessagesQueryHandler`** — keyset paging on `(SentAt, Id)` through the index `(ThreadId, SentAt, Id)`, at most 50 per page (L2-027 AC5), returning `hasMore`.
-- **Delivery budget** — the send handler notifies after `SaveChangesAsync` inside the same request; there is no queue between store and push. Meeting 1 second end to end at 100 ms latency (L2-027 AC1) is measured, not asserted in a test: the notifier records `popkin.hub.send.duration`, the time from the commit to the end of the hub send, by event name ([ADR 0012](../../../adr/0012-opentelemetry.md)). The Playwright behaviour test, with the hub stubbed ([ADR 0010](../../../adr/0010-the-hub-in-tests.md)), proves that an arriving event shows without a reload. Every send is awaited and names a group or users; a failed send is logged and counted, never dropped silently. A load target for concurrent connections is `<TO SUPPLY>`.
-- **Order of events** — two requests that commit in one order can push in the other, because the push follows the commit with no queue. The client therefore never relies on arrival order. `MessageAdded` and `MessageDeleted` are fact events: messages are ordered by `(SentAt, Id)`, not by arrival. `ReactionsChanged` and `PresenceChanged` are state events: `Message.ReactionsVersion` and the tracker's version rise with every change, and a client drops an event whose version is not above the one it holds.
+- **`SignalRPopkinNotifier`** — implementation of `IPopkinNotifier` over `IHubContext<PopkinHub, IPopkinClient>`. Everyone events go to `popkin:{popkinId}`. Direct-thread events go to `Clients.Users(personA, personB)` only (direct-messages). `ThreadRead` goes to `Clients.User(personId)`. A send that fails is logged and counted and never fails the request that caused it: what was saved stays saved, and the event's recovery read gives the same state.
+- **`IPopkinConnections`** / **`HubPopkinConnections`** — which connections are sent a Popkin's events. A handler decides it from membership and the hub's groups carry it out: `ConnectToHubCommandHandler` for a new connection, `JoinPopkinCommandHandler` for the connections a new member already holds. Removing a member's connections when they leave arrives with leave-popkin.
+- **`PresenceTracker`** (`Popkin.Application/Realtime`) — singleton that knows which people have Popkin open, per Popkin. It returns the here-now count, counting a person once however many tabs they hold. It guards its maps with one lock, because many connections read and write it at once. It keeps a version per Popkin that rises with every change of the count, and `PresenceChanged` carries it. A dropped connection releases presence only after a grace period of 20 seconds without a reconnect by the same person, so "here now" does not flicker with every tunnel; the grace is a timer built from `TimeProvider`. The tracker is in-process, which is correct for the one API instance of [ADR 0009](../../../adr/0009-one-api-instance.md).
+- **`PresenceBroadcaster`** — hosted service in the API that sends `PresenceChanged` whenever the tracker's count changes, whether a connection or the end of a grace period caused it. This send alone is not awaited by what caused it; the version lets a client drop a late one.
+- **`MarkThreadReadCommand`** / **`MarkThreadReadCommandHandler`** — membership, the thread of that Popkin, the message of that thread, then `ThreadReadState.At` for a first read point or `ThreadReadState.Advance(message, now)`, which never moves the read point backwards. "Later" is by `SentAt`, then by `Id`; two messages of the same instant compare their ids as .NET orders GUIDs. When the read point moves, the handler sends `ThreadRead`. Marking read is allowed in a wrapped-up Popkin. The unread count of a thread is the messages by others after the read point, system notes included.
+- **`GetMessagesQueryHandler`** — keyset paging on `(SentAt, Id)` through the index `(ThreadId, SentAt, Id)`, at most 50 per page (L2-027 AC5), returning `hasMore`; the window `from`…`to` is returned whole.
+- **Delivery budget** — the send handler notifies after `SaveChangesAsync` inside the same request; there is no queue between store and push. Meeting 1 second end to end at 100 ms latency (L2-027 AC1) is measured in production: the notifier records `popkin.hub.send.duration`, the time of the hub send that follows the commit, and counts `popkin.hub.send.failures`, both by event name only (`PopkinMetrics`, [ADR 0012](../../../adr/0012-opentelemetry.md)). An API test with two hub clients on the test server awaits `MessageAdded` within 1 second, in memory and so without the latency, and the Playwright behaviour test, with the hub stubbed ([ADR 0010](../../../adr/0010-the-hub-in-tests.md)), proves that an arriving event shows within 1 second without a reload. Every send names a group or users; a failed send is logged and counted, never dropped silently. A load target for concurrent connections is `<TO SUPPLY>`.
+- **Order of events** — two requests that commit in one order can push in the other, because the push follows the commit with no queue. The client therefore never relies on arrival order. `MessageAdded` and `MessageDeleted` are fact events: messages are ordered by `(SentAt, Id)`, not by arrival. `ReactionsChanged` and `PresenceChanged` are state events: `Message.ReactionsVersion` (react-to-message) and the tracker's version rise with every change, and a client drops an event whose version is not above the one it holds.
 
 **Frontend (Popkin web app, `api` library):**
 
-- **`PopkinRealtime` / `POPKIN_REALTIME` / `SignalRPopkinRealtime`** — root service that opens one `HubConnection` with `withAutomaticReconnect` once a person is signed in, and exposes `state` and one observable per event plus `reconnected$`. The reconnect delays are 0, 2, 10 and 30 seconds after each failure, then every 30 seconds without limit: people are at a campsite or in a basement venue, and a tab left open must come back by itself. The client is `@microsoft/signalr` from npm, on the release line of the server's ASP.NET Core and updated with it. It uses `invoke` where the caller needs the outcome and `send` where it does not.
-- **`ThreadStore`** — applies events for its thread. It drops an event whose `Id` or `ClientMessageId` it already shows, so the sender's own echo and a retried send never duplicate. It tracks `atBottom` from the scroll position. At the bottom it appends and keeps the latest in view; otherwise it appends without moving the view and raises `newMessagesBelow`, which the page shows as a "New messages" control that scrolls to the latest (L2-027 AC2). `loadOlder()` prepends a page and restores the scroll offset by the height added, so the view does not jump (L2-027 AC5, L2-055 AC5). `catchUp()` runs on `reconnected$`: it fetches `after` the newest shown message until `hasMore` is false, then re-fetches the loaded window (`from` its oldest to its newest message) and replaces what it shows with the answer, so a message deleted or reacted to while the connection was down is corrected. A `MessageDeleted` for a message the store does not hold is remembered by id, and a later `MessageAdded` for that id is dropped; a delete that overtakes its own message therefore leaves nothing on screen.
-- **Read point** — an `IntersectionObserver` on the last message calls `ChatApi.markRead` when the latest message is in view and the tab is visible (L2-027 AC4), at most once per message.
-- **`UnreadTracker`** — root service that keeps counts per thread and totals per Popkin from `ThreadListDto` and the Popkin lists, and applies `MessageAdded` for threads not open in a visible tab and `ThreadRead` for any thread (L2-027 AC3, AC4). The Chat tab, the Popkin home and My Popkins read it. On `reconnected$` it reloads counts from the API.
-- **Announcements** — each thread page holds a visually hidden `aria-live="polite"` region; each arriving message from someone else is announced as "{first name}: {text}", or "{first name} sent a photo" (copy `<TO SUPPLY>`) (L2-027 AC6). Messages loaded by paging or catch-up are not announced one by one; the summary for a catch-up is `<TO SUPPLY>`.
+- **`PopkinRealtime` / `POPKIN_REALTIME` / `SignalRPopkinRealtime`** — root service that opens one `HubConnection` with `withAutomaticReconnect`, and exposes `state`, one observable per event, `reconnected$`, `start()` and `stop()`. The thread page starts it when its thread opens; starting it once a person is signed in waits for the next screen that shows live state. The waits before each try are 0, 2, 10 and 30 seconds, then every 30 seconds without limit, for the first connection as for a lost one: people are at a campsite or in a basement venue, and a tab left open must come back by itself. `reconnected$` fires after every successful start, the first included, because nothing was heard before it. The client is `@microsoft/signalr` 10.x from npm, on the release line of the server's ASP.NET Core and updated with it. It uses `invoke` where the caller needs the outcome and `send` where it does not; chat calls neither.
+- **`ThreadStore`** — applies events for its thread. It drops a `MessageAdded` whose `Id` it already shows, and a pending entry gives way to the stored message with its `ClientMessageId`, so the sender's own echo and a retried send never duplicate. The page tells it whether the latest message is in view (`setLatestInView`, from `pk-thread`). With the latest in view it appends and the page scrolls to it (`added$`); otherwise it appends without moving the view and raises `newMessagesBelow`, which the page shows as a "New messages" control that scrolls to the latest (L2-027 AC2). `loadEarlier()` prepends a page inside `pk-thread`'s `keepPlace`, which keeps the view at the same distance from the end of the document, so it does not jump (L2-027 AC5, L2-055 AC5). The catch-up runs on `reconnected$`: it fetches `after` the newest shown message until `hasMore` is false, then re-fetches the loaded window (`from` its oldest to its newest message) and replaces what it shows with the answer, keeping anything newer that arrived meanwhile, so a message deleted while the connection was down is corrected. It then reads who is here. A `PresenceChanged` whose version is not above the one held is dropped; a newer one sets the count and reads `…/presence` for the members (`hereNow`). `MemberJoined` adds one to the member count. A `MessageDeleted` removes the message when the store holds it; a delete that overtakes its own `MessageAdded` is not remembered yet (see "Built in steps").
+- **Read point** — `pk-thread` watches the end of the thread with an `IntersectionObserver`. When the latest message is in view and the page is visible, `ThreadStore` calls `ChatApi.markRead` (L2-027 AC4), at most once per message, and again when a hidden page becomes visible.
+- **`UnreadTracker`** — root service that keeps a count per thread, with `forThread` and a total `forPopkin`. It takes the count of `ThreadDto.unreadCount` when a thread opens, adds one for a `MessageAdded` from another member while that thread's latest message is not in view on a visible page, and is zero on `ThreadRead` or when the thread is read here (L2-027 AC3, AC4). The Chat tab reads it; the Popkin home and My Popkins will. Taking counts from `ThreadListDto` and the Popkin lists, and reloading them on `reconnected$`, arrive with those screens.
+- **Announcements** — `pk-thread` holds a visually hidden `aria-live="polite"` region; each arriving message from someone else is announced as "{first name}: {text}" (L2-027 AC6); "{first name} sent a photo" (copy `<TO SUPPLY>`) arrives with send-photos-in-chat. A system note and the member's own message are not announced. Messages loaded by paging or catch-up are not announced one by one; no summary is announced for a catch-up, and whether one is wanted is `<TO SUPPLY>`.
 
 ### Events and their recovery reads
 
@@ -76,8 +78,9 @@ are open.
 | `MessageAdded` | fact | New messages | `GET …/messages?after={id}` | `ThreadStore.catchUp()` |
 | `MessageDeleted` | fact | A message on screen was deleted | `GET …/messages?from={id}&to={id}`, the loaded window | `ThreadStore.catchUp()` |
 | `ReactionsChanged` | state | Reactions on a message on screen | The same window read | `ThreadStore.catchUp()` |
-| `ThreadRead` | fact | Read on another device | `GET /api/popkins/{popkinId}/threads` and the Popkin lists | `UnreadTracker` |
-| `PresenceChanged` | state | "5 here now" | `GET /api/popkins/{popkinId}/presence` | `ThreadStore` and the Popkin home |
+| `ThreadRead` | fact | Read on another device | `GET …/threads/everyone` (`unreadCount`) when the thread opens; `GET /api/popkins/{popkinId}/threads` and the Popkin lists with those screens | `ThreadStore`; `UnreadTracker` when the lists exist |
+| `PresenceChanged` | state | "5 here now" and who they are | `GET /api/popkins/{popkinId}/presence` | `ThreadStore` and the Popkin home |
+| `MemberJoined` | fact | A new member: the note and the member count | The note is a message: `GET …/messages?after={id}`. The count: `GET …/threads/everyone`, read when the thread opens | `ThreadStore` ([Join a Popkin](../../invitations/join-popkin/README.md)) |
 | `CallChanged` | state | The call banner's count | `GET /api/popkins/{popkinId}/calls/current` | The banner's pages ([Group call](../../calls/group-call/README.md)) |
 | `CallEnded` | fact | The banner should be gone | The same read; `204` removes the banner | The banner's pages |
 | `ParticipantJoined`, `ParticipantLeft`, `ParticipantMediaChanged` | fact, fact, state | Who is on the call, and their microphone and camera | `POST …/calls`, which answers the participants, on rejoining | `CallSession` |
@@ -93,15 +96,43 @@ are open.
   `ApiFactory.CreateHubConnectionAsync(client)` connects a real SignalR client through the test
   server's handler on long polling, carrying the client's session cookie and
   `Sec-Fetch-Site: same-origin`. `HubEvents` in `Support/` collects events into a channel and
-  awaits the first that matches, with a timeout that fails naming the events received. The first
-  hub slice proves: a connection without a session is refused (L2-050 AC4); a person who is not
-  a member receives nothing from a Popkin (L2-051); a direct message reaches exactly two people.
-  No test sleeps.
+  awaits the first that matches, with a timeout that fails naming the events received. The hub
+  tests prove: a message reaches the other members within 1 second, and a repeated send tells
+  nobody again; a connection without a session is refused (L2-050 AC4), and so is one from
+  another origin; a person who is not a member receives nothing from a Popkin (L2-051);
+  `ThreadRead` reaches every connection of the reader and nobody else; "here now" counts a person
+  once and releases them after the grace. A direct message reaching exactly two people is proved
+  with direct-messages. The rules of `ThreadReadState` and `PresenceTracker` have direct tests in
+  `Popkin.Application.Tests`, the grace advanced with `FakeTimeProvider`. No test sleeps.
 - **Unit tests** (`api` library, [ADR 0011](../../../adr/0011-unit-tests-for-frontend-logic.md))
-  — `ThreadStore` and `UnreadTracker`: a duplicate and an echo, a delete before its add, a stale
-  state event, the window replaced after a catch-up.
+  — `ThreadStore`, `threadRows`, `UnreadTracker` and the event map: a duplicate and an echo, a
+  stale state event, the pages of a catch-up, the window replaced after it and a message that
+  arrives while it is read.
 - **Playwright** — the hub stubbed by `e2e/fixtures/hub.ts`; a spec pushes `MessageAdded` and
   sees the message, the "New messages" control or the unread count.
+
+### Built in steps
+
+Journey 3, Chat with everyone, built the hub and this design for the Everyone thread. What waits:
+
+- unread counts on the Popkin home (journey 4) and on My Popkins (journey 6): L2-027 AC3 is met
+  for the Chat tab only. With them, and with the list of conversations (journey 11),
+  `UnreadTracker` reads the counts of every thread and reloads them on `reconnected$`; today a
+  count comes from the thread that was opened;
+- starting the connection once a person is signed in: today the thread page starts it;
+- events of a direct thread, sent to two people (journey 11);
+- `ReactionsChanged` (journey 12) and a photo in the announcement (journey 13);
+- removing a member's connections from a Popkin's group when they leave (journey 18);
+- closing a person's connections at sign-out (open decision 8), with sign out (journey 17);
+- the exporter set-up of ADR 0012: the instruments `popkin.hub.send.duration` and
+  `popkin.hub.send.failures` exist on the `Popkin` meter, and nothing exports them yet.
+
+Not built, and not yet given to a journey: remembering a `MessageDeleted` that arrives before
+its `MessageAdded`. Today a message is deleted only by "Delete" on a message that was not sent
+(failed-messages), and the window read of the next catch-up removes one that slipped through.
+After a catch-up the member count of the header is not read again.
+
+The mock `group-chat/new-messages` was added for the "New messages" control.
 
 ## Requirements
 
@@ -131,7 +162,7 @@ catch-up and read state; the API reads and writes the Popkin database.
 ### Components
 
 `SignalRPopkinRealtime` connects to `PopkinHub`, which identifies users with
-`PersonUserIdProvider` and tracks `PresenceTracker`. `SignalRPopkinNotifier` sends through the hub
+`PersonUserIdProvider`; `ConnectToHubCommandHandler` records them in `PresenceTracker`. `SignalRPopkinNotifier` sends through the hub
 context. On the client, `ThreadStore` and `UnreadTracker` consume the events, and the store marks
 threads read through `MarkThreadReadCommandHandler`.
 
@@ -147,16 +178,17 @@ advances `ThreadReadState`. On the client, `SignalRPopkinRealtime` realises `Pop
 
 ### Behaviour — open the real-time connection
 
-The hub refuses a connection without a session (L2-050 AC4); otherwise it joins the caller to each
-of their Popkins' groups and publishes the here-now count.
+The hub refuses a connection without a session (L2-050 AC4); otherwise `ConnectToHubCommandHandler`
+adds the connection to each of the person's Popkins' groups, and the here-now count is published.
+The client reads again once it has started.
 
 ![Sequence diagram for opening the real-time connection](diagrams/sequence-connect.png)
 
 ### Behaviour — deliver a new message
 
 The notifier routes Everyone messages to the Popkin group and direct messages to the two people. Each
-client appends the message, shows "New messages", or raises an unread count, and announces it
-politely.
+client appends the message, shows "New messages" and raises the unread count while the latest is
+out of view, and announces it politely.
 
 ![Sequence diagram for delivering a new message](diagrams/sequence-deliver-message.png)
 
@@ -176,8 +208,9 @@ Scrolling up fetches 50 earlier messages and restores the scroll offset, so the 
 
 ### Behaviour — reconnect and catch up
 
-After a drop the client reconnects with back-off, the hub rejoins its groups, and the client runs
-the recovery read of every event for the screens that are open (the table above) before the outbox
-sends anything waiting. The diagram shows the reads for messages and counts.
+After a drop the client reconnects with back-off, the hub rejoins its groups, and the open thread
+reads again what it shows: the messages after its newest, the loaded window, and who is here. The
+outbox does not wait for it: it sends what waited when the browser reports the connection back
+(failed-messages).
 
 ![Sequence diagram for reconnecting and catching up](diagrams/sequence-reconnect-catch-up.png)

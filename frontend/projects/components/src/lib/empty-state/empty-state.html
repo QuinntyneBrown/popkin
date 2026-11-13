@@ -1,4 +1,8 @@
-<span class="empty__icon"><svg pk-icon [name]="icon()" size="xl"></svg></span>
+@if (tile(); as emoji) {
+  <span pk-popkin-tile size="xl" [emoji]="emoji"></span>
+} @else if (icon(); as name) {
+  <span class="empty__icon"><svg pk-icon [name]="name" size="xl"></svg></span>
+}
 @if (level() === 1) {
   <h1>{{ heading() }}</h1>
 } @else {

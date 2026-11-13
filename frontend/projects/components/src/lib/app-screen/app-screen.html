@@ -1,0 +1,16 @@
+<ng-content select="[slot=header]" />
+<ng-content select="[slot=banner]" />
+<main
+  id="main"
+  [class.thread]="body() !== 'plain'"
+  [class.thread--end]="body() === 'thread-end'"
+  [class.screen__body]="body() === 'plain'"
+  [attr.aria-label]="mainLabel() || null"
+  tabindex="-1"
+>
+  <ng-content />
+</main>
+<ng-content select="[slot=composer]" />
+<ng-content select="[slot=nav]" />
+<ng-content select="[slot=list]" />
+<ng-content select="[slot=detail]" />

@@ -1,0 +1,60 @@
+@if (skeleton()) {
+  @if (!mine()) {
+    <span pk-skeleton shape="circle"></span>
+  }
+  <span pk-skeleton shape="bubble" [width]="width()"></span>
+} @else {
+  @if (!mine()) {
+    @if (lead()) {
+      <span
+        pk-avatar
+        size="sm"
+        [initials]="avatar()?.initials"
+        [photo]="avatar()?.photoUrl"
+        [attr.data-accent]="avatar()?.accent"
+      ></span>
+    } @else {
+      <span class="msg__gap"></span>
+    }
+  }
+  <div class="msg__col">
+    @if (mine()) {
+      <span class="visually-hidden">You</span>
+    } @else if (lead()) {
+      <span class="msg__name">{{ name() }}</span>
+    } @else {
+      <span class="visually-hidden">{{ name() }}</span>
+    }
+    <div class="bubble" [class.bubble--failed]="state() === 'failed'">
+      <p class="bubble__text">{{ text() }}</p>
+    </div>
+    @if (mine()) {
+      @switch (state()) {
+        @case ('failed') {
+          <div class="msg__status">
+            <svg pk-icon name="alert" size="sm"></svg>
+            <span>Not sent</span>
+            <button class="msg__action" type="button" (click)="retry.emit()">Try again</button>
+            <button class="msg__action" type="button" (click)="discard.emit()">Delete</button>
+          </div>
+        }
+        @case ('waiting') {
+          <div class="msg__status msg__status--waiting">
+            <svg pk-icon name="clock" size="sm"></svg>
+            <span>Waiting to send</span>
+          </div>
+        }
+        @case ('sending') {
+          <div class="msg__meta">
+            <span class="msg__time"><span class="visually-hidden">Sending</span>&nbsp;</span>
+          </div>
+        }
+        @default {
+          <div class="msg__meta">
+            <span class="msg__time">{{ time() }}</span>
+          </div>
+        }
+      }
+    }
+  </div>
+}

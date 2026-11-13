@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace Popkin.Api.Auth;
 
 /// <summary>
-/// Same-site proof for every change (L2-050 AC2): a POST, PUT, PATCH or DELETE under /api or
-/// /hubs is accepted when `Sec-Fetch-Site` is `same-origin`, or, where a client sends no fetch
-/// metadata, when `Origin` is the app's origin (`App:Origin`) or absent. Otherwise 403
-/// `cross_site_request`. With the Strict cookie it closes cross-site request forgery.
+/// Same-site proof for every change (L2-050 AC2): a POST, PUT, PATCH or DELETE under /api, and
+/// every request under /hubs, is accepted when `Sec-Fetch-Site` is `same-origin`, or, where a
+/// client sends no fetch metadata, when `Origin` is the app's origin (`App:Origin`) or absent.
+/// Otherwise 403 `cross_site_request`. With the Strict cookie it closes cross-site request
+/// forgery. The hub is checked whatever the method, because a WebSocket opens with a GET and a
+/// browser sends its `Origin` with it: the hub accepts a connection from the app's own origin only.
 /// </summary>
 public sealed class SameSiteRequestMiddleware(RequestDelegate next, IConfiguration configuration)
 {
@@ -28,8 +30,9 @@ public sealed class SameSiteRequestMiddleware(RequestDelegate next, IConfigurati
     }
 
     private static bool IsChange(HttpRequest request) =>
-        (HttpMethods.IsPost(request.Method) || HttpMethods.IsPut(request.Method) || HttpMethods.IsPatch(request.Method) || HttpMethods.IsDelete(request.Method))
-        && (request.Path.StartsWithSegments("/api") || request.Path.StartsWithSegments("/hubs"));
+        request.Path.StartsWithSegments("/hubs")
+        || ((HttpMethods.IsPost(request.Method) || HttpMethods.IsPut(request.Method) || HttpMethods.IsPatch(request.Method) || HttpMethods.IsDelete(request.Method))
+            && request.Path.StartsWithSegments("/api"));
 
     private bool IsSameSite(HttpRequest request)
     {

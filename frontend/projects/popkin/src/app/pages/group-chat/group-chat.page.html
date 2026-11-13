@@ -1,0 +1,178 @@
+@if (state() === 'error') {
+  <div pk-screen>
+    <header
+      pk-top-bar
+      slot="header"
+      [back]="'/p/' + popkinId() + '/chat'"
+      [line]="true"
+      [sticky]="true"
+      heading="Chat"
+    ></header>
+    <div
+      pk-empty-state
+      icon="offline"
+      heading="We couldn’t load the chat"
+      text="Your messages are safe. Check your connection and try again."
+      [alert]="true"
+    >
+      <button pk-button type="button" variant="primary" size="md" (click)="reload()">
+        <svg pk-icon name="retry" size="md"></svg>Try again
+      </button>
+      <a pk-button variant="secondary" size="md" [routerLink]="['/p', popkinId(), 'chat']">
+        Back to Chat
+      </a>
+    </div>
+  </div>
+} @else {
+  <div
+    pk-app-screen
+    [accent]="accent()"
+    [body]="state() === 'loading' ? 'thread-end' : state() === 'ready' ? 'thread' : 'plain'"
+    [mainLabel]="state() === 'ready' ? 'Messages' : undefined"
+  >
+    <header
+      pk-top-bar
+      slot="header"
+      [back]="'/p/' + popkinId() + '/chat'"
+      [line]="true"
+      [sticky]="true"
+      [tile]="thread()?.emoji ?? ''"
+      [heading]="thread()?.popkinName ?? 'Chat'"
+      [sub]="sub()"
+    ></header>
+
+    @if (offline()) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="danger"
+        heading="You’re offline."
+        text="Messages will send when you’re back."
+      ></div>
+    }
+    @if (!offline() && sentOnReturn(); as count) {
+      <div
+        pk-banner
+        slot="banner"
+        variant="success"
+        heading="Back online."
+        [text]="sentMessages(count)"
+        [dismissible]="true"
+        (dismissed)="sentOnReturn.set(null)"
+      ></div>
+    }
+
+    @switch (state()) {
+      @case ('loading') {
+        <p class="visually-hidden" role="status">Loading messages…</p>
+        <div aria-hidden="true" class="stack">
+          @for (row of skeletons; track $index) {
+            <div pk-message [skeleton]="true" [mine]="row.mine" [width]="row.width"></div>
+          }
+        </div>
+      }
+      @case ('empty') {
+        <div
+          pk-empty-state
+          [tile]="thread()?.emoji"
+          heading="It’s quiet in here. For now."
+          text="Say hello, or share the QR code so your people can pop in."
+        >
+          @for (opener of openers; track opener) {
+            <button pk-chip type="button" [outline]="true" (click)="useOpener(opener)">
+              {{ opener }}
+            </button>
+          }
+        </div>
+      }
+      @case ('ready') {
+        <div
+          pk-thread
+          [newMessages]="store.newMessagesBelow()"
+          [announcement]="store.announcement()"
+          (reachedTop)="loadEarlier()"
+          (latestInView)="store.setLatestInView($event)"
+          (jump)="jumpToLatest()"
+        >
+          @for (row of store.rows(); track row.key) {
+            @switch (row.kind) {
+              @case ('day') {
+                <div pk-day-divider [label]="row.label"></div>
+              }
+              @case ('note') {
+                <p pk-system-note [name]="row.name" [text]="row.text"></p>
+              }
+              @case ('message') {
+                <div
+                  pk-message
+                  [mine]="row.mine"
+                  [lead]="row.lead"
+                  [name]="row.name"
+                  [avatar]="avatarOf(row)"
+                  [text]="row.text"
+                  [time]="row.time"
+                  [state]="row.state"
+                  (retry)="retry(row)"
+                  (discard)="discard(row)"
+                ></div>
+              }
+            }
+          }
+        </div>
+      }
+    }
+
+    @if (state() === 'ready' || state() === 'empty' || state() === 'loading') {
+      <div
+        pk-composer
+        slot="composer"
+        [(value)]="text"
+        [label]="fieldLabel()"
+        [disabled]="state() === 'loading' || !!thread()?.readOnly"
+        (send)="send($event)"
+      ></div>
+    }
+
+    @if (thread(); as thread) {
+      <nav
+        pk-popkin-nav
+        slot="nav"
+        current="chat"
+        [wide]="true"
+        [popkinId]="thread.popkinId"
+        [name]="thread.popkinName"
+        [emoji]="thread.emoji"
+        [members]="members()"
+        [timeLeft]="timeLeft()"
+        [unread]="unreadCount()"
+      ></nav>
+    }
+    @if (thread(); as thread) {
+      <aside pk-list-pane slot="list" label="Chat" heading="Chat">
+        <a
+          pk-conversation-card
+          title="Everyone"
+          [emoji]="thread.emoji"
+          [time]="latest().time"
+          [preview]="latest().preview"
+          [unread]="unreadCount() > 0"
+          [current]="true"
+          [routerLink]="['/p', thread.popkinId, 'chat', 'everyone']"
+        ></a>
+      </aside>
+    }
+    @if (thread(); as thread) {
+      <aside
+        pk-detail-pane
+        slot="detail"
+        label="About this Popkin"
+        listLabel="Here now"
+        [emoji]="thread.emoji"
+        [name]="thread.popkinName"
+        [timeLeft]="timeLeft()"
+        [people]="hereNow()"
+        [more]="others()"
+      ></aside>
+    }
+  </div>
+}

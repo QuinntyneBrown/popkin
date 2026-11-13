@@ -11,7 +11,7 @@ they can try again. It has no screen of its own; it shows through a toast.
 **rate limit** — maximum number of requests of one kind that one partition may make in one
 window
 
-**partition** — the key a rate limit counts by: the client address or the member
+**partition** — the key a rate limit counts by: the client address or the person
 
 **client address** — IP address of the person's device as seen by the Popkin API after the
 trusted reverse proxy has forwarded it. The proxy is the one of
@@ -26,7 +26,7 @@ The limits come from L2-053:
 | Policy | Partition | Limit | Window |
 |--------|-----------|-------|--------|
 | Code requests | client address | 10 | 10 minutes |
-| Messages | member (person in one Popkin) | 60 | 1 minute |
+| Messages | person | 60 | 1 minute |
 | Invite codes tried | client address | 20 | 10 minutes |
 | Call signals | hub connection | 600 | 1 minute |
 
@@ -79,10 +79,13 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
   from `Program.cs`. It configures `AddRateLimiter` with four policies:
   - `codes` — `FixedWindowRateLimiter`, `PermitLimit = 10`, `Window = 10 min`, `QueueLimit = 0`,
     partitioned by client address (L2-053 AC1).
-  - `messages` — `SlidingWindowRateLimiter`, `PermitLimit = 60`, `Window = 1 min`,
-    `SegmentsPerWindow = 6`, `QueueLimit = 0`, partitioned by `{personId}:{popkinId}` from the
-    session's claims and the route (L2-053 AC2). A sliding window stops a burst of 120 messages
-    across the boundary of two fixed windows.
+  - `messages` — `SlidingLogRateLimiter` (`Popkin.Api/RateLimiting/`), 60 permits in any one
+    minute, no queue, partitioned by the person id of the session (L2-053 AC2); a request
+    without a session is not counted, and authorisation refuses it. The limiter keeps the time
+    of each permit and reads the clock from `TimeProvider`: unlike a fixed window it cannot be
+    doubled across the boundary of two windows, and unlike the framework's segmented sliding
+    window it knows to the second when the oldest permit ages out, so `Retry-After` is exact.
+    One count per person covers every Popkin they are in.
   - `invite-codes` — `FixedWindowRateLimiter`, `PermitLimit = 20`, `Window = 10 min`,
     `QueueLimit = 0`, partitioned by client address (L2-053 AC3).
   - `address-checks` — `SlidingWindowRateLimiter`, `PermitLimit = 30`, `Window = 1 min`,
@@ -121,7 +124,8 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
   fail visibly.
 - **Measurement** — `OnRejected` and the hub filter add one to the counter
   `popkin.rate_limit.rejections`, with the policy name as its only dimension
-  ([ADR 0012](../../../adr/0012-opentelemetry.md)). The partition is never a dimension.
+  ([ADR 0012](../../../adr/0012-opentelemetry.md)). The partition is never a dimension. The
+  counter is not built yet.
 
 ### Frontend — Popkin web app
 
@@ -135,10 +139,30 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
   title "Slow down a little" and the line "You can send again {formatRetryAfter}." for messages.
   The title and line for code requests and invite codes are `<TO SUPPLY>`. A warning toast stays
   until dismissed (L2-056 AC7 treats it as a failure message).
-- **`GroupChatPage`** and **`DirectMessagePage`** — keep the text in the composer on a `429`, so
-  nothing typed is lost, and disable Send until the retry delay has passed.
+- **`GroupChatPage`** and **`DirectMessagePage`** — lose nothing typed on a `429`: the message
+  stays in the thread marked "Not sent" with "Try again" and "Delete", the queue of its thread
+  holds behind it, and the warning toast says when to send again
+  ([Failed messages](../../chat/failed-messages/README.md)). Send is not disabled for the retry
+  delay; a message sent too soon is refused again with a new delay.
 - **`VerifyCodePage`**, **`SignUpPage`**, **`SignInPage`** and **`JoinCodePage`** — show the toast
   and disable the submitting action until the retry delay has passed.
+
+### Built in steps
+
+The limits were built with the journeys that needed them, and part of this design waits:
+
+- `codes-per-address` (this design's `codes`) with sign up, journey 1; `invite-codes` with
+  joining, journey 2; `messages` with the Everyone thread, journey 3. The policies and
+  `OnRejected` are registered by `RateLimitPolicyNames.AddPopkinRateLimits`, which stands where
+  this design names `RateLimitingSetup`.
+- The values are constants there; binding them from the `RateLimits` section is not built.
+- `UseForwardedHeaders` and the `Proxy:` settings are not built
+  ([`docs/deployment.md`](../../../deployment.md)); until then the address limits count by the
+  address of the connection.
+- The counter `popkin.rate_limit.rejections` is not built.
+- The web app has no `rateLimitInterceptor` and no `formatRetryAfter`: `toApiProblem` reads
+  `retryAfterSeconds` from the answer's body and each page words the delay.
+- The call-signal limit: with the group call, journey 7.
 
 ## Requirements
 

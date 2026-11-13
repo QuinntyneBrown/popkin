@@ -1,0 +1,23 @@
+:host {
+  display: inline-grid;
+  place-items: center;
+  height: var(--space-6);
+  min-width: var(--space-6);
+  padding: 0 var(--space-1-5);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-fg-on-accent);
+  font: var(--font-weight-bold) var(--font-size-sm-plus) / 1 var(--font-family-sans);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+:host(.badge--popkin) {
+  background: var(--accent);
+  color: var(--color-fg-on-popkin);
+}
+
+:host(.badge--quiet) {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+}

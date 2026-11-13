@@ -23,32 +23,31 @@ package "web app (api library)" {
     +clientMessageId: string
     +popkinId: string
     +threadId: string
-    +text: string?
-    +photo: Blob?
-    +photoId: string?
-    +replyToMessageId: string?
+    +text: string
     +state: OutboxState
-    +failure: 'network' | 'rejected' | 'rate_limited'
-    +createdAt: number
+    +failure?: 'network' | 'rejected' | 'rate_limited'
+    +createdAt: string
   }
   class MessageOutbox {
-    +entries(threadId): Signal<OutboxEntry[]>
-    +enqueue(entry): void
+    +entries: Signal<OutboxEntry[]>
+    +sent$: Observable<MessageView>
+    +rateLimited$: Observable<number | undefined>
+    +wrappedUp$: Observable<string>
+    +forThread(threadId): OutboxEntry[]
+    +enqueue(popkinId, threadId, text): OutboxEntry
     +retry(clientMessageId): void
     +discard(clientMessageId): void
-    -flush(threadId): Promise<void>
+    +sendWaiting(): number
+    -pump(threadId): void
   }
-  class OutboxStorage {
-    +load(personId): Promise<OutboxEntry[]>
-    +put(entry): Promise<void>
-    +remove(clientMessageId): Promise<void>
-    +clear(personId): Promise<void>
+  interface OutboxStorage {
+    +load(): OutboxEntry[]
+    +save(entries): void
   }
+  class LocalOutboxStorage
   class DraftStore {
     +get(threadId): string
     +set(threadId, text): void
-    +clear(threadId): void
-    +clearAll(): void
   }
   interface NetworkStatus {
     +online: Signal<boolean>
@@ -72,13 +71,15 @@ package "Popkin.Application" {
 }
 package "Popkin.Domain" {
   class Message {
-    +Guid ClientMessageId
+    +Guid? ClientMessageId
     +Guid AuthorMembershipId
+    +DateTimeOffset? DeletedAt
   }
 }
 MessageOutbox "1" *-- "*" OutboxEntry
 OutboxEntry --> OutboxState
-MessageOutbox ..> OutboxStorage
+MessageOutbox ..> OutboxStorage : OUTBOX_STORAGE
+LocalOutboxStorage ..|> OutboxStorage
 MessageOutbox ..> NetworkStatus : NETWORK_STATUS
 BrowserNetworkStatus ..|> NetworkStatus
 SendMessageCommandHandler ..> SendMessageResult : returns

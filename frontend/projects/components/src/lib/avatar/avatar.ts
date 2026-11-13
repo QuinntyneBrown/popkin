@@ -1,5 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 
+/** What draws a person's avatar where a component is given the person: a message, a list. */
+export interface PersonAvatar {
+  initials: string;
+  /** The `data-accent` of the person's colour. */
+  accent: string;
+  photoUrl: string | null;
+}
+
 /**
  * Avatar (docs/design-system/components/avatar.html): a person's photograph, or their initials
  * on their colour. Decoration: the name beside it names the person. Set `data-accent` on it or
@@ -15,6 +23,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, signal } f
     '[class.avatar--2xs]': "size() === '2xs'",
     '[class.avatar--xs]': "size() === 'xs'",
     '[class.avatar--sm]': "size() === 'sm'",
+    '[class.avatar--36]': "size() === '36'",
     '[class.avatar--lg]': "size() === 'lg'",
     '[class.avatar--xl]': "size() === 'xl'",
     '[class.avatar--2xl]': "size() === '2xl'",
@@ -29,7 +38,8 @@ export class Avatar {
   /** The initials as the API gives them, where the name itself is not known (an invite). */
   readonly initials = input<string>();
   readonly photo = input<string | null>();
-  readonly size = input<'2xs' | 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl'>('base');
+  /** `36` is the 36 px avatar of a short row, as the design system names it. */
+  readonly size = input<'2xs' | 'xs' | 'sm' | '36' | 'base' | 'lg' | 'xl' | '2xl'>('base');
   /** A ring in the canvas colour, for avatars that overlap or sit on a picture. */
   readonly ring = input(false);
   /** No colour yet: the person has not joined, as in the photo picker. */

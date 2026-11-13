@@ -33,19 +33,21 @@ box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
 rt -> rt : Connection lost
-rt --> page : state reconnecting; offline banner when the device is offline (see failed-messages)
-loop withAutomaticReconnect delays 0, 2, 10, 30 s, then every 30 s (TO SUPPLY)
+rt --> page : state reconnecting; the offline banner shows only when the browser reports the device offline (see failed-messages)
+loop withAutomaticReconnect delays 0, 2, 10, 30 s, then every 30 s
   rt -> hub : Reconnect (new connection id)
 end
 alt session expired meanwhile
-  hub --> rt : 401; state disconnected
+  hub --> rt : 401; the start is tried again on the same waits
 else reconnected
   hub -> hub : OnConnectedAsync rejoins popkin groups and presence
   rt -> store : reconnected$
-  store -> handler : GET .../threads/{threadId}/messages?after={newestId}&limit=50 for the open thread
+  store -> handler : GET .../threads/{threadId}/messages?after={newestId} for the open thread
   handler --> store : Missed messages; repeat while hasMore
-  store -> handler : GET /api/popkins/{popkinId}/threads for fresh unread counts
-  store --> page : Missed messages appended in order, duplicates dropped by Id
-  store -> store : MessageOutbox flushes waiting messages (see failed-messages)
+  store -> handler : GET .../messages?from={oldestId}&to={newestId}, the loaded window
+  handler --> store : The window as it stands; a deleted message is absent
+  store --> page : The window replaces what is shown; anything newer that arrived meanwhile is kept
+  store -> handler : GET /api/popkins/{popkinId}/presence
+  store -> handler : PUT .../read when the latest message is in view
 end
 @enduml

@@ -1,6 +1,17 @@
 import path from 'node:path';
 import type { Locator, Page } from '@playwright/test';
 import {
+  aMessageArrivesBelow,
+  sendTheReplyToRuth,
+  theChatEmpty,
+  theChatFailing,
+  theChatLoading,
+  theChatWhoseSendsFail,
+  theChatWithManyMessages,
+  theMockChat,
+  writeTwoOffline,
+} from './chat';
+import {
   asVisitor,
   codeScreenAt24Seconds,
   howLongForLakeside,
@@ -20,6 +31,7 @@ import {
 import type { RouteKey } from './routes';
 import { answer, hold, problem } from './stubs';
 import { EndDateDialog } from '../pages/end-date.dialog';
+import { GroupChatPage } from '../pages/group-chat.page';
 import { HowLongPage } from '../pages/how-long.page';
 import { JoinInvitePage } from '../pages/join-invite.page';
 import { NameYourPopkinPage } from '../pages/name-your-popkin.page';
@@ -388,5 +400,56 @@ export const screenStates: ScreenState[] = [
     before: joelAtTheMockInvite,
     app: joinFromTheInvite,
     regions: (page) => ({ arrival: new YoureInPage(page).arrival }),
+  },
+  // The Everyone thread. Regions are the parts the mock and the app both draw: reactions,
+  // replies, photos and the composer's tools come with later journeys.
+  {
+    key: 'groupChat',
+    before: theMockChat,
+    regions: (page) => {
+      const chat = new GroupChatPage(page);
+      return {
+        titles: chat.titles,
+        dayDivider: chat.dayDividers.first(),
+        note: chat.notes.first(),
+        send: chat.send,
+      };
+    },
+  },
+  {
+    key: 'groupChatLoading',
+    before: theChatLoading,
+    regions: (page) => ({ skeletons: new GroupChatPage(page).skeletonRows }),
+  },
+  {
+    key: 'groupChatEmpty',
+    before: theChatEmpty,
+    regions: (page) => {
+      const chat = new GroupChatPage(page);
+      return { titles: chat.titles, empty: chat.empty };
+    },
+  },
+  {
+    key: 'groupChatError',
+    before: theChatFailing,
+    regions: (page) => ({ empty: new GroupChatPage(page).empty }),
+  },
+  {
+    key: 'groupChatFailedSend',
+    before: theChatWhoseSendsFail,
+    app: sendTheReplyToRuth,
+    regions: (page) => ({ titles: new GroupChatPage(page).titles }),
+  },
+  {
+    key: 'groupChatOffline',
+    before: theMockChat,
+    app: writeTwoOffline,
+    regions: (page) => ({ banner: new GroupChatPage(page).banner }),
+  },
+  {
+    key: 'groupChatNewMessages',
+    before: theChatWithManyMessages,
+    app: aMessageArrivesBelow,
+    regions: (page) => ({ titles: new GroupChatPage(page).titles }),
   },
 ];

@@ -22,6 +22,13 @@ export interface ParityCase {
   before?: (page: Page) => Promise<void>;
   /** Brings the app into the state the mock draws statically (typed values, a submitted form). */
   app?: (page: Page) => Promise<void>;
+  /**
+   * Moves the region down to the next whole pixel before it is compared. For a row of a thread:
+   * the rows above it differ between the mock and the app (the mock draws reactions and photos
+   * that later journeys build), so the same row starts at a different fraction of a pixel and
+   * the browser rounds its edges differently.
+   */
+  snap?: boolean;
   /** The widths to compare at, for a component that exists at some only; both by default. */
   widths?: readonly (typeof widths)[number][];
 }
@@ -47,6 +54,18 @@ export function parity(component: string, cases: ParityCase[]): void {
             }
             await parityCase.prepare?.(page);
             await page.evaluate(() => document.fonts.ready);
+            if (parityCase.snap) {
+              await parityCase.region(page).evaluate((element: HTMLElement) => {
+                const over = element.getBoundingClientRect().top % 1;
+                if (over === 0) return;
+                // A floating region is placed from its bottom edge; a row, after the row above.
+                if (getComputedStyle(element).position === 'absolute') {
+                  element.style.bottom = `${over - 1}px`;
+                } else {
+                  element.style.marginTop = `${1 - over}px`;
+                }
+              });
+            }
             await expect(parityCase.region(page)).toHaveScreenshot(
               `parity/${component}/${name}.png`,
             );

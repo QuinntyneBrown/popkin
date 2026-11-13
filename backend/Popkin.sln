@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Popkin.Api.Tests", "tests\P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Popkin.Cli.Tests", "tests\Popkin.Cli.Tests\Popkin.Cli.Tests.csproj", "{5CED687C-6C25-40FD-BC3E-A2055F7F0820}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Popkin.Application.Tests", "tests\Popkin.Application.Tests\Popkin.Application.Tests.csproj", "{32985B27-4635-4501-BA42-2D4296514559}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +131,18 @@ Global
 		{5CED687C-6C25-40FD-BC3E-A2055F7F0820}.Release|x64.Build.0 = Release|Any CPU
 		{5CED687C-6C25-40FD-BC3E-A2055F7F0820}.Release|x86.ActiveCfg = Release|Any CPU
 		{5CED687C-6C25-40FD-BC3E-A2055F7F0820}.Release|x86.Build.0 = Release|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Debug|x64.Build.0 = Debug|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Debug|x86.Build.0 = Debug|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Release|x64.ActiveCfg = Release|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Release|x64.Build.0 = Release|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Release|x86.ActiveCfg = Release|Any CPU
+		{32985B27-4635-4501-BA42-2D4296514559}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,5 +156,6 @@ Global
 		{65497A2A-03B1-4537-A34B-4199FCE78A24} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{A8041CD0-D548-4555-900D-D03A78B9ECA9} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{5CED687C-6C25-40FD-BC3E-A2055F7F0820} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{32985B27-4635-4501-BA42-2D4296514559} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

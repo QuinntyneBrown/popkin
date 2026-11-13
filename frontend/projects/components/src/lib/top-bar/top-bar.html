@@ -1,12 +1,28 @@
 @if (back() !== undefined) {
-  <a pk-icon-button icon="back" label="Back" size="lg" [routerLink]="back()"></a>
+  <a
+    pk-icon-button
+    class="topbar__back"
+    icon="back"
+    label="Back"
+    size="lg"
+    [routerLink]="back()"
+  ></a>
   <div class="topbar__titles">
     <div class="topbar__title">
       @if (steps() && step()) {
         <div pk-step-dots [step]="step()!" [steps]="steps()!"></div>
       }
+      @if (tile(); as emoji) {
+        <span pk-popkin-tile size="xs" [emoji]="emoji"></span>
+      }
+      @if (heading()) {
+        <h1 class="topbar__heading truncate">{{ heading() }}</h1>
+      }
       <ng-content select="[slot=title]" />
     </div>
+    @if (sub()) {
+      <div class="topbar__sub truncate">{{ sub() }}</div>
+    }
   </div>
   <div class="topbar__end"><ng-content select="[slot=end]" /></div>
 } @else {

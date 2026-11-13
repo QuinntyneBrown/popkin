@@ -1,0 +1,28 @@
+<span pk-popkin-tile size="lg" [emoji]="emoji()"></span>
+<h2 class="detail-pane__title">{{ name() }}</h2>
+@if (timeLeft()) {
+  <div class="detail-pane__time">
+    <span pk-time-left>{{ timeLeft() }}</span>
+  </div>
+}
+<h3 class="detail-pane__label">{{ listLabel() }}</h3>
+<ul class="detail-pane__list">
+  @for (person of people(); track $index) {
+    <li class="row row--short">
+      <span class="presence">
+        <span
+          pk-avatar
+          size="36"
+          [initials]="person.avatar.initials"
+          [photo]="person.avatar.photoUrl"
+          [attr.data-accent]="person.avatar.accent"
+        ></span>
+        <span class="presence__dot"></span>
+      </span>
+      <span class="row__main row__title truncate">{{ person.name }}</span>
+    </li>
+  }
+</ul>
+@if (more()) {
+  <p class="detail-pane__more">{{ more() }}</p>
+}

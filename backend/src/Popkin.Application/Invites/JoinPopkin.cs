@@ -1,8 +1,10 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Chat;
 using Popkin.Application.Photos;
 using Popkin.Application.Problems;
+using Popkin.Application.Realtime;
 using Popkin.Domain;
 
 namespace Popkin.Application.Invites;
@@ -30,8 +32,18 @@ public sealed record PhotoUpload(Stream Content, long Length);
 /// <summary>Joins the Popkin behind an invite code under a display name and, when given, a photo (L2-013).</summary>
 public sealed record JoinPopkinCommand(string Code, string? DisplayName, PhotoUpload? Photo = null) : IRequest<JoinResult>;
 
+/// <summary>Who joined, as the members with Popkin open are told (the `MemberJoined` event).</summary>
+public sealed record MemberJoinedDto(Guid MembershipId, string FirstName, AvatarDto Avatar);
+
 public sealed class JoinPopkinCommandHandler(
-    IAppDbContext db, ICurrentPerson current, TimeProvider clock, IPhotoProcessor processor, IPhotoStore photos)
+    IAppDbContext db,
+    ICurrentPerson current,
+    TimeProvider clock,
+    IPhotoProcessor processor,
+    IPhotoStore photos,
+    IPopkinNotifier notifier,
+    IPopkinConnections connections,
+    PresenceTracker presence)
     : IRequestHandler<JoinPopkinCommand, JoinResult>
 {
     public const int NamedMembers = 2;
@@ -69,9 +81,15 @@ public sealed class JoinPopkinCommandHandler(
 
         var membership = popkin.Join(current.PersonId, displayName, members[0].Id, clock.GetUtcNow());
         db.Memberships.Add(membership);
+        // Everyone is told in the thread they share, in the same unit of work as the joining
+        // and at its time (L2-014 AC4). Only a new membership writes the note.
+        var everyone = await ChatThreads.EveryoneAsync(db, popkin.Id, cancellationToken);
+        var note = Message.PoppedIn(everyone.Id, membership);
+        db.Messages.Add(note);
         if (avatar is null)
         {
             await db.SaveChangesAsync(cancellationToken);
+            await AnnounceAsync(popkin, membership, note, cancellationToken);
             return new JoinResult(Joined(popkin, membership, members), Created: true);
         }
 
@@ -90,7 +108,28 @@ public sealed class JoinPopkinCommandHandler(
             throw;
         }
 
+        await AnnounceAsync(popkin, membership, note, cancellationToken);
         return new JoinResult(Joined(popkin, membership, members), Created: true);
+    }
+
+    /// <summary>
+    /// After the save: the members are told who joined, as the group stood before the joiner
+    /// was in it, so the joiner is not told of their own joining. Then the connections the
+    /// joiner already holds start receiving the Popkin's events, the joiner is here now, and
+    /// the note goes to everyone, the joiner included.
+    /// </summary>
+    private async Task AnnounceAsync(PopkinSpace popkin, Membership membership, Message note, CancellationToken cancellationToken)
+    {
+        var avatar = AvatarDto.Of(membership, photos);
+        var held = presence.ConnectionsOf(membership.PersonId);
+        await notifier.MemberJoined(popkin.Id, new MemberJoinedDto(membership.Id, PersonName.FirstName(membership.DisplayName), avatar));
+        foreach (var connectionId in held)
+        {
+            await connections.AddToPopkinAsync(connectionId, popkin.Id, cancellationToken);
+        }
+
+        presence.Join(membership.PersonId, popkin.Id);
+        await notifier.MessageAdded(popkin.Id, MessageDto.Of(note, membership, photos));
     }
 
     private async Task<ProcessedPhoto> ReadAvatarAsync(PhotoUpload upload, CancellationToken cancellationToken)

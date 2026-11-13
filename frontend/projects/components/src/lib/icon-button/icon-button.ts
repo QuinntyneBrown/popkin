@@ -14,6 +14,7 @@ import { IconName } from '../icon/icons';
   styleUrl: './icon-button.scss',
   host: {
     class: 'icon-btn',
+    '[class.icon-btn--send]': "variant() === 'send'",
     '[attr.aria-label]': 'label()',
     '[attr.title]': 'label()',
   },
@@ -21,5 +22,7 @@ import { IconName } from '../icon/icons';
 export class IconButton {
   readonly icon = input.required<IconName>();
   readonly label = input.required<string>();
+  /** `send` is the coral button that sends a message. */
+  readonly variant = input<'plain' | 'send'>('plain');
   readonly size = input<'sm' | 'md' | 'lg' | 'base'>('base');
 }

@@ -1,4 +1,6 @@
+import { theChatEmpty, theChatFailing } from '../../fixtures/chat';
 import { inviteFailsOnTheServer, theInviteFailing } from '../../fixtures/journeys';
+import { GroupChatPage } from '../../pages/group-chat.page';
 import { JoinInvitePage } from '../../pages/join-invite.page';
 import { ServerErrorPage } from '../../pages/server-error.page';
 import { parity } from '../../fixtures/parity';
@@ -17,5 +19,17 @@ parity('empty-state', [
     name: 'invite-error',
     region: (page) => new JoinInvitePage(page).emptyState,
     before: theInviteFailing,
+  },
+  {
+    key: 'groupChatEmpty',
+    name: 'quiet-chat',
+    region: (page) => new GroupChatPage(page).empty,
+    before: theChatEmpty,
+  },
+  {
+    key: 'groupChatError',
+    name: 'chat-error',
+    region: (page) => new GroupChatPage(page).empty,
+    before: theChatFailing,
   },
 ]);

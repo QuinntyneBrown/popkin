@@ -11,7 +11,7 @@ Container_Boundary(web, "Popkin web app") {
 Container_Boundary(api, "Popkin API") {
   Component(threads, "ThreadsController", "ASP.NET Core controller", "GET /api/popkins/{popkinId}/threads/everyone")
   Component(messages, "MessagesController", "ASP.NET Core controller", "GET and POST .../threads/{threadId}/messages")
-  Component(send, "SendMessageCommandHandler", "MediatR handler", "Validates, stores, notifies")
+  Component(send, "SendMessageCommandHandler", "MediatR handler", "Checks, stores once per client message id, notifies")
   Component(guard, "IMembershipGuard", "Application abstraction", "Loads the caller's membership or 404")
   Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Sends MessageAdded to popkin group")
   ComponentDb(db, "Popkin database", "SQL Server", "ChatThread, Message, Membership")

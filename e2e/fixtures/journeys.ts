@@ -1,7 +1,7 @@
 import path from 'node:path';
 import type { Page } from '@playwright/test';
 import responses from './api/responses.json';
-import { answer, answerOnce, problem } from './stubs';
+import { answer, answerOnce, problem, recordedBody } from './stubs';
 import { JoinInvitePage } from '../pages/join-invite.page';
 import { NameYourPopkinPage } from '../pages/name-your-popkin.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
@@ -92,7 +92,7 @@ export const previewKey = `GET /api/invites/${inviteCode}`;
 export const membersKey = `GET /api/invites/${inviteCode}/members`;
 export const joinKey = `POST /api/invites/${inviteCode}/join`;
 
-const recordedPreview = responses[previewKey as keyof typeof responses].body as InvitePreview;
+const recordedPreview = recordedBody<InvitePreview>(previewKey);
 
 interface Avatar {
   initials: string;
@@ -185,7 +185,7 @@ export async function lakesideCast(page: Page, change: Partial<InvitePreview> = 
   await answer(page, joinKey, {
     status: 201,
     body: {
-      ...(responses[joinKey as keyof typeof responses].body as object),
+      ...recordedBody<object>(joinKey),
       namedMembers: ['Mara', 'Walt'],
       othersCount: 12,
     },

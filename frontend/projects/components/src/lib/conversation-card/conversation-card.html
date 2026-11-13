@@ -1,0 +1,13 @@
+<span pk-popkin-tile size="md" [emoji]="emoji()"></span>
+<span class="card__main">
+  <span class="card__top">
+    <span class="row__title row__title--display truncate">{{ title() }}</span>
+    @if (time()) {
+      <span class="card__time" [class.text-accent]="unread()">{{ time() }}</span>
+    }
+  </span>
+  <span class="row__text truncate" [class.row__text--unread]="unread()">{{ preview() }}</span>
+  @if (unread()) {
+    <span class="visually-hidden">Unread</span>
+  }
+</span>

@@ -33,7 +33,7 @@ package "Popkin.Domain" {
   class Message {
     +MessageKind Kind
     +string Text
-    +{static} PoppedIn(thread, membership, now): Message
+    +{static} PoppedIn(threadId, joiner): Message
   }
   class AvatarAccent <<static>> {
     +For(personId): PopkinColour
@@ -65,8 +65,8 @@ package "Popkin.Application" {
     +SaveAsync(stream, contentType, ct): Task<StoredPhoto>
   }
   interface IPopkinNotifier {
-    +MemberJoined(popkinId, member, ct)
-    +MessageSent(popkinId, threadId, message, ct)
+    +MemberJoined(popkinId, member)
+    +MessageAdded(popkinId, message)
   }
   class ImageSniffer <<static>> {
     +Detect(stream): ImageType?
@@ -83,9 +83,9 @@ package "Frontend (popkin app + api library)" {
     +sayHi(): void
     +seePhotos(): void
   }
-  class MemberJoinedToast
+  class GroupChatPage
   class Toaster {
-    +show(toast): void
+    +show(variant, heading, text): void
   }
   interface InvitesApi {
     +join(code, name, photo): Observable<JoinedView>
@@ -103,5 +103,5 @@ PopkinSpace "1" *-- "*" Membership
 Membership ..> AvatarAccent
 YourProfilePage --> InvitesApi
 YoureInPage ..> JoinedDto : via JoinInviteState
-Toaster ..> MemberJoinedToast : shows
+GroupChatPage ..> Toaster : "(name) popped in" on MemberJoined
 @enduml

@@ -48,8 +48,9 @@ info toast for members who have the Popkin open.
 - `GET /api/files/{key}?expires=&signature=` — anonymous; the address is the permission. It
   serves a stored photo when the signature matches and the time has not passed, else `404`
   `file_not_found` (L2-051 AC6, L2-054 AC2).
-- Real time: `MemberJoined` and `MessageSent` to group `popkin:{popkinId}`, from the first
-  change that brings the hub (see "Built in steps").
+- Real time: `MemberJoined(popkinId, { membershipId, firstName, avatar })` to group
+  `popkin:{popkinId}` as it stood before the joiner was in it, then `MessageAdded` with the
+  system message to the group, the joiner's open connections included.
 
 ### Frontend (Popkin web app)
 
@@ -88,25 +89,42 @@ info toast for members who have the Popkin open.
   The confetti burst plays only under `prefers-reduced-motion: no-preference` (AC5, L2-060).
   After a reload, with no `JoinedView` held, the page opens `/i/:code`, which sends a member to
   the Popkin home (L2-012 AC4).
-- **`MemberJoinedToast`** (`toasts/`) — shown by `Toaster` through `pk-toast` (info) when
-  `PopkinRealtime` delivers `MemberJoined` on any screen of that Popkin, except to the joiner. It
-  reads "{name} popped in", "Say hi in the chat." with action "Say hi" (opens the Everyone
-  thread) and dismisses after 8 s, pausing on hover or focus (L2-056 AC7).
+- **The "popped in" toast** — shown by `GroupChatPage` through `Toaster` and `pk-toast` (info)
+  when `PopkinRealtime` delivers `MemberJoined` for the Popkin whose Everyone thread is open.
+  The joiner is not sent the event. It reads "{first name} popped in" and "Say hi! 👋", and
+  leaves after 8 s (L2-056 AC7). The mock's line "Say hi in the chat.", its action "Say hi" and
+  the toast on the other screens of the Popkin are not built (see "Built in steps").
 - **`InvitesApi.join(code, displayName, photo)`** — `HttpInvitesApi` sends `FormData`;
   `getMembers(code)` reads who is already in.
 
 ### Built in steps
 
-Joining was built before the chat and the hub exist, so three parts of this design wait for the
-change that brings what they stand on:
+Joining was built in journey 2, before the chat and the hub existed. Journey 3, Chat with
+everyone, built the parts that waited for them:
 
-- the "popped in" system message (L2-014 AC4), `MessageSent` and the focus in the message field
-  that "Say hi to everyone" asks for (L2-014 AC2): with the Everyone thread, which adds the
-  `Message` entity. The welcome already hands on `focus: 'composer'` in the router state;
-- `MemberJoined` and the "popped in" toast: with the hub (`PopkinRealtime`);
-- the recap a member of a wrapped-up Popkin is sent to (L2-016 AC3): with wrapping up.
+- the "popped in" system message (L2-014 AC4): `Message.PoppedIn`, written in the same unit of
+  work as the membership, at `JoinedAt` and under the joiner's membership. It reads "{display
+  name} popped in. Say hi! 👋", and the thread stresses the name. Joining again writes no second
+  one. Because it is a message by another member, it counts in the other members' unread
+  counts;
+- `MemberJoined`, then `MessageAdded` with the system message. The first design called the
+  second event `MessageSent`; the event of a new message is `MessageAdded` everywhere. The
+  members are told as the group stood before the joiner was in it; the connections the joiner
+  already holds then join the Popkin's group and the joiner counts as here now;
+- the focus in the message field that "Say hi to everyone" asks for (L2-014 AC2): the group chat
+  page reads `focus: 'composer'` from the router state;
+- the "popped in" toast, from the Everyone thread.
 
-Steps 5 and 6 of `JoinPopkinCommandHandler` below are those parts.
+Still waiting:
+
+- the toast's action "Say hi" and the mock's line "Say hi in the chat.": `Toaster` shows a
+  heading and a text, and no action;
+- the toast on the other screens of a Popkin: with those screens, and with the hub connection
+  starting outside the thread ([Live messages](../../chat/live-messages/README.md));
+- the recap a member of a wrapped-up Popkin is sent to (L2-016 AC3): with wrapping up
+  (journey 9).
+
+Steps 5 and 6 of `JoinPopkinCommandHandler` below are built.
 
 ### Backend
 
@@ -127,9 +145,13 @@ Steps 5 and 6 of `JoinPopkinCommandHandler` below are those parts.
   4. calls `PopkinSpace.Join`, which adds a `Membership` with `Role = Member`, the display name,
      `JoinedAt` = now from `TimeProvider`, and `InvitedByMembershipId` = the Host's membership;
      a former member (`LeftAt` set) gets a new `Membership`;
-  5. adds `Message.PoppedIn` to the Everyone thread: `Kind = System`, text "{name} popped in.
-     Say hi! 👋", `SentAt` = `JoinedAt` (L2-014 AC4), and sets `LastActivityAt`;
-  6. saves in one unit of work, then calls `IPopkinNotifier.MemberJoined` and `MessageSent`.
+  5. adds `Message.PoppedIn` to the Everyone thread: `Kind = System`, text "{display name}
+     popped in. Say hi! 👋", `SentAt` = `JoinedAt`, authored by the joiner's membership
+     (L2-014 AC4); `PopkinSpace.Join` sets `LastActivityAt`;
+  6. saves in one unit of work, then calls `IPopkinNotifier.MemberJoined`, adds the connections
+     the joiner already holds to the Popkin's group (`IPopkinConnections`), counts the joiner as
+     here now (`PresenceTracker.Join`) and calls `IPopkinNotifier.MessageAdded` with the system
+     message.
 - **Profile photo storage** — the photo is stored through `IPhotoStore` under an avatar key and
   is not added to the album. `Membership.PhotoKey` holds that key; there is no `Photo` row for
   an avatar, which is not a photo of the Popkin.
@@ -196,7 +218,7 @@ in" note.
 
 ### Behaviour — welcome a new member
 
-The new member is greeted and offered the Everyone thread or Photos; other members receive the
-"popped in" toast.
+The new member is greeted and offered the Everyone thread or Photos; other members with the
+Everyone thread open receive the "popped in" toast, and the system message joins the thread.
 
 ![Sequence diagram for welcoming a new member](diagrams/sequence-welcome.png)

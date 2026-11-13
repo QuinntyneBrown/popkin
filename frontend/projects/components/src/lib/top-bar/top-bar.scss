@@ -25,12 +25,50 @@
   min-width: 0;
 }
 
+:host(.topbar--line) {
+  border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+:host(.topbar--sticky) {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: var(--color-bg-canvas);
+}
+
+/* The title is the screen's h1 in the type of the bar. */
+.topbar__heading {
+  font: inherit;
+}
+
+.topbar__sub {
+  font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
 .topbar__end {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-1);
   min-width: var(--target-comfortable);
+}
+
+/* From L a thread has the list of threads beside it, so its bar has no Back and sits further in. */
+@media (min-width: 64rem) {
+  :host-context(.screen--thread) {
+    padding-inline: var(--space-4);
+  }
+
+  :host-context(.screen--thread) .topbar__back {
+    display: none;
+  }
+
+  /* The head of a pane beside the thread keeps the padding of a padded bar. */
+  :host(.topbar--pad) {
+    padding-inline: var(--space-5);
+  }
 }
 
 /* In a split screen the bar sits a little lower and further in, over the form's part. */

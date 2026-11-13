@@ -14,7 +14,7 @@ hide empty members
 title Class structure — Send a message to everyone
 
 package "Popkin.Domain" {
-  enum ThreadKind {
+  enum ChatThreadKind {
     Everyone
     Direct
   }
@@ -25,43 +25,36 @@ package "Popkin.Domain" {
   class ChatThread {
     +Guid Id
     +Guid PopkinId
-    +ThreadKind Kind
-    +Guid? MemberAId
-    +Guid? MemberBId
-    +CanRead(membershipId: Guid): bool
+    +ChatThreadKind Kind
+    +DateTimeOffset CreatedAt
   }
   class Message {
     +Guid Id
     +Guid ThreadId
     +Guid AuthorMembershipId
-    +string? Text
-    +Guid? PhotoId
-    +Guid? ReplyToMessageId
-    +Guid ClientMessageId
+    +string Text
+    +Guid? ClientMessageId
     +DateTimeOffset SentAt
     +MessageKind Kind
     +DateTimeOffset? DeletedAt
-    +{static} Create(thread, author, text, clientMessageId, now): Message
+    +{static} MaxTextLength = 2000
+    +{static} Send(threadId, authorMembershipId, text, clientMessageId, now): Message
+    +{static} PoppedIn(threadId, joiner): Message
+    +Delete(now): void
   }
   class PopkinSpace {
     +Guid Id
     +string Name
     +string Emoji
     +PopkinStatus Status
-    +EnsureActive(): void
   }
 }
 package "Popkin.Application" {
   class SendMessageCommand {
     +Guid PopkinId
     +Guid ThreadId
-    +Guid ClientMessageId
+    +Guid? ClientMessageId
     +string? Text
-    +Guid? PhotoId
-    +Guid? ReplyToMessageId
-  }
-  class SendMessageCommandValidator {
-    +MaxTextLength = 2000
   }
   class SendMessageCommandHandler {
     +Handle(cmd: SendMessageCommand): Task<SendMessageResult>
@@ -70,18 +63,33 @@ package "Popkin.Application" {
     +Handle(q: GetEveryoneThreadQuery): Task<ThreadDto>
   }
   class GetMessagesQueryHandler {
+    +PageSize = 50
     +Handle(q: GetMessagesQuery): Task<MessagePageDto>
+  }
+  class ThreadDto {
+    +Guid Id
+    +Guid PopkinId
+    +ChatThreadKind Kind
+    +string PopkinName
+    +string Emoji
+    +PopkinColour Colour
+    +DateTimeOffset? EndsAt
+    +int MemberCount
+    +int HereNow
+    +long PresenceVersion
+    +bool ReadOnly
+    +int UnreadCount
+    +Guid? LastReadMessageId
+    +ThreadViewerDto Viewer
   }
   class MessageDto {
     +Guid Id
-    +Guid ClientMessageId
-    +AuthorDto Author
-    +string? Text
-    +string? PhotoUrl
-    +QuoteDto? Quote
-    +ReactionDto[] Reactions
+    +Guid ThreadId
+    +Guid? ClientMessageId
+    +MessageKind Kind
+    +MessageAuthorDto Author
+    +string Text
     +DateTimeOffset SentAt
-    +bool IsMine
   }
   interface IMembershipGuard
   interface IPopkinNotifier
@@ -89,43 +97,47 @@ package "Popkin.Application" {
 }
 package "Popkin.Api" {
   class MessagesController {
-    +Get(popkinId, threadId, before?, after?, limit): MessagePageDto
-    +Post(popkinId, threadId, body): MessageDto
+    +Get(popkinId, threadId, before?, after?, from?, to?, limit?): MessagePageDto
+    +Send(popkinId, threadId, request): MessageDto
+    +Discard(popkinId, threadId, clientMessageId): 204
   }
   class ThreadsController {
     +GetEveryone(popkinId): ThreadDto
+    +MarkRead(popkinId, threadId, request): 204
   }
 }
 package "web app (popkin, api, components)" {
   class GroupChatPage {
-    +thread: Signal<ThreadView>
-    +messages: Signal<MessageView[]>
+    +text: Signal<string>
     +send(text: string): void
-    +useOpener(text: string): void
+    +useOpener(opener: string): void
   }
   class ThreadStore {
-    +items: Signal<MessageView[]>
-    +load(popkinId, threadId): void
-    +loadOlder(): void
+    +thread: Signal<ThreadView | null>
+    +rows: Signal<ThreadRow[]>
+    +state: Signal<ThreadState>
+    +open(popkinId): void
+    +send(text): void
+    +loadEarlier(): Promise<void>
   }
   interface ChatApi {
-    +getEveryoneThread(popkinId): Observable<ThreadView>
-    +getMessages(popkinId, threadId, cursor): Observable<MessagePageView>
-    +sendMessage(popkinId, threadId, req): Observable<MessageView>
+    +getEveryone(popkinId): Observable<ThreadView>
+    +getMessages(popkinId, threadId, cursor?): Observable<MessagePageView>
+    +send(popkinId, threadId, clientMessageId, text): Observable<MessageView>
   }
   class HttpChatApi
 }
 ChatThread "1" *-- "*" Message : holds
-ChatThread --> ThreadKind
+ChatThread --> ChatThreadKind
 Message --> MessageKind
 SendMessageCommandHandler ..> SendMessageCommand : handles
-SendMessageCommandValidator ..> SendMessageCommand : validates
 SendMessageCommandHandler ..> IMembershipGuard
 SendMessageCommandHandler ..> IAppDbContext
 SendMessageCommandHandler ..> IPopkinNotifier
-SendMessageCommandHandler ..> PopkinSpace : EnsureActive
+SendMessageCommandHandler ..> PopkinSpace : reads Status
 SendMessageCommandHandler --> Message : creates
 SendMessageCommandHandler ..> MessageDto : returns
+GetEveryoneThreadQueryHandler ..> ThreadDto : returns
 MessagesController ..> SendMessageCommandHandler : MediatR
 MessagesController ..> GetMessagesQueryHandler : MediatR
 ThreadsController ..> GetEveryoneThreadQueryHandler : MediatR

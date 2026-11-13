@@ -16,5 +16,5 @@ Rel(others, spa, "Use", "HTTPS")
 Rel(spa, api, "Joins", "multipart/form-data over HTTPS")
 Rel(api, store, "Stores the photo")
 Rel(api, db, "Inserts membership and system message", "EF Core")
-Rel(api, spa, "Pushes MemberJoined and MessageSent", "SignalR")
+Rel(api, spa, "Pushes MemberJoined and MessageAdded", "SignalR")
 @enduml

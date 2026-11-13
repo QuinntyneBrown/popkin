@@ -1,0 +1,37 @@
+<a class="popkin-nav__exit" routerLink="/popkins" aria-label="Your Popkins">
+  <svg pk-icon name="back" size="md"></svg>
+  <span aria-hidden="true">Your Popkins</span>
+</a>
+<div class="popkin-nav__id">
+  <div class="popkin-nav__id-row">
+    <span pk-popkin-tile size="md" [emoji]="emoji()"></span>
+    <div class="popkin-nav__id-text">
+      <strong class="truncate">{{ name() }}</strong>{{ members() }}
+    </div>
+  </div>
+  @if (timeLeft()) {
+    <span pk-time-left class="popkin-nav__time">{{ timeLeft() }}</span>
+  }
+</div>
+<ul class="popkin-nav__tabs">
+  @for (tab of tabs(); track tab.key) {
+    <li>
+      <a
+        class="popkin-nav__tab"
+        [routerLink]="tab.link"
+        [attr.aria-current]="tab.key === current() ? 'page' : null"
+      >
+        <svg pk-icon class="popkin-nav__icon" [name]="tab.icon"></svg>
+        <span>{{ tab.label }}</span>
+        @if (tab.key === 'chat' && unread() > 0) {
+          <span
+            pk-badge
+            class="popkin-nav__badge"
+            [count]="unread()"
+            [label]="unreadLabel()"
+          ></span>
+        }
+      </a>
+    </li>
+  }
+</ul>

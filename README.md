@@ -29,7 +29,11 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > (1 min 48 s, with sound). Journey 2, Join by invite, is built too: open an invite link, see
 > what you are joining, join with a name and an optional photo, and be welcomed.
 > [Watch it](docs/videos/02-journey-02-join-by-invite/02-journey-02-join-by-invite.mp4)
-> (2 min 14 s, with sound). The journeys still to build are in
+> (2 min 14 s, with sound). Journey 3, Chat with everyone, is built as well: members read the
+> Everyone thread by day, send messages that reach the others as they are sent, and keep a
+> message that cannot be sent, marked "Not sent" or "Waiting to send".
+> [Watch it](docs/videos/03-journey-03-chat-with-everyone/03-journey-03-chat-with-everyone.mp4)
+> (2 min 10 s, with sound). The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents
@@ -49,9 +53,9 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 
 | Part | Technology | Responsibility |
 |---|---|---|
-| `backend/` | .NET 10, ASP.NET Core, EF Core, MediatR | The data and the rules, behind an HTTP API |
+| `backend/` | .NET 10, ASP.NET Core, SignalR, EF Core, MediatR | The data and the rules, behind an HTTP API and the hub that carries live updates |
 | `frontend/` | Angular 22, Angular CDK | The app (`popkin`), service contracts (`api`) and `pk-*` UI atoms (`components`) |
-| `e2e/` | Playwright (Chromium) | Behaviour tests against the app, with every `/api` request answered from a recording |
+| `e2e/` | Playwright (Chromium) | Behaviour tests against the app, with every `/api` request answered from a recording and the hub stubbed |
 | `docs/` | Markdown, HTML, PlantUML | Requirements, mocks, design system, detailed designs and architecture decisions |
 
 The backend layers depend in one direction only: `Domain` ← `Application` ← `Infrastructure` ←
@@ -103,11 +107,15 @@ python3.12 -m venv .cache/video-venv
    ```
 
 3. In a second terminal, start the app and open `http://localhost:4200`. The development server
-   sends `/api` to the API.
+   sends `/api` and `/hubs` to the API.
 
    ```shell
    npm start --prefix frontend
    ```
+
+With the two running, chat works locally: start a Popkin, open its invite link in a second
+browser profile, join, and each side sees the other's messages in the Everyone thread as they
+are sent.
 
 ### The database and the `popkin` tool
 
@@ -147,11 +155,14 @@ proxy and the release steps are in [`docs/deployment.md`](docs/deployment.md).
 | Print a video's schedule, or save one frame | `node tools/video-build/build.mjs docs/videos/<folder> --check` (or `--frame <seconds> <png>`) | repository root |
 | Render a video (MP4; `--captions` burns captions in) | `node tools/video-build/build.mjs docs/videos/<folder>` | repository root |
 
-- The backend tests run on EF Core InMemory and need no database.
+- The backend tests run on EF Core InMemory and need no database. The hub's tests connect a
+  SignalR client to the test server in memory
+  ([ADR 0010](docs/adr/0010-the-hub-in-tests.md)).
 - The end-to-end suite runs in Chromium only; run `npx playwright install chromium` in `e2e/`
   once. It starts the app by itself, or uses the one already running, and never reaches the API:
   every `/api` request is answered from the recorded responses in
-  `e2e/fixtures/api/responses.json` ([ADR 0005](docs/adr/0005-tests-without-a-backend-or-database.md)).
+  `e2e/fixtures/api/responses.json` ([ADR 0005](docs/adr/0005-tests-without-a-backend-or-database.md)),
+  and the hub is stubbed by `e2e/fixtures/hub.ts`.
 - `npm test` runs the behaviour specs only
   ([ADR 0006](docs/adr/0006-behaviour-tests-only-by-default.md)). The sweeps render the mocks in
   `docs/mocks` to screenshots, then compare the app with them region by region. CI never runs the

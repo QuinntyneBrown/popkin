@@ -4,7 +4,8 @@
  * the same change. It is maintenance, never part of a test run.
  *
  * The journey below is the cast of the mocks: Mara signs up and starts Lakeside Weekend, Walt
- * and Dev join it, and Joel opens its invite and joins. Each answer is keyed
+ * and Dev join it, Joel opens its invite and joins, and Walt and Mara write in the Everyone
+ * thread. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -96,7 +97,7 @@ await call('GET', `/api/popkins/${created.id}/invite`);
 
 // Invitations: Walt and Dev join, then Joel opens the invite as a visitor, signs up and joins.
 const invite = `/api/invites/${created.inviteCode}`;
-await signUp('Walt Brennan', '(415) 555-0177');
+const walt = await signUp('Walt Brennan', '(415) 555-0177');
 await call('POST', `${invite}/join`, joinForm('Walt Brennan'));
 await signUp('Dev Patel', '(415) 555-0162');
 await call('POST', `${invite}/join`, joinForm('Dev Patel'));
@@ -105,6 +106,30 @@ await call('GET', invite);
 await signUp('Joel', '(415) 555-0123', true);
 await call('GET', `${invite}/members`);
 await call('POST', `${invite}/join`, joinForm('Joel'));
+
+// Chat: Walt writes to everyone; Mara opens the Everyone thread, reads it, answers and is told
+// who is here. Nobody holds a hub connection while this runs, so nobody is here now.
+person = walt;
+const everyone = await call('GET', `/api/popkins/${created.id}/threads/everyone`);
+const messages = `/api/popkins/${created.id}/threads/${everyone.id}/messages`;
+await call('POST', messages, {
+  clientMessageId: '7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e01',
+  text: 'Pancakes at the main cabin, 8:30. Bring an appetite.',
+});
+person = mara;
+await call('GET', `/api/popkins/${created.id}/threads/everyone`);
+const page = await call('GET', messages);
+// What the app reads once its hub connection is up: anything newer, then the window it shows.
+await call('GET', `${messages}?after=${page.items.at(-1).id}`);
+await call('GET', `${messages}?from=${page.items[0].id}&to=${page.items.at(-1).id}`);
+await call('PUT', `/api/popkins/${created.id}/threads/${everyone.id}/read`, {
+  lastReadMessageId: page.items.at(-1).id,
+});
+await call('POST', messages, {
+  clientMessageId: '7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e02',
+  text: 'On it! Also: last call for the canoe sign-up 🛶',
+});
+await call('GET', `/api/popkins/${created.id}/presence`);
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

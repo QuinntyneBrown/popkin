@@ -21,72 +21,114 @@ package "Popkin.Api" {
   class PersonUserIdProvider {
     +GetUserId(connection): string
   }
-  class PresenceTracker {
-    +Connected(popkinId, personId, connectionId): int
-    +Disconnected(connectionId): (Guid popkinId, int hereNow)[]
-    +HereNow(popkinId): int
-  }
+  class HubPopkinConnections
+  class PresenceBroadcaster
   class SignalRPopkinNotifier {
-    +MessageAdded(thread, dto): Task
-    +MessageDeleted(thread, messageId): Task
-    +ReactionsChanged(thread, messageId, summary): Task
+    +MessageAdded(popkinId, message): Task
+    +MessageDeleted(popkinId, threadId, messageId): Task
     +ThreadRead(personId, threadId): Task
+    +PresenceChanged(popkinId, version, hereNow): Task
+    +MemberJoined(popkinId, member): Task
   }
 }
 package "Popkin.Application" {
   interface IPopkinNotifier
+  interface IPopkinClient
+  interface IPopkinConnections {
+    +AddToPopkinAsync(connectionId, popkinId, ct): Task
+  }
+  class ConnectToHubCommandHandler
+  class DisconnectFromHubCommandHandler
+  class PresenceTracker {
+    +{static} Grace = 20 s
+    +Changed: event
+    +Connect(connectionId, personId, popkinIds): void
+    +Join(personId, popkinId): void
+    +Disconnect(connectionId): void
+    +Get(popkinId): PresenceSnapshot
+    +PeopleHere(popkinId): Guid[]
+    +ConnectionsOf(personId): string[]
+  }
+  class PopkinMetrics {
+    +HubSent(eventName, duration): void
+    +HubSendFailed(eventName): void
+  }
   class MarkThreadReadCommand {
     +Guid PopkinId
     +Guid ThreadId
-    +Guid LastReadMessageId
+    +Guid? LastReadMessageId
   }
   class MarkThreadReadCommandHandler
   class GetMessagesQuery {
     +Guid? Before
     +Guid? After
-    +int Limit = 50
+    +Guid? From
+    +Guid? To
+    +int? Limit
   }
+  class GetPresenceQueryHandler
 }
 package "Popkin.Domain" {
   class ThreadReadState {
     +Guid ThreadId
     +Guid MembershipId
-    +Guid? LastReadMessageId
-    +DateTimeOffset LastReadAt
-    +Advance(message, now): void
+    +Guid LastReadMessageId
+    +DateTimeOffset LastReadSentAt
+    +DateTimeOffset UpdatedAt
+    +{static} At(membershipId, message, now): ThreadReadState
+    +Advance(message, now): bool
   }
 }
 package "web app (popkin, api, components)" {
   interface PopkinRealtime {
-    +state: Signal<'connected' | 'reconnecting' | 'disconnected'>
+    +state: Signal<'disconnected' | 'connecting' | 'connected' | 'reconnecting'>
     +messageAdded$: Observable<MessageView>
-    +messageDeleted$: Observable<MessageDeletedEvent>
-    +reactionsChanged$: Observable<ReactionsChangedEvent>
-    +threadRead$: Observable<ThreadReadEvent>
-    +presenceChanged$: Observable<PresenceEvent>
+    +messageDeleted$: Observable<{threadId, messageId}>
+    +threadRead$: Observable<string>
+    +presenceChanged$: Observable<{popkinId, version, hereNow}>
+    +memberJoined$: Observable<{popkinId, member}>
     +reconnected$: Observable<void>
+    +start(): void
+    +stop(): void
   }
   class SignalRPopkinRealtime
   class ThreadStore {
-    +atBottom: Signal<boolean>
-    +newMessagesBelow: Signal<number>
-    +loadOlder(): void
-    +catchUp(): void
-    +markReadIfLatestInView(): void
+    +rows: Signal<ThreadRow[]>
+    +newMessagesBelow: Signal<boolean>
+    +announcement: Signal<string>
+    +hereNow: Signal<PresenceMember[]>
+    +added$: Observable<'mine' | 'theirs'>
+    +loadEarlier(within): Promise<void>
+    +setLatestInView(inView): void
+    -catchUp(): void
+    -reportRead(): void
   }
   class UnreadTracker {
-    +counts: Signal<Map<threadId, number>>
-    +popkinTotals: Signal<Map<popkinId, number>>
+    +set(thread): void
+    +setReading(threadId, reading): void
+    +read(threadId): void
+    +forThread(threadId): number
+    +forPopkin(popkinId): number
   }
 }
 SignalRPopkinNotifier ..|> IPopkinNotifier
-SignalRPopkinNotifier ..> PopkinHub : IHubContext
-PopkinHub ..> PresenceTracker
+SignalRPopkinNotifier ..> PopkinHub : IHubContext<PopkinHub, IPopkinClient>
+SignalRPopkinNotifier ..> PopkinMetrics
+HubPopkinConnections ..|> IPopkinConnections
+PopkinHub ..> ConnectToHubCommandHandler : MediatR
+PopkinHub ..> DisconnectFromHubCommandHandler : MediatR
 PopkinHub ..> PersonUserIdProvider
+ConnectToHubCommandHandler ..> IPopkinConnections
+ConnectToHubCommandHandler ..> PresenceTracker : Connect
+DisconnectFromHubCommandHandler ..> PresenceTracker : Disconnect
+PresenceBroadcaster ..> PresenceTracker : Changed
+PresenceBroadcaster ..> IPopkinNotifier : PresenceChanged
+GetPresenceQueryHandler ..> PresenceTracker
 MarkThreadReadCommandHandler ..> MarkThreadReadCommand : handles
 MarkThreadReadCommandHandler ..> ThreadReadState : Advance
 MarkThreadReadCommandHandler ..> IPopkinNotifier : ThreadRead
 SignalRPopkinRealtime ..|> PopkinRealtime
 ThreadStore ..> PopkinRealtime : POPKIN_REALTIME
+ThreadStore ..> UnreadTracker
 UnreadTracker ..> PopkinRealtime : POPKIN_REALTIME
 @enduml
