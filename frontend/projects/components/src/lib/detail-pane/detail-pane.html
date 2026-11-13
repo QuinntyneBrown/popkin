@@ -1,28 +1,51 @@
-<span pk-popkin-tile size="lg" [emoji]="emoji()"></span>
-<h2 class="detail-pane__title">{{ name() }}</h2>
-@if (timeLeft()) {
-  <div class="detail-pane__time">
-    <span pk-time-left>{{ timeLeft() }}</span>
-  </div>
-}
-<h3 class="detail-pane__label">{{ listLabel() }}</h3>
-<ul class="detail-pane__list">
-  @for (person of people(); track $index) {
-    <li class="row row--short">
-      <span class="presence">
-        <span
-          pk-avatar
-          size="36"
-          [initials]="person.avatar.initials"
-          [photo]="person.avatar.photoUrl"
-          [attr.data-accent]="person.avatar.accent"
-        ></span>
-        <span class="presence__dot"></span>
-      </span>
-      <span class="row__main row__title truncate">{{ person.name }}</span>
-    </li>
+@if (person(); as avatar) {
+  <span
+    pk-avatar
+    size="xl"
+    [initials]="avatar.initials"
+    [photo]="avatar.photoUrl"
+    [attr.data-accent]="avatar.accent"
+  ></span>
+  <h2 class="detail-pane__title">{{ name() }}</h2>
+  <p class="detail-pane__place">
+    In <span class="detail-pane__emoji" aria-hidden="true">{{ emoji() }}</span> {{ place() }}
+  </p>
+  <div class="detail-pane__action"><ng-content select="[slot=action]" /></div>
+  @if (shared().length) {
+    <h3 class="detail-pane__label">{{ listLabel() }}</h3>
+    <div class="detail-pane__shared">
+      @for (photo of shared(); track $index) {
+        <img [src]="photo" alt="" />
+      }
+    </div>
   }
-</ul>
-@if (more()) {
-  <p class="detail-pane__more">{{ more() }}</p>
+} @else {
+  <span pk-popkin-tile size="lg" [emoji]="emoji()"></span>
+  <h2 class="detail-pane__title">{{ name() }}</h2>
+  @if (timeLeft()) {
+    <div class="detail-pane__time">
+      <span pk-time-left>{{ timeLeft() }}</span>
+    </div>
+  }
+  <h3 class="detail-pane__label">{{ listLabel() }}</h3>
+  <ul class="detail-pane__list">
+    @for (person of people(); track $index) {
+      <li class="row row--short">
+        <span class="presence">
+          <span
+            pk-avatar
+            size="36"
+            [initials]="person.avatar.initials"
+            [photo]="person.avatar.photoUrl"
+            [attr.data-accent]="person.avatar.accent"
+          ></span>
+          <span class="presence__dot"></span>
+        </span>
+        <span class="row__main row__title truncate">{{ person.name }}</span>
+      </li>
+    }
+  </ul>
+  @if (more()) {
+    <p class="detail-pane__more">{{ more() }}</p>
+  }
 }

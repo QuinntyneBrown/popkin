@@ -128,3 +128,4 @@ export * from './lib/welcome/welcome';
 export * from './lib/conversation-row/conversation-row';
 export * from './lib/conversations/conversations';
 export * from './lib/thread-pane/thread-pane';
+export * from './lib/dm-intro/dm-intro';
