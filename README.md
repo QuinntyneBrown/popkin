@@ -65,7 +65,8 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > landing page what Popkin is, how it works, what it is for, how it compares with a group chat
 > and that it is free, and starts a Popkin or signs in from there; a person who is signed in
 > goes straight to My Popkins.
-> <!-- video of journey 10 -->
+> [Watch it](docs/videos/10-journey-10-discover-popkin/10-journey-10-discover-popkin.mp4)
+> (2 min 26 s, with sound).
 > The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
