@@ -31,8 +31,9 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > [Watch it](docs/videos/02-journey-02-join-by-invite/02-journey-02-join-by-invite.mp4)
 > (2 min 14 s, with sound). Journey 3, Chat with everyone, is built as well: members read the
 > Everyone thread by day, send messages that reach the others as they are sent, and keep a
-> message that cannot be sent, marked "Not sent" or "Waiting to send". The journeys still to
-> build are in
+> message that cannot be sent, marked "Not sent" or "Waiting to send".
+> [Watch it](docs/videos/03-journey-03-chat-with-everyone/03-journey-03-chat-with-everyone.mp4)
+> (2 min 10 s, with sound). The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents
