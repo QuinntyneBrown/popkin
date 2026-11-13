@@ -54,4 +54,20 @@ parity('tab-header', [
     name: 'experiences-empty',
     region: (page) => new ExperiencesPage(page).header,
   },
+  // A wrapped-up Popkin: nothing to add, so no action beside the filters.
+  {
+    key: 'photoAlbumWrapped',
+    name: 'photos-wrapped',
+    region: (page) => new PhotoAlbumPage(page).header,
+  },
+  {
+    key: 'photoAlbumRemoved',
+    name: 'photos-removed',
+    region: (page) => new PhotoAlbumPage(page).header,
+  },
+  {
+    key: 'experiencesWrapped',
+    name: 'experiences-wrapped',
+    region: (page) => new ExperiencesPage(page).header,
+  },
 ]);

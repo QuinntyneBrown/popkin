@@ -5,6 +5,7 @@ import { callStates } from '../../fixtures/call-states';
 import { parity } from '../../fixtures/parity';
 import { GroupChatPage } from '../../pages/group-chat.page';
 import { PopkinHomePage } from '../../pages/popkin-home.page';
+import { WrapUpBanner } from '../../pages/wrap-up-banner';
 
 parity('banner', [
   {
@@ -37,4 +38,21 @@ parity('banner', [
     // The header above it ends on a fraction of a pixel.
     snap: true,
   },
+  // One hour left: the Host's has "Change" before Dismiss.
+  {
+    key: 'popkinHomeLastHour',
+    name: 'last-hour',
+    region: (page) => new WrapUpBanner(page).root,
+    snap: true,
+  },
+  // Under an hour, a member's: the time left, and Dismiss alone.
+  {
+    key: 'popkinHomeLastHourMember',
+    name: 'last-hour-member',
+    region: (page) => new WrapUpBanner(page).root,
+    snap: true,
+  },
+  // The album was not kept: it stays until the photos go.
+  { key: 'photoAlbumGoing', name: 'photos-go', region: (page) => new WrapUpBanner(page).root },
+  { key: 'recapGoing', name: 'photos-go-recap', region: (page) => new WrapUpBanner(page).root },
 ]);

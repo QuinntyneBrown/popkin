@@ -4,6 +4,7 @@ import { HowLongPage } from '../../pages/how-long.page';
 import { JoinInvitePage } from '../../pages/join-invite.page';
 import { NameYourPopkinPage } from '../../pages/name-your-popkin.page';
 import { SignUpPage } from '../../pages/sign-up.page';
+import { WrapUpPage } from '../../pages/wrap-up.page';
 
 // The aside is not rendered below 768 px, so there is nothing to compare at 360 px.
 parity('split-aside', [
@@ -38,4 +39,6 @@ parity('split-aside', [
     before: theMockWrappedInvite,
     widths: [1280],
   },
+  // The recap that wrapping up will make: a mosaic of its photos over the Popkin.
+  { key: 'wrapUp', name: 'recap', region: (page) => new WrapUpPage(page).picture, widths: [1280] },
 ]);

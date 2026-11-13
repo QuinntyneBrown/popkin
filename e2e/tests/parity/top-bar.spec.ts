@@ -8,6 +8,7 @@ import { GroupChatPage } from '../../pages/group-chat.page';
 import { NotFoundPage } from '../../pages/not-found.page';
 import { SignUpPage } from '../../pages/sign-up.page';
 import { VideoCallPage } from '../../pages/video-call.page';
+import { WrapUpPage } from '../../pages/wrap-up.page';
 
 parity('top-bar', [
   { key: 'notFound', name: 'brand', region: (page) => new NotFoundPage(page).topBar },
@@ -38,4 +39,7 @@ parity('top-bar', [
     name: 'experience-error',
     region: (page) => new ExperienceDetailPage(page).bar,
   },
+  // A wrapped-up Popkin's thread: the tile greyed, and when it wrapped up.
+  { key: 'groupChatReadOnly', name: 'read-only', region: (page) => new GroupChatPage(page).topBar },
+  { key: 'wrapUp', name: 'wrap-up', region: (page) => new WrapUpPage(page).topBar },
 ]);

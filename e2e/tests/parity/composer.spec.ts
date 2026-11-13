@@ -11,4 +11,6 @@ parity('composer', [
     region: (page) => new GroupChatPage(page).send,
     before: theMockChat,
   },
+  // The Popkin has wrapped up: the line that says so, in place of the field.
+  { key: 'groupChatReadOnly', name: 'closed', region: (page) => new GroupChatPage(page).composer },
 ]);
