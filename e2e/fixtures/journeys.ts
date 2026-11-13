@@ -264,3 +264,17 @@ export async function joelJustJoined(page: Page): Promise<void> {
   await page.goto(`/i/${inviteCode}`);
   await joinFromTheInvite(page);
 }
+
+const confirmKey = `POST /api/auth/codes/${sent.verificationId}/confirm`;
+
+/** The code Joel types makes him a person: the recording's confirmation, under his name. */
+export async function joelSignsUp(page: Page): Promise<void> {
+  await answer(page, confirmKey, {
+    status: 200,
+    body: {
+      outcome: 'SignedIn',
+      session: { personId: '5d0c8e0e-6f0b-4f0e-9d53-0f6a1c1b2a3d', name: 'Joel', photoUrl: null },
+      isNewPerson: true,
+    },
+  });
+}

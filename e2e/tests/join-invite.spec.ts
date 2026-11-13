@@ -3,6 +3,7 @@ import {
   asJoel,
   asMemberOfLakeside,
   asVisitor,
+  joelSignsUp,
   inviteCode,
   lakesideCast,
   mockToday,
@@ -12,6 +13,10 @@ import {
 import { expect, test } from '../fixtures/pk-test';
 import { answer, answerOnce, failNetwork, hold, problem } from '../fixtures/stubs';
 import { JoinInvitePage } from '../pages/join-invite.page';
+import { SignUpPage } from '../pages/sign-up.page';
+import { VerifyCodePage } from '../pages/verify-code.page';
+import { YourProfilePage } from '../pages/your-profile.page';
+import { YoureInPage } from '../pages/youre-in.page';
 
 const created = responses['POST /api/popkins'].body;
 
@@ -107,6 +112,33 @@ test.describe('an invite to an active Popkin', () => {
     await invite.join.click();
 
     await expect(page).toHaveURL(`/i/${inviteCode}/profile`);
+  });
+
+  // L2-012 AC3, L2-013, L2-014 AC1: the whole way in, from a link to the welcome
+  test('Join takes a visitor through sign up and the profile step to the welcome', async ({
+    page,
+    pk,
+  }) => {
+    await asVisitor(page);
+    await joelSignsUp(page);
+    await pk.open('joinInvite');
+
+    await new JoinInvitePage(page).join.click();
+
+    await expect(page).toHaveURL(
+      `/sign-up?returnUrl=${encodeURIComponent(`/i/${inviteCode}/profile`)}`,
+    );
+    const signUp = new SignUpPage(page);
+    await signUp.fill('Joel', '(415) 555-0123');
+    await signUp.submit();
+    await new VerifyCodePage(page).type('482913');
+
+    await expect(page).toHaveURL(`/i/${inviteCode}/profile`);
+    const profile = new YourProfilePage(page);
+    await expect(profile.name).toHaveValue('Joel');
+    await profile.imIn.click();
+
+    await expect(new YoureInPage(page).heading).toHaveText('Welcome in, Joel!');
   });
 
   // L2-012 AC4
