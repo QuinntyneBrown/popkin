@@ -2,8 +2,8 @@ import type { Locator, Page } from '@playwright/test';
 
 /**
  * Popkin settings (L2-020): the menu the ⋯ of the Popkin home opens, named by the Popkin. The
- * Host has "Invite people" and "Wrap up"; a member has "Invite people". Journeys 16 and 18 add
- * the rest.
+ * Host has "Invite people" and "Wrap up"; a member has "Invite people" and "Leave this Popkin".
+ * Journey 16 adds the rest.
  */
 export class PopkinSettingsDialog {
   readonly root: Locator;
@@ -17,6 +17,8 @@ export class PopkinSettingsDialog {
   readonly invitePeople: Locator;
   /** The Host's only. */
   readonly wrapUp: Locator;
+  /** A member's only: the danger row. */
+  readonly leave: Locator;
 
   constructor(page: Page) {
     this.root = page.getByRole('dialog');
@@ -29,5 +31,6 @@ export class PopkinSettingsDialog {
     // A link in the mocks, which go from one to the next; a button or a link in the app.
     this.invitePeople = this.items.filter({ hasText: 'Invite people' });
     this.wrapUp = this.items.filter({ hasText: 'Wrap up' });
+    this.leave = this.items.filter({ hasText: 'Leave this Popkin' });
   }
 }

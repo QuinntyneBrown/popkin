@@ -13,6 +13,17 @@
       >
         Wrap up
       </button>
+    } @else {
+      <button
+        pk-menu-item
+        type="button"
+        icon="log-out"
+        hint="You can come back with a new invite"
+        [danger]="true"
+        (click)="choose('leave')"
+      >
+        Leave this Popkin
+      </button>
     }
   </div>
 </div>

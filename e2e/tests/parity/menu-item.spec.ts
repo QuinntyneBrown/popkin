@@ -25,4 +25,11 @@ parity('menu-item', [
     name: 'hint',
     region: (page) => new PopkinSettingsDialog(page).wrapUp,
   },
+  // The destructive row with a line under its words: a member's "Leave this Popkin".
+  {
+    key: 'popkinSettingsMember',
+    ...wrapUpStates.popkinSettingsMember,
+    name: 'leave',
+    region: (page) => new PopkinSettingsDialog(page).leave,
+  },
 ]);
