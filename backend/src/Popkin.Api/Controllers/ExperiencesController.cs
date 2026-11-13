@@ -24,6 +24,11 @@ public sealed class ExperiencesController(ISender sender) : ControllerBase
     public async Task<ActionResult<IReadOnlyList<ExperienceCardDto>>> List(Guid popkinId, [FromQuery] string? filter, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetExperiencesQuery(popkinId, filter), cancellationToken));
 
+    /// <summary>One experience with the group's score and what people said, for its page (L2-038).</summary>
+    [HttpGet("{experienceId:guid}")]
+    public async Task<ActionResult<ExperienceDetailDto>> Get(Guid popkinId, Guid experienceId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetExperienceQuery(popkinId, experienceId), cancellationToken));
+
     /// <summary>
     /// Shares an experience: a title, a kind and, when given, a when, a place and a picture
     /// (L2-040). The body may be up to twice the largest picture, so a picture over 10 MB is

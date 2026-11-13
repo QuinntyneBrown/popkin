@@ -56,6 +56,15 @@ public sealed class Experience
     public ExperiencePicture? Picture =>
         PictureKey is { } key && PictureThumbnailKey is { } thumbnailKey ? new ExperiencePicture(key, thumbnailKey) : null;
 
+    /// <summary>Something the group did and a restaurant are rated; something it wants to do is not.</summary>
+    public bool IsRateable => Kind != ExperienceKind.Want;
+
+    /// <summary>Only its sharer edits an experience (L2-040 AC6).</summary>
+    public bool CanBeEditedBy(Membership member) => member.Id == SharerMembershipId;
+
+    /// <summary>Its sharer deletes an experience, and the Host deletes any (L2-040 AC6).</summary>
+    public bool CanBeDeletedBy(Membership member) => CanBeEditedBy(member) || member.Role == MembershipRole.Host;
+
     public static Experience Share(
         Guid popkinId,
         Guid sharerMembershipId,
