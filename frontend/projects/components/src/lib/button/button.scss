@@ -78,6 +78,14 @@
   color: var(--color-fg-on-danger);
 }
 
+/* On a picture or the dark stage: white in both themes. */
+:host(.btn--on-accent),
+:host(.btn--on-accent:hover) {
+  background: var(--color-constant-light);
+  color: var(--color-constant-dark);
+  box-shadow: var(--shadow-1);
+}
+
 :host(.btn--md) {
   height: var(--control-height-md);
   padding: 0 var(--space-5);
