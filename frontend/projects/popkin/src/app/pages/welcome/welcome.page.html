@@ -1,0 +1,26 @@
+<div pk-screen layout="split" body="middle">
+  <aside
+    pk-split-aside
+    slot="aside"
+    label="Popkin"
+    surface="brand"
+    justify="center"
+    [mark]="picture"
+  ></aside>
+  <div
+    pk-welcome
+    heading="Your people, popped up in seconds."
+    lead="A little home for your group. Chat, photos, plans and calls, all in one place."
+    [picture]="picture"
+  >
+    <a pk-button slot="action" variant="primary" routerLink="/sign-up" [block]="true"
+      >Start a Popkin</a
+    >
+    <a pk-button slot="action" variant="secondary" routerLink="/join" [block]="true"
+      >Join with a code</a
+    >
+    <a pk-link slot="link" variant="text" action="Sign in" routerLink="/sign-in"
+      >Already have an account?</a
+    >
+  </div>
+</div>

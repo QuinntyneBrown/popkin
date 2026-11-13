@@ -91,7 +91,7 @@ design system does so from 992 px, which also meets it.
   scrolls inside `max-height: 92dvh` and its header stays in view.
 - **`pk-toast`** — full width minus 16 px above the tabs on a phone, up to
   `--layout-toast-max` (26 rem) and centred on wider screens.
-- **`pk-site-navigation`** and the landing sections — the landing page uses the `container`
+- **`pk-site-nav`** and the landing sections — the landing page uses the `container`
   utility (`max-width: var(--layout-container-max)`, margins `--layout-margin`) and CSS grid with
   `--layout-columns` and `--layout-gutter`, which the token file changes at 48 rem and 62 rem.
   The hero, steps and ideas stack in one column below 768 px (L2-001 AC5).

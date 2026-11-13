@@ -2,4 +2,4 @@
 
 | Design | Effort | Complete |
 |---|---|---|
-| view-landing-page | 4 days | 0% |
+| view-landing-page | 4 days | 100% |

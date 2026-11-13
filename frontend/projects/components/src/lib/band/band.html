@@ -1,0 +1,23 @@
+<div class="container section" [class.container--narrow]="width() === 'narrow'">
+  @if (heading()) {
+    @if (head() === 'split') {
+      <div class="section__head">
+        <ng-container [ngTemplateOutlet]="title" />
+        @if (lead()) {
+          <p class="section__aside">{{ lead() }}</p>
+        }
+      </div>
+    } @else {
+      <ng-container [ngTemplateOutlet]="title" />
+      @if (lead()) {
+        <p class="section__lead">{{ lead() }}</p>
+      }
+    }
+  }
+  <ng-content />
+</div>
+<ng-template #title>
+  <h2 class="section__title" [attr.id]="headingId()" [attr.tabindex]="anchor() ? -1 : null">
+    {{ heading() }}
+  </h2>
+</ng-template>

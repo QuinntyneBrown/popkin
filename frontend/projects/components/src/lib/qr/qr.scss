@@ -1,0 +1,38 @@
+/* Dark on white with a quiet zone, in both themes, so it scans (L2-059 AC4). */
+:host {
+  width: var(--layout-qr-size);
+  height: auto;
+  aspect-ratio: 1;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-constant-light);
+  overflow: visible;
+}
+
+:host(.qr--sm) {
+  width: var(--layout-qr-size-sm);
+}
+
+.qr__cells {
+  fill: var(--color-constant-dark);
+}
+
+.qr__hole {
+  fill: var(--color-constant-light);
+}
+
+.qr__logo {
+  fill: var(--color-accent);
+}
+
+.qr__mark {
+  color: var(--color-fg-on-accent);
+}
+
+/* The large code: the picture half of the created screen, from M. */
+@media (min-width: 48rem) {
+  :host(.qr--lg) {
+    width: var(--layout-qr-size-lg);
+    height: var(--layout-qr-size-lg);
+  }
+}

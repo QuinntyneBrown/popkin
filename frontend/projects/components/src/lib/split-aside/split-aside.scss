@@ -13,6 +13,10 @@
     background: var(--color-bg-subtle);
   }
 
+  :host(.split-aside--brand) {
+    background: var(--color-accent-subtle);
+  }
+
   :host(.split-aside--tint) {
     background: color-mix(in srgb, var(--accent) 14%, var(--color-bg-canvas));
   }
@@ -60,6 +64,11 @@
     display: block;
     max-width: var(--layout-measure-lg);
     margin-top: var(--space-2);
+  }
+
+  .split-aside__mark {
+    width: 100%;
+    max-width: var(--layout-form-max-s);
   }
 
   .split-aside__icon {

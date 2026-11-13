@@ -1,0 +1,12 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-comfortable);
+  color: var(--color-fg-muted);
+  text-decoration: none;
+}
+
+:host(:hover) {
+  color: var(--color-fg-default);
+  text-decoration: underline;
+}

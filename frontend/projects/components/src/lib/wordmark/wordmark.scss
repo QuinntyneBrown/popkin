@@ -4,6 +4,10 @@
   white-space: nowrap;
 }
 
+:host(.wordmark--lg) {
+  font-size: var(--font-size-4xl);
+}
+
 :host(.wordmark--coral) {
   color: var(--color-accent);
 }

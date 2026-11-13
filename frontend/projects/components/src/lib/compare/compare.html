@@ -1,0 +1,35 @@
+<caption class="visually-hidden">
+  {{
+    caption()
+  }}
+</caption>
+<thead>
+  <tr>
+    <th class="compare__column" scope="col">
+      <span class="visually-hidden">{{ what() }}</span>
+    </th>
+    <th class="compare__column" scope="col">{{ theirs() }}</th>
+    <th class="compare__column compare__column--ours" scope="col">
+      <span class="compare__brand"><svg pk-mark size="sm"></svg>{{ ours() }}</span>
+    </th>
+  </tr>
+</thead>
+<tbody>
+  @for (row of rows(); track row.label) {
+    <tr class="compare__row">
+      <th class="compare__label" scope="row">{{ row.label }}</th>
+      <td class="compare__theirs">
+        <span class="compare__cell">
+          <svg pk-icon class="compare__icon" name="minus" size="md"></svg>
+          <span>{{ row.theirs }}</span>
+        </span>
+      </td>
+      <td class="compare__ours">
+        <span class="compare__cell">
+          <svg pk-icon class="compare__icon compare__icon--ours" name="check" size="md"></svg>
+          <span>{{ row.ours }}</span>
+        </span>
+      </td>
+    </tr>
+  }
+</tbody>

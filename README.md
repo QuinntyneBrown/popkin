@@ -61,7 +61,12 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > read-only, and everyone gets a recap with the people, the messages, the photos and the
 > top-rated moment, saves the album as a zip, and the Host pops up another with the same crew.
 > [Watch it](docs/videos/09-journey-09-wrap-up/09-journey-09-wrap-up.mp4)
-> (2 min 20 s, with sound).
+> (2 min 20 s, with sound). Journey 10, Discover Popkin, is built too: a visitor reads on the
+> landing page what Popkin is, how it works, what it is for, how it compares with a group chat
+> and that it is free, and starts a Popkin or signs in from there; a person who is signed in
+> goes straight to My Popkins.
+> [Watch it](docs/videos/10-journey-10-discover-popkin/10-journey-10-discover-popkin.mp4)
+> (2 min 26 s, with sound).
 > The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 

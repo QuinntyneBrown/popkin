@@ -1,3 +1,5 @@
+import { LandingPage } from '../pages/landing.page';
+import { WelcomePage } from '../pages/welcome.page';
 import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
 import { RecapPage } from '../pages/recap.page';
 import { WrapUpPage } from '../pages/wrap-up.page';
@@ -991,5 +993,28 @@ export const screenStates: ScreenState[] = [
     key: 'experienceDetailWrapped',
     ...wrapUpStates.experienceDetailWrapped,
     regions: detailRegions,
+  },
+  // Discover Popkin (journey 10).
+  {
+    key: 'landing',
+    before: asVisitor,
+    regions: (page) => {
+      const landing = new LandingPage(page);
+      return {
+        nav: landing.nav,
+        hero: landing.heroText,
+        how: landing.how,
+        ideas: landing.ideas,
+        comparison: landing.comparison,
+        free: landing.free,
+        footer: landing.footer,
+      };
+    },
+  },
+  {
+    key: 'welcome',
+    before: asVisitor,
+    regions: (page) => ({ welcome: new WelcomePage(page).welcome }),
+    wideRegions: (page) => ({ aside: new WelcomePage(page).aside }),
   },
 ];

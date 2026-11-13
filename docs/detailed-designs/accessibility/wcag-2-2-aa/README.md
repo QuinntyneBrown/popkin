@@ -46,7 +46,8 @@ All parts below are introduced by this design unless marked existing.
   It renders three slots as siblings: `[slot=header]` inside `<header>`, the body inside
   `<main id="main" tabindex="-1">`, and `[slot=nav]` inside `<nav aria-label="Popkin">` when the
   page composes `pk-popkin-nav`. Each slot is declared once (AGENTS.md). The landing page uses
-  `pk-site-navigation` for its `header`, `nav` and `footer` landmarks instead.
+  `pk-site-nav`, `pk-site-main` and `pk-site-footer` for its `header`, `nav`, `main` and `footer`
+  landmarks instead.
 - **One `h1`** — each page template holds exactly one `h1`: in the top bar for threads and the
   Popkin home, in the body elsewhere. Section headings descend from it without skipping a level.
   A dialog's title is an `h2`.
