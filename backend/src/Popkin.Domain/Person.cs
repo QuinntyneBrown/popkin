@@ -38,6 +38,12 @@ public sealed class Person
     /// <summary>A new name of 1 to 40 characters, already trimmed (L2-048 AC2).</summary>
     public void Rename(string name) => Name = name;
 
+    /// <summary>
+    /// The person deleted their account (L2-049 AC4). Nothing signs in as them any more, and
+    /// their phone number or email may sign up again at once.
+    /// </summary>
+    public void MarkDeleted(DateTimeOffset now) => DeletedAt ??= now;
+
     /// <summary>A new photo, already stored under `photoKey` (L2-048 AC2).</summary>
     public void ChangePhoto(string photoKey) => PhotoKey = photoKey;
 }

@@ -1,4 +1,5 @@
 using MediatR;
+using Popkin.Api.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Popkin.Application.Account;
 using Popkin.Application.Invites;
@@ -43,5 +44,17 @@ public sealed class AccountController(ISender sender) : ControllerBase
         await using var content = photo?.OpenReadStream();
         var upload = photo is null ? null : new PhotoUpload(content!, photo.Length);
         return Ok(await sender.Send(new ChangeAccountPhotoCommand(upload), cancellationToken));
+    }
+
+    /// <summary>
+    /// Deletes the account (L2-049 AC4): every session ends and the cookie is deleted. A failure
+    /// answers 500 and changes nothing.
+    /// </summary>
+    [HttpDelete]
+    public async Task<IActionResult> Delete(CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeleteAccountCommand(), cancellationToken);
+        await SessionCookie.SignOutAsync(HttpContext);
+        return NoContent();
     }
 }

@@ -50,4 +50,15 @@ public sealed class Membership
 
     /// <summary>The name the other members see changed with the account's (L2-048 AC2).</summary>
     public void Rename(string displayName) => DisplayName = displayName;
+
+    /// <summary>
+    /// The account was deleted: the member leaves, and what they shared stays under
+    /// "Former member" with no photo (L2-049 AC1).
+    /// </summary>
+    public void Anonymise(DateTimeOffset now)
+    {
+        DisplayName = PersonName.FormerMember;
+        PhotoKey = null;
+        LeftAt ??= now;
+    }
 }
