@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Address safety
+
+Person(person, "Person", "Uses Popkin in a browser")
+System_Boundary(popkin, "Popkin") {
+  Container(proxy, "Reverse proxy", "<TO SUPPLY>", "TLS with *.popkin.community; HTTP and www redirects; headers; serves the web app")
+  Container(spa, "Popkin web app", "Angular SPA", "Same files on every host; calls /api on its own host")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Host check, same-site proof, __Secure-popkin cookie")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Session, Membership")
+}
+System_Ext(ca, "Certificate authority", "<TO SUPPLY>")
+Rel(person, proxy, "Requests the apex or an address", "HTTPS")
+Rel(proxy, spa, "Serves")
+Rel(proxy, api, "Forwards /api and /hubs with X-Forwarded-*", "HTTP")
+Rel(api, db, "Checks the session on every request", "EF Core")
+Rel(proxy, ca, "Renews the certificate", "ACME DNS-01")
+@enduml

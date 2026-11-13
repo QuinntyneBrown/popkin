@@ -1,0 +1,83 @@
+@startuml
+title UML sequence behaviour — Suggest and check the address
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "NameYourPopkinPage" as page
+  participant "NewPopkinDraft" as draft
+  participant "AddressCheck" as check
+  participant "HttpAddressesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AddressesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "CheckAddressQueryHandler" as handler
+  participant "AddressAvailability" as avail
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Type "Lakeside Weekend"
+page -> draft : setName(name)
+alt address not edited (L2-062 AC2)
+  draft -> draft : address = suggestAddress(name) (L2-062 AC1)
+end
+draft --> page : address "lakeside-weekend"
+page -> check : update(address)
+alt fewer than 3 characters suggested (L2-062 AC5)
+  check --> page : empty: hint to choose, "Looks good" disabled
+else broken rule (addressProblem, L2-062 AC4)
+  check --> page : invalid(problem): aria-invalid with the rule
+else well formed
+  check -> check : wait 500 ms without a change
+  check -> client : check(address)
+  client -> ctrl : GET /api/addresses/lakeside-weekend
+  ctrl -> ctrl : Session (401 for a visitor, L2-067 AC8); address-checks limit
+  alt more than 30 checks in a minute (L2-067 AC7)
+    ctrl --> client : 429 rate_limited, Retry-After
+    client --> check : RateLimited(retryAfter)
+    check --> page : rateLimited: when to try again
+  else allowed
+    ctrl -> handler : Send CheckAddressQuery
+    handler -> handler : PopkinAddress.TryParse, lower case (L2-063 AC1)
+    handler -> avail : IsTakenAsync(address)
+    avail -> avail : Reserved word? (L2-063 AC5)
+    avail -> db : AddressClaim exists? (L2-063 AC2, AC8)
+    db --> avail : yes or no
+    opt taken
+      handler -> avail : SuggestAsync(address)
+      avail -> db : Claims of lakeside-weekend-2 … in one query
+      db --> avail : Claimed candidates
+      avail --> handler : Up to three free addresses
+    end
+    handler --> ctrl : AddressCheckDto
+    ctrl --> client : 200
+    client --> check : AddressCheckView
+    check --> page : free or taken(suggestions) within 1 s (L2-062 AC6)
+  end
+  opt request fails (5xx, network)
+    client --> check : CheckFailed
+    check --> page : failed: "Try again", text kept (L2-062 AC8)
+  end
+end
+page --> actor : Status in words and icon, announced politely (L2-062 AC6)
+opt taken
+  actor -> page : Choose "lakeside-weekend-2" (L2-062 AC7)
+  page -> draft : setAddress(suggestion), addressEdited = true
+  page -> check : update(suggestion)
+end
+@enduml

@@ -11,11 +11,15 @@ starts one: two short steps, then a screen that hands over the invite at once.
 - **length** — time a Popkin runs before it wraps up, or no end at all ("Keep it going")
 - **invite** — QR code, invite link or code that lets a person join one Popkin
 - **wrap up** — end of a Popkin; a wrapped-up Popkin is read-only and has a recap
+- **address** — web address that belongs to one Popkin, `https://{address}.popkin.community`
 
 The first step, "Name your Popkin", collects the name, one of twelve emoji and a colour, with a
-preview tile that follows each choice. The second step, "How long should it last?", offers four
+preview tile that follows each choice. It also settles the Popkin's address, suggested from the
+name; that part of the step is designed in [Choose the address](../choose-address/README.md)
+(L2-062, L2-063). The second step, "How long should it last?", offers four
 lengths. "Pop it up" creates the Popkin; the person who created it becomes its Host and first
-member, and the created screen shows the QR code and link to pass around.
+member, and the created screen shows the QR code and link to pass around, with the Popkin's
+address beside them (L2-065 AC2).
 
 This feature introduces the domain entity for a Popkin. The entity is named **`PopkinSpace`**,
 not `Popkin`: a class named `Popkin` would collide with the root namespace `Popkin` that every
@@ -37,10 +41,16 @@ the product term.
   away.").
 - `docs/mocks/pages/popkin-created/default.html` and `copied.html` ("Copied", live announcement
   "Invite link copied").
+- The address states of `name-your-popkin` and the address on `popkin-created` are not drawn yet;
+  [Choose the address](../choose-address/README.md) lists the states the mocks need. The created
+  screen needs the address as text and the sentence of L2-065 AC2; its copy is `<TO SUPPLY>`.
 
 ### API
 
-- `POST /api/popkins` — `201 Created` with `PopkinCreatedDto` and a `Location` header.
+- `POST /api/popkins` — `201 Created` with `PopkinCreatedDto` and a `Location` header. The body
+  carries `address`; its failures, `400` `address_required`, `address_too_short`,
+  `address_too_long`, `address_malformed` and `409` `address_taken`, are designed in
+  `popkins/choose-address`.
   Failures: `400` ProblemDetails with `code` `name_required`, `name_too_long`,
   `emoji_not_allowed`, `colour_not_allowed`, `length_not_allowed` or `ends_at_out_of_range`;
   `401` without a session.
@@ -59,6 +69,8 @@ the product term.
   the `edge` mock; whether it shows earlier is `<TO SUPPLY>`. As built, the name field and its
   tile are one component, `pk-name-preview`. From 768 px the screen is split and
   `pk-split-aside` holds `pk-preview-card`, the Popkin as others will see it (L2-058 AC10).
+  Below the name it composes `pk-address-field`, and "Looks good" also waits for a free address
+  ([Choose the address](../choose-address/README.md), L2-062).
 - **`HowLongPage`** (`pages/how-long/how-long.page.ts`, route `/new/length`) — one radio group of
   four `pk-choice-card` options with arrow-key movement (L2-009 AC1, AC7), the line about changing
   later and the recap (AC6), a date control for "Until a date" that opens `EndDateDialog` (AC2),
@@ -71,18 +83,21 @@ the product term.
   with the mock's message (L2-009 AC3). Nothing is sent until "Pop it up". The same dialog
   serves `ChangeLengthDialog` in `popkins/popkin-settings`.
 - **`PopkinCreatedPage`** (`pages/popkin-created/popkin-created.page.ts`, route
-  `/p/:popkinId/created`, `shell: 'bare'`) — "Pop! {name} is up.", `pk-popkin-tile` in the
-  Popkin's colour, `pk-qr-card` with the QR code and link (L2-010 AC1), and three share actions:
+  `/p/:popkinId/created` on the apex, `shell: 'bare'`) — "Pop! {name} is up.", `pk-popkin-tile`
+  in the Popkin's colour, `pk-qr-card` with the QR code and link (L2-010 AC1), the address as
+  text (`lakeside-weekend.popkin.community`) with one sentence that the address opens the Popkin
+  for members and the invite lets new people in (L2-065 AC2), and three share actions:
   "Copy link" writes to `navigator.clipboard`, reads "Copied" for 3 s and announces "Invite link
   copied" through a visually hidden live region (AC2); "Text it" follows an `sms:` link whose body
   is the invite link (AC3); "Share" calls `navigator.share` and is not rendered when the browser
-  has no `navigator.share` (AC4). "Go to {name}" opens `/p/:popkinId` (AC5). The tile springs in
+  has no `navigator.share` (AC4). "Go to {name}" opens the Popkin's address, a full page load to
+  another origin ([Open a Popkin by its address](../open-by-address/README.md), AC5). The tile springs in
   and confetti bursts once, within 320 ms, only under `prefers-reduced-motion: no-preference`
   (AC7, L2-060). The share row is the mock's `share-actions` block, which has no design-system
   component page yet (`<TO SUPPLY>`). From 768 px the screen is split and the QR card, at
   `size="lg"`, is the picture in `pk-split-aside` (L2-058 AC10).
 - **`NewPopkinDraft`** (`api` library, `providedIn: 'root'`) — signal store holding `name`,
-  `emoji`, `colour`, `length`, `customEndsAt` and `created`. Both steps read and write it, so
+  `emoji`, `colour`, `address`, `addressEdited`, `length`, `customEndsAt` and `created`. Both steps read and write it, so
   going back keeps all three choices (L2-008 AC5); a failed create keeps them too (L2-009 AC5).
   Its first state is an empty name, the first emoji and Coral (L2-008 AC6).
 - **`resolveEndsAt(length, now, customEndsAt)`** (pure helper, `api` library) — resolves the end
@@ -97,7 +112,7 @@ the product term.
 - **`PopkinsController`** (`/api/popkins`) — authenticated by the fallback policy (L2-050);
   sends `CreatePopkinCommand` and maps the result to `201`.
 - **`CreatePopkinCommand`** — `Name`, `Emoji`, `Colour`, `Length` (`PopkinLength`:
-  `JustToday`, `TheWeekend`, `UntilDate`, `KeepItGoing`) and `EndsAt`. The client resolves
+  `JustToday`, `TheWeekend`, `UntilDate`, `KeepItGoing`), `EndsAt` and `Address`. The client resolves
   `EndsAt` because only the device knows its local midnight and Sunday; the server checks it.
 - **`CreatePopkinCommandValidator`** — trims the name; refuses an empty name and one longer than
   40 characters; accepts only the twelve emoji and the seven colours; requires `EndsAt` to be
@@ -108,20 +123,25 @@ the product term.
   the 1-hour and 1-year bounds. `popkins/popkin-settings` reuses them.
 - **`CreatePopkinCommandHandler`** — reads the caller from `ICurrentPerson`, the clock from
   `TimeProvider` and a code from `IInviteCodeGenerator`, calls `PopkinSpace.Start`, and saves
-  through `IAppDbContext` in one unit of work. A unique index on `PopkinSpace.InviteCode` turns a
+  through `IAppDbContext` in one unit of work. The same unit of work writes the
+  `AddressClaim`; a lost race for the address answers `409` `address_taken` and is not retried
+  ([Choose the address](../choose-address/README.md), L2-063 AC3). A unique index on `PopkinSpace.InviteCode` turns a
   collision into a retry with a new code.
 - **`PopkinSpace`** (`Popkin.Domain`) — the Popkin aggregate: `Id`, `Name`, `Emoji`, `Colour`
   (`PopkinColour`), `HostPersonId`, `EndsAt` (`null` = ongoing), `Status` (`PopkinStatus`:
   `Active`, `WrappedUp`), `WrappedUpAt`, `KeepPhotos`, `InviteCode`, `CreatedAt`,
-  `LastActivityAt`. `Start(...)` creates it `Active` together with the Host's `Membership`
+  `LastActivityAt`, `Address` (`PopkinAddress`, never changed after `Start`, L2-066).
+  `Start(...)` creates it `Active` together with the Host's `Membership`
   (`Role = Host`, `DisplayName` = the person's name, `JoinedAt` = now; L2-010 AC6) and the
   Popkin's Everyone `ChatThread` (`Kind = Everyone`).
 - **`IInviteCodeGenerator` / `RandomInviteCodeGenerator`** — 10 characters from the alphabet
   `abcdefghjkmnpqrstuvwxyz23456789`, drawn with `RandomNumberGenerator`, above the 8-character
-  minimum of L2-011 AC5. A slug chosen by the Host (the mock link `popk.in/lakeside`) has no
-  screen in the mocks; how a Host picks one is `<TO SUPPLY>`.
-- **`PopkinCreatedDto`** — `Id`, `Name`, `Emoji`, `Colour`, `EndsAt`, `InviteCode`, `InviteUrl`
-  (built by `InviteLinkBuilder`, see `invitations/invite-people`).
+  minimum of L2-011 AC5. L2-011 AC5 no longer allows a code the Host chose: the Host chooses the
+  address, and the code stays unguessable.
+- **`PopkinCreatedDto`** — `Id`, `Name`, `Emoji`, `Colour`, `EndsAt`, `InviteCode`, `InviteUrl`,
+  `Address` and `AddressUrl`. `PopkinUrlBuilder` builds both URLs from the address, the invite
+  link as the address followed by `/i/{code}` (`invitations/invite-people`, L2-065 AC1). It
+  replaces `InviteLinkBuilder`.
 - **Infrastructure** — `PopkinSpaceConfiguration`, `MembershipConfiguration` and
   `ChatThreadConfiguration` (`IEntityTypeConfiguration<T>`) add the tables and the unique
   `InviteCode` index; `IAppDbContext` gains `DbSet<PopkinSpace>`, `DbSet<Membership>` and
@@ -195,6 +215,8 @@ so it is out of the tab order and the accessibility tree (L2-058 AC13).
 | `L2-008` | `L1-003` | Name a Popkin and pick its emoji and colour: The first step of starting a Popkin gives it a name, an emoji and a colour, with a preview that changes as they are chosen. |
 | `L2-009` | `L1-003` | Choose how long a Popkin lasts: The second step sets when the Popkin wraps up. |
 | `L2-010` | `L1-003` | The Popkin is created: When a Popkin exists, its Host is given its invite straight away. |
+| `L2-062` | `L1-016` | Choose the address when naming a Popkin: The name step of starting a Popkin also settles its address. The address is suggested from the name, so most Hosts never type it. Designed in [Choose the address](../choose-address/README.md). |
+| `L2-065` | `L1-016` | Invites carry the address: The invite link and the QR code are built on the Popkin's address, so the person invited sees where they are going. The address shows which Popkin; the code is what lets a person in. This feature realises AC2. |
 | `L2-052` | `L1-012` | Input is validated and output is encoded: Nothing a person types can harm another person or the system. |
 | `L2-060` | `L1-014` | Motion is optional: Motion explains; it never gets in the way. |
 

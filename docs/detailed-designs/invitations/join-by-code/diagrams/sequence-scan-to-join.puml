@@ -40,7 +40,7 @@ else allowed
   dlg --> actor : Camera with frame, "Hold the QR code inside the frame"
   loop each decoded QR code
     scanner --> dlg : text
-    dlg -> parse : parseInviteInput(text)
+    dlg -> parse : parseInviteInput(text, baseDomain)
     alt not a Popkin invite (L2-015 AC3)
       parse --> dlg : null
       dlg --> actor : "That's not a Popkin code" "Keep scanning, or type the code instead."
@@ -48,7 +48,7 @@ else allowed
       parse --> dlg : code
       dlg --> actor : "Found it. Opening your invite…"
       dlg -> scanner : stop() releases the camera
-      dlg -> router : close, navigate /i/(code)
+      dlg -> router : close, open the link on the address, or apex /i/(code) for a bare code
       router --> actor : join-invite (preview-invite design)
     end
   end

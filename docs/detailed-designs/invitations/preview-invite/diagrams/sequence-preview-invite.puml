@@ -28,18 +28,18 @@ end box
 box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
-actor -> page : Open /i/(code) (public route)
+actor -> page : Open https://lakeside-weekend.popkin.community/i/(code) (public route)
 page --> actor : "Loading your invite…" skeleton
-page -> client : getPreview(code)
-client -> ctrl : GET /api/invites/(code), cookie if any
+page -> client : getPreview(code, address from the host)
+client -> ctrl : GET /api/invites/(code)?address=lakeside-weekend, cookie if any
 ctrl -> ctrl : invite-codes rate limit (L2-053 AC3)
 alt more than 20 lookups from this address in 10 min
   ctrl --> client : 429, Retry-After
 else within limit
   ctrl -> handler : Send GetInvitePreviewQuery
   handler -> db : PopkinSpace where InviteCode = code
-  alt no Popkin
-    handler --> ctrl : InviteNotFoundException
+  alt no Popkin, or its Address is not the one asked (L2-065 AC4)
+    handler --> ctrl : InviteNotFoundException, same body in both cases
     ctrl --> client : 404 ProblemDetails code invite_not_found
   else found
     handler -> db : Host membership, active member count, 5 avatars, caller's active membership
@@ -48,9 +48,9 @@ else within limit
   end
 end
 alt 200 and viewer is member, Popkin active (L2-012 AC4)
-  page --> actor : navigate /p/(popkinId)
+  page --> actor : navigate / (the Popkin home on this host)
 else 200 and viewer is member, Popkin wrapped up (L2-016 AC3)
-  page --> actor : navigate /p/(popkinId)/recap
+  page --> actor : navigate /recap on this host
 else 200, not a member, Open (L2-012 AC1, AC2)
   page --> actor : "Mara invited you", emoji, colour, name, 5 avatars, "14 people", "Here until Sunday, 6 pm" (none when no end), "Join", "Free, no app to download."
 else 200, not a member, WrappedUp (L2-016 AC1)

@@ -1,0 +1,9 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Choose the address
+
+Person(host, "Host", "Starts a Popkin and settles its address")
+System(popkin, "Popkin", "Suggests the address, checks it and claims it for one Popkin")
+Rel(host, popkin, "Names the Popkin and accepts or edits its address", "HTTPS")
+@enduml

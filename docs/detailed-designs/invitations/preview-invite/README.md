@@ -17,6 +17,13 @@ preview and lands on the Popkin home, or on its recap when it has wrapped up. Ch
 leads to the profile step (`invitations/join-popkin`), through sign-up or sign-in first for a
 visitor.
 
+An invite link is built on the Popkin's address, `https://{address}.popkin.community/i/{code}`
+(L2-065). The preview therefore checks two things: that the code matches a Popkin, and that the
+address the link was opened on is that Popkin's address. A right code on the wrong address is
+treated as an invite that cannot be found (L2-065 AC4). Removing the code from the link leaves
+the bare address, which admits nobody ([Open a Popkin by its
+address](../../popkins/open-by-address/README.md), L2-065 AC5).
+
 ## Description
 
 ### Screens and states
@@ -33,18 +40,21 @@ visitor.
 
 ### API
 
-- `GET /api/invites/{code}` — `[AllowAnonymous]`, rate-limited by the `invite-codes` policy.
-  `200` `InvitePreviewDto`. Failures: `404` `invite_not_found`; `429` with `Retry-After`.
+- `GET /api/invites/{code}?address={address}` — `[AllowAnonymous]`, rate-limited by the
+  `invite-codes` policy. `200` `InvitePreviewDto`. Failures: `404` `invite_not_found`; `429`
+  with `Retry-After`. `address` is sent by the page on an address host and left out on the apex
+  (changed, L2-065 AC4).
 
 ### Frontend (Popkin web app)
 
-- **`JoinInvitePage`** (`pages/join-invite/join-invite.page.ts`, route `/i/:code`,
+- **`JoinInvitePage`** (`pages/join-invite/join-invite.page.ts`, route `/i/:code` on the address
+  host,
   `data-page="join-invite"`, `shell: 'bare'`, public, L2-007 AC3) — loads the preview with
-  `InvitesApi.getPreview(code)` and renders by result:
-  - **member, active** — navigates to `/p/:popkinId` (L2-012 AC4);
-  - **member, wrapped up** — navigates to `/p/:popkinId/recap` (L2-016 AC3). The recap is built
-    with wrapping up; until then a member of a wrapped-up Popkin goes to `/p/:popkinId` like any
-    other member;
+  `InvitesApi.getPreview(code, address)`, the address read from the host, and renders by result:
+  - **member, active** — navigates to `/`, the Popkin home on the same host (L2-012 AC4);
+  - **member, wrapped up** — navigates to `/recap` on the same host (L2-016 AC3). The recap is
+    built with wrapping up; until then a member of a wrapped-up Popkin goes to `/` like any other
+    member;
   - **open** — `pk-wordmark`, then `pk-invite-preview`: a `pk-pill` "{first name} invited you"
     with the inviter's `pk-avatar`, `pk-popkin-tile` in the Popkin's colour, the name as the
     screen's `h1`, a `pk-avatar-stack` of up to 5 with "+N", "{n} people", and `pk-time-left`
@@ -69,13 +79,18 @@ visitor.
   invite (`/images/lake.jpg`, greyed when the Popkin has wrapped up). It is a stock picture and
   not one of the Popkin's photos: a visitor is shown nothing from inside the Popkin
   (L2-012 AC5). "Join" stays no wider than a button.
+- **On the apex** — `/i/:code` on the apex serves a code that came without an address: the
+  scanner and "Join with a code" ([Join by code](../join-by-code/README.md)). The page looks the
+  code up without `address` and, on `200`, loads `InvitePreviewDto.InviteUrl`, the link on the
+  Popkin's address, where the preview renders as above. A visitor has a code by then, so learning
+  the address adds nothing the invite would not show.
 - **"Join"** — stores the preview in `JoinInviteState`. A signed-in person goes to
   `/i/:code/profile`. A visitor goes to `/sign-up?returnUrl=/i/{code}/profile`; after the code is
   confirmed, the auth flow navigates to the return URL, accepting only same-origin app paths, so
   the person reaches the profile step without opening the link again (L2-012 AC3). A visitor
   who already has an account uses "sign in instead" on that screen once signing in is built;
   the invite itself offers one way in.
-- **`InvitesApi` / `INVITES_API` / `HttpInvitesApi`** — `getPreview(code)`; the page reads the
+- **`InvitesApi` / `INVITES_API` / `HttpInvitesApi`** — `getPreview(code, address?)`; the page reads the
   refusal with `toApiProblem`: `404` is not found, `429` is rate limited with its
   `retryAfterSeconds`, anything else a failure.
 - **`JoinInviteState`** (`api` library) — holds the preview and, later, the join result for the
@@ -90,12 +105,16 @@ visitor.
   requests per client address per 10 minutes, answering `429` with `Retry-After`
   (L2-053 AC3). `invitations/join-by-code` shares the policy.
 - **`GetInvitePreviewQueryHandler`** — finds the `PopkinSpace` by `InviteCode` or throws
-  `InviteNotFoundException` (`404` `invite_not_found`). It reads `ICurrentPerson` when a session
+  `InviteNotFoundException` (`404` `invite_not_found`). When the query carries an address, a
+  Popkin whose `Address` differs throws the same exception, with the same body, so a wrong
+  address and an unknown code cannot be told apart (L2-065 AC4). An address that is malformed
+  or no Popkin's address takes the same path. It reads `ICurrentPerson` when a session
   exists. It returns `InvitePreviewDto` with only what L2-012 shows (L2-012 AC5, L2-051 AC5):
   `State` (`Open` or `WrappedUp`, from the Popkin's status; a Popkin whose time is up but which
   has not been wrapped up yet is decided with wrapping up), name, emoji, colour, active member
   count, `EndsAt`,
-  `WrappedUpAt`, up to 5 `AvatarDto`s carrying initials, accent and an expiring photo URL but no
+  `WrappedUpAt`, `InviteUrl` (the link on the address, from `PopkinUrlBuilder`), up to 5
+  `AvatarDto`s carrying initials, accent and an expiring photo URL but no
   names, the inviter's first name and avatar, and `Viewer { IsMember, PopkinId }`. `PopkinId` is
   filled only for a member; a non-member never learns it.
 - **Inviter** — the Popkin has one invite code, so the link does not say which member shared it.
@@ -110,6 +129,7 @@ visitor.
 |-------|--------------|-------------|
 | `L2-012` | `L1-004` | See the invite before joining: An invite link shows what the person is joining before they commit. |
 | `L2-016` | `L1-004` | Invites that cannot be joined: An invite to a wrapped-up Popkin, or one that does not exist, says so and offers a way forward. |
+| `L2-065` | `L1-016` | Invites carry the address: The invite link and the QR code are built on the Popkin's address, so the person invited sees where they are going. The address shows which Popkin; the code is what lets a person in. This feature realises AC4 and AC5. |
 | `L2-051` | `L1-012` | Popkins are private to their members: Membership decides everything a person sees. |
 | `L2-053` | `L1-012` | Abuse is limited: One person cannot flood the system or another person. |
 
@@ -145,8 +165,9 @@ else from the Popkin is in it.
 
 ### Behaviour — preview an invite
 
-One lookup decides among seven outcomes: home, recap, open preview, wrapped-up preview, not
-found, rate limited and failure.
+One lookup on the address host decides among seven outcomes: home, recap, open preview,
+wrapped-up preview, not found (an unknown code, or a code on another Popkin's address), rate
+limited and failure.
 
 ![Sequence diagram for previewing an invite](diagrams/sequence-preview-invite.png)
 

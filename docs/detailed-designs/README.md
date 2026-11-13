@@ -30,6 +30,15 @@ root namespace `Popkin`. Every other entity carries its spec term: `Person`, `Me
 A person who is not a member of a Popkin receives `404` with code `popkin_not_found` for
 anything in it, so a Popkin's existence is never disclosed (L2-051).
 
+Every Popkin has its own address, `https://{address}.popkin.community` (L1-016). The same web app
+answers on the apex, `popkin.community`, and on every address host, and the proxy forwards `/api`
+and `/hubs` on every host, so each host is one origin
+([Open a Popkin by its address](popkins/open-by-address/README.md),
+[Address safety](security/address-safety/README.md)). The designs write the routes inside a
+Popkin as `/p/:popkinId/...`; on an address host each is served at the same path without that
+prefix (`/p/:popkinId/chat` is `/chat` on `lakeside-weekend.popkin.community`). The apex keeps
+only `/p/:popkinId/created`.
+
 Shared names used across the designs:
 
 - `IMembershipGuard` (`RequireMemberAsync`, `RequireActiveMemberAsync`, `RequireHostAsync`) is
@@ -38,9 +47,13 @@ Shared names used across the designs:
   `popkin_wrapped_up`, `429` `rate_limited`.
 - Rate-limiter policy names live in `RateLimitPolicyNames`
   ([Abuse limits](security/abuse-limits/README.md)).
-- The session cookie is `__Host-popkin`, `Secure`, `HttpOnly` and `SameSite=Strict`. The
-  scaffold sets `Lax` today; [Sessions](accounts/sessions/README.md) gives the reason for the
-  change (L2-007 AC4).
+- The session cookie is `__Host-popkin`, `Secure`, `HttpOnly` and `SameSite=Strict`, as built in
+  journey 1 ([Sessions](accounts/sessions/README.md), L2-007 AC4). Addresses change it to
+  `__Secure-popkin` with `Domain` set to the base domain, so one session serves every address
+  ([Address safety](security/address-safety/README.md), L2-067 AC3).
+- Addresses, invite links and Popkin links are built by `PopkinUrlBuilder` from the configuration
+  section `Addresses` (`BaseDomain`, `Reserved`), which replaces `Invites:BaseUrl`
+  ([Choose the address](popkins/choose-address/README.md)).
 - Routes follow the mock manifest. A direct message is `/p/:popkinId/chat/:memberId` and the
   welcome screen is `/i/:code/welcome`.
 
@@ -105,6 +118,16 @@ Each design follows the source named below and marks the conflict in its own REA
   ([View an experience](experiences/view-experience/README.md)). The design follows the mock.
 - The album thumbnails carry empty `alt` text, while L2-032 AC7 names the text
   ([Browse the album](photos/browse-album/README.md)). The design follows the requirement.
+- The invite dialog, the created screen and "Got a code?" show the short link `popk.in/lakeside`,
+  while L2-065 builds the link on the Popkin's address and L2-011 AC5 no longer allows a code the
+  Host chose ([Invite people](invitations/invite-people/README.md),
+  [Join by code](invitations/join-by-code/README.md)). The design follows the requirement; the
+  mocks need the new link.
+- L2-064 AC7 asks for the not-found screen at a host more than one label deep
+  (`a.b.popkin.community`), while a wildcard certificate covers one label only, so the browser
+  refuses the connection before any screen loads, and L2-067 AC5 refuses such a host with `400`
+  ([Address safety](security/address-safety/README.md)). The design follows L2-067 AC5; whether a
+  certificate for deeper hosts is wanted is open (known gap 19).
 - L2-002 AC4 shows "Sign in" from 640 px, while the design system's responsive page says
   576 px ([Responsive layout](accessibility/responsive-layout/README.md)). The design follows
   the requirement.
@@ -120,15 +143,17 @@ Each design follows the source named below and marks the conflict in its own REA
 | Accounts | [Sessions](accounts/sessions/README.md) | L2-007, L2-050 |
 | Accounts | [Manage the account](accounts/manage-account/README.md) | L2-048 |
 | Accounts | [Delete the account](accounts/delete-account/README.md) | L2-049 |
-| Popkins | [Start a Popkin](popkins/start-popkin/README.md) | L2-008, L2-009, L2-010 |
-| Popkins | [My Popkins](popkins/my-popkins/README.md) | L2-017, L2-018 |
+| Popkins | [Start a Popkin](popkins/start-popkin/README.md) | L2-008, L2-009, L2-010, L2-062, L2-065 |
+| Popkins | [Choose the address](popkins/choose-address/README.md) | L2-062, L2-063, L2-067 |
+| Popkins | [Open a Popkin by its address](popkins/open-by-address/README.md) | L2-064 |
+| Popkins | [My Popkins](popkins/my-popkins/README.md) | L2-017, L2-018, L2-064 |
 | Popkins | [Popkin home](popkins/popkin-home/README.md) | L2-019 |
-| Popkins | [Popkin settings](popkins/popkin-settings/README.md) | L2-020 |
+| Popkins | [Popkin settings](popkins/popkin-settings/README.md) | L2-020, L2-066 |
 | Popkins | [Leave a Popkin](popkins/leave-popkin/README.md) | L2-047 |
-| Invitations | [Invite people](invitations/invite-people/README.md) | L2-011 |
-| Invitations | [Preview an invite](invitations/preview-invite/README.md) | L2-012, L2-016 |
+| Invitations | [Invite people](invitations/invite-people/README.md) | L2-011, L2-065 |
+| Invitations | [Preview an invite](invitations/preview-invite/README.md) | L2-012, L2-016, L2-065 |
 | Invitations | [Join a Popkin](invitations/join-popkin/README.md) | L2-013, L2-014 |
-| Invitations | [Join by code](invitations/join-by-code/README.md) | L2-015 |
+| Invitations | [Join by code](invitations/join-by-code/README.md) | L2-015, L2-065 |
 | Chat | [Send a message to everyone](chat/send-message-to-everyone/README.md) | L2-021 |
 | Chat | [Conversations](chat/conversations/README.md) | L2-022 |
 | Chat | [Direct messages](chat/direct-messages/README.md) | L2-023 |
@@ -159,6 +184,7 @@ Each design follows the source named below and marks the conflict in its own REA
 | Security | [Input validation and encoding](security/input-validation-and-encoding/README.md) | L2-052 |
 | Security | [Abuse limits](security/abuse-limits/README.md) | L2-053 |
 | Security | [Personal data protection](security/personal-data-protection/README.md) | L2-054 |
+| Security | [Address safety](security/address-safety/README.md) | L2-067 |
 | Reliability | [Fast screens](reliability/fast-screens/README.md) | L2-055 |
 | Reliability | [Loading, failure and offline](reliability/loading-failure-offline/README.md) | L2-056 |
 | Accessibility | [WCAG 2.2 AA](accessibility/wcag-2-2-aa/README.md) | L2-057 |
@@ -166,7 +192,7 @@ Each design follows the source named below and marks the conflict in its own REA
 | Accessibility | [Light and dark themes](accessibility/light-and-dark-themes/README.md) | L2-059 |
 | Accessibility | [Optional motion](accessibility/optional-motion/README.md) | L2-060 |
 
-Every L2 requirement from L2-001 to L2-061 is realised by at least one feature above.
+Every L2 requirement from L2-001 to L2-067 is realised by at least one feature above.
 
 ## Known gaps
 
@@ -193,6 +219,10 @@ or design that settled it.
 | 14 | Number of Worker instances ([Time is up](wrap-up/time-is-up/README.md)) | Journey 9 | |
 | 15 | Whether field measurement of screen speed is wanted, and its collector ([Fast screens](reliability/fast-screens/README.md)) | Nothing | |
 | 16 | One command that starts the API, the Worker and the app (an AppHost, by ADR) | Nothing; wanted when the Worker hosts its first job (journey 9) | |
+| 17 | DNS provider, wildcard certificate authority and renewal for `*.popkin.community` ([Address safety](security/address-safety/README.md)) | First deployment with addresses; L2-067 AC1 | |
+| 18 | How each web app build sets `BASE_DOMAIN`, and whether development needs one session across `*.localhost` ([Open a Popkin by its address](popkins/open-by-address/README.md), [Address safety](security/address-safety/README.md)) | Building addresses (journey 1 rework) | |
+| 19 | Whether a host more than one label deep should reach the not-found screen, which needs a certificate beyond the wildcard (L2-064 AC7 against L2-067 AC5) | Nothing | |
+| 20 | Mocks for the address field, the not-here screen, the address on the created screen and in Edit name and look, and the invite link on the address ([Choose the address](popkins/choose-address/README.md)) | Building addresses | |
 
 Settled so far:
 

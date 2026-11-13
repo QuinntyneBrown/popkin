@@ -1,0 +1,73 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Address safety
+
+package "Popkin.Domain" {
+  class PopkinAddress <<value object>> {
+    +{static} TryParse(text, out address, out problem): bool
+  }
+  class Session {
+    +Guid Id
+    +Guid PersonId
+    +DateTimeOffset ExpiresAt
+    +DateTimeOffset? RevokedAt
+    +IsLive(now): bool
+    +Revoke(now): void
+  }
+}
+package "Popkin.Application" {
+  class AddressOptions {
+    +string BaseDomain
+    +string[] Reserved
+  }
+  interface IMembershipGuard {
+    +RequireMemberAsync(popkinId, ct): Task<Membership>
+  }
+}
+package "Popkin.Api" {
+  class HostCheckMiddleware {
+    +InvokeAsync(context): Task
+    -IsAllowed(host): bool
+  }
+  class SameSiteRequestMiddleware {
+    -string apexOrigin
+    +InvokeAsync(context): Task
+    -IsSameSite(request): bool
+    -IsPopkinOrigin(origin): bool
+  }
+  class SessionCookie <<static>> {
+    +string Name = "__Secure-popkin"
+    +AddPopkinSessions(services): IServiceCollection
+    +SignInAsync(http, session): Task
+    +SignOutAsync(http): Task
+  }
+  class SessionCookieEvents {
+    +ValidatePrincipal(context): Task
+  }
+  class RateLimitPolicyNames <<static>> {
+    +string AddressChecks = "address-checks"
+  }
+}
+HostCheckMiddleware --> AddressOptions
+HostCheckMiddleware ..> PopkinAddress : parses label
+SameSiteRequestMiddleware --> AddressOptions
+SameSiteRequestMiddleware ..> PopkinAddress : parses Origin label
+SessionCookie --> AddressOptions : Cookie.Domain
+SessionCookieEvents ..> Session : checks IsLive
+@enduml

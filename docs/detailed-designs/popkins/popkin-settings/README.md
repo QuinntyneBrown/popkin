@@ -16,6 +16,11 @@ rules of L2-008 and the length rules of L2-009. "Invite people", "Wrap up" and "
 Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
 `popkins/leave-popkin`.
 
+A Popkin's address ([Choose the address](../choose-address/README.md)) is not part of its look.
+Renaming the Popkin leaves the address as it was, so printed QR codes and saved links keep
+working for as long as the Popkin exists (L2-066). "Edit name and look" shows the address as text
+that cannot be edited, and no endpoint changes it.
+
 ## Description
 
 ### Screens and states
@@ -24,6 +29,9 @@ Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
 - `docs/mocks/dialogs/edit-popkin/default.html`, `busy.html` ("Saving…"), `invalid.html` ("Give
   your Popkin a name."), `failed.html` ("We couldn't save that. Your changes are still here. Try
   again.").
+- The address in "Edit name and look" (L2-066 AC2) is not drawn yet. `edit-popkin/default.html`
+  needs the address as read-only text and the sentence that it stays the same so that links keep
+  working; its copy is `<TO SUPPLY>`.
 - `docs/mocks/dialogs/change-length/default.html`, `busy.html`, `failed.html` ("We couldn't
   change that. It still wraps up Sunday at 6 pm. Try again.").
 - `docs/mocks/dialogs/end-date/default.html` and `invalid.html`, reused from
@@ -34,6 +42,9 @@ Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
 - `PATCH /api/popkins/{popkinId}` — body `{ name, emoji, colour }`; `200` `PopkinDto`.
   Failures: `400` `name_required`, `name_too_long`, `emoji_not_allowed`, `colour_not_allowed`;
   `403` `host_only`; `404` `popkin_not_found`; `409` `popkin_wrapped_up`.
+  The body admits no other member: a body that carries `address`, or any property not named
+  here, is refused with `400` and `code` `address_cannot_change` for `address` and
+  `unknown_field` otherwise (L2-066 AC3).
 - `PUT /api/popkins/{popkinId}/length` — body `{ length, endsAt }`; `200` `PopkinDto`.
   Failures: `400` `length_not_allowed`, `ends_at_out_of_range`; `403` `host_only`; `404`
   `popkin_not_found`; `409` `popkin_wrapped_up`.
@@ -51,7 +62,9 @@ Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
   `pk-colour-picker`, "Save" and "Cancel". An empty name marks the field invalid with "Give your
   Popkin a name." and sends nothing (L2-008 AC3). While saving, "Save" reads "Saving…" and is
   disabled (L2-056 AC3). On failure the dialog stays open with the entries and `pk-alert`
-  (L2-020 AC6).
+  (L2-020 AC6). Below the name it shows `{address}.popkin.community` as text, not as a field, with
+  the sentence that the address stays the same so that links keep working (L2-066 AC2). Saving a
+  new name leaves the address on the dialog and on the home unchanged (L2-066 AC1).
 - **`ChangeLengthDialog`** (`dialogs/change-length/change-length.dialog.ts`) — "How long should
   it last?", "Everyone sees the new time left.", the four `pk-choice-card` options of
   `HowLongPage` with the current one chosen, and the date control that opens `EndDateDialog`.
@@ -80,6 +93,14 @@ Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
   without further work.
 - **`SignalRPopkinNotifier`** (`Popkin.Api`) — implements `IPopkinNotifier`; sends
   `PopkinChanged` with the `PopkinDto` to `popkin:{popkinId}`.
+- **The address does not change (L2-066)** — `PopkinSpace.Address` has no setter after
+  `PopkinSpace.Start`, and `ChangeLook` takes the name, emoji and colour only, so a rename keeps
+  the address (L2-066 AC1). `UpdatePopkinLookRequest` carries
+  `[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]`; a body with `address` is
+  refused with `400` `address_cannot_change`, and no endpoint of the API writes an address after
+  creation (L2-066 AC3). A wrapped-up Popkin keeps its address, so its address and its invite
+  link lead to the recap and to L2-016 at the same place (L2-066 AC4).
+- **`PopkinDto`** (changed) — gains `Address`, which `EditPopkinDialog` shows.
 - The order of checks — membership, then role, then status — keeps a non-member's answer at
   `404` whatever the Popkin's state.
 
@@ -90,6 +111,7 @@ Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
 | `L2-020` | `L1-006` | Popkin settings: The Host changes how a Popkin looks and how long it lasts. |
 | `L2-008` | `L1-003` | Name a Popkin and pick its emoji and colour: The first step of starting a Popkin gives it a name, an emoji and a colour, with a preview that changes as they are chosen. |
 | `L2-009` | `L1-003` | Choose how long a Popkin lasts: The second step sets when the Popkin wraps up. |
+| `L2-066` | `L1-016` | The address does not change: A printed QR code and a saved link must keep working for as long as the Popkin exists. |
 | `L2-051` | `L1-012` | Popkins are private to their members: Membership decides everything a person sees. |
 
 ## Diagrams
@@ -140,3 +162,10 @@ The new end follows the same range rules as at creation and updates the time lef
 member.
 
 ![Sequence diagram for changing the length](diagrams/sequence-change-length.png)
+
+### Behaviour — the address stays when the Popkin is renamed
+
+The Host renames the Popkin; the address on the dialog, the home and every invite stays the same,
+and a request that tries to change it is refused (L2-066 AC1 to AC3).
+
+![Sequence diagram for the address staying the same](diagrams/sequence-address-stays.png)

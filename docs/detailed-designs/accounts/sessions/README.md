@@ -31,6 +31,13 @@ front-end guard and interceptor.
 ### Back end
 
 - **`Session`** (`Popkin.Domain`, introduced) — `Id`, `PersonId`, `CreatedAt`, `ExpiresAt`, `RevokedAt?`. `Start(personId, now)` sets `ExpiresAt` to 30 days after `now` (L2-007 AC1). `IsLive(now)` and `Revoke(now)` express the rules. `IAppDbContext` gains `DbSet<Session> Sessions`; `SessionConfiguration` indexes `PersonId`. Whether each authenticated request extends `ExpiresAt` (sliding expiry) or the 30 days run from sign in (absolute expiry) is `<TO SUPPLY>`.
+- **Address hosts (changed by L2-067)** — every Popkin has its own host under
+  `popkin.community` (L1-016), and one session must serve them all (L2-067 AC3). The cookie
+  therefore becomes `__Secure-popkin` with `Domain` set to the base domain, keeping `HttpOnly`,
+  `Secure`, `SameSite=Strict` and `Path=/`; the `__Host-` prefix below forbids a `Domain` and is
+  retired. The same-site proof also accepts an `Origin` on any address host. Both changes are
+  designed in [Address safety](../../security/address-safety/README.md); the text below records
+  the design as journey 1 built it.
 - **Cookie options** (`Program.cs`, changed) — `Cookie.Name = "__Host-popkin"`, `Cookie.HttpOnly = true` (existing), `Cookie.SecurePolicy = CookieSecurePolicy.Always`, `Cookie.Path = "/"`, `ExpireTimeSpan` 30 days, `Events` replaced by `SessionCookieEvents`, which keeps the existing 401 and 403 answers instead of redirects. The `__Host-` prefix forbids a `Domain` attribute and requires `Secure`, so the cookie goes only to the origin that set it and only over HTTPS (L2-007 AC4).
 - **SameSite: Lax to Strict (changed)** — L2-007 AC4 requires that the cookie "is not sent with requests from other sites". `SameSite=Lax` still sends it on top-level cross-site navigations, so it does not meet the criterion. `SameSite=Strict` does. All API calls come from the single-page app on the same site, so Strict costs nothing: an invite link opened from another site loads the app shell, and the app's later API calls are same-site. This corrects the existing setting; the change belongs in the same change set as this feature.
 - **`SameSiteRequestMiddleware`** (`Popkin.Api`, introduced) — runs before authentication. For `POST`, `PUT`, `PATCH` and `DELETE` under `/api` and `/hubs`, it accepts the request when `Sec-Fetch-Site` is `same-origin`, or, where that header is absent, when `Origin` equals the configured app origin (`App:Origin`). Otherwise it answers 403 `cross_site_request` (L2-050 AC2). This "same-site proof" replaces anti-forgery tokens, which the SPA would otherwise have to fetch from an extra anonymous endpoint; together with `SameSite=Strict` it closes cross-site request forgery.
@@ -72,6 +79,7 @@ front-end guard and interceptor.
 |-------|--------------|-------------|
 | `L2-007` | `L1-002` | Sessions: A signed-in person stays signed in on their device until they sign out or the session ends. |
 | `L2-050` | `L1-012` | Every request is authenticated: Nothing private is served without a session. |
+| `L2-067` | `L1-012` | Addresses are safe: An address per Popkin must not weaken the privacy of a Popkin or the session of a person. AC3, AC4 and AC6 change this design; see [Address safety](../../security/address-safety/README.md). |
 
 ## Diagrams
 

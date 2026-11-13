@@ -1,0 +1,73 @@
+@startuml
+title UML sequence behaviour — Open an address
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "App start (readHost)" as start
+  participant "signedInGuard" as guard
+  participant "popkinAtAddressResolver" as resolver
+  participant "HttpPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPopkinAtAddressQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> start : Open https://lakeside-weekend.popkin.community/
+start -> start : readHost(hostname) in lower case (L2-064 AC6)
+alt notAnAddress: reserved word or deeper host (L2-064 AC7)
+  start --> actor : Not-found screen
+else address
+  start -> guard : Activate the Popkin's routes
+  alt visitor (L2-064 AC3)
+    guard --> actor : /sign-in?returnUrl=/ on the same host
+    actor -> guard : Confirm the code, return to /
+  end
+  guard -> resolver : Signed in
+  resolver -> client : getAtAddress("lakeside-weekend")
+  client -> ctrl : GET /api/popkins/at/lakeside-weekend
+  ctrl -> handler : Send GetPopkinAtAddressQuery
+  handler -> handler : PopkinAddress.TryParse, reserved words
+  alt malformed or reserved
+    handler --> ctrl : NotAnAddressException
+    ctrl --> client : 404 not_an_address
+    resolver --> actor : Not-found screen (L2-064 AC7)
+  else well formed
+    handler -> db : Caller's membership, LeftAt null, PopkinSpace.Address = address
+    alt no row: not a member, or no Popkin (L2-064 AC4, AC5, L2-051 AC1)
+      db --> handler : none
+      handler --> ctrl : PopkinNotFoundException
+      ctrl --> client : 404 popkin_not_found, same body in both cases
+      resolver --> actor : Not-here screen: "Join with a code", "Your Popkins"; no name, emoji or count
+    else member
+      db --> handler : PopkinId, Status
+      handler --> ctrl : PopkinAtAddressDto
+      ctrl --> client : 200
+      client --> resolver : PopkinAtAddressView
+      resolver -> resolver : CurrentPopkin.set(view)
+      alt active (L2-064 AC1)
+        resolver --> actor : Popkin home at /
+      else wrapped up (L2-064 AC2)
+        resolver --> actor : Redirect to /recap
+      end
+    end
+  end
+end
+@enduml

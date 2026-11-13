@@ -5,8 +5,9 @@
 Popkin grows by invitation. Any member of an active Popkin can bring someone in without knowing
 their phone number: they show a QR code to scan, or copy an invite link to send.
 
-- **invite code** — short unguessable or Host-chosen string that identifies one Popkin's invite
-- **invite link** — URL made of the invite base address and the invite code, such as `popk.in/lakeside`
+- **invite code** — short unguessable string that identifies one Popkin's invite
+- **address** — web address that belongs to one Popkin, `https://{address}.popkin.community`
+- **invite link** — URL made of the Popkin's address, the path `/i/` and the invite code, such as `https://lakeside-weekend.popkin.community/i/7kq2mxr9ta`
 - **QR code** — two-dimensional barcode that encodes the invite link
 
 This feature covers the "Bring someone in" dialog, opened by "Invite" on the Popkin home or by
@@ -14,12 +15,19 @@ This feature covers the "Bring someone in" dialog, opened by "Invite" on the Pop
 (`popkins/start-popkin`); the dialog reads it. What happens when someone opens the link belongs
 to `invitations/preview-invite`.
 
+The invite link is built on the Popkin's address (L2-065), so the person invited sees where they
+are going. The address shows which Popkin; the code is what lets a person in. A bare address
+admits nobody ([Open a Popkin by its address](../../popkins/open-by-address/README.md)).
+
 ## Description
 
 ### Screens and states
 
 - `docs/mocks/dialogs/invite/default.html` — "Bring someone in", "They scan, they're in. No
   numbers needed.", QR code, emoji and name, `popk.in/lakeside`, "Copy invite link".
+- The mocks write the link as `popk.in/lakeside`, the short form that L2-065 replaces. The dialog
+  shows the link on the address; the mock needs the new link before implementation, and how a
+  long link fits the card at 360 px is `<TO SUPPLY>`.
 - `docs/mocks/dialogs/invite/copied.html` — the action reads "Copied", live announcement "Invite
   link copied".
 - The mocks draw no loading or failure state for the dialog (the manifest marks busy and invalid
@@ -60,17 +68,21 @@ to `invitations/preview-invite`.
 - **`GetInviteQueryHandler`** — calls `IMembershipGuard.RequireMemberAsync` (`404`
   `popkin_not_found` for anyone else, L2-051 AC1), refuses a wrapped-up Popkin with
   `PopkinWrappedUpException` (`409` `popkin_wrapped_up`), and returns `InviteDto`: `Code`,
-  `Url`, `PopkinName`, `Emoji`, `Colour`. Any member may read it; the invite is not Host-only
+  `Url`, `Address`, `PopkinName`, `Emoji`, `Colour`. Any member may read it; the invite is not Host-only
   (L2-011).
-- **`InviteLinkBuilder`** — builds `Url` from `InviteOptions.BaseUrl` (configuration
-  `Invites:BaseUrl`) and the code. The mocks show the short form `popk.in/{code}`; the
-  production base address and how it reaches the web app route `/i/:code` (redirect or same
-  host) are `<TO SUPPLY>`.
+- **`PopkinUrlBuilder`** (replaces `InviteLinkBuilder`) — `InviteUrl(address, code)` builds
+  `https://{address}.{BaseDomain}/i/{code}` from `AddressOptions` (configuration
+  `Addresses:BaseDomain`). The link is the Popkin's address followed by a path that ends in the
+  code, and the QR code holds that link (L2-065 AC1). The dialog shows and copies the same link
+  (L2-065 AC3). The route `/i/:code` is served on the address host by the same web app
+  ([Open a Popkin by its address](../../popkins/open-by-address/README.md)), so the link needs no
+  redirect. `Invites:BaseUrl` is retired.
 - **Invite code rules (L2-011 AC5)** — `RandomInviteCodeGenerator` draws 10 characters from
   `abcdefghjkmnpqrstuvwxyz23456789` with `RandomNumberGenerator`, which leaves out characters
   that read alike. `PopkinSpaceConfiguration` puts a unique index on `InviteCode`, and creation
-  retries on a collision. A Host-chosen slug shall be at least 8 characters and unique too; the
-  screen and endpoint to choose one do not exist in the mocks and are `<TO SUPPLY>`.
+  retries on a collision. L2-011 AC5 now reads that the link begins with the Popkin's address and
+  that the code is at least 8 characters from an unguessable source; a code the Host chooses is
+  no longer allowed. The Host chooses the address instead.
 - **Lookups by code** — the code is matched exactly after lower-casing; the anonymous lookup and
   its rate limit live in `invitations/preview-invite`.
 
@@ -80,8 +92,8 @@ to `invitations/preview-invite`.
   centre does not stop a camera reading it. `encodeQr()` in the `api` library wraps it.
 - **Quiet zone** — the QR code's own padding is white in both themes (the design system's `.qr`
   now carries it), and a behaviour spec decodes the code from its pixels in both themes.
-- **`Invites:BaseUrl`** — configuration; `https://popk.in/` locally and in tests. How the
-  production address reaches `/i/:code` stays `<TO SUPPLY>`.
+- **`Invites:BaseUrl`** — configuration; `https://popk.in/` locally and in tests. Retired by
+  L2-065: `Addresses:BaseDomain` takes its place, and the invite link is built on the address.
 
 ### Settled when the wide layouts were built
 
@@ -98,6 +110,7 @@ to `invitations/preview-invite`.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-011` | `L1-004` | Invite with a QR code or a link: Any member invites people from the Popkin home. |
+| `L2-065` | `L1-016` | Invites carry the address: The invite link and the QR code are built on the Popkin's address, so the person invited sees where they are going. The address shows which Popkin; the code is what lets a person in. This feature realises AC1 and AC3. |
 | `L2-051` | `L1-012` | Popkins are private to their members: Membership decides everything a person sees. |
 | `L2-057` | `L1-014` | Accessible to WCAG 2.2 AA: Everyone can use every screen. |
 
@@ -120,13 +133,13 @@ database; the QR code is drawn on the device.
 ### Components
 
 `InviteDialog` reads through `PopkinsApi` and draws with `QrEncoder` and `pk-qr-card`;
-`GetInviteQueryHandler` checks membership and builds the link with `InviteLinkBuilder`.
+`GetInviteQueryHandler` checks membership and builds the link on the address with `PopkinUrlBuilder`.
 
 ![C4 component view for inviting people](diagrams/c4-component.png)
 
 ### Class structure
 
-`InviteDto` is built from `PopkinSpace` and `InviteOptions`; `RandomInviteCodeGenerator` and the
+`InviteDto` is built from `PopkinSpace` and `AddressOptions`; `RandomInviteCodeGenerator` and the
 unique index carry the code rules.
 
 ![Class diagram for inviting people](diagrams/class-structure.png)

@@ -1,0 +1,47 @@
+@startuml
+title UML sequence behaviour — Sign out at one address
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app on lakeside-weekend" #E0F2FE
+  participant "Account menu" as spa1
+end box
+box "Frontend — Popkin web app on thursday-night" #E0F2FE
+  participant "Open tab" as spa2
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as ctrl
+  participant "SessionCookieEvents" as cookie
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SignOutCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> spa1 : Sign out
+spa1 -> ctrl : POST /api/auth/sign-out, cookie __Secure-popkin
+ctrl -> handler : Send SignOutCommand
+handler -> db : Session.Revoke(now)
+db --> handler : Committed
+ctrl --> spa1 : 204, Set-Cookie __Secure-popkin expired, Domain=popkin.community
+spa1 --> actor : Signed out
+actor -> spa2 : Act in the other tab
+spa2 -> cookie : Any /api request (cookie already removed for the site)
+cookie -> db : Session live?
+db --> cookie : Revoked
+cookie --> spa2 : 401 (L2-067 AC3, L2-050 AC3)
+spa2 --> actor : Sign-in screen on that address
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Open a Popkin by its address
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(host, "readHost / HostKind", "Pure helper and token", "apex, www, address or notAnAddress")
+  Component(routes, "ROUTES factory", "app.config.ts", "apexRoutes or addressRoutes")
+  Component(guard, "signedInGuard", "CanActivateFn", "Visitor to /sign-in?returnUrl=/")
+  Component(resolver, "popkinAtAddressResolver", "ResolveFn", "Home, recap, not here or not found")
+  Component(current, "CurrentPopkin", "Signal store", "popkinId and status for the host")
+  Component(nothere, "NotHerePage", "Angular page", "Join with a code, Your Popkins")
+  Component(client, "HttpPopkinsApi", "POPKINS_API", "getAtAddress(address)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PopkinsController", "ASP.NET Core controller", "GET /api/popkins/at/{address}")
+  Component(handler, "GetPopkinAtAddressQueryHandler", "MediatR handler", "One membership query")
+  Component(addr, "PopkinAddress", "Domain value object", "Address rules")
+  ComponentDb(db, "Popkin database", "SQL Server", "Membership, PopkinSpace")
+}
+Rel(routes, host, "Reads")
+Rel(routes, guard, "Guards the Popkin's routes with")
+Rel(routes, resolver, "Resolves with")
+Rel(resolver, client, "Calls")
+Rel(resolver, current, "Stores the result in")
+Rel(resolver, nothere, "Opens on 404 popkin_not_found")
+Rel(client, ctrl, "GET", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetPopkinAtAddressQuery")
+Rel(handler, addr, "Parses with")
+Rel(handler, db, "Reads the caller's live membership", "EF Core")
+@enduml

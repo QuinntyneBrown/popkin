@@ -1,0 +1,101 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #FFFFFF
+}
+' --------------------------
+title Class structure — Open a Popkin by its address
+
+package "Popkin.Domain" {
+  class PopkinAddress <<value object>>
+  class PopkinSpace {
+    +Guid Id
+    +PopkinAddress Address
+    +PopkinStatus Status
+  }
+  class Membership {
+    +Guid PopkinId
+    +Guid PersonId
+    +DateTimeOffset? LeftAt
+  }
+}
+package "Popkin.Application" {
+  class GetPopkinAtAddressQuery {
+    +string Address
+  }
+  class GetPopkinAtAddressQueryHandler {
+    +Handle(query, ct): Task<PopkinAtAddressDto>
+  }
+  class PopkinAtAddressDto {
+    +Guid PopkinId
+    +PopkinStatus Status
+  }
+  class PopkinNotFoundException <<404 popkin_not_found>>
+  class NotAnAddressException <<404 not_an_address>>
+  class AddressOptions {
+    +string BaseDomain
+    +string[] Reserved
+  }
+  class PopkinUrlBuilder {
+    +AddressUrl(address): string
+    +InviteUrl(address, code): string
+  }
+}
+package "Popkin.Api" {
+  class PopkinsController {
+    +GetAtAddress(address, ct): Task<PopkinAtAddressDto>
+  }
+}
+package "Frontend (popkin app + api library)" {
+  enum HostKind {
+    apex
+    www
+    address
+    notAnAddress
+  }
+  class readHost <<pure helper>> {
+    +readHost(hostname, baseDomain, reserved): HostKind
+  }
+  class CurrentPopkin {
+    +popkinId: Signal<string>
+    +status: Signal<PopkinStatus>
+  }
+  class popkinAtAddressResolver <<ResolveFn>>
+  class NotHerePage
+  class PopkinUrls {
+    +home(addressUrl): string
+    +recap(addressUrl): string
+    +apex(path): string
+  }
+  interface PopkinsApi {
+    +getAtAddress(address): Observable<PopkinAtAddressView>
+  }
+}
+PopkinSpace --> PopkinAddress
+PopkinSpace "1" *-- "*" Membership
+PopkinsController ..> GetPopkinAtAddressQuery : sends
+GetPopkinAtAddressQueryHandler ..> GetPopkinAtAddressQuery : handles
+GetPopkinAtAddressQueryHandler ..> Membership : reads
+GetPopkinAtAddressQueryHandler --> AddressOptions
+GetPopkinAtAddressQueryHandler ..> PopkinAtAddressDto : returns
+GetPopkinAtAddressQueryHandler ..> PopkinNotFoundException : throws
+GetPopkinAtAddressQueryHandler ..> NotAnAddressException : throws
+PopkinUrlBuilder --> AddressOptions
+readHost ..> HostKind : returns
+popkinAtAddressResolver --> PopkinsApi
+popkinAtAddressResolver --> CurrentPopkin : writes
+popkinAtAddressResolver ..> NotHerePage : opens
+NotHerePage --> PopkinUrls
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Address safety
+
+Container_Boundary(api, "Popkin API") {
+  Component(fwd, "UseForwardedHeaders", "ASP.NET Core middleware", "Trusts the configured proxy only")
+  Component(hostcheck, "HostCheckMiddleware", "Middleware", "400 host_not_allowed; host never echoed")
+  Component(samesite, "SameSiteRequestMiddleware", "Middleware", "Accepts same-origin, or an Origin on the apex or an address")
+  Component(cookie, "SessionCookie / SessionCookieEvents", "Cookie authentication", "__Secure-popkin, Domain = base domain; checks the Session row")
+  Component(limits, "Rate limiter", "address-checks policy", "30 checks a minute per person")
+  Component(guard, "IMembershipGuard", "Application service", "404 popkin_not_found for a non-member")
+  Component(addr, "PopkinAddress / AddressOptions", "Domain and options", "Label rules, base domain")
+  ComponentDb(db, "Popkin database", "SQL Server", "Session, Membership")
+}
+Rel(fwd, hostcheck, "Then")
+Rel(hostcheck, samesite, "Then")
+Rel(samesite, cookie, "Then")
+Rel(cookie, limits, "Then")
+Rel(limits, guard, "Handlers call")
+Rel(hostcheck, addr, "Parses the label with")
+Rel(samesite, addr, "Parses the Origin label with")
+Rel(cookie, addr, "Reads the base domain from")
+Rel(cookie, db, "Reads Session", "EF Core")
+Rel(guard, db, "Reads Membership", "EF Core")
+@enduml

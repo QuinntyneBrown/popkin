@@ -27,7 +27,7 @@ end box
 box "Backend — Popkin Application and Domain" #ECFDF3
   participant "GetInviteQueryHandler" as handler
   participant "IMembershipGuard" as guard
-  participant "InviteLinkBuilder" as link
+  participant "PopkinUrlBuilder" as link
 end box
 box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
@@ -43,9 +43,9 @@ alt not a member (L2-051 AC1)
 else Popkin wrapped up (L2-045 AC2)
   handler --> ctrl : 409 popkin_wrapped_up
 else member of active Popkin
-  handler -> db : PopkinSpace name, emoji, colour, InviteCode
-  handler -> link : Build(code)
-  link --> handler : https://popk.in/(code) (base URL TO SUPPLY)
+  handler -> db : PopkinSpace name, emoji, colour, Address, InviteCode
+  handler -> link : InviteUrl(address, code)
+  link --> handler : https://lakeside-weekend.popkin.community/i/(code) (L2-065 AC1)
   handler --> ctrl : InviteDto
   ctrl --> client : 200
 end
