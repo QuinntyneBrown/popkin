@@ -9,6 +9,11 @@ namespace Popkin.Api.Controllers;
 [Route("api/popkins/{popkinId:guid}/threads")]
 public sealed class ThreadsController(ISender sender) : ControllerBase
 {
+    /// <summary>The Chat tab: Everyone, then the caller's direct messages, the most recent first (L2-022).</summary>
+    [HttpGet]
+    public async Task<ActionResult<ThreadListDto>> List(Guid popkinId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetThreadsQuery(popkinId), cancellationToken));
+
     /// <summary>The Everyone thread, which every member shares (L2-021).</summary>
     [HttpGet("everyone")]
     public async Task<ActionResult<ThreadDto>> GetEveryone(Guid popkinId, CancellationToken cancellationToken) =>
