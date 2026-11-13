@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ExperienceCardView, ExperienceFilter } from '../../models/experiences';
@@ -37,7 +38,9 @@ export class ExperiencesStore {
   private reading?: Subscription;
   private readonly items = signal<ExperienceCardView[]>([]);
 
-  readonly state = signal<'loading' | 'ready' | 'empty' | 'no-results' | 'error'>('loading');
+  readonly state = signal<'loading' | 'ready' | 'empty' | 'no-results' | 'error' | 'not-found'>(
+    'loading',
+  );
   readonly filter = signal<ExperienceFilter>('all');
   readonly cards = computed(() => this.items().map(toCard));
   /** What the screen says with nothing to list. */
@@ -75,7 +78,10 @@ export class ExperiencesStore {
         this.items.set(items);
         this.state.set(items.length ? 'ready' : this.filter() === 'all' ? 'empty' : 'no-results');
       },
-      error: () => this.state.set('error'),
+      error: (error: unknown) =>
+        this.state.set(
+          error instanceof HttpErrorResponse && error.status === 404 ? 'not-found' : 'error',
+        ),
     });
   }
 }

@@ -38,7 +38,7 @@ const beach = card('beach', {
 });
 
 describe('ExperiencesStore', () => {
-  type Answer = ExperienceCardView[] | 'down' | Subject<ExperienceCardView[]>;
+  type Answer = ExperienceCardView[] | 'down' | 'missing' | Subject<ExperienceCardView[]>;
   let answers: Record<ExperienceFilter, Answer>;
   let asked: ExperienceFilter[];
   let store: ExperiencesStore;
@@ -50,6 +50,7 @@ describe('ExperiencesStore', () => {
       asked.push(filter);
       const answer = answers[filter];
       if (answer === 'down') return throwError(() => new HttpErrorResponse({ status: 500 }));
+      if (answer === 'missing') return throwError(() => new HttpErrorResponse({ status: 404 }));
       return answer instanceof Subject ? answer : of(answer);
     };
     TestBed.configureTestingModule({
@@ -144,6 +145,12 @@ describe('ExperiencesStore', () => {
     store.retry();
     expect(store.state()).toBe('ready');
     expect(asked).toEqual(['all', 'all']);
+  });
+
+  it('is not found for someone who is not a member of the Popkin', () => {
+    answers.all = 'missing';
+    store.open('p', 'all');
+    expect(store.state()).toBe('not-found');
   });
 
   it('shows the filter chosen last when an earlier answer comes late', () => {
