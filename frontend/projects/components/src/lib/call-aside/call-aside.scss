@@ -1,0 +1,59 @@
+/* Absent until XL, where it is fixed at the end of the screen, in the room the screen leaves. */
+:host {
+  display: none;
+}
+
+@media (min-width: 80rem) {
+  :host {
+    position: fixed;
+    inset: 0 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    width: var(--pk-detail-width);
+    padding: var(--space-6) var(--space-5);
+    border-left: var(--border-width-hairline) solid var(--color-bg-stage-control);
+    background: var(--color-bg-stage-tile);
+    color: var(--color-fg-on-stage);
+    overflow-y: auto;
+  }
+}
+
+.call-aside__heading {
+  font: var(--text-h3);
+}
+
+.call-aside__list {
+  margin-top: var(--space-3);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-14);
+}
+
+.row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+/* The microphone: muted in tone, and the Popkin's colour while the person speaks. */
+.call-aside__microphone {
+  color: var(--color-fg-on-stage-muted);
+}
+
+.call-aside__microphone[data-speaking] {
+  color: var(--accent);
+}
+
+.call-aside__note {
+  margin-top: var(--space-4);
+  font: var(--text-body-sm);
+  color: var(--color-fg-on-stage-muted);
+}

@@ -86,3 +86,4 @@ export * from './lib/call-grid/call-grid';
 export * from './lib/call-tile/call-tile';
 export * from './lib/call-controls/call-controls';
 export * from './lib/stage-message/stage-message';
+export * from './lib/call-aside/call-aside';
