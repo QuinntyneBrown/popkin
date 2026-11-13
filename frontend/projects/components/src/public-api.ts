@@ -71,3 +71,4 @@ export * from './lib/fab/fab';
 export * from './lib/group-label/group-label';
 export * from './lib/photo-grid/photo-grid';
 export * from './lib/album/album';
+export * from './lib/tab-header/tab-header';

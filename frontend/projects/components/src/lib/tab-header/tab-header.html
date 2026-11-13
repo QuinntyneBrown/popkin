@@ -1,0 +1,30 @@
+<h1 class="tab-header__title">{{ heading() }}</h1>
+<div class="tab-header__summary">
+  @if (loading()) {
+    <span pk-skeleton shape="text" [width]="50"></span>
+  } @else {
+    @if (avatars().length) {
+      <span pk-avatar-stack size="2xs" [avatars]="avatars()" [more]="more()"></span>
+    }
+    <span>{{ summary() }}</span>
+  }
+</div>
+@if (filter() || action()) {
+  <div class="tab-header__tools">
+    @if (filter(); as label) {
+      <div class="chips" role="group" [attr.aria-label]="label"><ng-content /></div>
+    }
+    @if (action(); as words) {
+      <button
+        pk-button
+        class="tab-header__action"
+        type="button"
+        variant="popkin"
+        size="sm"
+        (click)="acted.emit()"
+      >
+        <svg pk-icon size="md" [name]="actionIcon()"></svg>{{ words }}
+      </button>
+    }
+  </div>
+}
