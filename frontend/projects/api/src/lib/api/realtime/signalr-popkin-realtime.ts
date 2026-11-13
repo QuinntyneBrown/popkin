@@ -90,8 +90,9 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
         connection.start().then(
           () => {
             this.status.set('connected');
-            // Whatever happened while it was not connected was missed.
-            if (tries > 0) this.back.next();
+            // The server answers before it has put the connection in its Popkins' groups, and
+            // nothing was heard while it was not connected: the screens read again what they show.
+            this.back.next();
           },
           () => this.open(connection, tries + 1),
         );

@@ -32,6 +32,22 @@ test.describe('reading the Everyone thread', () => {
     await expect(chat.screen).toHaveAttribute('data-accent', 'teal');
   });
 
+  // L2-021 AC1, L2-014 AC4: the thread as the API answered it when it was recorded
+  test('opens the thread the API recorded', async ({ page }) => {
+    await page.goto(chatUrl);
+    const chat = new GroupChatPage(page);
+
+    await expect(chat.heading).toHaveText('Lakeside Weekend');
+    await expect(chat.sub).toHaveText('4 members');
+    await expect(chat.notes).toHaveText([
+      'Walt Brennan popped in. Say hi! 👋',
+      'Dev Patel popped in. Say hi! 👋',
+      'Joel popped in. Say hi! 👋',
+    ]);
+    await expect(chat.texts()).toHaveText(['Pancakes at the main cabin, 8:30. Bring an appetite.']);
+    await expect(chat.nameOf(chat.messages.first())).toHaveText('Walt');
+  });
+
   // L2-021 AC1
   test('shows the messages oldest first, with the latest in view', async ({ page }) => {
     await maraInTheChat(page);

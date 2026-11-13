@@ -242,18 +242,22 @@ export class ThreadStore {
         last(),
         switchMap(() => {
           const shown = this.messages();
-          return this.chat.getMessages(thread.popkinId, thread.id, {
-            from: shown[0].id,
-            to: shown[shown.length - 1].id,
-          });
+          const to = shown[shown.length - 1];
+          return this.chat
+            .getMessages(thread.popkinId, thread.id, { from: shown[0].id, to: to.id })
+            .pipe(map((window) => ({ window, to })));
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (window) => {
+        next: ({ window, to }) => {
           this.today.set(new Date());
-          this.messages.set(window.items);
-          if (window.items.length > before && !this.latestInView) this.below.set(true);
+          // What arrived or was sent while the window was being read is newer than it: keep it.
+          const since = this.messages().filter(
+            (message) => mergeMessages([to], [message]).at(-1) === message && message.id !== to.id,
+          );
+          this.messages.set(mergeMessages(window.items, since));
+          if (this.messages().length > before && !this.latestInView) this.below.set(true);
           this.readPresence();
           this.reportRead();
         },

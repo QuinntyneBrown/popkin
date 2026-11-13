@@ -4,7 +4,7 @@ import responses from './api/responses.json';
 import { hubOf, type Hub } from './hub';
 import { mockToday } from './journeys';
 import { GroupChatPage } from '../pages/group-chat.page';
-import { problem } from './stubs';
+import { problem, recordedBody } from './stubs';
 
 /**
  * The Everyone thread of Lakeside Weekend as the mocks draw it, answered in place of the API
@@ -13,8 +13,29 @@ import { problem } from './stubs';
  */
 const created = responses['POST /api/popkins'].body;
 export const popkinId = created.id;
-export const threadId = '0c1d4b7e-2a55-4d0b-9a57-7c6f0b1e9a01';
+const recordedThread = recordedBody<RecordedThread>(
+  `GET /api/popkins/${created.id}/threads/everyone`,
+);
+export const threadId = recordedThread.id;
 export const chatUrl = `/p/${popkinId}/chat/everyone`;
+
+/** The Everyone thread as the API answers it. */
+interface RecordedThread {
+  id: string;
+  popkinId: string;
+  kind: string;
+  popkinName: string;
+  emoji: string;
+  colour: string;
+  endsAt: string | null;
+  memberCount: number;
+  hereNow: number;
+  presenceVersion: number;
+  readOnly: boolean;
+  unreadCount: number;
+  lastReadMessageId: string | null;
+  viewer: { membershipId: string; firstName: string };
+}
 
 interface Avatar {
   initials: string;
@@ -112,20 +133,15 @@ export function aLongThread(count: number): ChatMessage[] {
 type SendFailure = 'network' | 'server' | 'rate-limited' | 'too-long';
 
 export class Chat {
-  thread = {
-    id: threadId,
-    popkinId,
-    kind: 'Everyone',
-    popkinName: 'Lakeside Weekend',
-    emoji: '🏕️',
-    colour: 'Teal',
-    endsAt: new Date(2026, 8, 13, 18, 0).toISOString() as string | null,
+  /** The recorded thread, with the counts and the end the mocks draw. */
+  thread: RecordedThread = {
+    ...recordedThread,
+    endsAt: new Date(2026, 8, 13, 18, 0).toISOString(),
     memberCount: 14,
     hereNow: 5,
     presenceVersion: 1,
-    readOnly: false,
     unreadCount: 0,
-    lastReadMessageId: null as string | null,
+    lastReadMessageId: null,
     viewer: { membershipId: people.mara.membershipId, firstName: 'Mara' },
   };
   messages: ChatMessage[] = theMockThread();

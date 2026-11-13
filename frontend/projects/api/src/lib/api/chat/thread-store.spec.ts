@@ -318,6 +318,18 @@ describe('ThreadStore', () => {
       expect(shown()).toEqual(['message 1', 'message 3', 'message 4']);
     });
 
+    it('keeps a message that arrives while the window is being read', () => {
+      const read = chat.getMessages.bind(chat);
+      chat.getMessages = (p, t, cursor) => {
+        const answer = read(p, t, cursor);
+        // The window was read on the server before this message was stored.
+        if (cursor && 'from' in cursor) realtime.messageAdded$.next(message(9));
+        return answer;
+      };
+      realtime.reconnected$.next();
+      expect(shown()).toEqual(['message 1', 'message 2', 'message 3', 'message 9']);
+    });
+
     it('raises "New messages" for what was missed while older messages were being read', () => {
       store.setLatestInView(false);
       chat.stored = range(1, 5);

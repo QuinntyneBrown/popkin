@@ -2,12 +2,12 @@ import responses from '../fixtures/api/responses.json';
 import { howLongForLakeside } from '../fixtures/journeys';
 import { expect, test } from '../fixtures/pk-test';
 import { scan } from '../fixtures/qr';
+import { recordedBody } from '../fixtures/stubs';
 import { HowLongPage } from '../pages/how-long.page';
 import { PopkinCreatedPage } from '../pages/popkin-created.page';
 
 const created = responses['POST /api/popkins'].body;
-const invite = responses[`GET /api/popkins/${created.id}/invite` as keyof typeof responses]
-  .body as { url: string; code: string };
+const invite = recordedBody<{ url: string; code: string }>(`GET /api/popkins/${created.id}/invite`);
 
 test.describe('the created screen', () => {
   // L2-010 AC1, AC6: popped up from How long, the Host gets the invite straight away
