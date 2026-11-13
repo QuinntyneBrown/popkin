@@ -170,7 +170,7 @@ test.describe('An experience', () => {
       const detail = new ExperienceDetailPage(page);
       await expect(detail.title).toBeVisible();
 
-      expect(await detail.sideBySide()).toBe(beside);
+      await expect.poll(() => detail.sideBySide()).toBe(beside);
       await expect(detail.nav).toBeVisible({ visible: width >= 768 });
     });
   }

@@ -150,6 +150,11 @@ export class ExperienceStore {
     this.read(true);
   }
 
+  /** Reads the experience again after it was edited; what is shown stays until it answers. */
+  refresh(): void {
+    this.read(false);
+  }
+
   /**
    * The member chose a star. It shows at once; the score and the thanks follow the API's
    * answer, and a failure puts the stars back (L2-039 AC2, AC3, AC5). A later choice

@@ -300,6 +300,17 @@ describe('ExperienceStore', () => {
     });
   });
 
+  it('reads the experience again after an edit, keeping what is shown meanwhile', () => {
+    store.open('p', 'canoe');
+    const late = new Subject<ExperienceDetailView>();
+    answer = late;
+    store.refresh();
+    expect(store.state()).toBe('ready');
+    expect(store.view()?.title).toBe('Sunrise canoe to Heron Point');
+    late.next(detail({ title: 'Twice round the point' }));
+    expect(store.view()?.title).toBe('Twice round the point');
+  });
+
   it('reads again after a change of rating by a member who commented, for their comment’s stars', () => {
     answer = detail({
       myRating: { stars: 4, comment: 'Cold.' },

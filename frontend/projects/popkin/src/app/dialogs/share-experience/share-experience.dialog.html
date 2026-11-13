@@ -1,7 +1,7 @@
 <form
   pk-dialog
   novalidate
-  heading="Share an experience"
+  [heading]="words.heading"
   [accent]="data.accent"
   (submit)="share($event)"
 >
@@ -9,7 +9,7 @@
     <div pk-form-summary [problems]="summary()"></div>
   }
   @if (failed()) {
-    <div pk-alert heading="We couldn’t share that.">Everything you entered is still here.</div>
+    <div pk-alert [heading]="words.failed">Everything you entered is still here.</div>
   }
   <div
     pk-text-field
@@ -69,6 +69,6 @@
     [busy]="busy()"
     [disabled]="busy()"
   >
-    {{ busy() ? 'Sharing…' : 'Share it' }}
+    {{ busy() ? words.busy : words.action }}
   </button>
 </form>

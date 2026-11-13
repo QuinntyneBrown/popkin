@@ -36,6 +36,15 @@ import {
 export interface ShareExperienceData {
   popkinId: string;
   accent: string;
+  /** The experience to change; absent when a new one is shared. */
+  editing?: {
+    id: string;
+    title: string;
+    kind: ExperienceKind;
+    when: string | null;
+    place: string | null;
+    pictureUrl: string | null;
+  };
 }
 
 /** The ids of the dialog's fields, which its summary links to. */
@@ -43,7 +52,8 @@ const FIELD_IDS = { title: 'etitle', when: 'ewhen', place: 'eplace', picture: 'e
 
 /**
  * "Share an experience" (L2-040): a title and a kind, and optionally when it was, a place and
- * a picture. It closes with the experience that was shared. The CDK dialog that opens it
+ * a picture. Opened with an experience, it is "Edit experience" and starts from what that one
+ * has (L2-040 AC6). It closes with the experience that was shared or changed. The CDK dialog that opens it
  * closes on Escape and returns focus to what opened it.
  */
 @Component({
@@ -74,13 +84,34 @@ export class ShareExperienceDialog {
     label: kindLabel(kind),
   }));
 
-  protected readonly title = new FormControl('', { nonNullable: true });
-  protected readonly when = new FormControl('', { nonNullable: true });
-  protected readonly place = new FormControl('', { nonNullable: true });
-  protected readonly kind = signal<string>('Did');
+  private readonly editing = this.data.editing;
+  protected readonly words = this.editing
+    ? {
+        heading: 'Edit experience',
+        action: 'Save changes',
+        busy: 'Saving…',
+        failed: 'We couldn’t save that.',
+      }
+    : {
+        heading: 'Share an experience',
+        action: 'Share it',
+        busy: 'Sharing…',
+        failed: 'We couldn’t share that.',
+      };
+
+  protected readonly title = new FormControl(this.editing?.title ?? '', { nonNullable: true });
+  protected readonly when = new FormControl(this.editing?.when ?? '', { nonNullable: true });
+  protected readonly place = new FormControl(this.editing?.place ?? '', { nonNullable: true });
+  protected readonly kind = signal<string>(this.editing?.kind ?? 'Did');
   private readonly picture = signal<File | null>(null);
-  /** The chosen picture, drawn from the device before anything is sent. */
-  protected readonly preview = signal<string | null>(null);
+  /** The picture chosen on the device, drawn before anything is sent. */
+  private readonly chosen = signal<string | null>(null);
+  /** The picture an edited experience has is to go. */
+  private readonly removing = signal(false);
+  /** The picture the field shows: the one just chosen, or the one the experience has. */
+  protected readonly preview = computed(
+    () => this.chosen() ?? (this.removing() ? null : (this.editing?.pictureUrl ?? null)),
+  );
 
   protected readonly problems = signal<DraftProblems>({});
   protected readonly summary = computed(() =>
@@ -99,13 +130,15 @@ export class ShareExperienceDialog {
   protected picked(file: File): void {
     this.forgetPreview();
     this.picture.set(file);
-    this.preview.set(URL.createObjectURL(file));
+    this.chosen.set(URL.createObjectURL(file));
+    this.removing.set(false);
     this.problems.update((problems) => ({ ...problems, picture: undefined }));
   }
 
   protected removed(): void {
     this.forgetPreview();
     this.picture.set(null);
+    this.removing.set(true);
     this.problems.update((problems) => ({ ...problems, picture: undefined }));
   }
 
@@ -119,6 +152,7 @@ export class ShareExperienceDialog {
       when: this.when.value,
       place: this.place.value,
       picture: this.picture(),
+      removePicture: !!this.editing?.pictureUrl && this.removing(),
     };
     const problems = draftProblems(draft);
     this.problems.set(problems);
@@ -126,7 +160,10 @@ export class ShareExperienceDialog {
     if (Object.keys(problems).length) return;
 
     this.busy.set(true);
-    this.api.share(this.data.popkinId, draft).subscribe({
+    const saving = this.editing
+      ? this.api.edit(this.data.popkinId, this.editing.id, draft)
+      : this.api.share(this.data.popkinId, draft);
+    saving.subscribe({
       next: (card) => this.ref.close(card),
       error: (error: unknown) => {
         this.busy.set(false);
@@ -138,8 +175,8 @@ export class ShareExperienceDialog {
   }
 
   private forgetPreview(): void {
-    const preview = this.preview();
-    if (preview) URL.revokeObjectURL(preview);
-    this.preview.set(null);
+    const chosen = this.chosen();
+    if (chosen) URL.revokeObjectURL(chosen);
+    this.chosen.set(null);
   }
 }

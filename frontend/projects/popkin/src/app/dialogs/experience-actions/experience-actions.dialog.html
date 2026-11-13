@@ -1,0 +1,12 @@
+<div pk-dialog [heading]="data.title" [accent]="data.accent">
+  <div pk-menu-list>
+    @if (data.canEdit) {
+      <button pk-menu-item type="button" icon="edit" (click)="choose('edit')">Edit</button>
+    }
+    @if (data.canDelete) {
+      <button pk-menu-item type="button" icon="trash" [danger]="true" (click)="choose('delete')">
+        Delete
+      </button>
+    }
+  </div>
+</div>

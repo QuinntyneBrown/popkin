@@ -9,9 +9,10 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   ErrorScreens,
+  ExperienceCardView,
   ExperienceCommentView,
   ExperienceStore,
   PopkinFrame,
@@ -32,6 +33,19 @@ import {
   TopBar,
 } from 'components';
 import { AddCommentData, AddCommentDialog } from '../../dialogs/add-comment/add-comment.dialog';
+import {
+  DeleteExperienceData,
+  DeleteExperienceDialog,
+} from '../../dialogs/delete-experience/delete-experience.dialog';
+import {
+  ExperienceAction,
+  ExperienceActionsData,
+  ExperienceActionsDialog,
+} from '../../dialogs/experience-actions/experience-actions.dialog';
+import {
+  ShareExperienceData,
+  ShareExperienceDialog,
+} from '../../dialogs/share-experience/share-experience.dialog';
 import { Toaster } from '../../toasts/toaster';
 
 /**
@@ -69,6 +83,7 @@ export class ExperienceDetailPage {
   private readonly errors = inject(ErrorScreens);
   private readonly dialog = inject(Dialog);
   private readonly toaster = inject(Toaster);
+  private readonly router = inject(Router);
 
   protected readonly back = computed(() => `/p/${this.popkinId()}/experiences`);
   protected readonly unreadCount = computed(() => this.unread.forPopkin(this.popkinId()));
@@ -120,4 +135,63 @@ export class ExperienceDetailPage {
       if (comment) this.store.commented(comment);
     });
   }
+
+  /** "Experience actions" (L2-040 AC6): what its sharer, or the Host, may do with it. */
+  protected actions(): void {
+    const experience = this.store.source();
+    if (!experience) return;
+    const opened = this.dialog.open<ExperienceAction, ExperienceActionsData>(
+      ExperienceActionsDialog,
+      {
+        data: {
+          accent: this.frame.accent(),
+          title: experience.title,
+          canEdit: experience.canEdit,
+          canDelete: experience.canDelete,
+        },
+        ...MODAL,
+      },
+    );
+    opened.closed.subscribe((action) => {
+      if (action === 'edit') this.edit();
+      if (action === 'delete') this.delete();
+    });
+  }
+
+  private edit(): void {
+    const experience = this.store.source();
+    if (!experience) return;
+    const opened = this.dialog.open<ExperienceCardView, ShareExperienceData>(
+      ShareExperienceDialog,
+      {
+        data: { popkinId: this.popkinId(), accent: this.frame.accent(), editing: experience },
+        autoFocus: '#etitle',
+        ...MODAL,
+      },
+    );
+    opened.closed.subscribe((changed) => {
+      if (changed) this.store.refresh();
+    });
+  }
+
+  private delete(): void {
+    const title = this.store.source()?.title ?? '';
+    const opened = this.dialog.open<boolean, DeleteExperienceData>(DeleteExperienceDialog, {
+      data: {
+        popkinId: this.popkinId(),
+        experienceId: this.experienceId(),
+        accent: this.frame.accent(),
+      },
+      ariaDescribedBy: 'dlg-desc',
+      ...MODAL,
+    });
+    opened.closed.subscribe((deleted) => {
+      if (!deleted) return;
+      this.toaster.show('success', 'Experience deleted', `${title} is gone from the list.`);
+      void this.router.navigateByUrl(this.back());
+    });
+  }
 }
+
+/** pk-dialog draws its own backdrop, as the mocks do. */
+const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true } as const;

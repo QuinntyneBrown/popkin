@@ -29,6 +29,8 @@
         [by]="view.sharedBy"
         [avatar]="view.avatar"
         [place]="view.place ?? undefined"
+        [actions]="view.canEdit || view.canDelete ? 'Experience actions' : undefined"
+        (actionsOpened)="actions()"
       >
         @if (view.score; as score) {
           <div
