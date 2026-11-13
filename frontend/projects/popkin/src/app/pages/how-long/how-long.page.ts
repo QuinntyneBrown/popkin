@@ -22,6 +22,7 @@ import {
   TopBar,
 } from 'components';
 import { EndDateData, EndDateDialog } from '../../dialogs/end-date/end-date.dialog';
+import { Toaster } from '../../toasts/toaster';
 
 /** The second step of starting a Popkin: when it wraps up (L2-009). */
 @Component({
@@ -35,6 +36,7 @@ export class HowLongPage {
   private readonly dialog = inject(Dialog);
   private readonly popkins = inject(POPKINS_API);
   private readonly router = inject(Router);
+  private readonly toaster = inject(Toaster);
 
   protected readonly status = signal<'idle' | 'popping' | 'failed'>('idle');
 
@@ -113,9 +115,28 @@ export class HowLongPage {
       })
       .subscribe({
         next: (created) => {
+          if (draft.crewOf) this.inviteCrew(created.id, draft.crewOf);
           void this.router.navigateByUrl(`/p/${created.id}/created`).then(() => this.store.reset());
         },
         error: () => this.status.set('failed'),
       });
+  }
+
+  /** "Pop up another with this crew" (L2-046 AC5): the new Popkin is there either way. */
+  private inviteCrew(popkinId: string, crewOf: string): void {
+    this.popkins.inviteCrew(popkinId, crewOf).subscribe({
+      next: () =>
+        this.toaster.show(
+          'success',
+          'Invites are on their way',
+          'Everyone from the last Popkin gets one.',
+        ),
+      error: () =>
+        this.toaster.show(
+          'danger',
+          'We couldn’t invite the crew',
+          'Share the code or the link with them instead.',
+        ),
+    });
   }
 }

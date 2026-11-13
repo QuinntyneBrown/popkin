@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -37,7 +37,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './name-your-popkin.page.html',
 })
-export class NameYourPopkinPage {
+export class NameYourPopkinPage implements OnInit {
   private readonly store = inject(NewPopkinDraft);
   private readonly router = inject(Router);
 
@@ -52,6 +52,20 @@ export class NameYourPopkinPage {
 
   constructor() {
     this.name.valueChanges.subscribe((name) => this.store.update({ name }));
+  }
+
+  /**
+   * `?crew=`: the wrapped-up Popkin whose members get this one's invite (L2-046 AC5). It is
+   * kept through Back from the second step, and dropped when a Popkin is started any other way.
+   */
+  readonly crew = input<string>();
+  private readonly cameBack =
+    this.router.lastSuccessfulNavigation()?.finalUrl?.toString().startsWith('/new/length') ?? false;
+
+  ngOnInit(): void {
+    const crew = this.crew();
+    if (crew) this.store.update({ crewOf: crew });
+    else if (!this.cameBack) this.store.update({ crewOf: null });
   }
 
   protected chooseEmoji(emoji: string): void {

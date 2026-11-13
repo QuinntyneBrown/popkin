@@ -257,3 +257,23 @@ export async function theMockRecap(page: Page, change?: (wrapUp: WrapUp) => void
     change?.(wrapUp);
   });
 }
+
+/** The crew's invites alone, for the start of a Popkin: what was asked, in order. */
+export async function crewInvites(
+  page: Page,
+  answers: 'sent' | 'fails' = 'sent',
+): Promise<{ popkinId: string; fromPopkinId: string }[]> {
+  const asked: { popkinId: string; fromPopkinId: string }[] = [];
+  await page.route('**/api/popkins/*/crew-invites', (route) => {
+    const body = route.request().postDataJSON() as { fromPopkinId: string };
+    asked.push({
+      popkinId: new URL(route.request().url()).pathname.split('/')[3],
+      fromPopkinId: body.fromPopkinId,
+    });
+    const refused = problem(500, 'server_error');
+    return answers === 'sent'
+      ? route.fulfill({ status: 202 })
+      : route.fulfill({ status: refused.status, json: refused.body });
+  });
+  return asked;
+}
