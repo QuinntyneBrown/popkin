@@ -91,7 +91,7 @@ export class ExperiencesPage {
     return this.card(title).locator('.exp-card__by');
   }
 
-  /** The average and the number of ratings of an experience: "4.8 (11)". */
+  /** The average and the number of ratings of an experience: "4.7 (11)". */
   ratingOf(title: string): Locator {
     return this.card(title).locator('.rating');
   }

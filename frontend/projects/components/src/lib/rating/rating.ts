@@ -3,11 +3,11 @@ import { Icon } from '../icon/icon';
 
 /**
  * Rating (docs/design-system/components/rating.html): the average of an experience's ratings
- * beside one star, and how many ratings there are: "4.8 · 11 ratings". The number is always
+ * beside one star, and how many ratings there are: "4.7 · 11 ratings". The number is always
  * shown, so the score never depends on the star's colour. Without a `value` it is the words
  * alone, for an experience nobody has rated.
  *
- * On an experience card the number of ratings is the `count` in brackets, "4.8 (11)"; on a
+ * On an experience card the number of ratings is the `count` in brackets, "4.7 (11)"; on a
  * comment the value is one member's stars, and `prefix` says so to assistive technology
  * ("Rated 5").
  */

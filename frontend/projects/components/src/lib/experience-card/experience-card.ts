@@ -9,7 +9,7 @@ import { Rating } from '../rating/rating';
  * grid of Experiences, `ul[pk-experience-grid]`. The whole card is one link. It shows the
  * picture, or the Popkin's `emoji` on its colour where there is none (L2-040 AC5), the `kind` on
  * a tag over it, the title, who shared it and when, and at the end either the average of its
- * ratings with how many there are, "4.8 (11)", or, for one the group wants to do, how many are
+ * ratings with how many there are, "4.7 (11)", or, for one the group wants to do, how many are
  * `keen`. Set `data-accent` on an ancestor.
  */
 @Component({

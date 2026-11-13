@@ -16,7 +16,7 @@ Members: Walt Brennan (Leaf, photo), Dev Patel (Sky, photo), Ellie Brennan (Berr
   joining), Priya Nair (Coral), Tomás Reyes (Leaf).
 Mara's other Popkins: Thursday Night Group 🕯️ Amber, 9 members, ongoing; Tigers U9 Parents ⚽
   Leaf, 22 members, until Nov 30. Wrapped up: Build Weekend ’26 💻 Sky; Brennan Reunion 🌻 Berry.
-Experiences: Sunrise canoe to Heron Point (4.8, 11 ratings, by Mara); La Paloma Taqueria (4.5, 9,
+Experiences: Sunrise canoe to Heron Point (4.7, 11 ratings, by Mara); La Paloma Taqueria (4.5, 9,
   Sam); Ridge trail loop (4.2, 8, Walt); Beach day next summer? (want to do, 7 keen, Ellie).
 -->
 

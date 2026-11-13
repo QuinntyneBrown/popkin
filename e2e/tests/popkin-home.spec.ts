@@ -321,7 +321,7 @@ test.describe('the Photos and Experiences sections of the Popkin home', () => {
     await expect(home.meta(home.experiences)).toHaveText('4 shared');
     await expect(cards).toHaveCount(1);
     await expect(home.titleOf(cards.first())).toHaveText('Sunrise canoe to Heron Point');
-    await expect(home.ratingOf(cards.first())).toHaveText('4.8 · 11 ratings');
+    await expect(home.ratingOf(cards.first())).toHaveText('4.7 · 11 ratings');
     await expect(cards.first()).toHaveAttribute(
       'href',
       `/p/${popkinId}/experiences/00000000-0000-4000-b000-000000000001`,
