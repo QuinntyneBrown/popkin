@@ -25,6 +25,11 @@ public sealed class PhotosController(ISender sender) : ControllerBase
         Guid popkinId, [FromQuery] string? filter, [FromQuery] string? cursor, [FromQuery] int? limit, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetAlbumQuery(popkinId, filter, cursor, limit), cancellationToken));
 
+    /// <summary>One photo with its display image and its neighbours in the album, for the photo view (L2-033).</summary>
+    [HttpGet("{photoId:guid}")]
+    public async Task<ActionResult<PhotoDetailDto>> GetPhoto(Guid popkinId, Guid photoId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetPhotoQuery(popkinId, photoId), cancellationToken));
+
     /// <summary>
     /// Adds one photo to the album, with a caption when given (L2-031). The body may be up to
     /// twice the largest photo, so a photo over 10 MB is refused with its own message and not by

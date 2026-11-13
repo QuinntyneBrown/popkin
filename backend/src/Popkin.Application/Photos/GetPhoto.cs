@@ -1,0 +1,77 @@
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Popkin.Application.Abstractions;
+using Popkin.Application.Invites;
+using Popkin.Application.Problems;
+using Popkin.Application.Security;
+using Popkin.Domain;
+
+namespace Popkin.Application.Photos;
+
+/// <summary>Who added a photo, as the photo view names them: no contact detail (L2-054 AC2).</summary>
+public sealed record PhotoDetailUploaderDto(Guid MembershipId, string FirstName, string DisplayName, AvatarDto Avatar);
+
+/// <summary>One reaction to a photo: how many members gave it and whether the reader did (journey 14).</summary>
+public sealed record PhotoReactionDto(string Emoji, int Count, bool Mine);
+
+/// <summary>
+/// A photo as the photo view shows it: the display image at an expiring address (L2-051 AC2)
+/// with its size, so the screen keeps its place while it loads (L2-055 AC5), and its
+/// neighbours in the album: `PreviousPhotoId` is the newer one and `NextPhotoId` the older one.
+/// </summary>
+public sealed record PhotoDetailDto(
+    Guid Id,
+    PhotoDetailUploaderDto Uploader,
+    DateTimeOffset AddedAt,
+    DateTimeOffset TakenAt,
+    string? Caption,
+    string ImageUrl,
+    int Width,
+    int Height,
+    IReadOnlyList<PhotoReactionDto> Reactions,
+    int CommentCount,
+    Guid? PreviousPhotoId,
+    Guid? NextPhotoId,
+    bool CanDelete,
+    bool IsMine);
+
+/// <summary>One photo of a Popkin's album, for any of its members (L2-033, L2-051 AC1).</summary>
+public sealed record GetPhotoQuery(Guid PopkinId, Guid PhotoId) : IRequest<PhotoDetailDto>;
+
+public sealed class GetPhotoQueryHandler(IAppDbContext db, IMembershipGuard guard, IPhotoStore store)
+    : IRequestHandler<GetPhotoQuery, PhotoDetailDto>
+{
+    public async Task<PhotoDetailDto> Handle(GetPhotoQuery request, CancellationToken cancellationToken)
+    {
+        var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
+        var album = db.Photos.AsNoTracking().Where(p => p.PopkinId == popkin.Id);
+        // A photo of another Popkin is the same as no photo (L2-051 AC3).
+        var photo = await album.FirstOrDefaultAsync(p => p.Id == request.PhotoId, cancellationToken)
+            ?? throw new ProblemException(404, "photo_not_found", "This photo isn't here.");
+
+        // The neighbours follow the whole album, whatever filter the member came from.
+        var point = PhotoPoint.Of(photo);
+        var newer = await album.NewerThan(point).OldestFirst().Select(p => (Guid?)p.Id).FirstOrDefaultAsync(cancellationToken);
+        var older = await album.OlderThan(point).LatestFirst().Select(p => (Guid?)p.Id).FirstOrDefaultAsync(cancellationToken);
+        // A member who has left still added their photos.
+        var uploader = await db.Memberships.AsNoTracking().FirstAsync(m => m.Id == photo.UploaderMembershipId, cancellationToken);
+        var isMine = uploader.Id == membership.Id;
+
+        return new PhotoDetailDto(
+            photo.Id,
+            new PhotoDetailUploaderDto(uploader.Id, PersonName.FirstName(uploader.DisplayName), uploader.DisplayName, AvatarDto.Of(uploader, store)),
+            photo.AddedAt,
+            photo.TakenAt,
+            photo.Caption,
+            store.GetReadUrl(photo.StorageKey),
+            photo.Width,
+            photo.Height,
+            // Reactions and comments arrive with journey 14; until then a photo has none.
+            Reactions: [],
+            CommentCount: 0,
+            newer,
+            older,
+            CanDelete: isMine || membership.Role == MembershipRole.Host,
+            isMine);
+    }
+}
