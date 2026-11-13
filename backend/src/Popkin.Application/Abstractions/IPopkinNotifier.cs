@@ -17,4 +17,7 @@ public interface IPopkinNotifier
 
     /// <summary>To that person only, on every connection they hold.</summary>
     Task ThreadRead(Guid personId, Guid threadId);
+
+    /// <summary>To every member of the Popkin with a connection open.</summary>
+    Task PresenceChanged(Guid popkinId, long version, int hereNow);
 }

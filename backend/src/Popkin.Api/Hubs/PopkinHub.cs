@@ -23,13 +23,15 @@ public sealed class PopkinHub(ISender sender) : Hub<IPopkinClient>
 
     public override async Task OnConnectedAsync()
     {
-        var connection = await sender.Send(new ConnectToHubCommand(Guid.Parse(Context.UserIdentifier!), Context.ConnectionId), Context.ConnectionAborted);
-        foreach (var popkinId in connection.PopkinIds)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupOf(popkinId), Context.ConnectionAborted);
-        }
-
+        await sender.Send(new ConnectToHubCommand(Guid.Parse(Context.UserIdentifier!), Context.ConnectionId), Context.ConnectionAborted);
         await base.OnConnectedAsync();
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        // The connection has gone, so its token is cancelled: the release must not be.
+        await sender.Send(new DisconnectFromHubCommand(Context.ConnectionId), CancellationToken.None);
+        await base.OnDisconnectedAsync(exception);
     }
 }
 
@@ -37,4 +39,11 @@ public sealed class PopkinHub(ISender sender) : Hub<IPopkinClient>
 public sealed class PersonUserIdProvider : IUserIdProvider
 {
     public string? GetUserId(HubConnectionContext connection) => connection.User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+/// <summary>Carries out, with the hub's groups, which connections are sent a Popkin's events.</summary>
+public sealed class HubPopkinConnections(IHubContext<PopkinHub, IPopkinClient> hub) : IPopkinConnections
+{
+    public Task AddToPopkinAsync(string connectionId, Guid popkinId, CancellationToken cancellationToken) =>
+        hub.Groups.AddToGroupAsync(connectionId, PopkinHub.GroupOf(popkinId), cancellationToken);
 }

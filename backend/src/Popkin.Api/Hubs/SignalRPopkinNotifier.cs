@@ -24,6 +24,9 @@ public sealed class SignalRPopkinNotifier(
     public Task ThreadRead(Guid personId, Guid threadId) =>
         SendAsync(nameof(IPopkinClient.ThreadRead), () => hub.Clients.User(personId.ToString()).ThreadRead(threadId));
 
+    public Task PresenceChanged(Guid popkinId, long version, int hereNow) =>
+        SendAsync(nameof(IPopkinClient.PresenceChanged), () => Group(popkinId).PresenceChanged(popkinId, version, hereNow));
+
     private IPopkinClient Group(Guid popkinId) => hub.Clients.Group(PopkinHub.GroupOf(popkinId));
 
     private async Task SendAsync(string eventName, Func<Task> send)

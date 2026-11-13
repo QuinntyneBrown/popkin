@@ -18,4 +18,10 @@ public interface IPopkinClient
 
     /// <summary>The person read a thread, here or on another device: its unread count is zero.</summary>
     Task ThreadRead(Guid threadId);
+
+    /// <summary>
+    /// How many members have the Popkin open changed. A state: it carries the whole count and a
+    /// version that only rises, and an event whose version is not above the one held is dropped.
+    /// </summary>
+    Task PresenceChanged(Guid popkinId, long version, int hereNow);
 }

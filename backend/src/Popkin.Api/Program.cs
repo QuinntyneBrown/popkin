@@ -52,6 +52,8 @@ builder.Services
     .AddJsonProtocol(options => options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddSingleton<IUserIdProvider, PersonUserIdProvider>();
 builder.Services.AddSingleton<IPopkinNotifier, SignalRPopkinNotifier>();
+builder.Services.AddSingleton<IPopkinConnections, HubPopkinConnections>();
+builder.Services.AddHostedService<PresenceBroadcaster>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

@@ -4,24 +4,41 @@ using Popkin.Application.Abstractions;
 
 namespace Popkin.Application.Realtime;
 
-/// <summary>The Popkins whose events a new connection receives.</summary>
-public sealed record HubConnectionDto(IReadOnlyList<Guid> PopkinIds);
-
 /// <summary>
 /// A person opened a connection to the hub. The person comes from the connection's session,
-/// never from what the client says. The answer is every Popkin they are a member of: membership
-/// alone decides whose events a connection receives (L2-051).
+/// never from what the client says. The connection is sent the events of every Popkin they are
+/// a member of, and of no other: membership alone decides it (L2-051). They are then here now
+/// in each.
 /// </summary>
-public sealed record ConnectToHubCommand(Guid PersonId, string ConnectionId) : IRequest<HubConnectionDto>;
+public sealed record ConnectToHubCommand(Guid PersonId, string ConnectionId) : IRequest;
 
-public sealed class ConnectToHubCommandHandler(IAppDbContext db) : IRequestHandler<ConnectToHubCommand, HubConnectionDto>
+public sealed class ConnectToHubCommandHandler(IAppDbContext db, IPopkinConnections connections, PresenceTracker presence)
+    : IRequestHandler<ConnectToHubCommand>
 {
-    public async Task<HubConnectionDto> Handle(ConnectToHubCommand request, CancellationToken cancellationToken)
+    public async Task Handle(ConnectToHubCommand request, CancellationToken cancellationToken)
     {
         var popkinIds = await db.Memberships.AsNoTracking()
             .Where(m => m.PersonId == request.PersonId && m.LeftAt == null)
             .Select(m => m.PopkinId)
             .ToListAsync(cancellationToken);
-        return new HubConnectionDto(popkinIds);
+        foreach (var popkinId in popkinIds)
+        {
+            await connections.AddToPopkinAsync(request.ConnectionId, popkinId, cancellationToken);
+        }
+
+        // After the connection receives each Popkin's events, so it is told of its own arrival.
+        presence.Connect(request.ConnectionId, request.PersonId, popkinIds);
+    }
+}
+
+/// <summary>A connection to the hub closed; its person is released after the grace (see <see cref="PresenceTracker"/>).</summary>
+public sealed record DisconnectFromHubCommand(string ConnectionId) : IRequest;
+
+public sealed class DisconnectFromHubCommandHandler(PresenceTracker presence) : IRequestHandler<DisconnectFromHubCommand>
+{
+    public Task Handle(DisconnectFromHubCommand request, CancellationToken cancellationToken)
+    {
+        presence.Disconnect(request.ConnectionId);
+        return Task.CompletedTask;
     }
 }

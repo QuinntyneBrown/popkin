@@ -1,5 +1,6 @@
 using System.Net;
 using System.Runtime.CompilerServices;
+using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -36,6 +37,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public DatabaseFaults Faults { get; } = new();
 
+    /// <summary>The requests the API has finished handling, to await what it does on its own time.</summary>
+    public HandledRequests Requests { get; } = new();
+
     /// <summary>The photo store of this fixture, in memory.</summary>
     public InMemoryPhotoStore Photos => Services.GetRequiredService<InMemoryPhotoStore>();
 
@@ -57,6 +61,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<IPhotoStore>();
             services.AddSingleton<InMemoryPhotoStore>();
             services.AddSingleton<IPhotoStore>(sp => sp.GetRequiredService<InMemoryPhotoStore>());
+            services.AddSingleton(Requests);
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(HandledRequests.Behavior<,>));
             services.RemoveAll<ICodeSender>();
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Email));

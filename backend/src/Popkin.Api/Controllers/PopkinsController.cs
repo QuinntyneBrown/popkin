@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Popkin.Application.Popkins;
+using Popkin.Application.Realtime;
 
 namespace Popkin.Api.Controllers;
 
@@ -23,4 +24,9 @@ public sealed class PopkinsController(ISender sender) : ControllerBase
     [HttpGet("{popkinId:guid}/invite")]
     public async Task<ActionResult<InviteDto>> GetInvite(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetInviteQuery(popkinId), cancellationToken));
+
+    /// <summary>Who is here now, for any member; the recovery read of `PresenceChanged` (L2-051).</summary>
+    [HttpGet("{popkinId:guid}/presence")]
+    public async Task<ActionResult<PresenceDto>> GetPresence(Guid popkinId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetPresenceQuery(popkinId), cancellationToken));
 }

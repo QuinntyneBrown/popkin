@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Popkin.Application.Realtime;
 using Popkin.Domain;
 using Popkin.Infrastructure.Persistence;
 
@@ -58,6 +59,21 @@ public static class ChatExtensions
         db.Messages.AddRange(messages);
         await db.SaveChangesAsync();
         return messages.Select(m => m.Id).ToList();
+    }
+
+    /// <summary>
+    /// Puts every member of the Popkin "here now", as if each had Popkin open, for a cast larger
+    /// than one address may sign up (L2-053 AC1).
+    /// </summary>
+    public static void ConnectEveryMember(this ApiFactory api, Guid popkinId)
+    {
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var presence = scope.ServiceProvider.GetRequiredService<PresenceTracker>();
+        foreach (var personId in db.Memberships.Where(m => m.PopkinId == popkinId && m.LeftAt == null).Select(m => m.PersonId).ToList())
+        {
+            presence.Connect($"test-{personId:N}", personId, [popkinId]);
+        }
     }
 
     public static int MessageCount(this ApiFactory api)

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Realtime;
 using Popkin.Application.Security;
 using Popkin.Domain;
 
@@ -32,7 +33,7 @@ public sealed record ThreadDto(
 /// <summary>The Everyone thread of a Popkin, for any of its members (L2-021).</summary>
 public sealed record GetEveryoneThreadQuery(Guid PopkinId) : IRequest<ThreadDto>;
 
-public sealed class GetEveryoneThreadQueryHandler(IAppDbContext db, IMembershipGuard guard)
+public sealed class GetEveryoneThreadQueryHandler(IAppDbContext db, IMembershipGuard guard, PresenceTracker presence)
     : IRequestHandler<GetEveryoneThreadQuery, ThreadDto>
 {
     public async Task<ThreadDto> Handle(GetEveryoneThreadQuery request, CancellationToken cancellationToken)
@@ -49,6 +50,8 @@ public sealed class GetEveryoneThreadQueryHandler(IAppDbContext db, IMembershipG
         var unreadCount = await (read is null ? byOthers : byOthers.After(new MessagePoint(read.LastReadSentAt, read.LastReadMessageId)))
             .CountAsync(cancellationToken);
 
+        var hereNow = presence.Get(popkin.Id);
+
         return new ThreadDto(
             thread.Id,
             popkin.Id,
@@ -58,8 +61,8 @@ public sealed class GetEveryoneThreadQueryHandler(IAppDbContext db, IMembershipG
             popkin.Colour,
             popkin.EndsAt,
             memberCount,
-            HereNow: 0,
-            PresenceVersion: 0,
+            hereNow.HereNow,
+            hereNow.Version,
             popkin.Status == PopkinStatus.WrappedUp,
             unreadCount,
             read?.LastReadMessageId,
