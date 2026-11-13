@@ -71,8 +71,8 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 > unread; New message finds any other member by name, and a direct message is between the two
 > of them alone, live, and read-only once the Popkin wraps up; "Call" opens a video call
 > between the two, which the other joins from the banner in their chat.
-> <!-- video of journey 11 -->
-> The journeys still to build are in
+> [Watch it](docs/videos/11-journey-11-direct-message/11-journey-11-direct-message.mp4)
+> (2 min 12 s, with sound). The journeys still to build are in
 > [`docs/journeys.md`](docs/journeys.md), each with its prompt in [`docs/prompts/`](docs/prompts/).
 
 ## Contents

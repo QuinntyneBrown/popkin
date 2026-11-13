@@ -118,7 +118,7 @@ Journey 3, Chat with everyone, built the hub and this design for the Everyone th
 - unread counts on My Popkins (journey 6): L2-027 AC3 is met for the Chat tab and, since
   journey 4, for the Popkin home. Journey 11 built the list of conversations: `UnreadTracker`
   takes the counts of every thread from it, and `ConversationsStore` reads it again on
-  `reconnected$`; the Popkin home still counts the Everyone thread alone (gap 67);
+  `reconnected$`; the Popkin home reads it too, so its Chat tab counts the direct messages;
 - starting the connection once a person is signed in: today the thread page starts it;
 - events of a direct thread, sent to two people, were built in journey 11: `IPopkinNotifier`
   takes an `Audience`, and `LiveDirectMessagesTests` proves that nobody else hears of them;
