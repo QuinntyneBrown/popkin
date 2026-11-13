@@ -1,0 +1,47 @@
+:host {
+  display: block;
+}
+
+/* The field's place in a form is the form's: the button brings no room of its own above it. */
+.picture-field__add {
+  margin-top: 0;
+}
+
+.optional {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+/* The chosen picture, where the button was, with Remove over its corner. */
+.picture-field__chosen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.picture-field__picture {
+  width: 100%;
+  height: 100%;
+}
+
+.picture-field__remove {
+  position: absolute;
+  right: var(--space-2);
+  top: var(--space-2);
+}
+
+.picture-field__file {
+  display: none;
+}
+
+.field__error {
+  display: flex;
+  gap: var(--space-1-5);
+  align-items: flex-start;
+  margin-top: var(--space-2);
+  font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-danger-fg);
+}

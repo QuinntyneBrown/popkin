@@ -1,6 +1,14 @@
 @if (value()) {
   <svg pk-icon class="rating__star" name="star"></svg>
-  <strong class="rating__value">{{ value() }}</strong>
+  <strong class="rating__value">
+    @if (prefix()) {
+      <span class="visually-hidden">{{ prefix() }}</span>
+    }
+    {{ value() }}
+  </strong>
+  @if (count()) {
+    <span>({{ count() }})</span>
+  }
   {{ rest() }}
 } @else {
   {{ label() }}

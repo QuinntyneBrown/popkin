@@ -19,6 +19,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[class.skeleton--tile]': "shape() === 'tile'",
     '[class.skeleton--tile-2xl]': "shape() === 'tile-2xl'",
     '[class.skeleton--card]': "shape() === 'card'",
+    '[class.skeleton--media]': "shape() === 'media'",
     '[class.skeleton--btn]': "shape() === 'btn'",
     '[class.skeleton--pill]': "shape() === 'pill'",
     '[class.skeleton--bubble]': "shape() === 'bubble'",
@@ -42,6 +43,7 @@ export class Skeleton {
     | 'tile'
     | 'tile-2xl'
     | 'card'
+    | 'media'
     | 'btn'
     | 'pill'
     | 'bubble'

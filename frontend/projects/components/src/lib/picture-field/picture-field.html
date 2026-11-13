@@ -1,0 +1,48 @@
+@if (picture()) {
+  <div class="picture-field__chosen">
+    <img class="picture-field__picture" [src]="picture()" [alt]="alt()" />
+    <button
+      #remove
+      pk-icon-button
+      class="picture-field__remove"
+      type="button"
+      variant="card"
+      icon="close"
+      size="md"
+      [label]="removeLabel()"
+      [disabled]="disabled()"
+      (click)="take()"
+    ></button>
+  </div>
+} @else {
+  <button
+    #add
+    pk-date-button
+    class="picture-field__add"
+    icon="photo-add"
+    [id]="fieldId()"
+    [popup]="null"
+    [disabled]="disabled()"
+    [attr.aria-describedby]="error() ? fieldId() + '-err' : null"
+    (click)="open()"
+  >
+    {{ label() }}
+    @if (optional()) {
+      <span class="optional">{{ optional() }}</span>
+    }
+  </button>
+}
+<input
+  #file
+  class="picture-field__file"
+  type="file"
+  tabindex="-1"
+  aria-hidden="true"
+  [accept]="accept()"
+  (change)="choose()"
+/>
+@if (error()) {
+  <span class="field__error" role="alert" [id]="fieldId() + '-err'"
+    ><svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span></span
+  >
+}

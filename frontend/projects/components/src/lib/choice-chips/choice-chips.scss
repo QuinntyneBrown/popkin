@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.field__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font: var(--text-label);
+  color: var(--color-fg-default);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

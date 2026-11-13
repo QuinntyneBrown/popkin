@@ -1,0 +1,27 @@
+<div class="score-card__summary">
+  @if (average(); as score) {
+    <div class="score-card__value">{{ value() }}</div>
+    <div class="score-card__stars">
+      <span pk-stars [value]="score" [label]="value() + ' ' + outOf()"></span>
+    </div>
+    <div class="score-card__count">{{ count() }}</div>
+  } @else {
+    <div class="score-card__stars" aria-hidden="true">
+      <span pk-stars [value]="0" label=""></span>
+    </div>
+    <p class="score-card__count">{{ empty() }}</p>
+  }
+</div>
+@if (bars().length) {
+  <ul class="score-bars" [attr.aria-label]="barsLabel()">
+    @for (bar of bars(); track bar.stars) {
+      <li class="score-bars__row">
+        <span aria-hidden="true">{{ bar.stars }}</span>
+        <span class="visually-hidden">{{ bar.label }}</span>
+        <span class="meter" aria-hidden="true">
+          <span class="meter__fill" [style.width.%]="bar.percent"></span>
+        </span>
+      </li>
+    }
+  </ul>
+}

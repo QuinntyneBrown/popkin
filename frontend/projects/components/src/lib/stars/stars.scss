@@ -1,0 +1,28 @@
+:host {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stars {
+  display: inline-flex;
+  gap: var(--space-0-5);
+}
+
+.star {
+  width: var(--space-4);
+  height: var(--space-4);
+  color: var(--color-star);
+  fill: var(--color-star);
+}
+
+.star--empty {
+  color: var(--color-star-empty);
+  fill: none;
+}
+
+.stars__caption {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}

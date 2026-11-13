@@ -1,0 +1,39 @@
+<a class="exp-card" [routerLink]="link()">
+  <div class="exp-card__media">
+    @if (photo()) {
+      <img
+        class="exp-card__photo"
+        alt=""
+        loading="lazy"
+        decoding="async"
+        width="640"
+        height="480"
+        [src]="photo()"
+      />
+    } @else {
+      <span class="exp-card__emoji" aria-hidden="true">{{ emoji() }}</span>
+    }
+    <span class="tag">{{ kind() }}</span>
+  </div>
+  <div class="exp-card__body">
+    <h2 class="exp-card__title">{{ title() }}</h2>
+    <div class="exp-card__foot">
+      <span class="exp-card__by">
+        <span
+          pk-avatar
+          size="2xs"
+          [initials]="avatar()?.initials ?? ''"
+          [photo]="avatar()?.photoUrl"
+          [blank]="!avatar()"
+          [attr.data-accent]="avatar()?.accent"
+        ></span>
+        <span class="truncate">{{ by() }}</span>
+      </span>
+      @if (keen()) {
+        <span class="exp-card__keen"><svg pk-icon name="keen" size="sm"></svg>{{ keen() }}</span>
+      } @else if (rating()) {
+        <span pk-rating [value]="rating()" [count]="count()"></span>
+      }
+    </div>
+  </div>
+</a>

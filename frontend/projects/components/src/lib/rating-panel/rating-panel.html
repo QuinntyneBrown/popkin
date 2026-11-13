@@ -1,0 +1,24 @@
+<h2 class="rating-panel__heading" [id]="headingId()">{{ heading() }}</h2>
+<div
+  class="star-btns"
+  role="radiogroup"
+  [attr.aria-labelledby]="headingId()"
+  [attr.aria-disabled]="busy() ? 'true' : null"
+>
+  @for (star of stars; track star) {
+    <button
+      #button
+      class="star-btn"
+      type="button"
+      role="radio"
+      [attr.aria-checked]="star <= (value() ?? 0)"
+      [attr.aria-label]="names()[star - 1]"
+      [tabIndex]="star === entry() ? 0 : -1"
+      (click)="choose(star)"
+      (keydown)="move($event, star)"
+    >
+      <svg pk-icon class="star-btn__icon" name="star"></svg>
+    </button>
+  }
+</div>
+<div class="rating-panel__more"><ng-content /></div>

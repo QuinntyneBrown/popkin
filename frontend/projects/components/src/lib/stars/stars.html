@@ -1,0 +1,8 @@
+<span class="stars" role="img" [attr.aria-label]="label()">
+  @for (full of filled(); track $index) {
+    <svg pk-icon class="star" name="star" [class.star--empty]="!full"></svg>
+  }
+</span>
+@if (caption()) {
+  <span class="stars__caption">{{ caption() }}</span>
+}

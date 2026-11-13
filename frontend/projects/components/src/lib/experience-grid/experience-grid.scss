@@ -1,0 +1,37 @@
+/* XS: one card across. */
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* S: two across. */
+@media (min-width: 40rem) {
+  :host {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* M: in line with the header beside the rail. */
+@media (min-width: 48rem) {
+  :host {
+    margin-inline: var(--space-4);
+  }
+}
+
+/* L: three across. */
+@media (min-width: 64rem) {
+  :host {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* XL: four across, further in. */
+@media (min-width: 80rem) {
+  :host {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin-inline: var(--space-6);
+  }
+}

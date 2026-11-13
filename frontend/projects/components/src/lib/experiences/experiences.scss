@@ -1,0 +1,23 @@
+/*
+ * A column that fills the screen's flush body: room under the header and at the sides, and at
+ * its end, with the body's own, the room of the floating action and the tabs.
+ */
+:host {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--space-5) var(--space-4) var(--space-18);
+}
+
+.experiences__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.experiences__skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

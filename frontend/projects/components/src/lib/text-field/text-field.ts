@@ -32,6 +32,8 @@ export class TextField implements ControlValueAccessor {
   /** The id of the input; form summaries link to it. */
   readonly fieldId = input.required<string>();
   readonly label = input.required<string>();
+  /** After the label, muted, on a field that may stay empty: "(optional)". */
+  readonly optional = input<string>();
   /** `row` puts the label in a row with the `[slot=label-end]` content, such as a switch. */
   readonly labelLayout = input<'above' | 'row'>('above');
   readonly type = input<'text' | 'tel' | 'email' | 'date' | 'time'>('text');
