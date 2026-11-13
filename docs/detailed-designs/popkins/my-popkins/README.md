@@ -104,7 +104,8 @@ Popkins.
 - **`PopkinsController.List`** — `GET /api/popkins`; sends `GetMyPopkinsQuery`.
 - **`GetMyPopkinsQueryHandler`** (`Popkins/GetMyPopkins.cs`) — reads the caller from
   `ICurrentPerson` and, through `IAppDbContext`, the caller's memberships with `LeftAt` null and
-  their `PopkinSpace`s. It makes up to nine queries, each for the whole list and none per
+  their `PopkinSpace`s. It makes up to ten queries (nine until journey 11 added the read of the
+  direct messages), each for the whole list and none per
   Popkin; the design asked for one, which the latest message per thread and the counts do not
   fit.
   - active cards, the most recently active first (L2-017): by the later of
@@ -118,8 +119,8 @@ Popkins.
 - **Unread count** — messages sent after the member's read point and not authored by them, in
   the Everyone thread and, since journey 11, in the member's direct messages of that Popkin
   whose other member has not left (`DirectThreads.Of`), counted by `ThreadUnread.CountsAsync`,
-  the rule the Popkin home and the thread use. The query count stays as it was: the direct
-  messages of every Popkin are read in one query.
+  the rule the Popkin home and the thread use. The direct messages of every Popkin are read in
+  one query. The web app hands each Popkin's count to `UnreadTracker.setPopkin`.
 - **Avatars** — `AvatarDto` carries initials, an accent from `AvatarAccent.For(personId)` (the
   colour that stays the same for a person, L2-013 AC6) and, for a member with a photo, an
   expiring URL from `IPhotoStore` (L2-051 AC2).
