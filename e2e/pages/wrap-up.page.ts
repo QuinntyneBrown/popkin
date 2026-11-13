@@ -23,6 +23,9 @@ export class WrapUpPage {
   readonly notYet: Locator;
   /** From 768 px: the recap that wrapping up will make. */
   readonly picture: Locator;
+  /** What it shows could not be read. */
+  readonly failed: Locator;
+  readonly tryAgain: Locator;
 
   constructor(page: Page) {
     this.root = page.locator('body[data-page="wrap-up"]');
@@ -42,5 +45,7 @@ export class WrapUpPage {
     this.wrapItUp = this.main.locator('.btn--primary');
     this.notYet = this.main.getByRole('link', { name: 'Not yet' });
     this.picture = page.locator('.split-aside');
+    this.failed = this.main.locator('.empty');
+    this.tryAgain = this.failed.getByRole('button', { name: 'Try again' });
   }
 }

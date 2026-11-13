@@ -1,3 +1,85 @@
-<div pk-screen>
-  <h1 class="visually-hidden">Wrap up</h1>
-</div>
+@if (state() === 'ready') {
+  <div
+    pk-screen
+    layout="split"
+    body="middle"
+    [accent]="accent()"
+    [tile]="emoji()"
+    [heading]="'Wrap up ' + name() + '?'"
+    [lead]="lede()"
+  >
+    <aside
+      pk-split-aside
+      slot="aside"
+      label="The recap"
+      surface="tint"
+      [photos]="pictures()"
+      [tile]="emoji()"
+      [name]="name()"
+      [line]="recapLine()"
+    ></aside>
+    <header pk-top-bar slot="header" [back]="'/p/' + popkinId()"></header>
+    @if (failed()) {
+      <div pk-alert slot="notice" heading="We couldn’t wrap it up.">
+        {{ name() }} is still open and nothing has changed. Try again in a moment.
+      </div>
+    }
+    <div class="stack stack--lg">
+      <ul pk-facts>
+        <li
+          pk-fact
+          icon="archive"
+          heading="Everyone gets a recap"
+          text="The people, the photos, the best-rated moment. A proper send-off."
+        ></li>
+        <li
+          pk-fact
+          icon="message-off"
+          heading="Chat goes quiet"
+          text="Messages stay readable, but nobody can post new ones."
+        ></li>
+      </ul>
+      <div
+        pk-setting-row
+        icon="photos"
+        heading="Keep the photo album"
+        [text]="keepLine()"
+        [disabled]="busy()"
+        [(checked)]="keepPhotos"
+      ></div>
+    </div>
+    <div slot="actions" class="stack stack--sm">
+      <button
+        pk-button
+        type="button"
+        variant="primary"
+        [block]="true"
+        [busy]="busy()"
+        [disabled]="busy()"
+        (click)="wrapUp()"
+      >
+        {{ busy() ? 'Wrapping up…' : 'Wrap it up' }}
+      </button>
+      <a pk-button variant="quiet" [block]="true" [routerLink]="home()">Not yet</a>
+    </div>
+  </div>
+} @else {
+  <div pk-screen [accent]="accent()">
+    <header pk-top-bar slot="header" [back]="'/p/' + popkinId()"></header>
+    <h1 class="visually-hidden">Wrap up</h1>
+    @if (state() === 'error') {
+      <div
+        pk-empty-state
+        icon="offline"
+        heading="We couldn’t open this"
+        text="Nothing has changed. Check your connection and try again."
+        [alert]="true"
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="read()">
+          <svg pk-icon name="retry" size="md"></svg>Try again
+        </button>
+        <a pk-button variant="secondary" size="md" [routerLink]="home()">Not yet</a>
+      </div>
+    }
+  </div>
+}
