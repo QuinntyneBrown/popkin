@@ -52,23 +52,18 @@ test('the home at every form factor, and in the dark', async ({ page }) => {
     const home = await open(page);
     await shot(page, `home-${size.toLowerCase()}`);
     if (size === 'XS') {
-      await detail(home.header, 'header', 0);
       await detail(home.identity, 'header-identity', 12);
+      await detail(home.timeLeft, 'header-time', 12);
       await detail(home.actions, 'header-actions', 12);
       await closeUp(home.chat, 'chat');
-      await closeUp(home.photos, 'photos');
-      await closeUp(home.experiences, 'experiences');
-      await closeUp(home.members, 'members');
+      await closeUp(home.photos, 'photos', 0);
+      await closeUp(home.experiences, 'experiences', 0);
+      await closeUp(home.members, 'members', 0);
     }
-    if (size === 'M') {
-      await detail(home.nav, 'rail', 0);
-      await detail(home.chatTab, 'tab-chat', 10);
-    }
-    if (size === 'L') await detail(home.nav, 'sidebar', 0);
+    if (size === 'M') await detail(home.chatTab, 'tab-chat', 10);
     if (size === 'XL') {
-      await closeUp(home.chat, 'chat-wide');
-      await closeUp(home.experiences, 'experiences-wide');
-      await closeUp(home.members, 'members-wide');
+      await closeUp(home.experiences, 'experiences-wide', 0);
+      await closeUp(home.members, 'members-wide', 0);
     }
   }
   await frame(page, 'XS', 'dark');
@@ -101,9 +96,9 @@ test('a new Popkin', async ({ page }) => {
   const home = await open(page);
   await shot(page, 'empty-xs');
   await closeUp(home.chat, 'empty-chat');
-  await closeUp(home.photos, 'empty-photos');
+  await closeUp(home.photos, 'empty-photos', 0);
   await shot(page, 'empty-photos-xs');
-  await closeUp(home.experiences, 'empty-experiences');
+  await closeUp(home.experiences, 'empty-experiences', 0);
   await shot(page, 'empty-experiences-xs');
 });
 
@@ -114,7 +109,7 @@ test('one section fails, and "Try again"', async ({ page }) => {
   await home.failureOf(home.photos).waitFor();
   await centre(home.photos);
   await shot(page, 'failed-xs');
-  await closeUp(home.photos, 'failed-photos');
+  await closeUp(home.photos, 'failed-photos', 0);
 
   fixture.recover('photos');
   await home.tryAgainIn(home.photos).click();
@@ -122,7 +117,7 @@ test('one section fails, and "Try again"', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   await centre(home.photos);
   await shot(page, 'recovered-xs');
-  await closeUp(home.photos, 'recovered-photos');
+  await closeUp(home.photos, 'recovered-photos', 0);
 });
 
 test('"Bring someone in"', async ({ page, context }) => {
