@@ -81,6 +81,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("StartedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid?>("ThreadId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<long>("Version")
                         .IsConcurrencyToken()
                         .HasColumnType("bigint");
@@ -89,7 +92,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("PopkinId")
                         .IsUnique()
-                        .HasFilter("[EndedAt] IS NULL");
+                        .HasFilter("[EndedAt] IS NULL AND [ThreadId] IS NULL");
+
+                    b.HasIndex("ThreadId")
+                        .IsUnique()
+                        .HasFilter("[EndedAt] IS NULL AND [ThreadId] IS NOT NULL");
 
                     b.ToTable("Calls", (string)null);
                 });
@@ -152,12 +159,26 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<Guid?>("MemberAId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("MemberBId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("PopkinId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MemberAId");
+
+                    b.HasIndex("MemberBId");
+
                     b.HasIndex("PopkinId");
+
+                    b.HasIndex("PopkinId", "MemberAId", "MemberBId")
+                        .IsUnique()
+                        .HasFilter("[Kind] = 'Direct'");
 
                     b.ToTable("ChatThreads", (string)null);
                 });
@@ -641,6 +662,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasForeignKey("PopkinId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Popkin.Domain.ChatThread", null)
+                        .WithMany()
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("Popkin.Domain.CallParticipant", b =>
@@ -660,6 +686,16 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Popkin.Domain.ChatThread", b =>
                 {
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("MemberAId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("MemberBId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Popkin.Domain.PopkinSpace", null)
                         .WithMany()
                         .HasForeignKey("PopkinId")
