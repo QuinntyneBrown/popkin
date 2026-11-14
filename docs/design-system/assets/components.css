@@ -357,7 +357,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .bubble { overflow: hidden; border-radius: var(--radius-lg); border-bottom-left-radius: var(--radius-xs); background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: var(--shadow-1); font: var(--text-body); overflow-wrap: anywhere; }
 .msg--mine .bubble { border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-xs); background: var(--accent); color: var(--color-fg-on-popkin); box-shadow: none; }
 .bubble p { padding: var(--space-2-5) var(--space-4); }
-.bubble img { width: var(--layout-photo-in-chat); aspect-ratio: 4 / 3; }
+.bubble__photo { display: block; width: fit-content; max-width: 100%; padding: 0; border: 0; background: none; cursor: pointer; } /* a photo message's photo: a button, "Open photo from {first name}", that opens the photo view (L2-026 AC2) */
+.bubble__photo img { width: var(--layout-photo-in-chat); aspect-ratio: 4 / 3; object-fit: cover; } /* 16rem, never wider than the bubble (max-width from the reset); alt "Photo from {first name}", "Your photo" for your own */
+.bubble__photo:focus-visible { outline-offset: calc(-1 * var(--focus-ring-width)); } /* inside the edge: the bubble clips what is outside it */
 .bubble__quote { margin: var(--space-2) var(--space-2) 0; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-bg-subtle); font: var(--text-body-sm); }
 .msg--mine .bubble__quote { background: var(--color-bg-quote-on-popkin); }
 .bubble__quote strong { display: block; font-weight: var(--font-weight-semibold); }
