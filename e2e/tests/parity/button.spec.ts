@@ -115,7 +115,7 @@ parity('button', [
     key: 'landing',
     before: asVisitor,
     name: 'on-accent-link',
-    region: (page) => new LandingPage(page).freeStart,
+    region: (page) => new LandingPage(page).noAdsStart,
   },
   {
     key: 'welcome',

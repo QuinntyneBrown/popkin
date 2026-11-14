@@ -76,7 +76,7 @@ test('the landing page on a phone, section by section', async ({ page, pk }) => 
   const landing = await landingAt(page, pk, 'XS');
   await closeUp(landing.heroText, 'hero-text', 8);
   await closeUp(landing.heroStart, 'hero-start', 10);
-  await closeUp(landing.heroFree, 'hero-free', 10);
+  await closeUp(landing.heroNote, 'hero-free', 10);
   await closeUp(landing.preview, 'preview', 0);
 
   await bringToTop(landing.how, 0);
@@ -94,9 +94,9 @@ test('the landing page on a phone, section by section', async ({ page, pk }) => 
   await closeUp(landing.compareHeading, 'compare-heading', 10);
   await closeUp(landing.compare, 'compare-table-xs', 6);
 
-  await bringToTop(landing.free, 60);
+  await bringToTop(landing.noAds, 60);
   await shot(page, 'free-xs');
-  await closeUp(landing.free, 'free-band-xs', 0);
+  await closeUp(landing.noAds, 'free-band-xs', 0);
 
   await landing.footer.scrollIntoViewIfNeeded();
   await shot(page, 'footer-xs');
@@ -125,7 +125,7 @@ test('the landing page on a desktop: the links to its sections', async ({ page, 
   await shot(page, 'compare-xl');
   await closeUp(landing.compare, 'compare-table', 8);
 
-  await closeUp(landing.free, 'free-band', 0);
+  await closeUp(landing.noAds, 'free-band', 0);
   await landing.footer.scrollIntoViewIfNeeded();
   await shot(page, 'footer-xl');
   await closeUp(landing.footer, 'footer-xl-detail', 0);

@@ -42,7 +42,7 @@ test.describe('an invite to an active Popkin', () => {
     await expect(invite.people).toHaveText('14 people');
     await expect(invite.timeLeft).toHaveText('Here until Sunday, 6 pm');
     await expect(invite.join).toBeVisible();
-    await expect(invite.note).toHaveText('Free, no app to download.');
+    await expect(invite.note).toHaveText('No app to download.');
   });
 
   test('counts the people of the recorded Popkin, with no "+" when every avatar shows', async ({

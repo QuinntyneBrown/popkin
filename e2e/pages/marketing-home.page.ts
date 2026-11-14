@@ -21,7 +21,7 @@ export class MarketingHomePage {
   readonly heroLead: Locator;
   readonly heroStart: Locator;
   readonly heroFilm: Locator;
-  readonly heroFree: Locator;
+  readonly heroNote: Locator;
   readonly preview: Locator;
   readonly previewQr: Locator;
   /** "See Popkin in action." and the film. */
@@ -44,9 +44,11 @@ export class MarketingHomePage {
   readonly compareHeading: Locator;
   readonly compareRowHeadings: Locator;
   /** The closing band. */
-  readonly free: Locator;
-  readonly freeHeading: Locator;
-  readonly freeStart: Locator;
+  readonly noAds: Locator;
+  readonly noAdsHeading: Locator;
+  readonly noAdsStart: Locator;
+  /** Any text on the page that calls Popkin free (ADR 0019). */
+  readonly mentionsOfFree: Locator;
   /** The footer. */
   readonly footer: Locator;
   readonly footerBlurb: Locator;
@@ -73,7 +75,7 @@ export class MarketingHomePage {
     this.heroLead = this.heroText.locator('p').first();
     this.heroStart = this.hero.getByRole('link', { name: 'Start a Popkin' });
     this.heroFilm = this.hero.getByRole('link', { name: 'Watch the film' });
-    this.heroFree = this.hero.getByText('Free. Takes about a minute.');
+    this.heroNote = this.hero.getByText('Takes about a minute.');
     this.preview = this.hero.locator('.hero__art');
     this.previewQr = page.getByRole('img', { name: 'QR code for popk.in/lakeside' });
 
@@ -100,9 +102,10 @@ export class MarketingHomePage {
       .getByRole('table', { name: 'A group chat compared with a Popkin' })
       .getByRole('rowheader');
 
-    this.free = page.locator('.cta-band');
-    this.freeHeading = page.getByRole('heading', { name: 'Free. Like, actually free.' });
-    this.freeStart = this.free.getByRole('link', { name: 'Start a Popkin' });
+    this.noAds = page.locator('.cta-band');
+    this.noAdsHeading = page.getByRole('heading', { name: 'No ads. Like, actually none.' });
+    this.noAdsStart = this.noAds.getByRole('link', { name: 'Start a Popkin' });
+    this.mentionsOfFree = page.getByText(/\bfree\b/i);
 
     this.footer = page.getByRole('contentinfo');
     this.footerBlurb = this.footer.getByText('Pop-up communities for small groups.');

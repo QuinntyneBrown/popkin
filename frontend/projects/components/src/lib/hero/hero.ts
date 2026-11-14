@@ -52,7 +52,7 @@ export class Hero {
   /** The `h1` of the page. */
   readonly heading = input.required<string>();
   readonly lead = input.required<string>();
-  /** The line beside the action: "Free. Takes about a minute." */
+  /** The line beside the action: "Takes about a minute." */
   readonly note = input<string>();
   readonly preview = input.required<HeroPreview>();
 }
