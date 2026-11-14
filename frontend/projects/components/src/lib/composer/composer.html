@@ -1,6 +1,22 @@
 @if (closed(); as line) {
   <p class="composer__closed">{{ line }}</p>
 } @else {
+  @if (reply(); as replying) {
+    <div class="composer__reply">
+      <div class="grow">
+        <strong>Replying to {{ replying.firstName }}</strong>
+        <span class="truncate text-muted">{{ replying.snippet }}</span>
+      </div>
+      <button
+        pk-icon-button
+        type="button"
+        icon="close"
+        size="md"
+        label="Cancel reply"
+        (click)="cancel()"
+      ></button>
+    </div>
+  }
   <form class="composer__row" (submit)="submit($event)">
     <ng-content select="[slot=start]" />
     <div class="composer__field">
