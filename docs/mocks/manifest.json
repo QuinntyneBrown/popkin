@@ -314,7 +314,8 @@
         "L2-026",
         "L2-027",
         "L2-028",
-        "L2-045"
+        "L2-045",
+        "L2-036"
       ],
       "states": [
         "default",
@@ -328,7 +329,8 @@
         "marked",
         "deleted-quote",
         "photo-preview",
-        "photo-refused"
+        "photo-refused",
+        "photo-removed"
       ]
     },
     {
@@ -381,7 +383,8 @@
       "requirements": [
         "L2-032",
         "L2-031",
-        "L2-045"
+        "L2-045",
+        "L2-036"
       ],
       "states": [
         "default",
@@ -392,7 +395,8 @@
         "no-results",
         "wrapped",
         "going",
-        "removed"
+        "removed",
+        "photo-deleted"
       ]
     },
     {
@@ -405,6 +409,9 @@
         "L2-034",
         "L2-035",
         "L2-036",
+        "L2-045",
+        "L2-056",
+        "L2-058",
         "L2-059"
       ],
       "states": [
@@ -412,7 +419,13 @@
         "not-reacted",
         "loading",
         "error",
-        "direct"
+        "direct",
+        "own-comment",
+        "member",
+        "reaction-failed",
+        "save-failed",
+        "wrapped",
+        "removed"
       ],
       "not_applicable": {
         "empty": "The screen shows one photo; there is no collection to be empty."
@@ -921,15 +934,72 @@
       "title": "Photo comments",
       "opens_from": "photo-view",
       "requirements": [
-        "L2-035"
+        "L2-035",
+        "L2-045",
+        "L2-056"
       ],
       "states": [
         "default",
         "empty",
-        "busy"
+        "busy",
+        "own-comment",
+        "near-limit",
+        "error",
+        "read-only"
       ],
       "not_applicable": {
-        "invalid": "Post comment stays disabled until there is text; the 500-character limit stops typing."
+        "invalid": "Post comment stays disabled until there is text; the 500-character limit stops typing, and a count shows from 450 (near-limit)."
+      }
+    },
+    {
+      "id": "photo-actions",
+      "kind": "dialog",
+      "title": "Photo actions",
+      "opens_from": "photo-view",
+      "requirements": [
+        "L2-036"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "busy": "The one row opens Delete this photo?; nothing is sent from this menu.",
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "delete-photo",
+      "kind": "dialog",
+      "title": "Delete photo",
+      "opens_from": "photo-actions",
+      "requirements": [
+        "L2-036",
+        "L2-056"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "delete-comment",
+      "kind": "dialog",
+      "title": "Delete comment",
+      "opens_from": "photo-comments",
+      "requirements": [
+        "L2-035"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "busy": "The dialog closes on Delete; the comment leaves the list when the API answers.",
+        "failed": "A failed delete leaves the comment in the list and is told by the danger toast “We couldn’t delete your comment.”, drawn by notifications/toast/danger.html.",
+        "invalid": "The dialog has no field to fill in."
       }
     },
     {
