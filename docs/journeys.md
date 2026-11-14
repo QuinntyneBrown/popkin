@@ -24,7 +24,7 @@ Ordered by value. Effort is days for an intermediate developer.
 | 18 | Leave a Popkin | Member leaves a Popkin they no longer want. | 1 |
 | 19 | Delete account | Person deletes their account and personal data. | 2 |
 | 20 | Say keen | Member marks an experience the group wants to do as keen. | 1 |
-| 21 | Plan the trip | Members add stories to the trip board, move them to Done and read the burn-down. | 8 |
+| 21 | Make the plan | Members add stories to the plan board, move them to Done and read the burn-down. | 8 |
 | 22 | Find a free evening | Members enter time off and working hours and see when everyone is free. | 8 |
-| 23 | Switch a feature | Admin signs in to the admin app and turns Trips or Schedules off and on. | 5 |
+| 23 | Switch a feature | Admin signs in to the admin app and turns Plan or Schedules off and on. | 5 |
 | | **Total** | | **92** |

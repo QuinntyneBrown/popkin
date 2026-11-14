@@ -84,7 +84,7 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Preview card](components/preview-card.html) | Identity | With a name. No name yet. A 40-character name. | Static (both themes) | pages/name-your-popkin/default, pages/name-your-popkin/blank, pages/name-your-popkin/edge |
 | [Timeline](components/timeline.html) | Content | Day, weekend, custom, forever. | Static (both themes) | pages/how-long/default, pages/how-long/custom, pages/how-long/forever |
 
-Added with the Trips, Schedules and admin mocks on 13 November 2026, in `assets/components.css`
+Added with the Plan, Schedules and admin mocks on 13 November 2026, in `assets/components.css`
 and not yet given a page of their own (the next run of `extracting-design-systems` writes them):
 view switch (`.view-nav`), plan header (`.plan-header`), sprint chip and sparkline
 (`.sprint-chip`, `.sparkline`), board and story card (`.board`, `.story-card`, `.pts-group`,

@@ -671,10 +671,10 @@
       }
     },
     {
-      "id": "trip-board",
+      "id": "plan-board",
       "kind": "page",
-      "title": "Trip board",
-      "route": "/p/:popkin/trips",
+      "title": "Plan board",
+      "route": "/p/:popkin/plan",
       "requirements": [
         "L2-068",
         "L2-069",
@@ -694,7 +694,7 @@
       "id": "burn-down",
       "kind": "page",
       "title": "Burn-down",
-      "route": "/p/:popkin/trips/burn-down",
+      "route": "/p/:popkin/plan/burn-down",
       "requirements": [
         "L2-071"
       ],
@@ -1163,7 +1163,7 @@
       "id": "new-story",
       "kind": "dialog",
       "title": "New story",
-      "opens_from": "trip-board",
+      "opens_from": "plan-board",
       "requirements": [
         "L2-069",
         "L2-052"
@@ -1179,7 +1179,7 @@
       "id": "story",
       "kind": "dialog",
       "title": "Story",
-      "opens_from": "trip-board",
+      "opens_from": "plan-board",
       "requirements": [
         "L2-070"
       ],
