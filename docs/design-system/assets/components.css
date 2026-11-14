@@ -402,7 +402,7 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
 .composer__photo img { width: var(--space-28); aspect-ratio: 4 / 3; border-radius: var(--radius-md); box-shadow: var(--shadow-1); } /* alt "Photo to send" */
 .composer__remove { margin-top: calc(-1 * var(--space-1)); } /* "Remove photo", beside the photo's top corner */
 .composer__alert { align-items: center; margin-bottom: var(--space-2); } /* a refused photo: why, in the album's words, with Dismiss; nothing is previewed (L2-031 AC2) */
-.composer__alert button { margin-top: 0; padding: 0 var(--space-2); min-height: var(--target-comfortable); }
+.alert.composer__alert button { margin-top: 0; padding: 0 var(--space-2); min-height: var(--target-comfortable); } /* above .alert button: Dismiss is a full 44px target, centred on the line */
 /* How much of the 2,000 characters is used, from 1,800 on. */
 .composer__count { margin-top: var(--space-1); padding: 0 var(--space-12) 0 var(--space-4); text-align: right; font: var(--text-caption); font-variant-numeric: tabular-nums; color: var(--color-fg-muted); }
 .composer__closed { padding: var(--space-2) var(--space-3); text-align: center; font: var(--text-body-sm); color: var(--color-fg-muted); }
