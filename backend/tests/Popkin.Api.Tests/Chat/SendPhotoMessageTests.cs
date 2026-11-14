@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Popkin.Api.Tests.Support;
+using Popkin.Infrastructure.Persistence;
+using Popkin.Domain;
 
 namespace Popkin.Api.Tests.Chat;
 
@@ -123,6 +126,33 @@ public sealed class SendPhotoMessageTests
         Assert.Equal(photoId, stored.GetProperty("photo").GetProperty("id").GetGuid());
         Assert.Single((await lakeside.Host.MessagesAsync(lakeside.Id, threadId)).GetProperty("items").EnumerateArray(),
             m => m.GetProperty("photo").ValueKind != JsonValueKind.Null);
+    }
+
+    // Given two sends of one photo under different client message ids that race,
+    // when the second loses to the first as it saves,
+    // then it answers 400 photo_not_found, not a server error, and the photo is on one message.
+    [Fact]
+    public async Task A_photo_send_that_loses_the_race_for_its_photo_is_refused()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var threadId = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
+        var photoId = await lakeside.Host.UploadedThreadPhotoIdAsync(lakeside.Id, threadId);
+        api.Faults.LoseNextSaveTo = async () =>
+        {
+            using var scope = api.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var host = db.Memberships.Single(m => m.PopkinId == lakeside.Id && m.Role == MembershipRole.Host);
+            var photo = db.Photos.Single(p => p.Id == photoId);
+            db.Messages.Add(Message.Send(threadId, host.Id, "", Guid.NewGuid(), api.Clock.GetUtcNow(), photo: photo));
+            await db.SaveChangesAsync();
+        };
+
+        var response = await lakeside.Host.SendPhotoMessageAsync(lakeside.Id, threadId, photoId);
+
+        var body = await response.AssertProblem(HttpStatusCode.BadRequest, "photo_not_found");
+        Assert.Equal("photoId", body.GetProperty("field").GetString());
+        Assert.Equal(1, api.MessageCount());
     }
 
     // Given two members with Popkin open, when one sends a photo message in Everyone,

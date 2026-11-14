@@ -93,6 +93,12 @@ public sealed class SendMessageCommandHandler(
             var winner = await StoredAsync(membership.Id, clientMessageId, cancellationToken);
             if (winner is null)
             {
+                // Two sends of one photo raced under different names: the other has it now.
+                if (photo is not null && await db.Messages.AnyAsync(m => m.PhotoId == photo.Id, cancellationToken))
+                {
+                    throw ProblemException.Invalid("photo_not_found", "That photo isn't one you can send here.", "photoId");
+                }
+
                 throw;
             }
 
