@@ -15,7 +15,7 @@ export class MessageActions {
     const composer = page.locator('.composer');
     this.replyBar = composer.locator('.composer__reply');
     this.replyingTo = this.replyBar.locator('strong');
-    this.replySnippet = this.replyBar.locator('.composer__reply-text');
+    this.replySnippet = this.replyBar.locator('.truncate');
     this.cancelReply = this.replyBar.getByRole('button', { name: 'Cancel reply' });
   }
 

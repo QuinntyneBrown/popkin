@@ -102,9 +102,9 @@ export class GroupChatPage {
     this.navBadge = this.nav.locator('.badge');
   }
 
-  /** The message with this text. */
+  /** The message with this text, not one that only quotes it. */
   message(text: string): Locator {
-    return this.messages.filter({ has: this.page.locator('.bubble', { hasText: text }) });
+    return this.messages.filter({ has: this.page.locator('.bubble > p', { hasText: text }) });
   }
 
   nameOf(message: Locator): Locator {
