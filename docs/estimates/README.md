@@ -1,12 +1,12 @@
 # Estimates
 
-- Overall effort: 185 days
-- Complete: 78%
+- Overall effort: 193 days
+- Complete: 76%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
 | [accounts](accounts.md) | 24 days | 97% |
-| [popkins](popkins.md) | 19 days | 82% |
+| [popkins](popkins.md) | 27 days | 65% |
 | [invitations](invitations.md) | 13 days | 81% |
 | [chat](chat.md) | 29 days | 80% |
 | [security](security.md) | 13 days | 63% |
@@ -23,6 +23,6 @@
 1. Chat: photos in chat, in Everyone and in a direct message (journey 13).
 2. Photos: react, comment, save and delete (journey 14), and the photo store of a deployed system, which the album's zip needs too.
 3. Join with a code, which the welcome screen now links to (journey 15).
-4. Popkin settings: edit name and look and change how long it lasts, which the banner of the last hour offers the Host (journey 16).
+4. A Popkin's own address: choose it when starting, open a Popkin by it, and keep it when the Popkin is renamed.
 5. The SMS and email providers, which the crew invites need too.
 6. Reliability: a saved answer for every screen and an app that opens without a connection.

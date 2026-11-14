@@ -46,14 +46,14 @@ Everyone thread's read carries `endsAt` and `readOnly` too.
 - `docs/mocks/notifications/banner/warning.html` — warning banner "1 hour left. Lakeside Weekend
   wraps up at 6 pm." with the Host's "Change" action and a Dismiss button (L2-044 AC2).
 - `docs/mocks/dialogs/change-length/default.html` — the dialog the Host's banner action is to
-  open (owned by [Popkin settings](../../popkins/popkin-settings/README.md)); not built.
+  open (owned by [Popkin settings](../../popkins/popkin-settings/README.md)); built in journey 16.
 - `docs/mocks/pages/wrapped-up/default.html` — the recap a member lands on when the Popkin wraps
   up while open (L2-044 AC4).
 
 The mock's banner action reads "Change"; L2-044 AC2 names it "Change how long it lasts". The
 design gave the action the visible label "Change" and the accessible name "Change how long it
-lasts", which contains the visible label (WCAG 2.5.3). The build has the visible label only: the
-accessible name is "Change" (known gap 47).
+lasts", which contains the visible label (WCAG 2.5.3). Journey 9 built the visible label only;
+journey 16 gave it the accessible name, through `pk-banner`'s `actionLabel` (known gap 47).
 
 ### API and real-time
 
@@ -63,7 +63,8 @@ accessible name is "Change" (known gap 47).
   the API after the Host wraps a Popkin up. A fact, and final; `GET /api/popkins/{popkinId}`
   recovers it. **It is not sent when a Popkin's time is up**: the Worker wraps that Popkin up,
   and the Worker sends no hub events (ADR 0015).
-- `PopkinLengthChanged` is not built; it comes with "Change how long it lasts", journey 16
+- A change of length reaches every member as `PopkinChanged`, journey 16, which carries the
+  look and the length together; no `PopkinLengthChanged` was built
   ([Popkin settings](../../popkins/popkin-settings/README.md)).
 
 ### Backend — Popkin Worker
@@ -142,8 +143,8 @@ accessible name is "Change" (known gap 47).
   then the time left: "59 min left." and so on. The home, the Everyone thread, Photos and
   Experiences each render it as `pk-banner` (warning) with Dismiss. Dismissing it hides it for
   that Popkin, on all four screens, until the app is loaded again. On the home only, the Host's
-  banner carries the action "Change" (L2-044 AC2). Until "Change how long it lasts" is built
-  (journey 16) it opens Popkin settings, where that dialog will be (known gap 47).
+  banner carries the action "Change" (L2-044 AC2). Since journey 16 it opens "Change how long it
+  lasts", named so for assistive technology (known gap 47).
 - **The move to the recap** — the root component `App` subscribes to `WrapUpWatch.wrappedUp$`.
   When the Popkin that wrapped up is the one on the screen (the address is `/p/{popkinId}` or
   under it, and is not the recap already), it closes every open dialog and navigates to
@@ -180,9 +181,9 @@ Everything above. What differs from the design as it first stood, and what waits
   corrects for a wrong device clock: a device whose clock is behind reads late by as much, and
   one that is ahead asks early and keeps asking.
 - The banner under one hour reads the time left; the design left its copy to supply.
-- The Host's "Change" opens Popkin settings, shows on the home only, and has the accessible
-  name "Change" (known gap 47). `ChangeLengthDialog` and `PopkinLengthChanged` wait for
-  journey 16.
+- The Host's "Change" shows on the home only (known gap 47). Journey 16 made it open
+  `ChangeLengthDialog`, with the accessible name "Change how long it lasts"; a new end reaches
+  every member's banner and time left through `PopkinChanged`.
 - The batch of the due query is 100.
 - The exporter of ADR 0012 is not set up, so the two instruments are recorded and not exported.
 

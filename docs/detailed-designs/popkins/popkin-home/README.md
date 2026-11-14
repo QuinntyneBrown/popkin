@@ -154,7 +154,13 @@ form factors, the live Chat card and Members, and the invite dialog
 - the banner of the last hour was built in journey 9, with the Host's "Change", and the home
   moves to the recap when its Popkin wraps up while it is open
   ([Time is up](../../wrap-up/time-is-up/README.md));
-- `PopkinChanged` and `MemberLeft`: journeys 16 and 18. No handler sends them yet;
+- `MemberLeft` was built in journey 18 ([Leave a Popkin](../leave-popkin/README.md)), and
+  `PopkinChanged` in journey 16: `PopkinHomeDto` gained `length` and `version`, and
+  `PopkinHomeStore.applySettings` takes a change whose version is higher than the one it holds,
+  from the dialog that saved it or from the hub, so the header, the sidebar, the accent and the
+  time left follow the Host's change without a reload
+  ([Popkin settings](../popkin-settings/README.md)). The Host's "Change" on the banner of the
+  last hour opens "Change how long it lasts";
 - the call was built in journey 7, Group call: "Group call" opens the call screen at
   `/p/:popkinId/call`, and the home shows the banner of a call under way, read by
   `CallBannerStore` ([Group call](../../calls/group-call/README.md));
