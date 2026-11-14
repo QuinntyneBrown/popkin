@@ -1,3 +1,5 @@
+import { joinCodeStates } from '../../fixtures/join-code';
+import { JoinCodePage } from '../../pages/join-code.page';
 import { experienceStates } from '../../fixtures/experience-states';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { SignInPage } from '../../pages/sign-in.page';
@@ -104,5 +106,31 @@ parity('text-field', [
     region: (page) => new ShareExperienceDialog(page).titleField,
     // The mock's Title has autofocus; the dialog focuses it on open.
     prepare: (page) => new ShareExperienceDialog(page).title.focus(),
+  },
+  {
+    key: 'joinCode',
+    name: 'join-code',
+    region: (page) => new JoinCodePage(page).field,
+    ...joinCodeStates.joinCode,
+  },
+  {
+    key: 'joinCodeInvalid',
+    name: 'join-code-invalid',
+    region: (page) => new JoinCodePage(page).field,
+    ...joinCodeStates.joinCodeInvalid,
+  },
+  {
+    key: 'joinCodeBlank',
+    name: 'join-code-blank',
+    region: (page) => new JoinCodePage(page).field,
+    ...joinCodeStates.joinCodeBlank,
+  },
+  {
+    key: 'joinCodeSubmitting',
+    name: 'join-code-readonly',
+    region: (page) => new JoinCodePage(page).field,
+    ...joinCodeStates.joinCodeSubmitting,
+    // The mock's field has autofocus; the harness blurs the app's last interaction.
+    prepare: (page) => new JoinCodePage(page).code.focus(),
   },
 ]);

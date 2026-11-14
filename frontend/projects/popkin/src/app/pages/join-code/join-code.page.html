@@ -15,6 +15,13 @@
   ></aside>
   <header pk-top-bar slot="header" back="/welcome"></header>
   <form id="join-code" class="stack stack--lg" novalidate (submit)="find($event)">
+    @if (join.state() === 'limited') {
+      <div pk-alert heading="That’s a lot of tries.">{{ join.tryAgain() }}</div>
+    } @else if (join.state() === 'failed') {
+      <div pk-alert heading="We couldn’t look that up.">
+        Check your connection and try again. What you typed is still here.
+      </div>
+    }
     <div
       pk-text-field
       fieldId="code"

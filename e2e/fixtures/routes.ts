@@ -62,6 +62,8 @@ export const routes = {
   joinCodeSubmitting: { app: '/join', mock: 'pages/join-code/submitting.html' },
   joinCodeInvalid: { app: '/join', mock: 'pages/join-code/invalid.html' },
   joinCodeBlank: { app: '/join', mock: 'pages/join-code/blank.html' },
+  joinCodeError: { app: '/join', mock: 'pages/join-code/error.html' },
+  joinCodeLimited: { app: '/join', mock: 'pages/join-code/limited.html' },
   signUp: { app: '/sign-up', mock: 'pages/sign-up/default.html' },
   signUpEmail: { app: '/sign-up', mock: 'pages/sign-up/email.html' },
   signUpError: { app: '/sign-up', mock: 'pages/sign-up/error.html' },

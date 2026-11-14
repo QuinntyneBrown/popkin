@@ -106,7 +106,7 @@ import { SignInPage } from '../pages/sign-in.page';
 import { PopkinCreatedPage } from '../pages/popkin-created.page';
 import { ServerErrorPage } from '../pages/server-error.page';
 import { JoinCodePage } from '../pages/join-code.page';
-import { aVisitorWithACode, holdTheLookup, unknownCode } from './join-code';
+import { joinCodeStates } from './join-code';
 import { SignUpPage } from '../pages/sign-up.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
 import { YourProfilePage } from '../pages/your-profile.page';
@@ -244,45 +244,37 @@ export const screenStates: ScreenState[] = [
   },
   {
     key: 'joinCode',
-    before: asVisitor,
-    regions: joinCodeRegions,
-    wideRegions: joinCodePicture,
-  },
-  {
-    key: 'joinCodeInvalid',
-    before: aVisitorWithACode,
-    app: async (page) => {
-      const join = new JoinCodePage(page);
-      await join.code.fill(unknownCode);
-      await join.find.click();
-      await expect(join.error).toBeVisible();
-    },
-    regions: joinCodeRegions,
-    wideRegions: joinCodePicture,
-  },
-  {
-    key: 'joinCodeBlank',
-    before: aVisitorWithACode,
-    app: async (page) => {
-      const join = new JoinCodePage(page);
-      await join.find.click();
-      await expect(join.error).toBeVisible();
-    },
+    ...joinCodeStates.joinCode,
     regions: joinCodeRegions,
     wideRegions: joinCodePicture,
   },
   {
     key: 'joinCodeSubmitting',
-    before: async (page) => {
-      await aVisitorWithACode(page);
-      await holdTheLookup(page);
-    },
-    app: async (page) => {
-      const join = new JoinCodePage(page);
-      await join.code.fill(inviteCode);
-      await join.find.click();
-      await expect(join.find).toBeDisabled();
-    },
+    ...joinCodeStates.joinCodeSubmitting,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeInvalid',
+    ...joinCodeStates.joinCodeInvalid,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeBlank',
+    ...joinCodeStates.joinCodeBlank,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeError',
+    ...joinCodeStates.joinCodeError,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeLimited',
+    ...joinCodeStates.joinCodeLimited,
     regions: joinCodeRegions,
     wideRegions: joinCodePicture,
   },

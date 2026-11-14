@@ -12,7 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { JoinCode } from 'api';
-import { Button, Screen, SplitAside, TextField, TopBar } from 'components';
+import { Alert, Button, Screen, SplitAside, TextField, TopBar } from 'components';
 import { ScanToJoinDialog } from '../../dialogs/scan-to-join/scan-to-join.dialog';
 
 /**
@@ -21,7 +21,7 @@ import { ScanToJoinDialog } from '../../dialogs/scan-to-join/scan-to-join.dialog
  */
 @Component({
   selector: 'pk-join-code-page',
-  imports: [Button, ReactiveFormsModule, Screen, SplitAside, TextField, TopBar],
+  imports: [Alert, Button, ReactiveFormsModule, Screen, SplitAside, TextField, TopBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './join-code.page.html',
   providers: [JoinCode],

@@ -1,3 +1,5 @@
+import { joinCodeStates } from '../../fixtures/join-code';
+import { JoinCodePage } from '../../pages/join-code.page';
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { parity } from '../../fixtures/parity';
 import { howLongForLakeside, maraWithPhoto, theMockWrappedInvite } from '../../fixtures/journeys';
@@ -55,5 +57,12 @@ parity('split-aside', [
     name: 'brand-mark',
     region: (page) => new WelcomePage(page).aside,
     widths: [1280],
+  },
+  {
+    key: 'joinCode',
+    name: 'join-code',
+    region: (page) => new JoinCodePage(page).picture,
+    widths: [1280],
+    ...joinCodeStates.joinCode,
   },
 ]);

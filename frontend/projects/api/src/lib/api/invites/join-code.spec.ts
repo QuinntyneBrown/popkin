@@ -101,4 +101,32 @@ describe('JoinCode', () => {
     join.edit();
     expect(join.state()).toBe('finding');
   });
+
+  // L2-053 AC3, AC4
+  it('says when to try again once too many codes are tried', () => {
+    join.find('kx7m2pqr9t');
+    refuse(429, { code: 'rate_limited', retryAfterSeconds: 540 });
+
+    expect(join.state()).toBe('limited');
+    expect(join.tryAgain()).toBe('Try again in 9 minutes.');
+  });
+
+  it('says a lookup that fails failed, and lets it be tried again', () => {
+    join.find('kx7m2pqr9t');
+    refuse(500, { code: 'server_error' });
+
+    expect(join.state()).toBe('failed');
+
+    join.find('kx7m2pqr9t');
+    expect(asked).toHaveLength(2);
+  });
+
+  it('keeps the refusal shown while the text is changed', () => {
+    join.find('kx7m2pqr9t');
+    refuse(429, { code: 'rate_limited', retryAfterSeconds: 60 });
+
+    join.edit();
+
+    expect(join.state()).toBe('limited');
+  });
 });

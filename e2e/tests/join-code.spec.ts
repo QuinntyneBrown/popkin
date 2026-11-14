@@ -1,5 +1,12 @@
 import { aCamera } from '../fixtures/camera';
-import { aVisitorWithACode, holdTheLookup, joinCodeUrl, unknownCode } from '../fixtures/join-code';
+import {
+  aVisitorWithACode,
+  holdTheLookup,
+  joinCodeUrl,
+  theLookupFails,
+  tooManyTries,
+  unknownCode,
+} from '../fixtures/join-code';
 import { asVisitor, inviteCode } from '../fixtures/journeys';
 import { maraWithPopkins } from '../fixtures/my-popkins';
 import { expect, test } from '../fixtures/pk-test';
@@ -170,5 +177,39 @@ test.describe('Join with a code', () => {
 
     await expect(join.error).toHaveCount(0);
     await expect(join.hint).toBeVisible();
+  });
+
+  // L2-053 AC3, AC4
+  test('says when to try again once too many codes are tried', async ({ page }) => {
+    await aVisitorWithACode(page);
+    await tooManyTries(page, 540);
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+    await join.code.fill(inviteCode);
+
+    await join.find.click();
+
+    await expect(join.alert).toContainText('That’s a lot of tries.');
+    await expect(join.alert).toContainText('Try again in 9 minutes.');
+    await expect(join.code).toHaveValue(inviteCode);
+    await expect(join.code).not.toHaveAttribute('aria-invalid', 'true');
+    await expect(page).toHaveURL(joinCodeUrl);
+  });
+
+  test('says when the lookup fails, and keeps what was typed', async ({ page }) => {
+    await aVisitorWithACode(page);
+    await theLookupFails(page);
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+    await join.code.fill(inviteCode);
+
+    await join.find.click();
+
+    await expect(join.alert).toContainText('We couldn’t look that up.');
+    await expect(join.alert).toContainText(
+      'Check your connection and try again. What you typed is still here.',
+    );
+    await expect(join.code).toHaveValue(inviteCode);
+    await expect(join.find).toBeEnabled();
   });
 });
