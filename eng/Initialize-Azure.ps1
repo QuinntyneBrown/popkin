@@ -11,7 +11,8 @@
       OpenID Connect, trusted for the repository's `production` environment only: no Azure secret
       is stored in GitHub;
     - its roles on the resource group: Contributor, and Role Based Access Control Administrator
-      limited to assigning AcrPull, which main.bicep gives the apps' identity;
+      limited to assigning AcrPull and Communication and Email Service Owner, which main.bicep
+      gives the apps' identity (ADR 0021);
     - the GitHub environment `production`, deployable from main only, with the variables the
       Deploy workflow reads and the two keys the API and the Worker share, generated here once.
 #>
@@ -84,12 +85,13 @@ function Grant-Role([string] $Role, [string] $Condition) {
 }
 
 $acrPull = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+$communication = '09976791-48a7-449e-bb21-39d1a415f350'
 Grant-Role 'Contributor'
 Grant-Role 'Role Based Access Control Administrator' (
     "((!(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})) OR " +
-    "(@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {$acrPull})) AND " +
+    "(@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {$acrPull, $communication})) AND " +
     "((!(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})) OR " +
-    "(@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {$acrPull}))")
+    "(@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {$acrPull, $communication}))")
 
 # The GitHub environment, deployable from main alone.
 gh api --method PUT "repos/$Repository/environments/$Environment" `
