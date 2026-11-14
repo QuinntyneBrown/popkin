@@ -50,6 +50,10 @@ The mechanism adds no endpoint. Every endpoint answers with these shapes:
 - `400` `unsupported_image` — an uploaded file whose content is not JPEG, PNG, WebP or HEIC; the
   `errors` entry names the file field (L2-052 AC3).
 - `400` `image_too_large` — a file over 10 MB (L2-013 AC2, L2-031 AC2).
+- `413` `request_too_large` — a body over the request limit of its action (`[RequestSizeLimit]`),
+  "The request is too large.", with no `errors`. Each upload's limit leaves room for its largest
+  file and its multipart overhead, so a file a little over its own limit still reaches the
+  handler and gets its own `400`; only a body well past it is cut off.
 - `500` `server_error` — ProblemDetails with `title` "Something went wrong", `code` and a
   `reference`; nothing else (L2-052 AC5).
 
@@ -110,7 +114,13 @@ normalisation; it is never HTML-sanitised on input, because encoding happens on 
 
 - **`[ApiController]` binding failures** — `ApiBehaviorOptions.InvalidModelStateResponseFactory`
   is replaced so that a body that is not JSON or a field of the wrong type answers the same
-  `validation_failed` shape, with `invalid_type` as the rule code.
+  `validation_failed` shape, with `invalid_type` as the rule code. A body over the action's
+  `IRequestSizeLimitMetadata` limit, known from its `Content-Length` or found by the server or the
+  form reader as it reads past the limit, answers `413` `request_too_large` instead
+  (`Problems/RequestLimits.cs`). Journey 13 added the rule with the chat's photo upload, 10 MB
+  plus 64 KB; it holds for every upload with a request limit (the album's 20 MB, an avatar's on
+  joining and on the account, an experience's picture), which answered `400`
+  before. `UploadThreadPhotoTests` proves it on the chat's upload.
 - **`ProblemDetailsExceptionHandler`** (from
   [Membership authorisation](../membership-authorisation/README.md)) — maps
   `RequestValidationException` to `400 validation_failed`, `UnsupportedImageException` to
