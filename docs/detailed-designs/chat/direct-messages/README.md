@@ -14,8 +14,8 @@ read it.
 A direct message opens from a row on the Chat tab, from the New message dialog (conversations) or
 from its address. Its header shows the other member's avatar and name and "From {emoji} {Popkin
 name}"; the thread starts with "Only you two can see this". Everything a member can do in Everyone
-works the same way here: text, photos, reactions and replies; journey 11 built text, and photos,
-reactions and replies come with the journeys that build them in Everyone (known gap 64). A direct
+works the same way here: text, photos, reactions and replies; journey 11 built text, journey 12
+reactions and replies, and photos come with journey 13, which builds them in Everyone (known gap 64). A direct
 message belongs to its Popkin: it exists only between members of that Popkin and becomes
 read-only when the Popkin wraps up. "Call {first name}" opens a call between the two
 ([Group call](../../calls/group-call/README.md)).
@@ -71,7 +71,7 @@ the idempotent `PUT` above, which is safe to repeat and may create the thread.
 
 Everything above, for messages of text. Waiting, each in [the register](../../README.md#known-gaps):
 
-- reactions, replies and photos in a direct message (L2-023 AC3), with journeys 12 and 13, and "Shared between you" in the person pane, with journey 13 (gap 64);
+- photos in a direct message (L2-023 AC3) and "Shared between you" in the person pane, with journey 13 (gap 64); journey 12 built reactions and replies here, with message actions;
 - what a direct message shows when one of the two leaves the Popkin, with journey 18 (gap 65).
 
 Decided in the build:
