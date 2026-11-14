@@ -19,6 +19,24 @@ public sealed class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.HasIndex(m => new { m.AuthorMembershipId, m.ClientMessageId }).IsUnique();
         builder.HasOne<ChatThread>().WithMany().HasForeignKey(m => m.ThreadId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Membership>().WithMany().HasForeignKey(m => m.AuthorMembershipId).OnDelete(DeleteBehavior.Restrict);
+        // Two changes to a message's reactions at once: one saves, the other is made again.
+        builder.Property(m => m.ReactionsVersion).IsConcurrencyToken();
+        // A reply links to the message it answers; messages are soft-deleted, so the link never dangles.
+        builder.HasOne<Message>().WithMany().HasForeignKey(m => m.ReplyToMessageId).OnDelete(DeleteBehavior.NoAction);
+    }
+}
+
+public sealed class MessageReactionConfiguration : IEntityTypeConfiguration<MessageReaction>
+{
+    public void Configure(EntityTypeBuilder<MessageReaction> builder)
+    {
+        builder.ToTable("MessageReactions");
+        // One reaction per member, message and emoji, even when two requests race (L2-024).
+        builder.HasKey(r => new { r.MessageId, r.MembershipId, r.Emoji });
+        builder.Property(r => r.Emoji).HasMaxLength(MessageReaction.MaxEmojiLength);
+        // The reactions go with their message.
+        builder.HasOne<Message>().WithMany().HasForeignKey(r => r.MessageId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Membership>().WithMany().HasForeignKey(r => r.MembershipId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 

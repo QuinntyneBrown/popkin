@@ -41,6 +41,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public DatabaseFaults Faults { get; } = new();
 
+    /// <summary>Every line the API logged.</summary>
+    public CapturingLoggerProvider Logs { get; } = new();
+
     /// <summary>The requests the API has finished handling, to await what it does on its own time.</summary>
     public HandledRequests Requests { get; } = new();
 
@@ -64,6 +67,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
         builder.ConfigureTestServices(services =>
         {
+            services.AddSingleton<Microsoft.Extensions.Logging.ILoggerProvider>(Logs);
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Clock);
             services.RemoveAll<ICodeGenerator>();

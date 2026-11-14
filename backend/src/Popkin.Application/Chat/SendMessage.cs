@@ -10,8 +10,12 @@ namespace Popkin.Application.Chat;
 /// <summary>`Created` is false when the author already sent this client message id.</summary>
 public sealed record SendMessageResult(MessageDto Message, bool Created);
 
-/// <summary>Posts text to a thread under the name the device gave the message (L2-021, L2-028).</summary>
-public sealed record SendMessageCommand(Guid PopkinId, Guid ThreadId, Guid? ClientMessageId, string? Text) : IRequest<SendMessageResult>;
+/// <summary>
+/// Posts text to a thread under the name the device gave the message (L2-021, L2-028), as a
+/// reply to an earlier message of the thread when `ReplyToMessageId` names one (L2-025).
+/// </summary>
+public sealed record SendMessageCommand(Guid PopkinId, Guid ThreadId, Guid? ClientMessageId, string? Text, Guid? ReplyToMessageId = null)
+    : IRequest<SendMessageResult>;
 
 public sealed class SendMessageCommandHandler(
     IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore photos, IPopkinNotifier notifier)
@@ -43,15 +47,21 @@ public sealed class SendMessageCommandHandler(
         // repeat says, so "Try again" after a lost answer adds nothing (L2-028 AC1).
         if (await StoredAsync(membership.Id, clientMessageId, cancellationToken) is { } stored)
         {
-            return new SendMessageResult(MessageDto.Of(stored, membership, photos), Created: false);
+            return new SendMessageResult(await StoredDtoAsync(stored, membership, cancellationToken), Created: false);
         }
+
+        // A reply answers a message of the same thread; a deleted one still links (L2-025 AC4).
+        var replyTo = request.ReplyToMessageId is { } replyToId
+            ? await db.Messages.AsNoTracking().FirstOrDefaultAsync(m => m.Id == replyToId && m.ThreadId == thread.Id, cancellationToken)
+                ?? throw ProblemException.Invalid("reply_not_found", "That message isn't in this conversation.", "replyToMessageId")
+            : null;
 
         if (popkin.Status == PopkinStatus.WrappedUp)
         {
             throw new ProblemException(409, "popkin_wrapped_up", "This Popkin has wrapped up.");
         }
 
-        var message = Message.Send(thread.Id, membership.Id, text, clientMessageId, clock.GetUtcNow());
+        var message = Message.Send(thread.Id, membership.Id, text, clientMessageId, clock.GetUtcNow(), replyTo);
         db.Messages.Add(message);
         try
         {
@@ -67,14 +77,18 @@ public sealed class SendMessageCommandHandler(
                 throw;
             }
 
-            return new SendMessageResult(MessageDto.Of(winner, membership, photos), Created: false);
+            return new SendMessageResult(await StoredDtoAsync(winner, membership, cancellationToken), Created: false);
         }
 
         // Told after the commit, in the same request: there is no queue between store and push (L2-027 AC1).
-        var sent = MessageDto.Of(message, membership, photos);
+        var sent = MessageDto.Of(message, membership, photos, quote: await Quotes.OfAsync(db, message, cancellationToken));
         await notifier.MessageAdded(await ChatThreads.AudienceAsync(db, thread, cancellationToken), sent);
         return new SendMessageResult(sent, Created: true);
     }
+
+    private async Task<MessageDto> StoredDtoAsync(Message stored, Membership author, CancellationToken cancellationToken) =>
+        MessageDto.Of(
+            stored, author, photos, await Reactions.OfAsync(db, stored.Id, cancellationToken), await Quotes.OfAsync(db, stored, cancellationToken));
 
     private Task<Message?> StoredAsync(Guid authorMembershipId, Guid clientMessageId, CancellationToken cancellationToken) =>
         db.Messages.AsNoTracking().FirstOrDefaultAsync(

@@ -20,6 +20,8 @@ public interface IAppDbContext
 
     DbSet<Message> Messages { get; }
 
+    DbSet<MessageReaction> MessageReactions { get; }
+
     DbSet<ThreadReadState> ThreadReadStates { get; }
 
     DbSet<Photo> Photos { get; }

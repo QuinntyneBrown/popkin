@@ -26,8 +26,13 @@ public sealed class UnexpectedExceptionHandler(IProblemDetailsService problems, 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         var reference = ReferenceCode.New();
-        logger.LogError(exception, "Unexpected failure {Reference} on {Method} {Path} ({TraceId})",
-            reference, httpContext.Request.Method, httpContext.Request.Path, httpContext.TraceIdentifier);
+        // The route by its template, never the path: a path carries ids and what a person chose,
+        // such as the emoji of a reaction (ADR 0012).
+        // The middleware clears the endpoint before it hands the failure on; its feature keeps it.
+        var endpoint = httpContext.Features.Get<IExceptionHandlerFeature>()?.Endpoint ?? httpContext.GetEndpoint();
+        var route = (endpoint as RouteEndpoint)?.RoutePattern.RawText ?? "(no route)";
+        logger.LogError(exception, "Unexpected failure {Reference} on {Method} {Route} ({TraceId})",
+            reference, httpContext.Request.Method, route, httpContext.TraceIdentifier);
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
         var details = new ProblemDetails { Status = 500, Title = "Something went wrong" };
         details.Extensions["code"] = "server_error";
