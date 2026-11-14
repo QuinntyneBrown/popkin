@@ -41,8 +41,18 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<CrewInvite> CrewInvites => Set<CrewInvite>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        // SQL Server's default collations hold many emoji equal to one another; a reaction's
+        // emoji is part of its key, so it is compared code point by code point there. SQLite
+        // already compares text in binary.
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+        {
+            modelBuilder.Entity<MessageReaction>().Property(r => r.Emoji).UseCollation("Latin1_General_100_BIN2");
+        }
+    }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
