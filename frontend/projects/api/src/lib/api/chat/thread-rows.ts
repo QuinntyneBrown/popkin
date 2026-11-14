@@ -36,14 +36,23 @@ export interface RowPhoto {
   url: string;
   /** "Photo from Dev", or "Your photo". */
   alt: string;
-  /** The name of the button that opens it full screen. */
+  /** The name of the link that opens it full screen. */
   label: string;
+  /** The photo view it opens (L2-026 AC2); null while it is still on the device. */
+  link: string[] | null;
 }
 
-function rowPhoto(id: string | null, url: string, mine: boolean, firstName: string): RowPhoto {
+function rowPhoto(
+  popkinId: string,
+  id: string | null,
+  url: string,
+  mine: boolean,
+  firstName: string,
+): RowPhoto {
+  const link = id ? ['/p', popkinId, 'photos', id] : null;
   return mine
-    ? { id, url, alt: 'Your photo', label: 'Open your photo' }
-    : { id, url, alt: `Photo from ${firstName}`, label: `Open photo from ${firstName}` };
+    ? { id, url, alt: 'Your photo', label: 'Open your photo', link }
+    : { id, url, alt: `Photo from ${firstName}`, label: `Open photo from ${firstName}`, link };
 }
 
 /** The quote in a reply: a deleted message keeps its id only and reads "Message deleted". */
@@ -129,6 +138,7 @@ export function threadRows(
       quote: replyQuote(message.quote),
       photo: message.photo
         ? rowPhoto(
+            message.popkinId,
             message.photo.id,
             message.photo.url,
             author === viewerMembershipId,
@@ -158,7 +168,9 @@ export function threadRows(
       state: SHOWN_AS[entry.state],
       reactions: [],
       quote: entry.replyTo ?? null,
-      photo: entry.photo?.preview ? rowPhoto(null, entry.photo.preview, true, '') : null,
+      photo: entry.photo?.preview
+        ? rowPhoto(entry.popkinId, null, entry.photo.preview, true, '')
+        : null,
     });
     lastAuthor = viewerMembershipId;
   }

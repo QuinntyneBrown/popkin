@@ -129,7 +129,7 @@ test.describe('sending a photo (L2-026 AC1, AC2)', () => {
 
     const mine = chat.message('Look at the lake');
     await expect(photos.photo(mine)).toBeVisible();
-    const photo = await photos.photo(mine).boundingBox();
+    const photo = await photos.image(mine).boundingBox();
     const text = await mine.locator('.bubble > p').boundingBox();
     expect(text && photo && text.y >= photo.y + photo.height).toBe(true);
   });
@@ -159,7 +159,12 @@ test.describe('sending a photo (L2-026 AC1, AC2)', () => {
 
   test('choosing it opens the photo full screen', async ({ page }) => {
     await maraInTheChat(page);
-    await withTheAlbum(page);
+    // Sent in Everyone, Dev's photo is in the album too (L2-026 AC3).
+    const album = await withTheAlbum(page);
+    album.shots = [
+      { ...album.shots[0], id: dockPhoto.id, caption: null, by: people.dev },
+      ...album.shots,
+    ];
     await page.goto(chatUrl);
 
     await new ChatPhotos(page).photo(new GroupChatPage(page).message(devs)).click();

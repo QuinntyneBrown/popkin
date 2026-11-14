@@ -190,8 +190,20 @@ describe('threadRows', () => {
       now,
     );
     expect(rows.slice(1).map((row) => (row.kind === 'message' ? row.photo : null))).toEqual([
-      { id: 'ph-1', url: '/api/files/dock', alt: 'Photo from Dev', label: 'Open photo from Dev' },
-      { id: 'ph-2', url: '/api/files/dock', alt: 'Your photo', label: 'Open your photo' },
+      {
+        id: 'ph-1',
+        url: '/api/files/dock',
+        alt: 'Photo from Dev',
+        label: 'Open photo from Dev',
+        link: ['/p', 'p', 'photos', 'ph-1'],
+      },
+      {
+        id: 'ph-2',
+        url: '/api/files/dock',
+        alt: 'Your photo',
+        label: 'Open your photo',
+        link: ['/p', 'p', 'photos', 'ph-2'],
+      },
       null,
     ]);
   });
@@ -207,7 +219,7 @@ describe('threadRows', () => {
       now,
     );
     expect(rows.slice(1).map((row) => (row.kind === 'message' ? row.photo : null))).toEqual([
-      { id: null, url: 'blob:dock', alt: 'Your photo', label: 'Open your photo' },
+      { id: null, url: 'blob:dock', alt: 'Your photo', label: 'Open your photo', link: null },
       null,
     ]);
   });
