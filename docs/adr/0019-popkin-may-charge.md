@@ -24,8 +24,9 @@ free would have to be broken then, and its people would have been told something
   payment method. Pricing is a feature like any other: it gets its requirement, its detailed
   design and its mocks before any code (AGENTS.md).
 - The closing band of the landing page and the marketing site says "No ads. Like, actually
-  none." in place of "Free. Like, actually free."; the hero says "Takes about a minute." and the
-  invite "No app to download."
+  none." in place of "Free. Like, actually free.", and "No ads, no tracking" in place of "No ads,
+  no premium tier"; the hero's paragraph drops "free", its note says "Takes about a minute." and
+  the invite "No app to download."
 
 ## Consequences
 
