@@ -321,7 +321,9 @@
         "failed-send",
         "offline",
         "new-messages",
-        "read-only"
+        "read-only",
+        "marked",
+        "deleted-quote"
       ]
     },
     {
@@ -860,13 +862,33 @@
       "opens_from": "group-chat",
       "requirements": [
         "L2-024",
-        "L2-025"
+        "L2-025",
+        "L2-023"
+      ],
+      "states": [
+        "default",
+        "mine",
+        "more"
+      ],
+      "not_applicable": {
+        "busy": "A reaction shows at once and is undone with a message if it fails to save.",
+        "invalid": "The dialog has no field to fill in."
+      }
+    },
+    {
+      "id": "delete-message",
+      "kind": "dialog",
+      "title": "Delete message",
+      "opens_from": "reactions",
+      "requirements": [
+        "L2-024"
       ],
       "states": [
         "default"
       ],
       "not_applicable": {
-        "busy": "A reaction shows at once and is undone with a message if it fails to save.",
+        "busy": "The dialog closes on Delete; the message leaves the thread when the API answers.",
+        "failed": "A failed delete is told by the danger toast “We couldn’t delete your message.” with Try again, drawn by notifications/toast/danger.html.",
         "invalid": "The dialog has no field to fill in."
       }
     },
