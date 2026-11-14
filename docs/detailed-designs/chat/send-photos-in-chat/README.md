@@ -19,8 +19,8 @@ stays the album's. An accepted photo waits above the message field as the photo 
 album's words. Send is enabled with text, a photo or both. The photo uploads when the message is
 sent, then the message is posted with it.
 
-In the thread the photo shows at most 16 rem wide at 4:3 with any text under it, and is a button
-that opens the photo view. A photo sent in Everyone joins Photos under the sender's name when its
+In the thread the photo shows at most 16 rem wide at 4:3 with any text under it, and is a link
+to the photo view. A photo sent in Everyone joins Photos under the sender's name when its
 message is sent; a photo sent in a direct message never does, and only that direct message's two
 members can read it. The limits of the album apply: JPEG, PNG, WebP or HEIC, at most 10 MB, with
 location and device data removed.
@@ -29,7 +29,7 @@ location and device data removed.
 
 **Screens and states:**
 
-- `docs/mocks/pages/group-chat/default.html` — Dev's photo message: the photo, a button named "Open photo from Dev" holding the image with alt text "Photo from Dev", and "Dock was glass this morning" under it in the same bubble. Every thread mock that draws a photo message draws it so, the read-only thread included, where the photo still opens.
+- `docs/mocks/pages/group-chat/default.html` — Dev's photo message: the photo, a link to the photo view named "Open photo from Dev" holding the image with alt text "Photo from Dev", and "Dock was glass this morning" under it in the same bubble. Every thread mock that draws a photo message draws it so, the read-only thread included, where the photo still opens.
 - `docs/mocks/pages/group-chat/photo-preview.html` — Mara has chosen a photo: the photo preview above the field (the image, alt "Photo to send", and the icon button "Remove photo"), the field empty and Send enabled (L2-026 AC1).
 - `docs/mocks/pages/group-chat/photo-refused.html` — the alert above the field, "This file is 14 MB. Photos can be up to 10 MB." with "Dismiss"; nothing is previewed and Send is disabled (L2-026 AC4, L2-031 AC2).
 - `docs/mocks/pages/direct-message/default.html` — Walt's photo message in a direct message, "Open photo from Walt" (L2-023 AC3).
@@ -41,7 +41,7 @@ location and device data removed.
 
 - Photo preview — `div.composer__photo` above `form.composer__row`, holding `img` (alt "Photo to send") and `button.icon-btn.icon-btn--card.composer__remove` named "Remove photo" (`aria-label` and `title`), with the close icon.
 - Refused photo — `div.alert.alert--danger.composer__alert` `role="alert"` above `form.composer__row`, holding the alert icon, `p.grow` with the reason, and `button` "Dismiss".
-- Photo of a message — the first child of `div.bubble`: `button.bubble__photo` `type="button"`, `aria-label` "Open photo from {first name}" ("Open your photo" on the member's own), holding `img` with alt "Photo from {first name}" ("Your photo"). The text follows as `p` in the same bubble; a quote, when the message is a reply, comes before the photo.
+- Photo of a message — the first child of `div.bubble`: `a.bubble__photo` with `href` the photo view, `aria-label` "Open photo from {first name}" ("Open your photo" on the member's own), holding `img` with alt "Photo from {first name}" ("Your photo"). The text follows as `p` in the same bubble; a quote, when the message is a reply, comes before the photo.
 - "Photo" in `pk-composer` — the same `icon-btn` named "Photo", now a button that clicks a hidden file input instead of a link to the Add photos dialog.
 
 **API:**
@@ -59,7 +59,7 @@ location and device data removed.
 - **`pk-composer`** — shows the photo preview from `photo` and the alert from `photoProblem` (L2-026 AC1, L2-031 AC2). Send is enabled with text, a photo or both; a reply and a photo may go together. "Remove photo" returns focus to "Photo"; "Dismiss" too. The preview is the same size at every form factor, XS to XL, and the alert fills the composer's width, which is the thread's: the whole screen on a phone, the column beside the list from 1024 px (L2-058 AC3, AC11). The mocks draw each state at 360, 768 and 1280 px.
 - **`MessageOutbox.enqueue(popkinId, threadId, text, replyTo?, photo?: File)`** — uploads the photo with `ChatApi.uploadPhoto`, keeps the answered `photoId` on the entry, then calls `ChatApi.send(…, replyToMessageId?, photoId?)`, text possibly empty. A retry after a successful upload reuses the `photoId` and does not upload again ([Failed messages](../failed-messages/README.md)). A pending, waiting or failed row shows its photo from the local object URL. The `File` is held in memory only: `LocalOutboxStorage` saves entries to local storage, which cannot hold a file (see Open questions).
 - **`thread-rows.ts`** — `MessageRow.photo: { url, alt, label, photoId | null }`: alt "Photo from {first name}" or "Your photo", label "Open photo from {first name}" or "Open your photo"; `photoId` null while it is not sent.
-- **`pk-message`** — draws `button.bubble__photo` with the image at most 16 rem wide at 4:3 (`object-fit: cover`) and the text under it (L2-026 AC2). Choosing it navigates to the photo view, `/p/{popkinId}/photos/{photoId}`, full screen below 1024 px and with the side panel from 1024 px, in Everyone and in a direct message alike. A pending photo, whose `photoId` is null, does not open.
+- **`pk-message`** — draws `a.bubble__photo`, a link to the photo view, with the image at most 16 rem wide at 4:3 (`object-fit: cover`) and the text under it (L2-026 AC2). Choosing it navigates to the photo view, `/p/{popkinId}/photos/{photoId}`, full screen below 1024 px and with the side panel from 1024 px, in Everyone and in a direct message alike. A pending photo, whose `photoId` is null, is the same picture in a `span.bubble__photo`, not a link, and does not open. A long press on the photo opens the message's actions and does not follow the link.
 - **Photo view** — `PhotoViewPage` opens a direct-message photo as any other; with no previous or next it offers none, and swiping does nothing. Close and Escape go back to the screen it was opened from.
 - **Quotes and previews** — the quote of a reply, the reply bar and the quote of Message actions read "Photo" for a photo message with no text, and its text otherwise. The previews of the Chat tab (`conversation-text.ts`), the home's chat card and My Popkins read "Photo", or "You: Photo", likewise. Copy copies the text, and is not offered when there is none.
 - **Wrapped up** — the composer is gone, and the read-only thread shows photos, which still open (L2-045).
@@ -92,7 +92,7 @@ Settled for journey 13:
 1. No dialog in chat: "Photo" opens the device's picker; the Add photos dialog stays the album's. An accepted photo shows as the photo preview with "Remove photo"; a refused one is not previewed, and an alert above the field says why in the album's words (`albumPhotoProblem`), with "Dismiss". The server checks again whatever the client says. Chat mode of `AddPhotosDialog`, its confirm label and whether it keeps a caption no longer arise.
 2. Send is enabled with text, a photo or both; sending clears the preview; a photo and a reply may go together.
 3. The upload happens on send: the outbox uploads, keeps the `photoId`, then posts the message; a retry after a successful upload reuses it. While uploading or sending, the photo shows from the local object URL, marked as sending like any message.
-4. In the thread, the photo is at most 16 rem wide at 4:3 with any text under it; alt "Photo from {first name}" ("Your photo"); a button "Open photo from {first name}" ("Open your photo") that opens the photo view, in Everyone and in a direct message. A chat photo has no caption: the message's text is its words.
+4. In the thread, the photo is at most 16 rem wide at 4:3 with any text under it; alt "Photo from {first name}" ("Your photo"); a link "Open photo from {first name}" ("Open your photo"), `a.bubble__photo`, to the photo view, in Everyone and in a direct message. A link, not a button: it navigates, so it opens in a new tab and shows its address as any link does (known gap 75). A photo still sending has no address and is not a link. A chat photo has no caption: the message's text is its words.
 5. An Everyone photo joins Photos under the sender when its message is sent, not at upload, with `PhotoAdded`; a direct-message photo never does.
 6. A direct-message photo is readable only by its two members: the message and its address reach only them, `GET …/photos/{photoId}` is 404 `photo_not_found` to anyone else, and the album, its summaries and its zip never include it. Each is proved by an API test.
 7. The photo view of a direct-message photo has no previous or next, and shows its sharer as any photo; it offers no delete (journey 14).
@@ -108,7 +108,6 @@ Still open:
 - A photo message waiting to send across a reload: the outbox is saved to local storage, which cannot hold a file, so a photo not yet uploaded lives only in memory and a reload loses it; one already uploaded can be resent from its `photoId`. What a restored entry without its file shows is `<TO SUPPLY>` (known gap 72).
 - Whether a direct-message photo takes the photo reactions and comments of the album. The mock (`photo-view/direct.html`) draws none: its reactions live on its message. `<TO SUPPLY>` (known gap 73).
 - What the removal of an album that was not kept, and the erasure of a deleted account, do to direct-message photos and to the photos of Everyone's messages; the read-only thread then shows a photo that is gone. `<TO SUPPLY>` (known gap 74).
-- Whether the photo of a message should be a link rather than a button, since it navigates to the photo view; the decision says a button, as the mocks draw it. `<TO SUPPLY>` (known gap 75).
 - What "Shared between you", in the person pane of a direct message from 1024 px, lists, and whether its thumbnails open the photo view: the mock draws three plain thumbnails. `<TO SUPPLY>` (known gap 64).
 - "Photo removed", for a photo taken out of the album, is journey 14's.
 
