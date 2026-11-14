@@ -18,78 +18,82 @@ package "Popkin.Domain" {
     +Guid Id
     +Guid PopkinId
     +Guid UploaderMembershipId
-    +string? Caption
     +DateTimeOffset TakenAt
     +DateTimeOffset AddedAt
     +string StorageKey
+    +string ThumbnailKey
     +int Width
     +int Height
-    +string ContentType
-    +Guid? DirectThreadId
-    +bool InAlbum()
+    +Guid? ThreadId
+    +bool InAlbum
   }
   class Message {
     +Guid? PhotoId
-    +string? Text
+    +string Text
   }
 }
 package "Popkin.Application" {
-  class UploadThreadPhotoCommand {
+  class UploadChatPhotoCommand {
     +Guid PopkinId
     +Guid ThreadId
     +Stream Content
-    +string FileName
     +long Length
   }
-  class UploadThreadPhotoCommandValidator {
-    +MaxBytes = 10 MB
-    +Allowed = JPEG, PNG, WebP, HEIC
+  class UploadChatPhotoCommandHandler
+  class SendMessageCommandHandler {
+    +photoId must be the caller's, this thread's, unused
+    +Everyone: Photo.InAlbum = true, PhotoAdded
   }
-  class UploadThreadPhotoCommandHandler
-  class PhotoUploadedDto {
-    +Guid PhotoId
+  class ChatPhotoDto {
+    +Guid Id
+    +string Url
     +int Width
     +int Height
   }
+  class MessageDto {
+    +ChatPhotoDto? Photo
+  }
   interface IPhotoStore {
-    +PutAsync(key, stream, contentType): Task
-    +GetReadUrl(key, size, expiresIn): Uri
+    +PutAsync(key, stream, contentType)
   }
-  interface IImageSanitizer {
-    +SanitizeAsync(stream): Task<SanitizedImage>
+  interface IPhotoProcessor {
+    +ProcessAsync(stream): display and thumbnail, metadata removed
+  }
+  class PhotoUrlSigner {
+    +Sign(key): expiring address
   }
 }
-package "Popkin.Infrastructure" {
-  class ObjectStoragePhotoStore
-  class ImageSanitizer
-}
-package "web app (popkin, api, components)" {
-  class AddPhotosDialog {
-    +data: AddPhotosDialogData
-  }
-  class AddPhotosDialogData {
-    +mode: 'album' | 'chat'
-    +max: number
-  }
-  class ComposerPhoto {
-    +file: File
-    +previewUrl: string
-    +remove(): void
+package "web app (api, components)" {
+  class ThreadStore {
+    +photo: Signal<{ file, previewUrl } | null>
+    +photoProblem: Signal<string | null>
+    +choosePhoto(file): void
+    +removePhoto(): void
+    +dismissPhotoProblem(): void
+    +send(text): void
   }
   class MessageOutbox {
-    +enqueue(threadId, text?, photo?: File, replyTo?): void
+    +enqueue(popkinId, threadId, text, replyTo?, photo?: File): void
+  }
+  class ChatApi {
+    +uploadPhoto(popkinId, threadId, file): Observable<ChatPhotoView>
+    +send(..., replyToMessageId?, photoId?)
+  }
+  class MessageRow {
+    +photo: { url, alt, label, photoId | null }
   }
 }
-UploadThreadPhotoCommandHandler ..> UploadThreadPhotoCommand : handles
-UploadThreadPhotoCommandValidator ..> UploadThreadPhotoCommand : validates
-UploadThreadPhotoCommandHandler ..> IImageSanitizer
-UploadThreadPhotoCommandHandler ..> IPhotoStore
-UploadThreadPhotoCommandHandler --> Photo : creates
-UploadThreadPhotoCommandHandler ..> PhotoUploadedDto : returns
-ObjectStoragePhotoStore ..|> IPhotoStore
-ImageSanitizer ..|> IImageSanitizer
+UploadChatPhotoCommandHandler ..> UploadChatPhotoCommand : handles
+UploadChatPhotoCommandHandler ..> IPhotoProcessor
+UploadChatPhotoCommandHandler ..> IPhotoStore
+UploadChatPhotoCommandHandler --> Photo : creates, InAlbum false
+UploadChatPhotoCommandHandler ..> ChatPhotoDto : returns
+SendMessageCommandHandler --> Message : saves
+SendMessageCommandHandler --> Photo : puts Everyone's in the album
+MessageDto --> ChatPhotoDto
+ChatPhotoDto ..> PhotoUrlSigner : url signed by
 Message "0..*" --> "0..1" Photo
-AddPhotosDialog --> AddPhotosDialogData
-AddPhotosDialog ..> ComposerPhoto : returns File
-MessageOutbox ..> ComposerPhoto
+ThreadStore ..> MessageOutbox : send
+MessageOutbox ..> ChatApi : upload, then send
+ThreadStore ..> MessageRow : derives
 @enduml

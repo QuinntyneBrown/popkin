@@ -18,23 +18,27 @@ skinparam package {
 
 actor "Member" as actor
 box "Frontend — Popkin web app" #E0F2FE
-  participant "GroupChatPage\n(pk-composer)" as page
-  participant "AddPhotosDialog" as dialog
+  participant "pk-composer" as composer
+  participant "Device picker\n(input type=file)" as picker
+  participant "ThreadStore\n(api library)" as store
 end box
-actor -> page : Choose Photo in the composer
-page -> dialog : Dialog.open(AddPhotosDialog, {mode: 'chat', max: 1})
-dialog --> actor : "JPEG, PNG, WebP or HEIC, up to 10 MB each. Location data is removed."
-actor -> dialog : Pick from the device or take one with the camera
-dialog -> dialog : Check type by content signature and size (L2-026 AC4, L2-031 AC2)
+actor -> composer : Choose "Photo"
+composer -> picker : click(); accept JPEG, PNG, WebP, HEIC; one file (no dialog)
+actor -> picker : Pick from the device or take one with the camera
+picker --> composer : change(File)
+composer -> store : choosePhoto(file)
+store -> store : albumPhotoProblem(file): type and size (L2-026 AC4, L2-031 AC2)
 alt not an allowed type, or larger than 10 MB
-  dialog --> actor : Photo marked with the reason, e.g. "This file is 14 MB. Photos can be up to 10 MB." (dialogs/add-photos/invalid)
+  store --> composer : photoProblem = "This file is 14 MB. Photos can be up to 10 MB."
+  composer --> actor : Alert above the field with "Dismiss"; nothing previewed (group-chat/photo-refused)
 else allowed
-  actor -> dialog : Confirm (action label in chat mode TO SUPPLY)
-  dialog --> page : close(File)
-  page --> actor : Preview above the message field with "Remove photo"; Send enabled (L2-026 AC1)
+  store -> store : photo = { file, object URL }; revoke the URL it replaces
+  store --> composer : photo
+  composer --> actor : Photo preview with "Remove photo"; Send enabled without text (L2-026 AC1, group-chat/photo-preview)
   opt Remove photo
-    actor -> page : Remove photo
-    page --> actor : Preview removed; Send follows the text field again
+    actor -> composer : Remove photo
+    composer -> store : removePhoto(); revoke the object URL
+    composer --> actor : Preview gone; focus back on "Photo"; Send follows the text again
   end
 end
 @enduml
