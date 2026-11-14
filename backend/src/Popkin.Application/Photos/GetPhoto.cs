@@ -35,7 +35,10 @@ public sealed record PhotoDetailDto(
     bool CanDelete,
     bool IsMine);
 
-/// <summary>One photo of a Popkin's album, for any of its members (L2-033, L2-051 AC1).</summary>
+/// <summary>
+/// One photo of a Popkin, for any of its members when it is in the album (L2-033, L2-051 AC1);
+/// a photo of a direct message only for its two members, once sent (L2-023 AC2, L2-026).
+/// </summary>
 public sealed record GetPhotoQuery(Guid PopkinId, Guid PhotoId) : IRequest<PhotoDetailDto>;
 
 public sealed class GetPhotoQueryHandler(IAppDbContext db, IMembershipGuard guard, IPhotoStore store)
@@ -46,13 +49,25 @@ public sealed class GetPhotoQueryHandler(IAppDbContext db, IMembershipGuard guar
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
         // A photo of another Popkin is the same as no photo (L2-051 AC3).
         var photo = await db.Photos.AsNoTracking().FirstOrDefaultAsync(p => p.Id == request.PhotoId && p.PopkinId == popkin.Id, cancellationToken)
-            ?? throw new ProblemException(404, "photo_not_found", "This photo isn't here.");
+            ?? throw NotFound();
 
-        // The neighbours follow the whole album, whatever filter the member came from.
-        var album = db.Photos.AsNoTracking().InAlbumOf(popkin.Id);
-        var point = PhotoPoint.Of(photo);
-        var newer = await album.NewerThan(point).OldestFirst().Select(p => (Guid?)p.Id).FirstOrDefaultAsync(cancellationToken);
-        var older = await album.OlderThan(point).LatestFirst().Select(p => (Guid?)p.Id).FirstOrDefaultAsync(cancellationToken);
+        // A photo of chat outside the album is the same as no photo to anyone who may not read
+        // its message: a direct message's to a third member, an upload never sent to everyone.
+        if (!photo.InAlbum && !await IsOnAMessageTheMemberReadsAsync(photo, membership, cancellationToken))
+        {
+            throw NotFound();
+        }
+
+        // The neighbours follow the whole album, whatever filter the member came from; a photo in no album has none.
+        Guid? newer = null, older = null;
+        if (photo.InAlbum)
+        {
+            var album = db.Photos.AsNoTracking().InAlbumOf(popkin.Id);
+            var point = PhotoPoint.Of(photo);
+            newer = await album.NewerThan(point).OldestFirst().Select(p => (Guid?)p.Id).FirstOrDefaultAsync(cancellationToken);
+            older = await album.OlderThan(point).LatestFirst().Select(p => (Guid?)p.Id).FirstOrDefaultAsync(cancellationToken);
+        }
+
         // A member who has left still added their photos.
         var uploader = await db.Memberships.AsNoTracking().FirstAsync(m => m.Id == photo.UploaderMembershipId, cancellationToken);
         var isMine = uploader.Id == membership.Id;
@@ -71,7 +86,22 @@ public sealed class GetPhotoQueryHandler(IAppDbContext db, IMembershipGuard guar
             CommentCount: 0,
             newer,
             older,
-            CanDelete: isMine || membership.Role == MembershipRole.Host,
+            // The Host looks after the album; a photo of a direct message is its sharer's alone.
+            CanDelete: isMine || (photo.InAlbum && membership.Role == MembershipRole.Host),
             isMine);
+    }
+
+    private static ProblemException NotFound() => new(404, "photo_not_found", "This photo isn't here.");
+
+    private async Task<bool> IsOnAMessageTheMemberReadsAsync(Photo photo, Membership membership, CancellationToken cancellationToken)
+    {
+        if (photo.ThreadId is not { } threadId
+            || !await db.Messages.AnyAsync(m => m.PhotoId == photo.Id && m.ThreadId == threadId && m.DeletedAt == null, cancellationToken))
+        {
+            return false;
+        }
+
+        var thread = await db.ChatThreads.AsNoTracking().FirstOrDefaultAsync(t => t.Id == threadId && t.PopkinId == photo.PopkinId, cancellationToken);
+        return thread is not null && thread.CanRead(membership.Id);
     }
 }
