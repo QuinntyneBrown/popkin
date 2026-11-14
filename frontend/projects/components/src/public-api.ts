@@ -125,6 +125,7 @@ export * from './lib/uses/uses';
 export * from './lib/use/use';
 export * from './lib/compare/compare';
 export * from './lib/cta-band/cta-band';
+export * from './lib/film/film';
 export * from './lib/action-pair/action-pair';
 export * from './lib/mark-picture/mark-picture';
 export * from './lib/welcome/welcome';

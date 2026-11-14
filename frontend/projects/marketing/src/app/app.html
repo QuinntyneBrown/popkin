@@ -18,7 +18,16 @@
       >Watch the film</a
     >
   </section>
-  <section pk-band anchor="film" heading="See Popkin in action."></section>
+  <section pk-band anchor="film" heading="See Popkin in action.">
+    <pk-film
+      [src]="film.src"
+      [still]="film.still"
+      [label]="film.label"
+      [playLabel]="film.playLabel"
+      [length]="film.length"
+      [chapters]="film.chapters"
+    />
+  </section>
   <section pk-band surface="surface" anchor="how" heading="Scan. Join. You’re in.">
     <ol pk-steps [steps]="steps"></ol>
   </section>

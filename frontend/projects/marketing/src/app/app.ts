@@ -5,6 +5,7 @@ import {
   Button,
   Compare,
   CtaBand,
+  Film,
   Hero,
   Link,
   SiteFooter,
@@ -18,7 +19,7 @@ import {
   Uses,
 } from 'components';
 import { APP_URL } from './app.config';
-import { COMPARISON, IDEAS, PREVIEW, STEPS } from './content';
+import { COMPARISON, FILM, IDEAS, PREVIEW, STEPS } from './content';
 
 /**
  * The marketing site's one page (L2-079 to L2-081): the landing page's sections with the pitch
@@ -31,6 +32,7 @@ import { COMPARISON, IDEAS, PREVIEW, STEPS } from './content';
     Button,
     Compare,
     CtaBand,
+    Film,
     Hero,
     Link,
     SiteFooter,
@@ -50,6 +52,7 @@ export class App {
   private readonly document = inject(DOCUMENT);
   private readonly appUrl = inject(APP_URL);
 
+  protected readonly film = FILM;
   protected readonly preview = PREVIEW;
   protected readonly steps = STEPS;
   protected readonly ideas = IDEAS;

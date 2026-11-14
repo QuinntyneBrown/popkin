@@ -1,5 +1,5 @@
 import { encodeQr } from 'api';
-import type { CompareRow, HeroPreview, StepView } from 'components';
+import type { CompareRow, FilmChapter, HeroPreview, StepView } from 'components';
 
 /**
  * The marketing page's fixed copy (L2-079). The hero's preview, the steps, the ideas and the
@@ -7,6 +7,25 @@ import type { CompareRow, HeroPreview, StepView } from 'components';
  * both pages and both mocks (ADR 0017). The pictures are copied into `public/images` from
  * docs/mocks/assets/images by `npm run media:sync`.
  */
+
+/**
+ * The pitch film "Meet Popkin" (L2-080), docs/videos/19-meet-popkin, copied into `public/media` by
+ * `npm run media:sync`. Its narration is burned into the picture (AC5). The chapters are its
+ * acts: the moment and the group chat (0:00), Popkin itself (0:16) and the send-off (1:08).
+ */
+export const FILM = {
+  src: 'media/meet-popkin.mp4',
+  // A picture of the mocks until a frame of the film replaces it.
+  still: 'images/bonfire.jpg',
+  label: 'Meet Popkin',
+  playLabel: 'Play the Popkin film',
+  length: '1:38',
+  chapters: [
+    { at: 0, time: '0:00', title: 'Getting everyone together' },
+    { at: 16, time: '0:16', title: 'Meet Popkin' },
+    { at: 68, time: '1:08', title: 'A proper send-off' },
+  ] satisfies readonly FilmChapter[],
+} as const;
 
 export const PREVIEW: HeroPreview = {
   accent: 'teal',
