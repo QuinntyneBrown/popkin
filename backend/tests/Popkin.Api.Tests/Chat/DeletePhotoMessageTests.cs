@@ -27,11 +27,11 @@ public sealed class DeletePhotoMessageTests
         Assert.Equal([photoId], (await lakeside.Host.AlbumAsync(lakeside.Id)).PhotoIds());
         var view = await lakeside.Host.PhotoAsync(lakeside.Id, photoId);
         Assert.Equal(HttpStatusCode.OK, (await lakeside.Host.GetAsync(view.GetProperty("imageUrl").GetString())).StatusCode);
-        Assert.Equal(2, api.Photos.Files.Count);
+        Assert.Equal(3, api.Photos.Files.Count);
     }
 
     // Given Mara's photo message in her direct message with Walt,
-    // when she deletes the message, then its photo and both its files are gone: the photo view
+    // when she deletes the message, then its photo and its files are gone: the photo view
     // and the address the message gave answer 404 to both.
     [Fact]
     public async Task A_direct_message_photo_goes_with_its_message()

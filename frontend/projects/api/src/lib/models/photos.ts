@@ -47,6 +47,16 @@ export interface PhotoDetailView {
   isMine: boolean;
 }
 
+/** One comment on a photo (L2-035), oldest first. */
+export interface PhotoCommentView {
+  id: string;
+  author: { membershipId: string; firstName: string; avatar: AvatarView };
+  addedAt: string;
+  text: string;
+  /** The member's own, which they may delete (L2-035 AC5). */
+  mine: boolean;
+}
+
 /** What an upload reports while it runs, then the photo it became. */
 export type PhotoUploadEvent =
   { kind: 'progress'; fraction: number } | { kind: 'done'; photo: PhotoSummaryView };

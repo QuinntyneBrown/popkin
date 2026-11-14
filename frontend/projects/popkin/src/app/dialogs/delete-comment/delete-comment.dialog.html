@@ -1,0 +1,30 @@
+<div
+  pk-dialog
+  heading="Delete this comment?"
+  titleId="delete-comment-title"
+  descriptionId="delete-comment-desc"
+  description="It will be removed for everyone."
+  [accent]="data.accent"
+>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    [block]="true"
+    (click)="close(true)"
+  >
+    Delete
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="secondary"
+    cdkFocusInitial
+    [block]="true"
+    (click)="close(false)"
+  >
+    Cancel
+  </button>
+</div>

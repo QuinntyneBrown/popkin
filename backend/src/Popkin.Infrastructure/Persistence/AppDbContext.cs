@@ -27,6 +27,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Photo> Photos => Set<Photo>();
 
+    public DbSet<PhotoReaction> PhotoReactions => Set<PhotoReaction>();
+
+    public DbSet<PhotoComment> PhotoComments => Set<PhotoComment>();
+
     public DbSet<Experience> Experiences => Set<Experience>();
 
     public DbSet<ExperienceRating> ExperienceRatings => Set<ExperienceRating>();

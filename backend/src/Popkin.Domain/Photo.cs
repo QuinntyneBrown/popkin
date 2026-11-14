@@ -2,9 +2,9 @@ namespace Popkin.Domain;
 
 /// <summary>
 /// A photo of a Popkin, added by one member to its album or uploaded for a message of one of its
-/// threads (L2-026). The database holds its facts and the keys of its two stored files, the
-/// display image and the thumbnail; the files themselves are in the photo store, without
-/// location or device data (L2-031 AC6).
+/// threads (L2-026). The database holds its facts and the keys of its stored files, the display
+/// image, the thumbnail and the photo at the size it was added; the files themselves are in the
+/// photo store, without location or device data (L2-031 AC6).
 /// </summary>
 public sealed class Photo
 {
@@ -36,6 +36,13 @@ public sealed class Photo
 
     /// <summary>The photo store key of the thumbnail.</summary>
     public string ThumbnailKey { get; private set; } = "";
+
+    /// <summary>
+    /// The photo store key of the photo at the size it was added, re-encoded without its location
+    /// or device data, which "Save photo" downloads (L2-036 AC1); null for a photo stored before
+    /// Popkin kept it, which is saved as its display image.
+    /// </summary>
+    public string? OriginalKey { get; private set; }
 
     /// <summary>The width of the display image, turned upright.</summary>
     public int Width { get; private set; }
@@ -69,7 +76,8 @@ public sealed class Photo
         string thumbnailKey,
         int width,
         int height,
-        string contentType) => new()
+        string contentType,
+        string? originalKey = null) => new()
     {
         Id = id,
         PopkinId = popkinId,
@@ -79,6 +87,7 @@ public sealed class Photo
         AddedAt = now,
         StorageKey = storageKey,
         ThumbnailKey = thumbnailKey,
+        OriginalKey = originalKey,
         Width = width,
         Height = height,
         ContentType = contentType,
@@ -100,13 +109,22 @@ public sealed class Photo
         string thumbnailKey,
         int width,
         int height,
-        string contentType)
+        string contentType,
+        string? originalKey = null)
     {
-        var photo = Add(id, popkinId, uploaderMembershipId, null, capturedAt, now, storageKey, thumbnailKey, width, height, contentType);
+        var photo = Add(id, popkinId, uploaderMembershipId, null, capturedAt, now, storageKey, thumbnailKey, width, height, contentType, originalKey);
         photo.ThreadId = threadId;
         photo.InAlbum = false;
         return photo;
     }
+
+    /// <summary>
+    /// Who may delete it (L2-036 AC2): the member who added it, and the Host too for a photo of the
+    /// album; a photo of a direct message is its sharer's alone.
+    /// </summary>
+    public bool CanBeDeletedBy(Membership membership) =>
+        membership.PopkinId == PopkinId
+        && (UploaderMembershipId == membership.Id || (InAlbum && membership.Role == MembershipRole.Host));
 
     /// <summary>
     /// The photo's message was sent in Everyone: it joins the album under its uploader, as added

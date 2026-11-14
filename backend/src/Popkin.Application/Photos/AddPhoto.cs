@@ -39,7 +39,8 @@ public sealed class AddPhotoCommandHandler(
             files.ThumbnailKey,
             processed.Width,
             processed.Height,
-            processed.Display.ContentType);
+            processed.Display.ContentType,
+            files.OriginalKey);
         db.Photos.Add(photo);
         try
         {
@@ -48,7 +49,7 @@ public sealed class AddPhotoCommandHandler(
         catch
         {
             // No photo was added, so the files belong to nothing.
-            await PhotoFiles.DeleteAsync(store, files.DisplayKey, files.ThumbnailKey);
+            await PhotoFiles.DeleteAsync(store, files.Keys);
             throw;
         }
 

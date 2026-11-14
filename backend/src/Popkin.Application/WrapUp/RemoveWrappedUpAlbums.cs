@@ -8,7 +8,8 @@ namespace Popkin.Application.WrapUp;
 
 /// <summary>
 /// Removes the photos of every Popkin that wrapped up without its album 30 days ago or more
-/// (L2-045 AC4): the files, the photos (those of chat with them) and any export of them. The pictures of experiences
+/// (L2-045 AC4): the files, the photos (those of chat with them, whose messages then read "Photo
+/// removed", L2-036 AC3) and any export of them. The pictures of experiences
 /// stay. The Worker sends it on each tick of `RemovePhotosOfWrappedUpPopkinsJob`. Returns how
 /// many albums it removed.
 /// </summary>
@@ -64,15 +65,18 @@ public sealed class RemoveWrappedUpAlbumsCommandHandler(
     {
         var photos = await db.Photos.Where(p => p.PopkinId == popkin.Id).ToListAsync(CancellationToken.None);
         var exports = await db.AlbumExports.Where(e => e.PopkinId == popkin.Id).ToListAsync(CancellationToken.None);
+        var photoIds = photos.Select(p => (Guid?)p.Id).ToList();
+        var messages = await db.Messages.Where(m => photoIds.Contains(m.PhotoId)).ToListAsync(CancellationToken.None);
         try
         {
             // The files first: a file whose photo is gone could never be found again. Deleting a
             // file twice is harmless, so a tick that fails here is simply made again.
-            foreach (var key in photos.SelectMany(p => new[] { p.StorageKey, p.ThumbnailKey }).Concat(exports.Select(e => e.StorageKey).OfType<string>()))
+            foreach (var key in photos.SelectMany(Photos.PhotoFiles.KeysOf).Concat(exports.Select(e => e.StorageKey).OfType<string>()))
             {
                 await store.DeleteAsync(key, CancellationToken.None);
             }
 
+            messages.ForEach(message => message.RemovePhoto());
             db.Photos.RemoveRange(photos);
             db.AlbumExports.RemoveRange(exports);
             // The recap goes on counting what the album held; the photos of direct messages and unsent uploads go too.
@@ -83,6 +87,7 @@ public sealed class RemoveWrappedUpAlbumsCommandHandler(
         {
             // Nothing of this Popkin is saved with the next one.
             photos.ForEach(photo => db.Photos.Entry(photo).State = EntityState.Detached);
+            messages.ForEach(message => db.Messages.Entry(message).State = EntityState.Detached);
             exports.ForEach(export => db.AlbumExports.Entry(export).State = EntityState.Detached);
             db.Popkins.Entry(popkin).State = EntityState.Detached;
             throw;

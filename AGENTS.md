@@ -17,10 +17,10 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first thirteen journeys, and journeys 15 to 20, are built; the rest is designed.** Journey
+**The first twenty journeys are built; the rest is designed.** Journey
 1, Start a Popkin, journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin
 home, journey 5, Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an
-experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey 12, React and reply, journey 13, Photos in chat, journey 15, Join by code, journey 16, Change Popkin settings, journey
+experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey 12, React and reply, journey 13, Photos in chat, journey 14, Engage with a photo, journey 15, Join by code, journey 16, Change Popkin settings, journey
 17, Manage account, journey 18, Leave a Popkin, journey 19, Delete account, and journey 20, Say
 keen, run end to end: the backend has sign up and sign in
 with a code, sessions, Popkin creation, the list of a person's Popkins, the invite preview, joining with a name and a photo,
@@ -33,7 +33,12 @@ message's kept to its two members, and "Photo" in quotes and previews), `413`
 members, the photos summary, and the experiences summary), the list of a member's threads,
 direct messages (opening one, kept to its two members, its events sent to them alone through an
 `Audience`, and its unread messages in the counts of the Popkin home and My Popkins), adding a
-photo, the album and one photo, the group call (starting, joining and leaving it, the call
+photo, the album and one photo, engaging with a photo (its reactions, several of chat's each,
+`PUT`/`DELETE …/photos/{photoId}/reactions/{emoji}`, its comments, `GET`/`POST …/comments` and
+the deletion of one's own, saving it, `GET …/download`, an original-size copy without location or
+device data, and deleting it, by its uploader or the Host for an album photo, with the hub event
+`PhotoDeleted` and "Photo removed" in its messages, which the removal of an album that was not
+kept sets too), the group call (starting, joining and leaving it, the call
 under way, each participant's microphone and camera, the relay of signals through the hub and
 the media relay's credentials) and the direct call of a direct message, which runs beside it,
 experiences (sharing one with a picture, the list and its filter, one experience with the
@@ -60,7 +65,10 @@ call), Experiences, the experience page, the wrap-up screen, the recap and the a
 (`/account`, with its theme of the device) among them, and no placeholder screen, built for the
 five form factors of L2-058, the read-only chat, Photos and Experiences of a wrapped-up Popkin,
 the banner of a Popkin's last hour, the invite dialog, the New message dialog, the Message actions and Delete this message?
-dialogs of a message, the photo preview and refusal of the composer, the Add photos dialog, the Scan to join
+dialogs of a message, the photo preview and refusal of the composer, the Add photos dialog, the photo view's react
+bar, its comments beside the photo from 1024 px, its removed state and its read-only view of a
+wrapped-up Popkin, the Photo actions, Delete this photo?, More reactions, Photo comments and
+Delete this comment? dialogs of a photo, the Scan to join
 dialog, the dialogs of an experience (Share an experience, Add a comment, its actions and its
 deletion), the Popkin settings dialog (Edit name and look, Change how long it lasts, Invite people and
 Wrap up for the Host, and Invite people and Leave this Popkin for any other member), the Edit name
@@ -68,16 +76,18 @@ and look and Change how long it lasts dialogs, the Leave Popkin dialog, the Sign
 not-found, server-error and offline screens; the marketing site (`frontend/projects/marketing`,
 ADR 0017) is one static page with the landing page's sections and the pitch film "Meet Popkin" in
 `pk-film`, linking to the app through `APP_URL`; the `components` library holds the `pk-*`
-components they use, `pk-keen-panel` among them, the blocks of the landing page (`pk-site-nav`, `pk-site-main`,
+components they use, `pk-keen-panel`, `pk-react-bar` and `pk-stage-button` among them, the blocks of the landing page (`pk-site-nav`, `pk-site-main`,
 `pk-site-footer`, `pk-hero`, `pk-band`, `pk-steps`, `pk-uses`, `pk-compare`, `pk-cta-band`) and
 of the welcome screen (`pk-welcome`, `pk-action-pair`, `pk-mark-picture`) and the parts of the
 Chat tab and the direct message (`pk-conversations`, `pk-conversation-row`, `pk-thread-pane`,
 `pk-dm-intro`, `pk-search-field`, `pk-member-picker`) and of a message (`pk-quote`,
-`pk-reaction-grid`, and the photo of `pk-message` and the photo preview of `pk-composer`) among them, each with a parity spec but
+`pk-reaction-grid`, and the photo of `pk-message`, with its "Photo removed", and the photo preview of `pk-composer`) among them, each with a parity spec but
 `pk-qr` (known gap 56); the `api` library has the chat's stores (`ThreadStore` with reactions, deletion, replies,
 the jump to a quote and the photo chosen, and the outbox's replies and photos, uploaded before
 their message), the reactions offered (`reactions.ts`), the store of the Chat tab
-(`ConversationsStore`) and its text (`conversation-text.ts`), the home's store, the album's stores, the store of My Popkins and its saved list, the QR scanner, the lookup of a code typed
+(`ConversationsStore`) and its text (`conversation-text.ts`), the home's store, the album's stores, the photo view's store (`PhotoViewStore`, which reacts,
+saves and deletes), the store of a photo's comments (`PhotoCommentsStore`) and the toggle of a
+photo's reaction (`applyReactionToggle`), the store of My Popkins and its saved list, the QR scanner, the lookup of a code typed
 (`JoinCode`),
 the call session, its peer links (a mesh, ADR 0014) and the call banner's store, the stores of
 Experiences and of one experience, the recap's store (`RecapStore`, behind `RECAP_API`), the

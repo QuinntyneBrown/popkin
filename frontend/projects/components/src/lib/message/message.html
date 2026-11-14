@@ -48,7 +48,11 @@
           ></button>
         }
       }
-      @if (photo(); as p) {
+      @if (photoRemoved()) {
+        <div class="bubble__removed">
+          <svg pk-icon name="photo-off"></svg><span>{{ photoRemovedText() }}</span>
+        </div>
+      } @else if (photo(); as p) {
         @if (p.link) {
           <a class="bubble__photo" [routerLink]="p.link" [attr.aria-label]="p.label">
             <img [src]="p.url" [alt]="p.alt" />
@@ -57,7 +61,7 @@
           <span class="bubble__photo"><img [src]="p.url" [alt]="p.alt" /></span>
         }
       }
-      @if (text() || !photo()) {
+      @if (text() || (!photo() && !photoRemoved())) {
         <p class="bubble__text">{{ text() }}</p>
       }
     </div>

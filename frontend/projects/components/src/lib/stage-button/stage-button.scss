@@ -1,0 +1,12 @@
+:host {
+  display: grid;
+  place-items: center;
+  width: var(--space-12);
+  height: var(--space-12);
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-stage-control-subtle);
+  color: var(--color-fg-on-stage);
+  text-decoration: none;
+}

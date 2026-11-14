@@ -38,7 +38,7 @@ public sealed class SendMessageTests
         Assert.Equal("Mara", author.GetProperty("firstName").GetString());
         Assert.Equal("MO", author.GetProperty("avatar").GetProperty("initials").GetString());
         Assert.Equal(
-            ["author", "clientMessageId", "id", "kind", "photo", "popkinId", "quote", "reactions", "reactionsVersion", "sentAt", "text", "threadId"],
+            ["author", "clientMessageId", "id", "kind", "photo", "photoRemoved", "popkinId", "quote", "reactions", "reactionsVersion", "sentAt", "text", "threadId"],
             message.EnumerateObject().Select(p => p.Name).Order());
 
         var page = await lakeside.Host.MessagesAsync(lakeside.Id, threadId);

@@ -28,7 +28,8 @@ public sealed class RemoveAlbumTests
         await lakeside.Host.AddedPhotoAsync(lakeside.Id, TestPhotos.WithLocation(MagickFormat.Jpeg, 400, 300));
         await lakeside.Host.AddedPhotoAsync(lakeside.Id, TestPhotos.WithLocation(MagickFormat.Jpeg, 300, 400));
         var experience = await lakeside.Host.SharedExperienceAsync(lakeside.Id, "Bonfire", picture: TestPhotos.WithLocation(MagickFormat.Jpeg, 200, 200));
-        var filesBeforeTheAlbum = AlbumFiles(api) - 4;
+        // Three files for each of the two photos.
+        var filesBeforeTheAlbum = AlbumFiles(api) - 6;
         await lakeside.Host.WrappedUpAsync(lakeside.Id, keepPhotos: false);
         (await lakeside.Host.PostAsync($"/api/popkins/{lakeside.Id}/recap/album-exports", null)).EnsureSuccessStatusCode();
         await api.SendAsync(new PrepareAlbumExportsCommand());
@@ -85,5 +86,43 @@ public sealed class RemoveAlbumTests
         Assert.Equal(2, (await lakeside.Host.AlbumAsync(lakeside.Id)).PhotoIds().Count);
         Assert.Equal(3, (await sam.AlbumAsync(bookClubId)).PhotoIds().Count);
         Assert.Equal(JsonValueKind.Null, (await sam.HomeAsync(bookClubId)).GetProperty("photosRemovedAt").ValueKind);
+    }
+
+    // Given Walt's photo with text in Everyone, his photo without text in his direct message with
+    // Mara, and a reply quoting the second, in Lakeside wrapped up without its album,
+    // when the photos are removed 30 days on, then each message carries no photo and reads
+    // "photoRemoved", keeping its text; the reply's quote reads "Photo removed" for the one
+    // without text; and a message that never had a photo is untouched (L2-036 AC3, L2-045 AC4).
+    [Fact]
+    public async Task The_messages_of_removed_photos_read_Photo_removed()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var walt = await api.JoinedAsync(lakeside.Code, "Walt Brennan", "(415) 555-0191");
+        var everyoneId = await walt.EveryoneThreadIdAsync(lakeside.Id);
+        var directId = await walt.DirectThreadIdAsync(lakeside.Id, await lakeside.Host.MembershipIdAsync(lakeside.Id));
+        api.Clock.Advance(TimeSpan.FromMinutes(1));
+        var captioned = await walt.SentPhotoMessageAsync(lakeside.Id, everyoneId, "Dock was glass");
+        var plain = await lakeside.Host.SentMessageAsync(lakeside.Id, everyoneId, "Coffee's on");
+        var bare = await walt.SentPhotoMessageAsync(lakeside.Id, directId);
+        api.Clock.Advance(TimeSpan.FromMinutes(1));
+        var reply = await (await lakeside.Host.PostAsJsonAsync(
+            $"/api/popkins/{lakeside.Id}/threads/{directId}/messages",
+            new { clientMessageId = Guid.NewGuid(), text = "Lovely", replyToMessageId = bare.Id() })).Content.ReadFromJsonAsync<JsonElement>();
+        await lakeside.Host.WrappedUpAsync(lakeside.Id, keepPhotos: false);
+        api.Clock.Advance(TimeSpan.FromDays(30));
+
+        Assert.Equal(1, await api.SendAsync(new RemoveWrappedUpAlbumsCommand()));
+
+        await lakeside.Host.SignInAgainAsync(api, "(415) 555-0148");
+        var captionedNow = await lakeside.Host.MessageAsync(lakeside.Id, everyoneId, captioned.Id());
+        var bareNow = await lakeside.Host.MessageAsync(lakeside.Id, directId, bare.Id());
+        Assert.Equal(JsonValueKind.Null, captionedNow.GetProperty("photo").ValueKind);
+        Assert.True(captionedNow.GetProperty("photoRemoved").GetBoolean());
+        Assert.Equal("Dock was glass", captionedNow.GetProperty("text").GetString());
+        Assert.Equal(JsonValueKind.Null, bareNow.GetProperty("photo").ValueKind);
+        Assert.True(bareNow.GetProperty("photoRemoved").GetBoolean());
+        Assert.False((await lakeside.Host.MessageAsync(lakeside.Id, everyoneId, plain.Id())).GetProperty("photoRemoved").GetBoolean());
+        Assert.Equal("Photo removed", (await lakeside.Host.MessageAsync(lakeside.Id, directId, reply.Id())).GetProperty("quote").GetProperty("snippet").GetString());
     }
 }

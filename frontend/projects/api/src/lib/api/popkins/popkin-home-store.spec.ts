@@ -108,6 +108,7 @@ describe('PopkinHomeStore', () => {
     memberJoined$: new Subject<{ popkinId: string; member: MemberJoinedView }>(),
     memberLeft$: new Subject<{ popkinId: string; membershipId: string }>(),
     photosAdded$: new Subject<{ popkinId: string; photoIds: string[] }>(),
+    photoDeleted$: new Subject<{ popkinId: string; photoId: string }>(),
     reconnected$: new Subject<void>(),
     popkinWrappedUp$: new Subject<string>(),
     popkinChanged$: new Subject<PopkinSettingsView>(),
@@ -396,6 +397,13 @@ describe('PopkinHomeStore', () => {
       store.open('p');
       realtime.photosAdded$.next({ popkinId: 'other', photoIds: ['x'] });
       expect(api.asked.photos).toBe(1);
+    });
+
+    it('read Photos again when one is deleted (L2-036 AC3)', () => {
+      store.open('p');
+      realtime.photoDeleted$.next({ popkinId: 'other', photoId: 'x' });
+      realtime.photoDeleted$.next({ popkinId: 'p', photoId: 'x' });
+      expect(api.asked.photos).toBe(2);
     });
   });
 

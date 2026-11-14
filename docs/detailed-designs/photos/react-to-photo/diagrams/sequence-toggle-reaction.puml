@@ -60,7 +60,7 @@ end
 alt Failure of any kind
   client --> page : Error
   page --> actor : Restore the previous counts and pressed state (L2-034 AC4)
-  page -> toaster : Danger toast that stays until dismissed, copy TO SUPPLY (L2-056 AC7)
+  page -> toaster : "We couldn’t save your reaction.", stays until dismissed (L2-056 AC7)
 else Success
   client --> page : Server counts replace the optimistic ones
 end

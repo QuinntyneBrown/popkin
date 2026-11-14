@@ -42,7 +42,7 @@ package "Popkin.Application" {
     +Handle(c: DeletePhotoCommand): Task
   }
   interface IPhotoStore {
-    +GetDownloadUrlAsync(key: string, fileName: string, ttl: TimeSpan): Task<Uri>
+    +GetDownloadUrl(key: string, fileName: string): string
     +DeleteAsync(key: string): Task
   }
   interface IPopkinNotifier {

@@ -67,6 +67,7 @@ export interface ChatMessage {
   } | null;
   /** The photo it carries (L2-026). */
   photo: ChatPhoto | null;
+  photoRemoved: boolean;
 }
 
 export interface ChatPhoto {
@@ -137,6 +138,7 @@ export function message(
     reactionsVersion: 0,
     quote: null,
     photo: null,
+    photoRemoved: false,
     ...extra,
   };
 }
@@ -488,6 +490,17 @@ export class Chat {
       lastReadMessageId: null,
       other: { ...direct.other, firstName: direct.other.displayName.split(' ')[0] },
     };
+  }
+
+  /**
+   * A photo is deleted: the messages that carried it read "Photo removed" from then on, as the
+   * API answers them, and the hub says so (L2-036 AC3).
+   */
+  async photoDeleted(hub: Hub, photoId: string): Promise<void> {
+    this.messages = this.messages.map((said) =>
+      said.photo?.id === photoId ? { ...said, photo: null, photoRemoved: true } : said,
+    );
+    await hub.push('PhotoDeleted', popkinId, photoId);
   }
 
   /** Someone else's message, stored and sent to the app over the hub. */

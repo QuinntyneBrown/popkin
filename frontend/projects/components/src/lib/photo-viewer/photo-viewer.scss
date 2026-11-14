@@ -42,16 +42,6 @@
   color: var(--color-fg-on-stage-muted);
 }
 
-.photo-viewer__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.photo-viewer__actions:empty {
-  display: none;
-}
-
 .photo-viewer__main {
   display: flex;
   flex: 1;
@@ -118,15 +108,38 @@
   margin-top: var(--space-3);
 }
 
+/* The number of comments: a link's look, in the stage's muted words; it opens the comments. */
 .photo-info__comment-count {
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--color-fg-on-stage-muted);
   font-size: var(--font-size-sm-plus);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
-.photo-info__more:empty {
+/* "Only you two can see this", under a direct message's photo. */
+.photo-info__note {
+  font: var(--text-body-sm);
+  color: var(--color-fg-on-stage-muted);
+}
+
+/* The comments and the field are the side panel's, from L; below it the dialog has them. */
+.photo-info__comments,
+.photo-info__composer {
   display: none;
 }
 
+/* The react bar and Comment, side by side. */
+.photo-info__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* A reaction as a count. One the person looking has given is white, and its name says so. */
 .stage-chip {
   display: inline-flex;
   align-items: center;
@@ -140,26 +153,9 @@
   font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
 }
 
-/* A reaction the person looking has given: white, and its name says so. */
 .stage-chip--mine {
   background: var(--color-constant-light);
   color: var(--color-constant-dark);
-}
-
-/* The photo did not load. */
-.stage-message {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  padding: var(--space-8);
-  text-align: center;
-}
-
-.stage-message__text {
-  color: var(--color-fg-on-stage-muted);
 }
 
 /* M: more room around the photo; the caption keeps a readable width. */
@@ -225,11 +221,22 @@
     margin-bottom: var(--space-5);
   }
 
-  /* What a later journey adds fills the rest of the panel, so its last part can sit at the end. */
-  .photo-info__more {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
+  .photo-info__comments {
+    display: block;
+    margin: var(--space-6) 0 var(--space-4);
+    padding-top: var(--space-1);
+    border-top: var(--border-width-hairline) solid var(--color-bg-stage-control);
+  }
+
+  /* The react bar and the field sit at the panel's end, under the comments. */
+  .photo-info__tools {
+    margin-top: auto;
+  }
+
+  /* The field "Add a comment" (L2-058 AC11). */
+  .photo-info__composer {
+    display: block;
+    margin-top: var(--space-4);
   }
 }
 

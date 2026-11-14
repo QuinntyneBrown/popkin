@@ -21,8 +21,7 @@ Reacting, commenting and saving happen on this screen, but each has its own desi
 [react to a photo](../react-to-photo/README.md),
 [comment on a photo](../comment-on-photo/README.md) and [save a photo](../save-photo/README.md).
 This feature owns the screen, its loading and failure states, and the navigation. It is built
-(journey 5); the reactions, the comments, "Save photo" and delete are journey 14, and until then
-the screen shows none of them.
+(journey 5); the reactions, the comments, "Save photo" and delete were built in journey 14.
 
 ## Description
 
@@ -43,7 +42,7 @@ the screen shows none of them.
   (membership id, first name, display name and avatar only, L2-054 AC2), `AddedAt`, `TakenAt`,
   `Caption`, display image address, `Width`, `Height`, `Reactions` (emoji, count, mine),
   `CommentCount`, `PreviousPhotoId` (the newer neighbour), `NextPhotoId` (the older one),
-  `CanDelete` and `IsMine`. Until journey 14, `Reactions` is empty and `CommentCount` is 0.
+  `CanDelete` and `IsMine`. Since journey 14, `Reactions` and `CommentCount` are the photo's own.
   Errors: `404 popkin_not_found` for a non-member (L2-051 AC1), `404 photo_not_found` for a
   photo that is not in this Popkin.
 
@@ -73,7 +72,7 @@ the screen shows none of them.
   and `imageError`. The caption is the page's heading. The focus ring is cream so it reads on the
   dark stage.
 - **`pk-top-bar`** — "Close", the uploader's avatar and name, and the time label, which reads
-  `AddedAt`. "Save photo" joins it with journey 14.
+  `AddedAt`. "Save photo" and "Photo actions" joined it in journey 14.
 - **`PhotosApi`** — gains `getPhoto(popkinId, photoId)`; view model `PhotoDetailView`.
 
 ### Backend
@@ -84,8 +83,7 @@ the screen shows none of them.
   album order with two indexed reads on `(PopkinId, TakenAt, Id)`. It asks
   `IPhotoStore.GetReadUrlAsync` for the display image. `CanDelete` is true for the uploader and
   for the Host (L2-036 AC2). Grouping `PhotoReaction` rows by emoji, with the caller's own
-  marked, and counting `PhotoComment` rows come with journey 14; until then the handler answers
-  no reactions and no comments.
+  marked, and counting `PhotoComment` rows came with journey 14.
 
 ### Open questions
 
@@ -100,7 +98,7 @@ its longest edge and its address lasts one hour.
 
 ### With journey 13, Photos in chat
 
-- A photo of a direct message opens here from its message, for its two members only; anyone else gets `404` `photo_not_found`. It is in no album, so `PreviousPhotoId` and `NextPhotoId` are null and the view offers no previous or next. It shows its sharer as any photo and offers no delete (journey 14); its `CanDelete` is true for its sharer alone, never for the Host, who looks after the album only. A chat photo that is on no message, or whose message was deleted, is `404` to everyone, its uploader too. Mock: `docs/mocks/pages/photo-view/direct.html`, which draws no caption and none of the photo's own reactions or comments; whether it takes them is open (known gap 73) ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
+- A photo of a direct message opens here from its message, for its two members only; anyone else gets `404` `photo_not_found`. It is in no album, so `PreviousPhotoId` and `NextPhotoId` are null and the view offers no previous or next. It shows its sharer as any photo and, since journey 14, offers delete to its sharer; its `CanDelete` is true for its sharer alone, never for the Host, who looks after the album only. A chat photo that is on no message, or whose message was deleted, is `404` to everyone, its uploader too. Mock: `docs/mocks/pages/photo-view/direct.html`, which draws no caption and, as journey 14 settles, the photo's own reactions and comments for its two members ([React to a photo](../react-to-photo/README.md), [Comment on a photo](../comment-on-photo/README.md); known gap 73, closed by journey 14) ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
 - An Everyone photo opened from the chat is a photo of the album, and the default states cover it. Close and Escape go back to the screen the photo was opened from.
 
 ## Requirements

@@ -81,6 +81,8 @@ export interface MessageView {
   quote: QuoteView | null;
   /** The photo it carries, with or without text (L2-026). */
   photo: ChatPhotoView | null;
+  /** Its photo was deleted: it reads "Photo removed" in its place (L2-036 AC3). */
+  photoRemoved: boolean;
 }
 
 /** One emoji on a message and the members who chose it. */

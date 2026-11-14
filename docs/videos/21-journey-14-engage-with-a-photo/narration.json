@@ -1,0 +1,28 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 3, "lines": ["A photo worth a heart? React to it, talk about it, keep it."] },
+    { "id": "react", "bars": 6, "lines": ["In the photo view, five quick reactions sit under the photo, with More reactions for the rest.", "Tap the heart. The count goes up to ten, and the heart is pressed."] },
+    { "id": "back", "bars": 4, "lines": ["Tap it again, and it is taken back. More reactions offers the others, like a party popper."] },
+    { "id": "failed", "bars": 4, "lines": ["If a reaction can't be saved, the count goes back to what it was, and a message says so."] },
+    { "id": "comments", "bars": 6, "lines": ["On a phone, Comment opens Photo comments: oldest first, each with a face, a first name and a time.", "Add one, and the count goes up to four."] },
+    { "id": "limit", "bars": 5, "lines": ["A comment takes up to five hundred characters, and a count shows near the limit.", "With none yet, it invites the first."] },
+    { "id": "own", "bars": 4, "lines": ["Your own comment has Delete. It goes once you confirm."] },
+    { "id": "panel", "bars": 6, "lines": ["From ten twenty-four pixels, there is no dialog. The same comments sit beside the photo, with the field under them.", "The same comments, in two places."] },
+    { "id": "save", "bars": 4, "lines": ["Save photo downloads it at the size it was added, without location or device data."] },
+    { "id": "delete", "bars": 7, "lines": ["Your own photo has Photo actions, and the Host can delete any photo in the album.", "Delete this photo? Once you confirm, you are back in Photos, and it says Photo deleted."] },
+    { "id": "removed", "bars": 5, "lines": ["In chat, its message now reads Photo removed.", "And anyone looking at it is told This photo was removed."] },
+    { "id": "grow", "bars": 6, "lines": [
+      { "text": "On a phone, the photo fills the screen, with the react bar under it.", "at": 0 },
+      { "text": "From ten twenty-four pixels, the side panel opens beside it.", "at": 8 }
+    ] },
+    { "id": "readonly", "bars": 4, "lines": ["Once the Popkin wraps up, the reactions and comments stay, to read."] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: a deleted photo leaves nothing behind, its reactions and comments included.", "Only its author deletes a comment, and a comment's text is never logged."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey fourteen. Popkin is a free platform for pop-up communities."] }
+  ]
+}

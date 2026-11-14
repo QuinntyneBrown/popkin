@@ -8,12 +8,12 @@ System_Boundary(popkin, "Popkin") {
   Container(spa, "Popkin web app", "Angular 20+ SPA", "Photos pages and dialogs")
   Container(api, "Popkin API", "ASP.NET Core (.NET 10)", "PhotosController and PopkinHub")
   ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Photos, reactions, comments, memberships")
-  ContainerDb(store, "Photo store", "Object storage, provider TO SUPPLY", "Photo files, encrypted at rest")
+  ContainerDb(store, "Photo store", "Object storage, provider TO SUPPLY (known gap 9)", "Photo files, encrypted at rest")
 }
 Rel(member, spa, "Uses", "HTTPS")
 Rel(spa, api, "Requests a download address; deletes a photo", "JSON/HTTPS")
 Rel(api, db, "Deletes Photo, reactions, comments; marks messages", "EF Core")
-Rel(api, store, "Serves the original as an attachment; removes files", "TO SUPPLY")
+Rel(api, store, "Signs the stored image's address as an attachment; removes files", "IPhotoStore")
 Rel(spa, store, "Loads image files by expiring address", "HTTPS")
-Rel(api, spa, "Pushes PhotoDeleted to the Popkin", "SignalR/WebSocket")
+Rel(api, spa, "Pushes PhotoDeleted to the photo's audience", "SignalR/WebSocket")
 @enduml

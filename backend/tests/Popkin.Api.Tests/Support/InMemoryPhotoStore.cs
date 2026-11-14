@@ -18,8 +18,16 @@ public sealed class InMemoryPhotoStore(PhotoUrlSigner signer) : IPhotoStore
     public Task<StoredPhoto?> OpenAsync(string key, CancellationToken cancellationToken) =>
         Task.FromResult(Files.TryGetValue(key, out var file) ? new StoredPhoto(new MemoryStream(file.Content), file.ContentType) : null);
 
+    /// <summary>Makes every deletion fail, as a store out of reach would.</summary>
+    public bool FailDeletes { get; set; }
+
     public Task DeleteAsync(string key, CancellationToken cancellationToken)
     {
+        if (FailDeletes)
+        {
+            throw new IOException($"Simulated failure to delete {key}.");
+        }
+
         Files.TryRemove(key, out _);
         return Task.CompletedTask;
     }

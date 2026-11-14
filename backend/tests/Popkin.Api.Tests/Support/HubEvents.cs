@@ -27,6 +27,7 @@ public sealed class HubEvents : IAsyncDisposable
         ("MemberJoined", 2),
         ("MemberLeft", 2),
         ("PhotosAdded", 2),
+        ("PhotoDeleted", 2),
         ("CallChanged", 5),
         ("CallEnded", 3),
         ("ParticipantJoined", 2),

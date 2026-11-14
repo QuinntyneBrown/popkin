@@ -1,0 +1,62 @@
+<div pk-dialog [heading]="store.title()" [accent]="data.accent">
+  @switch (store.state()) {
+    @case ('error') {
+      <div
+        pk-alert
+        heading="These comments didn’t load."
+        action="Try again"
+        (acted)="store.retry()"
+      >
+        Check your connection and try again.
+      </div>
+    }
+    @case ('loading') {
+      <p class="text-muted" role="status">Loading comments…</p>
+    }
+    @default {
+      @if (store.comments().length) {
+        <section pk-comments>
+          @for (said of store.comments(); track said.id) {
+            <li
+              pk-comment
+              avatarSize="sm"
+              [name]="said.name"
+              [avatar]="{
+                initials: said.avatar.initials,
+                accent: accentOf(said.avatar.accent),
+                photoUrl: said.avatar.photoUrl,
+              }"
+              [time]="said.time"
+              [text]="said.text"
+              [deletable]="said.mine && !data.readOnly"
+              (delete)="delete(said.id)"
+            ></li>
+          }
+        </section>
+      } @else {
+        <div
+          pk-empty-state
+          icon="message"
+          heading="No comments yet"
+          text="Be the first to say something about this one."
+          [level]="3"
+          [compact]="true"
+        ></div>
+      }
+      @if (!data.readOnly) {
+        <div
+          pk-composer
+          label="Add a comment"
+          sendLabel="Post comment"
+          [inline]="true"
+          [photos]="false"
+          [maxLength]="500"
+          [countFrom]="450"
+          [busy]="store.posting()"
+          [(value)]="store.draft"
+          (send)="post()"
+        ></div>
+      }
+    }
+  }
+</div>

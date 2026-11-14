@@ -72,6 +72,10 @@ const LONG_PRESS_SLOP = 10;
  * link to the photo view, and a long press on it opens the actions rather than following it.
  * After a jump the page sets `marked` for 2 seconds and calls `reveal()`.
  *
+ * With `photoRemoved` the photo the message carried was deleted: in its place a muted line says
+ * "Photo removed", with the image-off icon, and is not a link; any text stays under it
+ * (L2-036 AC3).
+ *
  * With `skeleton` it is the shape of a message that is loading and reads no other input but
  * `mine` and `width`.
  */
@@ -116,6 +120,9 @@ export class Message {
   readonly quote = input<MessageQuote | null>(null);
   /** The photo of a photo message; its text, if any, shows under it. */
   readonly photo = input<MessagePhoto | null>(null);
+  /** The photo the message carried was deleted: "Photo removed" stands in its place. */
+  readonly photoRemoved = input(false);
+  readonly photoRemovedText = input('Photo removed');
   /** Tinted and outlined: the message a quote just went to (L2-025 AC3). */
   readonly marked = input(false);
 

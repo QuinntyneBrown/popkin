@@ -33,6 +33,59 @@ public sealed class PhotosController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetPhotoQuery(popkinId, photoId), cancellationToken));
 
     /// <summary>
+    /// Gives the photo the caller's reaction, the emoji URL-encoded in the path, and answers the
+    /// photo's reactions; giving it again changes nothing (L2-034 AC2).
+    /// </summary>
+    [HttpPut("{photoId:guid}/reactions/{emoji}")]
+    public async Task<ActionResult<IReadOnlyList<PhotoReactionDto>>> React(Guid popkinId, Guid photoId, string? emoji, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new AddPhotoReactionCommand(popkinId, photoId, emoji), cancellationToken));
+
+    /// <summary>Takes the caller's reaction away and answers the photo's reactions; taking it again changes nothing (L2-034 AC3).</summary>
+    [HttpDelete("{photoId:guid}/reactions/{emoji}")]
+    public async Task<ActionResult<IReadOnlyList<PhotoReactionDto>>> Unreact(Guid popkinId, Guid photoId, string? emoji, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new RemovePhotoReactionCommand(popkinId, photoId, emoji), cancellationToken));
+
+    /// <summary>
+    /// Deletes the photo for everyone (L2-036 AC2, AC3): 204. Only the member who added it, or
+    /// the Host for a photo of the album, may.
+    /// </summary>
+    [HttpDelete("{photoId:guid}")]
+    public async Task<IActionResult> Delete(Guid popkinId, Guid photoId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeletePhotoCommand(popkinId, photoId), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>"Save photo": an address the stored photo downloads from as an attachment, for an hour (L2-036 AC1).</summary>
+    [HttpGet("{photoId:guid}/download")]
+    public async Task<ActionResult<PhotoDownloadDto>> GetDownload(Guid popkinId, Guid photoId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetPhotoDownloadQuery(popkinId, photoId), cancellationToken));
+
+    public sealed record AddCommentRequest(string? Text);
+
+    /// <summary>The photo's comments, oldest first (L2-035 AC1).</summary>
+    [HttpGet("{photoId:guid}/comments")]
+    public async Task<ActionResult<IReadOnlyList<PhotoCommentDto>>> GetComments(Guid popkinId, Guid photoId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetPhotoCommentsQuery(popkinId, photoId), cancellationToken));
+
+    /// <summary>Adds the caller's comment, 1 to 500 characters (L2-035 AC2, AC3): 201. It counts with messages, at most 60 a minute per person (L2-053 AC2).</summary>
+    [HttpPost("{photoId:guid}/comments")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<PhotoCommentDto>> AddComment(Guid popkinId, Guid photoId, AddCommentRequest request, CancellationToken cancellationToken)
+    {
+        var comment = await sender.Send(new AddPhotoCommentCommand(popkinId, photoId, request.Text), cancellationToken);
+        return Created($"/api/popkins/{popkinId}/photos/{photoId}/comments/{comment.Id}", comment);
+    }
+
+    /// <summary>Deletes the caller's own comment (L2-035 AC5): 204.</summary>
+    [HttpDelete("{photoId:guid}/comments/{commentId:guid}")]
+    public async Task<IActionResult> DeleteComment(Guid popkinId, Guid photoId, Guid commentId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeletePhotoCommentCommand(popkinId, photoId, commentId), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>
     /// Adds one photo to the album, with a caption when given (L2-031). The body may be up to
     /// twice the largest photo, so a photo over 10 MB is refused with its own message and not by
     /// the server's size limit. At most 60 a minute per person.

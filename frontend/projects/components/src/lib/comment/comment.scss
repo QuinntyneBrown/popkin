@@ -32,3 +32,25 @@
     var(--font-family-sans);
   overflow-wrap: anywhere;
 }
+
+/* "Delete comment", on one's own comment only, at the row's top end (L2-035 AC5). */
+.comment__delete {
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0 0;
+  color: var(--color-fg-muted);
+}
+
+/* In the photo view's side panel, on the stage: no hairlines, and the stage's muted words. */
+:host-context(.photo-info__comments) {
+  border-top: 0;
+}
+
+/* The panel's words are the size of the caption above them. */
+:host-context(.photo-info__comments) .comment__text {
+  font: var(--text-body);
+  line-height: var(--line-height-relaxed);
+}
+
+:host-context(.photo-info__comments) .text-caption,
+:host-context(.photo-info__comments) .comment__delete {
+  color: var(--color-fg-on-stage-muted);
+}

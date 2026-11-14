@@ -73,6 +73,8 @@ describe('messageLine (L2-026)', () => {
     ['a photo with text', { text: 'Dock', photo }, 'Dock'],
     ['a photo alone', { text: '', photo }, 'Photo'],
     ['nothing', { text: '', photo: null }, ''],
+    ['a removed photo alone', { text: '', photo: null, photoRemoved: true }, 'Photo removed'],
+    ['a removed photo with text', { text: 'Dock', photo: null, photoRemoved: true }, 'Dock'],
   ])('reads %s as its line', (_case, message, line) => {
     expect(messageLine(message)).toBe(line);
   });

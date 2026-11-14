@@ -29,36 +29,43 @@ box "Backend — Popkin Application and Domain" #ECFDF3
 end box
 box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
-  participant "ObjectStoragePhotoStore" as store
+  participant "IPhotoStore" as store
   participant "SignalRPopkinNotifier" as notifier
 end box
-actor "Other members" as others
+actor "The photo's audience" as others
 
-actor -> page : Open the photo's actions (offered when CanDelete, mock TO SUPPLY)
-actor -> page : Choose delete, then confirm (L2-036 AC2)
+
+actor -> page : Choose "Photo actions" (shown when canDelete and not wrapped up)
+page --> actor : Menu "Photo actions": "Delete photo"
+actor -> page : Choose "Delete photo"
+page --> actor : "Delete this photo?" — "It will be removed from Photos and from chat for everyone."
+actor -> page : Choose "Delete photo" (L2-036 AC2)
+page --> actor : "Deleting…", disabled and busy (L2-056 AC3)
 page -> client : deletePhoto(popkinId, photoId)
 client -> controller : DELETE /api/popkins/{popkinId}/photos/{photoId}
 controller -> handler : Send DeletePhotoCommand
-handler -> db : Load membership and Photo in this Popkin
-alt Not a member or no such photo
+handler -> db : Load membership and Photo in this Popkin (read guard of GET photos/{id})
+alt Not a member, no such photo, or a direct message's photo of others
   controller --> client : 404 popkin_not_found or photo_not_found (L2-051 AC1)
-else Neither uploader nor Host
+else Popkin wrapped up
+  controller --> client : 409 popkin_wrapped_up (L2-045)
+else Not the uploader, nor the Host on an album photo
   handler -> photo : CanBeDeletedBy(membership)
   controller --> client : 403 photo_not_yours (L2-036 AC2, L2-051 AC4)
 else Allowed
   handler -> db : Delete PhotoReaction and PhotoComment rows (L2-036 AC3)
-  handler -> db : Set Message.PhotoRemoved for every message that carried it
+  handler -> db : PhotoRemoved = true, PhotoId = null on every message that carried it
   handler -> db : Delete Photo; save in one unit of work
-  handler -> store : DeleteAsync original and thumbnails
+  handler -> store : DeleteAsync stored image and thumbnail
   alt File removal fails
-    store --> handler : Error; logged for cleanup TO SUPPLY
+    store --> handler : Error; logged without content, the file stays an orphan
   end
-  handler -> notifier : PhotoDeleted to popkin:{popkinId}
+  handler -> notifier : PhotoDeleted {popkinId, photoId} to the photo's audience
   controller --> client : 204 No Content
-  notifier --> others : Leaves the album; chat messages read "Photo removed" (L2-036 AC3)
-  page --> actor : Opens the album without the photo
+  notifier --> others : Album drops it; open threads read "Photo removed"; an open view reads "This photo was removed" (L2-036 AC3)
+  page --> actor : Album without the photo (or back to the direct message), toast "Photo deleted."
 end
 alt Failure
-  page --> actor : Photo stays; message TO SUPPLY
+  page --> actor : Dialog stays open: "We couldn’t delete this photo." / "It’s still here. Try again."
 end
 @enduml

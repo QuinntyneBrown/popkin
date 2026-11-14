@@ -43,7 +43,8 @@ public sealed class UploadThreadPhotoCommandHandler(
             files.ThumbnailKey,
             processed.Width,
             processed.Height,
-            processed.Display.ContentType);
+            processed.Display.ContentType,
+            files.OriginalKey);
         db.Photos.Add(photo);
         try
         {
@@ -52,7 +53,7 @@ public sealed class UploadThreadPhotoCommandHandler(
         catch
         {
             // No photo was added, so the files belong to nothing.
-            await PhotoFiles.DeleteAsync(store, files.DisplayKey, files.ThumbnailKey);
+            await PhotoFiles.DeleteAsync(store, files.Keys);
             throw;
         }
 

@@ -21,6 +21,22 @@ export class PhotoViewPage {
   readonly error: Locator;
   readonly errorHeading: Locator;
   readonly tryAgain: Locator;
+  /** "Save photo", and "Photo actions" for whoever may delete the photo (L2-036). */
+  readonly save: Locator;
+  readonly photoActions: Locator;
+  /** The react bar of the quick five and "More reactions", and "Comment" beside it (L2-034). */
+  readonly reactBar: Locator;
+  readonly react: (name: string) => Locator;
+  readonly moreReactions: Locator;
+  readonly comment: Locator;
+  /** From 1024 px: the comments in the side panel, and its field "Add a comment" (L2-035). */
+  readonly panelComments: Locator;
+  readonly panelField: Locator;
+  readonly commentField: Locator;
+  readonly postComment: Locator;
+  /** A photo deleted while it was open: "This photo was removed" (L2-036). */
+  readonly removed: Locator;
+  readonly backToPhotos: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly titles: Locator;
   readonly captionRegion: Locator;
@@ -43,6 +59,19 @@ export class PhotoViewPage {
     this.error = this.screen.getByRole('alert');
     this.errorHeading = this.error.getByRole('heading');
     this.tryAgain = this.error.getByRole('button', { name: 'Try again' });
+    this.save = this.bar.getByRole('button', { name: 'Save photo' });
+    // A link in the mock, a button in the app.
+    this.photoActions = this.bar.getByLabel('Photo actions');
+    this.reactBar = this.panel.getByRole('group', { name: 'React' });
+    this.react = (name) => this.reactBar.getByRole('button', { name: `React ${name}` });
+    this.moreReactions = this.reactBar.getByLabel('More reactions');
+    this.comment = this.panel.locator('.stage-btn');
+    this.panelComments = this.panel.locator('.photo-info__comments');
+    this.panelField = this.panel.locator('.photo-info__composer');
+    this.commentField = this.panelField.getByRole('textbox', { name: 'Add a comment' });
+    this.postComment = this.panelField.getByRole('button', { name: 'Post comment' });
+    this.removed = this.screen.locator('.stage-message');
+    this.backToPhotos = this.removed.getByRole('link', { name: 'Back to Photos' });
     this.titles = this.bar.locator('.topbar__titles');
     this.captionRegion = this.panel.getByRole('heading', { level: 1 });
   }

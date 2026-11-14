@@ -29,6 +29,7 @@ function message(
     reactions: [],
     reactionsVersion: 0,
     photo: null,
+    photoRemoved: false,
     quote: null,
     ...extra,
   };
@@ -175,6 +176,16 @@ describe('threadRows', () => {
       { messageId: 'x', firstName: 'Walt', snippet: 'Shed', deleted: false },
       { messageId: 'y', firstName: '', snippet: '', deleted: true },
     ]);
+  });
+
+  it('marks a message whose photo was removed (L2-036 AC3)', () => {
+    const rows = threadRows(
+      [message('a', 'Dev', at(9), 'Dock was glass', { photoRemoved: true })],
+      [],
+      mara,
+      now,
+    );
+    expect(rows[1]).toMatchObject({ kind: 'message', photo: null, photoRemoved: true });
   });
 
   it('gives a photo its alt text and the name of the button that opens it (L2-026 AC2)', () => {

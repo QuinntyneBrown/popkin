@@ -13,6 +13,7 @@ export const HUB_EVENTS = {
   memberJoined: 'MemberJoined',
   memberLeft: 'MemberLeft',
   photosAdded: 'PhotosAdded',
+  photoDeleted: 'PhotoDeleted',
   callChanged: 'CallChanged',
   callEnded: 'CallEnded',
   participantJoined: 'ParticipantJoined',

@@ -77,6 +77,8 @@ export * from './lib/tab-header/tab-header';
 export * from './lib/progress/progress';
 export * from './lib/upload-item/upload-item';
 export * from './lib/photo-viewer/photo-viewer';
+export * from './lib/react-bar/react-bar';
+export * from './lib/stage-button/stage-button';
 export * from './lib/files-input/files-input';
 export * from './lib/page-screen/page-screen';
 export * from './lib/popkin-grid/popkin-grid';

@@ -1,0 +1,27 @@
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  padding: var(--space-1) var(--space-1-5);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-stage-control-subtle);
+}
+
+/* One of the quick five, a toggle: the pressed one is veiled and ringed, not only coloured. */
+.react-bar__emoji {
+  display: grid;
+  place-items: center;
+  width: var(--target-comfortable);
+  height: var(--target-comfortable);
+  border: var(--border-width-thick) solid transparent;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-fg-on-stage-muted);
+  font: var(--font-size-2xl) / 1 var(--font-family-emoji);
+}
+
+.react-bar__emoji[aria-pressed='true'] {
+  background: var(--color-bg-stage-control-strong);
+  border-color: var(--color-fg-on-stage);
+}

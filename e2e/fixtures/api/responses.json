@@ -2,18 +2,18 @@
   "POST /api/auth/codes": {
     "status": 202,
     "body": {
-      "verificationId": "e089bd38-61de-41a3-9b29-84a07b6ab00b",
+      "verificationId": "d74172b6-7b12-40fe-9e64-fe98a0fe9086",
       "channel": "Phone",
       "displayDestination": "(•••) •••-••48",
-      "resendAvailableAt": "2026-11-14T02:39:15.092884+00:00"
+      "resendAvailableAt": "2026-11-14T03:16:10.274307+00:00"
     }
   },
-  "POST /api/auth/codes/e089bd38-61de-41a3-9b29-84a07b6ab00b/confirm": {
+  "POST /api/auth/codes/d74172b6-7b12-40fe-9e64-fe98a0fe9086/confirm": {
     "status": 200,
     "body": {
       "outcome": "SignedIn",
       "session": {
-        "personId": "241f8463-cb4c-49b2-9144-a3ec551cf7ff",
+        "personId": "4ed4abfb-8fff-4d5a-8486-f152ca2fbfb1",
         "name": "Mara Okafor",
         "photoUrl": null
       },
@@ -23,43 +23,43 @@
   "GET /api/auth/session": {
     "status": 200,
     "body": {
-      "personId": "241f8463-cb4c-49b2-9144-a3ec551cf7ff",
+      "personId": "4ed4abfb-8fff-4d5a-8486-f152ca2fbfb1",
       "name": "Mara Okafor",
       "photoUrl": null
     }
   },
-  "POST /api/auth/codes/e089bd38-61de-41a3-9b29-84a07b6ab00b/resend": {
+  "POST /api/auth/codes/d74172b6-7b12-40fe-9e64-fe98a0fe9086/resend": {
     "status": 202,
     "body": {
-      "verificationId": "f7626e68-b620-4257-8364-377dad72effb",
+      "verificationId": "0802b6ca-6730-48ef-9ec1-e1e0d69889d6",
       "channel": "Phone",
       "displayDestination": "(•••) •••-••48",
-      "resendAvailableAt": "2026-11-14T02:39:46.538631+00:00"
+      "resendAvailableAt": "2026-11-14T03:16:41.71434+00:00"
     }
   },
   "POST /api/popkins": {
     "status": 201,
     "body": {
-      "id": "5540d313-e719-4223-ba9f-827e26de51f8",
+      "id": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
       "endsAt": "2026-11-15T23:00:00+00:00",
-      "inviteCode": "ff6ufvkcbf",
-      "inviteUrl": "https://popk.in/ff6ufvkcbf"
+      "inviteCode": "hbs6zsmrpz",
+      "inviteUrl": "https://popk.in/hbs6zsmrpz"
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/invite": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/invite": {
     "status": 200,
     "body": {
-      "code": "ff6ufvkcbf",
-      "url": "https://popk.in/ff6ufvkcbf",
+      "code": "hbs6zsmrpz",
+      "url": "https://popk.in/hbs6zsmrpz",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal"
     }
   },
-  "GET /api/invites/ff6ufvkcbf": {
+  "GET /api/invites/hbs6zsmrpz": {
     "status": 200,
     "body": {
       "state": "Open",
@@ -72,17 +72,17 @@
       "avatars": [
         {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         },
         {
           "initials": "WB",
-          "accent": "Berry",
+          "accent": "Plum",
           "photoUrl": null
         },
         {
           "initials": "DP",
-          "accent": "Amber",
+          "accent": "Sky",
           "photoUrl": null
         }
       ],
@@ -90,7 +90,7 @@
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
@@ -100,7 +100,7 @@
       }
     }
   },
-  "GET /api/invites/ff6ufvkcbf/members": {
+  "GET /api/invites/hbs6zsmrpz/members": {
     "status": 200,
     "body": {
       "members": [
@@ -108,7 +108,7 @@
           "displayName": "Mara Okafor",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Plum",
             "photoUrl": null
           }
         },
@@ -116,7 +116,7 @@
           "displayName": "Walt Brennan",
           "avatar": {
             "initials": "WB",
-            "accent": "Berry",
+            "accent": "Plum",
             "photoUrl": null
           }
         },
@@ -124,7 +124,7 @@
           "displayName": "Dev Patel",
           "avatar": {
             "initials": "DP",
-            "accent": "Amber",
+            "accent": "Sky",
             "photoUrl": null
           }
         }
@@ -132,11 +132,11 @@
       "othersCount": 0
     }
   },
-  "POST /api/invites/ff6ufvkcbf/join": {
+  "POST /api/invites/hbs6zsmrpz/join": {
     "status": 201,
     "body": {
-      "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-      "membershipId": "e095ecb8-fb06-4e65-a8f7-b89923007dfe",
+      "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+      "membershipId": "2a408f0b-b814-45ec-a238-6234987e1048",
       "displayName": "Joel",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
@@ -145,11 +145,11 @@
       "othersCount": 1
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/everyone": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/everyone": {
     "status": 200,
     "body": {
-      "id": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
-      "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
+      "id": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
+      "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
       "kind": "Everyone",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
@@ -162,241 +162,250 @@
       "unreadCount": 4,
       "lastReadMessageId": null,
       "viewer": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara"
       },
       "other": null,
       "popkinVersion": 0
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/0e1ed7f9-80d5-4916-8729-a2dad1c5354c/messages": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/8fc7d490-73b1-4bbc-adf8-c48f152b4d21/messages": {
     "status": 200,
     "body": {
       "items": [
         {
-          "id": "e775b112-f5a3-47c2-957c-b3d0f9311a90",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+          "id": "570b32ff-e245-4593-a49d-1062244a84b2",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "20f24279-edcf-4252-b4b3-25a0c482b93f",
+            "membershipId": "aebc93ea-dfa7-49b8-b055-9ab51534df2b",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Berry",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
           "text": "Walt Brennan popped in. Say hi! 👋",
-          "sentAt": "2026-11-14T02:39:16.6356+00:00",
+          "sentAt": "2026-11-14T03:16:11.8102+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
-          "photo": null
+          "photo": null,
+          "photoRemoved": false
         },
         {
-          "id": "72b219b5-f8fa-4433-9cf3-2d58950ad6f0",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+          "id": "c1382f3b-c90d-4195-99c5-48dcf6e7c811",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "015ed278-1f8a-4626-8d62-718e7c6de7a3",
+            "membershipId": "8ca14034-1d7d-49f5-8b39-13945375313e",
             "firstName": "Dev",
             "avatar": {
               "initials": "DP",
-              "accent": "Amber",
-              "photoUrl": null
-            }
-          },
-          "text": "Dev Patel popped in. Say hi! 👋",
-          "sentAt": "2026-11-14T02:39:16.6593+00:00",
-          "reactionsVersion": 0,
-          "reactions": [],
-          "quote": null,
-          "photo": null
-        },
-        {
-          "id": "69f8eb37-ca03-4a14-a619-7be7159a2299",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
-          "clientMessageId": null,
-          "kind": "System",
-          "author": {
-            "membershipId": "e095ecb8-fb06-4e65-a8f7-b89923007dfe",
-            "firstName": "Joel",
-            "avatar": {
-              "initials": "J",
               "accent": "Sky",
               "photoUrl": null
             }
           },
-          "text": "Joel popped in. Say hi! 👋",
-          "sentAt": "2026-11-14T02:39:16.6781+00:00",
+          "text": "Dev Patel popped in. Say hi! 👋",
+          "sentAt": "2026-11-14T03:16:11.8353+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
-          "photo": null
+          "photo": null,
+          "photoRemoved": false
         },
         {
-          "id": "d5bc2232-f4c4-45f4-bf5d-5ca882db25b9",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+          "id": "cbfe9064-9b91-43b1-a150-364711ddc840",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
+          "clientMessageId": null,
+          "kind": "System",
+          "author": {
+            "membershipId": "2a408f0b-b814-45ec-a238-6234987e1048",
+            "firstName": "Joel",
+            "avatar": {
+              "initials": "J",
+              "accent": "Teal",
+              "photoUrl": null
+            }
+          },
+          "text": "Joel popped in. Say hi! 👋",
+          "sentAt": "2026-11-14T03:16:11.8559+00:00",
+          "reactionsVersion": 0,
+          "reactions": [],
+          "quote": null,
+          "photo": null,
+          "photoRemoved": false
+        },
+        {
+          "id": "4bcf1c4c-7cf2-4495-beba-27912a6b8363",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
           "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e01",
           "kind": "Member",
           "author": {
-            "membershipId": "20f24279-edcf-4252-b4b3-25a0c482b93f",
+            "membershipId": "aebc93ea-dfa7-49b8-b055-9ab51534df2b",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Berry",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
           "text": "Pancakes at the main cabin, 8:30. Bring an appetite.",
-          "sentAt": "2026-11-14T02:39:16.7045+00:00",
+          "sentAt": "2026-11-14T03:16:11.8882+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
-          "photo": null
+          "photo": null,
+          "photoRemoved": false
         }
       ],
       "hasMore": false
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/0e1ed7f9-80d5-4916-8729-a2dad1c5354c/messages?after=d5bc2232-f4c4-45f4-bf5d-5ca882db25b9": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/8fc7d490-73b1-4bbc-adf8-c48f152b4d21/messages?after=4bcf1c4c-7cf2-4495-beba-27912a6b8363": {
     "status": 200,
     "body": {
       "items": [],
       "hasMore": false
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/0e1ed7f9-80d5-4916-8729-a2dad1c5354c/messages?from=e775b112-f5a3-47c2-957c-b3d0f9311a90&to=d5bc2232-f4c4-45f4-bf5d-5ca882db25b9": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/8fc7d490-73b1-4bbc-adf8-c48f152b4d21/messages?from=570b32ff-e245-4593-a49d-1062244a84b2&to=4bcf1c4c-7cf2-4495-beba-27912a6b8363": {
     "status": 200,
     "body": {
       "items": [
         {
-          "id": "e775b112-f5a3-47c2-957c-b3d0f9311a90",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+          "id": "570b32ff-e245-4593-a49d-1062244a84b2",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "20f24279-edcf-4252-b4b3-25a0c482b93f",
+            "membershipId": "aebc93ea-dfa7-49b8-b055-9ab51534df2b",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Berry",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
           "text": "Walt Brennan popped in. Say hi! 👋",
-          "sentAt": "2026-11-14T02:39:16.6356+00:00",
+          "sentAt": "2026-11-14T03:16:11.8102+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
-          "photo": null
+          "photo": null,
+          "photoRemoved": false
         },
         {
-          "id": "72b219b5-f8fa-4433-9cf3-2d58950ad6f0",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+          "id": "c1382f3b-c90d-4195-99c5-48dcf6e7c811",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "015ed278-1f8a-4626-8d62-718e7c6de7a3",
+            "membershipId": "8ca14034-1d7d-49f5-8b39-13945375313e",
             "firstName": "Dev",
             "avatar": {
               "initials": "DP",
-              "accent": "Amber",
-              "photoUrl": null
-            }
-          },
-          "text": "Dev Patel popped in. Say hi! 👋",
-          "sentAt": "2026-11-14T02:39:16.6593+00:00",
-          "reactionsVersion": 0,
-          "reactions": [],
-          "quote": null,
-          "photo": null
-        },
-        {
-          "id": "69f8eb37-ca03-4a14-a619-7be7159a2299",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
-          "clientMessageId": null,
-          "kind": "System",
-          "author": {
-            "membershipId": "e095ecb8-fb06-4e65-a8f7-b89923007dfe",
-            "firstName": "Joel",
-            "avatar": {
-              "initials": "J",
               "accent": "Sky",
               "photoUrl": null
             }
           },
-          "text": "Joel popped in. Say hi! 👋",
-          "sentAt": "2026-11-14T02:39:16.6781+00:00",
+          "text": "Dev Patel popped in. Say hi! 👋",
+          "sentAt": "2026-11-14T03:16:11.8353+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
-          "photo": null
+          "photo": null,
+          "photoRemoved": false
         },
         {
-          "id": "d5bc2232-f4c4-45f4-bf5d-5ca882db25b9",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+          "id": "cbfe9064-9b91-43b1-a150-364711ddc840",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
+          "clientMessageId": null,
+          "kind": "System",
+          "author": {
+            "membershipId": "2a408f0b-b814-45ec-a238-6234987e1048",
+            "firstName": "Joel",
+            "avatar": {
+              "initials": "J",
+              "accent": "Teal",
+              "photoUrl": null
+            }
+          },
+          "text": "Joel popped in. Say hi! 👋",
+          "sentAt": "2026-11-14T03:16:11.8559+00:00",
+          "reactionsVersion": 0,
+          "reactions": [],
+          "quote": null,
+          "photo": null,
+          "photoRemoved": false
+        },
+        {
+          "id": "4bcf1c4c-7cf2-4495-beba-27912a6b8363",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
           "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e01",
           "kind": "Member",
           "author": {
-            "membershipId": "20f24279-edcf-4252-b4b3-25a0c482b93f",
+            "membershipId": "aebc93ea-dfa7-49b8-b055-9ab51534df2b",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Berry",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
           "text": "Pancakes at the main cabin, 8:30. Bring an appetite.",
-          "sentAt": "2026-11-14T02:39:16.7045+00:00",
+          "sentAt": "2026-11-14T03:16:11.8882+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
-          "photo": null
+          "photo": null,
+          "photoRemoved": false
         }
       ],
       "hasMore": false
     }
   },
-  "PUT /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/0e1ed7f9-80d5-4916-8729-a2dad1c5354c/read": {
+  "PUT /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/8fc7d490-73b1-4bbc-adf8-c48f152b4d21/read": {
     "status": 204
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/0e1ed7f9-80d5-4916-8729-a2dad1c5354c/messages": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/8fc7d490-73b1-4bbc-adf8-c48f152b4d21/messages": {
     "status": 201,
     "body": {
-      "id": "3423eb38-d228-49ef-8d21-91516c6c7d47",
-      "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-      "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+      "id": "ad1ab6a7-7acf-4a99-a635-577463216796",
+      "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+      "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
       "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e02",
       "kind": "Member",
       "author": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
       "text": "On it! Also: last call for the canoe sign-up 🛶",
-      "sentAt": "2026-11-14T02:39:16.767817+00:00",
+      "sentAt": "2026-11-14T03:16:11.988526+00:00",
       "reactionsVersion": 0,
       "reactions": [],
       "quote": null,
-      "photo": null
+      "photo": null,
+      "photoRemoved": false
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/presence": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/presence": {
     "status": 200,
     "body": {
       "version": 0,
@@ -404,48 +413,48 @@
       "members": []
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/members": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/members": {
     "status": 200,
     "body": [
       {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "displayName": "Mara Okafor",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         },
         "role": "Host",
         "isViewer": true
       },
       {
-        "membershipId": "20f24279-edcf-4252-b4b3-25a0c482b93f",
+        "membershipId": "aebc93ea-dfa7-49b8-b055-9ab51534df2b",
         "displayName": "Walt Brennan",
         "avatar": {
           "initials": "WB",
-          "accent": "Berry",
+          "accent": "Plum",
           "photoUrl": null
         },
         "role": "Member",
         "isViewer": false
       },
       {
-        "membershipId": "015ed278-1f8a-4626-8d62-718e7c6de7a3",
+        "membershipId": "8ca14034-1d7d-49f5-8b39-13945375313e",
         "displayName": "Dev Patel",
         "avatar": {
           "initials": "DP",
-          "accent": "Amber",
+          "accent": "Sky",
           "photoUrl": null
         },
         "role": "Member",
         "isViewer": false
       },
       {
-        "membershipId": "e095ecb8-fb06-4e65-a8f7-b89923007dfe",
+        "membershipId": "2a408f0b-b814-45ec-a238-6234987e1048",
         "displayName": "Joel",
         "avatar": {
           "initials": "J",
-          "accent": "Sky",
+          "accent": "Teal",
           "photoUrl": null
         },
         "role": "Member",
@@ -453,11 +462,11 @@
       }
     ]
   },
-  "PUT /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/direct/20f24279-edcf-4252-b4b3-25a0c482b93f": {
+  "PUT /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/direct/aebc93ea-dfa7-49b8-b055-9ab51534df2b": {
     "status": 201,
     "body": {
-      "id": "03d5336c-70d7-490a-b5ee-2a0720f25fed",
-      "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
+      "id": "d57d3288-72b2-4439-8b55-bfc84779f820",
+      "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
       "kind": "Direct",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
@@ -470,121 +479,123 @@
       "unreadCount": 0,
       "lastReadMessageId": null,
       "viewer": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara"
       },
       "other": {
-        "membershipId": "20f24279-edcf-4252-b4b3-25a0c482b93f",
+        "membershipId": "aebc93ea-dfa7-49b8-b055-9ab51534df2b",
         "displayName": "Walt Brennan",
         "firstName": "Walt",
         "avatar": {
           "initials": "WB",
-          "accent": "Berry",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
       "popkinVersion": 0
     }
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/03d5336c-70d7-490a-b5ee-2a0720f25fed/messages": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/d57d3288-72b2-4439-8b55-bfc84779f820/messages": {
     "status": 201,
     "body": {
-      "id": "894f07ce-f123-4c99-92a4-1d984927103a",
-      "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-      "threadId": "03d5336c-70d7-490a-b5ee-2a0720f25fed",
+      "id": "a0349a3f-2bf0-402d-823d-e5f32323ea53",
+      "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+      "threadId": "d57d3288-72b2-4439-8b55-bfc84779f820",
       "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e03",
       "kind": "Member",
       "author": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
       "text": "Walt, your pancakes were unreal. Is that your mum’s recipe?",
-      "sentAt": "2026-11-14T02:39:16.789934+00:00",
+      "sentAt": "2026-11-14T03:16:12.02425+00:00",
       "reactionsVersion": 0,
       "reactions": [],
       "quote": null,
-      "photo": null
+      "photo": null,
+      "photoRemoved": false
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/03d5336c-70d7-490a-b5ee-2a0720f25fed/messages": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/d57d3288-72b2-4439-8b55-bfc84779f820/messages": {
     "status": 200,
     "body": {
       "items": [
         {
-          "id": "894f07ce-f123-4c99-92a4-1d984927103a",
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-          "threadId": "03d5336c-70d7-490a-b5ee-2a0720f25fed",
+          "id": "a0349a3f-2bf0-402d-823d-e5f32323ea53",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+          "threadId": "d57d3288-72b2-4439-8b55-bfc84779f820",
           "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e03",
           "kind": "Member",
           "author": {
-            "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+            "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
           "text": "Walt, your pancakes were unreal. Is that your mum’s recipe?",
-          "sentAt": "2026-11-14T02:39:16.7899+00:00",
+          "sentAt": "2026-11-14T03:16:12.0242+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
-          "photo": null
+          "photo": null,
+          "photoRemoved": false
         }
       ],
       "hasMore": false
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/calls/current?threadId=03d5336c-70d7-490a-b5ee-2a0720f25fed": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/calls/current?threadId=d57d3288-72b2-4439-8b55-bfc84779f820": {
     "status": 204
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads": {
     "status": 200,
     "body": {
-      "viewerMembershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+      "viewerMembershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
       "everyone": {
-        "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+        "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
         "latest": {
           "firstName": "Mara",
           "text": "On it! Also: last call for the canoe sign-up 🛶",
           "isMine": true,
-          "sentAt": "2026-11-14T02:39:16.7678+00:00"
+          "sentAt": "2026-11-14T03:16:11.9885+00:00"
         },
         "unreadCount": 0
       },
       "direct": [
         {
-          "threadId": "03d5336c-70d7-490a-b5ee-2a0720f25fed",
+          "threadId": "d57d3288-72b2-4439-8b55-bfc84779f820",
           "other": {
-            "membershipId": "20f24279-edcf-4252-b4b3-25a0c482b93f",
+            "membershipId": "aebc93ea-dfa7-49b8-b055-9ab51534df2b",
             "displayName": "Walt Brennan",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Berry",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
           "latest": {
             "text": "Walt, your pancakes were unreal. Is that your mum’s recipe?",
             "isMine": true,
-            "sentAt": "2026-11-14T02:39:16.7899+00:00"
+            "sentAt": "2026-11-14T03:16:12.0242+00:00"
           },
           "unreadCount": 0
         }
       ]
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8": {
     "status": 200,
     "body": {
-      "id": "5540d313-e719-4223-ba9f-827e26de51f8",
+      "id": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
@@ -595,28 +606,28 @@
       "avatars": [
         {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         },
         {
           "initials": "WB",
-          "accent": "Berry",
+          "accent": "Plum",
           "photoUrl": null
         },
         {
           "initials": "DP",
-          "accent": "Amber",
+          "accent": "Sky",
           "photoUrl": null
         },
         {
           "initials": "J",
-          "accent": "Sky",
+          "accent": "Teal",
           "photoUrl": null
         }
       ],
       "viewerRole": "Host",
       "viewer": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara"
       },
       "unreadCount": 0,
@@ -627,61 +638,61 @@
       "version": 0
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/threads/everyone/preview": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/threads/everyone/preview": {
     "status": 200,
     "body": {
-      "threadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
+      "threadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
       "messages": [
         {
-          "id": "d5bc2232-f4c4-45f4-bf5d-5ca882db25b9",
+          "id": "4bcf1c4c-7cf2-4495-beba-27912a6b8363",
           "author": {
-            "membershipId": "20f24279-edcf-4252-b4b3-25a0c482b93f",
+            "membershipId": "aebc93ea-dfa7-49b8-b055-9ab51534df2b",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Berry",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
           "text": "Pancakes at the main cabin, 8:30. Bring an appetite.",
-          "sentAt": "2026-11-14T02:39:16.7045+00:00"
+          "sentAt": "2026-11-14T03:16:11.8882+00:00"
         },
         {
-          "id": "3423eb38-d228-49ef-8d21-91516c6c7d47",
+          "id": "ad1ab6a7-7acf-4a99-a635-577463216796",
           "author": {
-            "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+            "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
           "text": "On it! Also: last call for the canoe sign-up 🛶",
-          "sentAt": "2026-11-14T02:39:16.7678+00:00"
+          "sentAt": "2026-11-14T03:16:11.9885+00:00"
         }
       ],
       "newCount": 0
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/photos/summary": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/photos/summary": {
     "status": 200,
     "body": {
       "count": 0,
       "photos": []
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences/summary": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences/summary": {
     "status": 200,
     "body": {
       "count": 0,
       "top": []
     }
   },
-  "PATCH /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8": {
+  "PATCH /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8": {
     "status": 200,
     "body": {
-      "id": "5540d313-e719-4223-ba9f-827e26de51f8",
+      "id": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
@@ -690,10 +701,10 @@
       "version": 1
     }
   },
-  "PUT /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/length": {
+  "PUT /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/length": {
     "status": 200,
     "body": {
-      "id": "5540d313-e719-4223-ba9f-827e26de51f8",
+      "id": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
@@ -702,43 +713,43 @@
       "version": 2
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/calls/current": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/calls/current": {
     "status": 204
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/calls": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/calls": {
     "status": 201,
     "body": {
       "call": {
-        "id": "1ef22486-7b03-468c-b718-92447f7f855e",
+        "id": "740d857f-4a42-4398-bfd9-0dfe93b63e53",
         "threadId": null,
-        "startedAt": "2026-11-14T02:39:16.877568+00:00",
+        "startedAt": "2026-11-14T03:16:12.130107+00:00",
         "version": 1,
         "participantCount": 1
       },
-      "viewerMembershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+      "viewerMembershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
       "participants": [
         {
-          "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+          "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
           "firstName": "Mara",
           "name": "Mara Okafor",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Plum",
             "photoUrl": null
           },
           "micOn": true,
           "cameraOn": true,
           "mediaVersion": 0,
-          "joinedAt": "2026-11-14T02:39:16.8806+00:00"
+          "joinedAt": "2026-11-14T03:16:12.1336+00:00"
         }
       ],
       "iceServers": []
     }
   },
-  "PATCH /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/calls/1ef22486-7b03-468c-b718-92447f7f855e/participants/me": {
+  "PATCH /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/calls/740d857f-4a42-4398-bfd9-0dfe93b63e53/participants/me": {
     "status": 204
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/calls/1ef22486-7b03-468c-b718-92447f7f855e/leave": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/calls/740d857f-4a42-4398-bfd9-0dfe93b63e53/leave": {
     "status": 204
   },
   "GET /api/popkins": {
@@ -746,7 +757,7 @@
     "body": {
       "active": [
         {
-          "id": "5540d313-e719-4223-ba9f-827e26de51f8",
+          "id": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
           "name": "Lakeside Weekend",
           "emoji": "🏕️",
           "colour": "Teal",
@@ -755,17 +766,17 @@
           "avatars": [
             {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Plum",
               "photoUrl": null
             },
             {
               "initials": "WB",
-              "accent": "Berry",
+              "accent": "Plum",
               "photoUrl": null
             },
             {
               "initials": "DP",
-              "accent": "Amber",
+              "accent": "Sky",
               "photoUrl": null
             }
           ],
@@ -774,14 +785,14 @@
             "text": "On it! Also: last call for the canoe sign-up 🛶"
           },
           "unreadCount": 0,
-          "everyoneThreadId": "0e1ed7f9-80d5-4916-8729-a2dad1c5354c",
-          "viewerMembershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d"
+          "everyoneThreadId": "8fc7d490-73b1-4bbc-adf8-c48f152b4d21",
+          "viewerMembershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2"
         }
       ],
       "wrappedUp": []
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/photos?filter=mine": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/photos?filter=mine": {
     "status": 200,
     "body": {
       "photoCount": 0,
@@ -792,29 +803,29 @@
       "canAdd": true
     }
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/photos": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/photos": {
     "status": 201,
     "body": {
-      "id": "22be1b82-8d94-41b6-9616-2e42d3d8a8bc",
+      "id": "9ae8446a-6f65-4fcd-8e39-7c0cedd7c77e",
       "caption": "First light on the dock. Worth the 6 am alarm.",
       "uploader": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
-      "takenAt": "2026-11-14T02:39:17.025243+00:00",
-      "addedAt": "2026-11-14T02:39:17.025243+00:00",
-      "thumbnailUrl": "/api/files/popkins/5540d313e7194223ba9f827e26de51f8/7ede42c71fdc4d418a115dc86aab8bbb-thumbnail.jpg?expires=1794627557&signature=WEjnTJK6pHNw6bWGiZkYTkGgYpL1b-GJbVVM01wFoNE",
+      "takenAt": "2026-11-14T03:16:12.28982+00:00",
+      "addedAt": "2026-11-14T03:16:12.28982+00:00",
+      "thumbnailUrl": "/api/files/popkins/ebebad3dd1ba4e16bc176ae7766be6f8/f3e455fd069043f89126ccb5a1be88e2-thumbnail.jpg?expires=1794629772&signature=WN4MOpVXeI-Nf915V6oQ5ts33UivDLsQBUNaMHJX4qI",
       "width": 960,
       "height": 717,
       "isMine": true
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/photos?filter=everyone": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/photos?filter=everyone": {
     "status": 200,
     "body": {
       "photoCount": 1,
@@ -824,27 +835,27 @@
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Plum",
             "photoUrl": null
           }
         }
       ],
       "items": [
         {
-          "id": "22be1b82-8d94-41b6-9616-2e42d3d8a8bc",
+          "id": "9ae8446a-6f65-4fcd-8e39-7c0cedd7c77e",
           "caption": "First light on the dock. Worth the 6 am alarm.",
           "uploader": {
-            "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+            "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Plum",
               "photoUrl": null
             }
           },
-          "takenAt": "2026-11-14T02:39:17.0252+00:00",
-          "addedAt": "2026-11-14T02:39:17.0252+00:00",
-          "thumbnailUrl": "/api/files/popkins/5540d313e7194223ba9f827e26de51f8/7ede42c71fdc4d418a115dc86aab8bbb-thumbnail.jpg?expires=1794627557&signature=WEjnTJK6pHNw6bWGiZkYTkGgYpL1b-GJbVVM01wFoNE",
+          "takenAt": "2026-11-14T03:16:12.2898+00:00",
+          "addedAt": "2026-11-14T03:16:12.2898+00:00",
+          "thumbnailUrl": "/api/files/popkins/ebebad3dd1ba4e16bc176ae7766be6f8/f3e455fd069043f89126ccb5a1be88e2-thumbnail.jpg?expires=1794629772&signature=WN4MOpVXeI-Nf915V6oQ5ts33UivDLsQBUNaMHJX4qI",
           "width": 960,
           "height": 717,
           "isMine": true
@@ -854,24 +865,24 @@
       "canAdd": true
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/photos/22be1b82-8d94-41b6-9616-2e42d3d8a8bc": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/photos/9ae8446a-6f65-4fcd-8e39-7c0cedd7c77e": {
     "status": 200,
     "body": {
-      "id": "22be1b82-8d94-41b6-9616-2e42d3d8a8bc",
+      "id": "9ae8446a-6f65-4fcd-8e39-7c0cedd7c77e",
       "uploader": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara",
         "displayName": "Mara Okafor",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
-      "addedAt": "2026-11-14T02:39:17.0252+00:00",
-      "takenAt": "2026-11-14T02:39:17.0252+00:00",
+      "addedAt": "2026-11-14T03:16:12.2898+00:00",
+      "takenAt": "2026-11-14T03:16:12.2898+00:00",
       "caption": "First light on the dock. Worth the 6 am alarm.",
-      "imageUrl": "/api/files/popkins/5540d313e7194223ba9f827e26de51f8/7ede42c71fdc4d418a115dc86aab8bbb.jpg?expires=1794627557&signature=NxTLZTzIsuiowrTmn7-jnjh3kSHG2375YAt69jrCPJA",
+      "imageUrl": "/api/files/popkins/ebebad3dd1ba4e16bc176ae7766be6f8/f3e455fd069043f89126ccb5a1be88e2.jpg?expires=1794629772&signature=L7R_W1FjYKKL2IpiZPHaDVNPUH7l_HYIbpAfcyyMGRk",
       "width": 960,
       "height": 717,
       "reactions": [],
@@ -882,56 +893,56 @@
       "isMine": true
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences?filter=want": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences?filter=want": {
     "status": 200,
     "body": []
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences": {
     "status": 201,
     "body": {
-      "id": "b0104ab6-6594-4610-949f-85b98c1ac7f7",
+      "id": "42265416-32a2-4891-bb80-add1d89e6226",
       "kind": "Want",
       "title": "Beach day next summer?",
       "pictureUrl": null,
       "emoji": "🏕️",
       "colour": "Teal",
       "sharedBy": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
       "when": null,
-      "sharedAt": "2026-11-14T02:39:17.135737+00:00",
+      "sharedAt": "2026-11-14T03:16:12.439553+00:00",
       "average": null,
       "ratingCount": 0,
       "keenCount": 0
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences/1e94c01c-551e-46e7-a259-8d9148d9d425": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences/fb9069cc-6c3b-4824-89d0-302aae4e08b6": {
     "status": 200,
     "body": {
-      "id": "1e94c01c-551e-46e7-a259-8d9148d9d425",
+      "id": "fb9069cc-6c3b-4824-89d0-302aae4e08b6",
       "kind": "Did",
       "title": "Sunrise canoe to Heron Point",
-      "pictureUrl": "/api/files/popkins/5540d313e7194223ba9f827e26de51f8/experiences/0b9a07334d7644f79e56674cfa694d73.jpg?expires=1794627557&signature=tFhvZ9pK7m-jGOLSL7D7wkBmvt6iqgbUgx2p4EVY1Qc",
+      "pictureUrl": "/api/files/popkins/ebebad3dd1ba4e16bc176ae7766be6f8/experiences/aac8ae745cb1429fa0215b6db1200d28.jpg?expires=1794629772&signature=t6_U2WQ9jGV2sg6G3tMAVE-2Tlbs1ppi_okgsppJzIc",
       "emoji": "🏕️",
       "colour": "Teal",
       "sharedBy": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
       "when": "Sat morning",
       "place": "Heron Point, Lake Ossia",
-      "sharedAt": "2026-11-14T02:39:17.0898+00:00",
+      "sharedAt": "2026-11-14T03:16:12.3699+00:00",
       "average": null,
       "ratingCount": 0,
       "keenCount": 0,
@@ -971,7 +982,7 @@
       "canDelete": true
     }
   },
-  "PUT /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences/1e94c01c-551e-46e7-a259-8d9148d9d425/my-rating": {
+  "PUT /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences/fb9069cc-6c3b-4824-89d0-302aae4e08b6/my-rating": {
     "status": 200,
     "body": {
       "stars": 5,
@@ -1003,42 +1014,42 @@
       }
     }
   },
-  "PUT /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences/1e94c01c-551e-46e7-a259-8d9148d9d425/my-rating/comment": {
+  "PUT /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences/fb9069cc-6c3b-4824-89d0-302aae4e08b6/my-rating/comment": {
     "status": 200,
     "body": {
-      "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+      "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
       "firstName": "Mara",
       "avatar": {
         "initials": "MO",
-        "accent": "Leaf",
+        "accent": "Plum",
         "photoUrl": null
       },
       "stars": 5,
       "text": "Would do it every morning if I could.",
-      "commentedAt": "2026-11-14T02:39:17.133417+00:00"
+      "commentedAt": "2026-11-14T03:16:12.432307+00:00"
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences/b0104ab6-6594-4610-949f-85b98c1ac7f7": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences/42265416-32a2-4891-bb80-add1d89e6226": {
     "status": 200,
     "body": {
-      "id": "b0104ab6-6594-4610-949f-85b98c1ac7f7",
+      "id": "42265416-32a2-4891-bb80-add1d89e6226",
       "kind": "Want",
       "title": "Beach day next summer?",
       "pictureUrl": null,
       "emoji": "🏕️",
       "colour": "Teal",
       "sharedBy": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
       "when": null,
       "place": null,
-      "sharedAt": "2026-11-14T02:39:17.1357+00:00",
+      "sharedAt": "2026-11-14T03:16:12.4395+00:00",
       "average": null,
       "ratingCount": 0,
       "keenCount": 0,
@@ -1082,7 +1093,7 @@
       "canDelete": true
     }
   },
-  "DELETE /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences/b0104ab6-6594-4610-949f-85b98c1ac7f7/keen": {
+  "DELETE /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences/42265416-32a2-4891-bb80-add1d89e6226/keen": {
     "status": 200,
     "body": {
       "count": 0,
@@ -1090,45 +1101,45 @@
       "members": []
     }
   },
-  "PUT /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences/b0104ab6-6594-4610-949f-85b98c1ac7f7/keen": {
+  "PUT /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences/42265416-32a2-4891-bb80-add1d89e6226/keen": {
     "status": 200,
     "body": {
       "count": 1,
       "mine": true,
       "members": [
         {
-          "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+          "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Plum",
             "photoUrl": null
           }
         }
       ]
     }
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences/b0104ab6-6594-4610-949f-85b98c1ac7f7/done": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences/42265416-32a2-4891-bb80-add1d89e6226/done": {
     "status": 200,
     "body": {
-      "id": "b0104ab6-6594-4610-949f-85b98c1ac7f7",
+      "id": "42265416-32a2-4891-bb80-add1d89e6226",
       "kind": "Did",
       "title": "Beach day next summer?",
       "pictureUrl": null,
       "emoji": "🏕️",
       "colour": "Teal",
       "sharedBy": {
-        "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+        "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         }
       },
       "when": null,
       "place": null,
-      "sharedAt": "2026-11-14T02:39:17.1357+00:00",
+      "sharedAt": "2026-11-14T03:16:12.4395+00:00",
       "average": null,
       "ratingCount": 0,
       "keenCount": 0,
@@ -1168,98 +1179,98 @@
       "canDelete": true
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences?filter=all": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences?filter=all": {
     "status": 200,
     "body": [
       {
-        "id": "b0104ab6-6594-4610-949f-85b98c1ac7f7",
+        "id": "42265416-32a2-4891-bb80-add1d89e6226",
         "kind": "Did",
         "title": "Beach day next summer?",
         "pictureUrl": null,
         "emoji": "🏕️",
         "colour": "Teal",
         "sharedBy": {
-          "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+          "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Plum",
             "photoUrl": null
           }
         },
         "when": null,
-        "sharedAt": "2026-11-14T02:39:17.1357+00:00",
+        "sharedAt": "2026-11-14T03:16:12.4395+00:00",
         "average": null,
         "ratingCount": 0,
         "keenCount": 0
       },
       {
-        "id": "1e94c01c-551e-46e7-a259-8d9148d9d425",
+        "id": "fb9069cc-6c3b-4824-89d0-302aae4e08b6",
         "kind": "Did",
         "title": "Sunrise canoe to Heron Point",
-        "pictureUrl": "/api/files/popkins/5540d313e7194223ba9f827e26de51f8/experiences/0b9a07334d7644f79e56674cfa694d73-thumbnail.jpg?expires=1794627557&signature=xKCtIz43N2YwM7Wx1Dfkec53llwDkoB4z2FWu3XpqDo",
+        "pictureUrl": "/api/files/popkins/ebebad3dd1ba4e16bc176ae7766be6f8/experiences/aac8ae745cb1429fa0215b6db1200d28-thumbnail.jpg?expires=1794629772&signature=4Ha7e8efDTTyvKId30MNrxgQ21UlyzPZ9Vjkfnam7T8",
         "emoji": "🏕️",
         "colour": "Teal",
         "sharedBy": {
-          "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+          "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Plum",
             "photoUrl": null
           }
         },
         "when": "Sat morning",
-        "sharedAt": "2026-11-14T02:39:17.0898+00:00",
+        "sharedAt": "2026-11-14T03:16:12.3699+00:00",
         "average": 5,
         "ratingCount": 1,
         "keenCount": 0
       }
     ]
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/experiences?filter=did": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/experiences?filter=did": {
     "status": 200,
     "body": [
       {
-        "id": "b0104ab6-6594-4610-949f-85b98c1ac7f7",
+        "id": "42265416-32a2-4891-bb80-add1d89e6226",
         "kind": "Did",
         "title": "Beach day next summer?",
         "pictureUrl": null,
         "emoji": "🏕️",
         "colour": "Teal",
         "sharedBy": {
-          "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+          "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Plum",
             "photoUrl": null
           }
         },
         "when": null,
-        "sharedAt": "2026-11-14T02:39:17.1357+00:00",
+        "sharedAt": "2026-11-14T03:16:12.4395+00:00",
         "average": null,
         "ratingCount": 0,
         "keenCount": 0
       },
       {
-        "id": "1e94c01c-551e-46e7-a259-8d9148d9d425",
+        "id": "fb9069cc-6c3b-4824-89d0-302aae4e08b6",
         "kind": "Did",
         "title": "Sunrise canoe to Heron Point",
-        "pictureUrl": "/api/files/popkins/5540d313e7194223ba9f827e26de51f8/experiences/0b9a07334d7644f79e56674cfa694d73-thumbnail.jpg?expires=1794627557&signature=xKCtIz43N2YwM7Wx1Dfkec53llwDkoB4z2FWu3XpqDo",
+        "pictureUrl": "/api/files/popkins/ebebad3dd1ba4e16bc176ae7766be6f8/experiences/aac8ae745cb1429fa0215b6db1200d28-thumbnail.jpg?expires=1794629772&signature=4Ha7e8efDTTyvKId30MNrxgQ21UlyzPZ9Vjkfnam7T8",
         "emoji": "🏕️",
         "colour": "Teal",
         "sharedBy": {
-          "membershipId": "c5e0bc90-fc1c-4025-83ee-ad5644c52a9d",
+          "membershipId": "2d877ae8-1433-4f7f-885c-069be58fa5d2",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Plum",
             "photoUrl": null
           }
         },
         "when": "Sat morning",
-        "sharedAt": "2026-11-14T02:39:17.0898+00:00",
+        "sharedAt": "2026-11-14T03:16:12.3699+00:00",
         "average": 5,
         "ratingCount": 1,
         "keenCount": 0
@@ -1271,14 +1282,14 @@
     "body": {
       "hostedActivePopkins": [
         {
-          "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
+          "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
           "name": "Lakeside Weekend",
           "emoji": "🏕️"
         }
       ]
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/wrap-up": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/wrap-up": {
     "status": 200,
     "body": {
       "memberCount": 4,
@@ -1286,22 +1297,22 @@
       "messageCount": 2
     }
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/wrap-up": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/wrap-up": {
     "status": 200,
     "body": {
-      "popkinId": "5540d313-e719-4223-ba9f-827e26de51f8",
-      "wrappedUpAt": "2026-11-14T02:39:17.179105+00:00"
+      "popkinId": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
+      "wrappedUpAt": "2026-11-14T03:16:12.512269+00:00"
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/recap": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/recap": {
     "status": 200,
     "body": {
-      "id": "5540d313-e719-4223-ba9f-827e26de51f8",
+      "id": "ebebad3d-d1ba-4e16-bc17-6ae7766be6f8",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
-      "startedAt": "2026-11-14T02:39:16.5549+00:00",
-      "wrappedUpAt": "2026-11-14T02:39:17.1791+00:00",
+      "startedAt": "2026-11-14T03:16:11.7257+00:00",
+      "wrappedUpAt": "2026-11-14T03:16:12.5122+00:00",
       "keepPhotos": true,
       "photosRemoveAt": null,
       "photosRemovedAt": null,
@@ -1311,36 +1322,36 @@
       "photoCount": 1,
       "photos": [
         {
-          "id": "22be1b82-8d94-41b6-9616-2e42d3d8a8bc",
-          "thumbnailUrl": "/api/files/popkins/5540d313e7194223ba9f827e26de51f8/7ede42c71fdc4d418a115dc86aab8bbb-thumbnail.jpg?expires=1794627557&signature=WEjnTJK6pHNw6bWGiZkYTkGgYpL1b-GJbVVM01wFoNE"
+          "id": "9ae8446a-6f65-4fcd-8e39-7c0cedd7c77e",
+          "thumbnailUrl": "/api/files/popkins/ebebad3dd1ba4e16bc176ae7766be6f8/f3e455fd069043f89126ccb5a1be88e2-thumbnail.jpg?expires=1794629772&signature=WN4MOpVXeI-Nf915V6oQ5ts33UivDLsQBUNaMHJX4qI"
         }
       ],
       "avatars": [
         {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Plum",
           "photoUrl": null
         },
         {
           "initials": "WB",
-          "accent": "Berry",
+          "accent": "Plum",
           "photoUrl": null
         },
         {
           "initials": "DP",
-          "accent": "Amber",
+          "accent": "Sky",
           "photoUrl": null
         },
         {
           "initials": "J",
-          "accent": "Sky",
+          "accent": "Teal",
           "photoUrl": null
         }
       ],
       "topRated": {
-        "experienceId": "1e94c01c-551e-46e7-a259-8d9148d9d425",
+        "experienceId": "fb9069cc-6c3b-4824-89d0-302aae4e08b6",
         "title": "Sunrise canoe to Heron Point",
-        "pictureUrl": "/api/files/popkins/5540d313e7194223ba9f827e26de51f8/experiences/0b9a07334d7644f79e56674cfa694d73-thumbnail.jpg?expires=1794627557&signature=xKCtIz43N2YwM7Wx1Dfkec53llwDkoB4z2FWu3XpqDo",
+        "pictureUrl": "/api/files/popkins/ebebad3dd1ba4e16bc176ae7766be6f8/experiences/aac8ae745cb1429fa0215b6db1200d28-thumbnail.jpg?expires=1794629772&signature=4Ha7e8efDTTyvKId30MNrxgQ21UlyzPZ9Vjkfnam7T8",
         "average": 5,
         "ratingCount": 1,
         "sharedBy": {
@@ -1349,33 +1360,33 @@
       }
     }
   },
-  "POST /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/recap/album-exports": {
+  "POST /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/recap/album-exports": {
     "status": 202,
     "body": {
-      "id": "8055b29e-de6d-486b-a78f-e968f42f9bc1",
+      "id": "bbab278f-35c8-4baf-afb3-eda73701ad6d",
       "status": "Preparing",
       "photosDone": 0,
       "photosTotal": 1,
       "downloadUrl": null
     }
   },
-  "GET /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/recap/album-exports/8055b29e-de6d-486b-a78f-e968f42f9bc1": {
+  "GET /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/recap/album-exports/bbab278f-35c8-4baf-afb3-eda73701ad6d": {
     "status": 200,
     "body": {
-      "id": "8055b29e-de6d-486b-a78f-e968f42f9bc1",
+      "id": "bbab278f-35c8-4baf-afb3-eda73701ad6d",
       "status": "Preparing",
       "photosDone": 0,
       "photosTotal": 1,
       "downloadUrl": null
     }
   },
-  "DELETE /api/popkins/5540d313-e719-4223-ba9f-827e26de51f8/members/me": {
+  "DELETE /api/popkins/ebebad3d-d1ba-4e16-bc17-6ae7766be6f8/members/me": {
     "status": 204
   },
   "PATCH /api/account": {
     "status": 200,
     "body": {
-      "personId": "241f8463-cb4c-49b2-9144-a3ec551cf7ff",
+      "personId": "4ed4abfb-8fff-4d5a-8486-f152ca2fbfb1",
       "name": "Mara Okafor",
       "photoUrl": null,
       "channel": "Phone",
@@ -1385,7 +1396,7 @@
   "GET /api/account": {
     "status": 200,
     "body": {
-      "personId": "241f8463-cb4c-49b2-9144-a3ec551cf7ff",
+      "personId": "4ed4abfb-8fff-4d5a-8486-f152ca2fbfb1",
       "name": "Mara Okafor",
       "photoUrl": null,
       "channel": "Phone",
@@ -1395,9 +1406,9 @@
   "PUT /api/account/photo": {
     "status": 200,
     "body": {
-      "personId": "241f8463-cb4c-49b2-9144-a3ec551cf7ff",
+      "personId": "4ed4abfb-8fff-4d5a-8486-f152ca2fbfb1",
       "name": "Mara Okafor",
-      "photoUrl": "/api/files/avatars/2d7baeeeef3742f88864bc4963d7092b.jpg?expires=1794627557&signature=qsU38_oUU6Jv_6aIR8EYmlG-s-1rPOAbbcvUmf-BwKw",
+      "photoUrl": "/api/files/avatars/92884801d8d64e8ca8f4810ee97b6440.jpg?expires=1794629772&signature=umXDisJz_sJtpgmEOEzlRr6QOlBuGV29z6bAi4TJUxk",
       "channel": "Phone",
       "destination": "(415) 555-0148"
     }

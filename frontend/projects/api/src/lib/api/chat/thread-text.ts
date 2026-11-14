@@ -39,9 +39,15 @@ export function othersHere(memberCount: number, listed: number): string | null {
   return `and ${others} ${others === 1 ? 'other' : 'others'} in this Popkin`;
 }
 
-/** A message's line where one line stands for it: its text, or "Photo" for a photo alone (L2-026). */
-export function messageLine(message: { text: string; photo: unknown }): string {
-  return message.text || (message.photo ? 'Photo' : '');
+/** A message's line where one line stands for it: its text, or "Photo" for a photo alone (L2-026), "Photo removed" for one deleted (L2-036 AC3). */
+export function messageLine(message: {
+  text: string;
+  photo: unknown;
+  photoRemoved?: boolean;
+}): string {
+  if (message.text) return message.text;
+  if (message.photo) return 'Photo';
+  return message.photoRemoved ? 'Photo removed' : '';
 }
 
 /** What assistive technology hears when a message arrives: its sender, then its text (L2-027 AC6). */

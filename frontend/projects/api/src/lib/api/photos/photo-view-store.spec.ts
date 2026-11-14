@@ -3,7 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PhotoDetailView } from '../../models/photos';
+import { PhotoReaction } from './photo-reactions';
 import { PhotoViewStore } from './photo-view-store';
+import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PHOTOS_API } from './photos-api';
 
 const avatar = { initials: 'MO', accent: 'Coral', photoUrl: null } as const;
@@ -31,12 +33,26 @@ function detail(id: string, extra: Partial<PhotoDetailView> = {}): PhotoDetailVi
 describe('PhotoViewStore', () => {
   let answers: Record<string, PhotoDetailView | 'missing' | 'down' | Subject<PhotoDetailView>>;
   let asked: string[];
+  let downloads: Subject<{ url: string; expiresAt: string }>[];
+  let deletions: Subject<void>[];
+  const photoDeleted = new Subject<{ popkinId: string; photoId: string }>();
+  let reacted: { kind: 'add' | 'remove'; emoji: string; answer: Subject<PhotoReaction[]> }[];
   let store: PhotoViewStore;
 
   beforeEach(() => {
     vi.useFakeTimers({ now: new Date(2026, 8, 12, 12, 0) });
     answers = { a: detail('a') };
     asked = [];
+    reacted = [];
+    downloads = [];
+    deletions = [];
+    const reaction =
+      (kind: 'add' | 'remove') =>
+      (_: string, __: string, emoji: string): Observable<PhotoReaction[]> => {
+        const answer = new Subject<PhotoReaction[]>();
+        reacted.push({ kind, emoji, answer });
+        return answer;
+      };
     const getPhoto = (_: string, id: string): Observable<PhotoDetailView> => {
       asked.push(id);
       const answer = answers[id] ?? 'missing';
@@ -45,7 +61,28 @@ describe('PhotoViewStore', () => {
       return answer instanceof Subject ? answer : of(answer);
     };
     TestBed.configureTestingModule({
-      providers: [PhotoViewStore, { provide: PHOTOS_API, useValue: { getPhoto } }],
+      providers: [
+        PhotoViewStore,
+        { provide: POPKIN_REALTIME, useValue: { photoDeleted$: photoDeleted } },
+        {
+          provide: PHOTOS_API,
+          useValue: {
+            getPhoto,
+            addReaction: reaction('add'),
+            removeReaction: reaction('remove'),
+            getDownload: () => {
+              const answer = new Subject<{ url: string; expiresAt: string }>();
+              downloads.push(answer);
+              return answer;
+            },
+            deletePhoto: () => {
+              const answer = new Subject<void>();
+              deletions.push(answer);
+              return answer;
+            },
+          },
+        },
+      ],
     });
     store = TestBed.inject(PhotoViewStore);
   });
@@ -128,5 +165,124 @@ describe('PhotoViewStore', () => {
   it('is not found for a photo that is not in the Popkin', () => {
     store.open('p', 'gone');
     expect(store.state()).toBe('not-found');
+  });
+
+  describe('reactions (L2-034)', () => {
+    const heart = { emoji: '❤️', count: 9, mine: false };
+    const answered = (index: number, reactions: PhotoReaction[]) => {
+      reacted[index].answer.next(reactions);
+      reacted[index].answer.complete();
+    };
+    const failed = (index: number) =>
+      reacted[index].answer.error(new HttpErrorResponse({ status: 500 }));
+
+    beforeEach(() => {
+      answers['a'] = detail('a', { reactions: [heart] });
+      store.open('p', 'a');
+    });
+
+    it('shows a reaction at once, then what the server answered', () => {
+      store.react('❤️');
+      expect(store.reactions()).toEqual([{ ...heart, count: 10, mine: true }]);
+      expect(reacted.map((r) => [r.kind, r.emoji])).toEqual([['add', '❤️']]);
+
+      answered(0, [{ ...heart, count: 11, mine: true }]);
+      expect(store.reactions()).toEqual([{ ...heart, count: 11, mine: true }]);
+    });
+
+    it('takes the member’s own reaction back', () => {
+      answers['a'] = detail('a', { reactions: [{ ...heart, count: 10, mine: true }] });
+      store.open('p', 'a');
+      store.react('❤️');
+      expect(store.reactions()).toEqual([heart]);
+      expect(reacted.map((r) => r.kind)).toEqual(['remove']);
+    });
+
+    it('puts the count back and says so when a reaction fails (AC4)', () => {
+      store.react('❤️');
+      failed(0);
+      expect(store.reactions()).toEqual([heart]);
+      expect(store.reactionFailed()).toBe(true);
+
+      store.dismissReactionFailure();
+      expect(store.reactionFailed()).toBe(false);
+    });
+
+    it('sends a second press only once the first has answered, so the two cannot cross', () => {
+      store.react('❤️');
+      store.react('❤️');
+      expect(store.reactions()).toEqual([heart]);
+      expect(reacted).toHaveLength(1);
+
+      answered(0, [{ ...heart, count: 10, mine: true }]);
+      expect(reacted.map((r) => r.kind)).toEqual(['add', 'remove']);
+      answered(1, [heart]);
+      expect(store.reactions()).toEqual([heart]);
+    });
+
+    it('keeps a later press when an earlier one fails', () => {
+      store.react('❤️');
+      store.react('🔥');
+      failed(0);
+      expect(store.reactions()).toEqual([heart, { emoji: '🔥', count: 1, mine: true }]);
+      expect(reacted.map((r) => r.emoji)).toEqual(['❤️', '🔥']);
+    });
+  });
+
+  describe('Save photo (L2-036 AC1)', () => {
+    beforeEach(() => store.open('p', 'a'));
+
+    it('is busy while it asks for the address, then downloads it', () => {
+      const clicked: string[] = [];
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+        this: HTMLAnchorElement,
+      ) {
+        clicked.push(this.href);
+      });
+      store.save();
+      expect(store.saving()).toBe(true);
+
+      downloads[0].next({ url: 'https://files.test/a.jpg?sig=1', expiresAt: '' });
+      downloads[0].complete();
+      expect(clicked).toEqual(['https://files.test/a.jpg?sig=1']);
+      expect(store.saving()).toBe(false);
+    });
+
+    it('says so when it cannot save', () => {
+      store.save();
+      downloads[0].error(new HttpErrorResponse({ status: 500 }));
+      expect(store.saving()).toBe(false);
+      expect(store.saveFailed()).toBe(true);
+    });
+  });
+
+  describe('Delete photo (L2-036 AC2)', () => {
+    beforeEach(() => store.open('p', 'a'));
+
+    it('is busy while it deletes, then says it is done', async () => {
+      const done = store.remove();
+      expect(store.deleting()).toBe(true);
+      deletions[0].next();
+      deletions[0].complete();
+      await expect(done).resolves.toBe(true);
+    });
+
+    it('says so when it cannot delete, and keeps the photo', async () => {
+      const done = store.remove();
+      deletions[0].error(new HttpErrorResponse({ status: 500 }));
+      await expect(done).resolves.toBe(false);
+      expect(store.deleting()).toBe(false);
+      expect(store.deleteFailed()).toBe(true);
+      expect(store.state()).toBe('ready');
+    });
+  });
+
+  it('shows a photo deleted while it is open as removed (L2-036 AC3)', () => {
+    store.open('p', 'a');
+    photoDeleted.next({ popkinId: 'p', photoId: 'other' });
+    photoDeleted.next({ popkinId: 'q', photoId: 'a' });
+    expect(store.state()).toBe('ready');
+    photoDeleted.next({ popkinId: 'p', photoId: 'a' });
+    expect(store.state()).toBe('removed');
   });
 });

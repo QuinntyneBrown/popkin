@@ -115,6 +115,14 @@ import { YoureInPage } from '../pages/youre-in.page';
 import { AddPhotosDialog } from '../pages/add-photos.dialog';
 import { PhotoAlbumPage } from '../pages/photo-album.page';
 import { PhotoViewPage } from '../pages/photo-view.page';
+import { PhotoTalkPage } from '../pages/photo-talk';
+import {
+  maraOnTheDock,
+  theDockAsDrawn,
+  theDockRemoved,
+  theDockWithMyComment,
+  theDockWrappedUp,
+} from './photo-talk';
 import responses from './api/responses.json';
 import { theAccountFailing, theAccountLoading } from './account';
 import { accountStates } from './account-states';
@@ -790,6 +798,113 @@ export const screenStates: ScreenState[] = [
     key: 'photoViewError',
     before: thePhotoFailing,
     regions: (page) => ({ error: new PhotoViewPage(page).error }),
+  },
+  // Journey 14, Engage with a photo: the photo view's states, then the dialogs over it. The
+  // comments dialog is the phone's and the tablet's; from 1024 px Comment goes to the panel.
+  {
+    key: 'photoViewNotReacted',
+    before: (page) => maraOnTheDock(page).then(() => undefined),
+    regions: (page) => ({ bar: new PhotoViewPage(page).bar, info: new PhotoViewPage(page).panel }),
+  },
+  {
+    key: 'photoViewOwnComment',
+    before: theDockWithMyComment,
+    regions: (page) => ({ info: new PhotoViewPage(page).panel }),
+  },
+  {
+    key: 'photoViewMember',
+    before: (page) => maraOnTheDock(page, (dock) => (dock.canDelete = false)).then(() => undefined),
+    regions: (page) => ({ bar: new PhotoViewPage(page).bar }),
+  },
+  {
+    key: 'photoViewReactionFailed',
+    before: (page) => maraOnTheDock(page).then(({ talk }) => talk.fail('react')),
+    app: (page) => new PhotoTalkPage(page).quick('Heart').click(),
+    regions: (page) => ({ toast: new PhotoTalkPage(page).says('We couldn’t save your reaction.') }),
+  },
+  {
+    key: 'photoViewSaveFailed',
+    before: (page) => maraOnTheDock(page).then(({ talk }) => talk.fail('save')),
+    app: (page) => new PhotoTalkPage(page).save.click(),
+    regions: (page) => ({ toast: new PhotoTalkPage(page).says('We couldn’t save this photo.') }),
+  },
+  {
+    key: 'photoViewWrapped',
+    before: theDockWrappedUp,
+    regions: (page) => ({ bar: new PhotoViewPage(page).bar, info: new PhotoViewPage(page).panel }),
+  },
+  {
+    key: 'photoViewRemoved',
+    before: theDockRemoved,
+    regions: (page) => ({ removed: new PhotoViewPage(page).removed }),
+  },
+  {
+    key: 'photoComments',
+    before: theDockAsDrawn,
+    app: (page) => new PhotoTalkPage(page).comment.click(),
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).dialog }),
+  },
+  {
+    key: 'photoCommentsEmpty',
+    before: (page) => maraOnTheDock(page, (dock) => (dock.comments = [])).then(() => undefined),
+    app: (page) => new PhotoTalkPage(page).comment.click(),
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).dialog }),
+  },
+  {
+    key: 'photoCommentsError',
+    before: (page) => maraOnTheDock(page).then(({ talk }) => talk.fail('comments')),
+    app: (page) => new PhotoTalkPage(page).comment.click(),
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).dialog }),
+  },
+  {
+    key: 'photoCommentsNearLimit',
+    before: theDockAsDrawn,
+    app: async (page) => {
+      const talk = new PhotoTalkPage(page);
+      await talk.comment.click();
+      await talk.dialogField.fill('a'.repeat(490));
+    },
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).dialog }),
+  },
+  {
+    key: 'photoCommentsOwnComment',
+    before: theDockWithMyComment,
+    app: (page) => new PhotoTalkPage(page).comment.click(),
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).dialog }),
+  },
+  {
+    key: 'photoCommentsReadOnly',
+    before: theDockWrappedUp,
+    app: (page) => new PhotoTalkPage(page).commentCount.click(),
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).dialog }),
+  },
+  {
+    key: 'photoActions',
+    before: theDockAsDrawn,
+    app: (page) => new PhotoTalkPage(page).actions.click(),
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).actionsMenu }),
+  },
+  {
+    key: 'deletePhoto',
+    before: theDockAsDrawn,
+    app: async (page) => {
+      const talk = new PhotoTalkPage(page);
+      await talk.actions.click();
+      await talk.deletePhoto.click();
+    },
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).confirmPhoto }),
+  },
+  {
+    key: 'deletePhotoFailed',
+    before: (page) => maraOnTheDock(page).then(({ talk }) => talk.fail('delete')),
+    app: async (page) => {
+      const talk = new PhotoTalkPage(page);
+      await talk.actions.click();
+      await talk.deletePhoto.click();
+      await talk.confirmPhotoDelete.click();
+      await talk.confirmPhotoProblem.waitFor();
+    },
+    regions: (page) => ({ dialog: new PhotoTalkPage(page).confirmPhoto }),
   },
   // Journey 6. Sign in, the name step of the code screen, My Popkins, Scan to join and the
   // offline screen. The scanner is compared while the browser still asks for the camera: the

@@ -28,6 +28,32 @@ export interface Shot {
   by: Person;
   takenAt: Date;
   addedAt: Date;
+  /** What journey 14 adds to a photo; none until a spec gives them. */
+  reactions?: { emoji: string; count: number; mine: boolean }[];
+  comments?: ShotComment[];
+  canDelete?: boolean;
+}
+
+/** A comment as the API answers it, Mara's marked as hers. */
+export function commentOf(said: ShotComment): Record<string, unknown> {
+  return {
+    id: said.id,
+    author: {
+      membershipId: said.by.membershipId,
+      firstName: said.by.firstName,
+      avatar: said.by.avatar,
+    },
+    addedAt: said.addedAt.toISOString(),
+    text: said.text,
+    mine: said.by === people.mara,
+  };
+}
+
+export interface ShotComment {
+  id: string;
+  by: Person;
+  addedAt: Date;
+  text: string;
 }
 
 const id = (n: number) => `00000000-0000-4000-a000-${String(n).padStart(12, '0')}`;
@@ -118,6 +144,14 @@ export class Album {
     await this.page.route(`**/api/popkins/${popkinId}/photos`, (route) =>
       route.request().method() === 'POST' ? this.upload(route) : this.album(route),
     );
+    // Every photo view reads its comments (L2-035): none, unless a spec gives the photo some.
+    await this.page.route(`**/api/popkins/${popkinId}/photos/*/comments`, (route) => {
+      const photoId = new URL(route.request().url()).pathname.split('/').at(-2);
+      const shot = this.shots.find((s) => s.id === photoId);
+      return route.fulfill({
+        json: (shot?.comments ?? []).map(commentOf),
+      });
+    });
     await this.page.route(`**/api/popkins/${popkinId}/photos/*`, (route) => {
       const photoId = new URL(route.request().url()).pathname.split('/').pop() ?? '';
       return photoId === 'summary' ? route.fallback() : this.photo(route, photoId);
@@ -259,11 +293,11 @@ export class Album {
       imageUrl: `/photos/${s.file}?display=${s.id}`,
       width: 1600,
       height: 1067,
-      reactions: [],
-      commentCount: 0,
+      reactions: s.reactions ?? [],
+      commentCount: s.comments?.length ?? 0,
       previousPhotoId: this.shots[at - 1]?.id ?? null,
       nextPhotoId: this.shots[at + 1]?.id ?? null,
-      canDelete: true,
+      canDelete: s.canDelete ?? true,
       isMine: s.by === people.mara,
     }));
   }
