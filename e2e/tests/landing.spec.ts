@@ -21,10 +21,10 @@ test.describe('The landing page', () => {
     await expect(landing.root).toBeVisible();
     await expect(landing.heroHeading).toHaveText('Your people, popped up in seconds.');
     await expect(landing.heroLead).toHaveText(
-      'Popkin is a free little home for any small group: chat, photos, plans and video, joined with one scan. Keep it for a weekend or for years.',
+      'Popkin is a little home for any small group: chat, photos, plans and video, joined with one scan. Keep it for a weekend or for years.',
     );
     await expect(landing.heroStart).toHaveText('Start a Popkin');
-    await expect(landing.heroFree).toHaveText('Free. Takes about a minute.');
+    await expect(landing.heroNote).toHaveText('Takes about a minute.');
     await expect(landing.preview).toContainText('Lakeside Weekend');
     await expect(landing.preview).toContainText('14 here');
     await expect(landing.preview).toContainText('Wraps up Sunday');
@@ -86,12 +86,13 @@ test.describe('The landing page', () => {
   });
 
   // L2-061 AC3
-  test('says Popkin is free, with no ads and no premium tier', async ({ page, pk }) => {
+  test('says Popkin has no ads, and never that it is free', async ({ page, pk }) => {
     await pk.open('landing');
     const landing = new LandingPage(page);
 
-    await expect(landing.freeHeading).toHaveText('Free. Like, actually free.');
-    await expect(landing.free).toContainText('No ads, no premium tier');
+    await expect(landing.noAdsHeading).toHaveText('No ads. Like, actually none.');
+    await expect(landing.noAds).toContainText('No ads, no tracking');
+    await expect(landing.mentionsOfFree).toHaveCount(0);
   });
 
   // L2-061 AC2
@@ -104,7 +105,7 @@ test.describe('The landing page', () => {
     });
 
     await pk.open('landing');
-    await expect(new LandingPage(page).freeHeading).toBeVisible();
+    await expect(new LandingPage(page).noAdsHeading).toBeVisible();
 
     expect(elsewhere).toEqual([]);
   });
@@ -143,7 +144,7 @@ test.describe('The actions of the landing page', () => {
   });
 
   // AC1
-  for (const place of ['navStart', 'heroStart', 'freeStart'] as const) {
+  for (const place of ['navStart', 'heroStart', 'noAdsStart'] as const) {
     test(`"Start a Popkin" opens the sign-up screen (${place})`, async ({ page, pk }) => {
       await pk.open('landing');
 

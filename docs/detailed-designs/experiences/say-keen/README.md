@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. Members of a *Popkin*, a private space for one
+Popkin is a platform for pop-up communities. Members of a *Popkin*, a private space for one
 group, share *experiences*. Some are things the group did; others are ideas for next time, of
 kind "Want to do". An idea has nothing to rate yet, so instead of a score it collects the members
 who are keen on it. This feature lets a member say they are keen, take it back, and lets the

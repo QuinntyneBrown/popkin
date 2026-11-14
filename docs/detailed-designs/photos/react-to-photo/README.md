@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. Members of a Popkin share photos in an album
+Popkin is a platform for pop-up communities. Members of a Popkin share photos in an album
 and open each one in the [photo view](../view-photo/README.md). This feature lets a member react
 to a photo with an emoji. A row under the photo offers five quick reactions, ❤️ 😂 😍 🔥 and 👏,
 and "More reactions" for any other emoji of the catalogue. Picking a reaction the member already

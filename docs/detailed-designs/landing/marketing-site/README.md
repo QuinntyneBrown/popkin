@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. This feature covers the marketing site, a
+Popkin is a platform for pop-up communities. This feature covers the marketing site, a
 public page separate from the app that says what the landing page says and shows the pitch film
 "Meet Popkin" (`docs/videos/19-meet-popkin/`), then sends a person to the app to start a Popkin or
 sign in.
@@ -65,4 +65,4 @@ AC3), so the two read the same.
 | `L2-079` | `L1-020` | Marketing home page: one page that says what the landing page says and shows the film after the hero. |
 | `L2-080` | `L1-020` | Pitch film player: a still until play, chapters marked current, captions in the picture. |
 | `L2-081` | `L1-020`, `L1-015` | From the marketing site to the app: every link to the app from one address; no API, nothing from another host. |
-| `L2-061` | `L1-015` | No payment and no advertising. |
+| `L2-061` | `L1-015` | No advertising. |

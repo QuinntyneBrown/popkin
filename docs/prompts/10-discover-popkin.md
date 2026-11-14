@@ -150,7 +150,7 @@ any code, and change them only where they disagree with each other or leave a ga
 ## Phase 3: Incremental implementation (`implementing-incrementally`, test-first)
 
 - Plan thin vertical slices. A suggested plan, which you can adjust:
-  1. Hero: headline, paragraph, Start a Popkin to `/sign-up`, the free line and the preview (L2-001 AC1, L2-002 AC1).
+  1. Hero: headline, paragraph, Start a Popkin to `/sign-up`, the note "Takes about a minute." and the preview (L2-001 AC1, L2-002 AC1).
   2. Steps, ideas and comparison sections with their content; the comparison columns told apart by icon and heading (L2-001 AC2 to AC4).
   3. Navigation: Sign in, How it works and Ideas scroll and move focus; Sign in in the footer below 640 px (L2-002 AC2, AC4, AC5).
   4. Responsive: one column below 768 px with no sideways scroll; text beside the preview and four ideas across from 1024 px (L2-001 AC5, AC6).

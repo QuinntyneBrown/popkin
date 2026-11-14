@@ -56,7 +56,7 @@ alt signed in (L2-002 AC3)
 else visitor
   guard --> router : true
   router -> page : Render with data-page="landing"
-  page --> actor : Hero, how it works, ideas, comparison, free, footer (L2-001 AC1-AC4)
+  page --> actor : Hero, how it works, ideas, comparison, no ads, footer (L2-001 AC1-AC4)
 end
 actor -> page : Choose "Start a Popkin" (navigation, hero or closing band)
 page -> router : navigate /sign-up (L2-002 AC1)

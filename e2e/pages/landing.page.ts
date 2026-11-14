@@ -14,7 +14,7 @@ export class LandingPage {
   readonly heroHeading: Locator;
   readonly heroLead: Locator;
   readonly heroStart: Locator;
-  readonly heroFree: Locator;
+  readonly heroNote: Locator;
   /** The hero's preview of a Popkin. */
   readonly preview: Locator;
   readonly previewName: Locator;
@@ -40,10 +40,12 @@ export class LandingPage {
   readonly compareColumns: Locator;
   readonly compareRows: Locator;
   readonly compareRowHeadings: Locator;
-  /** The closing band: it is free. */
-  readonly free: Locator;
-  readonly freeHeading: Locator;
-  readonly freeStart: Locator;
+  /** The closing band: it has no ads. */
+  readonly noAds: Locator;
+  readonly noAdsHeading: Locator;
+  readonly noAdsStart: Locator;
+  /** Any text on the page that calls Popkin free (ADR 0019). */
+  readonly mentionsOfFree: Locator;
   /** The footer. */
   readonly footer: Locator;
   readonly footerNav: Locator;
@@ -83,7 +85,7 @@ export class LandingPage {
     this.heroText = this.heroHeading.locator('..');
     this.heroLead = this.heroText.locator('p');
     this.heroStart = this.hero.getByRole('link', { name: 'Start a Popkin' });
-    this.heroFree = this.hero.getByText('Free. Takes about a minute.');
+    this.heroNote = this.hero.getByText('Takes about a minute.');
     this.preview = this.hero.locator('.hero__art');
     this.previewCard = this.preview.locator('.hero__card');
     this.previewName = this.preview.getByText('Lakeside Weekend');
@@ -116,9 +118,10 @@ export class LandingPage {
     this.compareRows = this.compare.locator('tbody tr');
     this.compareRowHeadings = this.compare.getByRole('rowheader');
 
-    this.free = page.locator('.cta-band');
-    this.freeHeading = page.getByRole('heading', { name: 'Free. Like, actually free.' });
-    this.freeStart = this.free.getByRole('link', { name: 'Start a Popkin' });
+    this.noAds = page.locator('.cta-band');
+    this.noAdsHeading = page.getByRole('heading', { name: 'No ads. Like, actually none.' });
+    this.noAdsStart = this.noAds.getByRole('link', { name: 'Start a Popkin' });
+    this.mentionsOfFree = page.getByText(/\bfree\b/i);
 
     this.footer = page.getByRole('contentinfo');
     this.footerLogo = this.footer.locator('.logo');
