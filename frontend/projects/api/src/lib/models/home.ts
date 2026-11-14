@@ -1,6 +1,6 @@
 import { MessageAuthorView } from './chat';
 import { AvatarView } from './invite';
-import { PopkinColour } from './popkin';
+import { PopkinColour, PopkinLength } from './popkin';
 
 /** The header of a Popkin's home (L2-019 AC1). */
 export interface PopkinHomeView {
@@ -16,6 +16,8 @@ export interface PopkinHomeView {
   photosRemoveAt: string | null;
   /** When they went. */
   photosRemovedAt: string | null;
+  /** How long it was chosen to last, which `endsAt` was resolved from. */
+  length: PopkinLength;
   /** ISO date-time; null when the Popkin keeps going. */
   endsAt: string | null;
   memberCount: number;
@@ -25,6 +27,8 @@ export interface PopkinHomeView {
   viewer: { membershipId: string; firstName: string };
   /** Unread messages of the Everyone thread. */
   unreadCount: number;
+  /** Rises with every change of its settings; orders `PopkinChanged` (L2-020). */
+  version: number;
 }
 
 /** The latest of the Everyone thread, oldest first, without the notes the system writes. */

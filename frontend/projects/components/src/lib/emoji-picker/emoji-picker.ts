@@ -17,6 +17,11 @@ export interface EmojiOption {
 })
 export class EmojiPicker {
   readonly heading = input('Pick an emoji');
+  /**
+   * Where the picker is one field of a form, such as in a dialog: a field label in place of the
+   * heading, as "Emoji" or "Colour".
+   */
+  readonly label = input<string>();
   readonly options = input.required<readonly EmojiOption[]>();
   readonly value = model.required<string>();
 }

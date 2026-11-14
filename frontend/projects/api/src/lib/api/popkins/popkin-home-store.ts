@@ -15,9 +15,11 @@ import { EXPERIENCES_API } from '../experiences/experiences-api';
 import { PHOTOS_API } from '../photos/photos-api';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { timeLeftLine } from './home-text';
+import { applySettings } from './popkin-settings';
 import { POPKINS_API } from './popkins-api';
 import { timeLeft } from './time-left';
 import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
+import { PopkinSettingsView } from '../../models/popkin';
 
 /** One block of the home, loaded and failing on its own (L2-019 AC8, AC9). */
 export interface Section<T> {
@@ -122,6 +124,19 @@ export class PopkinHomeStore {
 
   dismissWarning(): void {
     this.watch.dismissWarning(this.popkinId);
+  }
+
+  /**
+   * The Host's change of the Popkin's settings, saved here or heard of over the hub (L2-020
+   * AC3, AC4): the header, the time left and the banner of the last hour follow it at once.
+   */
+  applySettings(change: PopkinSettingsView): void {
+    const held = this.popkin();
+    const changed = applySettings(held, change);
+    if (!changed || changed === held) return;
+    this.now.set(new Date());
+    this.popkin.set(changed);
+    this.watch.look(changed.id, changed.endsAt);
   }
 
   retrySection(section: HomeSection): void {

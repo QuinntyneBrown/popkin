@@ -1,4 +1,4 @@
-import { homeUrl } from '../fixtures/home';
+import { homeNow, homeUrl } from '../fixtures/home';
 import { expect, test } from '../fixtures/pk-test';
 import { maraWithWrapUp, wrapUpUrl } from '../fixtures/wrap-up';
 import { InviteDialog } from '../pages/invite.dialog';
@@ -6,9 +6,12 @@ import { PopkinHomePage } from '../pages/popkin-home.page';
 import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
 import { WrapUpPage } from '../pages/wrap-up.page';
 
-// L2-020 AC1, AC2: the items whose actions exist so far (journeys 9 and 18).
+// L2-020 AC1, AC2: what the Host, and any other member, may do with the Popkin.
 test.describe('Popkin settings', () => {
-  test('offers the Host to invite people and to wrap up', async ({ page }) => {
+  test('offers the Host to edit it, change how long it lasts, invite people and wrap up', async ({
+    page,
+  }) => {
+    await page.clock.install({ time: homeNow });
     await maraWithWrapUp(page);
     await page.goto(homeUrl);
     const home = new PopkinHomePage(page);
@@ -17,7 +20,14 @@ test.describe('Popkin settings', () => {
 
     const settings = new PopkinSettingsDialog(page);
     await expect(settings.heading).toHaveText('Lakeside Weekend');
-    await expect(settings.items).toHaveCount(2);
+    await expect(settings.items).toHaveText([
+      /Edit name and look/,
+      /Change how long it lasts/,
+      /Invite people/,
+      /Wrap up/,
+    ]);
+    await expect(settings.editLook).toContainText('Name, emoji and colour');
+    await expect(settings.changeLength).toContainText('Wraps up Sun, 6 pm');
     await expect(settings.invitePeople).toContainText('QR code and link');
     await expect(settings.wrapUp).toContainText('End it now and send the recap');
   });
@@ -36,6 +46,8 @@ test.describe('Popkin settings', () => {
     await expect(settings.invitePeople).toBeVisible();
     await expect(settings.leave).toContainText('You can come back with a new invite');
     await expect(settings.wrapUp).toHaveCount(0);
+    await expect(settings.editLook).toHaveCount(0);
+    await expect(settings.changeLength).toHaveCount(0);
   });
 
   test('offers the Host no way to leave', async ({ page }) => {

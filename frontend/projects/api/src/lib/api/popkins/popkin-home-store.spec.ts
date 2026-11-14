@@ -30,12 +30,14 @@ const home: PopkinHomeView = {
   keepPhotos: true,
   photosRemoveAt: null,
   photosRemovedAt: null,
+  length: 'TheWeekend',
   endsAt: new Date(2026, 8, 13, 18, 0).toISOString(),
   memberCount: 14,
   avatars: [avatar],
   viewerRole: 'Host',
   viewer: { membershipId: 'm-mara', firstName: 'Mara' },
   unreadCount: 3,
+  version: 1,
 };
 const mara: MemberView = {
   membershipId: 'm-mara',

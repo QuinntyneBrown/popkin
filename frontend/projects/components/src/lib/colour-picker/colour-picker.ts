@@ -12,6 +12,11 @@ import { ChangeDetectionStrategy, Component, input, model } from '@angular/core'
 })
 export class ColourPicker {
   readonly heading = input('And a colour');
+  /**
+   * Where the picker is one field of a form, such as in a dialog: a field label in place of the
+   * heading, as "Emoji" or "Colour".
+   */
+  readonly label = input<string>();
   readonly options = input.required<readonly string[]>();
   readonly value = model.required<string>();
 }

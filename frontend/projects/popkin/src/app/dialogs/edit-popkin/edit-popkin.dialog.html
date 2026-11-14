@@ -1,0 +1,48 @@
+<div
+  pk-dialog
+  heading="Edit name and look"
+  description="Everyone sees the change straight away."
+  [accent]="accent()"
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t save that.">Your changes are still here. Try again.</div>
+  }
+  <div
+    pk-text-field
+    fieldId="pname"
+    label="Name"
+    [maxlength]="nameMax"
+    [readonly]="busy()"
+    [error]="nameMissing() ? 'Give your Popkin a name.' : undefined"
+    [formControl]="name"
+  ></div>
+  <div
+    pk-emoji-picker
+    label="Emoji"
+    [options]="emoji"
+    [value]="chosenEmoji()"
+    (valueChange)="chooseEmoji($event)"
+  ></div>
+  <div
+    pk-colour-picker
+    label="Colour"
+    [options]="colours"
+    [value]="colour()"
+    (valueChange)="chooseColour($event)"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="popkin"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy() || nameMissing()"
+    (click)="save()"
+  >
+    {{ busy() ? 'Saving…' : 'Save' }}
+  </button>
+  <button pk-button slot="footer" type="button" variant="quiet" [block]="true" (click)="cancel()">
+    Cancel
+  </button>
+</div>

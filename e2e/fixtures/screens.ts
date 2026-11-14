@@ -1,3 +1,5 @@
+import { EditPopkinDialog } from '../pages/edit-popkin.dialog';
+import { settingsStates } from './settings-states';
 import { ConversationsPage } from '../pages/conversations.page';
 import { DirectMessagePage } from '../pages/direct-message.page';
 import { NewMessageDialog } from '../pages/new-message.dialog';
@@ -167,6 +169,7 @@ const commentRegions = (page: Page) => ({ dialog: new AddCommentDialog(page).pan
 const actionsRegions = (page: Page) => ({ dialog: new ExperienceActionsDialog(page).panel });
 const deleteRegions = (page: Page) => ({ dialog: new DeleteExperienceDialog(page).panel });
 const leaveRegions = (page: Page) => ({ dialog: new LeavePopkinDialog(page).panel });
+const editRegions = (page: Page) => ({ dialog: new EditPopkinDialog(page).panel });
 const wrapUpRegions = (page: Page) => {
   const wrapUp = new WrapUpPage(page);
   return { main: wrapUp.main, picture: wrapUp.picture };
@@ -1008,6 +1011,11 @@ export const screenStates: ScreenState[] = [
     ...wrapUpStates.popkinSettingsMember,
     regions: (page) => ({ dialog: new PopkinSettingsDialog(page).panel }),
   },
+  // Change Popkin settings (journey 16).
+  { key: 'editPopkin', ...settingsStates.editPopkin, regions: editRegions },
+  { key: 'editPopkinBusy', ...settingsStates.editPopkinBusy, regions: editRegions },
+  { key: 'editPopkinInvalid', ...settingsStates.editPopkinInvalid, regions: editRegions },
+  { key: 'editPopkinFailed', ...settingsStates.editPopkinFailed, regions: editRegions },
   // Leave a Popkin (journey 18).
   { key: 'leavePopkin', ...leaveStates.leavePopkin, regions: leaveRegions },
   { key: 'leavePopkinBusy', ...leaveStates.leavePopkinBusy, regions: leaveRegions },

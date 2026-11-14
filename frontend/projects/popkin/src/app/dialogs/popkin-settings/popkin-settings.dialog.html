@@ -1,5 +1,25 @@
 <div pk-dialog [heading]="data.name" [accent]="data.accent">
   <div pk-menu-list>
+    @if (data.host) {
+      <button
+        pk-menu-item
+        type="button"
+        icon="edit"
+        hint="Name, emoji and colour"
+        (click)="choose('edit')"
+      >
+        Edit name and look
+      </button>
+      <button
+        pk-menu-item
+        type="button"
+        icon="clock"
+        [hint]="data.lengthHint"
+        (click)="choose('length')"
+      >
+        Change how long it lasts
+      </button>
+    }
     <button pk-menu-item type="button" icon="qr" hint="QR code and link" (click)="choose('invite')">
       Invite people
     </button>

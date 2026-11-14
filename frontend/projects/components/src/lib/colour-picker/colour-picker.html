@@ -1,4 +1,8 @@
-<h2 class="picker__heading">{{ heading() }}</h2>
+@if (label(); as label) {
+  <span class="field__label">{{ label }}</span>
+} @else {
+  <h2 class="picker__heading">{{ heading() }}</h2>
+}
 <div class="swatches" role="group" aria-label="Colour">
   @for (colour of options(); track colour) {
     <button

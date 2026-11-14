@@ -4,6 +4,8 @@ import { accentOf } from '../../models/popkin';
 import { membersLabel } from './home-text';
 import { POPKINS_API } from './popkins-api';
 import { timeLeft } from './time-left';
+import { applySettings } from './popkin-settings';
+import { PopkinSettingsView } from '../../models/popkin';
 import { photosGo, wrappedUpOn } from '../wrap-up/wrap-up-text';
 import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
 
@@ -69,6 +71,15 @@ export class PopkinFrame {
       },
       error: () => undefined,
     });
+  }
+
+  /** The Host's change of the Popkin's settings (L2-020 AC3, AC4). */
+  applySettings(change: PopkinSettingsView): void {
+    const held = this.popkin();
+    const changed = applySettings(held, change);
+    if (!changed || changed === held) return;
+    this.popkin.set(changed);
+    this.watch.look(changed.id, changed.endsAt);
   }
 
   dismissWarning(): void {

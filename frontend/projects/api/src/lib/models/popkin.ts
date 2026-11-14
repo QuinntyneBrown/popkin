@@ -37,6 +37,33 @@ export interface CreatePopkinRequest {
   endsAt: string | null;
 }
 
+/**
+ * A Popkin's settings as its Host last saved them: the answer to a change and what
+ * `PopkinChanged` carries (L2-020 AC3, AC4). A higher version replaces a lower one.
+ */
+export interface PopkinSettingsView {
+  id: string;
+  name: string;
+  emoji: string;
+  colour: PopkinColour;
+  length: PopkinLength;
+  /** ISO date-time; null when it keeps going. */
+  endsAt: string | null;
+  version: number;
+}
+
+export interface ChangeLookRequest {
+  name: string;
+  emoji: string;
+  colour: PopkinColour;
+}
+
+export interface ChangeLengthRequest {
+  length: PopkinLength;
+  /** ISO date-time, resolved on the device; null when it keeps going. */
+  endsAt: string | null;
+}
+
 export interface PopkinCreatedView {
   id: string;
   name: string;
