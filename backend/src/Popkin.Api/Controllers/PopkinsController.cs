@@ -38,6 +38,13 @@ public sealed class PopkinsController(ISender sender) : ControllerBase
     public async Task<ActionResult<PopkinDto>> ChangeLook(Guid popkinId, ChangePopkinLookRequest request, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new ChangePopkinLookCommand(popkinId, request.Name, request.Emoji, request.Colour), cancellationToken));
 
+    public sealed record ChangePopkinLengthRequest(string? Length, DateTimeOffset? EndsAt);
+
+    /// <summary>The Host changes how long the Popkin lasts (L2-020 AC4, AC5).</summary>
+    [HttpPut("{popkinId:guid}/length")]
+    public async Task<ActionResult<PopkinDto>> ChangeLength(Guid popkinId, ChangePopkinLengthRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new ChangePopkinLengthCommand(popkinId, request.Length, request.EndsAt), cancellationToken));
+
     /// <summary>What the wrap-up screen tells the Host the recap will count (L2-043 AC1).</summary>
     [HttpGet("{popkinId:guid}/wrap-up")]
     public async Task<ActionResult<WrapUpPreviewDto>> GetWrapUpPreview(Guid popkinId, CancellationToken cancellationToken) =>

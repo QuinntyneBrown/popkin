@@ -22,6 +22,9 @@ public sealed class PopkinSpace
 
     public Guid HostPersonId { get; private set; }
 
+    /// <summary>How long it was chosen to last (L2-009 AC1), which the end was resolved from.</summary>
+    public PopkinLength Length { get; private set; }
+
     /// <summary>When it wraps up; null when it keeps going.</summary>
     public DateTimeOffset? EndsAt { get; private set; }
 
@@ -61,7 +64,7 @@ public sealed class PopkinSpace
     /// Starts a Popkin with its Host as its first member (L2-010 AC6) and its Everyone thread.
     /// </summary>
     public static (PopkinSpace Popkin, ChatThread Everyone) Start(
-        Person host, string name, string emoji, PopkinColour colour, DateTimeOffset? endsAt, string inviteCode, DateTimeOffset now)
+        Person host, string name, string emoji, PopkinColour colour, PopkinLength length, DateTimeOffset? endsAt, string inviteCode, DateTimeOffset now)
     {
         var popkin = new PopkinSpace
         {
@@ -70,6 +73,7 @@ public sealed class PopkinSpace
             Emoji = emoji,
             Colour = colour,
             HostPersonId = host.Id,
+            Length = length,
             EndsAt = endsAt,
             Status = PopkinStatus.Active,
             InviteCode = inviteCode,
@@ -102,6 +106,18 @@ public sealed class PopkinSpace
         Name = name;
         Emoji = emoji;
         Colour = colour;
+        Version++;
+    }
+
+    /// <summary>
+    /// The Host changes how long the Popkin lasts (L2-020 AC4). The wrap-up job reads the end at
+    /// each run, so the new one is the one it keeps.
+    /// </summary>
+    public void ChangeLength(PopkinLength length, DateTimeOffset? endsAt)
+    {
+        RequireActive();
+        Length = length;
+        EndsAt = endsAt;
         Version++;
     }
 

@@ -10,7 +10,7 @@ public sealed class PopkinSpaceWrapUpTests
     private static PopkinSpace Lakeside()
     {
         var mara = Person.Create("Mara Okafor", ContactChannel.Email, "mara@example.com", Now.AddDays(-2));
-        return PopkinSpace.Start(mara, "Lakeside Weekend", "🏕️", PopkinColour.Teal, Now.AddDays(1), "lakeside1", Now.AddDays(-2)).Popkin;
+        return PopkinSpace.Start(mara, "Lakeside Weekend", "🏕️", PopkinColour.Teal, PopkinLength.TheWeekend, Now.AddDays(1), "lakeside1", Now.AddDays(-2)).Popkin;
     }
 
     [Fact]

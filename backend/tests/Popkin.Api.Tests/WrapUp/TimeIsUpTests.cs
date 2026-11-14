@@ -24,7 +24,7 @@ public sealed class TimeIsUpTests
         var ids = new List<Guid>();
         for (var number = 1; number <= count; number++)
         {
-            var (popkin, everyone) = PopkinSpace.Start(host, $"Popkin {number}", "🎈", PopkinColour.Coral, endsAt, $"code{Guid.NewGuid():N}", api.Clock.GetUtcNow());
+            var (popkin, everyone) = PopkinSpace.Start(host, $"Popkin {number}", "🎈", PopkinColour.Coral, PopkinLength.UntilDate, endsAt, $"code{Guid.NewGuid():N}", api.Clock.GetUtcNow());
             db.Popkins.Add(popkin);
             db.ChatThreads.Add(everyone);
             ids.Add(popkin.Id);

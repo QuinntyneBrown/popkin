@@ -28,7 +28,8 @@ public sealed class CreatePopkinCommandHandler(
         var name = PopkinInput.Name(request.Name);
         var emoji = PopkinInput.Emoji(request.Emoji);
         var colour = PopkinInput.Colour(request.Colour);
-        var endsAt = PopkinInput.End(PopkinInput.Length(request.Length), request.EndsAt, now);
+        var length = PopkinInput.Length(request.Length);
+        var endsAt = PopkinInput.End(length, request.EndsAt, now);
 
         var host = await db.People.SingleAsync(p => p.Id == current.PersonId, cancellationToken);
         for (var attempt = 1; ; attempt++)
@@ -45,7 +46,7 @@ public sealed class CreatePopkinCommandHandler(
                 throw new InvalidOperationException("No free invite code was found.");
             }
 
-            var (popkin, everyone) = PopkinSpace.Start(host, name, emoji, colour, endsAt, code, now);
+            var (popkin, everyone) = PopkinSpace.Start(host, name, emoji, colour, length, endsAt, code, now);
             db.Popkins.Add(popkin);
             db.ChatThreads.Add(everyone);
             await db.SaveChangesAsync(cancellationToken);

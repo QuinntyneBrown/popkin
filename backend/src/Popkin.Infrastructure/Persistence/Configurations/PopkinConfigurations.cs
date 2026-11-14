@@ -14,6 +14,7 @@ public sealed class PopkinSpaceConfiguration : IEntityTypeConfiguration<PopkinSp
         builder.Property(p => p.Emoji).HasMaxLength(16).IsRequired();
         builder.Property(p => p.Colour).HasConversion<string>().HasMaxLength(10);
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(10);
+        builder.Property(p => p.Length).HasConversion<string>().HasMaxLength(12);
         builder.Property(p => p.InviteCode).HasMaxLength(64).IsRequired();
         builder.HasIndex(p => p.InviteCode).IsUnique();
         // A counter the entity raises, not a `rowversion`, so SQL Server, SQLite and the tests'
