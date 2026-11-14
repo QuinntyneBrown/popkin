@@ -32,6 +32,8 @@ function detail(id: string, extra: Partial<PhotoDetailView> = {}): PhotoDetailVi
 describe('PhotoViewStore', () => {
   let answers: Record<string, PhotoDetailView | 'missing' | 'down' | Subject<PhotoDetailView>>;
   let asked: string[];
+  let downloads: Subject<{ url: string; expiresAt: string }>[];
+  let deletions: Subject<void>[];
   let reacted: { kind: 'add' | 'remove'; emoji: string; answer: Subject<PhotoReaction[]> }[];
   let store: PhotoViewStore;
 
@@ -40,6 +42,8 @@ describe('PhotoViewStore', () => {
     answers = { a: detail('a') };
     asked = [];
     reacted = [];
+    downloads = [];
+    deletions = [];
     const reaction =
       (kind: 'add' | 'remove') =>
       (_: string, __: string, emoji: string): Observable<PhotoReaction[]> => {
@@ -59,7 +63,21 @@ describe('PhotoViewStore', () => {
         PhotoViewStore,
         {
           provide: PHOTOS_API,
-          useValue: { getPhoto, addReaction: reaction('add'), removeReaction: reaction('remove') },
+          useValue: {
+            getPhoto,
+            addReaction: reaction('add'),
+            removeReaction: reaction('remove'),
+            getDownload: () => {
+              const answer = new Subject<{ url: string; expiresAt: string }>();
+              downloads.push(answer);
+              return answer;
+            },
+            deletePhoto: () => {
+              const answer = new Subject<void>();
+              deletions.push(answer);
+              return answer;
+            },
+          },
         },
       ],
     });
@@ -206,5 +224,61 @@ describe('PhotoViewStore', () => {
       expect(store.reactions()).toEqual([heart, { emoji: '🔥', count: 1, mine: true }]);
       expect(reacted.map((r) => r.emoji)).toEqual(['❤️', '🔥']);
     });
+  });
+
+  describe('Save photo (L2-036 AC1)', () => {
+    beforeEach(() => store.open('p', 'a'));
+
+    it('is busy while it asks for the address, then downloads it', () => {
+      const clicked: string[] = [];
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+        this: HTMLAnchorElement,
+      ) {
+        clicked.push(this.href);
+      });
+      store.save();
+      expect(store.saving()).toBe(true);
+
+      downloads[0].next({ url: 'https://files.test/a.jpg?sig=1', expiresAt: '' });
+      downloads[0].complete();
+      expect(clicked).toEqual(['https://files.test/a.jpg?sig=1']);
+      expect(store.saving()).toBe(false);
+    });
+
+    it('says so when it cannot save', () => {
+      store.save();
+      downloads[0].error(new HttpErrorResponse({ status: 500 }));
+      expect(store.saving()).toBe(false);
+      expect(store.saveFailed()).toBe(true);
+    });
+  });
+
+  describe('Delete photo (L2-036 AC2)', () => {
+    beforeEach(() => store.open('p', 'a'));
+
+    it('is busy while it deletes, then says it is done', async () => {
+      const done = store.remove();
+      expect(store.deleting()).toBe(true);
+      deletions[0].next();
+      deletions[0].complete();
+      await expect(done).resolves.toBe(true);
+    });
+
+    it('says so when it cannot delete, and keeps the photo', async () => {
+      const done = store.remove();
+      deletions[0].error(new HttpErrorResponse({ status: 500 }));
+      await expect(done).resolves.toBe(false);
+      expect(store.deleting()).toBe(false);
+      expect(store.deleteFailed()).toBe(true);
+      expect(store.state()).toBe('ready');
+    });
+  });
+
+  it('shows a photo deleted while it is open as removed', () => {
+    store.open('p', 'a');
+    store.removed('other');
+    expect(store.state()).toBe('ready');
+    store.removed('a');
+    expect(store.state()).toBe('removed');
   });
 });

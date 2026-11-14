@@ -36,6 +36,10 @@ export interface PhotosApi {
   addComment(popkinId: string, photoId: string, text: string): Observable<PhotoCommentView>;
   /** Deletes the member's own (L2-035 AC5). 403 `comment_not_yours`; 404 `comment_not_found`. */
   deleteComment(popkinId: string, photoId: string, commentId: string): Observable<void>;
+  /** A short-lived address of the photo at the size it was added, as a download (L2-036 AC1). */
+  getDownload(popkinId: string, photoId: string): Observable<{ url: string; expiresAt: string }>;
+  /** Deletes it: the uploader, or the Host (L2-036 AC2). 403 `photo_not_yours`; 409. */
+  deletePhoto(popkinId: string, photoId: string): Observable<void>;
 }
 
 export const PHOTOS_API = new InjectionToken<PhotosApi>('PhotosApi');
@@ -76,6 +80,16 @@ export class HttpPhotosApi implements PhotosApi {
 
   removeReaction(popkinId: string, photoId: string, emoji: string): Observable<PhotoReaction[]> {
     return this.http.delete<PhotoReaction[]>(reaction(popkinId, photoId, emoji));
+  }
+
+  getDownload(popkinId: string, photoId: string): Observable<{ url: string; expiresAt: string }> {
+    return this.http.get<{ url: string; expiresAt: string }>(
+      `${photos(popkinId)}/${encodeURIComponent(photoId)}/download`,
+    );
+  }
+
+  deletePhoto(popkinId: string, photoId: string): Observable<void> {
+    return this.http.delete<void>(`${photos(popkinId)}/${encodeURIComponent(photoId)}`);
   }
 
   getComments(popkinId: string, photoId: string): Observable<PhotoCommentView[]> {

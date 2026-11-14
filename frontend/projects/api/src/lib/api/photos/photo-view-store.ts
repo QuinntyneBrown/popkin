@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { DOCUMENT, Injectable, computed, inject, signal } from '@angular/core';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { PhotoDetailView } from '../../models/photos';
 import { photoName, photoTime } from './album-days';
 import { PhotoReaction, applyReactionToggle } from './photo-reactions';
@@ -13,12 +13,14 @@ import { PHOTOS_API } from './photos-api';
 @Injectable()
 export class PhotoViewStore {
   private readonly api = inject(PHOTOS_API);
+  private readonly document = inject(DOCUMENT);
 
   private popkinId = '';
   private photoId = '';
   private reading?: Subscription;
 
-  readonly state = signal<'loading' | 'ready' | 'error' | 'not-found'>('loading');
+  /** `removed`: the photo was deleted while it was open. */
+  readonly state = signal<'loading' | 'ready' | 'error' | 'not-found' | 'removed'>('loading');
   readonly photo = signal<PhotoDetailView | null>(null);
   /** "Saturday, 7:02 am": when it was added (L2-033 AC1). */
   readonly when = computed(() => {
@@ -44,6 +46,12 @@ export class PhotoViewStore {
   );
   /** A reaction did not save and its count went back (L2-034 AC4). */
   readonly reactionFailed = signal(false);
+  /** "Save photo" asking for its address, and whether it failed (L2-036 AC1). */
+  readonly saving = signal(false);
+  readonly saveFailed = signal(false);
+  /** Deleting the photo, and whether it failed (L2-036 AC2). */
+  readonly deleting = signal(false);
+  readonly deleteFailed = signal(false);
 
   open(popkinId: string, photoId: string): void {
     this.popkinId = popkinId;
@@ -72,6 +80,56 @@ export class PhotoViewStore {
 
   dismissReactionFailure(): void {
     this.reactionFailed.set(false);
+  }
+
+  /** Downloads the photo at the size it was added, through a short-lived address (L2-036 AC1). */
+  save(): void {
+    if (this.saving()) return;
+    this.saving.set(true);
+    this.saveFailed.set(false);
+    this.api.getDownload(this.popkinId, this.photoId).subscribe({
+      next: ({ url }) => {
+        const link = this.document.createElement('a');
+        link.href = url;
+        link.download = '';
+        link.rel = 'noopener';
+        link.click();
+        this.saving.set(false);
+      },
+      error: () => {
+        this.saving.set(false);
+        this.saveFailed.set(true);
+      },
+    });
+  }
+
+  dismissSaveFailure(): void {
+    this.saveFailed.set(false);
+  }
+
+  /** Deletes the photo, once confirmed; true when it is gone (L2-036 AC2). */
+  async remove(): Promise<boolean> {
+    this.deleting.set(true);
+    this.deleteFailed.set(false);
+    try {
+      await firstValueFrom(this.api.deletePhoto(this.popkinId, this.photoId), {
+        defaultValue: undefined,
+      });
+      return true;
+    } catch {
+      this.deleteFailed.set(true);
+      return false;
+    } finally {
+      this.deleting.set(false);
+    }
+  }
+
+  /** A photo was deleted by someone: the one open reads as removed (L2-036 AC3). */
+  removed(photoId: string): void {
+    if (photoId === this.photoId) {
+      this.reading?.unsubscribe();
+      this.state.set('removed');
+    }
   }
 
   private sendNext(): void {
