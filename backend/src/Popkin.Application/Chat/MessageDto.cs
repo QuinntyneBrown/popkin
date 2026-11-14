@@ -14,7 +14,9 @@ public sealed record MessageAuthorDto(Guid MembershipId, string FirstName, Avata
 /// nothing about who is reading, and it names its Popkin and its thread, so a client that holds
 /// several knows where it belongs. `ClientMessageId` is null for a system message. `Reactions`
 /// is the message's summary of reactions (L2-024), at `ReactionsVersion`; `Quote` is that of the message a reply
-/// answers, and null for a message that replies to nothing (L2-025).
+/// answers, and null for a message that replies to nothing (L2-025). `Photo` is the photo it
+/// carries, at an expiring address, and null for a message of text alone (L2-026); its text is
+/// then empty or says something of the photo.
 /// </summary>
 public sealed record MessageDto(
     Guid Id,
@@ -27,14 +29,20 @@ public sealed record MessageDto(
     DateTimeOffset SentAt,
     int ReactionsVersion,
     IReadOnlyList<ReactionDto> Reactions,
-    QuoteDto? Quote)
+    QuoteDto? Quote,
+    ChatPhotoDto? Photo)
 {
     /// <summary>
     /// A message of a thread of that Popkin; the author is a member of the same Popkin. Given no
     /// reactions, it has none, as a message just sent.
     /// </summary>
     public static MessageDto Of(
-        Message message, Membership author, IPhotoStore photos, IReadOnlyList<ReactionDto>? reactions = null, QuoteDto? quote = null) =>
+        Message message,
+        Membership author,
+        IPhotoStore photos,
+        IReadOnlyList<ReactionDto>? reactions = null,
+        QuoteDto? quote = null,
+        ChatPhotoDto? photo = null) =>
         new(
             message.Id,
             author.PopkinId,
@@ -46,7 +54,8 @@ public sealed record MessageDto(
             message.SentAt,
             message.ReactionsVersion,
             reactions ?? [],
-            quote);
+            quote,
+            photo);
 }
 
 /// <summary>A page of a thread, oldest first. `HasMore` says whether more lie in the direction read.</summary>
