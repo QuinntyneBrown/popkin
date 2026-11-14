@@ -60,8 +60,9 @@
         [heading]="warning.lead"
         [text]="warning.text"
         [action]="isHost() ? 'Change' : undefined"
+        actionLabel="Change how long it lasts"
         [dismissible]="true"
-        (acted)="settings()"
+        (acted)="changeLength()"
         (dismissed)="store.dismissWarning()"
       ></div>
     }

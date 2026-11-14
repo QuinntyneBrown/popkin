@@ -7,9 +7,16 @@
 </div>
 @if (action(); as words) {
   @if (actionLink(); as route) {
-    <a class="banner__action" [routerLink]="route">{{ words }}</a>
+    <a class="banner__action" [routerLink]="route" [attr.aria-label]="actionLabel()">{{ words }}</a>
   } @else {
-    <button class="banner__action" type="button" (click)="acted.emit()">{{ words }}</button>
+    <button
+      class="banner__action"
+      type="button"
+      [attr.aria-label]="actionLabel()"
+      (click)="acted.emit()"
+    >
+      {{ words }}
+    </button>
   }
 }
 <ng-content />

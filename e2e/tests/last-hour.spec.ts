@@ -3,8 +3,8 @@ import { experiencesUrl, maraWithExperiences } from '../fixtures/experiences';
 import { type Home, homeUrl, maraAtHome } from '../fixtures/home';
 import { albumUrl, maraInTheAlbum } from '../fixtures/photos';
 import { expect, test } from '../fixtures/pk-test';
+import { ChangeLengthDialog } from '../pages/change-length.dialog';
 import { PopkinHomePage } from '../pages/popkin-home.page';
-import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
 import { WrapUpBanner } from '../pages/wrap-up-banner';
 
 /** Lakeside Weekend wraps up on Sunday 13 September 2026 at 6 pm. */
@@ -77,17 +77,21 @@ test.describe('The last hour of a Popkin', () => {
     });
   }
 
-  test('offers the Host "Change", which opens Popkin settings until its dialog is built', async ({
-    page,
-  }) => {
+  test('offers the Host "Change", which opens Change how long it lasts', async ({ page }) => {
     await page.clock.install({ time: sunday(17, 17, 30) });
     await maraAtHome(page);
     await page.goto(homeUrl);
     const banner = new WrapUpBanner(page);
 
+    await expect(banner.action).toHaveText('Change');
+    await expect(banner.action).toHaveAccessibleName('Change how long it lasts');
     await banner.action.click();
 
-    await expect(new PopkinSettingsDialog(page).heading).toBeVisible();
+    const dialog = new ChangeLengthDialog(page);
+    await expect(dialog.heading).toBeVisible();
+    await expect(dialog.checked).toContainText('The weekend');
+    await dialog.cancel.click();
+    await expect(banner.action).toBeFocused();
   });
 
   test('offers a member who is not the Host nothing to change', async ({ page }) => {
