@@ -52,11 +52,13 @@ test.describe('choosing a photo (L2-026 AC1)', () => {
     await page.goto(chatUrl);
     const photos = new ChatPhotos(page);
 
+    // Listened for first: Playwright starts catching the picker only once it is listened for.
+    const chooser = page.waitForEvent('filechooser');
     // Photo is offered once the thread has opened; focusing does not wait for it as a click does.
     await expect(photos.choose).toBeEnabled();
-    const chooser = page.waitForEvent('filechooser');
-    // Focused and pressed in one step, so the thread opening cannot take the focus in between.
-    await photos.choose.press('Enter');
+    await photos.choose.focus();
+    await expect(photos.choose).toBeFocused();
+    await page.keyboard.press('Enter');
     await (await chooser).setFiles(aPhoto('lake.jpg'));
     await photos.remove.press('Enter');
 
