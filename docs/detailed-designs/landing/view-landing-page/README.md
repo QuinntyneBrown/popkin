@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. A *Popkin* is a private space for one group,
+Popkin is a platform for pop-up communities. A *Popkin* is a private space for one group,
 with a name, an emoji, a colour, members and a length. Before a person has an account, the only
 parts of Popkin they reach are public screens. This feature covers the two public screens that
 introduce Popkin and send a person onward: the landing page and the welcome screen.
@@ -10,13 +10,13 @@ introduce Popkin and send a person onward: the landing page and the welcome scre
 - **landing page** — public page at `/` that explains Popkin in six sections and offers "Start a Popkin" and "Sign in"
 - **welcome screen** — public phone-width screen at `/welcome` with "Start a Popkin", "Join with a code" and "Already have an account? Sign in"; the screen a person sees after signing out (L2-048 AC5)
 - **Visitor** — someone without a session, as defined in `docs/specs/L1.md`
-- **section** — one band of the landing page: the hero, how it works, ideas, the comparison with a group chat, the statement that it is free, and the footer
+- **section** — one band of the landing page: the hero, how it works, ideas, the comparison with a group chat, the statement that it has no ads, and the footer
 
 The landing page is the front door of the *landing* subsystem. It loads no data of its own: every
 word, idea and comparison row is fixed copy taken from the mock. The only request it depends on
 is the session check that decides whether a signed-in person is sent to My Popkins instead
-(L2-002 AC3). The page also carries Popkin's promise to stay free, with no ads and no premium
-tier (L2-061 AC3), and loads no third-party advertising or tracking script (L2-061 AC2).
+(L2-002 AC3). The page also carries Popkin's promise of no ads, and never says Popkin is free
+(L2-061 AC3, ADR 0019), and loads no third-party advertising or tracking script (L2-061 AC2).
 
 Journey 10, Discover Popkin, built this design. The sections below say what was built, and
 [Built in journey 10](#built-in-journey-10) lists what differs from the design as it first stood
@@ -52,7 +52,7 @@ feature (`docs/detailed-designs/accounts/sessions`) owns.
 
 ### Behaviour rules
 
-- **Section order and copy** — the hero ("Your people, popped up in seconds.", one paragraph, "Start a Popkin", "Free. Takes about a minute.", a Lakeside Weekend preview), "Scan. Join. You're in." with three numbered steps, the ideas, "Better than a group chat.", "Free. Like, actually free.", and the footer (L2-001 AC1–AC3).
+- **Section order and copy** — the hero ("Your people, popped up in seconds.", one paragraph, "Start a Popkin", "Takes about a minute.", a Lakeside Weekend preview), "Scan. Join. You're in." with three numbered steps, the ideas, "Better than a group chat.", "No ads. Like, actually none.", and the footer (L2-001 AC1–AC3).
 - **Comparison table** — a `table` with a visually hidden caption. The group chat and Popkin columns are told apart by an icon and a column heading, never by colour alone (L2-001 AC4, L2-057 AC5).
 - **Hero preview** — illustrative fixed content, as in the mock: the tile emoji, avatars and photos are hidden from assistive technology (empty `alt`, `aria-hidden`), the name "Lakeside Weekend", "14 here" and "Wraps up Sunday" stay readable, and the QR is an image named "QR code for popk.in/lakeside" (L2-057 AC6).
 - **Responsive layout** — below 768 px the hero, steps and ideas stack in one column with no sideways scroll (L2-001 AC5). The hero places its text beside the preview and the ideas show four across from 992 px, as the mock's CSS does, which satisfies "at least 1024 px" (L2-001 AC6). Columns live inside a container no wider than 72 rem (L2-058 AC5).
@@ -61,7 +61,7 @@ feature (`docs/detailed-designs/accounts/sessions`) owns.
 - **Jump to a section** — "How it works" and "Ideas", in the navigation and in the footer, are links to `/#how` and `/#ideas`. Each sets the fragment and also calls the jump directly, so a link chosen a second time jumps again, although the fragment did not change. The page also jumps when it opens on an address that names a section. The jump brings the section's heading into view (`scrollIntoView`), smoothly, or at once when reduced motion is preferred (L2-060), and the heading takes focus (L2-002 AC5). The router's own anchor scrolling is not used.
 - **Footer links** — Safety, Privacy and Help link to `/safety`, `/privacy` and `/help`, which have no screen; they show the not-found screen until they do, as the mock notes (known gap 54).
 - **"Join with a code"** — the welcome screen links to `/join`, the screen of journey 15, Join with a code.
-- **Free and ad-free** — the closing band states "No ads, no premium tier" (L2-061 AC3). The page loads only first-party scripts, self-hosted fonts and pictures the app serves; a behaviour spec proves the landing page requests nothing from another origin (L2-061 AC2). The content security policy of L2-054 AC1 forbids third-party script sources besides.
+- **Ad-free, never called free** — the closing band states "No ads, no tracking" and nothing on the page calls Popkin free (L2-061 AC3, ADR 0019). The page loads only first-party scripts, self-hosted fonts and pictures the app serves; a behaviour spec proves the landing page requests nothing from another origin (L2-061 AC2). The content security policy of L2-054 AC1 forbids third-party script sources besides.
 - **Signed-in redirect on other public screens** — whether `/welcome`, `/sign-up` and `/sign-in` also redirect a signed-in person to My Popkins is `<TO SUPPLY>`; the specs require it for the landing address only, and that is what is built (known gap 55).
 
 ### Tests
@@ -93,9 +93,9 @@ What waits, each a known gap in [the register](../../README.md#known-gaps):
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-001` | `L1-001` | Landing page content: The landing page explains Popkin to a visitor in six sections, in this order: the hero, how it works, ideas, the comparison with a group chat, the statement that it is free, and the footer. |
+| `L2-001` | `L1-001` | Landing page content: The landing page explains Popkin to a visitor in six sections, in this order: the hero, how it works, ideas, the comparison with a group chat, the statement that it has no ads, and the footer. |
 | `L2-002` | `L1-001` | Landing page actions: The landing page offers one primary action, starting a Popkin, and a way in for people who have an account. |
-| `L2-061` | `L1-015` | No payment and no advertising: Popkin costs nothing and sells nothing. |
+| `L2-061` | `L1-015` | No advertising: Popkin shows no advertising and makes no claim that it is free (ADR 0019). |
 
 ## Diagrams
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. Members of a Popkin share photos in an album
+Popkin is a platform for pop-up communities. Members of a Popkin share photos in an album
 and open each one in the [photo view](../view-photo/README.md). This feature lets members talk
 about a photo under it. The photo's comments are listed oldest first with a field to add one.
 A member may delete their own comment after confirming.

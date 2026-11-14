@@ -29,7 +29,7 @@ address](../../popkins/open-by-address/README.md), L2-065 AC5).
 ### Screens and states
 
 - `docs/mocks/pages/join-invite/default.html` — "Mara invited you", tile, "Lakeside Weekend", 5
-  avatars with "+9", "14 people", "Here until Sunday, 6 pm", "Join", "Free, no app to download."
+  avatars with "+9", "14 people", "Here until Sunday, 6 pm", "Join", "No app to download."
 - `docs/mocks/pages/join-invite/loading.html` — "Loading your invite…".
 - `docs/mocks/pages/join-invite/wrapped.html` — muted tile, "This Popkin wrapped up on Sunday.
   What a time. Ask Mara for the next one.", "Start your own Popkin", no "Join".
@@ -60,7 +60,7 @@ address](../../popkins/open-by-address/README.md), L2-065 AC5).
     with the inviter's `pk-avatar`, `pk-popkin-tile` in the Popkin's colour, the name as the
     screen's `h1`, a `pk-avatar-stack` of up to 5 with "+N", "{n} people", and `pk-time-left`
     "Here until {day}, {time}" only when `endsAt` is set (L2-012 AC1, AC2); then `pk-button`
-    "Join" and the line "Free, no app to download." (`pk-legal` as a note);
+    "Join" and the line "No app to download." (`pk-legal` as a note);
   - **wrapped up** — the same with a muted `pk-popkin-tile`, the wrapped-up sentence naming the
     inviter in place of the time, `pk-button` "Start your own Popkin" (to `/new`, or `/sign-up`
     for a visitor) and no "Join" (L2-016 AC1);

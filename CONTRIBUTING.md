@@ -37,7 +37,7 @@ Security vulnerabilities are never reported in a public issue; see [`SECURITY.md
 3. For anything larger than a small fix, open an issue first so the approach can be agreed before
    you write code.
 
-Every change serves what Popkin is for: a free platform for pop-up communities, where people spin
+Every change serves what Popkin is for: a platform for pop-up communities, where people spin
 up a private space in seconds, invite others by QR code, then chat, video call, share photos and
 rate experiences together. A change that cannot be traced back to that does not belong here.
 

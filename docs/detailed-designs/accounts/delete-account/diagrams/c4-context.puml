@@ -5,7 +5,7 @@ title System Context — Delete the account
 
 Person(member, "Member", "A signed-in person, possibly the Host of active Popkins")
 Person(others, "Other members", "People who share a Popkin with the deleted person")
-System(popkin, "Popkin", "Free platform for pop-up communities")
+System(popkin, "Popkin", "Platform for pop-up communities")
 
 Rel(member, popkin, "Deletes their account in", "HTTPS")
 Rel(popkin, others, "Shows remaining messages and photos without the name to", "HTTPS, SignalR")

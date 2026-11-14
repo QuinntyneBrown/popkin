@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title System Context — Sign in
 
 Person(visitor, "Visitor", "Someone with or without an account")
-System(popkin, "Popkin", "Free platform for pop-up communities")
+System(popkin, "Popkin", "Platform for pop-up communities")
 System_Ext(sms, "SMS provider", "Delivers the code by text; provider TO SUPPLY")
 System_Ext(email, "Email provider", "Delivers the code by email; provider TO SUPPLY")
 

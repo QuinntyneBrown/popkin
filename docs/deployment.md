@@ -1,26 +1,52 @@
 # Deployment
 
-How Popkin is deployed, by [ADR 0013](adr/0013-deployment-shape.md). **Nothing here is built
-yet**: the images, the forwarded-header handling, the readiness endpoint and the telemetry set-up
-are decided and designed, not coded. Each section says what it waits for. Keep this document
-true: a setting added to the code is added here in the same change.
+How Popkin is deployed, by [ADR 0013](adr/0013-deployment-shape.md) and
+[ADR 0018](adr/0018-deploy-to-azure-on-every-commit.md). **Every commit to `main` that passes CI
+is deployed to Azure** by the `Deploy` workflow (`.github/workflows/deploy.yml`). The images,
+the infrastructure (`infra/`) and the release are built; the forwarded-header handling, the
+readiness endpoint and the telemetry set-up are decided and designed, not coded. Each section
+says what it waits for. Keep this document true: a setting added to the code is added here, and
+in `infra/main.bicep`, in the same change.
+
+## Azure
+
+| Part | Azure resource | Notes |
+|---|---|---|
+| The app and its reverse proxy | Container App `popkin-web` | Image `popkin-web` (`infra/web/`): Caddy serving the built app and forwarding `/api` and `/hubs`; public, HTTPS only |
+| The API | Container App `popkin-api` | Image `popkin-api`; exactly one replica; inside the environment only; its init container runs `popkin migrate` |
+| The Worker | Container App `popkin-worker` | Image `popkin-worker`; exactly one replica; no ingress |
+| The database | Azure SQL Database `popkin` (Basic) | Microsoft Entra authentication only; the apps' identity `id-popkin` signs in with no password |
+| The marketing site | Static Web App `swa-popkin-marketing` (Free) | Its own public address; built with the app's address as `APP_URL` |
+| The images | Container registry `popkin<suffix>` (Basic) | Tagged with the commit; pulled by `id-popkin` |
+| Logs | Log Analytics workspace `log-popkin` | The console log of every container |
+
+All of it is in the resource group `rg-popkin`, in East US 2 but for the database, in Central US:
+East US 2 and East US take no new Azure SQL servers (`sqlLocation` in `infra/main.bicep`). To set up a new subscription or
+repository, run `eng/Initialize-Azure.ps1` once with `az` and `gh` signed in: it creates the
+resource group, the Entra application `popkin-github-deploy` that GitHub signs in as through
+OpenID Connect, its roles, and the GitHub environment `production` with these entries:
+
+| Name | Kind | Holds |
+|---|---|---|
+| `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` | Variables | Who the workflow signs in as, and where |
+| `AZURE_RESOURCE_GROUP` | Variable | `rg-popkin` |
+| `AUTH_CODE_HASH_KEY` | Secret | `Auth:CodeHashKey`, generated once |
+| `PHOTOS_SIGNING_KEY` | Secret | `Photos:SigningKey`, generated once |
+
+The addresses of the app and the marketing site are in the summary of each Deploy run.
 
 ## Shape
 
-- One reverse proxy on one origin. It ends TLS, serves the built web app
+- One reverse proxy on one origin. It serves the built web app
   (`frontend/dist/popkin/browser`, with `index.html` as the fallback for app routes) and forwards
-  `/api` and `/hubs` to the API, with WebSockets allowed on `/hubs`. Product: `<TO SUPPLY>`.
-- The marketing site ([ADR 0017](adr/0017-marketing-site.md)), served by the same proxy for the
-  host `about.popkin.community`: the static files of `frontend/dist/marketing/browser`, built by
-  `npm run build:marketing`, which copies the pitch film and its pictures in first. It needs no
-  setting at run time; the app's address its links use is built in (`environment.ts`,
-  `https://popkin.community`). Nothing on that host reaches `/api` or `/hubs`.
-- Both hosts serve the content security policy of
-  [Personal data protection](detailed-designs/security/personal-data-protection/README.md), whose
-  `script-src 'self'` refuses every inline script. The production builds therefore turn off
-  Angular's critical-CSS inlining (`optimization.styles.inlineCritical: false` in
-  `angular.json`): it loads the stylesheet as `media="print"` and needs an inline script to switch
-  it to `all`, which that policy blocks, so the page would show with its foundations only.
+  `/api` and `/hubs` to the API, with WebSockets allowed on `/hubs`. Product: Caddy
+  (`infra/web/Caddyfile`), behind the Container Apps ingress, which ends TLS (ADR 0018).
+- The marketing site ([ADR 0017](adr/0017-marketing-site.md)), published on its own, as an
+  Azure Static Web App: the static files of `frontend/dist/marketing/browser`, built after
+  `npm run media:sync`, which copies the pitch film and its pictures in first, with its headers in
+  `staticwebapp.config.json`. It needs no setting at run time; the app's address its links use is
+  built in: `POPKIN_APP_URL` when the build defines it, `https://popkin.community` otherwise
+  (`environment.ts`). Nothing on that host reaches `/api` or `/hubs`.
 - **One** instance of the Popkin API ([ADR 0009](adr/0009-one-api-instance.md)). Do not scale it
   out: hub groups, presence and the rate limits live in its memory.
 - **One** instance of the Popkin Worker. It must run: it wraps up the Popkins whose time is up
@@ -33,7 +59,7 @@ true: a setting added to the code is added here in the same change.
   is the file the API hands out. It serves no HTTP and sends no hub events; a screen that is
   open learns of a timed wrap-up from its own clock check
   ([known gap 13](detailed-designs/README.md#known-gaps)).
-- SQL Server.
+- SQL Server: Azure SQL Database, with Microsoft Entra authentication alone.
 
 ## Settings
 
@@ -67,9 +93,20 @@ This and the other open decisions are in the [known gaps](detailed-designs/READM
 
 ## Release
 
-1. Build the web app (`npm run build` in `frontend/`), the marketing site (`npm run build:marketing`) and the two images (not built yet).
-2. Run `popkin migrate` against the database. The API never migrates on startup.
-3. Start the new API, then the Worker. Open hub connections drop and reconnect.
+The Deploy workflow does each step, in order:
+
+1. Deploy `infra/registry.bicep`, then build and push the three images, tagged with the commit:
+   `popkin-api` (`backend/src/Popkin.Api/Dockerfile`, with the `popkin` tool in `/app/cli`),
+   `popkin-worker` (`backend/src/Popkin.Worker/Dockerfile`) and `popkin-web`
+   (`infra/web/Dockerfile`, which builds the web app).
+2. Deploy `infra/main.bicep`. The new API revision's init container runs `popkin migrate`
+   against the database before the API starts; the API never migrates on startup.
+3. The new API starts, then the Worker. Open hub connections drop and reconnect.
+4. Build the marketing site (`npm run media:sync`, then `ng build marketing --define
+   "POPKIN_APP_URL='<the app's address>'"`) and publish it to its Static Web App.
+5. Run steps 1 to 3 of the smoke test.
+
+To deploy `main` again without a commit, run the Deploy workflow by hand.
 
 ## Probes
 

@@ -21,7 +21,7 @@ test.describe('The marketing home page', () => {
       'Scan. Join. You’re in.',
       'For every group that forms around a table.',
       'Better than a group chat.',
-      'Free. Like, actually free.',
+      'No ads. Like, actually none.',
     ]);
     await expect(site.footer).toBeVisible();
   });
@@ -35,11 +35,11 @@ test.describe('The marketing home page', () => {
     const site = new MarketingHomePage(page);
 
     await expect(site.heroLead).toHaveText(
-      'Popkin is a free little home for any small group: chat, photos, plans and video, joined with one scan. Keep it for a weekend or for years.',
+      'Popkin is a little home for any small group: chat, photos, plans and video, joined with one scan. Keep it for a weekend or for years.',
     );
     await expect(site.heroStart).toHaveText('Start a Popkin');
     await expect(site.heroFilm).toHaveText('Watch the film');
-    await expect(site.heroFree).toHaveText('Free. Takes about a minute.');
+    await expect(site.heroNote).toHaveText('Takes about a minute.');
     await expect(site.preview).toContainText('Lakeside Weekend');
     await expect(site.preview).toContainText('14 here');
     await expect(site.preview).toContainText('Wraps up Sunday');
@@ -67,7 +67,8 @@ test.describe('The marketing home page', () => {
       'Video',
       'The end',
     ]);
-    await expect(site.free).toContainText('No ads, no premium tier');
+    await expect(site.noAds).toContainText('No ads, no tracking');
+    await expect(site.mentionsOfFree).toHaveCount(0);
   });
 
   // AC4
@@ -239,7 +240,7 @@ test.describe('From the marketing site to the app', () => {
     await pk.open('marketingHome');
     const site = new MarketingHomePage(page);
 
-    for (const start of [site.navStart, site.heroStart, site.freeStart]) {
+    for (const start of [site.navStart, site.heroStart, site.noAdsStart]) {
       await expect(start).toHaveAttribute('href', `${MARKETING_APP_URL}/sign-up`);
     }
     await expect(site.navSignIn).toHaveAttribute('href', `${MARKETING_APP_URL}/sign-in`);
@@ -293,7 +294,7 @@ test.describe('From the marketing site to the app', () => {
     });
 
     await pk.open('marketingHome');
-    await expect(new MarketingHomePage(page).freeHeading).toBeVisible();
+    await expect(new MarketingHomePage(page).noAdsHeading).toBeVisible();
     await page.waitForLoadState('networkidle');
 
     expect(elsewhere).toEqual([]);

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities, and a Popkin is private to its members
+Popkin is a platform for pop-up communities, and a Popkin is private to its members
 (L1-012). Every Popkin has its own address, `https://{address}.popkin.community` (L1-016). One
 host per Popkin changes the web's unit of trust, the origin: the web app, its session and its
 requests now span many hosts instead of one. This feature keeps the privacy of a Popkin and the

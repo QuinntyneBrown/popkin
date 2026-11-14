@@ -1255,7 +1255,7 @@ export const screenStates: ScreenState[] = [
         how: landing.how,
         ideas: landing.ideas,
         comparison: landing.comparison,
-        free: landing.free,
+        noAds: landing.noAds,
         footer: landing.footer,
       };
     },

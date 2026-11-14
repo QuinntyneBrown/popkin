@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. Every Popkin has its own address,
+Popkin is a platform for pop-up communities. Every Popkin has its own address,
 `https://{address}.popkin.community` (L1-016), settled when it is started
 ([Choose the address](../choose-address/README.md)). This feature makes that address the
 Popkin's front door: it opens the Popkin for its members and tells everyone else nothing.
