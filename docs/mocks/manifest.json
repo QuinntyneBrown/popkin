@@ -323,7 +323,9 @@
         "new-messages",
         "read-only",
         "marked",
-        "deleted-quote"
+        "deleted-quote",
+        "photo-preview",
+        "photo-refused"
       ]
     },
     {
