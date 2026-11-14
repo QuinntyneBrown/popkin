@@ -78,7 +78,7 @@ is specified here because it lives in this dialog.
 
 Everything above, for messages of text, in Everyone and in a direct message (L2-023 AC3). The
 diagrams were not redrawn (known gap 69); what happens to a deleted message's photo, and what the
-quote of the dialog shows for a photo, wait for journey 13.
+quote of the dialog shows for a photo, were settled by journey 13.
 
 ### Open questions
 
@@ -93,10 +93,13 @@ Settled for journey 12:
 - The summary carries the message's `ReactionsVersion`, in `MessageDto`, in the answer and in `ReactionsChanged`, and the client ignores an older one (known gap 70). A repeat that changes nothing keeps the version and raises no event.
 - In a wrapped-up Popkin the chips are not buttons and the messages open no actions.
 
+Settled for journey 13 ([Send photos in chat](../send-photos-in-chat/README.md)):
+
+- Deleting a photo message removes the message. A photo sent in Everyone stays in the album, where it was added under the sender; a photo sent in a direct message is removed from the photo store and the database.
+- The quote of Message actions reads "Photo" for a photo message with no text. Reactions work on a photo message as on any message; Copy copies the text and is not offered when there is none.
+
 Still open:
 
-- What happens to the photo of a deleted message sent in Everyone, which is also in the album: `<TO SUPPLY>`, with journey 13.
-- What the quote of the dialog shows for a photo without text: `<TO SUPPLY>`, with journey 13.
 
 ## Requirements
 

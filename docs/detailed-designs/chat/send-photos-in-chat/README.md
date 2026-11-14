@@ -108,7 +108,8 @@ Still open:
 - A photo message waiting to send across a reload: the outbox is saved to local storage, which cannot hold a file, so a photo not yet uploaded lives only in memory and a reload loses it; one already uploaded can be resent from its `photoId`. What a restored entry without its file shows is `<TO SUPPLY>` (known gap 72).
 - Whether a direct-message photo takes the photo reactions and comments of the album. The mock (`photo-view/direct.html`) draws none: its reactions live on its message. `<TO SUPPLY>` (known gap 73).
 - What the removal of an album that was not kept, and the erasure of a deleted account, do to direct-message photos and to the photos of Everyone's messages; the read-only thread then shows a photo that is gone. `<TO SUPPLY>` (known gap 74).
-- Whether the photo of a message should be a link rather than a button, since it navigates to the photo view; the decision says a button, as the mocks draw it. `<TO SUPPLY>`.
+- Whether the photo of a message should be a link rather than a button, since it navigates to the photo view; the decision says a button, as the mocks draw it. `<TO SUPPLY>` (known gap 75).
+- What "Shared between you", in the person pane of a direct message from 1024 px, lists, and whether its thumbnails open the photo view: the mock draws three plain thumbnails. `<TO SUPPLY>` (known gap 64).
 - "Photo removed", for a photo taken out of the album, is journey 14's.
 
 ## Requirements

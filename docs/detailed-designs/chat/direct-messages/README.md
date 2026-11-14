@@ -15,7 +15,7 @@ A direct message opens from a row on the Chat tab, from the New message dialog (
 from its address. Its header shows the other member's avatar and name and "From {emoji} {Popkin
 name}"; the thread starts with "Only you two can see this". Everything a member can do in Everyone
 works the same way here: text, photos, reactions and replies; journey 11 built text, journey 12
-reactions and replies, and photos come with journey 13, which builds them in Everyone (known gap 64). A direct
+reactions and replies, and photos come with journey 13, which builds them in Everyone and here alike: a photo sent here is readable only by the two members, never joins the album and opens in the photo view with no previous or next ([Send photos in chat](../send-photos-in-chat/README.md), known gap 64). A direct
 message belongs to its Popkin: it exists only between members of that Popkin and becomes
 read-only when the Popkin wraps up. "Call {first name}" opens a call between the two
 ([Group call](../../calls/group-call/README.md)).

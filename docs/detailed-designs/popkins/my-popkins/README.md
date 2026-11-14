@@ -151,6 +151,10 @@ already holds to the new Popkin's group, as `JoinPopkinCommandHandler` does for 
 A person who starts a Popkin in one tab gets no event for it on My Popkins in another until
 the hub reconnects (open decision 23 in [the register](../../README.md#known-gaps)).
 
+### With journey 13, Photos in chat
+
+- The photo count of a wrapped-up row counts the photos in the album only (`Photo.InAlbum`). The latest message of a card reads "{first name}: Photo", or "You: Photo", for a photo message with no text, and its text otherwise ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

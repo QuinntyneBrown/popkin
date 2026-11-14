@@ -104,6 +104,11 @@ says "More photos didn’t load." with "Try again".
 None. Settled while building: a day group follows the capture day (`TakenAt`), and a day starts
 where the member's device says it does; a thumbnail address lasts one hour.
 
+### With journey 13, Photos in chat
+
+- The album lists only the photos in it (`Photo.InAlbum`). An album upload is in it at once; a photo sent in Everyone joins it under its sender when its message is sent, not when it is uploaded, with `PhotoAdded`; a photo sent in a direct message never does, and neither does a chat photo whose message was never sent ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
+- The album summary of the home, the "Mine" filter and the counts read the same set.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

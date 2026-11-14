@@ -86,6 +86,10 @@ Gaps found, each in [the register](../../README.md#known-gaps):
 
 - Whether a denormalised latest-message column is needed at scale: `<TO SUPPLY>`.
 
+### With journey 13, Photos in chat
+
+- A conversation's latest line reads "Photo", or "You: Photo", for a photo message with no text, and its text otherwise (`conversation-text.ts`) ([Send photos in chat](../send-photos-in-chat/README.md)).
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |
