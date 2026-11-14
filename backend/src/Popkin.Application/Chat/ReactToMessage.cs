@@ -76,13 +76,14 @@ public static class ReactionTargets
     {
         var (popkin, membership) = await guard.RequireMemberAsync(popkinId, cancellationToken);
         var thread = await ChatThreads.RequireAsync(db, membership, threadId, cancellationToken);
+        var valid = ReactionValidator.Require(emoji);
         var message = await ChatThreads.RequireMessageAsync(db, thread, messageId, cancellationToken);
         if (popkin.Status == PopkinStatus.WrappedUp)
         {
             throw MembershipGuard.WrappedUp();
         }
 
-        return new ReactionTarget(popkin, membership, thread, message, emoji ?? "");
+        return new ReactionTarget(popkin, membership, thread, message, valid);
     }
 
     /// <summary>

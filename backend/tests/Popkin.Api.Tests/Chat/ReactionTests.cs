@@ -88,6 +88,28 @@ public sealed class ReactionTests
         Assert.Empty(added.Arguments[0].GetProperty("reactions").EnumerateArray());
     }
 
+    // Given a message, when a member reacts with something that is not one emoji, or takes it away,
+    // then 400 reaction_invalid names `emoji` and the message has no reaction (L2-052 AC1).
+    [Theory]
+    [InlineData("a")]
+    [InlineData("❤️❤️")]
+    public async Task A_reaction_that_is_not_one_emoji_is_refused(string emoji)
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var threadId = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
+        var message = (await lakeside.Host.SentMessageAsync(lakeside.Id, threadId, "Paddles are in the shed")).Id();
+
+        var added = await lakeside.Host.ReactAsync(lakeside.Id, threadId, message, emoji);
+        var removed = await lakeside.Host.UnreactAsync(lakeside.Id, threadId, message, emoji);
+
+        var problem = await added.AssertProblem(HttpStatusCode.BadRequest, "reaction_invalid");
+        Assert.Equal("emoji", problem.GetProperty("field").GetString());
+        await removed.AssertProblem(HttpStatusCode.BadRequest, "reaction_invalid");
+        var read = (await lakeside.Host.MessagesAsync(lakeside.Id, threadId)).GetProperty("items").EnumerateArray().Single(m => m.Id() == message);
+        Assert.Empty(read.GetProperty("reactions").EnumerateArray());
+    }
+
     private static async Task<List<string>> SummaryOf(HttpResponseMessage response) =>
         (await response.Content.ReadFromJsonAsync<JsonElement>()).Summary();
 }
