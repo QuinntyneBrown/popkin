@@ -10,10 +10,26 @@ import { parity } from '../../fixtures/parity';
 import { lines, reactStates } from '../../fixtures/react-states';
 import { GroupChatPage } from '../../pages/group-chat.page';
 import { devsPhotoLine } from '../../fixtures/chat-photo-states';
+import { dockPhoto } from '../../fixtures/chat';
+
+/** Dev's photo was deleted: his message reads "Photo removed" (L2-036 AC3). */
+const devsPhotoRemoved = (page: Page) =>
+  theMockChat(page, (chat) => {
+    chat.messages = chat.messages.map((said) =>
+      said.photo?.id === dockPhoto.id ? { ...said, photo: null, photoRemoved: true } : said,
+    );
+  });
 
 const chat = (page: Page) => new GroupChatPage(page);
 
 parity('message', [
+  {
+    key: 'groupChatPhotoRemoved',
+    name: 'photo-removed',
+    region: (page: Page) => chat(page).message(devsPhotoLine).locator('.bubble'),
+    before: devsPhotoRemoved,
+    snap: true,
+  },
   {
     key: 'groupChat',
     name: 'theirs',

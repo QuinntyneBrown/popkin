@@ -201,3 +201,54 @@ export function talkOf(page: Page): PhotoTalk {
   if (!talk) throw new Error('This page has no photo talk.');
   return talk;
 }
+
+/*
+ * The states the photo-view mocks draw, for the parity specs and the sweeps: each is the step
+ * before the page opens, on the mocks' dock photo.
+ */
+
+/** The default mock: Mara's heart among ten, four heart eyes, and three comments. */
+export async function theDockAsDrawn(page: Page): Promise<void> {
+  await maraOnTheDock(page, (dock) => {
+    dock.reactions = [
+      { emoji: '❤️', count: 10, mine: true },
+      { emoji: '😍', count: 4, mine: false },
+    ];
+  });
+}
+
+/** Mara's own comment last, with Delete comment. */
+export async function theDockWithMyComment(page: Page): Promise<void> {
+  await maraOnTheDock(page, (dock) => {
+    dock.reactions = [
+      { emoji: '❤️', count: 10, mine: true },
+      { emoji: '😍', count: 4, mine: false },
+    ];
+    dock.comments?.push({
+      id: 'c-mara',
+      by: people.mara,
+      addedAt: sat(9, 12),
+      text: 'Up at 6 again tomorrow? Bring the good coffee.',
+    });
+  });
+}
+
+/** The Popkin has wrapped up: everything shows, read-only. */
+export async function theDockWrappedUp(page: Page): Promise<void> {
+  await maraOnTheDock(page, (dock, _album, home) => {
+    dock.reactions = [
+      { emoji: '❤️', count: 10, mine: true },
+      { emoji: '😍', count: 4, mine: false },
+    ];
+    home.popkin.status = 'WrappedUp';
+    home.popkin.wrappedUpAt = sat(11).toISOString();
+  });
+}
+
+/** Someone deletes the photo while it is open. */
+export async function theDockRemoved(page: Page): Promise<void> {
+  const { dock, talk } = await maraOnTheDock(page);
+  void hubOf(page)
+    .connected()
+    .then(() => talk.deletedBySomeone(dock));
+}
