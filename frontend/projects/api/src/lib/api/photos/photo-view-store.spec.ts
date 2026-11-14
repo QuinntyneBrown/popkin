@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PhotoDetailView } from '../../models/photos';
+import { PhotoReaction } from './photo-reactions';
 import { PhotoViewStore } from './photo-view-store';
 import { PHOTOS_API } from './photos-api';
 
@@ -31,12 +32,21 @@ function detail(id: string, extra: Partial<PhotoDetailView> = {}): PhotoDetailVi
 describe('PhotoViewStore', () => {
   let answers: Record<string, PhotoDetailView | 'missing' | 'down' | Subject<PhotoDetailView>>;
   let asked: string[];
+  let reacted: { kind: 'add' | 'remove'; emoji: string; answer: Subject<PhotoReaction[]> }[];
   let store: PhotoViewStore;
 
   beforeEach(() => {
     vi.useFakeTimers({ now: new Date(2026, 8, 12, 12, 0) });
     answers = { a: detail('a') };
     asked = [];
+    reacted = [];
+    const reaction =
+      (kind: 'add' | 'remove') =>
+      (_: string, __: string, emoji: string): Observable<PhotoReaction[]> => {
+        const answer = new Subject<PhotoReaction[]>();
+        reacted.push({ kind, emoji, answer });
+        return answer;
+      };
     const getPhoto = (_: string, id: string): Observable<PhotoDetailView> => {
       asked.push(id);
       const answer = answers[id] ?? 'missing';
@@ -45,7 +55,13 @@ describe('PhotoViewStore', () => {
       return answer instanceof Subject ? answer : of(answer);
     };
     TestBed.configureTestingModule({
-      providers: [PhotoViewStore, { provide: PHOTOS_API, useValue: { getPhoto } }],
+      providers: [
+        PhotoViewStore,
+        {
+          provide: PHOTOS_API,
+          useValue: { getPhoto, addReaction: reaction('add'), removeReaction: reaction('remove') },
+        },
+      ],
     });
     store = TestBed.inject(PhotoViewStore);
   });
@@ -128,5 +144,67 @@ describe('PhotoViewStore', () => {
   it('is not found for a photo that is not in the Popkin', () => {
     store.open('p', 'gone');
     expect(store.state()).toBe('not-found');
+  });
+
+  describe('reactions (L2-034)', () => {
+    const heart = { emoji: '❤️', count: 9, mine: false };
+    const answered = (index: number, reactions: PhotoReaction[]) => {
+      reacted[index].answer.next(reactions);
+      reacted[index].answer.complete();
+    };
+    const failed = (index: number) =>
+      reacted[index].answer.error(new HttpErrorResponse({ status: 500 }));
+
+    beforeEach(() => {
+      answers['a'] = detail('a', { reactions: [heart] });
+      store.open('p', 'a');
+    });
+
+    it('shows a reaction at once, then what the server answered', () => {
+      store.react('❤️');
+      expect(store.reactions()).toEqual([{ ...heart, count: 10, mine: true }]);
+      expect(reacted.map((r) => [r.kind, r.emoji])).toEqual([['add', '❤️']]);
+
+      answered(0, [{ ...heart, count: 11, mine: true }]);
+      expect(store.reactions()).toEqual([{ ...heart, count: 11, mine: true }]);
+    });
+
+    it('takes the member’s own reaction back', () => {
+      answers['a'] = detail('a', { reactions: [{ ...heart, count: 10, mine: true }] });
+      store.open('p', 'a');
+      store.react('❤️');
+      expect(store.reactions()).toEqual([heart]);
+      expect(reacted.map((r) => r.kind)).toEqual(['remove']);
+    });
+
+    it('puts the count back and says so when a reaction fails (AC4)', () => {
+      store.react('❤️');
+      failed(0);
+      expect(store.reactions()).toEqual([heart]);
+      expect(store.reactionFailed()).toBe(true);
+
+      store.dismissReactionFailure();
+      expect(store.reactionFailed()).toBe(false);
+    });
+
+    it('sends a second press only once the first has answered, so the two cannot cross', () => {
+      store.react('❤️');
+      store.react('❤️');
+      expect(store.reactions()).toEqual([heart]);
+      expect(reacted).toHaveLength(1);
+
+      answered(0, [{ ...heart, count: 10, mine: true }]);
+      expect(reacted.map((r) => r.kind)).toEqual(['add', 'remove']);
+      answered(1, [heart]);
+      expect(store.reactions()).toEqual([heart]);
+    });
+
+    it('keeps a later press when an earlier one fails', () => {
+      store.react('❤️');
+      store.react('🔥');
+      failed(0);
+      expect(store.reactions()).toEqual([heart, { emoji: '🔥', count: 1, mine: true }]);
+      expect(reacted.map((r) => r.emoji)).toEqual(['❤️', '🔥']);
+    });
   });
 });

@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { PhotoDetailView } from '../../models/photos';
 import { photoName, photoTime } from './album-days';
+import { PhotoReaction, applyReactionToggle } from './photo-reactions';
 import { PHOTOS_API } from './photos-api';
 
 /**
@@ -30,6 +31,20 @@ export class PhotoViewStore {
     return photo ? photoName(photo) : '';
   });
 
+  /** The reactions the server last answered, and the presses still to send, in order. */
+  private readonly confirmed = signal<readonly PhotoReaction[]>([]);
+  private readonly pressed = signal<readonly string[]>([]);
+  private sending?: Subscription;
+  /** The chips as the member sees them: the server's, with their presses applied (L2-034 AC2). */
+  readonly reactions = computed(() =>
+    this.pressed().reduce<PhotoReaction[]>(
+      (reactions, emoji) => applyReactionToggle(reactions, emoji),
+      [...this.confirmed()],
+    ),
+  );
+  /** A reaction did not save and its count went back (L2-034 AC4). */
+  readonly reactionFailed = signal(false);
+
   open(popkinId: string, photoId: string): void {
     this.popkinId = popkinId;
     this.photoId = photoId;
@@ -46,6 +61,38 @@ export class PhotoViewStore {
     this.state.set('error');
   }
 
+  /**
+   * Gives the reaction, or takes it back, at once; the requests go one at a time, so two presses
+   * cannot cross, and a failed one is undone (L2-034 AC2 to AC4).
+   */
+  react(emoji: string): void {
+    this.pressed.update((pressed) => [...pressed, emoji]);
+    if (!this.sending) this.sendNext();
+  }
+
+  dismissReactionFailure(): void {
+    this.reactionFailed.set(false);
+  }
+
+  private sendNext(): void {
+    const emoji = this.pressed()[0];
+    if (emoji === undefined) {
+      this.sending = undefined;
+      return;
+    }
+    const mine = this.confirmed().some((reaction) => reaction.emoji === emoji && reaction.mine);
+    const request = mine
+      ? this.api.removeReaction(this.popkinId, this.photoId, emoji)
+      : this.api.addReaction(this.popkinId, this.photoId, emoji);
+    const done = (answer?: PhotoReaction[]) => {
+      if (answer) this.confirmed.set(answer);
+      else this.reactionFailed.set(true);
+      this.pressed.update((pressed) => pressed.slice(1));
+      this.sendNext();
+    };
+    this.sending = request.subscribe({ next: (answer) => done(answer), error: () => done() });
+  }
+
   /** The newer photo of the album, or the older one; null at its ends (L2-033 AC3). */
   neighbour(side: 'previous' | 'next'): string | null {
     const photo = this.state() === 'ready' ? this.photo() : null;
@@ -54,10 +101,14 @@ export class PhotoViewStore {
 
   private read(): void {
     this.reading?.unsubscribe();
+    this.sending?.unsubscribe();
+    this.sending = undefined;
+    this.pressed.set([]);
     this.state.set('loading');
     this.reading = this.api.getPhoto(this.popkinId, this.photoId).subscribe({
       next: (photo) => {
         this.photo.set(photo);
+        this.confirmed.set(photo.reactions);
         this.state.set('ready');
       },
       error: (error: unknown) =>
