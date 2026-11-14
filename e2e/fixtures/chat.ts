@@ -67,6 +67,7 @@ export interface ChatMessage {
   } | null;
   /** The photo it carries (L2-026). */
   photo: ChatPhoto | null;
+  photoRemoved: boolean;
 }
 
 export interface ChatPhoto {
@@ -137,6 +138,7 @@ export function message(
     reactionsVersion: 0,
     quote: null,
     photo: null,
+    photoRemoved: false,
     ...extra,
   };
 }

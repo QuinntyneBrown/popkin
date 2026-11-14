@@ -29,6 +29,8 @@ export interface MessageRow {
   quote: ReplyQuote | null;
   /** The photo it carries (L2-026); its id is null while it is still on the device. */
   photo: RowPhoto | null;
+  /** Its photo was deleted, and "Photo removed" shows in its place (L2-036 AC3). */
+  photoRemoved: boolean;
 }
 
 export interface RowPhoto {
@@ -145,6 +147,7 @@ export function threadRows(
             message.author.firstName,
           )
         : null,
+      photoRemoved: message.photoRemoved,
     });
     lastAuthor = author;
   }
@@ -171,6 +174,7 @@ export function threadRows(
       photo: entry.photo?.preview
         ? rowPhoto(entry.popkinId, null, entry.photo.preview, true, '')
         : null,
+      photoRemoved: false,
     });
     lastAuthor = viewerMembershipId;
   }

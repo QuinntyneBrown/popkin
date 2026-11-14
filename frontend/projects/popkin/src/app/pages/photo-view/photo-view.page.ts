@@ -48,6 +48,7 @@ export class PhotoViewPage {
   /** The not-found screen takes over; until it does the stage keeps loading. */
   protected readonly state = computed(() => {
     const state = this.store.state();
+    if (state === 'removed') return 'error';
     return state === 'not-found' ? 'loading' : state;
   });
   protected readonly avatar = computed(() => {

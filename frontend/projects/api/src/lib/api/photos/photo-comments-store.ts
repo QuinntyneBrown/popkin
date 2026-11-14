@@ -6,7 +6,7 @@ import { messageTime } from '../chat/thread-text';
 import { PHOTOS_API } from './photos-api';
 
 /** The most a comment holds, and where the count starts to show (L2-035 AC3). */
-export const COMMENT_MAX = 500;
+export const PHOTO_COMMENT_MAX = 500;
 const COUNT_FROM = 450;
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -77,7 +77,7 @@ export class PhotoCommentsStore {
   /** "450 / 500" once the field is near the limit (L2-035 AC3). */
   readonly countText = computed(() => {
     const length = this.draft().length;
-    return length >= COUNT_FROM ? `${length} / ${COMMENT_MAX}` : null;
+    return length >= COUNT_FROM ? `${length} / ${PHOTO_COMMENT_MAX}` : null;
   });
   readonly postFailed = signal(false);
   /** The comment being deleted, and whether the last delete failed. */

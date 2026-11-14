@@ -42,6 +42,7 @@ function message(n: number, author = 'Walt', extra: Partial<MessageView> = {}): 
     reactions: [],
     reactionsVersion: 0,
     photo: null,
+    photoRemoved: false,
     quote: null,
     ...extra,
   };
