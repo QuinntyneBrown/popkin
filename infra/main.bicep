@@ -29,7 +29,7 @@ param location string = resourceGroup().location
 param domain string = 'popkin.community'
 
 @description('Set once Azure has checked popkin.community for email (docs/deployment.md); codes are then sent from it.')
-param customEmailDomainVerified bool = false
+param customEmailDomainVerified bool = true
 
 @description('The toll-free number SMS is sent from, as +1…, once its verification is approved; empty sends no text.')
 param smsSender string = ''
