@@ -1,4 +1,5 @@
 import { expect, test } from '../fixtures/pk-test';
+import { MARKETING, MARKETING_APP_URL } from '../fixtures/routes';
 import { MarketingHomePage } from '../pages/marketing-home.page';
 
 // Traces to: L2-079
@@ -225,5 +226,77 @@ test.describe('The pitch film', () => {
     await page.keyboard.press('Space');
     await expect(site.chapter('Meet Popkin')).toHaveAttribute('aria-current', 'true');
     expect(await site.filmTime()).toBe(16);
+  });
+});
+
+// Traces to: L2-081
+test.describe('From the marketing site to the app', () => {
+  // AC1, AC2: in development the site is built with the app at MARKETING_APP_URL.
+  test('sends every "Start a Popkin" to sign up and every "Sign in" to sign in, at the app', async ({
+    page,
+    pk,
+  }) => {
+    await pk.open('marketingHome');
+    const site = new MarketingHomePage(page);
+
+    for (const start of [site.navStart, site.heroStart, site.freeStart]) {
+      await expect(start).toHaveAttribute('href', `${MARKETING_APP_URL}/sign-up`);
+    }
+    await expect(site.navSignIn).toHaveAttribute('href', `${MARKETING_APP_URL}/sign-in`);
+    await expect(site.footerLink('Sign in')).toHaveAttribute('href', `${MARKETING_APP_URL}/sign-in`);
+    await expect(site.footerLink('Safety')).toHaveAttribute('href', `${MARKETING_APP_URL}/safety`);
+    await expect(site.footerLink('Privacy')).toHaveAttribute('href', `${MARKETING_APP_URL}/privacy`);
+    await expect(site.footerLink('Help')).toHaveAttribute('href', `${MARKETING_APP_URL}/help`);
+  });
+
+  // AC1
+  test('"Start a Popkin" opens the app at sign up', async ({ page, pk }) => {
+    await pk.open('marketingHome');
+    const site = new MarketingHomePage(page);
+
+    await site.heroStart.click();
+
+    await expect(page).toHaveURL(`${MARKETING_APP_URL}/sign-up`);
+  });
+
+  // AC3
+  test('"How it works" and "Ideas" move to their section and focus its heading, every time', async ({
+    page,
+    pk,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await pk.open('marketingHome');
+    const site = new MarketingHomePage(page);
+
+    await site.navIdeas.click();
+    await expect(site.ideasHeading).toBeFocused();
+    await expect(site.ideasHeading).toBeInViewport();
+
+    await site.navHowItWorks.click();
+    await expect(site.howHeading).toBeFocused();
+
+    await page.mouse.wheel(0, -4000);
+    await expect(site.howHeading).not.toBeInViewport();
+    await site.footerLink('How it works').click();
+    await expect(site.howHeading).toBeInViewport();
+    await expect(site.howHeading).toBeFocused();
+  });
+
+  // AC4, L2-061 AC2
+  test('calls no API and requests nothing from another host', async ({ page, pk }) => {
+    const elsewhere: string[] = [];
+    const api: string[] = [];
+    page.on('request', (request) => {
+      const url = new URL(request.url());
+      if (url.protocol.startsWith('http') && url.origin !== MARKETING) elsewhere.push(request.url());
+      if (url.pathname.startsWith('/api') || url.pathname.startsWith('/hubs')) api.push(request.url());
+    });
+
+    await pk.open('marketingHome');
+    await expect(new MarketingHomePage(page).freeHeading).toBeVisible();
+    await page.waitForLoadState('networkidle');
+
+    expect(elsewhere).toEqual([]);
+    expect(api).toEqual([]);
   });
 });
