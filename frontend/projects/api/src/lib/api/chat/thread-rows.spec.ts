@@ -177,6 +177,41 @@ describe('threadRows', () => {
     ]);
   });
 
+  it('gives a photo its alt text and the name of the button that opens it (L2-026 AC2)', () => {
+    const dock = { id: 'ph-1', url: '/api/files/dock', width: 800, height: 600 };
+    const rows = threadRows(
+      [
+        message('a', 'Dev', at(9), 'Dock was glass', { photo: dock }),
+        message('b', 'Mara', at(9, 1), '', { photo: { ...dock, id: 'ph-2' } }),
+        message('c', 'Dev', at(9, 2), 'No photo'),
+      ],
+      [],
+      mara,
+      now,
+    );
+    expect(rows.slice(1).map((row) => (row.kind === 'message' ? row.photo : null))).toEqual([
+      { id: 'ph-1', url: '/api/files/dock', alt: 'Photo from Dev', label: 'Open photo from Dev' },
+      { id: 'ph-2', url: '/api/files/dock', alt: 'Your photo', label: 'Open your photo' },
+      null,
+    ]);
+  });
+
+  it('shows a photo on its way from the device, which opens nothing yet', () => {
+    const rows = threadRows(
+      [],
+      [
+        { ...pending('p1', 'Sending', at(9)), photo: { id: null, preview: 'blob:dock' } },
+        { ...pending('p2', 'Failed', at(9)), photo: { id: null } },
+      ],
+      mara,
+      now,
+    );
+    expect(rows.slice(1).map((row) => (row.kind === 'message' ? row.photo : null))).toEqual([
+      { id: null, url: 'blob:dock', alt: 'Your photo', label: 'Open your photo' },
+      null,
+    ]);
+  });
+
   it('shows a message once when the server already has what the device still holds', () => {
     const rows = threadRows(
       [message('a', 'Mara', at(9), 'hello', { clientMessageId: 'p1' })],
