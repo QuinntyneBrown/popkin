@@ -40,7 +40,10 @@ test.describe('Pop up another with this crew', () => {
     await name.chooseLakeside();
     await name.looksGood.click();
     const length = new HowLongPage(page);
+    // Back belongs to the second step: it is chosen once that step is open, and back again.
+    await expect(length.root).toBeVisible();
     await length.back.click();
+    await expect(name.root).toBeVisible();
     await name.looksGood.click();
 
     await length.popItUp.click();

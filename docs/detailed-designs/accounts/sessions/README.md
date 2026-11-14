@@ -71,7 +71,8 @@ front-end guard and interceptor.
 - **Same-site proof** — `SameSiteRequestMiddleware` as designed; a request with neither
   `Sec-Fetch-Site` nor `Origin` (a non-browser client) is accepted, because only a browser carries
   the cookie into a cross-site request, and browsers send one of the two.
-- **`/join`** — decided by the join-by-code journey (journey 15); journey 6 built the scanner and not that screen.
+- **`/join`** — public, behind no guard: a visitor from the welcome screen and a signed-in member
+  from Scan to join both reach it (journey 15).
 
 ## Requirements
 

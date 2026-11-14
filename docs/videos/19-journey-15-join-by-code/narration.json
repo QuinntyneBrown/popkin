@@ -1,0 +1,21 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 3, "lines": ["No QR code to scan? Type the code instead."] },
+    { "id": "reach", "bars": 5, "lines": ["On the welcome screen, Join with a code opens Got a code?", "And if the camera is easier, Scan a QR code instead is one tap away."] },
+    { "id": "type", "bars": 7, "lines": ["A friend reads out the code. Type it, or paste the whole invite link.", "Find my Popkin, and the invite to Lakeside Weekend opens."] },
+    { "id": "invalid", "bars": 3, "lines": ["A code no Popkin has marks the field, and keeps what you typed."] },
+    { "id": "limited", "bars": 5, "lines": ["Try too many codes, and Popkin says when to try again.", "If the lookup fails, what you typed is still there."] },
+    { "id": "grow", "bars": 6, "lines": [
+      { "text": "On a phone, it is one column.", "at": 0 },
+      { "text": "From 768 pixels, the campfire sits beside it.", "at": 8 }
+    ] },
+    { "id": "proof", "bars": 7, "lines": ["What no screen shows: twenty tries in ten minutes from one address, then a wait. Nothing is sent for an empty field, or a link that isn't Popkin's.", "Still to come: links on a Popkin's own address."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey fifteen. Popkin is a free platform for pop-up communities."] }
+  ]
+}

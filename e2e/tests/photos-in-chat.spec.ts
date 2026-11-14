@@ -54,12 +54,11 @@ test.describe('choosing a photo (L2-026 AC1)', () => {
 
     // Photo is offered once the thread has opened; focusing does not wait for it as a click does.
     await expect(photos.choose).toBeEnabled();
-    await photos.choose.focus();
     const chooser = page.waitForEvent('filechooser');
-    await page.keyboard.press('Enter');
+    // Focused and pressed in one step, so the thread opening cannot take the focus in between.
+    await photos.choose.press('Enter');
     await (await chooser).setFiles(aPhoto('lake.jpg'));
-    await photos.remove.focus();
-    await page.keyboard.press('Enter');
+    await photos.remove.press('Enter');
 
     await expect(photos.preview).toHaveCount(0);
   });
