@@ -45,6 +45,11 @@ public sealed class PhotosController(ISender sender) : ControllerBase
     public async Task<ActionResult<IReadOnlyList<PhotoReactionDto>>> Unreact(Guid popkinId, Guid photoId, string? emoji, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new RemovePhotoReactionCommand(popkinId, photoId, emoji), cancellationToken));
 
+    /// <summary>"Save photo": an address the stored photo downloads from as an attachment, for an hour (L2-036 AC1).</summary>
+    [HttpGet("{photoId:guid}/download")]
+    public async Task<ActionResult<PhotoDownloadDto>> GetDownload(Guid popkinId, Guid photoId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetPhotoDownloadQuery(popkinId, photoId), cancellationToken));
+
     public sealed record AddCommentRequest(string? Text);
 
     /// <summary>The photo's comments, oldest first (L2-035 AC1).</summary>

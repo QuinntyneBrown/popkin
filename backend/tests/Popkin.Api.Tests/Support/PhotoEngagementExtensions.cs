@@ -60,6 +60,10 @@ public static class PhotoEngagementExtensions
     public static List<string> CommentTexts(this JsonElement comments) =>
         comments.EnumerateArray().Select(c => c.GetProperty("text").GetString()!).ToList();
 
+    /// <summary>Asks for the address the photo is saved from.</summary>
+    public static Task<HttpResponseMessage> PhotoDownloadAsync(this HttpClient member, Guid popkinId, Guid photoId) =>
+        member.GetAsync($"{PhotoPath(popkinId, photoId)}/download");
+
     /// <summary>The id of the photo a message carries.</summary>
     public static Guid PhotoIdOf(this JsonElement message) => message.GetProperty("photo").GetProperty("id").GetGuid();
 }
