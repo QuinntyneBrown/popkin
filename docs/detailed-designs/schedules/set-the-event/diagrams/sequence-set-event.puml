@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Setting the event
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinSettingsDialog" as menu
+  participant "SetEventDialog" as dialog
+  participant "HttpScheduleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ScheduleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "SetEventCommandHandler" as handler
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> menu : Choose "Set the event" (L2-020 AC1, L2-085 AC1)
+menu -> dialog : Open with the current event, or empty
+alt Empty label, last day before first, or more than a year ahead
+  dialog --> actor : "Save" disabled and a message (L2-085 AC2)
+end
+actor -> dialog : "Save"
+dialog -> client : setEvent(popkinId, label, firstDay, lastDay)
+client -> controller : PUT /api/popkins/{popkinId}/event
+controller -> handler : Send SetEventCommand
+handler -> switches : Require(Schedules)
+handler -> guard : RequireHostAsync(popkinId)
+alt Not the Host
+  controller --> client : 403 host_only (L2-085 AC6)
+else Wrapped up
+  controller --> client : 409 popkin_wrapped_up
+else Host
+  handler -> db : PopkinSpace.SetEvent; save
+  handler -> notifier : ScheduleChanged(popkinId)
+  controller --> client : 200 EventDto
+  dialog --> actor : Close, "Event saved" (L2-085 AC4)
+end
+alt Failure
+  dialog --> actor : Stays open; "We couldn't save the event." (L2-085 AC7)
+end
+@enduml

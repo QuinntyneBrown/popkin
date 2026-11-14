@@ -1,0 +1,73 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — This week
+
+package "Popkin.Domain" {
+  class WorkingStretch {
+    +Guid MembershipId
+    +DateOnly Day
+    +int Index
+    +int StartMinute
+    +int EndMinute
+  }
+  class WorkingHours {
+    +{static} Check(stretches: WorkingStretch[]): void
+  }
+  class EveningFreedom {
+    +{static} EveningStart: int = 1200
+    +{static} EveningEnd: int = 1380
+    +{static} Of(day: MemberDay[]): EveningFreedom
+    +int FreeCount
+    +int? EveryoneFreeFrom
+    +string[] LastOffShift
+    +string[] Working
+  }
+  class Membership {
+    +Guid Id
+    +string DisplayName
+  }
+}
+package "Popkin.Application" {
+  class GetThisWeekQuery {
+    +Guid PopkinId
+    +DateOnly From
+  }
+  class SetWorkingHoursCommand {
+    +Guid PopkinId
+    +Guid MembershipId
+    +DateOnly From
+    +StretchInput[][] Days
+  }
+  class GetScheduleSummaryQuery {
+    +Guid PopkinId
+    +DateOnly From
+  }
+  class ThisWeekDto {
+    +DateOnly From
+    +int MemberCount
+    +DayFreedomDto[] Days
+    +WeekMemberDto[] Members
+    +bool CanEdit
+  }
+  class ScheduleSummaryDto {
+    +bool HasHours
+    +DateOnly? Day
+    +string? EveryoneFreeFrom
+  }
+}
+Membership "1" *-- "0..*" WorkingStretch
+GetThisWeekQuery ..> EveningFreedom
+GetScheduleSummaryQuery ..> EveningFreedom
+SetWorkingHoursCommand ..> WorkingHours
+GetThisWeekQuery ..> ThisWeekDto
+GetScheduleSummaryQuery ..> ScheduleSummaryDto
+@enduml

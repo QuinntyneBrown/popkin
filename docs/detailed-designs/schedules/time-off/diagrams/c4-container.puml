@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Time off
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Time off page and the Add my time off dialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET and PUT .../schedule/time-off, hub event ScheduleChanged")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "TimeOffDay, PopkinSpace event")
+}
+Rel(member, web, "Opens the Schedule tab, chooses a week, adds time off", "HTTPS")
+Rel(web, api, "Reads a week, saves my time off", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads and replaces time-off days", "EF Core")
+Rel(api, web, "ScheduleChanged", "SignalR")
+@enduml

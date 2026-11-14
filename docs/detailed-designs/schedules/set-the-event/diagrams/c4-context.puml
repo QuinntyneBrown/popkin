@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Set the event
+
+Person(host, "Host", "Sets what the group is getting together for")
+Person(member, "Member", "Sees the event in time off")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences and schedules")
+
+Rel(host, popkin, "Sets or removes the event in")
+Rel(member, popkin, "Sees the event marked in time off in")
+@enduml

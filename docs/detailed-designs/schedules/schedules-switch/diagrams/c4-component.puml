@@ -1,0 +1,23 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Schedules switch
+
+Container_Boundary(web, "Popkin web app") {
+  Component(frame, "PopkinFrame", "api library", "schedules from the header")
+  Component(nav, "pk-popkin-nav", "components library", "Schedule tab when on")
+  Component(store, "TimeOffStore, ThisWeekStore", "api library", "state off on 404 feature_off")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(home, "GetPopkinHomeQueryHandler", "MediatR handler", "PopkinHomeDto.schedules")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "IsOn, Require")
+  Component(settings, "SettingsFeatureSwitches", "Infrastructure", "Reads IConfiguration Features:Schedules")
+  Component(handlers, "Schedule handlers", "MediatR handlers", "Require Schedules first")
+}
+Rel(frame, home, "GET header")
+Rel(nav, frame, "Reads schedules")
+Rel(store, handlers, "Reads")
+Rel(home, switches, "IsOn")
+Rel(handlers, switches, "Require")
+Rel(switches, settings, "Implemented by")
+@enduml

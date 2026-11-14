@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Opening this week
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ThisWeekPage" as page
+  participant "ThisWeekStore" as store
+  participant "HttpScheduleApi" as client
+  participant "Everyone thread" as chat
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ScheduleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "Handler" as handler
+  participant "EveningFreedom" as freedom
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "This week" (L2-074 AC1)
+page -> store : open(popkinId, the viewer's today)
+store -> client : week(popkinId, from)
+client -> controller : GET /api/popkins/{popkinId}/schedule/week?from=2026-09-12
+controller -> handler : Send GetThisWeekQuery
+handler -> switches : Require(Schedules)
+handler -> guard : RequireMemberAsync(popkinId)
+handler -> db : Members who have not left; their WorkingStretch rows of the seven days
+loop Each day
+  handler -> freedom : Of(the members' stretches)
+  freedom --> handler : Free count, everyone free from, last off shift, working
+end
+controller --> client : 200 ThisWeekDto
+store --> page : Day buttons "{n}/{members} free", today chosen (L2-074 AC2)
+alt Everyone free
+  page --> actor : "Wednesday, everyone's free from 7:30 pm." and who is last off shift (L2-074 AC3)
+else Someone works
+  page --> actor : "Tuesday, 3 of 6 are free in the evening." and who is working (L2-074 AC4)
+end
+page --> actor : Timeline noon to midnight, its text for assistive technology (L2-074 AC5, AC6)
+actor -> page : Choose "Plan dinner in chat" or "Ask in chat anyway"
+page -> chat : Navigate to Everyone with ?draft=
+chat --> actor : The draft in the message field, not sent (L2-074 AC7)
+@enduml

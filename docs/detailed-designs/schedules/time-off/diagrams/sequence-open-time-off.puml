@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — Opening time off
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "TimeOffPage" as page
+  participant "TimeOffStore" as store
+  participant "HttpScheduleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ScheduleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "Handler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open the Schedule tab (L2-072 AC1)
+page -> store : open(popkinId, week from the address, or none)
+alt No week chosen
+  store -> store : The event's week, or the viewer's current week (L2-072 AC8)
+end
+store -> client : timeOff(popkinId, week)
+client -> controller : GET /api/popkins/{popkinId}/schedule/time-off?week=2027-02-15
+controller -> handler : Send GetTimeOffWeekQuery
+handler -> switches : Require(Schedules)
+alt Schedules is off
+  controller --> client : 404 feature_off (L2-077 AC3)
+  store --> page : state off: "Schedules is switched off" (L2-077 AC2)
+else On
+  handler -> guard : RequireMemberAsync(popkinId)
+  alt Not a member
+    controller --> client : 404 popkin_not_found (L2-051)
+  else Member
+    handler -> db : Members who have not left, by JoinedAt; their TimeOffDay rows of the week
+    controller --> client : 200 TimeOffWeekDto
+    client --> store : The week
+    store --> page : Month, year, week chips with the event's dot, table, counts, legend (L2-072 AC2 to AC6)
+  end
+end
+actor -> page : Choose another week, Previous or Next week, or month
+page -> page : Put ?week= in the address
+page -> store : open(popkinId, week)
+page --> actor : "Go to Cabin week" when it is not the event's week (L2-072 AC7)
+@enduml

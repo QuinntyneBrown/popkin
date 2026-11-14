@@ -1,0 +1,49 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Set the event
+
+package "Popkin.Domain" {
+  class PopkinSpace {
+    +Guid Id
+    +Guid HostPersonId
+    +string? EventLabel
+    +DateOnly? EventFirstDay
+    +DateOnly? EventLastDay
+    +SetEvent(label: string, firstDay: DateOnly, lastDay: DateOnly): void
+    +RemoveEvent(): void
+  }
+}
+package "Popkin.Application" {
+  class SetEventCommand {
+    +Guid PopkinId
+    +string? Label
+    +DateOnly? FirstDay
+    +DateOnly? LastDay
+  }
+  class RemoveEventCommand {
+    +Guid PopkinId
+  }
+  class EventInput {
+    +{static} Label(value: string?): string
+    +{static} Days(first: DateOnly?, last: DateOnly?, today: DateOnly): (DateOnly, DateOnly)
+  }
+  class EventDto {
+    +string Label
+    +DateOnly FirstDay
+    +DateOnly LastDay
+  }
+}
+SetEventCommand ..> EventInput
+SetEventCommand ..> PopkinSpace
+RemoveEventCommand ..> PopkinSpace
+SetEventCommand ..> EventDto
+@enduml

@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Time off
+
+Person(member, "Member", "Sees who is off each day and enters their own time off")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences and schedules")
+
+Rel(member, popkin, "Reads time off and adds their own in")
+@enduml
