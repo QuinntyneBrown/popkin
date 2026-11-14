@@ -12,34 +12,38 @@ public sealed record AddReactionCommand(Guid PopkinId, Guid ThreadId, Guid Messa
 /// <summary>Takes the caller's emoji off a message (L2-024 AC3). Taking it twice, or one never added, changes nothing.</summary>
 public sealed record RemoveReactionCommand(Guid PopkinId, Guid ThreadId, Guid MessageId, string? Emoji) : IRequest<IReadOnlyList<ReactionDto>>;
 
-public sealed class AddReactionCommandHandler(IAppDbContext db, IMembershipGuard guard, TimeProvider clock)
+public sealed class AddReactionCommandHandler(IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPopkinNotifier notifier)
     : IRequestHandler<AddReactionCommand, IReadOnlyList<ReactionDto>>
 {
     public async Task<IReadOnlyList<ReactionDto>> Handle(AddReactionCommand request, CancellationToken cancellationToken)
     {
         var target = await ReactionTargets.RequireAsync(db, guard, request.PopkinId, request.ThreadId, request.MessageId, request.Emoji, cancellationToken);
-        if (!await ReactionTargets.ExistsAsync(db, target, cancellationToken))
+        if (await ReactionTargets.ExistsAsync(db, target, cancellationToken))
         {
-            db.MessageReactions.Add(MessageReaction.React(target.Message.Id, target.Membership.Id, target.Emoji, clock.GetUtcNow()));
-            try
-            {
-                await db.SaveChangesAsync(cancellationToken);
-            }
-            catch (DbUpdateException)
-            {
-                // Two adds of one reaction raced and this one lost on the key: the reaction is there.
-                if (!await ReactionTargets.ExistsAsync(db, target, cancellationToken))
-                {
-                    throw;
-                }
-            }
+            return await Reactions.OfAsync(db, target.Message.Id, cancellationToken);
         }
 
-        return await Reactions.OfAsync(db, target.Message.Id, cancellationToken);
+        db.MessageReactions.Add(MessageReaction.React(target.Message.Id, target.Membership.Id, target.Emoji, clock.GetUtcNow()));
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            // Two adds of one reaction raced and this one lost on the key: the winner was told.
+            if (!await ReactionTargets.ExistsAsync(db, target, cancellationToken))
+            {
+                throw;
+            }
+
+            return await Reactions.OfAsync(db, target.Message.Id, cancellationToken);
+        }
+
+        return await ReactionTargets.ToldAsync(db, notifier, target, cancellationToken);
     }
 }
 
-public sealed class RemoveReactionCommandHandler(IAppDbContext db, IMembershipGuard guard)
+public sealed class RemoveReactionCommandHandler(IAppDbContext db, IMembershipGuard guard, IPopkinNotifier notifier)
     : IRequestHandler<RemoveReactionCommand, IReadOnlyList<ReactionDto>>
 {
     public async Task<IReadOnlyList<ReactionDto>> Handle(RemoveReactionCommand request, CancellationToken cancellationToken)
@@ -47,13 +51,14 @@ public sealed class RemoveReactionCommandHandler(IAppDbContext db, IMembershipGu
         var target = await ReactionTargets.RequireAsync(db, guard, request.PopkinId, request.ThreadId, request.MessageId, request.Emoji, cancellationToken);
         var reaction = await db.MessageReactions.FirstOrDefaultAsync(
             r => r.MessageId == target.Message.Id && r.MembershipId == target.Membership.Id && r.Emoji == target.Emoji, cancellationToken);
-        if (reaction is not null)
+        if (reaction is null)
         {
-            db.MessageReactions.Remove(reaction);
-            await db.SaveChangesAsync(cancellationToken);
+            return await Reactions.OfAsync(db, target.Message.Id, cancellationToken);
         }
 
-        return await Reactions.OfAsync(db, target.Message.Id, cancellationToken);
+        db.MessageReactions.Remove(reaction);
+        await db.SaveChangesAsync(cancellationToken);
+        return await ReactionTargets.ToldAsync(db, notifier, target, cancellationToken);
     }
 }
 
@@ -78,6 +83,19 @@ public static class ReactionTargets
         }
 
         return new ReactionTarget(popkin, membership, thread, message, emoji ?? "");
+    }
+
+    /// <summary>
+    /// The message's summary after a change was saved, told to the thread's audience, so a
+    /// direct message's reactions reach its two members alone (L2-023 AC3). A repeat that changed
+    /// nothing is not told.
+    /// </summary>
+    public static async Task<IReadOnlyList<ReactionDto>> ToldAsync(
+        IAppDbContext db, IPopkinNotifier notifier, ReactionTarget target, CancellationToken cancellationToken)
+    {
+        var summary = await Reactions.OfAsync(db, target.Message.Id, cancellationToken);
+        await notifier.ReactionsChanged(await ChatThreads.AudienceAsync(db, target.Thread, cancellationToken), target.Thread.Id, target.Message.Id, summary);
+        return summary;
     }
 
     public static Task<bool> ExistsAsync(IAppDbContext db, ReactionTarget target, CancellationToken cancellationToken) =>
