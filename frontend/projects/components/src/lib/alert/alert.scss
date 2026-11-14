@@ -37,3 +37,15 @@ strong {
   font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-family-sans);
   text-decoration: underline;
 }
+
+/* One line: the words take the room between the icon and the action, which sits at the end. */
+.alert__line {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert__action--end {
+  min-height: var(--target-comfortable);
+  margin-top: 0;
+  padding: 0 var(--space-2);
+}

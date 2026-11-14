@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { Icon } from '../icon/icon';
 import { IconName } from '../icon/icons';
@@ -7,10 +8,13 @@ import { IconName } from '../icon/icons';
  * in plain words, announced when it appears. With an `action` it ends in a button that puts it
  * right, such as "Try again" under a section that did not load (L2-019 AC9). Its `icon` is the
  * alert's own unless the failure has one that says more, such as a camera that is off.
+ *
+ * Without a `heading` it is one line: the words beside the icon and the action at its end, as a
+ * refused photo above the composer says why with "Dismiss" (L2-031 AC2).
  */
 @Component({
   selector: 'div[pk-alert]',
-  imports: [Icon],
+  imports: [Icon, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './alert.html',
   styleUrl: './alert.scss',
@@ -23,7 +27,8 @@ import { IconName } from '../icon/icons';
   },
 })
 export class Alert {
-  readonly heading = input.required<string>();
+  /** What happened, in bold. Without it the alert is one line with its action at the end. */
+  readonly heading = input<string>();
   readonly variant = input<'danger' | 'info' | 'warning'>('danger');
   /** Another icon than the alert's own: `scan` for a code that is not ours. */
   readonly icon = input<IconName>('alert');
