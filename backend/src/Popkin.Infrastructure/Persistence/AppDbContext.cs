@@ -21,6 +21,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Message> Messages => Set<Message>();
 
+    public DbSet<MessageReaction> MessageReactions => Set<MessageReaction>();
+
     public DbSet<ThreadReadState> ThreadReadStates => Set<ThreadReadState>();
 
     public DbSet<Photo> Photos => Set<Photo>();

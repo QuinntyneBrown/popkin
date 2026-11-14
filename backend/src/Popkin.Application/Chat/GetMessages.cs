@@ -67,6 +67,7 @@ public sealed class GetMessagesQueryHandler(IAppDbContext db, IMembershipGuard g
         // A member who has left still wrote their messages, so authors are read whether or not they are still in.
         var authorIds = messages.Select(m => m.AuthorMembershipId).Distinct().ToList();
         var authors = await db.Memberships.AsNoTracking().Where(m => authorIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, cancellationToken);
-        return messages.Select(m => MessageDto.Of(m, authors[m.AuthorMembershipId], photos)).ToList();
+        var reactions = await Reactions.OfAsync(db, messages.Select(m => m.Id).ToList(), cancellationToken);
+        return messages.Select(m => MessageDto.Of(m, authors[m.AuthorMembershipId], photos, reactions.GetValueOrDefault(m.Id))).ToList();
     }
 }

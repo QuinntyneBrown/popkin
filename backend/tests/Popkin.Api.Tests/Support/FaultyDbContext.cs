@@ -34,6 +34,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<Message> Messages => inner.Messages;
 
+    public DbSet<MessageReaction> MessageReactions => inner.MessageReactions;
+
     public DbSet<ThreadReadState> ThreadReadStates => inner.ThreadReadStates;
 
     public DbSet<Photo> Photos => inner.Photos;

@@ -12,7 +12,8 @@ public sealed record MessageAuthorDto(Guid MembershipId, string FirstName, Avata
 /// <summary>
 /// A message as every member reads it. The same value travels the hub to everyone, so it says
 /// nothing about who is reading, and it names its Popkin and its thread, so a client that holds
-/// several knows where it belongs. `ClientMessageId` is null for a system message.
+/// several knows where it belongs. `ClientMessageId` is null for a system message. `Reactions`
+/// is the message's summary of reactions (L2-024).
 /// </summary>
 public sealed record MessageDto(
     Guid Id,
@@ -22,10 +23,14 @@ public sealed record MessageDto(
     MessageKind Kind,
     MessageAuthorDto Author,
     string Text,
-    DateTimeOffset SentAt)
+    DateTimeOffset SentAt,
+    IReadOnlyList<ReactionDto> Reactions)
 {
-    /// <summary>A message of a thread of that Popkin; the author is a member of the same Popkin.</summary>
-    public static MessageDto Of(Message message, Membership author, IPhotoStore photos) =>
+    /// <summary>
+    /// A message of a thread of that Popkin; the author is a member of the same Popkin. Given no
+    /// reactions, it has none, as a message just sent.
+    /// </summary>
+    public static MessageDto Of(Message message, Membership author, IPhotoStore photos, IReadOnlyList<ReactionDto>? reactions = null) =>
         new(
             message.Id,
             author.PopkinId,
@@ -34,7 +39,8 @@ public sealed record MessageDto(
             message.Kind,
             new MessageAuthorDto(author.Id, PersonName.FirstName(author.DisplayName), AvatarDto.Of(author, photos)),
             message.Text,
-            message.SentAt);
+            message.SentAt,
+            reactions ?? []);
 }
 
 /// <summary>A page of a thread, oldest first. `HasMore` says whether more lie in the direction read.</summary>
@@ -45,6 +51,9 @@ public static class ChatProblems
     public static ProblemException ThreadNotFound() => new(404, "thread_not_found", "This conversation isn't here.");
 
     public static ProblemException MessageNotFound(string field) => ProblemException.Invalid("message_not_found", "That message isn't in this conversation.", field);
+
+    /// <summary>The message a path names is not one of the thread's that can be read.</summary>
+    public static ProblemException MessageGone() => new(404, "message_not_found", "That message isn't in this conversation.");
 }
 
 public static class ChatThreads
@@ -80,6 +89,15 @@ public static class ChatThreads
             .ToListAsync(cancellationToken);
         return Audience.People(thread.PopkinId, people);
     }
+
+    /// <summary>
+    /// A member's message of the thread that is still there, to act on; otherwise 404
+    /// `message_not_found`, the same for a deleted one, a system note and one of another thread.
+    /// </summary>
+    public static async Task<Message> RequireMessageAsync(IAppDbContext db, ChatThread thread, Guid messageId, CancellationToken cancellationToken) =>
+        await db.Messages.FirstOrDefaultAsync(
+            m => m.Id == messageId && m.ThreadId == thread.Id && m.DeletedAt == null && m.Kind == MessageKind.Member, cancellationToken)
+        ?? throw ChatProblems.MessageGone();
 
     public static async Task<ChatThread> EveryoneAsync(IAppDbContext db, Guid popkinId, CancellationToken cancellationToken) =>
         await db.ChatThreads.AsNoTracking().FirstAsync(t => t.PopkinId == popkinId && t.Kind == ChatThreadKind.Everyone, cancellationToken);

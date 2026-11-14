@@ -43,7 +43,8 @@ public sealed class SendMessageCommandHandler(
         // repeat says, so "Try again" after a lost answer adds nothing (L2-028 AC1).
         if (await StoredAsync(membership.Id, clientMessageId, cancellationToken) is { } stored)
         {
-            return new SendMessageResult(MessageDto.Of(stored, membership, photos), Created: false);
+            return new SendMessageResult(
+                MessageDto.Of(stored, membership, photos, await Reactions.OfAsync(db, stored.Id, cancellationToken)), Created: false);
         }
 
         if (popkin.Status == PopkinStatus.WrappedUp)

@@ -22,6 +22,20 @@ public sealed class MessageConfiguration : IEntityTypeConfiguration<Message>
     }
 }
 
+public sealed class MessageReactionConfiguration : IEntityTypeConfiguration<MessageReaction>
+{
+    public void Configure(EntityTypeBuilder<MessageReaction> builder)
+    {
+        builder.ToTable("MessageReactions");
+        // One reaction per member, message and emoji, even when two requests race (L2-024).
+        builder.HasKey(r => new { r.MessageId, r.MembershipId, r.Emoji });
+        builder.Property(r => r.Emoji).HasMaxLength(MessageReaction.MaxEmojiLength);
+        // The reactions go with their message.
+        builder.HasOne<Message>().WithMany().HasForeignKey(r => r.MessageId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Membership>().WithMany().HasForeignKey(r => r.MembershipId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public sealed class ThreadReadStateConfiguration : IEntityTypeConfiguration<ThreadReadState>
 {
     public void Configure(EntityTypeBuilder<ThreadReadState> builder)
