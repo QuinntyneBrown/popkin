@@ -156,6 +156,7 @@
                   [readOnly]="readOnly()"
                   [quote]="row.quote"
                   [photo]="row.photo"
+                  [photoRemoved]="row.photoRemoved"
                   [marked]="!!row.id && row.id === store.marked()"
                   (retry)="retry(row)"
                   (discard)="discard(row)"
