@@ -2,6 +2,7 @@ import { InjectionToken, Signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CallParticipantView, CallSignal } from '../../models/calls';
 import { MemberJoinedView, MessageView, ReactionSummary } from '../../models/chat';
+import { PopkinSettingsView } from '../../models/popkin';
 
 export type RealtimeState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
 
@@ -29,6 +30,11 @@ export interface PopkinRealtime {
   readonly memberLeft$: Observable<{ popkinId: string; membershipId: string }>;
   /** A Popkin wrapped up, by its Host; the id of the Popkin (L2-044 AC4). */
   readonly popkinWrappedUp$: Observable<string>;
+  /**
+   * The Host changed a Popkin's name, emoji, colour or length (L2-020 AC3, AC4): its settings in
+   * full, with the version that orders them.
+   */
+  readonly popkinChanged$: Observable<PopkinSettingsView>;
   /** Photos were added to a Popkin's album (L2-031 AC7). */
   readonly photosAdded$: Observable<{ popkinId: string; photoIds: string[] }>;
   /**

@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Subject, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PopkinHomeView } from '../../models/home';
+import { PopkinSettingsView } from '../../models/popkin';
 import { PopkinFrame } from './popkin-frame';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
@@ -21,17 +22,31 @@ const lakeside = {
   keepPhotos: true,
   photosRemoveAt: null,
   photosRemovedAt: null,
+  length: 'TheWeekend',
+  version: 1,
 } as PopkinHomeView;
+
+const changed = (version: number, id = 'p'): PopkinSettingsView => ({
+  id,
+  name: 'Campfire Nights',
+  emoji: '🎉',
+  colour: 'Plum',
+  length: 'KeepItGoing',
+  endsAt: null,
+  version,
+});
 
 describe('PopkinFrame', () => {
   let answer: PopkinHomeView | 'down';
   let asked: number;
   let frame: PopkinFrame;
+  let hub: Subject<PopkinSettingsView>;
 
   beforeEach(() => {
     vi.useFakeTimers({ now: new Date(2026, 8, 12, 12, 0) });
     answer = lakeside;
     asked = 0;
+    hub = new Subject<PopkinSettingsView>();
     const getHome = () => {
       asked++;
       return answer === 'down'
@@ -42,7 +57,14 @@ describe('PopkinFrame', () => {
       providers: [
         PopkinFrame,
         { provide: POPKINS_API, useValue: { getHome } },
-        { provide: POPKIN_REALTIME, useValue: { popkinWrappedUp$: new Subject<string>() } },
+        {
+          provide: POPKIN_REALTIME,
+          useValue: {
+            popkinWrappedUp$: new Subject<string>(),
+            popkinChanged$: hub,
+            start: () => undefined,
+          },
+        },
       ],
     });
     frame = TestBed.inject(PopkinFrame);
@@ -67,6 +89,22 @@ describe('PopkinFrame', () => {
     frame.open('p');
     expect(frame.accent()).toBe('coral');
     expect(frame.name()).toBe('');
+    expect(frame.timeLeft()).toBeNull();
+  });
+
+  // L2-020 AC3, AC4: the tabs follow what the Host saves.
+  it('takes the Host’s newer change of the Popkin, and drops an older one', () => {
+    frame.open('p');
+    hub.next(changed(1));
+    expect(frame.name()).toBe('Lakeside Weekend');
+    hub.next(changed(2, 'q'));
+    expect(frame.name()).toBe('Lakeside Weekend');
+
+    hub.next(changed(2));
+
+    expect(frame.name()).toBe('Campfire Nights');
+    expect(frame.emoji()).toBe('🎉');
+    expect(frame.accent()).toBe('plum');
     expect(frame.timeLeft()).toBeNull();
   });
 

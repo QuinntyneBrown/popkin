@@ -32,6 +32,8 @@ export class PhotoAlbumPage {
   readonly moreFailed: Locator;
   readonly tryMoreAgain: Locator;
   readonly nav: Locator;
+  /** The Popkin's name in the sidebar, from 1024 px. */
+  readonly sidebarName: Locator;
   readonly currentTab: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly album: Locator;
@@ -73,6 +75,7 @@ export class PhotoAlbumPage {
     this.moreFailed = this.album.locator('.alert');
     this.tryMoreAgain = this.moreFailed.getByRole('button', { name: 'Try again' });
     this.nav = page.getByRole('navigation', { name: 'Popkin' });
+    this.sidebarName = this.nav.locator('.popkin-nav__id-text strong');
     this.currentTab = this.nav.locator('[aria-current="page"]');
     this.picker = page.locator('input[type="file"]');
     this.faces = this.header.locator('.avatar-stack');

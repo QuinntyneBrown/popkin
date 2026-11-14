@@ -14,6 +14,8 @@ export interface ThreadView {
   memberCount: number;
   hereNow: number;
   presenceVersion: number;
+  /** Orders `PopkinChanged`: a change no newer than this is dropped (L2-020). */
+  popkinVersion: number;
   /** True once the Popkin has wrapped up. */
   readOnly: boolean;
   /** Messages from other members after the viewer's read point. */

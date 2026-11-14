@@ -5,9 +5,9 @@
  *
  * The journey below is the cast of the mocks: Mara signs up and starts Lakeside Weekend, Walt
  * and Dev join it, Joel opens its invite and joins, Walt and Mara write in the Everyone
- * thread, Mara opens the Popkin's home, starts a group call and leaves it, she adds the
- * album's first photo, she shares an experience, rates it and comments on it, she wraps the
- * Popkin up and reads its recap, and Dev leaves it. Then she gives her full name, reads her
+ * thread, Mara opens the Popkin's home, saves its settings as they were, starts a group call
+ * and leaves it, she adds the album's first photo, she shares an experience, rates it and
+ * comments on it, she wraps the Popkin up and reads its recap, and Dev leaves it. Then she gives her full name, reads her
  * account and saves a photo; Joel signs out; and Mara deletes her account. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
@@ -156,6 +156,18 @@ await call('GET', `/api/popkins/${created.id}/threads/everyone/preview`);
 await call('GET', `/api/popkins/${created.id}/photos/summary`);
 await call('GET', `/api/popkins/${created.id}/experiences/summary`);
 await call('GET', `/api/popkins/${created.id}/members`);
+
+// Popkin settings: Mara saves its name and look, and how long it lasts, as they were, so the
+// Popkin stays the one the mocks draw.
+await call('PATCH', `/api/popkins/${created.id}`, {
+  name: 'Lakeside Weekend',
+  emoji: '🏕️',
+  colour: 'Teal',
+});
+await call('PUT', `/api/popkins/${created.id}/length`, {
+  length: 'TheWeekend',
+  endsAt: sunday.toISOString(),
+});
 
 // Calls: no group call is under way, which is what the home and the thread read; then Mara
 // starts one, turns her camera off and leaves, which ends it (journey 7).

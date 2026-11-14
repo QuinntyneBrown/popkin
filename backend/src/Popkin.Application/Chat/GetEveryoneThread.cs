@@ -24,7 +24,8 @@ public sealed record ThreadOtherDto(Guid MembershipId, string DisplayName, strin
 /// <summary>
 /// A thread's header: the Popkin's look and end, how many members it has and how many are here
 /// now, whether anything can still be posted, the reader's unread count and read point, and, on
-/// a direct message, the other member; `Other` is null on Everyone. A direct message has two
+/// a direct message, the other member; `Other` is null on Everyone. `PopkinVersion` orders the
+/// `PopkinChanged` events that change the Popkin's look and end (L2-020). A direct message has two
 /// members, and "here now" stays the Popkin's.
 /// </summary>
 public sealed record ThreadDto(
@@ -42,7 +43,8 @@ public sealed record ThreadDto(
     int UnreadCount,
     Guid? LastReadMessageId,
     ThreadViewerDto Viewer,
-    ThreadOtherDto? Other)
+    ThreadOtherDto? Other,
+    long PopkinVersion)
 {
     /// <summary>The header of a thread the member may read, with its other member when it is a direct message.</summary>
     public static async Task<ThreadDto> OfAsync(
@@ -76,7 +78,8 @@ public sealed record ThreadDto(
             unread.Count,
             unread.LastReadMessageId,
             new ThreadViewerDto(membership.Id, PersonName.FirstName(membership.DisplayName)),
-            other is null ? null : ThreadOtherDto.Of(other, photos));
+            other is null ? null : ThreadOtherDto.Of(other, photos),
+            popkin.Version);
     }
 }
 

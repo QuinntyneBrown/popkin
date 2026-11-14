@@ -1,6 +1,6 @@
 import type { Page, Route } from '@playwright/test';
 import { popkinId } from './chat';
-import { type Home, maraAtHome } from './home';
+import { type Home, homeOf, maraAtHome } from './home';
 import type { Hub } from './hub';
 import { problem } from './stubs';
 
@@ -82,6 +82,16 @@ export class Settings {
 
   private apply(change: Partial<Look & Length>): void {
     this.home.popkin = { ...this.home.popkin, ...change, version: this.home.popkin.version + 1 };
+    // The chat's header reads the same Popkin.
+    const { name, emoji, colour, endsAt, version } = this.home.popkin;
+    this.home.chat.thread = {
+      ...this.home.chat.thread,
+      popkinName: name,
+      emoji,
+      colour,
+      endsAt,
+      popkinVersion: version,
+    };
   }
 
   private dto() {
@@ -93,6 +103,13 @@ export class Settings {
     const answer = problem(status, code);
     return route.fulfill({ status: answer.status, json: answer.body });
   }
+}
+
+/** The settings of the Popkin whose home the page already answers (the album's, the chat's). */
+export async function settingsOf(page: Page): Promise<Settings> {
+  const settings = new Settings(page, homeOf(page));
+  await settings.install();
+  return settings;
 }
 
 /** Mara, the Host of Lakeside Weekend, at its home, with its settings answering. */

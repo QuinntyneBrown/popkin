@@ -31,6 +31,8 @@ interface RecordedThread {
   memberCount: number;
   hereNow: number;
   presenceVersion: number;
+  /** Orders `PopkinChanged` (L2-020). */
+  popkinVersion: number;
   readOnly: boolean;
   unreadCount: number;
   lastReadMessageId: string | null;
@@ -279,6 +281,7 @@ export class Chat {
     memberCount: 14,
     hereNow: 5,
     presenceVersion: 1,
+    popkinVersion: 1,
     unreadCount: 0,
     lastReadMessageId: null,
     viewer: { membershipId: people.mara.membershipId, firstName: 'Mara' },

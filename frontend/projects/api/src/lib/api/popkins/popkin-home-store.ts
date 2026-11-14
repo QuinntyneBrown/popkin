@@ -100,6 +100,12 @@ export class PopkinHomeStore {
         this.readPopkin(true);
         this.readMembers(true);
       });
+    this.realtime.popkinChanged$
+      .pipe(
+        filter((change) => change.id === this.popkinId),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((change) => this.applySettings(change));
     this.realtime.photosAdded$
       .pipe(
         filter((added) => added.popkinId === this.popkinId),

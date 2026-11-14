@@ -33,6 +33,10 @@ public sealed class EditPopkinLookTests
         AssertLook(saved, "Campfire Nights", "🎉", "Plum");
         Assert.True(saved.GetProperty("version").GetInt64() > before);
         AssertLook(await joel.HomeAsync(lakeside.Id), "Campfire Nights", "🎉", "Plum");
+        // The chat's header reads the Popkin too, with the version that orders the event.
+        var thread = await joel.GetFromJsonAsync<JsonElement>($"/api/popkins/{lakeside.Id}/threads/everyone");
+        Assert.Equal("Campfire Nights", thread.GetProperty("popkinName").GetString());
+        Assert.Equal(saved.GetProperty("version").GetInt64(), thread.GetProperty("popkinVersion").GetInt64());
         foreach (var hub in new[] { maraHub, joelHub })
         {
             var changed = await hub.WaitForAsync("PopkinChanged");
