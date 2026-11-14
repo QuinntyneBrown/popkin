@@ -142,8 +142,10 @@ Everyone, by event name.
 
 Each design follows the source named below and marks the conflict in its own README.
 
-- The reactions dialog shows six quick reactions, while L2-024 asks for five
-  ([React to a message](chat/react-to-message/README.md)).
+- The reactions dialog showed six quick reactions, while L2-024 asks for five
+  ([React to a message](chat/react-to-message/README.md)). Settled before journey 12 in favour
+  of the requirement: five (❤️ 😂 😍 🔥 👏), with 🥞 among the twelve of "More reactions"; the
+  mocks were redrawn (`reactions/default.html`, `mine.html` and `more.html`).
 - The score bars scale to the largest count, while L2-038 AC2 asks for each value's share
   ([View an experience](experiences/view-experience/README.md)). The design follows the mock, and
   journey 8 built it so: each bar is drawn against the largest count, and the count beside it
@@ -308,6 +310,8 @@ or design that settled it.
 | 66 | A failed load of the members in New message shows as an empty list, "Nobody by that name" and "Only members of {Popkin} can be messaged here.", not as a failure with "Try again". No mock draws that state ([Conversations](chat/conversations/README.md)) | None; found in journey 11; L2-056 AC2 for the dialog | |
 | 67 | A direct call keeps "Invite to call" in its top bar, which opens the Popkin's invite dialog, though only its two members can join it; `video-call/two.html`, the mock of the direct call, draws the button and also the line "12 others in Lakeside Weekend can join anytime.", where the app writes "Only you and {first name} can join this call." The mock changes first ([Group call](calls/group-call/README.md), [Call controls](calls/call-controls/README.md)) | None; found in journey 11 | |
 | 68 | The diagrams of [Conversations](chat/conversations/README.md) and [Direct messages](chat/direct-messages/README.md) were not redrawn after journey 11. They show `ThreadSummaryDto`, `pk-list-row` rows, `ChatApi.openDirectThread`, `ThreadNotFoundException`, a `GET` of a thread by its id and `Photo.DirectThreadId`; each design says so above its diagrams | None | |
+| 69 | The diagrams of [React to a message](chat/react-to-message/README.md) and [Reply to a message](chat/reply-to-message/README.md) were not redrawn after the decisions of journey 12. They show `ReactionDto` with `Count` and `Mine`, `ReactionView`, `addReaction` and `removeReaction`, a read `?around={messageId}` with `GetMessagesQuery.Around` and `loadUntil`, `QuoteDto.HasPhoto`, and `replyTo` and `highlighted` on the page; they draw neither "More reactions" nor the Delete message dialog. Each design says so above its diagrams | None | |
+| 70 | `ReactionsChanged(threadId, messageId, reactions)` carries no version, while the shared real-time rules ask a state event for one that only rises. Two changes to one message's reactions that commit close together can push in the other order, and a client then shows the older summary until its next change or its next window read ([React to a message](chat/react-to-message/README.md), [Live messages](chat/live-messages/README.md)) | None; found before journey 12. A version on the message (`ReactionsVersion`) settles it | |
 
 Settled so far:
 
@@ -392,6 +396,8 @@ Settled so far:
 | Whether a direct call and the group call run at once, and which call Everyone's thread names | [Group call](calls/group-call/README.md): the API allows both at once, and a device's `CallSession` holds one, leaving the first when another starts; Everyone's thread names the group call. A call has no `Kind`: `ThreadId` null is the group call |
 | The address, heading and waiting copy of a direct call | [Group call](calls/group-call/README.md): `/p/:popkinId/chat/:memberId/call`; the other member's name, "Just the two of you · 12:48"; "Waiting for {first name}" and "{first name} sees the call in your chat and can join with one tap.", drawn by no mock; "Only you and {first name} can join this call." under the pane |
 | The mocks of a direct message that is read-only or has a call under way | [Direct messages](chat/direct-messages/README.md): `direct-message/read-only.html` and `call.html`, added in journey 11 |
+| The quick reactions, "More reactions", the names of the chips, Delete and the toasts of message actions | [React to a message](chat/react-to-message/README.md): five quick reactions, as L2-024 asks, and twelve more; a fixed table of 17 names in the `api` library; Delete asks first (`delete-message/default.html`); "Message copied.", "We couldn't save your reaction." and "We couldn't delete your message." |
+| The quote's name, its snippet, the mark after a jump and how a jump reaches an older message | [Reply to a message](chat/reply-to-message/README.md): "Go to {first name}'s message"; the first line, at most 120 characters, cut on the server; 2 seconds, an outline as well as a tint (`group-chat/marked.html`); the store loads earlier pages, with no read around a message. A deleted quote: `group-chat/deleted-quote.html` |
 
 ## Diagrams
 
