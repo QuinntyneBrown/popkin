@@ -1,0 +1,93 @@
+<a pk-skip-link>Skip to content</a>
+<header pk-site-nav homeHref="/">
+  <a pk-site-nav-link from="m" href="#how" (click)="jumpTo($event, 'how')">How it works</a>
+  <a pk-site-nav-link from="m" href="#ideas" (click)="jumpTo($event, 'ideas')">Ideas</a>
+  <a pk-site-nav-link from="s" [href]="app('/sign-in')">Sign in</a>
+  <a pk-button variant="primary" size="sm" [href]="app('/sign-up')">Start a Popkin</a>
+</header>
+<main pk-site-main>
+  <section
+    pk-hero
+    heading="Your people, popped up in seconds."
+    lead="Popkin is a free little home for any small group: chat, photos, plans and video, joined with one scan. Keep it for a weekend or for years."
+    note="Free. Takes about a minute."
+    [preview]="preview"
+  >
+    <a pk-button slot="action" variant="primary" [href]="app('/sign-up')">Start a Popkin</a>
+    <a pk-link slot="action" variant="accent" href="#film" (click)="jumpTo($event, 'film')"
+      >Watch the film</a
+    >
+  </section>
+  <section pk-band anchor="film" heading="See Popkin in action.">
+    <pk-film
+      [src]="film.src"
+      [still]="film.still"
+      [label]="film.label"
+      [playLabel]="film.playLabel"
+      [length]="film.length"
+      [chapters]="film.chapters"
+    />
+  </section>
+  <section pk-band surface="surface" anchor="how" heading="Scan. Join. You’re in.">
+    <ol pk-steps [steps]="steps"></ol>
+  </section>
+  <section
+    pk-band
+    anchor="ideas"
+    head="split"
+    heading="For every group that forms around a table."
+    lead="Weekly, weekend-long or one-off. Each Popkin gets its own colour and emoji."
+  >
+    <div pk-uses>
+      @for (idea of ideas; track idea.heading) {
+        <article
+          pk-use
+          [accent]="idea.accent"
+          [image]="idea.image"
+          [emoji]="idea.emoji"
+          [heading]="idea.heading"
+          [text]="idea.text"
+          [length]="idea.length"
+        ></article>
+      }
+    </div>
+  </section>
+  <section
+    pk-band
+    surface="sand"
+    width="narrow"
+    heading="Better than a group chat."
+    lead="A group chat is one long scroll. A Popkin is a place, with room for the things a group actually does."
+  >
+    <table
+      pk-compare
+      caption="A group chat compared with a Popkin"
+      theirs="Group chat"
+      [rows]="comparison"
+    ></table>
+  </section>
+  <section pk-band labelledby="free-h">
+    <div
+      pk-cta-band
+      headingId="free-h"
+      heading="Free. Like, actually free."
+      text="No ads, no premium tier, no feed tuned to keep you scrolling. Just a place for your people, for as long as you need it."
+      note="No app store detour. Works in the browser."
+    >
+      <a pk-button variant="on-accent" [href]="app('/sign-up')">Start a Popkin</a>
+    </div>
+  </section>
+</main>
+<footer
+  pk-site-footer
+  blurb="Pop-up communities for small groups. Made with care, for people not metrics."
+  legal="© 2026 Popkin"
+>
+  <a pk-site-footer-link href="#how" (click)="jumpTo($event, 'how')">How it works</a>
+  <a pk-site-footer-link href="#ideas" (click)="jumpTo($event, 'ideas')">Ideas</a>
+  <a pk-site-footer-link href="#film" (click)="jumpTo($event, 'film')">Watch the film</a>
+  <a pk-site-footer-link [href]="app('/sign-in')">Sign in</a>
+  <a pk-site-footer-link [href]="app('/safety')">Safety</a>
+  <a pk-site-footer-link [href]="app('/privacy')">Privacy</a>
+  <a pk-site-footer-link [href]="app('/help')">Help</a>
+</footer>

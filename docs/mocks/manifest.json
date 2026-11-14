@@ -41,6 +41,27 @@
       }
     },
     {
+      "id": "marketing-home",
+      "kind": "page",
+      "title": "Marketing home",
+      "route": "about.popkin.community/",
+      "requirements": [
+        "L2-079",
+        "L2-080",
+        "L2-081",
+        "L2-061"
+      ],
+      "states": [
+        "default",
+        "playing"
+      ],
+      "not_applicable": {
+        "loading": "The page needs no request before it shows, so it has nothing to wait for.",
+        "empty": "The page lists nothing; it has no collection that can be empty.",
+        "error": "The page loads no data, so nothing on it can fail to load."
+      }
+    },
+    {
       "id": "sign-up",
       "kind": "page",
       "title": "Sign up",

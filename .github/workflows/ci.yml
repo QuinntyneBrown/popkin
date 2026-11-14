@@ -42,6 +42,8 @@ jobs:
       # ADR 0011: the unit tests of the api library's stores and pure helpers.
       - run: npm test
       - run: npm run build
+      # ADR 0017: the marketing site, a second application of the workspace.
+      - run: npm run build:marketing
 
   e2e:
     # ADR 0005: the suite answers every API request from its recording; no API, no database.

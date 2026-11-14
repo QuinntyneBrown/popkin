@@ -10,6 +10,11 @@ true: a setting added to the code is added here in the same change.
 - One reverse proxy on one origin. It ends TLS, serves the built web app
   (`frontend/dist/popkin/browser`, with `index.html` as the fallback for app routes) and forwards
   `/api` and `/hubs` to the API, with WebSockets allowed on `/hubs`. Product: `<TO SUPPLY>`.
+- The marketing site ([ADR 0017](adr/0017-marketing-site.md)), served by the same proxy for the
+  host `about.popkin.community`: the static files of `frontend/dist/marketing/browser`, built by
+  `npm run build:marketing`, which copies the pitch film and its pictures in first. It needs no
+  setting at run time; the app's address its links use is built in (`environment.ts`,
+  `https://popkin.community`). Nothing on that host reaches `/api` or `/hubs`.
 - **One** instance of the Popkin API ([ADR 0009](adr/0009-one-api-instance.md)). Do not scale it
   out: hub groups, presence and the rate limits live in its memory.
 - **One** instance of the Popkin Worker. It must run: it wraps up the Popkins whose time is up
@@ -56,7 +61,7 @@ This and the other open decisions are in the [known gaps](detailed-designs/READM
 
 ## Release
 
-1. Build the web app (`npm run build` in `frontend/`) and the two images (not built yet).
+1. Build the web app (`npm run build` in `frontend/`), the marketing site (`npm run build:marketing`) and the two images (not built yet).
 2. Run `popkin migrate` against the database. The API never migrates on startup.
 3. Start the new API, then the Worker. Open hub connections drop and reconnect.
 

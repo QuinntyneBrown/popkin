@@ -4,7 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve popkin",
+    "start:marketing": "npm run media:sync && ng serve marketing",
     "build": "ng build popkin",
+    "build:marketing": "npm run media:sync && ng build marketing",
     "test": "ng test api --no-watch",
     "watch": "ng build popkin --watch --configuration development",
     "lint": "ng lint",
@@ -12,7 +14,8 @@
     "format:check": "prettier --check .",
     "prepare": "cd .. && husky frontend/.husky || true",
     "design:sync": "node scripts/design-tokens.mjs sync",
-    "design:check": "node scripts/design-tokens.mjs check"
+    "design:check": "node scripts/design-tokens.mjs check",
+    "media:sync": "node scripts/media-sync.mjs"
   },
   "private": true,
   "packageManager": "npm@10.9.9",
