@@ -60,6 +60,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Database:Name", _databaseName);
         builder.UseSetting("App:Origin", "https://localhost");
         builder.UseSetting("Invites:BaseUrl", "https://popk.in/");
+        // Phone sign-in is on for every test but those of its switch (ADR 0023).
+        builder.UseSetting("Features:PhoneSignIn", "true");
         foreach (var (key, value) in Settings)
         {
             builder.UseSetting(key, value);

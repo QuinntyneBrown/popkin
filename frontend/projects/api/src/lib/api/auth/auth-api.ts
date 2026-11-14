@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { CodeSentView, ConfirmCodeView, RequestCodeRequest, SessionView } from '../../models/auth';
+import { Observable, map } from 'rxjs';
+import {
+  ApiContactChannel,
+  CodeSentView,
+  ConfirmCodeView,
+  RequestCodeRequest,
+  SessionView,
+} from '../../models/auth';
 
 /** Accounts without passwords (docs/detailed-designs/accounts). */
 export interface AuthApi {
@@ -12,6 +18,8 @@ export interface AuthApi {
   getSession(): Observable<SessionView>;
   /** Ends the session on this device (L2-048 AC5); 401 when it had already ended. */
   signOut(): Observable<void>;
+  /** The ways sign-up and sign-in may reach a person; `Email` alone while phone is off (L2-084). */
+  channels(): Observable<ApiContactChannel[]>;
 }
 
 export const AUTH_API = new InjectionToken<AuthApi>('AuthApi');
@@ -41,5 +49,11 @@ export class HttpAuthApi implements AuthApi {
 
   signOut(): Observable<void> {
     return this.http.post<void>('/api/auth/sign-out', null);
+  }
+
+  channels(): Observable<ApiContactChannel[]> {
+    return this.http
+      .get<{ channels: ApiContactChannel[] }>('/api/auth/channels')
+      .pipe(map((answer) => answer.channels));
   }
 }

@@ -23,4 +23,22 @@ describe('parseContact', () => {
   it('asks for something when nothing was typed', () => {
     expect(parseContact('   ').error).toBe('Enter your phone number or email.');
   });
+
+  describe('with phone sign-in switched off (L2-084 AC4)', () => {
+    it.each([
+      ['mara@hey.com', 'mara@hey.com', null],
+      ['(555) 010-4477', '(555) 010-4477', 'That email doesn’t look quite right.'],
+      ['mara', 'mara', 'That email doesn’t look quite right.'],
+    ])('reads %s as an email', (typed, destination, error) => {
+      expect(parseContact(typed, ['Email'])).toEqual({ channel: 'Email', destination, error });
+    });
+
+    it('asks for an email when nothing was typed', () => {
+      expect(parseContact('   ', ['Email'])).toEqual({
+        channel: 'Email',
+        destination: '',
+        error: 'Enter your email.',
+      });
+    });
+  });
 });

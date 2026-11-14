@@ -26,6 +26,8 @@ public static class DependencyInjection
         // Who is here now is kept in this process: one API instance (ADR 0009).
         services.AddSingleton<PresenceTracker>();
         services.AddSingleton(new InviteLinkBuilder(configuration?["Invites:BaseUrl"] ?? "https://popk.in/"));
+        // ADR 0023: off unless the setting is true.
+        services.AddSingleton(new SignInChannels(bool.TryParse(configuration?["Features:PhoneSignIn"], out var phone) && phone));
         return services;
     }
 }

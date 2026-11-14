@@ -92,6 +92,7 @@ import {
 } from './my-popkins';
 import type { RouteKey } from './routes';
 import { answer, hold, problem } from './stubs';
+import { phoneSignInOff } from './sign-in-channels';
 import { EndDateDialog } from '../pages/end-date.dialog';
 import { InviteDialog } from '../pages/invite.dialog';
 import { PopkinHomePage } from '../pages/popkin-home.page';
@@ -316,6 +317,17 @@ export const screenStates: ScreenState[] = [
       const s = new SignUpPage(page);
       await s.fill('Mara', '(415) 555-0148');
       await s.submit();
+    },
+    regions: signUpRegions,
+    wideRegions: signUpPicture,
+  },
+  {
+    key: 'signUpEmailOnly',
+    before: phoneSignInOff,
+    app: async (page) => {
+      const s = new SignUpPage(page);
+      await s.name.fill('Mara');
+      await s.email.fill('mara@hey.com');
     },
     regions: signUpRegions,
     wideRegions: signUpPicture,
@@ -922,6 +934,12 @@ export const screenStates: ScreenState[] = [
       };
     },
     wideRegions: (page) => ({ picture: new SignInPage(page).picture }),
+  },
+  {
+    key: 'signInEmailOnly',
+    before: phoneSignInOff,
+    app: (page) => new SignInPage(page).email.fill('mara@hey.com'),
+    regions: (page) => ({ field: new SignInPage(page).contactField }),
   },
   {
     key: 'signInInvalid',

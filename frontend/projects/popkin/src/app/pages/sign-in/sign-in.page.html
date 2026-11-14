@@ -25,9 +25,11 @@
     <div
       pk-text-field
       fieldId="contact"
-      label="Phone number or email"
       hint="The one you signed up with."
       autocomplete="username"
+      [label]="phoneOffered ? 'Phone number or email' : 'Email'"
+      [type]="phoneOffered ? 'text' : 'email'"
+      [inputmode]="phoneOffered ? undefined : 'email'"
       [formControl]="contact"
       [readonly]="status() === 'sending'"
       [error]="contactError() ?? undefined"

@@ -6,6 +6,8 @@ export class SignInPage {
   readonly heading: Locator;
   readonly lead: Locator;
   readonly contact: Locator;
+  /** The one field while phone sign-in is switched off (L2-084 AC4). */
+  readonly email: Locator;
   readonly contactHint: Locator;
   readonly contactError: Locator;
   readonly send: Locator;
@@ -25,6 +27,7 @@ export class SignInPage {
     this.heading = page.getByRole('heading', { level: 1 });
     this.lead = page.locator('main p').first();
     this.contact = page.getByLabel('Phone number or email');
+    this.email = page.getByRole('textbox', { name: 'Email', exact: true });
     this.contactHint = page.locator('#contact-hint');
     this.contactError = page.locator('#contact-err');
     this.send = page.getByRole('button', { name: /Send my code|Sending your code/ });

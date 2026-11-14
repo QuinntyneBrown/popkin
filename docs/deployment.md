@@ -76,7 +76,9 @@ values in the apex's TXT record set and the two DKIM CNAMEs. Two steps are done 
    Get: a United States toll-free number with SMS. Submit its toll-free verification
    (Regulatory documents); a number sends no text in the United States or Canada until it is
    approved, which takes weeks. Then set `smsSender` in `infra/main.bicep` to the number as
-   `+1…` and commit. Until then a phone code answers 503 `code_not_sent`.
+   `+1…` and commit. Until then a phone code answers 503 `code_not_sent`. Once a text arrives,
+   switch phone sign-in on: set `phoneSignIn` to `true` in `infra/main.bicep` and commit; until
+   then sign-up and sign-in offer an email alone (`Features:PhoneSignIn`, below).
 
 ## Shape
 
@@ -125,6 +127,7 @@ values in the apex's TXT record set and the two DKIM CNAMEs. Two steps are done 
 | `Communication:Endpoint` | API | No code or crew invite is sent on either channel: outside Development every code request answers 503 `code_not_sent`; in Development the code is written to the log. The endpoint of `acs-popkin` ([ADR 0021](adr/0021-codes-and-invites-by-azure-communication-services.md)) |
 | `Communication:EmailSender` | API | Email codes and crew invites are not sent, as above. `DoNotReply@popkin.community` once the domain is checked |
 | `Communication:SmsSender` | API | Phone codes and crew invites are not sent, as above. The toll-free number, as `+1…` |
+| `Features:PhoneSignIn` | API | Sign-up and sign-in offer an email alone and a phone code is refused with 400 `channel_not_offered` (L2-084, [ADR 0023](adr/0023-features-switched-on-by-a-setting.md)). `true` once `Communication:SmsSender` sends texts: set `phoneSignIn` to `true` in `infra/main.bicep` and commit |
 | `Communication:ClientId` | API | The API signs in to Azure Communication Services with `DefaultAzureCredential` (`az login` on a developer's machine). The client ID of `id-popkin` |
 | `Proxy:KnownProxies`, `Proxy:KnownNetworks` (not built) | API | Every person shares the proxy's address and one allowance of 10 codes per 10 minutes, and the HTTPS redirect can loop ([Abuse limits](detailed-designs/security/abuse-limits/README.md)) |
 | `DataProtection:KeysPath` (not built) | API | The session cookie's keys die with the container, and every restart signs everyone out ([Sessions](detailed-designs/accounts/sessions/README.md)) |

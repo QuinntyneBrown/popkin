@@ -106,11 +106,18 @@ Sign up is built for the five form factors of L2-058
   360 px. The parity spec of `pk-split-aside` runs at 1280 px only, as the part does not exist at
   360 px.
 
+### Phone sign-in switched off (L2-084)
+
+- **Mock** — `docs/mocks/pages/sign-up/email-only.html`: "Your name" and an "Email" field (`type="email"`, `inputmode="email"`, `autocomplete="email"`) with its own label and no `pk-segmented-control`.
+- **Shared with sign in** — the setting `Features:PhoneSignIn`, `GET /api/auth/channels`, the refusal `channel_not_offered` and `signInChannelsResolver` are those of the [sign-in design](../sign-in/README.md#phone-sign-in-switched-off-l2-084).
+- **Front end** — `SignUpPage` reads `channels` from the route's data; with `Email` alone its channel is `email`, the switch is not drawn and the field has its own label (L2-084 AC3). With both, the screen is as above, opening on "Phone" (AC5).
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-003` | `L1-002` | Sign up with a name and a phone number or an email: Signing up asks for a name and one way to reach the person. It never asks for a password. |
+| `L2-084` | `L1-002` | Phone sign-in is switched on by its owner: until then sign up offers an email alone. |
 | `L2-052` | `L1-012` | Input is validated and output is encoded: Nothing a person types can harm another person or the system. |
 | `L2-053` | `L1-012` | Abuse is limited: One person cannot flood the system or another person. |
 

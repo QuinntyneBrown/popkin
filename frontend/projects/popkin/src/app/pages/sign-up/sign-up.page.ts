@@ -10,6 +10,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   AUTH_API,
+  ApiContactChannel,
   ContactChannel,
   PendingVerificationStore,
   contactProblem,
@@ -56,9 +57,15 @@ export class SignUpPage {
     { value: 'email', label: 'Email' },
   ];
 
+  private readonly route = inject(ActivatedRoute);
+  /** False while phone sign-in is switched off: the screen offers an email alone (L2-084 AC3). */
+  protected readonly phoneOffered = (
+    (this.route.snapshot.data['channels'] as ApiContactChannel[] | undefined) ?? ['Email']
+  ).includes('Phone');
+
   protected readonly name = new FormControl('', { nonNullable: true });
   protected readonly contact = new FormControl('', { nonNullable: true });
-  protected readonly channel = signal<ContactChannel>('phone');
+  protected readonly channel = signal<ContactChannel>(this.phoneOffered ? 'phone' : 'email');
 
   protected readonly nameError = signal<string | null>(null);
   protected readonly contactError = signal<string | null>(null);
@@ -76,15 +83,14 @@ export class SignUpPage {
   private readonly auth = inject(AUTH_API);
   private readonly pending = inject(PendingVerificationStore);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
 
   constructor() {
     // "Use a different number" comes back here with what was typed (L2-003 AC8 keeps it too).
     const earlier = this.pending.pending();
     if (earlier?.purpose === 'SignUp') {
       this.name.setValue(earlier.name ?? '');
-      this.channel.set(earlier.contactChannel);
-      this.contact.setValue(earlier.contact);
+      if (this.phoneOffered) this.channel.set(earlier.contactChannel);
+      if (earlier.contactChannel === this.channel()) this.contact.setValue(earlier.contact);
     }
   }
 

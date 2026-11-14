@@ -10,6 +10,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   AUTH_API,
+  ApiContactChannel,
   PendingVerificationStore,
   parseContact,
   safeReturnUrl,
@@ -48,6 +49,12 @@ export class SignInPage {
   protected readonly status = signal<'idle' | 'sending' | 'failed' | 'limited'>('idle');
   protected readonly tryAgain = signal('');
 
+  /** `Email` alone while phone sign-in is switched off (L2-084 AC4), from the route's resolver. */
+  private readonly channels: ApiContactChannel[] = this.route.snapshot.data['channels'] ?? [
+    'Email',
+  ];
+  protected readonly phoneOffered = this.channels.includes('Phone');
+
   /** The screen that was asked for, carried to the code screen and to sign up (L2-007 AC2). */
   protected readonly returnUrl = safeReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl'));
 
@@ -61,7 +68,7 @@ export class SignInPage {
   protected submit(event: Event): void {
     event.preventDefault();
     if (this.status() === 'sending') return;
-    const typed = parseContact(this.contact.value);
+    const typed = parseContact(this.contact.value, this.channels);
     this.contactError.set(typed.error);
     if (typed.error) {
       this.field().focus();
