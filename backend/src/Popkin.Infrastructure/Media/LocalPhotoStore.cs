@@ -4,8 +4,8 @@ using Popkin.Application.Photos;
 namespace Popkin.Infrastructure.Media;
 
 /// <summary>
-/// Development only: photo files in a folder on this machine (`Photos:Root`), read through
-/// addresses the API signs itself, because the photo store provider is `&lt;TO SUPPLY&gt;`.
+/// Development, without `Photos:BlobEndpoint`: photo files in a folder on this machine (`Photos:Root`), read through
+/// addresses the API signs itself. Azure Blob Storage keeps them everywhere else (ADR 0022).
 /// </summary>
 public sealed class LocalPhotoStore(string root, PhotoUrlSigner signer) : IPhotoStore
 {
@@ -62,7 +62,7 @@ public sealed class LocalPhotoStore(string root, PhotoUrlSigner signer) : IPhoto
     }
 }
 
-/// <summary>Where no photo store is configured, no photo can be kept or read.</summary>
+/// <summary>Outside Development without `Photos:BlobEndpoint`, no photo can be kept or read.</summary>
 public sealed class UnconfiguredPhotoStore : IPhotoStore
 {
     public Task SaveAsync(string key, ReadOnlyMemory<byte> content, string contentType, CancellationToken cancellationToken) =>

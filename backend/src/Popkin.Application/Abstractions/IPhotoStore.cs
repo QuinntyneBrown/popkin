@@ -5,7 +5,7 @@ public sealed record StoredPhoto(Stream Content, string ContentType);
 
 /// <summary>
 /// Where photo files are kept. Keys are random, so they cannot be guessed, and a file is read
-/// through an address that expires (L2-051 AC2). The production provider is `&lt;TO SUPPLY&gt;`.
+/// through an address that expires (L2-051 AC2). Azure Blob Storage keeps them outside Development (ADR 0022).
 /// </summary>
 public interface IPhotoStore
 {

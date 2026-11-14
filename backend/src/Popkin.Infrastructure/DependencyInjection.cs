@@ -5,6 +5,7 @@ using Azure.Communication.Email;
 using Azure.Communication.Sms;
 using Azure.Core;
 using Azure.Identity;
+using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,9 +63,19 @@ public static class DependencyInjection
 
         var photoKey = SHA256.HashData(Encoding.UTF8.GetBytes(signingKey ?? "popkin-development-only-photo-key"));
         services.AddSingleton(sp => new PhotoUrlSigner(photoKey, sp.GetRequiredService<TimeProvider>()));
-        if (development)
+        // Azure Blob Storage keeps the photo files (ADR 0022), signed in to with the apps'
+        // managed identity; in Development, without it, files stay on this machine.
+        if (configuration["Photos:BlobEndpoint"] is { Length: > 0 } blobEndpoint)
         {
-            // The photo store provider is `<TO SUPPLY>`; in Development files stay on this machine.
+            TokenCredential credential = configuration["Photos:ClientId"] is { Length: > 0 } photosClientId
+                ? new ManagedIdentityCredential(ManagedIdentityId.FromUserAssignedClientId(photosClientId))
+                : new DefaultAzureCredential();
+            var containerName = configuration["Photos:Container"] is { Length: > 0 } name ? name : "photos";
+            var container = new BlobServiceClient(new Uri(blobEndpoint), credential).GetBlobContainerClient(containerName);
+            services.AddSingleton<IPhotoStore>(sp => new BlobPhotoStore(container, sp.GetRequiredService<PhotoUrlSigner>()));
+        }
+        else if (development)
+        {
             var root = configuration["Photos:Root"] ?? Path.Combine(Path.GetTempPath(), "popkin-photos");
             services.AddSingleton<IPhotoStore>(sp => new LocalPhotoStore(root, sp.GetRequiredService<PhotoUrlSigner>()));
         }
