@@ -5,6 +5,8 @@ import { parity } from '../../fixtures/parity';
 import { AccountPage } from '../../pages/account.page';
 import { ExperienceActionsDialog } from '../../pages/experience-actions.dialog';
 import { PopkinSettingsDialog } from '../../pages/popkin-settings.dialog';
+import { ReactionsDialog } from '../../pages/reactions.dialog';
+import { reactStates } from '../../fixtures/react-states';
 
 parity('menu-item', [
   {
@@ -39,5 +41,24 @@ parity('menu-item', [
     ...accountStates.account,
     name: 'account-sign-out',
     region: (page) => new AccountPage(page).signOutRow,
+  },
+  // Journey 12: "More reactions", closed and open, and Delete on the member's own message.
+  {
+    key: 'reactions',
+    ...reactStates.reactions,
+    name: 'more-reactions',
+    region: (page) => new ReactionsDialog(page).moreReactions,
+  },
+  {
+    key: 'reactionsMore',
+    ...reactStates.reactionsMore,
+    name: 'more-reactions-open',
+    region: (page) => new ReactionsDialog(page).moreReactions,
+  },
+  {
+    key: 'reactionsMine',
+    ...reactStates.reactionsMine,
+    name: 'delete-message',
+    region: (page) => new ReactionsDialog(page).deleteRow,
   },
 ]);

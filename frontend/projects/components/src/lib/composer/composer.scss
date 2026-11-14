@@ -9,6 +9,41 @@
   background: var(--color-bg-canvas);
 }
 
+/* The reply bar: an accent rule, "Replying to {first name}" and one line of the message. */
+.composer__reply {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  font: var(--text-body-sm);
+}
+
+.composer__reply::before {
+  content: '';
+  align-self: stretch;
+  width: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+}
+
+.composer__reply strong {
+  display: block;
+  font-weight: var(--font-weight-semibold);
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* One line of the message, cut at the bar's edge. */
+.composer__reply .truncate {
+  display: block;
+}
+
 .composer__row {
   display: flex;
   align-items: center;

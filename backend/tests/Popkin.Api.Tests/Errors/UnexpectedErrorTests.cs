@@ -25,4 +25,27 @@ public sealed class UnexpectedErrorTests
         Assert.DoesNotContain("Popkins", text);
         Assert.DoesNotContain(" at ", text);
     }
+
+    // Given a member whose reaction fails unexpectedly,
+    // when the failure is logged,
+    // then the log names the route by its template and carries neither the emoji the member
+    // chose nor its encoding: an emoji is content (ADR 0012, L2-054 AC3).
+    [Fact]
+    public async Task An_unexpected_failure_is_logged_by_its_route_template()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var threadId = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
+        var message = (await lakeside.Host.SentMessageAsync(lakeside.Id, threadId, "Pancakes at nine")).Id();
+        api.Faults.FailSaves = true;
+
+        var response = await lakeside.Host.ReactAsync(lakeside.Id, threadId, message, "🥞");
+
+        await response.AssertProblem(HttpStatusCode.InternalServerError, "server_error");
+        var logged = string.Join("\n", api.Logs.Lines);
+        Assert.Contains("api/popkins/{popkinId:guid}/threads/{threadId:guid}/messages/{messageId:guid}/reactions/{emoji}", logged);
+        Assert.DoesNotContain("🥞", logged);
+        Assert.DoesNotContain(Uri.EscapeDataString("🥞"), logged, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(message.ToString(), logged);
+    }
 }

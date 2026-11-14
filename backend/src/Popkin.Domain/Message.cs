@@ -37,16 +37,31 @@ public sealed class Message
     /// <summary>When it was deleted; a deleted message is never read again.</summary>
     public DateTimeOffset? DeletedAt { get; private set; }
 
-    public static Message Send(Guid threadId, Guid authorMembershipId, string text, Guid clientMessageId, DateTimeOffset now) => new()
+    /// <summary>
+    /// The earlier message of the same thread this one replies to; null when it replies to
+    /// nothing. Messages are only soft-deleted, so the link never dangles (L2-025).
+    /// </summary>
+    public Guid? ReplyToMessageId { get; private set; }
+
+    public static Message Send(Guid threadId, Guid authorMembershipId, string text, Guid clientMessageId, DateTimeOffset now, Message? replyTo = null)
     {
-        Id = Guid.NewGuid(),
-        ThreadId = threadId,
-        AuthorMembershipId = authorMembershipId,
-        Text = text,
-        ClientMessageId = clientMessageId,
-        SentAt = now,
-        Kind = MessageKind.Member,
-    };
+        if (replyTo is not null && replyTo.ThreadId != threadId)
+        {
+            throw new ArgumentException("A reply answers a message of the same thread.", nameof(replyTo));
+        }
+
+        return new Message
+        {
+            Id = Guid.NewGuid(),
+            ThreadId = threadId,
+            AuthorMembershipId = authorMembershipId,
+            Text = text,
+            ClientMessageId = clientMessageId,
+            SentAt = now,
+            Kind = MessageKind.Member,
+            ReplyToMessageId = replyTo?.Id,
+        };
+    }
 
     /// <summary>The note Popkin writes into Everyone when someone joins, at the time they joined (L2-014 AC4).</summary>
     public static Message PoppedIn(Guid threadId, Membership joiner) => new()
@@ -59,6 +74,22 @@ public sealed class Message
         Kind = MessageKind.System,
     };
 
-    /// <summary>Deletes the message. Deleting twice changes nothing.</summary>
-    public void Delete(DateTimeOffset now) => DeletedAt ??= now;
+    /// <summary>
+    /// Rises by one with every change to the message's reactions, so a client drops a summary
+    /// older than the one it holds; a repeat that changes nothing leaves it as it is.
+    /// </summary>
+    public int ReactionsVersion { get; private set; }
+
+    /// <summary>A reaction was added to the message or taken off it.</summary>
+    public void ReactionsChanged() => ReactionsVersion++;
+
+    /// <summary>Deletes the message: its text is not kept. Deleting twice changes nothing.</summary>
+    public void Delete(DateTimeOffset now)
+    {
+        DeletedAt ??= now;
+        Text = "";
+    }
+
+    /// <summary>Only its author deletes a message (L2-024).</summary>
+    public bool CanBeDeletedBy(Membership membership) => AuthorMembershipId == membership.Id;
 }

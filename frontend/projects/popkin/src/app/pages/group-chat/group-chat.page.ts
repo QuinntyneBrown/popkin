@@ -11,6 +11,7 @@ import {
   signal,
   untracked,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
@@ -55,6 +56,7 @@ import {
 } from 'components';
 import { Toaster } from '../../toasts/toaster';
 import { ConversationList } from '../conversations/conversation-list';
+import { MessageActions } from '../conversations/message-actions';
 
 /** How long "Back online. 2 messages sent." stays. */
 const BACK_ONLINE_MS = 5_000;
@@ -87,7 +89,14 @@ const BACK_ONLINE_MS = 5_000;
     Thread,
     TopBar,
   ],
-  providers: [ThreadStore, CallBannerStore, PopkinFrame, ConversationsStore, ConversationList],
+  providers: [
+    ThreadStore,
+    CallBannerStore,
+    PopkinFrame,
+    ConversationsStore,
+    ConversationList,
+    MessageActions,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './group-chat.page.html',
 })
@@ -96,6 +105,7 @@ export class GroupChatPage {
   readonly popkinId = input.required<string>();
 
   protected readonly store = inject(ThreadStore);
+  protected readonly actions = inject(MessageActions);
   protected readonly list = inject(ConversationList);
   /** The group call under way, if there is one (L2-029 AC2). */
   protected readonly call = inject(CallBannerStore).banner;
@@ -111,6 +121,7 @@ export class GroupChatPage {
 
   private readonly composer = viewChild(Composer);
   private readonly threadView = viewChild(Thread);
+  private readonly messageViews = viewChildren(Message);
 
   protected readonly openers = ['👋 Hey everyone!', 'So glad you’re here', 'Who’s coming?'];
   protected readonly skeletons = [
@@ -288,6 +299,18 @@ export class GroupChatPage {
 
   protected discard(row: MessageRow): void {
     if (row.clientMessageId) this.store.discard(row.clientMessageId);
+  }
+
+  /** Goes to the message a reply quotes, loading earlier ones if need be (L2-025 AC3). */
+  protected async goToQuote(messageId: string): Promise<void> {
+    if (!(await this.store.jumpTo(messageId))) return;
+    afterNextRender(
+      () =>
+        this.messageViews()
+          .find((view) => view.messageId() === messageId)
+          ?.reveal(),
+      { injector: this.injector },
+    );
   }
 
   protected loadEarlier(): void {

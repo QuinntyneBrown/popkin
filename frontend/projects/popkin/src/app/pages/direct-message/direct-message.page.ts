@@ -11,6 +11,7 @@ import {
   signal,
   untracked,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -49,6 +50,7 @@ import {
   TopBar,
 } from 'components';
 import { ConversationList } from '../conversations/conversation-list';
+import { MessageActions } from '../conversations/message-actions';
 
 /**
  * A direct message between the member and one other member of a Popkin (L2-023), which only
@@ -79,7 +81,7 @@ import { ConversationList } from '../conversations/conversation-list';
     Thread,
     TopBar,
   ],
-  providers: [ThreadStore, CallBannerStore, ConversationsStore, ConversationList],
+  providers: [ThreadStore, CallBannerStore, ConversationsStore, ConversationList, MessageActions],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './direct-message.page.html',
 })
@@ -89,6 +91,7 @@ export class DirectMessagePage {
   readonly memberId = input.required<string>();
 
   protected readonly store = inject(ThreadStore);
+  protected readonly actions = inject(MessageActions);
   protected readonly list = inject(ConversationList);
   protected readonly call = inject(CallBannerStore).banner;
   private readonly calls = inject(CallBannerStore);
@@ -101,6 +104,7 @@ export class DirectMessagePage {
 
   private readonly composer = viewChild(Composer);
   private readonly threadView = viewChild(Thread);
+  private readonly messageViews = viewChildren(Message);
 
   protected readonly skeletons = [
     { mine: false, width: 60 },
@@ -232,6 +236,18 @@ export class DirectMessagePage {
 
   protected discard(row: MessageRow): void {
     if (row.clientMessageId) this.store.discard(row.clientMessageId);
+  }
+
+  /** Goes to the message a reply quotes, loading earlier ones if need be (L2-025 AC3). */
+  protected async goToQuote(messageId: string): Promise<void> {
+    if (!(await this.store.jumpTo(messageId))) return;
+    afterNextRender(
+      () =>
+        this.messageViews()
+          .find((view) => view.messageId() === messageId)
+          ?.reveal(),
+      { injector: this.injector },
+    );
   }
 
   protected loadEarlier(): void {

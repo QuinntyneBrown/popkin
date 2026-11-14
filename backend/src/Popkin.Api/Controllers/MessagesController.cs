@@ -11,7 +11,7 @@ namespace Popkin.Api.Controllers;
 [Route("api/popkins/{popkinId:guid}/threads/{threadId:guid}/messages")]
 public sealed class MessagesController(ISender sender) : ControllerBase
 {
-    public sealed record SendMessageRequest(Guid? ClientMessageId, string? Text);
+    public sealed record SendMessageRequest(Guid? ClientMessageId, string? Text, Guid? ReplyToMessageId = null);
 
     /// <summary>
     /// A page of the thread, oldest first, at most 50 (L2-027 AC5): the latest, the page
@@ -37,11 +37,32 @@ public sealed class MessagesController(ISender sender) : ControllerBase
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]
     public async Task<ActionResult<MessageDto>> Send(Guid popkinId, Guid threadId, SendMessageRequest request, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new SendMessageCommand(popkinId, threadId, request.ClientMessageId, request.Text), cancellationToken);
+        var result = await sender.Send(new SendMessageCommand(popkinId, threadId, request.ClientMessageId, request.Text, request.ReplyToMessageId), cancellationToken);
         return result.Created
             ? Created($"/api/popkins/{popkinId}/threads/{threadId}/messages/{result.Message.Id}", result.Message)
             : Ok(result.Message);
     }
+
+    /// <summary>Deletes the caller's own message for everyone in the thread (L2-024): 204.</summary>
+    [HttpDelete("{messageId:guid}")]
+    public async Task<IActionResult> Delete(Guid popkinId, Guid threadId, Guid messageId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeleteMessageCommand(popkinId, threadId, messageId), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Adds the caller's reaction, the emoji URL-encoded in the path, and answers the message's
+    /// whole summary; adding it again changes nothing (L2-024).
+    /// </summary>
+    [HttpPut("{messageId:guid}/reactions/{emoji}")]
+    public async Task<ActionResult<MessageReactionsDto>> React(Guid popkinId, Guid threadId, Guid messageId, string emoji, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new AddReactionCommand(popkinId, threadId, messageId, emoji), cancellationToken));
+
+    /// <summary>Takes the caller's reaction away and answers the summary; taking it again changes nothing (L2-024 AC3).</summary>
+    [HttpDelete("{messageId:guid}/reactions/{emoji}")]
+    public async Task<ActionResult<MessageReactionsDto>> Unreact(Guid popkinId, Guid threadId, Guid messageId, string emoji, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new RemoveReactionCommand(popkinId, threadId, messageId, emoji), cancellationToken));
 
     /// <summary>
     /// Deletes the caller's own message with that client message id, if the server holds one:

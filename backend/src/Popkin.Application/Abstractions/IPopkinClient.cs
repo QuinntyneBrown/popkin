@@ -18,6 +18,13 @@ public interface IPopkinClient
     /// <summary>A message was deleted. A fact: applying it twice, or before its message, ends the same.</summary>
     Task MessageDeleted(Guid threadId, Guid messageId);
 
+    /// <summary>
+    /// A message's reactions changed (L2-024). A state: it carries the message's whole summary
+    /// and its reactions version, which only rises, and an event whose version is not above the
+    /// one held is dropped; a read of the thread's messages recovers it.
+    /// </summary>
+    Task ReactionsChanged(Guid threadId, Guid messageId, int version, IReadOnlyList<ReactionDto> reactions);
+
     /// <summary>The person read a thread, here or on another device: its unread count is zero.</summary>
     Task ThreadRead(Guid threadId);
 

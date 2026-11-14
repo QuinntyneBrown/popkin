@@ -52,6 +52,17 @@ export interface ChatMessage {
   author: { membershipId: string; firstName: string; avatar: Avatar };
   text: string;
   sentAt: string;
+  /** Who chose each emoji, in the order they were first chosen (L2-024). */
+  reactions: { emoji: string; membershipIds: string[] }[];
+  /** Rises with every change to its reactions. */
+  reactionsVersion: number;
+  /** The message it replies to (L2-025). */
+  quote: {
+    messageId: string;
+    authorFirstName: string | null;
+    snippet: string | null;
+    deleted: boolean;
+  } | null;
 }
 
 const member = (name: string, initials: string, accent: string, photo?: string) => ({
@@ -103,9 +114,28 @@ export function message(
     author,
     text,
     sentAt: sentAt.toISOString(),
+    reactions: [],
+    reactionsVersion: 0,
+    quote: null,
     ...extra,
   };
 }
+
+/** What a reply shows of the message it answers. */
+export const quoteOf = (quoted: ChatMessage): NonNullable<ChatMessage['quote']> => ({
+  messageId: quoted.id,
+  authorFirstName: quoted.author.firstName,
+  snippet: quoted.text.split('\n')[0].slice(0, 120),
+  deleted: false,
+});
+
+/** Members of the Popkin the specs never name, to make up a count. */
+const others = (count: number): string[] =>
+  Array.from(
+    { length: count },
+    (_, i) => `00000000-0000-4000-8000-${String(900 + i).padStart(12, '0')}`,
+  );
+const ids = (...whom: { membershipId: string }[]): string[] => whom.map((w) => w.membershipId);
 
 export const poppedIn = (who: typeof people.joel, at: Date): ChatMessage =>
   message(who, `${who.firstName} popped in. Say hi! 👋`, at, {
@@ -113,15 +143,31 @@ export const poppedIn = (who: typeof people.joel, at: Date): ChatMessage =>
     clientMessageId: null,
   });
 
-/** The thread the mocks draw, in words only: reactions, replies and photos come later. */
+/**
+ * The thread the mocks draw, with its reactions and Mara's reply to Ellie; the photo comes with
+ * journey 13. Mara's own Heart is on Walt's pancakes.
+ */
 export function theMockThread(): ChatMessage[] {
+  const { mara, walt, dev, ellie, ruth, joel } = people;
+  const paddles = message(ellie, 'Can someone grab the paddles from the shed?', saturday(9, 20));
   return [
-    poppedIn(people.joel, saturday(8, 2)),
-    message(people.walt, 'Pancakes at the main cabin, 8:30. Bring an appetite.', saturday(8, 5)),
-    message(people.dev, 'Dock was glass this morning', saturday(8, 40)),
-    message(people.ellie, 'Can someone grab the paddles from the shed?', saturday(9, 20)),
-    message(people.mara, 'On it! Also: last call for the canoe sign-up 🛶', saturday(9, 24)),
-    message(people.ruth, 'Put me down for the 10 o’clock boat, please', saturday(9, 30)),
+    poppedIn(joel, saturday(8, 2)),
+    message(walt, 'Pancakes at the main cabin, 8:30. Bring an appetite.', saturday(8, 5), {
+      reactions: [
+        { emoji: '🥞', membershipIds: [...ids(dev, ellie, ruth, joel), ...others(2)] },
+        { emoji: '❤️', membershipIds: ids(ellie, mara, ruth) },
+      ],
+    }),
+    message(dev, 'Dock was glass this morning', saturday(8, 40), {
+      reactions: [{ emoji: '😍', membershipIds: [...ids(walt, ellie, ruth), ...others(5)] }],
+    }),
+    paddles,
+    message(mara, 'On it! Also: last call for the canoe sign-up 🛶', saturday(9, 24), {
+      quote: quoteOf(paddles),
+    }),
+    message(ruth, 'Put me down for the 10 o’clock boat, please', saturday(9, 30), {
+      reactions: [{ emoji: '👍', membershipIds: ids(walt, dev) }],
+    }),
   ];
 }
 
@@ -187,7 +233,10 @@ export function theMockDirects(): DirectThread[] {
           saturday(9, 33),
           to(walt),
         ),
-        message(people.walt, 'Here’s the card she wrote it on', saturday(9, 34), to(walt)),
+        message(people.walt, 'Here’s the card she wrote it on', saturday(9, 34), {
+          ...to(walt),
+          reactions: [{ emoji: '❤️', membershipIds: [people.mara.membershipId] }],
+        }),
         message(
           people.mara,
           'Secret’s safe. Will you make them again tomorrow?',
@@ -251,6 +300,13 @@ export class Chat {
   readonly sent: { clientMessageId: string; text: string }[] = [];
   readonly read: string[] = [];
   readonly discarded: string[] = [];
+  /** Each reaction asked for, as "+❤️ {messageId}" or "-❤️ {messageId}". */
+  readonly reacted: string[] = [];
+  /** The messages the member deleted. */
+  readonly deleted: string[] = [];
+  /** The next reactions and deletions fail, until a spec says otherwise. */
+  failReactions = false;
+  failDeletes = false;
   /** How many times each page of messages was asked for, by its query. */
   readonly asked: string[] = [];
 
@@ -309,6 +365,39 @@ export class Chat {
     const found = this.directs.find((d) => d.other.membershipId === person.membershipId);
     if (!found) throw new Error('No direct message with that member.');
     return found;
+  }
+
+  /** Someone reacts, or takes a reaction back, and the app hears it over the hub (L2-024). */
+  async reacts(hub: Hub, person: Person, target: ChatMessage, emoji: string): Promise<void> {
+    toggle(target, emoji, person.membershipId);
+    await hub.push(
+      'ReactionsChanged',
+      target.threadId,
+      target.id,
+      target.reactionsVersion,
+      target.reactions,
+    );
+  }
+
+  /** Someone deletes their message elsewhere, and the app hears it over the hub. */
+  async deletes(hub: Hub, target: ChatMessage): Promise<void> {
+    this.remove(target.threadId, target.id);
+    await hub.push('MessageDeleted', target.threadId, target.id);
+  }
+
+  /** A message of a thread, gone; the replies to it quote it as deleted. */
+  private remove(thread: string, messageId: string): void {
+    const direct = this.directs.find((d) => d.id === thread);
+    const all = direct ? direct.messages : this.messages;
+    const kept = all
+      .filter((m) => m.id !== messageId)
+      .map((m) =>
+        m.quote?.messageId === messageId
+          ? { ...m, quote: { messageId, authorFirstName: null, snippet: null, deleted: true } }
+          : m,
+      );
+    if (direct) direct.messages = kept;
+    else this.messages = kept;
   }
 
   /** The other member writes in a direct message: stored, counted and sent over the hub. */
@@ -483,8 +572,39 @@ export class Chat {
       }
       return route.fulfill({ json: { items: all.slice(-50), hasMore: all.length > 50 } });
     }
+    const reaction = /^messages\/([0-9a-f-]{36})\/reactions\/(.+)$/.exec(what);
+    if (reaction && (method === 'PUT' || method === 'DELETE')) {
+      const [, messageId, encoded] = reaction;
+      const emoji = decodeURIComponent(encoded);
+      this.reacted.push(`${method === 'PUT' ? '+' : '-'}${emoji} ${messageId}`);
+      if (this.failReactions) return route.fulfill(asProblem(problem(500, 'server_error')));
+      if (this.thread.readOnly) return route.fulfill(asProblem(problem(409, 'popkin_wrapped_up')));
+      const target = held().find((m) => m.id === messageId);
+      if (!target) return route.fulfill(asProblem(problem(404, 'message_not_found')));
+      toggle(target, emoji, this.thread.viewer.membershipId, method === 'PUT');
+      return route.fulfill({
+        json: { version: target.reactionsVersion, reactions: target.reactions },
+      });
+    }
+    const one = /^messages\/([0-9a-f-]{36})$/.exec(what);
+    if (one && method === 'DELETE') {
+      const messageId = one[1];
+      this.deleted.push(messageId);
+      if (this.failDeletes) return route.fulfill(asProblem(problem(500, 'server_error')));
+      const target = held().find((m) => m.id === messageId);
+      if (!target) return route.fulfill(asProblem(problem(404, 'message_not_found')));
+      if (target.author.membershipId !== this.thread.viewer.membershipId) {
+        return route.fulfill(asProblem(problem(403, 'not_message_author')));
+      }
+      this.remove(id, messageId);
+      return route.fulfill({ status: 204 });
+    }
     if (method === 'POST' && what === 'messages') {
-      const body = request.postDataJSON() as { clientMessageId: string; text: string };
+      const body = request.postDataJSON() as {
+        clientMessageId: string;
+        text: string;
+        replyToMessageId?: string;
+      };
       this.sent.push(body);
       switch (this.failSends) {
         case 'network':
@@ -498,9 +618,16 @@ export class Chat {
       }
       const stored = held().find((m) => m.clientMessageId === body.clientMessageId);
       if (stored) return route.fulfill({ status: 200, json: stored });
+      const answered = body.replyToMessageId
+        ? held().find((m) => m.id === body.replyToMessageId)
+        : undefined;
+      if (body.replyToMessageId && !answered) {
+        return route.fulfill(asProblem(problem(400, 'reply_not_found')));
+      }
       const added = message(people.mara, body.text, new Date(), {
         clientMessageId: body.clientMessageId,
         threadId: id,
+        quote: answered ? quoteOf(answered) : null,
       });
       held().push(added);
       return route.fulfill({ status: 201, json: added });
@@ -518,6 +645,21 @@ export class Chat {
     }
     return route.fallback();
   }
+}
+
+/** Adds the member to an emoji of a message, or takes them off it; an emoji at zero goes. */
+function toggle(target: ChatMessage, emoji: string, membershipId: string, adding?: boolean): void {
+  const chosen = target.reactions.find((r) => r.emoji === emoji);
+  const add = adding ?? !chosen?.membershipIds.includes(membershipId);
+  if (chosen) {
+    chosen.membershipIds = add
+      ? [...new Set([...chosen.membershipIds, membershipId])]
+      : chosen.membershipIds.filter((m) => m !== membershipId);
+  } else if (add) {
+    target.reactions.push({ emoji, membershipIds: [membershipId] });
+  }
+  target.reactions = target.reactions.filter((r) => r.membershipIds.length > 0);
+  target.reactionsVersion++;
 }
 
 function asProblem(answer: { status: number; body?: unknown; headers?: Record<string, string> }) {

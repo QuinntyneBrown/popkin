@@ -7,6 +7,7 @@ export const HUB_URL = '/hubs/popkin';
 export const HUB_EVENTS = {
   messageAdded: 'MessageAdded',
   messageDeleted: 'MessageDeleted',
+  reactionsChanged: 'ReactionsChanged',
   threadRead: 'ThreadRead',
   presenceChanged: 'PresenceChanged',
   memberJoined: 'MemberJoined',

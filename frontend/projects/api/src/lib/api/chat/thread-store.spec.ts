@@ -2,12 +2,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   MemberJoinedView,
   MessagePageView,
   MessageView,
   PresenceView,
+  MessageReactions,
+  ReactionSummary,
   ThreadView,
 } from '../../models/chat';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
@@ -35,6 +37,9 @@ function message(n: number, author = 'Walt', extra: Partial<MessageView> = {}): 
     },
     text: `message ${n}`,
     sentAt: new Date(2026, 8, 12, 9, 0, n).toISOString(),
+    reactions: [],
+    reactionsVersion: 0,
+    quote: null,
     ...extra,
   };
 }
@@ -133,12 +138,69 @@ class FakeChat implements ChatApi {
     return of({ items: all.slice(at(cursor.from), at(cursor.to) + 1), hasMore: false });
   }
 
-  send(_p: string, _t: string, clientMessageId: string, text: string): Observable<MessageView> {
+  /** The message each send replied to, if any. */
+  readonly replies: (string | undefined)[] = [];
+
+  send(
+    _p: string,
+    _t: string,
+    clientMessageId: string,
+    text: string,
+    replyTo?: string,
+  ): Observable<MessageView> {
     this.sends.push(text);
-    return of(message(900 + this.sends.length, 'Mara', { clientMessageId, text }));
+    this.replies.push(replyTo);
+    const target = this.stored.find((m) => m.id === replyTo);
+    const quote = target
+      ? {
+          messageId: target.id,
+          authorFirstName: target.author.firstName,
+          snippet: target.text.split('\n')[0],
+          deleted: false,
+        }
+      : null;
+    return of(message(900 + this.sends.length, 'Mara', { clientMessageId, text, quote }));
   }
 
   discard(): Observable<void> {
+    return of(undefined);
+  }
+
+  /** Each reaction asked for, as "+🥞 id-0001" or "-🥞 id-0001". */
+  readonly reacted: string[] = [];
+  /** The answer to the next reaction; by default what the server would hold. */
+  reactionAnswer: 'held' | 'fail' | Subject<MessageReactions> = 'held';
+
+  react(_p: string, _t: string, messageId: string, emoji: string): Observable<MessageReactions> {
+    return this.reaction('+', messageId, emoji);
+  }
+
+  unreact(_p: string, _t: string, messageId: string, emoji: string): Observable<MessageReactions> {
+    return this.reaction('-', messageId, emoji);
+  }
+
+  private reaction(how: '+' | '-', messageId: string, emoji: string): Observable<MessageReactions> {
+    this.reacted.push(`${how}${emoji} ${messageId}`);
+    const answer = this.reactionAnswer;
+    if (answer === 'fail') return throwError(() => new Error('down'));
+    if (answer !== 'held') return answer;
+    const stored = this.stored.find((m) => m.id === messageId);
+    if (!stored) return of({ version: 0, reactions: [] });
+    const others = stored.reactions.find((r) => r.emoji === emoji)?.membershipIds ?? [];
+    const ids = how === '+' ? [...new Set([...others, me])] : others.filter((id) => id !== me);
+    const rest = stored.reactions.filter((r) => r.emoji !== emoji);
+    stored.reactions = ids.length ? [...rest, { emoji, membershipIds: ids }] : rest;
+    stored.reactionsVersion++;
+    return of({ version: stored.reactionsVersion, reactions: stored.reactions });
+  }
+
+  readonly deleted: string[] = [];
+  deleteFails = false;
+
+  deleteMessage(_p: string, _t: string, messageId: string): Observable<void> {
+    this.deleted.push(messageId);
+    if (this.deleteFails) return throwError(() => new Error('down'));
+    this.stored = this.stored.filter((m) => m.id !== messageId);
     return of(undefined);
   }
 
@@ -161,6 +223,12 @@ describe('ThreadStore', () => {
     state: signal('connected'),
     messageAdded$: new Subject<MessageView>(),
     messageDeleted$: new Subject<{ threadId: string; messageId: string }>(),
+    reactionsChanged$: new Subject<{
+      threadId: string;
+      messageId: string;
+      version: number;
+      reactions: ReactionSummary[];
+    }>(),
     threadRead$: new Subject<string>(),
     presenceChanged$: new Subject<{ popkinId: string; version: number; hereNow: number }>(),
     memberJoined$: new Subject<{ popkinId: string; member: MemberJoinedView }>(),
@@ -456,6 +524,56 @@ describe('ThreadStore', () => {
     });
   });
 
+  describe('replying (L2-025)', () => {
+    beforeEach(() => {
+      chat.stored = [
+        message(1, 'Ellie', { text: 'Can someone grab the paddles?\nThey are in the shed' }),
+      ];
+      store.open('p');
+    });
+
+    it('says whom the reply is to, with one line of their message (AC1)', () => {
+      store.startReply('id-0001');
+      expect(store.replyingTo()).toEqual({
+        messageId: 'id-0001',
+        firstName: 'Ellie',
+        snippet: 'Can someone grab the paddles?',
+        deleted: false,
+      });
+    });
+
+    it('sends the reply with what it answers, shows its quote at once, and is done (AC2)', () => {
+      store.startReply('id-0001');
+      store.send('On it');
+      expect(chat.replies).toEqual(['id-0001']);
+      expect(store.replyingTo()).toBeNull();
+      const sent = store.rows().find((row) => row.kind === 'message' && row.text === 'On it');
+      expect(sent?.kind === 'message' && sent.quote?.firstName).toBe('Ellie');
+    });
+
+    it('sends a plain message once the reply is cancelled', () => {
+      store.startReply('id-0001');
+      store.cancelReply();
+      store.send('Nothing to do with it');
+      expect(store.replyingTo()).toBeNull();
+      expect(chat.replies).toEqual([undefined]);
+    });
+
+    it('cuts a long line to 120 characters', () => {
+      chat.stored = [message(2, 'Walt', { text: 'x'.repeat(200) })];
+      store.open('p');
+      store.startReply('id-0002');
+      expect(store.replyingTo()?.snippet).toHaveLength(120);
+    });
+
+    it('does not reply in a Popkin that has wrapped up', () => {
+      chat.thread = { ...thread, readOnly: true };
+      store.open('p');
+      store.startReply('id-0001');
+      expect(store.replyingTo()).toBeNull();
+    });
+  });
+
   describe('opened out of view', () => {
     it('is not read until its latest message comes into view', () => {
       store.open('p', undefined, { inView: false });
@@ -501,6 +619,226 @@ describe('ThreadStore', () => {
       realtime.messageAdded$.next(message(7, 'Walt', { threadId: 't-walt' }));
       realtime.messageAdded$.next(message(8, 'Dev'));
       expect(shown()).toEqual(['message 7']);
+    });
+  });
+
+  describe('reactions (L2-024)', () => {
+    const chips = (n = 1) => {
+      const row = store.rows().find((r) => r.kind === 'message' && r.id === `id-000${n}`);
+      return row?.kind === 'message'
+        ? row.reactions.map((c) => `${c.emoji}${c.count}${c.mine ? '*' : ''}`)
+        : [];
+    };
+
+    beforeEach(() => {
+      chat.stored = [
+        message(1, 'Walt', { reactions: [{ emoji: '🥞', membershipIds: ['m-walt'] }] }),
+      ];
+      store.open('p');
+    });
+
+    it('shows the member’s reaction at once, pressed, and keeps what the server answers (AC2)', () => {
+      const answer = new Subject<MessageReactions>();
+      chat.reactionAnswer = answer;
+      store.toggleReaction('id-0001', '❤️');
+      expect(chips()).toEqual(['🥞1', '❤️1*']);
+      expect(chat.reacted).toEqual(['+❤️ id-0001']);
+
+      answer.next({
+        version: 1,
+        reactions: [
+          { emoji: '🥞', membershipIds: ['m-walt'] },
+          { emoji: '❤️', membershipIds: ['m-dev', me] },
+        ],
+      });
+      expect(chips()).toEqual(['🥞1', '❤️2*']);
+    });
+
+    it('adds the member to a chip someone else chose', () => {
+      store.toggleReaction('id-0001', '🥞');
+      expect(chips()).toEqual(['🥞2*']);
+    });
+
+    it('takes the member’s reaction away when they choose it again, and the chip at zero (AC3)', () => {
+      store.toggleReaction('id-0001', '❤️');
+      store.toggleReaction('id-0001', '❤️');
+      expect(chat.reacted).toEqual(['+❤️ id-0001', '-❤️ id-0001']);
+      expect(chips()).toEqual(['🥞1']);
+    });
+
+    it('shows both of a member’s different emoji (AC4)', () => {
+      store.toggleReaction('id-0001', '❤️');
+      store.toggleReaction('id-0001', '🔥');
+      expect(chips()).toEqual(['🥞1', '❤️1*', '🔥1*']);
+    });
+
+    it('puts the chips back and says so when the reaction does not save, with a way to try again', () => {
+      const failures: string[] = [];
+      store.failures$.subscribe((failure) => {
+        failures.push(failure.kind);
+        chat.reactionAnswer = 'held';
+        failure.retry();
+      });
+      chat.reactionAnswer = 'fail';
+      store.toggleReaction('id-0001', '❤️');
+      expect(failures).toEqual(['reaction']);
+      expect(chips()).toEqual(['🥞1', '❤️1*']);
+      expect(chat.reacted).toEqual(['+❤️ id-0001', '+❤️ id-0001']);
+    });
+
+    it('puts back exactly what was there before a failure', () => {
+      chat.reactionAnswer = 'fail';
+      store.failures$.subscribe(() => undefined);
+      store.toggleReaction('id-0001', '🥞');
+      expect(chips()).toEqual(['🥞1']);
+    });
+
+    it('shows what others choose as it happens, and nothing of another thread', () => {
+      realtime.reactionsChanged$.next({
+        threadId: 't',
+        messageId: 'id-0001',
+        version: 1,
+        reactions: [{ emoji: '😂', membershipIds: ['m-dev', 'm-ruth'] }],
+      });
+      realtime.reactionsChanged$.next({
+        threadId: 't-other',
+        messageId: 'id-0001',
+        version: 2,
+        reactions: [],
+      });
+      expect(chips()).toEqual(['😂2']);
+    });
+
+    it('never shows reactions older than those shown, whatever order they arrive in', () => {
+      const answer = new Subject<MessageReactions>();
+      chat.reactionAnswer = answer;
+      store.toggleReaction('id-0001', '❤️');
+      realtime.reactionsChanged$.next({
+        threadId: 't',
+        messageId: 'id-0001',
+        version: 3,
+        reactions: [{ emoji: '❤️', membershipIds: [me, 'm-dev'] }],
+      });
+      answer.next({ version: 2, reactions: [{ emoji: '❤️', membershipIds: [me] }] });
+      expect(chips()).toEqual(['❤️2*']);
+
+      realtime.reactionsChanged$.next({
+        threadId: 't',
+        messageId: 'id-0001',
+        version: 1,
+        reactions: [],
+      });
+      expect(chips()).toEqual(['❤️2*']);
+    });
+
+    it('does not put back old chips over newer ones when a reaction fails late', () => {
+      const answer = new Subject<MessageReactions>();
+      chat.reactionAnswer = answer;
+      store.failures$.subscribe(() => undefined);
+      store.toggleReaction('id-0001', '❤️');
+      realtime.reactionsChanged$.next({
+        threadId: 't',
+        messageId: 'id-0001',
+        version: 4,
+        reactions: [{ emoji: '🔥', membershipIds: ['m-dev'] }],
+      });
+      answer.error(new Error('down'));
+      expect(chips()).toEqual(['🔥1']);
+    });
+
+    it('does nothing in a Popkin that has wrapped up', () => {
+      chat.thread = { ...thread, readOnly: true };
+      store.open('p');
+      store.toggleReaction('id-0001', '❤️');
+      expect(chat.reacted).toEqual([]);
+      expect(chips()).toEqual(['🥞1']);
+    });
+  });
+
+  describe('deleting the member’s own message', () => {
+    beforeEach(() => {
+      chat.stored = [
+        message(1, 'Mara', { text: 'Paddles are in the shed' }),
+        message(2, 'Walt', {
+          text: 'Thanks',
+          quote: {
+            messageId: 'id-0001',
+            authorFirstName: 'Mara',
+            snippet: 'Paddles',
+            deleted: false,
+          },
+        }),
+      ];
+      store.open('p');
+    });
+
+    const quoteOf = (n: number) => {
+      const row = store.rows().find((r) => r.kind === 'message' && r.id === `id-000${n}`);
+      return row?.kind === 'message' ? row.quote : undefined;
+    };
+
+    it('takes it away and reads "Message deleted" in the replies to it (L2-025 AC4)', () => {
+      store.deleteMessage('id-0001');
+      expect(chat.deleted).toEqual(['id-0001']);
+      expect(shown()).toEqual(['Thanks']);
+      expect(quoteOf(2)).toMatchObject({ messageId: 'id-0001', deleted: true });
+    });
+
+    it('does the same when someone deletes a message elsewhere', () => {
+      realtime.messageDeleted$.next({ threadId: 't', messageId: 'id-0001' });
+      expect(quoteOf(2)).toMatchObject({ deleted: true });
+    });
+
+    it('stops a reply to a message that is deleted', () => {
+      store.startReply('id-0001');
+      realtime.messageDeleted$.next({ threadId: 't', messageId: 'id-0001' });
+      expect(store.replyingTo()).toBeNull();
+    });
+
+    it('keeps the message and says so when the deletion fails, with a way to try again', () => {
+      chat.deleteFails = true;
+      const failures: string[] = [];
+      store.failures$.subscribe((failure) => {
+        failures.push(failure.kind);
+        chat.deleteFails = false;
+        failure.retry();
+      });
+      store.deleteMessage('id-0001');
+      expect(failures).toEqual(['delete']);
+      expect(chat.deleted).toEqual(['id-0001', 'id-0001']);
+      expect(shown()).toEqual(['Thanks']);
+    });
+
+    it('deletes only the member’s own messages', () => {
+      store.deleteMessage('id-0002');
+      expect(chat.deleted).toEqual([]);
+    });
+  });
+
+  describe('going to a quoted message (L2-025 AC3)', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      chat.stored = Array.from({ length: 120 }, (_, i) => message(i + 1, 'Walt'));
+      store.open('p');
+    });
+    afterEach(() => vi.useRealTimers());
+
+    it('marks a message already shown, briefly', async () => {
+      await expect(store.jumpTo('id-0100')).resolves.toBe(true);
+      expect(store.marked()).toBe('id-0100');
+      vi.advanceTimersByTime(2_000);
+      expect(store.marked()).toBeNull();
+    });
+
+    it('loads earlier pages until it has the message', async () => {
+      await expect(store.jumpTo('id-0005')).resolves.toBe(true);
+      expect(shown()).toContain('message 5');
+      expect(store.marked()).toBe('id-0005');
+    });
+
+    it('finds nothing for a message the thread no longer has', async () => {
+      await expect(store.jumpTo('id-gone')).resolves.toBe(false);
+      expect(store.marked()).toBeNull();
     });
   });
 });

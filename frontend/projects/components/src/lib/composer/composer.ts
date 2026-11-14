@@ -11,6 +11,12 @@ import {
 } from '@angular/core';
 import { IconButton } from '../icon-button/icon-button';
 
+/** The message a reply answers, as the reply bar shows it. */
+export interface ComposerReply {
+  firstName: string;
+  snippet: string;
+}
+
 /**
  * Composer (docs/design-system/components/composer.html): the message bar at the foot of a
  * thread, a pill field and a coral Send. Enter sends and Shift+Enter starts a new line; the
@@ -20,6 +26,10 @@ import { IconButton } from '../icon-button/icon-button';
  * `send` carries the trimmed text. The composer does not empty itself: the consumer sets `value`
  * once the message is taken. `[slot=start]` (before the field) and `[slot=tools]` (inside it,
  * after the text) are for the buttons of later features.
+ *
+ * With a `reply` the bar above the field says "Replying to {first name}" over one line of the
+ * message, with "Cancel reply" (L2-025 AC1); the focus moves to the field when it shows, and
+ * Escape in the field or "Cancel reply" emits `cancelReply`, the focus staying in the field.
  *
  * With `closed` it is the closed form: no field and no Send, only the line that says why
  * nobody can post (L2-045 AC1).
@@ -44,9 +54,13 @@ export class Composer {
   /** Why nobody can post: "This Popkin has wrapped up. Messages stay, but nobody can post new
    * ones." It stands in place of the field. */
   readonly closed = input<string>();
+  /** The message being replied to: its sender's first name and one line of its text. */
+  readonly reply = input<ComposerReply | null>(null);
 
   /** The trimmed text to send. */
   readonly send = output<string>();
+  /** "Cancel reply", or Escape in the field while replying. */
+  readonly cancelReply = output<void>();
 
   private readonly field = viewChild<ElementRef<HTMLTextAreaElement>>('field');
 
@@ -71,6 +85,10 @@ export class Composer {
         field.style.height = `${field.scrollHeight + 1}px`;
       }
     });
+    // A reply that shows puts the focus where the answer is written.
+    afterRenderEffect(() => {
+      if (this.reply()) this.field()?.nativeElement.focus();
+    });
   }
 
   /** Moves focus to the field. */
@@ -78,13 +96,27 @@ export class Composer {
     this.field()?.nativeElement.focus();
   }
 
-  /** Enter sends; Shift+Enter, and Enter while an input method is composing, do not. */
+  /**
+   * Enter sends; Shift+Enter, and Enter while an input method is composing, do not. Escape
+   * cancels a reply.
+   */
   protected onKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.reply()) {
+      event.preventDefault();
+      this.cancelReply.emit();
+      return;
+    }
     if (event.key !== 'Enter' || event.shiftKey || event.isComposing || event.keyCode === 229) {
       return;
     }
     event.preventDefault();
     this.submit();
+  }
+
+  /** "Cancel reply": the button goes with the bar, so the focus stays in the field. */
+  protected cancel(): void {
+    this.focus();
+    this.cancelReply.emit();
   }
 
   protected submit(event?: Event): void {

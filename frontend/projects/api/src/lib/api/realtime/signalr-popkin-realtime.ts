@@ -7,7 +7,7 @@ import {
 } from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
 import { CallParticipantView, CallSignal } from '../../models/calls';
-import { MemberJoinedView, MessageView } from '../../models/chat';
+import { MemberJoinedView, MessageView, ReactionSummary } from '../../models/chat';
 import { HUB_EVENTS, HUB_METHODS, HUB_URL, reconnectDelay } from './hub-events';
 import { PopkinRealtime, RealtimeState } from './popkin-realtime';
 
@@ -26,6 +26,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
 
   private readonly added = new Subject<MessageView>();
   private readonly deleted = new Subject<{ threadId: string; messageId: string }>();
+  private readonly reactions = new Subject<Of<'reactionsChanged$'>>();
   private readonly read = new Subject<string>();
   private readonly presence = new Subject<{ popkinId: string; version: number; hereNow: number }>();
   private readonly joined = new Subject<{ popkinId: string; member: MemberJoinedView }>();
@@ -45,6 +46,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   readonly state = this.status.asReadonly();
   readonly messageAdded$ = this.added.asObservable();
   readonly messageDeleted$ = this.deleted.asObservable();
+  readonly reactionsChanged$ = this.reactions.asObservable();
   readonly threadRead$ = this.read.asObservable();
   readonly presenceChanged$ = this.presence.asObservable();
   readonly memberJoined$ = this.joined.asObservable();
@@ -73,6 +75,11 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
     connection.on(HUB_EVENTS.messageAdded, (message: MessageView) => this.added.next(message));
     connection.on(HUB_EVENTS.messageDeleted, (threadId: string, messageId: string) =>
       this.deleted.next({ threadId, messageId }),
+    );
+    connection.on(
+      HUB_EVENTS.reactionsChanged,
+      (threadId: string, messageId: string, version: number, reactions: ReactionSummary[]) =>
+        this.reactions.next({ threadId, messageId, version, reactions }),
     );
     connection.on(HUB_EVENTS.threadRead, (threadId: string) => this.read.next(threadId));
     connection.on(

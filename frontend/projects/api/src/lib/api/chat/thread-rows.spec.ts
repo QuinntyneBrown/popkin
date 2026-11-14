@@ -26,6 +26,9 @@ function message(
     },
     text,
     sentAt: at.toISOString(),
+    reactions: [],
+    reactionsVersion: 0,
+    quote: null,
     ...extra,
   };
 }
@@ -135,6 +138,42 @@ describe('threadRows', () => {
       clientMessageId: 'p1',
       text: 'p1',
     });
+  });
+
+  it('gives a message its reaction chips, the member’s own marked (L2-024 AC2)', () => {
+    const [, row] = threadRows(
+      [
+        message('a', 'Walt', at(9), 'Pancakes at 8', {
+          reactions: [{ emoji: '🥞', membershipIds: ['m-mara', 'm-dev'] }],
+        }),
+      ],
+      [],
+      mara,
+      now,
+    );
+    expect(row).toMatchObject({
+      reactions: [{ emoji: '🥞', count: 2, mine: true, label: 'Pancakes, you reacted, 2' }],
+    });
+  });
+
+  it('gives a reply the quote of the message it answers, or "deleted" (L2-025 AC2, AC4)', () => {
+    const rows = threadRows(
+      [
+        message('a', 'Ellie', at(9), 'Paddles?', {
+          quote: { messageId: 'x', authorFirstName: 'Walt', snippet: 'Shed', deleted: false },
+        }),
+        message('b', 'Ellie', at(9, 1), 'Never mind', {
+          quote: { messageId: 'y', authorFirstName: null, snippet: null, deleted: true },
+        }),
+      ],
+      [],
+      mara,
+      now,
+    );
+    expect(rows.slice(1).map((row) => (row.kind === 'message' ? row.quote : null))).toEqual([
+      { messageId: 'x', firstName: 'Walt', snippet: 'Shed', deleted: false },
+      { messageId: 'y', firstName: '', snippet: '', deleted: true },
+    ]);
   });
 
   it('shows a message once when the server already has what the device still holds', () => {

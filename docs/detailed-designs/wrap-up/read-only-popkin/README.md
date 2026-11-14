@@ -62,6 +62,7 @@ No endpoint is added. Every write endpoint below, owned by the feature named, an
 | `POST /api/popkins/{popkinId}/threads/{threadId}/messages` | [Send a message to everyone](../../chat/send-message-to-everyone/README.md) |
 | `PUT /api/popkins/{popkinId}/threads/direct/{memberId}` (open a direct message none of the two has yet; one that exists opens read-only) | [Direct messages](../../chat/direct-messages/README.md) |
 | `PUT`/`DELETE .../messages/{messageId}/reactions/{emoji}` | [React to a message](../../chat/react-to-message/README.md) |
+| `DELETE .../messages/{messageId}` (delete one's own message) | [React to a message](../../chat/react-to-message/README.md) |
 | `POST /api/popkins/{popkinId}/photos` | [Add photos](../../photos/add-photos/README.md) |
 | `PUT`/`DELETE .../photos/{photoId}/reactions/{emoji}` | [React to a photo](../../photos/react-to-photo/README.md) |
 | `POST .../photos/{photoId}/comments` | [Comment on a photo](../../photos/comment-on-photo/README.md) |
@@ -193,8 +194,12 @@ Everything above. What differs from the design as it first stood, and what waits
   The text of the removed album was chosen in the build, not taken from the requirements.
 - "Save" on the notice in Photos opens the recap; the album is saved there
   ([Recap](../recap/README.md)).
-- Waiting for their journeys: the photo view's "Save" (journey 14), the message actions sheet
-  with "Copy" only (journey 12), and the refusals of the writes not built yet.
+- Waiting for their journeys: the photo view's "Save" (journey 14) and the refusals of the
+  writes not built yet. Journey 12 settled that a message of a wrapped-up Popkin opens no
+  message actions, where this design had waited for a sheet with "Copy" only: its reaction chips
+  show and are not buttons, its quotes still go to the message they quote, and reacting,
+  replying and deleting are refused with `409` `popkin_wrapped_up`
+  ([React to a message](../../chat/react-to-message/README.md)).
   `DirectMessagePage` came with journey 11: a direct message of a wrapped-up Popkin opens
   read-only, with the wrapped-up line in place of the composer and no "Call {first name}", a new
   one is refused with `409` `popkin_wrapped_up`, and a wrap-up ends every direct call with the

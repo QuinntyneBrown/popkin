@@ -102,9 +102,9 @@ export class GroupChatPage {
     this.navBadge = this.nav.locator('.badge');
   }
 
-  /** The message with this text. */
+  /** The message with this text, not one that only quotes it. */
   message(text: string): Locator {
-    return this.messages.filter({ has: this.page.locator('.bubble', { hasText: text }) });
+    return this.messages.filter({ has: this.page.locator('.bubble > p', { hasText: text }) });
   }
 
   nameOf(message: Locator): Locator {
@@ -133,7 +133,7 @@ export class GroupChatPage {
 
   /** The text of every bubble, in the order shown. */
   texts(): Locator {
-    return this.messages.locator('.bubble');
+    return this.messages.locator('.bubble > p');
   }
 
   /** True when the bubble sits against the right edge of its row, as the member's own do. */

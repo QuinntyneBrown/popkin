@@ -1,0 +1,28 @@
+<div
+  pk-dialog
+  heading="Delete this message?"
+  description="It’s removed for everyone in this chat."
+  [accent]="data.accent"
+>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    [block]="true"
+    (click)="close(true)"
+  >
+    Delete
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="secondary"
+    cdkFocusInitial
+    [block]="true"
+    (click)="close(false)"
+  >
+    Keep
+  </button>
+</div>

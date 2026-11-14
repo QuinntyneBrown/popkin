@@ -26,6 +26,7 @@ export * from './lib/api/chat/draft-store';
 export * from './lib/api/chat/local-outbox-storage';
 export * from './lib/api/chat/message-outbox';
 export * from './lib/api/chat/network-status';
+export * from './lib/api/chat/reactions';
 export * from './lib/api/chat/thread-rows';
 export * from './lib/api/chat/conversation-text';
 export * from './lib/api/chat/conversations-store';

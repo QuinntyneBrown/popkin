@@ -86,8 +86,8 @@ export class DirectMessagePage {
     this.personPlace = this.personPane.locator('p').first();
   }
 
-  /** The message with this text. */
+  /** The message with this text, not one that only quotes it. */
   message(text: string): Locator {
-    return this.messages.filter({ has: this.page.locator('.bubble', { hasText: text }) });
+    return this.messages.filter({ has: this.page.locator('.bubble > p', { hasText: text }) });
   }
 }

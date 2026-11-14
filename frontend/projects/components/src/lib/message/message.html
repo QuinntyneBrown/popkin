@@ -25,7 +25,29 @@
     } @else {
       <span class="visually-hidden">{{ name() }}</span>
     }
-    <div class="bubble" [class.bubble--failed]="state() === 'failed'">
+    <div
+      class="bubble"
+      [class.bubble--failed]="state() === 'failed'"
+      (pointerdown)="pressStart($event)"
+      (pointermove)="pressMove($event)"
+      (pointerup)="pressEnd()"
+      (pointercancel)="pressEnd()"
+      (contextmenu)="onContextMenu($event)"
+    >
+      @if (quote(); as q) {
+        @if (q.deleted) {
+          <div pk-quote [deleted]="true"></div>
+        } @else {
+          <button
+            pk-quote
+            type="button"
+            [name]="q.firstName"
+            [snippet]="q.snippet"
+            [attr.aria-label]="'Go to ' + q.firstName + '’s message'"
+            (click)="onQuote(q.messageId)"
+          ></button>
+        }
+      }
       <p class="bubble__text">{{ text() }}</p>
     </div>
     @if (mine()) {
@@ -52,9 +74,38 @@
         @default {
           <div class="msg__meta">
             <span class="msg__time">{{ time() }}</span>
+            <ng-container *ngTemplateOutlet="chips" />
           </div>
         }
       }
+    } @else if (reactions().length) {
+      <div class="msg__meta">
+        <ng-container *ngTemplateOutlet="chips" />
+      </div>
     }
   </div>
 }
+
+<!-- The reaction chips: buttons that toggle the member's own, or, read-only, words only. -->
+<ng-template #chips>
+  @for (chip of reactions(); track chip.emoji) {
+    @if (readOnly()) {
+      <span class="reaction" [class.reaction--mine]="chip.mine">
+        <span aria-hidden="true"
+          ><span class="emoji">{{ chip.emoji }}</span> {{ chip.count }}</span
+        >
+        <span class="visually-hidden">{{ chip.label }}</span>
+      </span>
+    } @else {
+      <button
+        class="reaction"
+        type="button"
+        [attr.aria-pressed]="chip.mine"
+        [attr.aria-label]="chip.label"
+        (click)="react.emit(chip.emoji)"
+      >
+        <span class="emoji" aria-hidden="true">{{ chip.emoji }}</span> {{ chip.count }}
+      </button>
+    }
+  }
+</ng-template>

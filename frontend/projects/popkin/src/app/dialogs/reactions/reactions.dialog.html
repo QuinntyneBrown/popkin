@@ -1,0 +1,55 @@
+<div pk-dialog heading="Message actions" [accent]="data.accent">
+  <div pk-quote [name]="data.name" [snippet]="data.text" [truncate]="false"></div>
+  <div pk-reaction-grid [options]="quick" [pressed]="data.pressed()" (react)="react($event)"></div>
+  <!-- Closed, More reactions heads one list; open, its grid sits between it and Reply. -->
+  @if (showMore()) {
+    <div pk-menu-list>
+      <ng-container *ngTemplateOutlet="moreItem" />
+    </div>
+    <div
+      pk-reaction-grid
+      id="more-reactions"
+      label="More reactions"
+      [options]="more"
+      [pressed]="data.pressed()"
+      (react)="react($event)"
+    ></div>
+    <div pk-menu-list>
+      <ng-container *ngTemplateOutlet="items" />
+    </div>
+  } @else {
+    <div pk-menu-list>
+      <ng-container *ngTemplateOutlet="moreItem" />
+      <ng-container *ngTemplateOutlet="items" />
+    </div>
+  }
+</div>
+
+<ng-template #moreItem>
+  <button
+    pk-menu-item
+    type="button"
+    icon="smile-plus"
+    aria-controls="more-reactions"
+    [attr.aria-expanded]="showMore()"
+    (click)="showMore.set(!showMore())"
+  >
+    More reactions
+  </button>
+</ng-template>
+
+<ng-template #items>
+  <button pk-menu-item type="button" icon="reply" (click)="choose({ kind: 'reply' })">Reply</button>
+  <button pk-menu-item type="button" icon="copy" (click)="choose({ kind: 'copy' })">Copy</button>
+  @if (data.mine) {
+    <button
+      pk-menu-item
+      type="button"
+      icon="trash"
+      [danger]="true"
+      (click)="choose({ kind: 'delete' })"
+    >
+      Delete
+    </button>
+  }
+</ng-template>
