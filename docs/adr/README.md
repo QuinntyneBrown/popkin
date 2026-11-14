@@ -30,6 +30,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0017](0017-marketing-site.md) | The marketing site: a static Angular project at `about.popkin.community` with the pitch film, linking to the app through one `APP_URL` | Accepted |
 | [0018](0018-deploy-to-azure-on-every-commit.md) | Every commit to main is deployed to Azure: Container Apps behind Caddy, Azure SQL, the marketing site on a Static Web App | Accepted |
 | [0019](0019-popkin-may-charge.md) | Popkin may charge one day: no claim that it is free; no advertising stays | Accepted |
+| [0020](0020-popkin-community-on-front-door.md) | popkin.community: an Azure DNS zone and Azure Front Door with managed certificates; the app at `app` and `*`, the marketing site at the apex and `www` | Accepted |
 
 ## Format
 
