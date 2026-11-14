@@ -156,3 +156,25 @@ test.describe('naming a Popkin on a wider screen', () => {
     await expect(step.picture).toHaveCount(0);
   });
 });
+
+test.describe('naming a Popkin on a phone with its keyboard open', () => {
+  // A phone of 390 px whose keyboard leaves 420 px of the screen showing.
+  test.use({ viewport: { width: 390, height: 420 }, hasTouch: true, isMobile: true });
+
+  // L2-058 AC14
+  test('while the name takes typing, Looks good sits under the form, not on it', async ({
+    page,
+    pk,
+  }) => {
+    await pk.open('nameYourPopkin');
+    const step = new NameYourPopkinPage(page);
+
+    await step.name.focus();
+
+    await expect(step.looksGood).not.toBeInViewport();
+
+    await step.name.blur();
+
+    await expect(step.looksGood).toBeInViewport();
+  });
+});

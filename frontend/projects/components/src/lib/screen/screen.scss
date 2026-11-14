@@ -162,6 +162,17 @@
 }
 
 /*
+ * While a field takes typing on a touch screen, the keyboard covers the bottom of the screen and a
+ * sticky footer would sit on the form above it. The footer goes back to the end of the body until
+ * the field lets go.
+ */
+@media (hover: none) and (pointer: coarse) {
+  :host(:has(input:focus, textarea:focus)) .screen__footer {
+    position: static;
+  }
+}
+
+/*
  * Form factors. A split screen keeps its form in a readable column: 28 rem, 32 rem from S and
  * 36 rem from L (L2-058 AC3). From M the picture of what the step makes (pk-split-aside) takes
  * the start of the screen and the form the rest (AC10).

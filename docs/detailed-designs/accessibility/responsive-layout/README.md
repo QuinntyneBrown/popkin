@@ -74,9 +74,12 @@ design system does so from 992 px, which also meets it.
   viewport width in TypeScript.
 - **Sticky footer** — the step template's footer is `position: sticky; bottom: 0` inside the
   column, padded by `env(safe-area-inset-bottom)`, and holds the main action as a block button in
-  the thumb zone (L2-058 AC2). When the on-screen keyboard opens, the footer stays above it
-  because the column follows the visual viewport (`interactive-widget=resizes-content` in the
-  viewport meta tag of `index.html`).
+  the thumb zone (L2-058 AC2). While a field takes typing on a touch screen
+  (`(hover: none) and (pointer: coarse)` and `:has(input:focus, textarea:focus)`), the footer is
+  `position: static`: it waits at the end of the screen and comes back when the field lets go
+  (L2-058 AC14). With the keyboard up a phone shows little of the screen, and a footer pinned over
+  the keyboard would sit on the form; Safari on iOS also ignores
+  `interactive-widget=resizes-content` in the viewport meta tag of `index.html`.
 - **`pk-popkin-nav`** — the Popkin tabs. Below M they are fixed to the bottom of the screen,
   height `--layout-nav-height` plus the safe area, and the screen reserves the same space at its
   end (L2-058 AC2). From M the same `nav` is a rail on the left, and from L a sidebar that also
