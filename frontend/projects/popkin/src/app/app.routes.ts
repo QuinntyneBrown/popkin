@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { AlbumStore, ExperienceStore, ExperiencesStore, PopkinFrame } from 'api';
 import { signedInGuard } from './guards/signed-in.guard';
 import { signedOutGuard } from './guards/signed-out.guard';
+import { signInChannelsResolver } from './guards/sign-in-channels.resolver';
 
 /**
  * Route data drives the shell: `shell` picks the chrome (`app` or `bare`) and `page` is stamped
@@ -34,6 +35,7 @@ export const routes: Routes = [
     path: 'sign-in',
     loadComponent: () => import('./pages/sign-in/sign-in.page').then((m) => m.SignInPage),
     data: data({ shell: 'bare', page: 'sign-in' }),
+    resolve: { channels: signInChannelsResolver },
     title: 'Sign in · Popkin',
   },
   {
@@ -46,6 +48,7 @@ export const routes: Routes = [
     path: 'sign-up',
     loadComponent: () => import('./pages/sign-up/sign-up.page').then((m) => m.SignUpPage),
     data: data({ shell: 'bare', page: 'sign-up' }),
+    resolve: { channels: signInChannelsResolver },
     title: 'Sign up · Popkin',
   },
   {

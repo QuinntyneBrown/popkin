@@ -37,8 +37,8 @@
     <div
       pk-text-field
       fieldId="contact"
-      labelLayout="row"
       hint="We’ll send a 6-digit code to confirm it’s you."
+      [labelLayout]="phoneOffered ? 'row' : 'above'"
       [label]="contactLabel()"
       [type]="channel() === 'phone' ? 'tel' : 'email'"
       [inputmode]="channel() === 'phone' ? 'tel' : 'email'"
@@ -47,14 +47,16 @@
       [readonly]="status() === 'sending'"
       [error]="contactError() ?? undefined"
     >
-      <div
-        pk-segmented-control
-        slot="label-end"
-        label="How to reach you"
-        [options]="channels"
-        [value]="channel()"
-        (valueChange)="switchChannel($event)"
-      ></div>
+      @if (phoneOffered) {
+        <div
+          pk-segmented-control
+          slot="label-end"
+          label="How to reach you"
+          [options]="channels"
+          [value]="channel()"
+          (valueChange)="switchChannel($event)"
+        ></div>
+      }
     </div>
   </form>
   <ng-container slot="actions">

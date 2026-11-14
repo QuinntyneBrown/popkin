@@ -13,6 +13,12 @@ namespace Popkin.Api.Controllers;
 [Route("api/auth")]
 public sealed class AuthController(ISender sender) : ControllerBase
 {
+    /// <summary>The ways to reach a person that sign-up and sign-in offer (L2-084 AC1). Anonymous.</summary>
+    [HttpGet("channels")]
+    [AllowAnonymous]
+    public async Task<ActionResult<SignInChannelsDto>> GetChannels(CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetSignInChannelsQuery(), cancellationToken));
+
     public sealed record RequestCodeRequest(CodePurpose Purpose, ContactChannel Channel, string? Destination);
 
     /// <summary>Sends a six-digit code (L2-003 AC3). Anonymous (L2-050 AC1), limited per address (L2-053 AC1).</summary>

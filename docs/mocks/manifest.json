@@ -68,14 +68,16 @@
       "route": "/sign-up",
       "requirements": [
         "L2-003",
-        "L2-052"
+        "L2-052",
+        "L2-084"
       ],
       "states": [
         "default",
         "email",
         "invalid",
         "submitting",
-        "error"
+        "error",
+        "email-only"
       ],
       "not_applicable": {
         "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
@@ -113,12 +115,14 @@
       "route": "/sign-in",
       "requirements": [
         "L2-006",
-        "L2-007"
+        "L2-007",
+        "L2-084"
       ],
       "states": [
         "default",
         "invalid",
-        "submitting"
+        "submitting",
+        "email-only"
       ],
       "not_applicable": {
         "loading": "The screen needs no request before it shows, so it has nothing to wait for.",

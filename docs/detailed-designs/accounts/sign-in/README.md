@@ -57,11 +57,20 @@ name after confirming, and an account is made (L2-006 AC2).
 
 The screen, the name step and the tests above. The back end needed no new code: `RequestCodeCommand` and `ConfirmCodeCommand` already served the purpose `SignIn`. Nothing in this design is open.
 
+### Phone sign-in switched off (L2-084)
+
+- **Mock** — `docs/mocks/pages/sign-in/email-only.html`: the one field is "Email", `type="email"`, `inputmode="email"`, still `autocomplete="username"`.
+- **The setting** — `Features:PhoneSignIn` ([ADR 0023](../../../adr/0023-features-switched-on-by-a-setting.md)), off unless set to `true`.
+- **API** — `GET /api/auth/channels`, anonymous: `{ "channels": ["Email"] }` while it is off, `["Phone", "Email"]` once on (L2-084 AC1). `GetSignInChannelsQuery` reads `SignInChannels`, made once from the setting. `RequestCodeCommandHandler` refuses `Phone` while it is off with 400 `channel_not_offered`, field `channel`, before any code is made (AC2).
+- **Front end** — `signInChannelsResolver` (`guards/sign-in-channels.resolver.ts`) asks `AuthApi.channels()` before `/sign-in` and `/sign-up` open and answers `['Email']` when the request fails (AC6); each page reads the answer from the route's data, `channels`. With `Email` alone, `SignInPage` labels the field "Email" and calls `parseContact(raw, ['Email'])`, which checks every input as an email and says "Enter your email." for an empty field (AC4).
+- **Tests** — `Auth/SignInChannelsTests.cs` (the answer either way, and the refusal); Playwright specs stub the channels to `Email` alone (the recording, made with the switch on, offers both); `parse-contact.spec.ts` covers the email-only rows.
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-006` | `L1-002` | Sign in: A person with an account signs in with the same phone number or email and a new code. |
+| `L2-084` | `L1-002` | Phone sign-in is switched on by its owner: until then sign in offers an email alone. |
 
 ## Diagrams
 

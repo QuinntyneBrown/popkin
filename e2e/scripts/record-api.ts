@@ -73,6 +73,8 @@ function joinForm(displayName: string): FormData {
   return form;
 }
 
+// The ways to sign in: eng/Start-E2eApi.ps1 switches phone sign-in on (L2-084, ADR 0023).
+await call('GET', '/api/auth/channels');
 // Accounts: Mara signs up with the number the mocks show; every local code is 482913.
 const sent = await call('POST', '/api/auth/codes', {
   purpose: 'SignUp',

@@ -34,6 +34,9 @@ param customEmailDomainVerified bool = true
 @description('The toll-free number SMS is sent from, as +1…, once its verification is approved; empty sends no text.')
 param smsSender string = ''
 
+@description('Phone sign-in (L2-084, ADR 0023): true once smsSender sends texts; until then sign-up and sign-in offer an email alone.')
+param phoneSignIn bool = false
+
 @description('Azure SQL takes no new servers in some regions (East US 2 among them); the nearest that does.')
 param sqlLocation string = 'centralus'
 
@@ -244,6 +247,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
           env: concat(databaseEnv, keyEnv, photosEnv, communicationEnv, [
             { name: 'App__Origin', value: appOrigin }
             { name: 'Invites__BaseUrl', value: '${appOrigin}/i' }
+            { name: 'Features__PhoneSignIn', value: string(phoneSignIn) }
           ])
           resources: { cpu: json('0.5'), memory: '1Gi' }
           probes: [

@@ -1,4 +1,10 @@
 {
+  "GET /api/auth/channels": {
+    "status": 200,
+    "body": {
+      "channels": ["Phone", "Email"]
+    }
+  },
   "POST /api/auth/codes": {
     "status": 202,
     "body": {
