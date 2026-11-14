@@ -11,11 +11,11 @@ Container_Boundary(web, "Popkin web app") {
 }
 Container_Boundary(api, "Popkin API") {
   Component(threads, "ThreadsController", "ASP.NET Core controller", "POST …/threads/{threadId}/photos")
-  Component(upload, "UploadChatPhotoCommandHandler", "MediatR handler", "Checks type and size, removes metadata, stores; not in the album")
+  Component(upload, "UploadThreadPhotoCommandHandler", "MediatR handler", "Checks type and size, removes metadata, stores; not in the album")
   Component(messages, "MessagesController", "ASP.NET Core controller", "POST messages with photoId")
   Component(send, "SendMessageCommandHandler", "MediatR handler", "Saves the message; puts an Everyone photo in the album")
   Component(photostore, "IPhotoStore", "Infrastructure", "Writes files; signed addresses")
-  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "MessageAdded to the thread's audience; PhotoAdded for Everyone only")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "MessageAdded to the thread's audience; PhotosAdded for Everyone only")
   ComponentDb(db, "Popkin database", "SQL Server", "Photo.ThreadId, Photo.InAlbum, Message.PhotoId")
 }
 Rel(composer, store, "choosePhoto, removePhoto, send")
@@ -23,10 +23,10 @@ Rel(store, outbox, "Enqueues the photo message")
 Rel(composer, viewer, "Opens a sent photo in")
 Rel(outbox, threads, "Uploads", "multipart/form-data")
 Rel(outbox, messages, "Posts the message with photoId", "JSON/HTTPS")
-Rel(threads, upload, "Sends UploadChatPhotoCommand")
+Rel(threads, upload, "Sends UploadThreadPhotoCommand")
 Rel(upload, photostore, "Writes the cleaned files")
 Rel(upload, db, "Inserts Photo", "EF Core")
 Rel(messages, send, "Sends SendMessageCommand")
 Rel(send, db, "Saves Message; InAlbum for Everyone", "EF Core")
-Rel(send, notifier, "MessageAdded; PhotoAdded when Everyone")
+Rel(send, notifier, "MessageAdded; PhotosAdded when Everyone")
 @enduml

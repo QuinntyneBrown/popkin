@@ -27,7 +27,7 @@ box "Backend — Popkin API" #D1FADF
   participant "SignalRPopkinNotifier" as notifier
 end box
 box "Backend — Popkin Application and Domain" #ECFDF3
-  participant "UploadChatPhotoCommandHandler" as handler
+  participant "UploadThreadPhotoCommandHandler" as handler
   participant "SendMessageCommandHandler" as send
 end box
 box "Backend — Popkin Infrastructure" #FFF4E5
@@ -41,7 +41,7 @@ outbox --> page : Pending row with the photo from its object URL, marked as send
 outbox -> client : uploadPhoto(popkinId, threadId, file)
 client -> controller : POST /api/popkins/{popkinId}/threads/{threadId}/photos (multipart)
 controller -> controller : Request limit 10 MB plus 64 KB; photos rate limit
-controller -> handler : Send UploadChatPhotoCommand
+controller -> handler : Send UploadThreadPhotoCommand
 handler -> handler : Membership, ChatThread.CanRead, Popkin not wrapped up (else 409 popkin_wrapped_up)
 handler -> handler : ImageSniffer: content is JPEG, PNG, WebP or HEIC, at most 10 MB (L2-052 AC3)
 alt type or size not allowed
@@ -60,7 +60,7 @@ else allowed
   send -> db : Save Message with PhotoId
   alt Everyone (L2-026 AC3)
     send -> db : Photo.InAlbum = true, AddedAt = now: in Photos under the sender
-    send -> notifier : MessageAdded and PhotoAdded to the Popkin's group
+    send -> notifier : MessageAdded and PhotosAdded to the Popkin's group
   else Direct message (L2-023 AC2)
     send -> notifier : MessageAdded to the two members alone; not in the album
   end

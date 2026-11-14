@@ -33,16 +33,16 @@ package "Popkin.Domain" {
   }
 }
 package "Popkin.Application" {
-  class UploadChatPhotoCommand {
+  class UploadThreadPhotoCommand {
     +Guid PopkinId
     +Guid ThreadId
     +Stream Content
     +long Length
   }
-  class UploadChatPhotoCommandHandler
+  class UploadThreadPhotoCommandHandler
   class SendMessageCommandHandler {
     +photoId must be the caller's, this thread's, unused
-    +Everyone: Photo.InAlbum = true, PhotoAdded
+    +Everyone: Photo.InAlbum = true, PhotosAdded
   }
   class ChatPhotoDto {
     +Guid Id
@@ -80,19 +80,19 @@ package "web app (api, components)" {
     +send(..., replyToMessageId?, photoId?)
   }
   class MessageRow {
-    +photo: { url, alt, label, photoId | null }
+    +photo: { id, url, alt, label, link }
   }
 }
-UploadChatPhotoCommandHandler ..> UploadChatPhotoCommand : handles
-UploadChatPhotoCommandHandler ..> IPhotoProcessor
-UploadChatPhotoCommandHandler ..> IPhotoStore
-UploadChatPhotoCommandHandler --> Photo : creates, InAlbum false
-UploadChatPhotoCommandHandler ..> ChatPhotoDto : returns
+UploadThreadPhotoCommandHandler ..> UploadThreadPhotoCommand : handles
+UploadThreadPhotoCommandHandler ..> IPhotoProcessor
+UploadThreadPhotoCommandHandler ..> IPhotoStore
+UploadThreadPhotoCommandHandler --> Photo : creates, InAlbum false
+UploadThreadPhotoCommandHandler ..> ChatPhotoDto : returns
 SendMessageCommandHandler --> Message : saves
 SendMessageCommandHandler --> Photo : puts Everyone's in the album
 MessageDto --> ChatPhotoDto
 ChatPhotoDto ..> PhotoUrlSigner : url signed by
-Message "0..*" --> "0..1" Photo
+Message "0..1" --> "0..1" Photo
 ThreadStore ..> MessageOutbox : send
 MessageOutbox ..> ChatApi : upload, then send
 ThreadStore ..> MessageRow : derives
