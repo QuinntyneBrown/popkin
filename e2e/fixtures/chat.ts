@@ -469,6 +469,11 @@ export class Chat {
   /** Someone else's message, stored and sent to the app over the hub. */
   async arrives(hub: Hub, added: ChatMessage): Promise<void> {
     this.messages.push(added);
+    // As the API counts it: a later read of the list includes it among the unread.
+    const fromOther = added.author.membershipId !== this.thread.viewer.membershipId;
+    if (added.threadId === threadId && added.kind === 'Member' && fromOther) {
+      this.thread.unreadCount += 1;
+    }
     await hub.push('MessageAdded', added);
   }
 
