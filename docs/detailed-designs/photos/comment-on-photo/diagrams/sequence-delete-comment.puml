@@ -17,7 +17,7 @@ skinparam package {
 actor "Member" as actor
 box "Frontend — Popkin web app" #E0F2FE
   participant "PhotoCommentsDialog" as dialog
-  participant "Confirm dialog\n(mock TO SUPPLY)" as confirm
+  participant "DeleteCommentDialog" as confirm
   participant "PhotosApi" as client
 end box
 box "Backend — Popkin API" #D1FADF
@@ -30,12 +30,12 @@ box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
 
-actor -> dialog : Choose "Delete" on own comment (offered only when mine)
-dialog -> confirm : Ask to confirm
+actor -> dialog : Choose "Delete comment" on own comment (offered only when mine)
+dialog -> confirm : "Delete this comment?" — "It will be removed for everyone."
 alt Cancel
   confirm --> dialog : No
   dialog --> actor : Comment stays
-else Confirm
+else Delete
   confirm --> dialog : Yes
   dialog -> client : deleteComment(popkinId, photoId, commentId)
   client -> controller : DELETE /api/popkins/{popkinId}/photos/{photoId}/comments/{commentId}
@@ -43,14 +43,16 @@ else Confirm
   handler -> db : Check membership; load comment of this photo
   alt Not found
     controller --> client : 404 comment_not_found
-  else Another member's comment
+  else Popkin wrapped up
+    controller --> client : 409 popkin_wrapped_up (L2-045 AC2)
+  else Another member’s comment, the Host’s included
     controller --> client : 403 comment_not_yours
   else Own comment
     handler -> db : Delete, save
     controller --> client : 204 No Content
   end
   alt Failure
-    dialog --> actor : Comment stays, message TO SUPPLY
+    dialog --> actor : Comment stays; toast "We couldn’t delete your comment."
   else Deleted
     dialog --> actor : Comment removed, count - 1 (L2-035 AC5)
   end
