@@ -185,6 +185,7 @@ Each design follows the source named below and marks the conflict in its own REA
 | Accounts | [Sessions](accounts/sessions/README.md) | L2-007, L2-050 |
 | Accounts | [Manage the account](accounts/manage-account/README.md) | L2-048 |
 | Accounts | [Delete the account](accounts/delete-account/README.md) | L2-049 |
+| Accounts | [Terms and Privacy notice](accounts/legal-pages/README.md) | L2-082, L2-083, L2-003 |
 | Popkins | [Start a Popkin](popkins/start-popkin/README.md) | L2-008, L2-009, L2-010, L2-062, L2-065 |
 | Popkins | [Choose the address](popkins/choose-address/README.md) | L2-062, L2-063, L2-067 |
 | Popkins | [Open a Popkin by its address](popkins/open-by-address/README.md) | L2-064 |
@@ -322,6 +323,7 @@ or design that settled it.
 | 75 | Whether the photo of a message is a link rather than a button. It navigates to the photo view, `/p/{popkinId}/photos/{photoId}`, which a link does by the platform's practice (open in a new tab, the address on hover); journey 13 decided on a button, as journey 12 made quotes buttons, and the mocks drew `button.bubble__photo` ([Send photos in chat](chat/send-photos-in-chat/README.md)) | None | Journey 13: a link, `a.bubble__photo`, to the photo view, named "Open photo from {first name}"; a photo still sending has no address and is not a link (decision 4 of [Send photos in chat](chat/send-photos-in-chat/README.md)) |
 | 76 | The client's own lines for a photo message with no text read its empty text, not "Photo": the reply bar (`ThreadStore.startReply`), the quote of Message actions, the line a screen reader hears when the message arrives (`announcement`), and the latest line the Chat tab (`ConversationsStore`) and My Popkins (`MyPopkinsStore`) write from `MessageAdded`, until their next read. Message actions also offers Copy for it, which copies nothing and says "Message copied.". The design asks for "Photo" in each and for no Copy; every quote and preview the server answers already reads "Photo" ([Send photos in chat](chat/send-photos-in-chat/README.md), [React to a message](chat/react-to-message/README.md), [Reply to a message](chat/reply-to-message/README.md)) | Journey 13 | Journey 13: `messageLine` reads a photo alone as "Photo" for the reply bar, the announcement, and the latest line the Chat tab and My Popkins write from `MessageAdded`; Message actions quotes it as "Photo" and offers no Copy |
 | 77 | The album's zip packs the display images, at most 2048 px, not the originals that "Save photo" downloads since journey 14 (L2-046 AC4) ([Save a photo](photos/save-photo/README.md), [Recap](wrap-up/recap/README.md)) | None; found in journey 14 | |
+| 78 | Who runs Popkin (its legal name), the address to contact about personal data and the law that governs the Terms. The Terms and the Privacy notice show `<TO SUPPLY: …>` in their place ([Terms and Privacy notice](accounts/legal-pages/README.md)) | The toll-free verification of Popkin's SMS number (ADR 0021) | |
 
 Settled so far:
 

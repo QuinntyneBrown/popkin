@@ -186,6 +186,16 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .legal { margin-top: var(--space-4); text-align: center; font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
 .legal a { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
 
+/* Document: the text of the Terms and the Privacy notice (L2-082, L2-083), a section per h2. */
+.document { overflow-wrap: break-word; }
+.document__section + .document__section { margin-top: var(--space-8); }
+.document__heading { font: var(--text-h3); }
+.document__text, .document__list { margin-top: var(--space-3); font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-relaxed) var(--font-family-sans); }
+.document__list { padding-left: var(--space-5); list-style: disc; }
+.document__item + .document__item { margin-top: var(--space-2); }
+.document__end { margin-top: var(--space-10); padding-top: var(--space-6); border-top: 1px solid var(--color-border-default); font-weight: var(--font-weight-semibold); }
+.document__end a { color: var(--color-fg-default); }
+
 /* The one picture of something shared: a wide button until there is one, then the picture with Remove over its corner. */
 .picture-field__chosen { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-md); background: var(--color-bg-subtle); }
 .picture-field__chosen img { width: 100%; height: 100%; }

@@ -564,6 +564,43 @@
       }
     },
     {
+      "id": "terms",
+      "kind": "page",
+      "title": "Terms",
+      "route": "/terms",
+      "requirements": [
+        "L2-083",
+        "L2-003",
+        "L2-058"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The page is fixed copy and needs no request before it shows.",
+        "empty": "The page lists nothing; it has no collection that can be empty.",
+        "error": "The page sends no request, so nothing can fail."
+      }
+    },
+    {
+      "id": "privacy",
+      "kind": "page",
+      "title": "Privacy notice",
+      "route": "/privacy",
+      "requirements": [
+        "L2-082",
+        "L2-058"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The page is fixed copy and needs no request before it shows.",
+        "empty": "The page lists nothing; it has no collection that can be empty.",
+        "error": "The page sends no request, so nothing can fail."
+      }
+    },
+    {
       "id": "not-found",
       "kind": "page",
       "title": "Not found",

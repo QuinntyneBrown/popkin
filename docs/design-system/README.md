@@ -113,6 +113,9 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 - `screen` gains `screen__body--hero`, `screen__lead`, `screen__content--headed` and
   `screen__actions` (the mocks' `push`), and `icon` gains `icon--xl` (the empty state's icon).
 - `.qr` carries its own white padding, the quiet zone a camera needs.
+- `document` is `pk-document`, the text of the Terms and the Privacy notice: a section per `h2`
+  (`document__heading`), its paragraphs and lists, and a ruled-off end with the link to the other
+  page (`pages/terms/default`, `pages/privacy/default`).
 
 ## Patterns
 
