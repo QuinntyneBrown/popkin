@@ -79,11 +79,6 @@ act the cuts are hard.
   `Two_reactions_at_the_same_moment_are_both_kept_with_their_own_versions`), that a direct
   message's reactions go to its two members alone (`LiveReactionsTests.cs`), or that no log
   carries the emoji (`Errors/UnexpectedErrorTests.cs`); the film says so on a card.
-- **The register lags the branch.** Known gaps 64 and 70 of
-  `docs/detailed-designs/README.md`, and the hub event in
-  `docs/detailed-designs/chat/react-to-message/README.md`, still say reactions and replies in a
-  direct message are not built and `ReactionsChanged` carries no version; the branch builds both.
-  The film shows the branch.
 - It leaves out, though they are built and tested: "Cancel reply", "Keep" in "Delete this
   message?", a deletion that fails, choosing someone else's chip to add to it, a second emoji
   beside the first, and closing Message actions with Escape. `shots.ts` also saves the direct
