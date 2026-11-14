@@ -15,6 +15,12 @@ true: a setting added to the code is added here in the same change.
   `npm run build:marketing`, which copies the pitch film and its pictures in first. It needs no
   setting at run time; the app's address its links use is built in (`environment.ts`,
   `https://popkin.community`). Nothing on that host reaches `/api` or `/hubs`.
+- Both hosts serve the content security policy of
+  [Personal data protection](detailed-designs/security/personal-data-protection/README.md), whose
+  `script-src 'self'` refuses every inline script. The production builds therefore turn off
+  Angular's critical-CSS inlining (`optimization.styles.inlineCritical: false` in
+  `angular.json`): it loads the stylesheet as `media="print"` and needs an inline script to switch
+  it to `all`, which that policy blocks, so the page would show with its foundations only.
 - **One** instance of the Popkin API ([ADR 0009](adr/0009-one-api-instance.md)). Do not scale it
   out: hub groups, presence and the rate limits live in its memory.
 - **One** instance of the Popkin Worker. It must run: it wraps up the Popkins whose time is up
