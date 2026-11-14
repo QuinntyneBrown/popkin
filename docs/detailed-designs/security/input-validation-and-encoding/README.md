@@ -119,7 +119,10 @@ normalisation; it is never HTML-sanitised on input, because encoding happens on 
   gets a `traceId` and, for `500`, a `reference` in the form `PK-XXXX-XXXX` derived from the
   trace id, as on the server-error mock. The handler removes `detail` and any `exception`
   extension in every environment, so no stack trace, query, type name or connection detail
-  leaves the API (L2-052 AC5). The full exception is logged with the same reference.
+  leaves the API (L2-052 AC5). The full exception is logged with the same reference, the
+  method, the route template and the trace id; never the path, which carries ids and what a
+  person chose, such as the emoji of a reaction (ADR 0012). A failure outside any route logs
+  `(no route)`. `UnexpectedErrorTests` proves it since journey 12.
 - **JSON output** — `System.Text.Json` with its default encoder escapes `<`, `>`, `&`, `'` and
   `"`, so a JSON response read as HTML runs nothing. Responses carry
   `Content-Type: application/json` and `X-Content-Type-Options: nosniff`

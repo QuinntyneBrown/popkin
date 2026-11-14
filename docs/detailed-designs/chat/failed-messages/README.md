@@ -65,7 +65,8 @@ What waits:
 
 - the IndexedDB store, photo blobs in the outbox and the reuse of an uploaded `photoId` on
   "Try again": journey 13, Photos in chat;
-- `replyToMessageId` on an entry: journey 12, React and reply;
+- `replyToMessageId` on an entry was built in journey 12, React and reply: a reply that waits
+  or fails keeps its quote, and "Try again" sends it with it;
 - the same states in a direct message were built in journey 11: a direct message uses the same
   `ThreadStore` and outbox, with "Not sent", "Try again" and "Delete" as in Everyone. No
   behaviour spec covers them there; `DirectMessageTests` covers discarding a message of a

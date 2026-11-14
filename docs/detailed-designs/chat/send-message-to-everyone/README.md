@@ -77,7 +77,8 @@ journey:
 - the composer's Add, Emoji and Photo buttons, and a photo in a message (`PhotoId`, a photo
   address on `MessageDto`): journey 13, Photos in chat;
 - reactions and replies, with the reply bar that `group-chat/default` draws (`ReplyToMessageId`,
-  a quote and reactions on `MessageDto`): journey 12, React and reply;
+  a quote and reactions on `MessageDto`), were built in journey 12, React and reply
+  ([React to a message](../react-to-message/README.md), [Reply to a message](../reply-to-message/README.md));
 - "Start group call" in the top bar was built in journey 7, Group call, with the banner of a
   call under way ([Group call](../../calls/group-call/README.md));
 - the read-only line of `group-chat/read-only` was built in journey 9, Wrap up: the composer of

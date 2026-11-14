@@ -34,30 +34,43 @@ deleted, the quote reads "Message deleted".
 
 **API:**
 
-- `POST /api/popkins/{popkinId}/threads/{threadId}/messages` with the optional `replyToMessageId` — 201 or 200 `MessageDto` with its `Quote`; 400 `reply_not_found` when it is not a message of the same thread (a deleted one is allowed); the other codes as in send-message-to-everyone.
-- `MessageDto.Quote` — `QuoteDto(Guid MessageId, string? AuthorFirstName, string? Snippet, bool Deleted)`, or null for a message that replies to nothing. When the quoted message is deleted, `Deleted` is true and the name and snippet are null (L2-025 AC4).
+- `POST /api/popkins/{popkinId}/threads/{threadId}/messages` with the optional `replyToMessageId` — 201 or 200 `MessageDto` with its `Quote`; 400 `reply_not_found` (field `replyToMessageId`) when it is not a message of the same thread (a deleted one and a system note are allowed); the other codes as in send-message-to-everyone.
+- `MessageDto.Quote` — `QuoteDto(Guid MessageId, string? AuthorFirstName, string? Snippet, bool Deleted)`, or null for a message that replies to nothing. When the quoted message is deleted, `Deleted` is true and the name and snippet are null (L2-025 AC4). The hub's `MessageAdded` carries the same quote.
 - No read centred on a message: the pages are those of [Live messages](../live-messages/README.md), `?before={id}` and `?after={id}`.
 
 **Frontend (Popkin web app):**
 
-- **`ThreadStore`** — holds `replyTo: Signal<MessageRow | null>`. `startReply(row)` sets it when `ReactionsDialog` closes with `'reply'`; `cancelReply()` clears it; `send(text)` sends with `replyToMessageId` and clears it. `MessageOutbox` keeps `replyToMessageId` on the entry, so a pending, waiting or failed reply shows its quote, and a retry sends it again with its quote (failed-messages).
+- **`ThreadStore`** — holds `replyingTo`, the message being answered or null. `startReply(messageId)` sets it when `ReactionsDialog` closes with `{ kind: 'reply' }`; `cancelReply()` clears it; `send(text)` sends with `replyToMessageId` and clears it. `MessageOutbox` keeps `replyToMessageId` on the entry, so a pending, waiting or failed reply shows its quote, and a retry sends it again with its quote (failed-messages).
 - **`pk-composer`** — renders its `composer__reply` part when given a reply: "Replying to {first name}", one truncated line of the message and the icon button "Cancel reply" (L2-025 AC1). The composer moves focus to the field when the bar shows; Escape in the field cancels the reply too.
-- **`pk-message`** — renders `MessageQuoteView { messageId, firstName, snippet, deleted }` as its `bubble__quote` part (L2-025 AC2): a live quote is a button named "Go to {first name}'s message" that raises `quoteChosen`; a deleted one reads "Message deleted" and is not a button (AC4).
-- **Jump** — `ThreadStore.jumpTo(messageId)`: when the message is older than the loaded pages, the store loads earlier pages until it holds it; then the page scrolls it to the centre of the thread, focuses it, and `ThreadStore.marked` names it for 2 seconds, which `pk-message` draws as `msg--marked`, an outline as well as a tint (L2-025 AC3, L2-057). Under `prefers-reduced-motion` the scroll is instant (L2-060). If the message cannot be found, because it was deleted meanwhile, nothing scrolls.
+- **`pk-message`** — renders its `quote` input, `MessageQuote { messageId, firstName, snippet, deleted }`, as its `bubble__quote` part through `pk-quote` (L2-025 AC2): a live quote is a button named "Go to {first name}'s message" that raises `goToQuote`; a deleted one reads "Message deleted" and is not a button (AC4).
+- **Jump** — `ThreadStore.jumpTo(messageId)`: when the message is older than the loaded pages, the store loads earlier pages until it holds it; then it answers whether it found it, the page calls `pk-message`'s `reveal()`, which scrolls it to the centre of the thread and focuses it, and `ThreadStore.marked` names it for 2 seconds, which `pk-message` draws as `msg--marked`, an outline as well as a tint (L2-025 AC3, L2-057). Under `prefers-reduced-motion` the scroll is instant (L2-060). If the message cannot be found, because it was deleted meanwhile or the earlier pages run out, nothing scrolls.
 - **Wrapped up** — a read-only thread shows quotes as they are, and they still jump (L2-045).
 
 **Backend:**
 
-- **`SendMessageCommand.ReplyToMessageId`** — optional. `SendMessageCommandHandler` loads the target; a target that does not exist or belongs to another thread is 400 `reply_not_found`. A deleted target is allowed and still links. `Message.ReplyTo(target)` sets the link.
-- **`QuoteDto`** — projected by `GetMessagesQueryHandler` with a left join on `ReplyToMessageId`. `Snippet` is the first line of the quoted text, cut on the server to at most 120 characters.
+- **`SendMessageCommand.ReplyToMessageId`** — optional. `SendMessageCommandHandler` loads the target; a target that does not exist or belongs to another thread is 400 `reply_not_found`, checked before the wrapped-up `409`. A deleted target is allowed and still links, and so is a system note, which can be replied to though it cannot be reacted to or deleted. `Message.Send(…, replyTo)` sets the link, and refuses a target of another thread.
+- **`QuoteDto`** (`Chat/Quotes.cs`) — `Quotes.OfAsync` reads the quoted messages and their authors for a page of messages in two queries, not one per message. `Snippet` is the first line of the quoted text, cut on the server to at most 120 characters at a grapheme boundary, so no emoji is cut in two, and with no ellipsis; the client's `truncate` shortens it further to one line.
 - **`MessageConfiguration`** — `ReplyToMessageId` is a self-reference with `DeleteBehavior.NoAction`; messages are soft-deleted (react-to-message), so the link never dangles.
+
+### Tests
+
+- API integration tests on InMemory, in `Popkin.Api.Tests/Chat/`: `ReplyTests` (a reply's quote, a deleted quote, the 120 characters, `reply_not_found`) and `MessageActionsAccessTests` (a wrapped-up Popkin). The snippet's cut has direct tests in `Popkin.Application.Tests/Chat/QuoteSnippetTests.cs`.
+- Unit tests of `ThreadStore` (`startReply`, `cancelReply`, `jumpTo`, `marked`) and `MessageOutbox` (a reply that waits keeps its quote) in the `api` library.
+- Playwright: the "replying" and "in a direct message" specs of `e2e/tests/react-and-reply.spec.ts`, through `e2e/pages/message-actions.ts`, with the states of `e2e/fixtures/react-states.ts`.
+- Parity specs of `quote`, `message` (the quote and the mark) and `composer` (the reply bar).
+
+### Built in journey 12
+
+Everything above, for messages of text, in Everyone and in a direct message (L2-023 AC3). The
+diagrams were not redrawn (known gap 69); what the reply bar and the quote show for a photo
+waits for journey 13.
 
 ### Open questions
 
 Settled for journey 12:
 
 - The quote's accessible name: "Go to {first name}'s message"; a deleted quote reads "Message deleted" and is not a button.
-- The snippet: the first line of the text, at most 120 characters, cut on the server.
+- The snippet: the first line of the text, at most 120 characters, cut on the server between two grapheme clusters and with no ellipsis.
 - The mark: 2 seconds, an outline as well as a tint (`msg--marked`), drawn by `group-chat/marked.html`; the deleted quote is drawn by `group-chat/deleted-quote.html`.
 - A quoted message older than the loaded pages: the store loads earlier pages until it has it. A read centred on a message (`?around=`), with a gap that fills as the member scrolls, was the alternative; the simpler choice was taken, and it has no gap to draw.
 - Escape in the field cancels a reply; a failed reply keeps its quote and a retry sends it with it.
