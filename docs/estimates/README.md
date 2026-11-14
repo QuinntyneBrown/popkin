@@ -1,11 +1,11 @@
 # Estimates
 
-- Overall effort: 198 days
+- Overall effort: 199 days
 - Complete: 82%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
-| [accounts](accounts.md) | 24 days | 97% |
+| [accounts](accounts.md) | 25 days | 97% |
 | [popkins](popkins.md) | 27 days | 65% |
 | [invitations](invitations.md) | 13 days | 88% |
 | [chat](chat.md) | 31 days | 90% |

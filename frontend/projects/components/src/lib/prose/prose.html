@@ -1,0 +1,17 @@
+@for (section of sections(); track section.heading) {
+  <section class="prose__section">
+    <h2 class="prose__heading">{{ section.heading }}</h2>
+    @for (block of section.blocks; track $index) {
+      @if (isList(block)) {
+        <ul class="prose__list">
+          @for (item of block; track $index) {
+            <li class="prose__item">{{ item }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="prose__text">{{ block }}</p>
+      }
+    }
+  </section>
+}
+<footer class="prose__end"><ng-content /></footer>

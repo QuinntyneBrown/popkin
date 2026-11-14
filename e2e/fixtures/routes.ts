@@ -180,6 +180,9 @@ export const routes = {
     mock: 'pages/server-error/default.html',
   },
   notFound: { app: '/no-such-screen', mock: 'pages/not-found/default.html' },
+  // The Terms and the Privacy notice (L2-082, L2-083).
+  terms: { app: '/terms', mock: 'pages/terms/default.html' },
+  privacy: { app: '/privacy', mock: 'pages/privacy/default.html' },
   // Journey 9, Wrap up.
   // The Host's whole menu from journey 16, Change Popkin settings.
   popkinSettings: { app: home, mock: 'dialogs/popkin-settings/default.html' },

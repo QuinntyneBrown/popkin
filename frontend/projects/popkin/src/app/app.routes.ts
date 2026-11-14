@@ -225,6 +225,19 @@ export const routes: Routes = [
     data: data({ shell: 'bare', page: 'account' }),
     title: 'Your account · Popkin',
   },
+  // Open to anyone, signed in or not (L2-082, L2-083).
+  {
+    path: 'privacy',
+    loadComponent: () => import('./pages/privacy/privacy.page').then((m) => m.PrivacyPage),
+    data: data({ shell: 'bare', page: 'privacy' }),
+    title: 'Privacy notice · Popkin',
+  },
+  {
+    path: 'terms',
+    loadComponent: () => import('./pages/terms/terms.page').then((m) => m.TermsPage),
+    data: data({ shell: 'bare', page: 'terms' }),
+    title: 'Terms · Popkin',
+  },
   {
     path: 'offline',
     // Part of the first download: a screen that cannot be fetched offline still has this one.
