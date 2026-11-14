@@ -19,6 +19,8 @@ public sealed class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.HasIndex(m => new { m.AuthorMembershipId, m.ClientMessageId }).IsUnique();
         builder.HasOne<ChatThread>().WithMany().HasForeignKey(m => m.ThreadId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Membership>().WithMany().HasForeignKey(m => m.AuthorMembershipId).OnDelete(DeleteBehavior.Restrict);
+        // A reply links to the message it answers; messages are soft-deleted, so the link never dangles.
+        builder.HasOne<Message>().WithMany().HasForeignKey(m => m.ReplyToMessageId).OnDelete(DeleteBehavior.NoAction);
     }
 }
 

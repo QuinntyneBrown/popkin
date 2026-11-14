@@ -11,7 +11,7 @@ namespace Popkin.Api.Controllers;
 [Route("api/popkins/{popkinId:guid}/threads/{threadId:guid}/messages")]
 public sealed class MessagesController(ISender sender) : ControllerBase
 {
-    public sealed record SendMessageRequest(Guid? ClientMessageId, string? Text);
+    public sealed record SendMessageRequest(Guid? ClientMessageId, string? Text, Guid? ReplyToMessageId = null);
 
     /// <summary>
     /// A page of the thread, oldest first, at most 50 (L2-027 AC5): the latest, the page
@@ -37,7 +37,7 @@ public sealed class MessagesController(ISender sender) : ControllerBase
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]
     public async Task<ActionResult<MessageDto>> Send(Guid popkinId, Guid threadId, SendMessageRequest request, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new SendMessageCommand(popkinId, threadId, request.ClientMessageId, request.Text), cancellationToken);
+        var result = await sender.Send(new SendMessageCommand(popkinId, threadId, request.ClientMessageId, request.Text, request.ReplyToMessageId), cancellationToken);
         return result.Created
             ? Created($"/api/popkins/{popkinId}/threads/{threadId}/messages/{result.Message.Id}", result.Message)
             : Ok(result.Message);

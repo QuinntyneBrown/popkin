@@ -68,6 +68,7 @@ public sealed class GetMessagesQueryHandler(IAppDbContext db, IMembershipGuard g
         var authorIds = messages.Select(m => m.AuthorMembershipId).Distinct().ToList();
         var authors = await db.Memberships.AsNoTracking().Where(m => authorIds.Contains(m.Id)).ToDictionaryAsync(m => m.Id, cancellationToken);
         var reactions = await Reactions.OfAsync(db, messages.Select(m => m.Id).ToList(), cancellationToken);
-        return messages.Select(m => MessageDto.Of(m, authors[m.AuthorMembershipId], photos, reactions.GetValueOrDefault(m.Id))).ToList();
+        var quotes = await Quotes.OfAsync(db, messages, cancellationToken);
+        return messages.Select(m => MessageDto.Of(m, authors[m.AuthorMembershipId], photos, reactions.GetValueOrDefault(m.Id), quotes.GetValueOrDefault(m.Id))).ToList();
     }
 }
