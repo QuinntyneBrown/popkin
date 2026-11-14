@@ -32,4 +32,6 @@ export class StageMessage {
   readonly busy = input(false);
   /** Something went wrong: the message is announced at once. */
   readonly alert = input(false);
+  /** Something changed that is worth hearing, politely: "This photo was removed". */
+  readonly status = input(false);
 }
