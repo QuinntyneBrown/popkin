@@ -101,6 +101,26 @@
   object-fit: cover;
 }
 
+/* A photo that was deleted: a muted line in its place, not a link (L2-036 AC3). */
+.bubble__removed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2-5) var(--space-4);
+  font: var(--text-body-sm);
+  font-style: italic;
+  color: var(--color-fg-muted);
+}
+
+:host(.msg--mine) .bubble__removed {
+  color: var(--color-fg-on-popkin);
+}
+
+/* The text of the message, under the line. */
+.bubble__removed + .bubble__text {
+  padding-top: 0;
+}
+
 /* Not sent: a dashed edge, and the status line under it says so in words. */
 .bubble--failed {
   outline: var(--border-width-thick) dashed var(--color-danger-border);
