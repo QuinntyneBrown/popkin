@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Photos;
 using Popkin.Domain;
 
 namespace Popkin.Application.WrapUp;
@@ -26,5 +27,5 @@ public static class RecapCounts
     /// then, because they were shared all the same.
     /// </summary>
     public static async Task<int> PhotosAsync(IAppDbContext db, PopkinSpace popkin, CancellationToken cancellationToken) =>
-        popkin.PhotosRemovedCount ?? await db.Photos.AsNoTracking().CountAsync(p => p.PopkinId == popkin.Id, cancellationToken);
+        popkin.PhotosRemovedCount ?? await db.Photos.AsNoTracking().InAlbumOf(popkin.Id).CountAsync(cancellationToken);
 }

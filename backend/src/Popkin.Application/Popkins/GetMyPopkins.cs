@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Photos;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
 using Popkin.Domain;
@@ -83,7 +84,7 @@ public sealed class GetMyPopkinsQueryHandler(IAppDbContext db, ICurrentPerson cu
     {
         var popkinIds = popkins.Select(p => p.Id).ToList();
         var photoCounts = await db.Photos
-            .Where(p => popkinIds.Contains(p.PopkinId))
+            .InAlbumsOf(popkinIds)
             .GroupBy(p => p.PopkinId)
             .Select(g => new { PopkinId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(g => g.PopkinId, g => g.Count, cancellationToken);

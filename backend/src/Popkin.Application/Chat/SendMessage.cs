@@ -71,8 +71,17 @@ public sealed class SendMessageCommandHandler(
             throw new ProblemException(409, "popkin_wrapped_up", "This Popkin has wrapped up.");
         }
 
-        var message = Message.Send(thread.Id, membership.Id, text, clientMessageId, clock.GetUtcNow(), replyTo, photo);
+        var now = clock.GetUtcNow();
+        var message = Message.Send(thread.Id, membership.Id, text, clientMessageId, now, replyTo, photo);
         db.Messages.Add(message);
+        // A photo sent in Everyone is also added to Photos under its sender; one sent in a
+        // direct message stays the two members' own (L2-026 AC3).
+        var joinsAlbum = photo is not null && thread.Kind == ChatThreadKind.Everyone;
+        if (joinsAlbum)
+        {
+            photo!.JoinAlbum(now);
+        }
+
         try
         {
             await db.SaveChangesAsync(cancellationToken);
@@ -94,6 +103,11 @@ public sealed class SendMessageCommandHandler(
         var sent = MessageDto.Of(
             message, membership, photos, quote: await Quotes.OfAsync(db, message, cancellationToken), photo: photo is null ? null : ChatPhotoDto.Of(photo, photos));
         await notifier.MessageAdded(await ChatThreads.AudienceAsync(db, thread, cancellationToken), sent);
+        if (joinsAlbum)
+        {
+            await notifier.PhotosAdded(popkin.Id, [photo!.Id]);
+        }
+
         return new SendMessageResult(sent, Created: true);
     }
 

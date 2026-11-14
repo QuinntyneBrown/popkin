@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Photos;
 using Popkin.Application.Problems;
 using Popkin.Application.Security;
 using Popkin.Domain;
@@ -64,7 +65,7 @@ public sealed class StartAlbumExportCommandHandler(IAppDbContext db, IMembership
         var export = exports.Where(e => e.CanBeUsedAt(now)).OrderByDescending(e => e.RequestedAt).FirstOrDefault();
         if (export is null)
         {
-            var photos = await db.Photos.CountAsync(p => p.PopkinId == popkin.Id, cancellationToken);
+            var photos = await db.Photos.InAlbumOf(popkin.Id).CountAsync(cancellationToken);
             export = AlbumExport.Request(popkin.Id, membership.Id, photos, now);
             db.AlbumExports.Add(export);
             await db.SaveChangesAsync(cancellationToken);

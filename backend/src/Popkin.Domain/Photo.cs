@@ -107,4 +107,17 @@ public sealed class Photo
         photo.InAlbum = false;
         return photo;
     }
+
+    /// <summary>
+    /// The photo's message was sent in Everyone: it joins the album under its uploader, as added
+    /// now (L2-026 AC3). Joining twice changes nothing.
+    /// </summary>
+    public void JoinAlbum(DateTimeOffset now)
+    {
+        if (!InAlbum)
+        {
+            InAlbum = true;
+            AddedAt = now;
+        }
+    }
 }

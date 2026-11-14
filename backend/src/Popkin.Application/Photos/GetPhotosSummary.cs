@@ -23,7 +23,7 @@ public sealed class GetPhotosSummaryQueryHandler(IAppDbContext db, IMembershipGu
     public async Task<PhotosSummaryDto> Handle(GetPhotosSummaryQuery request, CancellationToken cancellationToken)
     {
         var (popkin, _) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
-        var album = db.Photos.AsNoTracking().Where(p => p.PopkinId == popkin.Id);
+        var album = db.Photos.AsNoTracking().InAlbumOf(popkin.Id);
         var count = await album.CountAsync(cancellationToken);
         var latest = await album.LatestFirst().Take(Latest).ToListAsync(cancellationToken);
 

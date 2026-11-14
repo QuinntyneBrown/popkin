@@ -8,7 +8,7 @@ namespace Popkin.Application.WrapUp;
 
 /// <summary>
 /// Removes the photos of every Popkin that wrapped up without its album 30 days ago or more
-/// (L2-045 AC4): the files, the photos and any export of them. The pictures of experiences
+/// (L2-045 AC4): the files, the photos (those of chat with them) and any export of them. The pictures of experiences
 /// stay. The Worker sends it on each tick of `RemovePhotosOfWrappedUpPopkinsJob`. Returns how
 /// many albums it removed.
 /// </summary>
@@ -75,7 +75,8 @@ public sealed class RemoveWrappedUpAlbumsCommandHandler(
 
             db.Photos.RemoveRange(photos);
             db.AlbumExports.RemoveRange(exports);
-            popkin.RemovePhotos(now, photos.Count);
+            // The recap goes on counting what the album held; the photos of direct messages and unsent uploads go too.
+            popkin.RemovePhotos(now, photos.Count(p => p.InAlbum));
             await db.SaveChangesAsync(CancellationToken.None);
         }
         catch

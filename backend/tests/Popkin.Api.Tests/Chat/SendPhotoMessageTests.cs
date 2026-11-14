@@ -33,8 +33,7 @@ public sealed class SendPhotoMessageTests
         Assert.Equal(HttpStatusCode.OK, (await lakeside.Host.GetAsync(photo.GetProperty("url").GetString())).StatusCode);
         Assert.Equal(JsonValueKind.Null, plain.GetProperty("photo").ValueKind);
         var page = await lakeside.Host.MessagesAsync(lakeside.Id, threadId);
-        var read = page.GetProperty("items").EnumerateArray().Last();
-        Assert.Equal(sent.GetProperty("id").GetGuid(), read.GetProperty("id").GetGuid());
+        var read = page.GetProperty("items").EnumerateArray().Single(m => m.GetProperty("id").GetGuid() == sent.GetProperty("id").GetGuid());
         Assert.Equal(photo.GetProperty("id").GetGuid(), read.GetProperty("photo").GetProperty("id").GetGuid());
     }
 

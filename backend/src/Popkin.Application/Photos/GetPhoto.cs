@@ -44,12 +44,12 @@ public sealed class GetPhotoQueryHandler(IAppDbContext db, IMembershipGuard guar
     public async Task<PhotoDetailDto> Handle(GetPhotoQuery request, CancellationToken cancellationToken)
     {
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
-        var album = db.Photos.AsNoTracking().Where(p => p.PopkinId == popkin.Id);
         // A photo of another Popkin is the same as no photo (L2-051 AC3).
-        var photo = await album.FirstOrDefaultAsync(p => p.Id == request.PhotoId, cancellationToken)
+        var photo = await db.Photos.AsNoTracking().FirstOrDefaultAsync(p => p.Id == request.PhotoId && p.PopkinId == popkin.Id, cancellationToken)
             ?? throw new ProblemException(404, "photo_not_found", "This photo isn't here.");
 
         // The neighbours follow the whole album, whatever filter the member came from.
+        var album = db.Photos.AsNoTracking().InAlbumOf(popkin.Id);
         var point = PhotoPoint.Of(photo);
         var newer = await album.NewerThan(point).OldestFirst().Select(p => (Guid?)p.Id).FirstOrDefaultAsync(cancellationToken);
         var older = await album.OlderThan(point).LatestFirst().Select(p => (Guid?)p.Id).FirstOrDefaultAsync(cancellationToken);
