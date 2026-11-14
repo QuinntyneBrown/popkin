@@ -25,7 +25,8 @@ one origin (the `__Host-` cookie and the `'self'` policy), and the API runs as o
   `popkin-github-deploy`, trusted for the repository's `production` environment alone, which
   deploys from `main` alone. No Azure credential is stored in GitHub. Its roles on the resource
   group are Contributor and Role Based Access Control Administrator, limited by a condition to
-  assigning AcrPull (and, since ADR 0021, Communication and Email Service Owner).
+  assigning AcrPull (and, since ADR 0021 and ADR 0022, Communication and Email Service Owner
+  and Storage Blob Data Contributor).
   `eng/Initialize-Azure.ps1` sets all of this up once.
 - **The infrastructure is code**: `infra/registry.bicep` (the registry, deployed first so the
   images can be pushed) and `infra/main.bicep` (everything else), deployed whole on each run, in

@@ -21,6 +21,7 @@ in `infra/main.bicep`, in the same change.
 | The marketing site | Static Web App `swa-popkin-marketing` (Free) | Served at `popkin.community` and `www.popkin.community` through the front door; built with `https://app.popkin.community` as `APP_URL` |
 | The images | Container registry `popkin<suffix>` (Basic) | Tagged with the commit; pulled by `id-popkin` |
 | Logs | Log Analytics workspace `log-popkin` | The console log of every container |
+| Photo files | Storage account `stpopkin<suffix>`, private container `photos` | Every photo and album zip; no public access; `id-popkin` signs in with Storage Blob Data Contributor ([ADR 0022](adr/0022-photos-in-azure-blob-storage.md)) |
 | Codes and crew invites | Communication Service `acs-popkin`, Email Communication Service `acs-popkin-email` | Email from `DoNotReply@popkin.community`, SMS from a toll-free number; `id-popkin` signs in with the role Communication and Email Service Owner ([ADR 0021](adr/0021-codes-and-invites-by-azure-communication-services.md), `infra/communication.bicep`) |
 
 All of it is in the resource group `rg-popkin`, in East US 2 but for the database, in Central US:
