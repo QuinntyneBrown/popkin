@@ -41,7 +41,7 @@ people by QR code, then chat, video call, share photos and rate experiences toge
 | Part | Technology | Responsibility |
 |---|---|---|
 | `backend/` | .NET 10, ASP.NET Core, SignalR, EF Core, MediatR | The data and the rules, behind an HTTP API and the hub that carries live updates |
-| `frontend/` | Angular 22, Angular CDK | The app (`popkin`), service contracts (`api`) and `pk-*` UI atoms (`components`) |
+| `frontend/` | Angular 22, Angular CDK | The app (`popkin`), the marketing site (`marketing`), service contracts (`api`) and `pk-*` UI atoms (`components`) |
 | `e2e/` | Playwright (Chromium) | Behaviour tests against the app, with every `/api` request answered from a recording and the hub stubbed |
 | `docs/` | Markdown, HTML, PlantUML | Requirements, mocks, design system, detailed designs and architecture decisions |
 
@@ -100,6 +100,10 @@ python3.12 -m venv .cache/video-venv
    npm start --prefix frontend
    ```
 
+The marketing site, with the pitch film, is a second application. It needs no API: start it
+with `npm run start:marketing --prefix frontend` and open `http://localhost:4201`. Its links go to
+the app on `:4200`.
+
 With the two running, chat works locally: start a Popkin, open its invite link in a second
 browser profile, join, and each side sees the other's messages in the Everyone thread as they
 are sent.
@@ -134,6 +138,7 @@ proxy and the release steps are in [`docs/deployment.md`](docs/deployment.md).
 | What | Command | Where |
 |---|---|---|
 | Build the frontend | `npm run build` | `frontend/` |
+| Build the marketing site (copies the film and pictures first) | `npm run build:marketing` | `frontend/` |
 | Backend tests | `pwsh eng/Test-Backend.ps1` | repository root |
 | Frontend unit tests (the `api` library) | `npm test` | `frontend/` |
 | Frontend lint | `npm run lint` | `frontend/` |
@@ -181,7 +186,7 @@ popkin/
 │   ├── src/                Popkin.Domain, .Application, .Infrastructure, .Api, .Worker, .Cli
 │   └── tests/              one test project per source project
 ├── frontend/               Angular workspace
-│   └── projects/           popkin (the app), api (service contracts), components (pk-* atoms)
+│   └── projects/           popkin (the app), marketing (the marketing site), api (service contracts), components (pk-* atoms)
 ├── e2e/                    Playwright suite: fixtures, page objects, specs
 ├── eng/                    local engineering scripts
 ├── tools/                  scripts that build the narrated videos

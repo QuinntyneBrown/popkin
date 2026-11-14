@@ -6,6 +6,7 @@ import { DirectMessagePage } from '../pages/direct-message.page';
 import { NewMessageDialog } from '../pages/new-message.dialog';
 import { directMessageStates } from './direct-message-states';
 import { LandingPage } from '../pages/landing.page';
+import { MarketingHomePage } from '../pages/marketing-home.page';
 import { WelcomePage } from '../pages/welcome.page';
 import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
 import { RecapPage } from '../pages/recap.page';
@@ -1096,6 +1097,19 @@ export const screenStates: ScreenState[] = [
         comparison: landing.comparison,
         free: landing.free,
         footer: landing.footer,
+      };
+    },
+  },
+  // The marketing site (ADR 0017).
+  {
+    key: 'marketingHome',
+    regions: (page) => {
+      const site = new MarketingHomePage(page);
+      return {
+        nav: site.nav,
+        hero: site.heroText,
+        film: site.film,
+        footer: site.footer,
       };
     },
   },
