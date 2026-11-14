@@ -258,6 +258,26 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("Experiences", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.ExperienceKeen", b =>
+                {
+                    b.Property<Guid>("ExperienceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("At")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("ExperienceId", "MembershipId");
+
+                    b.HasIndex("MembershipId");
+
+                    b.HasIndex("ExperienceId", "At");
+
+                    b.ToTable("ExperienceKeens", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.ExperienceRating", b =>
                 {
                     b.Property<Guid>("ExperienceId")
@@ -729,6 +749,21 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasOne("Popkin.Domain.Membership", null)
                         .WithMany()
                         .HasForeignKey("SharerMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ExperienceKeen", b =>
+                {
+                    b.HasOne("Popkin.Domain.Experience", null)
+                        .WithMany()
+                        .HasForeignKey("ExperienceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

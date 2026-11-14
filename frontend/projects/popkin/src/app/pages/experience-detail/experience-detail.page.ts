@@ -26,6 +26,7 @@ import {
   EmptyState,
   ExperienceDetail,
   Icon,
+  KeenPanel,
   PopkinNav,
   RatingPanel,
   ScoreCard,
@@ -50,7 +51,7 @@ import { Toaster } from '../../toasts/toaster';
 
 /**
  * One experience (L2-038): what it was, the group's score, the member's own rating
- * (L2-039) and what people said (L2-041).
+ * (L2-039) and what people said (L2-041); for an idea, who is keen (L2-042).
  */
 @Component({
   selector: 'pk-experience-detail-page',
@@ -62,6 +63,7 @@ import { Toaster } from '../../toasts/toaster';
     EmptyState,
     ExperienceDetail,
     Icon,
+    KeenPanel,
     PopkinNav,
     RatingPanel,
     RouterLink,
@@ -112,6 +114,20 @@ export class ExperienceDetailPage {
           { label: 'Try again', run: () => this.store.rate(stars) },
         ),
       );
+    // L2-042: the keen toggle is as it was; the toast says so and offers the same again.
+    this.store.keenFailed$.pipe(takeUntilDestroyed()).subscribe(() =>
+      this.toaster.show('danger', 'Your keen didn’t save', 'It’s back to how it was.', {
+        label: 'Try again',
+        run: () => this.store.toggleKeen(),
+      }),
+    );
+    // L2-042 AC4: it is still an idea; the toast says so and offers the same again.
+    this.store.doneFailed$.pipe(takeUntilDestroyed()).subscribe(() =>
+      this.toaster.show('danger', 'That didn’t save', 'It’s still something you want to do.', {
+        label: 'Try again',
+        run: () => this.store.markDone(),
+      }),
+    );
   }
 
   /** "Add a comment" and "Edit your comment" (L2-041 AC1, AC4). */

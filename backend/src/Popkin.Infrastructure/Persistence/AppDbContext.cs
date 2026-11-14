@@ -29,6 +29,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<ExperienceRating> ExperienceRatings => Set<ExperienceRating>();
 
+    public DbSet<ExperienceKeen> ExperienceKeens => Set<ExperienceKeen>();
+
     public DbSet<Call> Calls => Set<Call>();
 
     public DbSet<CallParticipant> CallParticipants => Set<CallParticipant>();

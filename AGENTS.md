@@ -17,12 +17,12 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first eleven journeys, and journeys 17 to 19, are built; the rest is designed.** Journey
+**The first eleven journeys, and journeys 17 to 20, are built; the rest is designed.** Journey
 1, Start a Popkin, journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin
 home, journey 5, Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an
 experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey
-17, Manage account, journey 18, Leave a Popkin, and journey 19, Delete account, run end to end:
-the backend has sign up and sign in
+17, Manage account, journey 18, Leave a Popkin, journey 19, Delete account, and journey 20, Say
+keen, run end to end: the backend has sign up and sign in
 with a code, sessions, Popkin creation, the list of a person's Popkins, the invite preview, joining with a name and a photo,
 the photo store behind avatars, the Everyone thread, messages, read points, presence, the
 SignalR hub `PopkinHub` and the reads of the Popkin home (the header, the chat preview, the
@@ -33,7 +33,8 @@ photo, the album and one photo, the group call (starting, joining and leaving it
 under way, each participant's microphone and camera, the relay of signals through the hub and
 the media relay's credentials) and the direct call of a direct message, which runs beside it,
 experiences (sharing one with a picture, the list and its filter, one experience with the
-group's score, rating it, commenting on it, editing and deleting it), wrapping up (the Host's wrap-up and what it will count, the
+group's score, rating it, commenting on it, editing and deleting it, saying you are keen on an idea or taking it back, and
+"We did this" for its sharer or the Host), wrapping up (the Host's wrap-up and what it will count, the
 wrap-up of a Popkin whose time is up, the refusal of every write to a wrapped-up Popkin with
 `409` `popkin_wrapped_up`, the end of every call under way, the hub event `PopkinWrappedUp`, the
 recap, the album export as a zip, the removal of an album that was not kept, and the crew
@@ -57,7 +58,7 @@ dialog, the dialogs of an experience (Share an experience, Add a comment, its ac
 deletion), the Popkin settings dialog (Invite people, Wrap up for the Host, and Leave this Popkin for any
 other member), the Leave Popkin dialog, the Sign out and Delete account dialogs, and the
 not-found, server-error and offline screens; the `components` library holds the `pk-*`
-components they use, the blocks of the landing page (`pk-site-nav`, `pk-site-main`,
+components they use, `pk-keen-panel` among them, the blocks of the landing page (`pk-site-nav`, `pk-site-main`,
 `pk-site-footer`, `pk-hero`, `pk-band`, `pk-steps`, `pk-uses`, `pk-compare`, `pk-cta-band`) and
 of the welcome screen (`pk-welcome`, `pk-action-pair`, `pk-mark-picture`) and the parts of the
 Chat tab and the direct message (`pk-conversations`, `pk-conversation-row`, `pk-thread-pane`,

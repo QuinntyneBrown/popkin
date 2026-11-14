@@ -57,6 +57,23 @@ export interface ExperiencePage {
     rated: string;
     text: string;
   }[];
+  /** Who is keen on an idea, in the rating panel's place (L2-042); null for anything else. */
+  keen: {
+    /** "7 keen". */
+    count: string;
+    /** The first four who are keen, the earliest first. */
+    faces: { initials: string; accent: string; photo: string | null }[];
+    /** How many more are keen than are shown. */
+    more: number;
+    /** Whether the member is keen; null where they cannot say so. */
+    pressed: boolean | null;
+    /** "I’m keen", or "You’re keen" while pressed. */
+    label: string;
+    /** A change of keen is on its way. */
+    busy: boolean;
+    /** "We did this", for its sharer or the Host (L2-042 AC4); null for anyone else. */
+    done: { busy: boolean } | null;
+  } | null;
   canEdit: boolean;
   canDelete: boolean;
 }
@@ -74,14 +91,26 @@ export class ExperienceStore {
   private experienceId = '';
   private reading?: Subscription;
   private rating?: Subscription;
+  private keening?: Subscription;
+  private marking?: Subscription;
   private readonly experience = signal<ExperienceDetailView | null>(null);
   /** The stars just chosen, shown before the API has answered (L2-039 AC2). */
   private readonly chosen = signal<number | null>(null);
   private readonly failures = new Subject<number>();
+  private readonly keenFailures = new Subject<void>();
+  /** A change of keen is on its way (L2-042). */
+  private readonly keenBusy = signal(false);
+  private readonly doneFailures = new Subject<void>();
+  /** "We did this" is on its way. */
+  private readonly doneBusy = signal(false);
 
   readonly state = signal<'loading' | 'ready' | 'error' | 'not-found'>('loading');
   /** A rating did not save: the stars that were chosen, to try again with (L2-039 AC5). */
   readonly rateFailed$ = this.failures.asObservable();
+  /** A change of keen did not save; the panel is as it was. */
+  readonly keenFailed$ = this.keenFailures.asObservable();
+  /** "We did this" did not save; it is still an idea. */
+  readonly doneFailed$ = this.doneFailures.asObservable();
 
   readonly view = computed<ExperiencePage | null>(() => {
     const experience = this.state() === 'ready' ? this.experience() : null;
@@ -123,6 +152,18 @@ export class ExperienceStore {
         rated: `Rated ${comment.stars}`,
         text: comment.text,
       })),
+      keen: experience.keen && {
+        count: `${experience.keen.count} keen`,
+        faces: experience.keen.members.map((member) => {
+          const shown = faceOf(member.avatar);
+          return { initials: shown.initials, accent: shown.accent, photo: shown.photoUrl };
+        }),
+        more: Math.max(0, experience.keen.count - experience.keen.members.length),
+        pressed: experience.canKeen ? experience.keen.mine : null,
+        label: experience.keen.mine ? 'You’re keen' : 'I’m keen',
+        busy: this.keenBusy(),
+        done: experience.canMarkDone ? { busy: this.doneBusy() } : null,
+      },
       canEdit: experience.canEdit,
       canDelete: experience.canDelete,
     };
@@ -141,6 +182,11 @@ export class ExperienceStore {
   readonly source = this.experience.asReadonly();
 
   open(popkinId: string, experienceId: string): void {
+    // A change of keen still on its way belongs to the experience that was open.
+    this.keening?.unsubscribe();
+    this.keenBusy.set(false);
+    this.marking?.unsubscribe();
+    this.doneBusy.set(false);
     this.popkinId = popkinId;
     this.experienceId = experienceId;
     this.read(true);
@@ -182,6 +228,51 @@ export class ExperienceStore {
       error: () => {
         this.chosen.set(null);
         this.failures.next(stars);
+      },
+    });
+  }
+
+  /**
+   * "I’m keen" or "You’re keen" was pressed: the member says they are keen, or takes it back
+   * (L2-042 AC2, AC3). The toggle is busy until the answer, which the panel then shows; a
+   * failure leaves it as it was and says so.
+   */
+  toggleKeen(): void {
+    const experience = this.experience();
+    if (!experience?.canKeen || !experience.keen || this.keenBusy()) return;
+    this.keenBusy.set(true);
+    this.keening = this.api
+      .setKeen(this.popkinId, this.experienceId, !experience.keen.mine)
+      .subscribe({
+        next: (keen) => {
+          this.experience.update(
+            (current) => current && { ...current, keen, keenCount: keen.count },
+          );
+          this.keenBusy.set(false);
+        },
+        error: () => {
+          this.keenBusy.set(false);
+          this.keenFailures.next();
+        },
+      });
+  }
+
+  /**
+   * "We did this": the idea becomes something the group did, and the page shows the answer, the
+   * rating panel and an empty score among it (L2-042 AC4). Busy until it answers; a failure
+   * leaves it an idea and says so.
+   */
+  markDone(): void {
+    if (!this.experience()?.canMarkDone || this.doneBusy()) return;
+    this.doneBusy.set(true);
+    this.marking = this.api.markDone(this.popkinId, this.experienceId).subscribe({
+      next: (experience) => {
+        this.experience.set(experience);
+        this.doneBusy.set(false);
+      },
+      error: () => {
+        this.doneBusy.set(false);
+        this.doneFailures.next();
       },
     });
   }

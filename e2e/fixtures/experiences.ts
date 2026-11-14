@@ -50,6 +50,10 @@ export interface Shared {
   /** How many gave five, four, three, two and one star, the signed-in member's own left out. */
   counts: [number, number, number, number, number];
   keen: number;
+  /** The first four who are keen, the earliest first (L2-042 AC1). */
+  keenFaces: Person[];
+  /** Whether the signed-in member is keen. */
+  iAmKeen: boolean;
   /** The signed-in member's own rating. */
   mine: { stars: number; comment: string | null } | null;
   /** The newest first. */
@@ -78,6 +82,8 @@ export function theMockExperiences(): Shared[] {
       sharedAt: sat(9, 0),
       counts: [9, 1, 1, 0, 0],
       keen: 0,
+      keenFaces: [],
+      iAmKeen: false,
       mine: null,
       said: [
         {
@@ -111,6 +117,8 @@ export function theMockExperiences(): Shared[] {
       sharedAt: sat(8, 0),
       counts: [5, 4, 0, 0, 0],
       keen: 0,
+      keenFaces: [],
+      iAmKeen: false,
       mine: null,
       said: [],
     },
@@ -125,6 +133,8 @@ export function theMockExperiences(): Shared[] {
       sharedAt: sat(7, 0),
       counts: [3, 4, 1, 0, 0],
       keen: 0,
+      keenFaces: [],
+      iAmKeen: false,
       mine: null,
       said: [],
     },
@@ -139,6 +149,8 @@ export function theMockExperiences(): Shared[] {
       sharedAt: sat(6, 0),
       counts: [0, 0, 0, 0, 0],
       keen: 7,
+      keenFaces: [people.ellie, people.walt, people.dev, people.ruth],
+      iAmKeen: false,
       mine: null,
       said: [],
     },
@@ -146,7 +158,7 @@ export function theMockExperiences(): Shared[] {
 }
 
 type Read = 'list' | 'detail';
-type Change = 'rate' | 'comment' | 'share' | 'edit' | 'delete';
+type Change = 'rate' | 'comment' | 'share' | 'edit' | 'delete' | 'keen' | 'done';
 type End = 'server' | { status: number; code: string; field?: string };
 
 export class Experiences {
@@ -175,6 +187,10 @@ export class Experiences {
     removePicture: boolean;
   }[] = [];
   readonly deleted: string[] = [];
+  /** What reached the server of keen, in order: true for "I'm keen", false to take it back. */
+  readonly keened: boolean[] = [];
+  /** The ideas "We did this" reached the server for. */
+  readonly done: string[] = [];
 
   private readonly failing = new Set<Read>();
   private readonly heldReads = new Map<Read, Promise<void>>();
@@ -203,6 +219,8 @@ export class Experiences {
       return this.detail(route, experienceId);
     });
     await this.page.route(`${base}/*/my-rating`, (route) => this.rate(route));
+    await this.page.route(`${base}/*/keen`, (route) => this.keenFor(route));
+    await this.page.route(`${base}/*/done`, (route) => this.markDone(route));
     await this.page.route(`${base}/*/my-rating/comment`, (route) => this.comment(route));
   }
 
@@ -262,7 +280,7 @@ export class Experiences {
       sharedAt: s.sharedAt.toISOString(),
       average: score.average,
       ratingCount: score.ratingCount,
-      keenCount: s.keen,
+      keenCount: s.kind === 'Want' ? s.keen : 0,
     };
   }
 
@@ -326,17 +344,38 @@ export class Experiences {
   private detail(route: Route, experienceId: string): Promise<void> {
     const s = this.shared.find((one) => one.id === experienceId);
     if (!s) return this.refuse(route, 404, 'experience_not_found');
+    return this.read(route, 'detail', () => this.detailOf(s));
+  }
+
+  private detailOf(s: Shared): Record<string, unknown> {
     const own = s.by.membershipId === this.viewer.membershipId;
-    return this.read(route, 'detail', () => ({
+    return {
       ...this.card(s, 'display'),
       place: s.place,
       score: this.score(s),
       myRating: s.mine,
       comments: this.comments(s),
+      keen: s.kind === 'Want' ? this.keenOf(s) : null,
       canRate: s.kind !== 'Want' && !this.wrappedUp,
+      canKeen: s.kind === 'Want' && !this.wrappedUp,
+      canMarkDone: s.kind === 'Want' && (own || this.host) && !this.wrappedUp,
       canEdit: own && !this.wrappedUp,
       canDelete: (own || this.host) && !this.wrappedUp,
-    }));
+    };
+  }
+
+  /** "We did this", for its sharer or the Host: the idea becomes something the group did. */
+  private async markDone(route: Route): Promise<void> {
+    const s = this.of(route, 2);
+    if (!s) return this.refuse(route, 404, 'experience_not_found');
+    if (!(await this.goesOn(route, 'done'))) return;
+    if (s.by.membershipId !== this.viewer.membershipId && !this.host) {
+      return this.refuse(route, 403, 'not_experience_sharer');
+    }
+    if (s.kind !== 'Want') return this.refuse(route, 409, 'experience_not_wanted');
+    this.done.push(s.id);
+    s.kind = 'Did';
+    return route.fulfill({ json: this.detailOf(s) });
   }
 
   private of(route: Route, back: number): Shared | undefined {
@@ -354,6 +393,30 @@ export class Experiences {
     const own = s.said.find((c) => c.by.membershipId === this.viewer.membershipId);
     if (own) own.stars = stars;
     return route.fulfill({ json: { stars, score: this.score(s) } });
+  }
+
+  private keenOf(s: Shared): Record<string, unknown> {
+    return { count: s.keen, mine: s.iAmKeen, members: s.keenFaces };
+  }
+
+  /** PUT says the viewer is keen and DELETE takes it back; saying either twice changes nothing. */
+  private async keenFor(route: Route): Promise<void> {
+    const s = this.of(route, 2);
+    if (!s) return this.refuse(route, 404, 'experience_not_found');
+    if (!(await this.goesOn(route, 'keen'))) return;
+    if (s.kind !== 'Want') return this.refuse(route, 409, 'experience_not_wanted');
+    const keen = route.request().method() === 'PUT';
+    this.keened.push(keen);
+    if (keen && !s.iAmKeen) {
+      s.keen++;
+      if (s.keenFaces.length < 4) s.keenFaces = [...s.keenFaces, this.viewer];
+    }
+    if (!keen && s.iAmKeen) {
+      s.keen--;
+      s.keenFaces = s.keenFaces.filter((p) => p.membershipId !== this.viewer.membershipId);
+    }
+    s.iAmKeen = keen;
+    return route.fulfill({ json: this.keenOf(s) });
   }
 
   private async comment(route: Route): Promise<void> {
@@ -402,6 +465,8 @@ export class Experiences {
       sharedAt: this.justNow(),
       counts: [0, 0, 0, 0, 0],
       keen: 0,
+      keenFaces: [],
+      iAmKeen: false,
       mine: null,
       said: [],
     };

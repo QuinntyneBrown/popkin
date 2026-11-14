@@ -3,7 +3,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 /**
  * Button (docs/design-system/components/button.html). On `<button>` it takes an action, on `<a>`
  * it goes somewhere. While `busy` it is disabled, says what is happening and cannot send twice
- * (L2-056 AC3).
+ * (L2-056 AC3). With `pressed` set it is a toggle: `aria-pressed` says whether it is on, and
+ * its label should say so too ("I’m keen", "You’re keen").
  */
 @Component({
   selector: 'a[pk-button], button[pk-button]',
@@ -22,6 +23,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[class.btn--sm]': "size() === 'sm'",
     '[class.btn--block]': 'block()',
     '[attr.aria-busy]': "busy() ? 'true' : null",
+    '[attr.aria-pressed]': 'pressed() === null ? null : pressed()',
     '[attr.disabled]': 'busy() || disabled() ? "" : null',
   },
 })
@@ -34,4 +36,6 @@ export class Button {
   readonly block = input(false);
   readonly busy = input(false);
   readonly disabled = input(false);
+  /** A toggle's state; null for a button that is not one. */
+  readonly pressed = input<boolean | null>(null);
 }

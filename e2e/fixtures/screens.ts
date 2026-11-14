@@ -158,6 +158,11 @@ const experiencesRegions = (page: Page) => {
 };
 const shareRegions = (page: Page) => ({ dialog: new ShareExperienceDialog(page).panel });
 const detailRegions = (page: Page) => ({ detail: new ExperienceDetailPage(page).detail });
+/** An idea: the mock draws comments without stars, which the app has no way to add yet. */
+const ideaRegions = (page: Page) => {
+  const detail = new ExperienceDetailPage(page);
+  return { lead: detail.lead, keen: detail.keenPanel };
+};
 const commentRegions = (page: Page) => ({ dialog: new AddCommentDialog(page).panel });
 const actionsRegions = (page: Page) => ({ dialog: new ExperienceActionsDialog(page).panel });
 const deleteRegions = (page: Page) => ({ dialog: new DeleteExperienceDialog(page).panel });
@@ -928,6 +933,7 @@ export const screenStates: ScreenState[] = [
   { key: 'experiencesEmpty', ...experienceStates.experiencesEmpty, regions: experiencesRegions },
   { key: 'experiencesError', ...experienceStates.experiencesError, regions: experiencesRegions },
   { key: 'experiencesDid', ...experienceStates.experiencesDid, regions: experiencesRegions },
+  { key: 'experiencesWant', ...experienceStates.experiencesWant, regions: experiencesRegions },
   {
     key: 'experiencesNoResults',
     ...experienceStates.experiencesNoResults,
@@ -953,6 +959,18 @@ export const screenStates: ScreenState[] = [
     regions: detailRegions,
   },
   { key: 'experienceDetailOwn', ...experienceStates.experienceDetailOwn, regions: detailRegions },
+  // Say keen (journey 20).
+  { key: 'experienceDetailWant', ...experienceStates.experienceDetailWant, regions: ideaRegions },
+  {
+    key: 'experienceDetailWantKeen',
+    ...experienceStates.experienceDetailWantKeen,
+    regions: ideaRegions,
+  },
+  {
+    key: 'experienceDetailWantOwn',
+    ...experienceStates.experienceDetailWantOwn,
+    regions: ideaRegions,
+  },
   {
     key: 'experienceDetailLoading',
     ...experienceStates.experienceDetailLoading,

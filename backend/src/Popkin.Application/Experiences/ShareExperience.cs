@@ -40,6 +40,6 @@ public sealed class ShareExperienceCommandHandler(
             throw;
         }
 
-        return ExperienceCardDto.Of(experience, popkin, membership, ExperienceScore.None, store);
+        return ExperienceCardDto.Of(experience, popkin, membership, ExperienceScore.None, keenCount: 0, store);
     }
 }

@@ -59,11 +59,22 @@ public sealed class Experience
     /// <summary>Something the group did and a restaurant are rated; something it wants to do is not.</summary>
     public bool IsRateable => Kind != ExperienceKind.Want;
 
+    /// <summary>Members say they are keen on something the group wants to do, and on nothing else (L2-042).</summary>
+    public bool IsWanted => Kind == ExperienceKind.Want;
+
     /// <summary>Only its sharer edits an experience (L2-040 AC6).</summary>
     public bool CanBeEditedBy(Membership member) => member.Id == SharerMembershipId;
 
     /// <summary>Its sharer deletes an experience, and the Host deletes any (L2-040 AC6).</summary>
     public bool CanBeDeletedBy(Membership member) => CanBeEditedBy(member) || member.Role == MembershipRole.Host;
+
+    /// <summary>Its sharer or the Host says the group did what it wanted to do (L2-042 AC4).</summary>
+    public bool CanBeMarkedDoneBy(Membership member) => CanBeDeletedBy(member);
+
+    /// <summary>"We did this": the idea becomes something the group did, which members rate (L2-042 AC4).</summary>
+    public void MarkDone() =>
+        Kind = IsWanted ? ExperienceKind.Did
+            : throw new InvalidOperationException("Only something the group wants to do is marked done.");
 
     /// <summary>Its sharer changes what it says; who shared it, and when, stay.</summary>
     public void Edit(ExperienceKind kind, string title, string? when, string? place)
@@ -86,6 +97,12 @@ public sealed class Experience
         IsRateable
             ? ExperienceRating.Give(Id, membershipId, stars, now)
             : throw new InvalidOperationException("Something the group wants to do is not rated.");
+
+    /// <summary>A member says they are keen on this idea (L2-042 AC2).</summary>
+    public ExperienceKeen AddKeen(Guid membershipId, DateTimeOffset now) =>
+        IsWanted
+            ? ExperienceKeen.Say(Id, membershipId, now)
+            : throw new InvalidOperationException("Only something the group wants to do takes keen.");
 
     public static Experience Share(
         Guid popkinId,

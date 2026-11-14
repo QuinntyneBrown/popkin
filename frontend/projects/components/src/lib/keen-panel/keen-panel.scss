@@ -1,0 +1,41 @@
+/* A tinted card with its content in the middle, as the rating panel is. */
+:host {
+  display: block;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--accent-tint);
+  text-align: center;
+}
+
+.keen-panel__heading {
+  font: var(--text-h3);
+}
+
+/* The faces and "7 keen". */
+.keen-panel__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.keen-panel__count {
+  color: var(--color-fg-muted);
+  font: var(--text-body-sm);
+}
+
+/* The toggle, and "We did this" beside it. */
+.keen-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.keen-panel__actions:empty {
+  display: none;
+}

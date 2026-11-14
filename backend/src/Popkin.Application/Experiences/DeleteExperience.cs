@@ -5,7 +5,7 @@ using Popkin.Application.Security;
 
 namespace Popkin.Application.Experiences;
 
-/// <summary>Deletes an experience, for its sharer or the Host (L2-040 AC6). Its ratings and comments go with it.</summary>
+/// <summary>Deletes an experience, for its sharer or the Host (L2-040 AC6). Its ratings, comments and keen go with it.</summary>
 public sealed record DeleteExperienceCommand(Guid PopkinId, Guid ExperienceId) : IRequest;
 
 public sealed class DeleteExperienceCommandHandler(IAppDbContext db, IMembershipGuard guard, IPhotoStore store)
@@ -24,6 +24,7 @@ public sealed class DeleteExperienceCommandHandler(IAppDbContext db, IMembership
         // The ratings, and the comments they carry, are removed in the same save as the experience.
         var ratings = await db.ExperienceRatings.Where(r => r.ExperienceId == experience.Id).ToListAsync(cancellationToken);
         db.ExperienceRatings.RemoveRange(ratings);
+        db.ExperienceKeens.RemoveRange(await db.ExperienceKeens.Where(k => k.ExperienceId == experience.Id).ToListAsync(cancellationToken));
         db.Experiences.Remove(experience);
         await db.SaveChangesAsync(cancellationToken);
 

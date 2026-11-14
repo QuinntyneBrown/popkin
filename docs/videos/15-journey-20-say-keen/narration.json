@@ -1,0 +1,22 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 3, "lines": ["Got an idea for next time? See who's keen."] },
+    { "id": "idea", "bars": 6, "lines": ["Ellie shared an idea: a beach day next summer. In place of a rating, it asks: Keen to do this?", "Four faces, plus three more. Seven keen."] },
+    { "id": "press", "bars": 5, "lines": ["Joel chooses I'm keen. The button is pressed, it reads You're keen, and the count goes up to eight."] },
+    { "id": "undo", "bars": 4, "lines": ["Changed your mind? Choose You're keen again, and the count goes back down."] },
+    { "id": "done", "bars": 7, "lines": ["Ellie shared it, so she, or the Host, can choose We did this.", "It becomes something we did, and everyone can rate it."] },
+    { "id": "list", "bars": 3, "lines": ["Under Want to do, the card says how many are keen."] },
+    { "id": "grow", "bars": 6, "lines": [
+      { "text": "On a phone, the panel sits under the picture.", "at": 0 },
+      { "text": "From ten twenty-four pixels, it sits beside it.", "at": 6 }
+    ] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: saying it twice changes nothing, and anyone else asking to mark it done is refused.", "Still to come: the count changing live, and comments on an idea."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey twenty. Popkin is a free platform for pop-up communities."] }
+  ]
+}

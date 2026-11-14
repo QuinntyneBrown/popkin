@@ -7,6 +7,7 @@ import {
   ExperienceDetailView,
   ExperienceDraft,
   ExperienceFilter,
+  KeenView,
   RatingResultView,
 } from '../../models/experiences';
 import { ExperiencesSummaryView } from '../../models/home';
@@ -27,6 +28,16 @@ export interface ExperiencesApi {
   rate(popkinId: string, experienceId: string, stars: number): Observable<RatingResultView>;
   /** Adds or replaces the member's comment (L2-041). 400 `comment_required`, `comment_too_long`; 409 `rating_required`. */
   comment(popkinId: string, experienceId: string, text: string): Observable<ExperienceCommentView>;
+  /**
+   * Says the member is keen on an idea, or takes it back (L2-042 AC2, AC3), and answers who is
+   * keen. 409 `experience_not_wanted`.
+   */
+  setKeen(popkinId: string, experienceId: string, keen: boolean): Observable<KeenView>;
+  /**
+   * "We did this": the idea becomes something the group did (L2-042 AC4), answered as its page
+   * shows it. 403 `not_experience_sharer`; 409 `experience_not_wanted`.
+   */
+  markDone(popkinId: string, experienceId: string): Observable<ExperienceDetailView>;
   /** Shares an experience (L2-040). 400 naming `title`, `when`, `place` or `picture`. */
   share(popkinId: string, draft: ExperienceDraft): Observable<ExperienceCardView>;
   /** Changes one's own experience. 403 `not_experience_sharer`. */
@@ -66,6 +77,15 @@ export class HttpExperiencesApi implements ExperiencesApi {
       `${one(popkinId, experienceId)}/my-rating/comment`,
       { text },
     );
+  }
+
+  setKeen(popkinId: string, experienceId: string, keen: boolean): Observable<KeenView> {
+    const url = `${one(popkinId, experienceId)}/keen`;
+    return keen ? this.http.put<KeenView>(url, null) : this.http.delete<KeenView>(url);
+  }
+
+  markDone(popkinId: string, experienceId: string): Observable<ExperienceDetailView> {
+    return this.http.post<ExperienceDetailView>(`${one(popkinId, experienceId)}/done`, null);
   }
 
   share(popkinId: string, draft: ExperienceDraft): Observable<ExperienceCardView> {

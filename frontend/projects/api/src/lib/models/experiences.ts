@@ -44,6 +44,20 @@ export interface ExperienceCommentView {
 }
 
 /** One experience, on its own page (L2-038). */
+/** One member who is keen: a first name and a face. */
+export interface KeenMemberView {
+  membershipId: string;
+  firstName: string;
+  avatar: AvatarView;
+}
+
+/** Who is keen on an idea (L2-042 AC1): how many, whether the reader is, the first four. */
+export interface KeenView {
+  count: number;
+  mine: boolean;
+  members: KeenMemberView[];
+}
+
 export interface ExperienceDetailView extends ExperienceCardView {
   place: string | null;
   score: ExperienceScoreView;
@@ -52,6 +66,12 @@ export interface ExperienceDetailView extends ExperienceCardView {
   comments: ExperienceCommentView[];
   /** False for "Want to do" and once the Popkin has wrapped up. */
   canRate: boolean;
+  /** Null for anything but "Want to do". */
+  keen: KeenView | null;
+  /** True for "Want to do" while the Popkin is active. */
+  canKeen: boolean;
+  /** "We did this": for its sharer or the Host, while it is an idea in an active Popkin. */
+  canMarkDone: boolean;
   canEdit: boolean;
   canDelete: boolean;
 }

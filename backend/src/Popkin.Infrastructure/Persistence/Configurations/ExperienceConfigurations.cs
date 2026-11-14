@@ -18,6 +18,7 @@ public sealed class ExperienceConfiguration : IEntityTypeConfiguration<Experienc
         builder.Property(e => e.PictureThumbnailKey).HasMaxLength(200);
         builder.Ignore(e => e.Picture);
         builder.Ignore(e => e.IsRateable);
+        builder.Ignore(e => e.IsWanted);
         // Experiences are listed newest first.
         builder.HasIndex(e => new { e.PopkinId, e.SharedAt });
         builder.HasOne<PopkinSpace>().WithMany().HasForeignKey(e => e.PopkinId).OnDelete(DeleteBehavior.Cascade);
@@ -36,5 +37,20 @@ public sealed class ExperienceRatingConfiguration : IEntityTypeConfiguration<Exp
         // The ratings go with their experience.
         builder.HasOne<Experience>().WithMany().HasForeignKey(r => r.ExperienceId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Membership>().WithMany().HasForeignKey(r => r.MembershipId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public sealed class ExperienceKeenConfiguration : IEntityTypeConfiguration<ExperienceKeen>
+{
+    public void Configure(EntityTypeBuilder<ExperienceKeen> builder)
+    {
+        builder.ToTable("ExperienceKeens");
+        // One keen per member and experience, even when two requests race (L2-042).
+        builder.HasKey(k => new { k.ExperienceId, k.MembershipId });
+        // Who is keen is read the earliest first.
+        builder.HasIndex(k => new { k.ExperienceId, k.At });
+        // The keen go with their experience.
+        builder.HasOne<Experience>().WithMany().HasForeignKey(k => k.ExperienceId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Membership>().WithMany().HasForeignKey(k => k.MembershipId).OnDelete(DeleteBehavior.Restrict);
     }
 }
