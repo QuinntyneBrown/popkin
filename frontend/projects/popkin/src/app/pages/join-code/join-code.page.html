@@ -25,6 +25,8 @@
       hint="The code is the last part of your invite link."
       [formControl]="code"
       [readonly]="join.state() === 'finding'"
+      [error]="error()"
+      [announceError]="true"
     ></div>
   </form>
   <ng-container slot="actions">

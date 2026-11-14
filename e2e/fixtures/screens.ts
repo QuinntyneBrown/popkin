@@ -106,7 +106,7 @@ import { SignInPage } from '../pages/sign-in.page';
 import { PopkinCreatedPage } from '../pages/popkin-created.page';
 import { ServerErrorPage } from '../pages/server-error.page';
 import { JoinCodePage } from '../pages/join-code.page';
-import { aVisitorWithACode, holdTheLookup } from './join-code';
+import { aVisitorWithACode, holdTheLookup, unknownCode } from './join-code';
 import { SignUpPage } from '../pages/sign-up.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
 import { YourProfilePage } from '../pages/your-profile.page';
@@ -245,6 +245,29 @@ export const screenStates: ScreenState[] = [
   {
     key: 'joinCode',
     before: asVisitor,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeInvalid',
+    before: aVisitorWithACode,
+    app: async (page) => {
+      const join = new JoinCodePage(page);
+      await join.code.fill(unknownCode);
+      await join.find.click();
+      await expect(join.error).toBeVisible();
+    },
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeBlank',
+    before: aVisitorWithACode,
+    app: async (page) => {
+      const join = new JoinCodePage(page);
+      await join.find.click();
+      await expect(join.error).toBeVisible();
+    },
     regions: joinCodeRegions,
     wideRegions: joinCodePicture,
   },

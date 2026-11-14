@@ -60,6 +60,8 @@ export const routes = {
   scanToJoinDenied: { app: '/popkins', mock: 'dialogs/scan-to-join/denied.html' },
   joinCode: { app: '/join', mock: 'pages/join-code/default.html' },
   joinCodeSubmitting: { app: '/join', mock: 'pages/join-code/submitting.html' },
+  joinCodeInvalid: { app: '/join', mock: 'pages/join-code/invalid.html' },
+  joinCodeBlank: { app: '/join', mock: 'pages/join-code/blank.html' },
   signUp: { app: '/sign-up', mock: 'pages/sign-up/default.html' },
   signUpEmail: { app: '/sign-up', mock: 'pages/sign-up/email.html' },
   signUpError: { app: '/sign-up', mock: 'pages/sign-up/error.html' },

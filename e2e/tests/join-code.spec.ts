@@ -1,5 +1,5 @@
 import { aCamera } from '../fixtures/camera';
-import { aVisitorWithACode, holdTheLookup, joinCodeUrl } from '../fixtures/join-code';
+import { aVisitorWithACode, holdTheLookup, joinCodeUrl, unknownCode } from '../fixtures/join-code';
 import { asVisitor, inviteCode } from '../fixtures/journeys';
 import { maraWithPopkins } from '../fixtures/my-popkins';
 import { expect, test } from '../fixtures/pk-test';
@@ -111,5 +111,64 @@ test.describe('Join with a code', () => {
     await expect(join.code).toHaveAttribute('readonly', '');
     release();
     await expect(page).toHaveURL(`/i/${inviteCode}`);
+  });
+
+  // L2-015 AC6
+  test('marks the field when no Popkin has the code, and keeps what was typed', async ({
+    page,
+  }) => {
+    await aVisitorWithACode(page);
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+    await join.code.fill(unknownCode);
+
+    await join.find.click();
+
+    await expect(join.code).toHaveAttribute('aria-invalid', 'true');
+    await expect(join.code).toHaveAccessibleDescription('We can’t find a Popkin with that code.');
+    await expect(join.code).toHaveValue(unknownCode);
+    await expect(page).toHaveURL(joinCodeUrl);
+  });
+
+  test('says the same of a link that is not a Popkin invite, without asking', async ({ page }) => {
+    await aVisitorWithACode(page);
+    const asked: string[] = [];
+    page.on('request', (request) => {
+      if (request.url().includes('/api/invites/')) asked.push(request.url());
+    });
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+    await join.code.fill('https://example.com/party');
+
+    await join.find.click();
+
+    await expect(join.error).toHaveText('We can’t find a Popkin with that code.');
+    await expect(join.code).toHaveValue('https://example.com/party');
+    expect(asked).toEqual([]);
+  });
+
+  test('asks for the code or the link when nothing is typed', async ({ page }) => {
+    await aVisitorWithACode(page);
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+
+    await join.find.click();
+
+    await expect(join.code).toHaveAttribute('aria-invalid', 'true');
+    await expect(join.error).toHaveText('Type the code or paste the link from your invite.');
+  });
+
+  test('takes the mark away once the code is changed', async ({ page }) => {
+    await aVisitorWithACode(page);
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+    await join.code.fill(unknownCode);
+    await join.find.click();
+    await expect(join.error).toBeVisible();
+
+    await join.code.fill(inviteCode);
+
+    await expect(join.error).toHaveCount(0);
+    await expect(join.hint).toBeVisible();
   });
 });

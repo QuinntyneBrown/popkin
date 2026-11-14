@@ -3,10 +3,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   afterNextRender,
+  computed,
   effect,
   inject,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { JoinCode } from 'api';
@@ -31,10 +33,18 @@ export class JoinCodePage {
   private readonly field = viewChild.required(TextField);
 
   protected readonly code = new FormControl('', { nonNullable: true });
+  /** What the field is marked with (L2-015 AC6). */
+  protected readonly error = computed(() => {
+    const state = this.join.state();
+    if (state === 'blank') return 'Type the code or paste the link from your invite.';
+    if (state === 'not-found') return 'We can’t find a Popkin with that code.';
+    return undefined;
+  });
 
   constructor() {
     // The field is what the screen is for, as the mock's `autofocus` says.
     afterNextRender(() => this.field().focus());
+    this.code.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.join.edit());
     // A match opens that Popkin's invite, where joining goes on (journey 2).
     effect(() => {
       const code = this.join.code();

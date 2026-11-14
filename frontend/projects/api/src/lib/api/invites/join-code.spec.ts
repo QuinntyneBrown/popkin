@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InvitePreviewView } from '../../models/invite';
@@ -17,6 +18,8 @@ describe('JoinCode', () => {
     answers.push(answer);
     return answer;
   };
+  const refuse = (status: number, body: object = {}) =>
+    answers.at(-1)?.error(new HttpErrorResponse({ status, error: body }));
   const answer = () => {
     answers.at(-1)?.next({} as InvitePreviewView);
     answers.at(-1)?.complete();
@@ -61,5 +64,41 @@ describe('JoinCode', () => {
     join.find('kx7m2pqr9t');
 
     expect(asked).toHaveLength(1);
+  });
+
+  // L2-015 AC6
+  it('says a code that matches no Popkin is not found, and can be tried again', () => {
+    join.find('kx7m2pqr9t');
+    refuse(404, { code: 'invite_not_found' });
+
+    expect(join.state()).toBe('not-found');
+
+    join.find('kx7m2pqr9u');
+    expect(join.state()).toBe('finding');
+  });
+
+  it('says text that holds no code is not found, without asking', () => {
+    join.find('https://example.com/i/kx7m2pqr9t');
+    expect(join.state()).toBe('not-found');
+    join.find('not a code');
+    expect(join.state()).toBe('not-found');
+    expect(asked).toEqual([]);
+  });
+
+  it('asks for a code when nothing is typed, without asking the API', () => {
+    join.find('   ');
+
+    expect(join.state()).toBe('blank');
+    expect(asked).toEqual([]);
+  });
+
+  it('takes the mark away when the text changes, but not while it looks', () => {
+    join.find('');
+    join.edit();
+    expect(join.state()).toBe('idle');
+
+    join.find('kx7m2pqr9t');
+    join.edit();
+    expect(join.state()).toBe('finding');
   });
 });
