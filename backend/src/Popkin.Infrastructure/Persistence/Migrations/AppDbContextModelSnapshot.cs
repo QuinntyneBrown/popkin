@@ -538,6 +538,28 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("Photos", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.PhotoReaction", b =>
+                {
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Emoji")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("ReactedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("PhotoId", "MembershipId", "Emoji");
+
+                    b.HasIndex("MembershipId");
+
+                    b.ToTable("PhotoReactions", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.PopkinSpace", b =>
                 {
                     b.Property<Guid>("Id")
@@ -895,6 +917,21 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UploaderMembershipId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PhotoReaction", b =>
+                {
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.Photo", null)
+                        .WithMany()
+                        .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

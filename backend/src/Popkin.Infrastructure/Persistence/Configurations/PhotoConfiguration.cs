@@ -22,3 +22,17 @@ public sealed class PhotoConfiguration : IEntityTypeConfiguration<Photo>
         builder.HasOne<Membership>().WithMany().HasForeignKey(p => p.UploaderMembershipId).OnDelete(DeleteBehavior.Restrict);
     }
 }
+
+public sealed class PhotoReactionConfiguration : IEntityTypeConfiguration<PhotoReaction>
+{
+    public void Configure(EntityTypeBuilder<PhotoReaction> builder)
+    {
+        builder.ToTable("PhotoReactions");
+        // One reaction per member, photo and emoji, even when two requests race (L2-034).
+        builder.HasKey(r => new { r.PhotoId, r.MembershipId, r.Emoji });
+        builder.Property(r => r.Emoji).HasMaxLength(MessageReaction.MaxEmojiLength);
+        // The reactions go with their photo (L2-036 AC3).
+        builder.HasOne<Photo>().WithMany().HasForeignKey(r => r.PhotoId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Membership>().WithMany().HasForeignKey(r => r.MembershipId).OnDelete(DeleteBehavior.Restrict);
+    }
+}

@@ -46,17 +46,7 @@ public sealed class GetPhotoQueryHandler(IAppDbContext db, IMembershipGuard guar
 {
     public async Task<PhotoDetailDto> Handle(GetPhotoQuery request, CancellationToken cancellationToken)
     {
-        var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
-        // A photo of another Popkin is the same as no photo (L2-051 AC3).
-        var photo = await db.Photos.AsNoTracking().FirstOrDefaultAsync(p => p.Id == request.PhotoId && p.PopkinId == popkin.Id, cancellationToken)
-            ?? throw NotFound();
-
-        // A photo of chat outside the album is the same as no photo to anyone who may not read
-        // its message: a direct message's to a third member, an upload never sent to everyone.
-        if (!photo.InAlbum && !await IsOnAMessageTheMemberReadsAsync(photo, membership, cancellationToken))
-        {
-            throw NotFound();
-        }
+        var (popkin, membership, photo) = await PhotoAccess.RequireAsync(db, guard, request.PopkinId, request.PhotoId, cancellationToken);
 
         // The neighbours follow the whole album, whatever filter the member came from; a photo in no album has none.
         Guid? newer = null, older = null;
@@ -81,27 +71,12 @@ public sealed class GetPhotoQueryHandler(IAppDbContext db, IMembershipGuard guar
             store.GetReadUrl(photo.StorageKey),
             photo.Width,
             photo.Height,
-            // Reactions and comments arrive with journey 14; until then a photo has none.
-            Reactions: [],
+            await PhotoReactions.OfAsync(db, photo.Id, membership.Id, cancellationToken),
             CommentCount: 0,
             newer,
             older,
             // The Host looks after the album; a photo of a direct message is its sharer's alone.
             CanDelete: isMine || (photo.InAlbum && membership.Role == MembershipRole.Host),
             isMine);
-    }
-
-    private static ProblemException NotFound() => new(404, "photo_not_found", "This photo isn't here.");
-
-    private async Task<bool> IsOnAMessageTheMemberReadsAsync(Photo photo, Membership membership, CancellationToken cancellationToken)
-    {
-        if (photo.ThreadId is not { } threadId
-            || !await db.Messages.AnyAsync(m => m.PhotoId == photo.Id && m.ThreadId == threadId && m.DeletedAt == null, cancellationToken))
-        {
-            return false;
-        }
-
-        var thread = await db.ChatThreads.AsNoTracking().FirstOrDefaultAsync(t => t.Id == threadId && t.PopkinId == photo.PopkinId, cancellationToken);
-        return thread is not null && thread.CanRead(membership.Id);
     }
 }

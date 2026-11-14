@@ -33,6 +33,19 @@ public sealed class PhotosController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetPhotoQuery(popkinId, photoId), cancellationToken));
 
     /// <summary>
+    /// Gives the photo the caller's reaction, the emoji URL-encoded in the path, and answers the
+    /// photo's reactions; giving it again changes nothing (L2-034 AC2).
+    /// </summary>
+    [HttpPut("{photoId:guid}/reactions/{emoji}")]
+    public async Task<ActionResult<IReadOnlyList<PhotoReactionDto>>> React(Guid popkinId, Guid photoId, string? emoji, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new AddPhotoReactionCommand(popkinId, photoId, emoji), cancellationToken));
+
+    /// <summary>Takes the caller's reaction away and answers the photo's reactions; taking it again changes nothing (L2-034 AC3).</summary>
+    [HttpDelete("{photoId:guid}/reactions/{emoji}")]
+    public async Task<ActionResult<IReadOnlyList<PhotoReactionDto>>> Unreact(Guid popkinId, Guid photoId, string? emoji, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new RemovePhotoReactionCommand(popkinId, photoId, emoji), cancellationToken));
+
+    /// <summary>
     /// Adds one photo to the album, with a caption when given (L2-031). The body may be up to
     /// twice the largest photo, so a photo over 10 MB is refused with its own message and not by
     /// the server's size limit. At most 60 a minute per person.

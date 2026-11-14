@@ -21,7 +21,8 @@ public static class ReactionValidator
     public static string Require(string? emoji) =>
         IsEmoji(emoji) ? emoji! : throw ProblemException.Invalid("reaction_invalid", "A reaction is one emoji.", "emoji");
 
-    private static bool IsEmoji(string? emoji)
+    /// <summary>Whether the text is one emoji, as a reaction to a message or to a photo must be.</summary>
+    public static bool IsEmoji(string? emoji)
     {
         if (string.IsNullOrEmpty(emoji) || emoji.Length > MessageReaction.MaxEmojiLength || !emoji.IsNormalized(NormalizationForm.FormC))
         {
