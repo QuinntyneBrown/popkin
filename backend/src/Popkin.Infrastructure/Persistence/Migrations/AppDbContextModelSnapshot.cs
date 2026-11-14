@@ -377,6 +377,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("PhotoId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("PhotoRemoved")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ReactionsVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("int");

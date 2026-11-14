@@ -16,7 +16,8 @@ public sealed record MessageAuthorDto(Guid MembershipId, string FirstName, Avata
 /// is the message's summary of reactions (L2-024), at `ReactionsVersion`; `Quote` is that of the message a reply
 /// answers, and null for a message that replies to nothing (L2-025). `Photo` is the photo it
 /// carries, at an expiring address, and null for a message of text alone (L2-026); its text is
-/// then empty or says something of the photo.
+/// then empty or says something of the photo. `PhotoRemoved` says the photo it carried was
+/// removed, so it reads "Photo removed" in its place (L2-036 AC3).
 /// </summary>
 public sealed record MessageDto(
     Guid Id,
@@ -30,7 +31,8 @@ public sealed record MessageDto(
     int ReactionsVersion,
     IReadOnlyList<ReactionDto> Reactions,
     QuoteDto? Quote,
-    ChatPhotoDto? Photo)
+    ChatPhotoDto? Photo,
+    bool PhotoRemoved)
 {
     /// <summary>
     /// A message of a thread of that Popkin; the author is a member of the same Popkin. Given no
@@ -55,7 +57,8 @@ public sealed record MessageDto(
             message.ReactionsVersion,
             reactions ?? [],
             quote,
-            photo);
+            photo,
+            message.PhotoRemoved);
 }
 
 /// <summary>A page of a thread, oldest first. `HasMore` says whether more lie in the direction read.</summary>

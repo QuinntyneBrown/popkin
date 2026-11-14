@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Popkin.Infrastructure.Persistence;
 
 namespace Popkin.Api.Tests.Support;
 
@@ -63,6 +65,29 @@ public static class PhotoEngagementExtensions
     /// <summary>Asks for the address the photo is saved from.</summary>
     public static Task<HttpResponseMessage> PhotoDownloadAsync(this HttpClient member, Guid popkinId, Guid photoId) =>
         member.GetAsync($"{PhotoPath(popkinId, photoId)}/download");
+
+    public static Task<HttpResponseMessage> DeletePhotoAsync(this HttpClient member, Guid popkinId, Guid photoId) =>
+        member.DeleteAsync(PhotoPath(popkinId, photoId));
+
+    /// <summary>How many reactions and comments the store holds for the photo, whoever gave them.</summary>
+    public static (int Reactions, int Comments) EngagementOf(this ApiFactory api, Guid photoId)
+    {
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return (db.PhotoReactions.Count(r => r.PhotoId == photoId), db.PhotoComments.Count(c => c.PhotoId == photoId));
+    }
+
+    /// <summary>The stored keys of the photo's two files.</summary>
+    public static (string Display, string Thumbnail) FileKeysOf(this ApiFactory api, Guid photoId)
+    {
+        using var scope = api.Services.CreateScope();
+        var photo = scope.ServiceProvider.GetRequiredService<AppDbContext>().Photos.Single(p => p.Id == photoId);
+        return (photo.StorageKey, photo.ThumbnailKey);
+    }
+
+    /// <summary>One message of a thread, as the member reads it.</summary>
+    public static async Task<JsonElement> MessageAsync(this HttpClient member, Guid popkinId, Guid threadId, Guid messageId) =>
+        (await member.MessagesAsync(popkinId, threadId)).GetProperty("items").EnumerateArray().Single(m => m.GetProperty("id").GetGuid() == messageId);
 
     /// <summary>The id of the photo a message carries.</summary>
     public static Guid PhotoIdOf(this JsonElement message) => message.GetProperty("photo").GetProperty("id").GetGuid();

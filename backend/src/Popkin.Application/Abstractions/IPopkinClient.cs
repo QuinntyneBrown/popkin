@@ -51,6 +51,13 @@ public interface IPopkinClient
     Task PhotosAdded(Guid popkinId, IReadOnlyList<Guid> photoIds);
 
     /// <summary>
+    /// A photo was deleted (L2-036 AC2, AC3): the album drops it, a photo view open on it says
+    /// so, and a thread marks the message that carried it, found by its photo's id, "Photo
+    /// removed"; the next read of the thread gives the same.
+    /// </summary>
+    Task PhotoDeleted(Guid popkinId, Guid photoId);
+
+    /// <summary>
     /// How many are on a call of the Popkin changed: its group call, or the direct call of the
     /// direct message `threadId` names, which only its two members are told of. A state: it
     /// carries the whole count and the call's version, which only rises, and an event whose

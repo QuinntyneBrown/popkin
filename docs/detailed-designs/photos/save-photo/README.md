@@ -139,29 +139,12 @@ is read-only.
 
 ### Open questions
 
-Settled by journey 14:
-
-- The mocks of the photo actions, the confirmation, its busy and failed states, the failed save,
-  "Photo removed" and a photo deleted while open now exist (listed above).
-- A wrapped-up Popkin refuses a delete with `409 popkin_wrapped_up`; saving works.
-- The saved file is named `popkin-photo-{yyyyMMdd-HHmm}.jpg` from `TakenAt`; the address lives one
-  hour. The time is written in UTC, as the API holds it; this is the simplest choice the contract
-  left open.
-- Orphan files whose deletion failed are logged and left; their cleanup stays open, as for the
-  chat photos of known gap 71.
-- A photo deleted while it is open shows "This photo was removed" rather than leaving at once, so
-  the member sees why it went (the simplest truthful choice of contract decision 7).
-- After deleting a photo of a direct message, the page goes back to the direct message with the
-  same toast "Photo deleted.".
-
-Still open:
-
-- **The size of a saved photo.** L2-036 AC1 asks for the photo "at the size it was added". Popkin
-  does not keep the file the member chose ([add photos](../add-photos/README.md)): the largest
-  file it keeps is the display image, at most 2048 px on its longest edge. "Save photo" downloads
-  that file, which is the size it was added for any photo up to 2048 px and smaller for a larger
-  one. Keeping the original, or changing the requirement's wording, is `<TO SUPPLY>`.
-- How open threads learn which messages lost their photo (see Backend), decided when built.
+- Mocks for the photo actions, the delete confirmation, failures and "Photo removed":
+  `<TO SUPPLY>`.
+- Whether photos may be deleted after the Popkin wraps up: `<TO SUPPLY>`. L2-045 lists no delete.
+- File name of a saved photo and lifetime of the download address: `<TO SUPPLY>`.
+- Cleanup of files whose deletion failed, for example by a `Popkin.Worker` job: `<TO SUPPLY>`.
+- How an open thread learns its message lost its photo: decided (journey 14) — no message event is reused; `PhotoDeleted(popkinId, photoId)` goes to the photo's audience (the Popkin, or a direct message's two members) and the client marks the message whose `photo.id` it names `photoRemoved`, as the next read of the thread gives.
 
 ## Requirements
 

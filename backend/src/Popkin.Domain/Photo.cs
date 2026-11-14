@@ -109,6 +109,14 @@ public sealed class Photo
     }
 
     /// <summary>
+    /// Who may delete it (L2-036 AC2): the member who added it, and the Host too for a photo of the
+    /// album; a photo of a direct message is its sharer's alone.
+    /// </summary>
+    public bool CanBeDeletedBy(Membership membership) =>
+        membership.PopkinId == PopkinId
+        && (UploaderMembershipId == membership.Id || (InAlbum && membership.Role == MembershipRole.Host));
+
+    /// <summary>
     /// The photo's message was sent in Everyone: it joins the album under its uploader, as added
     /// now (L2-026 AC3). Joining twice changes nothing.
     /// </summary>

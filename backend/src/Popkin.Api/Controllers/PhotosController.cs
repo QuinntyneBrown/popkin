@@ -45,6 +45,17 @@ public sealed class PhotosController(ISender sender) : ControllerBase
     public async Task<ActionResult<IReadOnlyList<PhotoReactionDto>>> Unreact(Guid popkinId, Guid photoId, string? emoji, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new RemovePhotoReactionCommand(popkinId, photoId, emoji), cancellationToken));
 
+    /// <summary>
+    /// Deletes the photo for everyone (L2-036 AC2, AC3): 204. Only the member who added it, or
+    /// the Host for a photo of the album, may.
+    /// </summary>
+    [HttpDelete("{photoId:guid}")]
+    public async Task<IActionResult> Delete(Guid popkinId, Guid photoId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeletePhotoCommand(popkinId, photoId), cancellationToken);
+        return NoContent();
+    }
+
     /// <summary>"Save photo": an address the stored photo downloads from as an attachment, for an hour (L2-036 AC1).</summary>
     [HttpGet("{photoId:guid}/download")]
     public async Task<ActionResult<PhotoDownloadDto>> GetDownload(Guid popkinId, Guid photoId, CancellationToken cancellationToken) =>

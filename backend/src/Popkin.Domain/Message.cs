@@ -46,6 +46,19 @@ public sealed class Message
     /// <summary>The photo the message carries, uploaded for its thread by its author; null for a message of text alone (L2-026).</summary>
     public Guid? PhotoId { get; private set; }
 
+    /// <summary>
+    /// Whether the photo it carried was removed, deleted from Photos or with an album that was not
+    /// kept: it then reads "Photo removed", told apart from a message that never had one (L2-036 AC3).
+    /// </summary>
+    public bool PhotoRemoved { get; private set; }
+
+    /// <summary>The photo it carried was removed: the message keeps its text and carries none.</summary>
+    public void RemovePhoto()
+    {
+        PhotoId = null;
+        PhotoRemoved = true;
+    }
+
     public static Message Send(
         Guid threadId, Guid authorMembershipId, string text, Guid clientMessageId, DateTimeOffset now, Message? replyTo = null, Photo? photo = null)
     {
