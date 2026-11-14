@@ -40,7 +40,9 @@
 
 <ng-template #items>
   <button pk-menu-item type="button" icon="reply" (click)="choose({ kind: 'reply' })">Reply</button>
-  <button pk-menu-item type="button" icon="copy" (click)="choose({ kind: 'copy' })">Copy</button>
+  @if (data.canCopy) {
+    <button pk-menu-item type="button" icon="copy" (click)="choose({ kind: 'copy' })">Copy</button>
+  }
   @if (data.mine) {
     <button
       pk-menu-item

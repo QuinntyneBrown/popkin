@@ -26,7 +26,7 @@ import { CHAT_API } from './chat-api';
 import { albumPhotoProblem } from '../photos/photo-rules';
 import { MessageOutbox } from './message-outbox';
 import { ReplyQuote, ThreadRow, mergeMessages, threadRows } from './thread-rows';
-import { announcement } from './thread-text';
+import { announcement, messageLine } from './thread-text';
 import { UnreadTracker } from './unread-tracker';
 
 /** How long a message a quote led to stays marked. */
@@ -324,7 +324,7 @@ export class ThreadStore {
     this.reply.set({
       messageId,
       firstName: message.author.firstName,
-      snippet: firstLine(message.text),
+      snippet: firstLine(messageLine(message)),
       deleted: false,
     });
   }
@@ -435,7 +435,7 @@ export class ThreadStore {
     this.messages.update((shown) => mergeMessages(shown, [message]));
     if (message.author.membershipId === thread.viewer.membershipId) return;
     if (message.kind === 'Member') {
-      this.said.set(announcement(message.author.firstName, message.text));
+      this.said.set(announcement(message.author.firstName, messageLine(message)));
     }
     if (this.latestInView) this.addedTo.next('theirs');
     else this.below.set(true);

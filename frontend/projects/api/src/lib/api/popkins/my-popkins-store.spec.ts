@@ -231,6 +231,14 @@ describe('MyPopkinsStore', () => {
       expect(second.id).toBe('lakeside');
     });
 
+    it('reads a photo with no text as "Photo" (L2-026)', () => {
+      messages.next({
+        ...from('t-thursday', 'm-walt', 'Walt', ''),
+        photo: { id: 'ph', url: '/f', width: 800, height: 600 },
+      });
+      expect(store.cards()[0]).toMatchObject({ latest: 'Walt: Photo' });
+    });
+
     it('does not count the member’s own message', () => {
       messages.next(from('t-lakeside', 'm-mara', 'Mara', 'on my way'));
       expect(store.cards()[0]).toMatchObject({ latest: 'Mara: on my way', unread: 3 });

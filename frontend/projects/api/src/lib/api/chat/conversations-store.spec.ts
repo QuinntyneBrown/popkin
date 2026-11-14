@@ -238,6 +238,14 @@ describe('ConversationsStore (L2-022)', () => {
       });
     });
 
+    it('that is a photo with no text reads "Photo" (L2-026)', () => {
+      messages.next({
+        ...from('t-dev', 'm-dev', 'Dev', ''),
+        photo: { id: 'ph', url: '/f', width: 800, height: 600 },
+      });
+      expect(store.rows()[0]).toMatchObject({ latest: 'Photo' });
+    });
+
     it('that is a note of the system leaves the Everyone card as it was', () => {
       messages.next({ ...from('t-everyone', 'm-joel', 'Joel', 'popped in'), kind: 'System' });
       expect(store.everyone()?.latest).toBe('Mara: last call for the canoe sign-up 🛶');

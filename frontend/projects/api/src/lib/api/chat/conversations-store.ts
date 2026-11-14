@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { messageLine } from './thread-text';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { merge } from 'rxjs';
 import { AvatarView } from '../../models/invite';
@@ -142,7 +143,7 @@ export class ConversationsStore {
       if (message.kind !== 'Member') return;
       const latest = {
         firstName: message.author.firstName,
-        text: message.text,
+        text: messageLine(message),
         isMine,
         sentAt: message.sentAt,
       };
@@ -156,7 +157,10 @@ export class ConversationsStore {
       this.read(true);
       return;
     }
-    const moved = { ...thread, latest: { text: message.text, isMine, sentAt: message.sentAt } };
+    const moved = {
+      ...thread,
+      latest: { text: messageLine(message), isMine, sentAt: message.sentAt },
+    };
     this.view.set({
       ...view,
       direct: [moved, ...view.direct.filter((direct) => direct !== thread)],

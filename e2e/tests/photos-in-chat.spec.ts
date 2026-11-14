@@ -13,7 +13,9 @@ import { expect, test } from '../fixtures/pk-test';
 import { ChatPhotos } from '../pages/chat-photos';
 import { DirectMessagePage } from '../pages/direct-message.page';
 import { GroupChatPage } from '../pages/group-chat.page';
+import { MessageActions } from '../pages/message-actions';
 import { PhotoViewPage } from '../pages/photo-view.page';
+import { ReactionsDialog } from '../pages/reactions.dialog';
 
 const devs = 'Dock was glass this morning';
 
@@ -188,6 +190,36 @@ test.describe('sending a photo (L2-026 AC1, AC2)', () => {
     await expect(new ChatPhotos(page).photo(chat.message('Pancakes are up'))).toHaveAccessibleName(
       'Open photo from Walt',
     );
+  });
+});
+
+test.describe('a photo with no text (L2-026, L2-024 AC1)', () => {
+  test('its actions quote it as "Photo" and offer no Copy', async ({ page }) => {
+    await maraInTheChat(page, (chat) =>
+      chat.messages.push(message(people.dev, '', new Date(), { photo: dockPhoto })),
+    );
+    await page.goto(chatUrl);
+    const chat = new GroupChatPage(page);
+    const dialog = new ReactionsDialog(page);
+
+    await new MessageActions(page).openByKeyboard(chat.messages.last());
+
+    await expect(dialog.quote).toContainText('Photo');
+    await expect(dialog.copy).toHaveCount(0);
+    await expect(dialog.reply).toBeVisible();
+  });
+
+  test('a reply to it says "Photo" above the field', async ({ page }) => {
+    await maraInTheChat(page, (chat) =>
+      chat.messages.push(message(people.dev, '', new Date(), { photo: dockPhoto })),
+    );
+    await page.goto(chatUrl);
+    const actions = new MessageActions(page);
+
+    await actions.openByKeyboard(new GroupChatPage(page).messages.last());
+    await new ReactionsDialog(page).reply.click();
+
+    await expect(actions.replySnippet).toHaveText('Photo');
   });
 });
 

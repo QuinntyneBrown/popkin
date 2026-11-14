@@ -54,7 +54,9 @@ export class MessageActions {
       data: {
         accent,
         name: row.name,
-        text: row.text,
+        // A photo alone is quoted as "Photo", and has no text to copy (L2-026).
+        text: row.text || (row.photo ? 'Photo' : ''),
+        canCopy: !!row.text,
         pressed: computed(() => {
           const shown = this.store.rows().find((r) => r.kind === 'message' && r.id === id);
           return shown?.kind === 'message'

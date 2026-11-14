@@ -13,6 +13,8 @@ export interface ReactionsData {
   pressed: Signal<readonly string[]>;
   /** The member's own message may be deleted. */
   mine: boolean;
+  /** Copy is offered when there is text to copy. */
+  canCopy: boolean;
 }
 
 export type MessageAction =

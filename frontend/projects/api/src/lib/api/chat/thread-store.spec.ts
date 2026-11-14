@@ -365,6 +365,12 @@ describe('ThreadStore', () => {
       expect(store.announcement()).toBe('Walt: message 4');
     });
 
+    it('announces a photo with no text as "Photo" (L2-026)', () => {
+      const photo = { id: 'ph', url: '/f', width: 800, height: 600 };
+      realtime.messageAdded$.next(message(6, 'Dev', { text: '', photo }));
+      expect(store.announcement()).toBe('Dev: Photo');
+    });
+
     it('raises "New messages" when one arrives while older messages are being read', () => {
       store.setLatestInView(false);
       realtime.messageAdded$.next(message(4));
@@ -673,6 +679,15 @@ describe('ThreadStore', () => {
       store.send('Nothing to do with it');
       expect(store.replyingTo()).toBeNull();
       expect(chat.replies).toEqual([undefined]);
+    });
+
+    it('reads a photo with no text as "Photo" (L2-026)', () => {
+      chat.stored = [
+        message(3, 'Dev', { text: '', photo: { id: 'ph', url: '/f', width: 800, height: 600 } }),
+      ];
+      store.open('p');
+      store.startReply('id-0003');
+      expect(store.replyingTo()?.snippet).toBe('Photo');
     });
 
     it('cuts a long line to 120 characters', () => {

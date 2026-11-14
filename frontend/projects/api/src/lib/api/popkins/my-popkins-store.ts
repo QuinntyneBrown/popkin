@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { messageLine } from '../chat/thread-text';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { AvatarView } from '../../models/invite';
@@ -110,7 +111,7 @@ export class MyPopkinsStore {
       const active = this.view().active;
       const popkin = active.find((one) => one.everyoneThreadId === message.threadId);
       if (!popkin) return;
-      const latestMessage = { firstName: message.author.firstName, text: message.text };
+      const latestMessage = { firstName: message.author.firstName, text: messageLine(message) };
       // The most recently active Popkin is first (L2-017).
       this.view.update((view) => ({
         ...view,
