@@ -45,6 +45,30 @@ public sealed class PhotosController(ISender sender) : ControllerBase
     public async Task<ActionResult<IReadOnlyList<PhotoReactionDto>>> Unreact(Guid popkinId, Guid photoId, string? emoji, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new RemovePhotoReactionCommand(popkinId, photoId, emoji), cancellationToken));
 
+    public sealed record AddCommentRequest(string? Text);
+
+    /// <summary>The photo's comments, oldest first (L2-035 AC1).</summary>
+    [HttpGet("{photoId:guid}/comments")]
+    public async Task<ActionResult<IReadOnlyList<PhotoCommentDto>>> GetComments(Guid popkinId, Guid photoId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetPhotoCommentsQuery(popkinId, photoId), cancellationToken));
+
+    /// <summary>Adds the caller's comment, 1 to 500 characters (L2-035 AC2, AC3): 201. It counts with messages, at most 60 a minute per person (L2-053 AC2).</summary>
+    [HttpPost("{photoId:guid}/comments")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<PhotoCommentDto>> AddComment(Guid popkinId, Guid photoId, AddCommentRequest request, CancellationToken cancellationToken)
+    {
+        var comment = await sender.Send(new AddPhotoCommentCommand(popkinId, photoId, request.Text), cancellationToken);
+        return Created($"/api/popkins/{popkinId}/photos/{photoId}/comments/{comment.Id}", comment);
+    }
+
+    /// <summary>Deletes the caller's own comment (L2-035 AC5): 204.</summary>
+    [HttpDelete("{photoId:guid}/comments/{commentId:guid}")]
+    public async Task<IActionResult> DeleteComment(Guid popkinId, Guid photoId, Guid commentId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeletePhotoCommentCommand(popkinId, photoId, commentId), cancellationToken);
+        return NoContent();
+    }
+
     /// <summary>
     /// Adds one photo to the album, with a caption when given (L2-031). The body may be up to
     /// twice the largest photo, so a photo over 10 MB is refused with its own message and not by

@@ -28,6 +28,8 @@ public interface IAppDbContext
 
     DbSet<PhotoReaction> PhotoReactions { get; }
 
+    DbSet<PhotoComment> PhotoComments { get; }
+
     DbSet<Experience> Experiences { get; }
 
     DbSet<ExperienceRating> ExperienceRatings { get; }

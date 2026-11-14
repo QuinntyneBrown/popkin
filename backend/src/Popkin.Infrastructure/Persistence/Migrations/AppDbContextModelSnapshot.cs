@@ -538,6 +538,35 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("Photos", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.PhotoComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("AuthorMembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PhotoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorMembershipId");
+
+                    b.HasIndex("PhotoId", "AddedAt");
+
+                    b.ToTable("PhotoComments", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.PhotoReaction", b =>
                 {
                     b.Property<Guid>("PhotoId")
@@ -917,6 +946,21 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UploaderMembershipId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PhotoComment", b =>
+                {
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("AuthorMembershipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.Photo", null)
+                        .WithMany()
+                        .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

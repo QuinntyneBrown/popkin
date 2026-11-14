@@ -72,7 +72,7 @@ public sealed class GetPhotoQueryHandler(IAppDbContext db, IMembershipGuard guar
             photo.Width,
             photo.Height,
             await PhotoReactions.OfAsync(db, photo.Id, membership.Id, cancellationToken),
-            CommentCount: 0,
+            await db.PhotoComments.CountAsync(c => c.PhotoId == photo.Id, cancellationToken),
             newer,
             older,
             // The Host looks after the album; a photo of a direct message is its sharer's alone.

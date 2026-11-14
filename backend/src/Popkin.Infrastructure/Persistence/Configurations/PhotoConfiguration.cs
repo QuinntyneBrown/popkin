@@ -36,3 +36,18 @@ public sealed class PhotoReactionConfiguration : IEntityTypeConfiguration<PhotoR
         builder.HasOne<Membership>().WithMany().HasForeignKey(r => r.MembershipId).OnDelete(DeleteBehavior.Restrict);
     }
 }
+
+public sealed class PhotoCommentConfiguration : IEntityTypeConfiguration<PhotoComment>
+{
+    public void Configure(EntityTypeBuilder<PhotoComment> builder)
+    {
+        builder.ToTable("PhotoComments");
+        builder.HasKey(c => c.Id);
+        builder.Property(c => c.Text).HasMaxLength(PhotoComment.MaxTextLength).IsRequired();
+        // A photo's comments are read oldest first.
+        builder.HasIndex(c => new { c.PhotoId, c.AddedAt });
+        // The comments go with their photo (L2-036 AC3).
+        builder.HasOne<Photo>().WithMany().HasForeignKey(c => c.PhotoId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Membership>().WithMany().HasForeignKey(c => c.AuthorMembershipId).OnDelete(DeleteBehavior.Restrict);
+    }
+}

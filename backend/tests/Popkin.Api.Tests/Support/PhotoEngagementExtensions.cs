@@ -33,6 +33,33 @@ public static class PhotoEngagementExtensions
             .Select(r => $"{r.GetProperty("emoji").GetString()} {r.GetProperty("count").GetInt32()}{(r.GetProperty("mine").GetBoolean() ? " mine" : "")}")
             .ToList();
 
+    /// <summary>The photo's comments, oldest first.</summary>
+    public static Task<HttpResponseMessage> PhotoCommentsAsync(this HttpClient member, Guid popkinId, Guid photoId) =>
+        member.GetAsync($"{PhotoPath(popkinId, photoId)}/comments");
+
+    /// <summary>The comments of a photo the member may read.</summary>
+    public static Task<JsonElement> ReadPhotoCommentsAsync(this HttpClient member, Guid popkinId, Guid photoId) =>
+        member.GetFromJsonAsync<JsonElement>($"{PhotoPath(popkinId, photoId)}/comments");
+
+    /// <summary>Posts a comment on the photo; a null text sends `{ text: null }`.</summary>
+    public static Task<HttpResponseMessage> CommentOnPhotoAsync(this HttpClient member, Guid popkinId, Guid photoId, string? text) =>
+        member.PostAsJsonAsync($"{PhotoPath(popkinId, photoId)}/comments", new { text });
+
+    /// <summary>Posts a comment that must be stored, and returns it.</summary>
+    public static async Task<JsonElement> CommentedOnPhotoAsync(this HttpClient member, Guid popkinId, Guid photoId, string text)
+    {
+        var response = await member.CommentOnPhotoAsync(popkinId, photoId, text);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<JsonElement>();
+    }
+
+    public static Task<HttpResponseMessage> DeletePhotoCommentAsync(this HttpClient member, Guid popkinId, Guid photoId, Guid commentId) =>
+        member.DeleteAsync($"{PhotoPath(popkinId, photoId)}/comments/{commentId}");
+
+    /// <summary>The texts of a list of comments, in its order.</summary>
+    public static List<string> CommentTexts(this JsonElement comments) =>
+        comments.EnumerateArray().Select(c => c.GetProperty("text").GetString()!).ToList();
+
     /// <summary>The id of the photo a message carries.</summary>
     public static Guid PhotoIdOf(this JsonElement message) => message.GetProperty("photo").GetProperty("id").GetGuid();
 }
