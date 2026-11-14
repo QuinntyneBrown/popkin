@@ -10,33 +10,69 @@
       (click)="closed.emit()"
     ></button>
   }
-  <span
-    pk-avatar
-    size="36"
-    [initials]="avatar()?.initials ?? ''"
-    [photo]="avatar()?.photoUrl"
-    [blank]="!avatar()"
-    [attr.data-accent]="avatar()?.accent"
-  ></span>
-  <div class="topbar__titles">
-    <div class="photo-viewer__name truncate">
-      {{ state() === 'loading' ? loadingTitle() : name() }}
+  @if (state() !== 'removed') {
+    <span
+      pk-avatar
+      size="36"
+      [initials]="avatar()?.initials ?? ''"
+      [photo]="avatar()?.photoUrl"
+      [blank]="!avatar()"
+      [attr.data-accent]="avatar()?.accent"
+    ></span>
+    <div class="topbar__titles">
+      <div class="photo-viewer__name truncate">
+        {{ state() === 'loading' ? loadingTitle() : name() }}
+      </div>
+      <div class="topbar__sub">{{ state() === 'loading' ? '' : time() }}</div>
     </div>
-    <div class="topbar__sub">{{ state() === 'loading' ? '' : time() }}</div>
-  </div>
-  <div class="photo-viewer__actions"><ng-content select="[slot=actions]" /></div>
+    <button
+      pk-icon-button
+      type="button"
+      icon="download"
+      label="Save photo"
+      [disabled]="saving()"
+      [attr.aria-busy]="saving() ? 'true' : null"
+      (click)="save.emit()"
+    ></button>
+    @if (canDelete() && !readOnly() && state() === 'ready') {
+      <button
+        pk-icon-button
+        type="button"
+        icon="more"
+        label="Photo actions"
+        (click)="actions.emit()"
+      ></button>
+    }
+  }
 </header>
 <main id="main" class="photo-viewer__main" tabindex="-1">
   @switch (state()) {
     @case ('error') {
       <h1 class="visually-hidden">{{ heading() }}</h1>
-      <div class="stage-message" role="alert">
-        <svg pk-icon name="photo-off" size="lg"></svg>
-        <h2 class="stage-message__heading">{{ errorHeading() }}</h2>
-        <p class="stage-message__text">{{ errorText() }}</p>
+      <div
+        pk-stage-message
+        icon="photo-off"
+        [alert]="true"
+        [heading]="errorHeading()"
+        [text]="errorText()"
+      >
         <button pk-button type="button" variant="on-accent" size="md" (click)="retried.emit()">
           {{ retryLabel() }}
         </button>
+      </div>
+    }
+    @case ('removed') {
+      <h1 class="visually-hidden">{{ heading() }}</h1>
+      <div
+        pk-stage-message
+        icon="photo-off"
+        [status]="true"
+        [heading]="removedHeading()"
+        [text]="removedText()"
+      >
+        @if (back(); as route) {
+          <a pk-button variant="on-accent" size="md" [routerLink]="route">{{ backLabel() }}</a>
+        }
       </div>
     }
     @case ('loading') {
@@ -99,9 +135,12 @@
         } @else {
           <h1 class="visually-hidden">{{ heading() }}</h1>
         }
-        @if (reactions().length || comments()) {
+        @if (note()) {
+          <p class="photo-info__note">{{ note() }}</p>
+        }
+        @if (chips().length || comments()) {
           <div class="photo-info__counts">
-            @for (reaction of reactions(); track reaction.emoji) {
+            @for (reaction of chips(); track reaction.emoji) {
               <span
                 class="stage-chip"
                 role="img"
@@ -111,11 +150,62 @@
               >
             }
             @if (comments()) {
-              <span class="photo-info__comment-count">{{ comments() }}</span>
+              <button class="photo-info__comment-count" type="button" (click)="comment()">
+                {{ comments() }}
+              </button>
             }
           </div>
         }
-        <div class="photo-info__more"><ng-content /></div>
+        @if (commentList().length) {
+          <ul class="photo-info__comments" aria-label="Comments">
+            @for (item of commentList(); track item.id) {
+              <li
+                pk-comment
+                avatarSize="sm"
+                [name]="item.name"
+                [avatar]="item.avatar"
+                [time]="item.time"
+                [text]="item.text"
+                [deletable]="item.mine && !readOnly()"
+                (delete)="deleteComment.emit(item.id)"
+              ></li>
+            }
+          </ul>
+        }
+        @if (!readOnly()) {
+          <div class="photo-info__tools">
+            @if (quickReactions().length) {
+              <div
+                pk-react-bar
+                [options]="quickReactions()"
+                [pressed]="pressedEmoji()"
+                (react)="react.emit($event)"
+                (more)="moreReactions.emit()"
+              ></div>
+            }
+            <button
+              pk-stage-button
+              type="button"
+              icon="message"
+              label="Comment"
+              (click)="comment()"
+            ></button>
+          </div>
+          <div #composerBox class="photo-info__composer">
+            <div
+              pk-composer
+              label="Add a comment"
+              sendLabel="Post comment"
+              [inline]="true"
+              [photos]="false"
+              [maxLength]="500"
+              [countFrom]="450"
+              [busy]="posting()"
+              [(value)]="commentDraft"
+              (send)="postComment.emit($event)"
+            ></div>
+          </div>
+        }
       </div>
     }
   }

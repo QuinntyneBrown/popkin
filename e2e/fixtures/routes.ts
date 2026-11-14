@@ -232,6 +232,28 @@ export const routes = {
   groupChatPhotoPreview: { app: chat, mock: 'pages/group-chat/photo-preview.html' },
   groupChatPhotoRefused: { app: chat, mock: 'pages/group-chat/photo-refused.html' },
   photoViewDirect: { app: photo, mock: 'pages/photo-view/direct.html' },
+  // Journey 14, Engage with a photo: the photo view's states, and the dialogs over it.
+  photoViewNotReacted: { app: photo, mock: 'pages/photo-view/not-reacted.html' },
+  photoViewOwnComment: { app: photo, mock: 'pages/photo-view/own-comment.html' },
+  photoViewMember: { app: photo, mock: 'pages/photo-view/member.html' },
+  photoViewReactionFailed: { app: photo, mock: 'pages/photo-view/reaction-failed.html' },
+  photoViewSaveFailed: { app: photo, mock: 'pages/photo-view/save-failed.html' },
+  photoViewWrapped: { app: photo, mock: 'pages/photo-view/wrapped.html' },
+  photoViewRemoved: { app: photo, mock: 'pages/photo-view/removed.html' },
+  photoComments: { app: photo, mock: 'dialogs/photo-comments/default.html' },
+  photoCommentsEmpty: { app: photo, mock: 'dialogs/photo-comments/empty.html' },
+  photoCommentsError: { app: photo, mock: 'dialogs/photo-comments/error.html' },
+  photoCommentsBusy: { app: photo, mock: 'dialogs/photo-comments/busy.html' },
+  photoCommentsNearLimit: { app: photo, mock: 'dialogs/photo-comments/near-limit.html' },
+  photoCommentsOwnComment: { app: photo, mock: 'dialogs/photo-comments/own-comment.html' },
+  photoCommentsReadOnly: { app: photo, mock: 'dialogs/photo-comments/read-only.html' },
+  deleteComment: { app: photo, mock: 'dialogs/delete-comment/default.html' },
+  photoActions: { app: photo, mock: 'dialogs/photo-actions/default.html' },
+  deletePhoto: { app: photo, mock: 'dialogs/delete-photo/default.html' },
+  deletePhotoBusy: { app: photo, mock: 'dialogs/delete-photo/busy.html' },
+  deletePhotoFailed: { app: photo, mock: 'dialogs/delete-photo/failed.html' },
+  photoAlbumPhotoDeleted: { app: photos, mock: 'pages/photo-album/photo-deleted.html' },
+  groupChatPhotoRemoved: { app: chat, mock: 'pages/group-chat/photo-removed.html' },
 } satisfies Record<string, ScreenRoute>;
 
 export type RouteKey = keyof typeof routes;
