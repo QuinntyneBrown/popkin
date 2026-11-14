@@ -5,6 +5,7 @@ import { PhotosSummaryView } from '../../models/home';
 import {
   AlbumFilter,
   AlbumPageView,
+  PhotoCommentView,
   PhotoDetailView,
   PhotoSummaryView,
   PhotoUploadEvent,
@@ -29,6 +30,12 @@ export interface PhotosApi {
   addReaction(popkinId: string, photoId: string, emoji: string): Observable<PhotoReaction[]>;
   /** Takes a reaction back; answers the photo's reactions (L2-034 AC3). */
   removeReaction(popkinId: string, photoId: string, emoji: string): Observable<PhotoReaction[]>;
+  /** A photo's comments, oldest first (L2-035 AC1). */
+  getComments(popkinId: string, photoId: string): Observable<PhotoCommentView[]>;
+  /** Adds one (L2-035 AC2). 400 `comment_empty`, `comment_too_long`; 409; 429. */
+  addComment(popkinId: string, photoId: string, text: string): Observable<PhotoCommentView>;
+  /** Deletes the member's own (L2-035 AC5). 403 `comment_not_yours`; 404 `comment_not_found`. */
+  deleteComment(popkinId: string, photoId: string, commentId: string): Observable<void>;
 }
 
 export const PHOTOS_API = new InjectionToken<PhotosApi>('PhotosApi');
@@ -70,6 +77,24 @@ export class HttpPhotosApi implements PhotosApi {
   removeReaction(popkinId: string, photoId: string, emoji: string): Observable<PhotoReaction[]> {
     return this.http.delete<PhotoReaction[]>(reaction(popkinId, photoId, emoji));
   }
+
+  getComments(popkinId: string, photoId: string): Observable<PhotoCommentView[]> {
+    return this.http.get<PhotoCommentView[]>(comments(popkinId, photoId));
+  }
+
+  addComment(popkinId: string, photoId: string, text: string): Observable<PhotoCommentView> {
+    return this.http.post<PhotoCommentView>(comments(popkinId, photoId), { text });
+  }
+
+  deleteComment(popkinId: string, photoId: string, commentId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${comments(popkinId, photoId)}/${encodeURIComponent(commentId)}`,
+    );
+  }
+}
+
+function comments(popkinId: string, photoId: string): string {
+  return `${photos(popkinId)}/${encodeURIComponent(photoId)}/comments`;
 }
 
 function reaction(popkinId: string, photoId: string, emoji: string): string {

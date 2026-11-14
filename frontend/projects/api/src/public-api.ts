@@ -53,6 +53,8 @@ export * from './lib/api/photos/photo-rules';
 export * from './lib/api/photos/album-days';
 export * from './lib/api/photos/album-store';
 export * from './lib/api/photos/photo-uploads';
+export * from './lib/api/photos/photo-comments-store';
+export * from './lib/api/photos/photo-reactions';
 export * from './lib/api/photos/photo-view-store';
 export * from './lib/api/popkins/popkin-frame';
 export * from './lib/api/auth/parse-contact';
