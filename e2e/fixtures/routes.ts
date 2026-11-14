@@ -221,6 +221,11 @@ export const routes = {
   deleteMessage: { app: chat, mock: 'dialogs/delete-message/default.html' },
   groupChatMarked: { app: chat, mock: 'pages/group-chat/marked.html' },
   groupChatDeletedQuote: { app: chat, mock: 'pages/group-chat/deleted-quote.html' },
+  // Journey 13, Photos in chat: the photo preview and a refused photo in the composer, and the
+  // photo view of a direct message's photo (an album photo until the app answers one).
+  groupChatPhotoPreview: { app: chat, mock: 'pages/group-chat/photo-preview.html' },
+  groupChatPhotoRefused: { app: chat, mock: 'pages/group-chat/photo-refused.html' },
+  photoViewDirect: { app: photo, mock: 'pages/photo-view/direct.html' },
 } satisfies Record<string, ScreenRoute>;
 
 export type RouteKey = keyof typeof routes;

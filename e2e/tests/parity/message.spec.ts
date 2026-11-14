@@ -9,10 +9,10 @@ import {
 import { parity } from '../../fixtures/parity';
 import { lines, reactStates } from '../../fixtures/react-states';
 import { GroupChatPage } from '../../pages/group-chat.page';
+import { devsPhotoLine } from '../../fixtures/chat-photo-states';
 
 const chat = (page: Page) => new GroupChatPage(page);
 
-// Photos come with a later journey: the messages compared carry none.
 parity('message', [
   {
     key: 'groupChat',
@@ -79,5 +79,13 @@ parity('message', [
     ...reactStates.groupChatReadOnly,
     name: 'read-only-reactions',
     region: (page) => chat(page).message(lines.walts),
+  },
+  // Journey 13: Dev's photo, a link to the photo view, with his text under it (L2-026 AC2).
+  {
+    key: 'groupChat',
+    before: theMockChat,
+    name: 'photo',
+    region: (page) => chat(page).message(devsPhotoLine),
+    snap: true,
   },
 ]);
