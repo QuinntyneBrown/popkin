@@ -10,6 +10,8 @@
 //   marketing site at popkin.community and www.popkin.community.
 // - Azure Communication Services (ADR 0021, communication.bicep) sends the codes and crew
 //   invites by email and SMS.
+// - Azure Blob Storage (ADR 0022) keeps the photo files and the albums' zips in a private
+//   container, read and written with the apps' managed identity; no access key is used.
 @description('The tag of the images to run: the commit being deployed.')
 param imageTag string
 
@@ -37,6 +39,7 @@ param sqlLocation string = 'centralus'
 
 var suffix = uniqueString(resourceGroup().id)
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+var blobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 
 resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: 'popkin${suffix}'
@@ -103,6 +106,42 @@ resource database 'Microsoft.Sql/servers/databases@2023-08-01' = {
   }
 }
 
+// ADR 0022: the photo store. Nothing in it is public, and no shared key signs in to it.
+resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
+  name: 'stpopkin${suffix}'
+  location: location
+  kind: 'StorageV2'
+  sku: { name: 'Standard_LRS' }
+  properties: {
+    accessTier: 'Hot'
+    allowBlobPublicAccess: false
+    allowSharedKeyAccess: false
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+  }
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
+  parent: storage
+  name: 'default'
+}
+
+resource photosContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: 'photos'
+  properties: { publicAccess: 'None' }
+}
+
+resource photosAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(storage.id, identity.id, blobDataContributorRoleId)
+  scope: storage
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', blobDataContributorRoleId)
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: 'cae-popkin'
   location: location
@@ -147,6 +186,12 @@ var keyEnv = [
   { name: 'Auth__CodeHashKey', secretRef: 'auth-code-hash-key' }
   { name: 'Photos__SigningKey', secretRef: 'photos-signing-key' }
 ]
+// ADR 0022: the API and the Worker read and write the same photo store.
+var photosEnv = [
+  { name: 'Photos__BlobEndpoint', value: storage.properties.primaryEndpoints.blob }
+  { name: 'Photos__Container', value: photosContainer.name }
+  { name: 'Photos__ClientId', value: identity.properties.clientId }
+]
 var secrets = [
   { name: 'auth-code-hash-key', value: authCodeHashKey }
   { name: 'photos-signing-key', value: photosSigningKey }
@@ -166,7 +211,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
   name: 'popkin-api'
   location: location
   identity: userIdentity
-  dependsOn: [acrPull, sqlFirewall]
+  dependsOn: [acrPull, sqlFirewall, photosAccess]
   properties: {
     managedEnvironmentId: environment.id
     configuration: {
@@ -196,7 +241,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
         {
           name: 'api'
           image: '${registry.properties.loginServer}/popkin-api:${imageTag}'
-          env: concat(databaseEnv, keyEnv, communicationEnv, [
+          env: concat(databaseEnv, keyEnv, photosEnv, communicationEnv, [
             { name: 'App__Origin', value: appOrigin }
             { name: 'Invites__BaseUrl', value: '${appOrigin}/i' }
           ])
@@ -240,7 +285,7 @@ resource worker 'Microsoft.App/containerApps@2024-03-01' = {
         {
           name: 'worker'
           image: '${registry.properties.loginServer}/popkin-worker:${imageTag}'
-          env: concat(databaseEnv, keyEnv)
+          env: concat(databaseEnv, keyEnv, photosEnv)
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
         }
       ]

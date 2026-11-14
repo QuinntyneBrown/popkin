@@ -113,6 +113,9 @@ values in the apex's TXT record set and the two DKIM CNAMEs. Two steps are done 
 | `Auth:CodeHashKey` | API, Worker | Each refuses to start outside Development |
 | `Invites:BaseUrl` | API | Invite links cannot be built |
 | `Photos:SigningKey` | API, Worker | Each refuses to start outside Development; with it, every photo address, and the address an album's zip downloads from, is signed and expires after an hour ([Join a Popkin](detailed-designs/invitations/join-popkin/README.md)). The API signs and checks; give the Worker the same value |
+| `Photos:BlobEndpoint` | API, Worker | No photo can be kept: outside Development every upload (a profile photo, the album, a photo in chat, an experience's picture) answers 500 and every album export fails; in Development files go to `Photos:Root`. The blob endpoint of `stpopkin{suffix}` ([ADR 0022](adr/0022-photos-in-azure-blob-storage.md)). The API and the Worker must name the same store |
+| `Photos:Container` | API, Worker | The container is `photos` |
+| `Photos:ClientId` | API, Worker | The default Azure credential signs in to the store instead of the user-assigned identity, which holds Storage Blob Data Contributor on it |
 | `Photos:Root` | API, Worker, Development only | Photo files go to a `popkin-photos` folder in the machine's temporary folder. The API and the Worker must name the same folder |
 | `App:Origin` | API | A change from a client that sends no `Sec-Fetch-Site` is refused with 403 `cross_site_request`. `https://app.popkin.community` in production |
 | `MediaRelay:Urls` (a list: `MediaRelay:Urls:0`, `MediaRelay:Urls:1`, …) | API | A participant is handed no STUN or TURN server, so a group call connects only between browsers that reach each other directly, as on one machine or one network ([Group call](detailed-designs/calls/group-call/README.md)) |
@@ -128,10 +131,9 @@ values in the apex's TXT record set and the two DKIM CNAMEs. Two steps are done 
 
 Codes and crew invites are sent by Azure Communication Services
 ([ADR 0021](adr/0021-codes-and-invites-by-azure-communication-services.md)); a channel whose
-`Communication` settings are missing answers 503 `code_not_sent` outside Development. The photo store provider is not chosen either: outside Development a join with
-a photo fails, and a join without one works; the same holds for the album, where adding a photo
-fails. No setting was added for the album. Journey 9 added no setting either: outside
-Development an album export fails for want of a photo store, and "Pop up another with this crew"
+`Communication` settings are missing answers 503 `code_not_sent` outside Development. Photo files, the albums' zips among them, are kept in Azure Blob Storage
+([ADR 0022](adr/0022-photos-in-azure-blob-storage.md)), through the `Photos` settings above;
+without `Photos:BlobEndpoint` outside Development no photo can be added. "Pop up another with this crew"
 is accepted and sends each invite on the channel its member signs in with. The Worker has no probe;
 its heartbeat is the gauge `popkin.wrap_up.last_tick` on the `Popkin` meter, which stops rising
 when it stops ticking, and `popkin.wrap_up.lateness` measures how long after its end date each

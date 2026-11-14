@@ -121,8 +121,8 @@ from 180 characters.
   [Join a Popkin](../../invitations/join-popkin/README.md): a read address is signed by
   `PhotoUrlSigner`, expires after one hour and is not tied to a session. In Development the
   store is `LocalPhotoStore`. The store of a deployed system encrypts files at rest
-  (L2-054 AC5); its provider is `<TO SUPPLY>`, and until it is chosen no photo can be added
-  outside Development.
+  (L2-054 AC5): it is `BlobPhotoStore`, a private Azure Blob Storage container
+  ([ADR 0022](../../../adr/0022-photos-in-azure-blob-storage.md)).
 - **Domain** — `Photo` (`Id`, `PopkinId`, `UploaderMembershipId`, `Caption?`, `TakenAt`,
   `AddedAt`, `StorageKey`, `ThumbnailKey`, `OriginalKey?`, `Width`, `Height`, `ContentType`;
   `OriginalKey` is null for a photo stored before journey 14). `TakenAt` is the
@@ -137,7 +137,7 @@ from 180 characters.
 
 ### Open questions
 
-- Photo store provider for a deployed system: `<TO SUPPLY>` (known gap 9).
+- Photo store provider for a deployed system: settled by [ADR 0022](../../../adr/0022-photos-in-azure-blob-storage.md), Azure Blob Storage (known gap 9).
 "Save photo" needs the photo at the size it was added (L2-036 AC1): settled in journey 14 by
 storing the original beside the display image and the thumbnail.
 

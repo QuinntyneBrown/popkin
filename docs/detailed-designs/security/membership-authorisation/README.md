@@ -88,7 +88,8 @@ caller's memberships ([My Popkins](../../popkins/my-popkins/README.md)).
 - **Photo file addresses** — photo DTOs carry read URLs from `IPhotoStore.GetReadUrl(storageKey,
   lifetime)`, issued only after the guard. Storage keys are random 128-bit values, never derived
   from names or sequence numbers, and the URLs are signed and expire (L2-051 AC2). The lifetime
-  is `<TO SUPPLY>`; the signing scheme depends on the photo store provider, `<TO SUPPLY>`.
+  is one hour, and the API signs every address with `PhotoUrlSigner` whatever the store, Azure
+  Blob Storage when deployed ([ADR 0022](../../../adr/0022-photos-in-azure-blob-storage.md)).
 - **Exceptions** (`Popkin.Domain`) — `PopkinNotFoundException`, `ThreadNotFoundException`,
   `HostOnlyException`, `PopkinWrappedUpException`. Each carries its `code`.
 

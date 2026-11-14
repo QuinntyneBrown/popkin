@@ -65,8 +65,9 @@ The mechanism adds no endpoint. It constrains every response:
     frame-ancestors 'none'; require-trusted-types-for 'script'`. Scripts run only from Popkin's own
     files, never inline. `style-src` allows inline styles because Angular adds component styles
     as `<style>` elements; replacing `'unsafe-inline'` with a nonce through Angular's `CSP_NONCE`
-    is `<TO SUPPLY>`, since it depends on how the web app is served. The photo store origin and
-    API host are `<TO SUPPLY>`.
+    is `<TO SUPPLY>`, since it depends on how the web app is served. Photos need no origin of
+    their own: the API serves every photo from the app's origin
+    ([ADR 0022](../../../adr/0022-photos-in-azure-blob-storage.md)), so `img-src 'self'` holds.
   - `X-Content-Type-Options: nosniff`.
   - `X-Frame-Options: DENY` with `frame-ancestors 'none'`, refusing every other site's frame.
   - `Referrer-Policy: same-origin`, so an invite code in an address does not leak to other sites.
