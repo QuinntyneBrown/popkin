@@ -1,9 +1,9 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
-using Popkin.Application.Photos;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
+using Popkin.Application.Photos;
 using Popkin.Domain;
 
 namespace Popkin.Application.Popkins;
@@ -163,7 +163,7 @@ public sealed class GetMyPopkinsQueryHandler(IAppDbContext db, ICurrentPerson cu
                     inOrder.Count,
                     inOrder.Take(MaxAvatars).Select(m => AvatarDto.Of(m, photos)).ToList(),
                     latest.TryGetValue(threadId, out var message)
-                        ? new LatestMessageDto(PersonName.FirstName(authors[message.AuthorMembershipId]), message.Text)
+                        ? new LatestMessageDto(PersonName.FirstName(authors[message.AuthorMembershipId]), MessagePreview.TextOf(message))
                         : null,
                     UnreadOf(p.Id),
                     threadId,

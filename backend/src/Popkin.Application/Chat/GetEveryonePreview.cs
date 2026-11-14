@@ -44,7 +44,7 @@ public sealed class GetEveryonePreviewQueryHandler(IAppDbContext db, IMembership
 
         return new ChatPreviewDto(
             thread.Id,
-            latest.Select(m => new ChatPreviewMessageDto(m.Id, MessageDto.Of(m, authors[m.AuthorMembershipId], photos).Author, m.Text, m.SentAt)).ToList(),
+            latest.Select(m => new ChatPreviewMessageDto(m.Id, MessageDto.Of(m, authors[m.AuthorMembershipId], photos).Author, MessagePreview.TextOf(m), m.SentAt)).ToList(),
             unread.Count);
     }
 }

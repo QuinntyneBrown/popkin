@@ -8,7 +8,7 @@ namespace Popkin.Application.Chat;
 
 /// <summary>
 /// The quote a reply carries of the message it answers (L2-025 AC2): the author's first name
-/// and one line of the text. When that message was deleted, `Deleted` is true and the name and
+/// and one line of the text, "Photo" for a photo without text (L2-026). When that message was deleted, `Deleted` is true and the name and
 /// snippet are null (AC4).
 /// </summary>
 public sealed record QuoteDto(Guid MessageId, string? AuthorFirstName, string? Snippet, bool Deleted)
@@ -18,7 +18,7 @@ public sealed record QuoteDto(Guid MessageId, string? AuthorFirstName, string? S
 
     public static QuoteDto Of(Message quoted, Membership author) =>
         quoted.DeletedAt is null
-            ? new QuoteDto(quoted.Id, PersonName.FirstName(author.DisplayName), SnippetOf(quoted.Text), Deleted: false)
+            ? new QuoteDto(quoted.Id, PersonName.FirstName(author.DisplayName), SnippetOf(MessagePreview.TextOf(quoted)), Deleted: false)
             : new QuoteDto(quoted.Id, null, null, Deleted: true);
 
     /// <summary>The first line of the text, cut to at most 120 characters between two grapheme clusters, so no emoji is cut in two.</summary>
