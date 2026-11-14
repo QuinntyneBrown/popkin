@@ -288,7 +288,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .tab-header__lead { margin-top: var(--space-1); font-size: var(--font-size-md-minus); color: var(--color-fg-muted); } /* a sentence in place of the summary */
 .tab-header .chips { margin-top: var(--space-4); }
 .popkin-nav { position: sticky; bottom: 0; z-index: var(--z-sticky); flex: none; padding: var(--space-1-5) var(--space-2) var(--space-5); border-top: var(--border-width-hairline) solid var(--color-border-default); background: var(--color-bg-surface); }
-.popkin-nav ul { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); } /* four tabs, or six with Trips and Schedule on (L2-077) */
+.popkin-nav ul { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); } /* four tabs, or six with Plan and Schedule on (L2-077) */
 .popkin-nav ul a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1); height: var(--control-height-lg); color: var(--color-fg-muted); font: var(--font-weight-medium) var(--font-size-xs) / 1 var(--font-family-sans); text-decoration: none; }
 .popkin-nav ul a[aria-current="page"] { color: var(--accent-text); font-weight: var(--font-weight-bold); }
 .popkin-nav ul a[aria-current="page"] .icon { stroke-width: 2.5; }
@@ -1120,7 +1120,7 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
 @keyframes pop-in { 0% { opacity: 0; scale: 0.96; } 60% { scale: 1.02; } }
 @keyframes shimmer { from { background-position: 100% 50%; } to { background-position: 0 50%; } }
 
-/* ---- Trips and Schedules (L2-068 to L2-077), added with their mocks on 13 November 2026 ---- */
+/* ---- Plan and Schedules (L2-068 to L2-077), added with their mocks on 13 November 2026 ---- */
 
 /* View switch: the views of one tab (Board / Burn-down, Time off / This week). */
 .view-nav { display: flex; gap: var(--space-1); overflow-x: auto; margin-inline: calc(-1 * var(--space-1)); padding-inline: var(--space-1); scrollbar-width: none; }

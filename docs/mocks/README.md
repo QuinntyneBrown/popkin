@@ -18,11 +18,11 @@ Mara's other Popkins: Thursday Night Group 🕯️ Amber, 9 members, ongoing; Ti
   Leaf, 22 members, until Nov 30. Wrapped up: Build Weekend ’26 💻 Sky; Brennan Reunion 🌻 Berry.
 Experiences: Sunrise canoe to Heron Point (4.7, 11 ratings, by Mara); La Paloma Taqueria (4.5, 9,
   Sam); Ridge trail loop (4.2, 8, Walt); Beach day next summer? (want to do, 7 keen, Ellie).
-Trips and Schedules are shown in another of Mara's Popkins: Cabin Week ’27 🛶, colour Sky, 6
-  members (Mara, Walt, Dev, Ellie, Sam, Priya), ongoing. Its trip is Mon 15 – Fri 19 Feb 2027.
+Plan and Schedules are shown in another of Mara's Popkins: Cabin Week ’27 🛶, colour Sky, 6
+  members (Mara, Walt, Dev, Ellie, Sam, Priya), ongoing. Its event is Mon 15 – Fri 19 Feb 2027.
   Sprint: "Planning sprint", Aug 30 – Sep 26 2026 (today is day 13 of 27; 14 days left);
   14 stories, 35 points in all, 24 left, 7 behind, finishes Sep 30 at this week's pace.
-  Time off is entered by the week from Feb 1 to Mar 8 2027; Dev is tentative for the trip week.
+  Time off is entered by the week from Feb 1 to Mar 8 2027; Dev is tentative for the event week.
   This week runs Sat 12 – Fri 18 Sep; Wednesday is the evening all six are free, from 7:30 pm.
 Admin app: Noor Haddad (Plum, initials) runs Popkin; both switches on since Sep 1 2026.
 -->
@@ -120,9 +120,10 @@ depends on one says so.
    keen panel holds the "I'm keen" toggle (`experience-detail/want`), pressed it reads "You're
    keen" (`want-keen`), and the sharer and the Host also get "We did this" (`want-own`).
 5. Safety, Privacy, Help, Terms and Contact have no pages yet; their links lead to `not-found`.
-6. Trips and Schedules (`trip-board`, `burn-down`, `time-off`, `this-week` and their dialogs)
-   come from the Trip Board, Burn-down, Time off and This week designs. The designs call the
-   tab "Plan"; the requirements and the mocks call it "Trips" (L1-017). The designs say the
+6. Plan and Schedules (`plan-board`, `burn-down`, `time-off`, `this-week` and their dialogs)
+   come from the Plan Board, Burn-down, Time off and This week designs. The designs, the
+   requirements and the mocks all call the tab "Plan" (L1-017); a trip is one kind of event a
+   Popkin gathers for, so no mock names a feature or a screen after it. The designs say the
    hours come "from everyone's work calendars"; the mocks have each member enter their own
    (`my-hours`), as L2-074 states, and a calendar connection is open. The story dialog
    (`story`) and the empty, loading and error states are new.
@@ -130,7 +131,7 @@ depends on one says so.
    no design at all (L1-019, ADR 0016); it is built from the Popkin app's components with an
    "Admin" mark in the top bar.
 8. The earlier mocks of a Popkin's screens show four tabs. They now stand for a Popkin where
-   Trips and Schedules are off (L2-077 AC1); the new screens show all six tabs.
+   Plan and Schedules are off (L2-077 AC1); the new screens show all six tabs.
 
 ## Checking and screenshots
 
@@ -185,7 +186,7 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Something went wrong (`server-error`) | [✅](pages/server-error/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-056`, `L2-052` |
 | Offline (`offline`) | [✅](pages/offline/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-056` |
 | Brand & components (`brand-components`) | [✅](pages/brand-components/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-057`, `L2-059` |
-| Trip board (`trip-board`) | [✅](pages/trip-board/default.html) | [✅](pages/trip-board/loading.html) | [✅](pages/trip-board/empty.html) | [✅](pages/trip-board/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/trip-board/read-only.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/trip-board/off.html) |  |  |  | `L2-068`, `L2-069`, `L2-070`, `L2-077` |
+| Plan board (`plan-board`) | [✅](pages/plan-board/default.html) | [✅](pages/plan-board/loading.html) | [✅](pages/plan-board/empty.html) | [✅](pages/plan-board/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/plan-board/read-only.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/plan-board/off.html) |  |  |  | `L2-068`, `L2-069`, `L2-070`, `L2-077` |
 | Burn-down (`burn-down`) | [✅](pages/burn-down/default.html) | [✅](pages/burn-down/loading.html) | [✅](pages/burn-down/empty.html) | [✅](pages/burn-down/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/burn-down/done.html) |  |  | `L2-071` |
 | Time off (`time-off`) | [✅](pages/time-off/default.html) | [✅](pages/time-off/loading.html) | [✅](pages/time-off/empty.html) | [✅](pages/time-off/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/time-off/off.html) |  | [✅](pages/time-off/confirmed.html) |  | `L2-072`, `L2-073`, `L2-077` |
 | This week (`this-week`) | [✅](pages/this-week/default.html) | [✅](pages/this-week/loading.html) | [✅](pages/this-week/empty.html) | [✅](pages/this-week/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/this-week/working.html) | `L2-074` |

@@ -108,7 +108,9 @@ change that needs it adds it.
 
 Roles, requirements and the journeys to build are in `docs/specs/L1.md` (each traces to
 L0-001), `docs/specs/L2.md` and `docs/journeys.md`. Use the words those documents use in code,
-docs and UI; do not invent synonyms.
+docs and UI; do not invent synonyms. A Popkin gathers for any kind of event and a trip is only one
+example of them: the tab where a Popkin plans is "Plan", and no requirement, design, mock or line
+of code names a feature, screen, route, type or concept "trip".
 
 Journeys 1 to 3 filled in the layout below; every later feature follows it.
 
