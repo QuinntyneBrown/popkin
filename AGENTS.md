@@ -17,10 +17,10 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first thirteen journeys, and journeys 17 to 20, are built; the rest is designed.** Journey
+**The first thirteen journeys, and journeys 16 to 20, are built; the rest is designed.** Journey
 1, Start a Popkin, journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin
 home, journey 5, Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an
-experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey 12, React and reply, journey 13, Photos in chat, journey
+experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey 12, React and reply, journey 13, Photos in chat, journey 16, Change Popkin settings, journey
 17, Manage account, journey 18, Leave a Popkin, journey 19, Delete account, and journey 20, Say
 keen, run end to end: the backend has sign up and sign in
 with a code, sessions, Popkin creation, the list of a person's Popkins, the invite preview, joining with a name and a photo,

@@ -29,14 +29,14 @@ import {
 } from '../../../tools/video-record/shots';
 
 /**
- * The screenshots of video 17: journey 13, Photos in chat, in the running app. Mara, in the
+ * The screenshots of video 18: journey 13, Photos in chat, in the running app. Mara, in the
  * Everyone thread of Lakeside Weekend, chooses "Photo", sees it above the field, sends it, has a
  * file refused, sees Walt's photo arrive and opens Dev's full screen; then the same in her direct
  * message with Walt, and the thread of a wrapped-up Popkin. The states are those of
  * `e2e/fixtures/chat-photo-states.ts`, opened by their keys in `e2e/fixtures/routes.ts`, and the
  * answers of `e2e/fixtures/chat.ts`, `home.ts` and `photos.ts`; the hub is `e2e/fixtures/hub.ts`
  * (ADR 0005, ADR 0010); no backend and no database ran. Not a test and not a sweep: only
- * `node tools/video-record/record.mjs docs/videos/17-journey-13-photos-in-chat` runs it.
+ * `node tools/video-record/record.mjs docs/videos/18-journey-13-photos-in-chat` runs it.
  */
 
 const lower = (size: Size) => size.toLowerCase();

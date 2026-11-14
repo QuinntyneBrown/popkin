@@ -1,4 +1,4 @@
-# 17 · Journey 13: Photos in chat
+# 18 · Journey 13: Photos in chat
 
 A member sends a photo in a thread, in Everyone and in a direct message. Mara, in the Everyone
 thread of Lakeside Weekend, chooses "Photo" in the composer and picks one photo on the device; it
@@ -11,7 +11,7 @@ Everyone, it is in Photos under his name. In the direct message with Walt it wor
 and stays between the two. A wrapped-up Popkin shows its photos, which still open, and offers no
 Photo.
 
-- **Film:** [`17-journey-13-photos-in-chat.mp4`](17-journey-13-photos-in-chat.mp4),
+- **Film:** [`18-journey-13-photos-in-chat.mp4`](18-journey-13-photos-in-chat.mp4),
   1920×1080, 30 fps, 2 min 4 s. Captions: [`captions.vtt`](captions.vtt), not burned in.
 - **Voice:** Kokoro-82M (`af_heart`), run locally, as the standard of
   [`docs/videos/README.md`](../README.md) asks; not edge-tts, which `tools/video-audio` does not
@@ -91,7 +91,7 @@ act the cuts are hard.
 From the repository root, with the app's dependencies installed (`README.md`):
 
 ```shell
-node tools/video-record/record.mjs docs/videos/17-journey-13-photos-in-chat
-.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/17-journey-13-photos-in-chat
-node tools/video-build/build.mjs docs/videos/17-journey-13-photos-in-chat --crf 23
+node tools/video-record/record.mjs docs/videos/18-journey-13-photos-in-chat
+.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/18-journey-13-photos-in-chat
+node tools/video-build/build.mjs docs/videos/18-journey-13-photos-in-chat --crf 23
 ```
