@@ -116,6 +116,21 @@
   overflow-y: auto;
 }
 
+/* A tool inside the pill, "Photo": a little smaller than the pill and muted, as the design draws
+ * it. */
+.composer__tool {
+  width: var(--space-10);
+  height: var(--space-10);
+  color: var(--color-fg-muted);
+}
+
+/* Empty, the field is one line, as the design's one-line field is: a placeholder too long for a
+ * narrow pill is cut, not wrapped onto a second line the field would grow for. */
+.composer__input:placeholder-shown {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 .composer__input::placeholder {
   color: var(--color-fg-subtle);
   opacity: 1;
