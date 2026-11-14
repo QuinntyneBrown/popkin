@@ -36,6 +36,19 @@ public readonly record struct PhotoPoint(DateTimeOffset TakenAt, Guid Id)
 }
 
 /// <summary>
+/// The album of a Popkin: its photos that are in it. A photo uploaded for a message is in it
+/// only once sent in Everyone; a photo of a direct message never is (L2-026 AC3, L2-051).
+/// </summary>
+public static class PhotoAlbum
+{
+    public static IQueryable<Photo> InAlbumOf(this IQueryable<Photo> photos, Guid popkinId) =>
+        photos.Where(p => p.PopkinId == popkinId && p.InAlbum);
+
+    public static IQueryable<Photo> InAlbumsOf(this IQueryable<Photo> photos, IReadOnlyCollection<Guid> popkinIds) =>
+        photos.Where(p => popkinIds.Contains(p.PopkinId) && p.InAlbum);
+}
+
+/// <summary>
 /// The order of an album: latest taken first, by `(TakenAt, Id)`, as queries the database runs
 /// through the index `(PopkinId, TakenAt, Id)`. "Previous" and "next" in the photo view follow it.
 /// </summary>

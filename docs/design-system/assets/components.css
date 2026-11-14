@@ -357,7 +357,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .bubble { overflow: hidden; border-radius: var(--radius-lg); border-bottom-left-radius: var(--radius-xs); background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: var(--shadow-1); font: var(--text-body); overflow-wrap: anywhere; }
 .msg--mine .bubble { border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-xs); background: var(--accent); color: var(--color-fg-on-popkin); box-shadow: none; }
 .bubble p { padding: var(--space-2-5) var(--space-4); }
-.bubble img { width: var(--layout-photo-in-chat); aspect-ratio: 4 / 3; }
+.bubble__photo { display: block; width: fit-content; max-width: 100%; color: inherit; text-decoration: none; } /* a photo message's photo: a link, "Open photo from {first name}", to the photo view (L2-026 AC2); without an address yet (still sending) the same picture in a span */
+.bubble__photo img { width: var(--layout-photo-in-chat); aspect-ratio: 4 / 3; object-fit: cover; } /* 16rem, never wider than the bubble (max-width from the reset); alt "Photo from {first name}", "Your photo" for your own */
+.bubble__photo:focus-visible { outline-offset: calc(-1 * var(--focus-ring-width)); } /* inside the edge: the bubble clips what is outside it */
 .bubble__quote { margin: var(--space-2) var(--space-2) 0; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-bg-subtle); font: var(--text-body-sm); }
 .msg--mine .bubble__quote { background: var(--color-bg-quote-on-popkin); }
 .bubble__quote strong { display: block; font-weight: var(--font-weight-semibold); }
@@ -396,6 +398,11 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
 .composer__reply { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-bg-subtle); font: var(--text-body-sm); }
 .composer__reply::before { content: ""; align-self: stretch; width: var(--space-1); border-radius: var(--radius-full); background: var(--color-accent); }
 .composer__reply strong { display: block; font-weight: var(--font-weight-semibold); }
+.composer__photo { display: flex; align-items: flex-start; gap: var(--space-1); margin-bottom: var(--space-2); } /* the photo preview: the chosen photo waits above the field until Send (L2-026 AC1) */
+.composer__photo img { width: var(--space-28); aspect-ratio: 4 / 3; border-radius: var(--radius-md); box-shadow: var(--shadow-1); } /* alt "Photo to send" */
+.composer__remove { margin-top: calc(-1 * var(--space-1)); } /* "Remove photo", beside the photo's top corner */
+.composer__alert { align-items: center; margin-bottom: var(--space-2); } /* a refused photo: why, in the album's words, with Dismiss; nothing is previewed (L2-031 AC2) */
+.alert.composer__alert button { margin-top: 0; padding: 0 var(--space-2); min-height: var(--target-comfortable); } /* above .alert button: Dismiss is a full 44px target, centred on the line */
 /* How much of the 2,000 characters is used, from 1,800 on. */
 .composer__count { margin-top: var(--space-1); padding: 0 var(--space-12) 0 var(--space-4); text-align: right; font: var(--text-caption); font-variant-numeric: tabular-nums; color: var(--color-fg-muted); }
 .composer__closed { padding: var(--space-2) var(--space-3); text-align: center; font: var(--text-body-sm); color: var(--color-fg-muted); }

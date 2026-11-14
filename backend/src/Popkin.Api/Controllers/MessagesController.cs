@@ -11,7 +11,7 @@ namespace Popkin.Api.Controllers;
 [Route("api/popkins/{popkinId:guid}/threads/{threadId:guid}/messages")]
 public sealed class MessagesController(ISender sender) : ControllerBase
 {
-    public sealed record SendMessageRequest(Guid? ClientMessageId, string? Text, Guid? ReplyToMessageId = null);
+    public sealed record SendMessageRequest(Guid? ClientMessageId, string? Text, Guid? ReplyToMessageId = null, Guid? PhotoId = null);
 
     /// <summary>
     /// A page of the thread, oldest first, at most 50 (L2-027 AC5): the latest, the page
@@ -30,14 +30,14 @@ public sealed class MessagesController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetMessagesQuery(popkinId, threadId, before, after, from, to, limit), cancellationToken));
 
     /// <summary>
-    /// Posts a message (L2-021): 201 when stored, 200 with the stored message when this author
+    /// Posts a message, with text, a photo uploaded for the thread or both (L2-021, L2-026): 201 when stored, 200 with the stored message when this author
     /// already sent the client message id (L2-028). At most 60 a minute per person (L2-053 AC2).
     /// </summary>
     [HttpPost]
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]
     public async Task<ActionResult<MessageDto>> Send(Guid popkinId, Guid threadId, SendMessageRequest request, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new SendMessageCommand(popkinId, threadId, request.ClientMessageId, request.Text, request.ReplyToMessageId), cancellationToken);
+        var result = await sender.Send(new SendMessageCommand(popkinId, threadId, request.ClientMessageId, request.Text, request.ReplyToMessageId, request.PhotoId), cancellationToken);
         return result.Created
             ? Created($"/api/popkins/{popkinId}/threads/{threadId}/messages/{result.Message.Id}", result.Message)
             : Ok(result.Message);

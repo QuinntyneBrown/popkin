@@ -79,6 +79,28 @@
   white-space: pre-wrap;
 }
 
+/*
+ * The photo of a photo message: a link to the photo view, 16 rem at 4:3 and never wider than the
+ * bubble (L2-026 AC2). Its focus ring is inside its edge, which the bubble clips.
+ */
+.bubble__photo {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.bubble__photo:focus-visible {
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.bubble__photo img {
+  width: var(--layout-photo-in-chat);
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
 /* Not sent: a dashed edge, and the status line under it says so in words. */
 .bubble--failed {
   outline: var(--border-width-thick) dashed var(--color-danger-border);

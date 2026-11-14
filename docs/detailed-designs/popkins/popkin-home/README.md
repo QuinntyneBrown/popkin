@@ -187,6 +187,10 @@ Tests: `PopkinHomeTests` and `HomeSummariesTests` in `Popkin.Api.Tests/Popkins/`
 `e2e/tests/popkin-home.spec.ts` and `e2e/tests/invite-dialog.spec.ts`, with the home's requests
 answered by `e2e/fixtures/home.ts` (ADR 0005).
 
+### With journey 13, Photos in chat
+
+- The Photos section and its summary count and show the photos in the album only (`Photo.InAlbum`): never a direct-message photo. A photo message with no text reads "Photo" in the Chat card ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

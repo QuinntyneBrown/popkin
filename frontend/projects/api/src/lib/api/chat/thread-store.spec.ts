@@ -9,6 +9,7 @@ import {
   MessagePageView,
   MessageView,
   PresenceView,
+  ChatPhotoView,
   MessageReactions,
   ReactionSummary,
   ThreadView,
@@ -40,6 +41,7 @@ function message(n: number, author = 'Walt', extra: Partial<MessageView> = {}): 
     sentAt: new Date(2026, 8, 12, 9, 0, n).toISOString(),
     reactions: [],
     reactionsVersion: 0,
+    photo: null,
     quote: null,
     ...extra,
   };
@@ -142,6 +144,8 @@ class FakeChat implements ChatApi {
 
   /** The message each send replied to, if any. */
   readonly replies: (string | undefined)[] = [];
+  /** The photo each send carried, if any. */
+  readonly photos: (string | undefined)[] = [];
 
   send(
     _p: string,
@@ -149,9 +153,11 @@ class FakeChat implements ChatApi {
     clientMessageId: string,
     text: string,
     replyTo?: string,
+    photoId?: string,
   ): Observable<MessageView> {
     this.sends.push(text);
     this.replies.push(replyTo);
+    this.photos.push(photoId);
     const target = this.stored.find((m) => m.id === replyTo);
     const quote = target
       ? {
@@ -198,6 +204,12 @@ class FakeChat implements ChatApi {
 
   readonly deleted: string[] = [];
   deleteFails = false;
+  readonly uploads: File[] = [];
+
+  uploadPhoto(_p: string, _t: string, file: File): Observable<ChatPhotoView> {
+    this.uploads.push(file);
+    return of({ id: `ph-${this.uploads.length}`, url: '/api/files/ph', width: 800, height: 600 });
+  }
 
   deleteMessage(_p: string, _t: string, messageId: string): Observable<void> {
     this.deleted.push(messageId);
@@ -351,6 +363,12 @@ describe('ThreadStore', () => {
 
       realtime.messageAdded$.next(message(5, 'Mara'));
       expect(store.announcement()).toBe('Walt: message 4');
+    });
+
+    it('announces a photo with no text as "Photo" (L2-026)', () => {
+      const photo = { id: 'ph', url: '/f', width: 800, height: 600 };
+      realtime.messageAdded$.next(message(6, 'Dev', { text: '', photo }));
+      expect(store.announcement()).toBe('Dev: Photo');
     });
 
     it('raises "New messages" when one arrives while older messages are being read', () => {
@@ -565,6 +583,69 @@ describe('ThreadStore', () => {
     });
   });
 
+  describe('a photo (L2-026)', () => {
+    const jpeg = (size = 1024) =>
+      new File([new Uint8Array(size)], 'dock.jpg', { type: 'image/jpeg' });
+
+    beforeEach(() => {
+      URL.createObjectURL = () => 'blob:dock';
+      URL.revokeObjectURL = vi.fn();
+      store.open('p');
+    });
+
+    it('shows the photo chosen above the field until it is removed (AC1)', () => {
+      const file = jpeg();
+      store.choosePhoto(file);
+      expect(store.photo()).toEqual({ file, preview: 'blob:dock' });
+
+      store.removePhoto();
+
+      expect(store.photo()).toBeNull();
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:dock');
+    });
+
+    it('sends a photo with no text, with the text when there is some, and is done (AC1)', () => {
+      store.choosePhoto(jpeg());
+      store.send('');
+      expect(chat.uploads).toHaveLength(1);
+      expect(chat.sends).toEqual(['']);
+      expect(chat.photos).toEqual(['ph-1']);
+      expect(store.photo()).toBeNull();
+
+      store.choosePhoto(jpeg());
+      store.send('Dock');
+      expect(chat.sends).toEqual(['', 'Dock']);
+      expect(chat.photos).toEqual(['ph-1', 'ph-2']);
+    });
+
+    it('refuses a file over 10 MB or of another type and says why, previewing nothing (AC4)', () => {
+      store.choosePhoto(jpeg(14 * 1024 * 1024));
+      expect(store.photo()).toBeNull();
+      expect(store.photoProblem()).toBe('This file is 14 MB. Photos can be up to 10 MB.');
+
+      store.choosePhoto(new File(['%PDF'], 'menu.pdf', { type: 'application/pdf' }));
+      expect(store.photoProblem()).toContain('JPEG, PNG, WebP or HEIC');
+
+      store.dismissPhotoProblem();
+      expect(store.photoProblem()).toBeNull();
+    });
+
+    it('puts a new photo in place of the one chosen, and forgets the refusal', () => {
+      store.choosePhoto(jpeg(14 * 1024 * 1024));
+      store.choosePhoto(jpeg());
+      store.choosePhoto(jpeg());
+      expect(store.photoProblem()).toBeNull();
+      expect(URL.revokeObjectURL).toHaveBeenCalledTimes(1);
+    });
+
+    it('chooses nothing in a Popkin that has wrapped up', () => {
+      chat.thread = { ...thread, readOnly: true };
+      store.open('p');
+      store.choosePhoto(jpeg());
+      expect(store.photo()).toBeNull();
+    });
+  });
+
   describe('replying (L2-025)', () => {
     beforeEach(() => {
       chat.stored = [
@@ -598,6 +679,15 @@ describe('ThreadStore', () => {
       store.send('Nothing to do with it');
       expect(store.replyingTo()).toBeNull();
       expect(chat.replies).toEqual([undefined]);
+    });
+
+    it('reads a photo with no text as "Photo" (L2-026)', () => {
+      chat.stored = [
+        message(3, 'Dev', { text: '', photo: { id: 'ph', url: '/f', width: 800, height: 600 } }),
+      ];
+      store.open('p');
+      store.startReply('id-0003');
+      expect(store.replyingTo()?.snippet).toBe('Photo');
     });
 
     it('cuts a long line to 120 characters', () => {

@@ -60,7 +60,7 @@ public sealed class PrepareAlbumExportsCommandHandler(
     private async Task PrepareAsync(AlbumExport export)
     {
         var photos = await db.Photos.AsNoTracking()
-            .Where(p => p.PopkinId == export.PopkinId)
+            .InAlbumOf(export.PopkinId)
             .OldestFirst()
             .Select(p => p.StorageKey)
             .ToListAsync(CancellationToken.None);

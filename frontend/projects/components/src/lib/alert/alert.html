@@ -1,7 +1,19 @@
 <svg pk-icon size="md" [name]="icon()"></svg>
-<div>
-  <strong>{{ heading() }}</strong><ng-content />
+@if (heading()) {
+  <div>
+    <strong>{{ heading() }}</strong><ng-container *ngTemplateOutlet="words" />
+    @if (action()) {
+      <button class="alert__action" type="button" (click)="acted.emit()">{{ action() }}</button>
+    }
+  </div>
+} @else {
+  <p class="alert__line"><ng-container *ngTemplateOutlet="words" /></p>
   @if (action()) {
-    <button class="alert__action" type="button" (click)="acted.emit()">{{ action() }}</button>
+    <button class="alert__action alert__action--end" type="button" (click)="acted.emit()">
+      {{ action() }}
+    </button>
   }
-</div>
+}
+
+<!-- The words of the alert, declared once for both forms. -->
+<ng-template #words><ng-content /></ng-template>

@@ -251,6 +251,11 @@ from the design as it first stood:
 The diagrams below were not redrawn (gap 53). They show `album_not_kept`, an invite that may go
 by an in-app invitation, and a page that holds the logic the store now holds.
 
+### With journey 13, Photos in chat
+
+- The album's zip, the recap's photo count and its latest photos read only the photos in the album (`Photo.InAlbum`): a photo sent in a direct message is never in the zip, and neither is a chat photo whose message was never sent ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
+- The removal of an album that was not kept (`RemoveWrappedUpAlbumsCommandHandler`) removes every photo of the Popkin, those of direct messages and uploads never sent with it; `PhotosRemovedCount`, which the recap goes on showing, counts only those that were in the album. A message whose photo went then reads with no photo; what it should show is "Photo removed", journey 14's (known gap 74).
+
 ## Requirements
 
 | L2 ID | Refines (L1) | Requirement |

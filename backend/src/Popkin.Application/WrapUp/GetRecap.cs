@@ -64,7 +64,7 @@ public sealed class GetRecapQueryHandler(IAppDbContext db, IMembershipGuard guar
         var people = await db.Memberships.AsNoTracking().CountAsync(m => m.PopkinId == popkin.Id, cancellationToken);
         var members = await InviteMembers.OfAsync(db, popkin, cancellationToken);
         // The latest three; none once the album was removed (L2-045 AC4).
-        var photos = await db.Photos.AsNoTracking().Where(p => p.PopkinId == popkin.Id).LatestFirst().Take(MaxPhotos).ToListAsync(cancellationToken);
+        var photos = await db.Photos.AsNoTracking().InAlbumOf(popkin.Id).LatestFirst().Take(MaxPhotos).ToListAsync(cancellationToken);
 
         return new RecapDto(
             popkin.Id,

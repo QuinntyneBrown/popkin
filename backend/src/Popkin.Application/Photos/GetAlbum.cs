@@ -50,7 +50,7 @@ public sealed class GetAlbumQueryHandler(IAppDbContext db, IMembershipGuard guar
         var after = ParseCursor(request.Cursor);
         var limit = request.Limit is > 0 and <= PageSize ? request.Limit.Value : PageSize;
 
-        var album = db.Photos.AsNoTracking().Where(p => p.PopkinId == popkin.Id);
+        var album = db.Photos.AsNoTracking().InAlbumOf(popkin.Id);
         var photoCount = await album.CountAsync(cancellationToken);
         // Who added, by their latest photo: the most recent contributors come first.
         var contributors = await album

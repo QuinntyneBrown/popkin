@@ -64,7 +64,7 @@ public sealed class GetThreadsQueryHandler(IAppDbContext db, IMembershipGuard gu
             .Select(r => new DirectSummaryDto(
                 r.Thread.Id,
                 ThreadOtherDto.Of(people[r.Thread.OtherThan(membership.Id)!.Value], photos),
-                new DirectLatestDto(r.Latest.Text, r.Latest.AuthorMembershipId == membership.Id, r.Latest.SentAt),
+                new DirectLatestDto(MessagePreview.TextOf(r.Latest), r.Latest.AuthorMembershipId == membership.Id, r.Latest.SentAt),
                 unread.GetValueOrDefault(r.Thread.Id)))
             .ToList();
 
@@ -76,7 +76,7 @@ public sealed class GetThreadsQueryHandler(IAppDbContext db, IMembershipGuard gu
                     ? null
                     : new EveryoneLatestDto(
                         PersonName.FirstName(people[everyoneLatest.AuthorMembershipId].DisplayName),
-                        everyoneLatest.Text,
+                        MessagePreview.TextOf(everyoneLatest),
                         everyoneLatest.AuthorMembershipId == membership.Id,
                         everyoneLatest.SentAt),
                 unread.GetValueOrDefault(everyone.Id)),

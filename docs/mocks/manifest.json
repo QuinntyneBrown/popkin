@@ -323,7 +323,9 @@
         "new-messages",
         "read-only",
         "marked",
-        "deleted-quote"
+        "deleted-quote",
+        "photo-preview",
+        "photo-refused"
       ]
     },
     {
@@ -406,7 +408,8 @@
         "default",
         "not-reacted",
         "loading",
-        "error"
+        "error",
+        "direct"
       ],
       "not_applicable": {
         "empty": "The screen shows one photo; there is no collection to be empty."

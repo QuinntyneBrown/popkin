@@ -1,9 +1,10 @@
 namespace Popkin.Domain;
 
 /// <summary>
-/// A photo in a Popkin's album, added by one member. The database holds its facts and the keys
-/// of its two stored files, the display image and the thumbnail; the files themselves are in
-/// the photo store, without location or device data (L2-031 AC6).
+/// A photo of a Popkin, added by one member to its album or uploaded for a message of one of its
+/// threads (L2-026). The database holds its facts and the keys of its two stored files, the
+/// display image and the thumbnail; the files themselves are in the photo store, without
+/// location or device data (L2-031 AC6).
 /// </summary>
 public sealed class Photo
 {
@@ -44,6 +45,15 @@ public sealed class Photo
     /// <summary>The type of both stored files.</summary>
     public string ContentType { get; private set; } = "";
 
+    /// <summary>The thread it was uploaded for, to go with a message; null for a photo added to the album.</summary>
+    public Guid? ThreadId { get; private set; }
+
+    /// <summary>
+    /// Whether it is in the album: a photo added to the album is, and a photo of a message in
+    /// Everyone joins it when its message is sent; a photo of a direct message never does (L2-026 AC3).
+    /// </summary>
+    public bool InAlbum { get; private set; }
+
     /// <summary>
     /// Adds a photo now. A capture time later than now is a camera clock that is wrong: the photo
     /// is never put in the future, so it counts as taken when it was added.
@@ -72,5 +82,42 @@ public sealed class Photo
         Width = width,
         Height = height,
         ContentType = contentType,
+        InAlbum = true,
     };
+
+    /// <summary>
+    /// A photo uploaded for a message of a thread (L2-026): in no album until its message is
+    /// sent, and then only when the thread is Everyone. It has no caption; its message has the text.
+    /// </summary>
+    public static Photo ForThread(
+        Guid id,
+        Guid popkinId,
+        Guid threadId,
+        Guid uploaderMembershipId,
+        DateTimeOffset? capturedAt,
+        DateTimeOffset now,
+        string storageKey,
+        string thumbnailKey,
+        int width,
+        int height,
+        string contentType)
+    {
+        var photo = Add(id, popkinId, uploaderMembershipId, null, capturedAt, now, storageKey, thumbnailKey, width, height, contentType);
+        photo.ThreadId = threadId;
+        photo.InAlbum = false;
+        return photo;
+    }
+
+    /// <summary>
+    /// The photo's message was sent in Everyone: it joins the album under its uploader, as added
+    /// now (L2-026 AC3). Joining twice changes nothing.
+    /// </summary>
+    public void JoinAlbum(DateTimeOffset now)
+    {
+        if (!InAlbum)
+        {
+            InAlbum = true;
+            AddedAt = now;
+        }
+    }
 }

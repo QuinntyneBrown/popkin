@@ -9,6 +9,7 @@ import {
   output,
   viewChild,
 } from '@angular/core';
+import { Alert } from '../alert/alert';
 import { IconButton } from '../icon-button/icon-button';
 
 /** The message a reply answers, as the reply bar shows it. */
@@ -31,12 +32,19 @@ export interface ComposerReply {
  * message, with "Cancel reply" (L2-025 AC1); the focus moves to the field when it shows, and
  * Escape in the field or "Cancel reply" emits `cancelReply`, the focus staying in the field.
  *
+ * "Photo" in the field opens the device's picker for one photo (a phone's offers the camera) and
+ * emits the file chosen as `pickPhoto`; the picker is emptied after, so the same file can be
+ * chosen again. With a `photo` (the address of its preview) the photo waits above the field with
+ * "Remove photo", and Send is enabled with no text (L2-026 AC1); with a `photoProblem` an alert
+ * above the field says why the photo was refused, with "Dismiss" (L2-031 AC2). Removing the photo
+ * or dismissing the alert gives the focus back to "Photo".
+ *
  * With `closed` it is the closed form: no field and no Send, only the line that says why
  * nobody can post (L2-045 AC1).
  */
 @Component({
   selector: 'div[pk-composer]',
-  imports: [IconButton],
+  imports: [Alert, IconButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './composer.html',
   styleUrl: './composer.scss',
@@ -56,15 +64,34 @@ export class Composer {
   readonly closed = input<string>();
   /** The message being replied to: its sender's first name and one line of its text. */
   readonly reply = input<ComposerReply | null>(null);
+  /** The address of the photo chosen to send, shown above the field until Send. */
+  readonly photo = input<string | null>(null);
+  /** Why the photo chosen was refused: "This file is 14 MB. Photos can be up to 10 MB." */
+  readonly photoProblem = input<string | null>(null);
 
   /** The trimmed text to send. */
   readonly send = output<string>();
   /** "Cancel reply", or Escape in the field while replying. */
   readonly cancelReply = output<void>();
+  /** The file chosen in the device's picker. */
+  readonly pickPhoto = output<File>();
+  /** "Remove photo". */
+  readonly removePhoto = output<void>();
+  /** "Dismiss" on the alert of a refused photo. */
+  readonly dismissPhotoProblem = output<void>();
 
   private readonly field = viewChild<ElementRef<HTMLTextAreaElement>>('field');
+  private readonly picker = viewChild<ElementRef<HTMLInputElement>>('picker');
+  private readonly choose = viewChild<string, ElementRef<HTMLButtonElement>>('choose', {
+    read: ElementRef,
+  });
 
-  protected readonly canSend = computed(() => !this.disabled() && this.value().trim() !== '');
+  /** The types of photo the album takes (L2-031 AC2). */
+  protected readonly accept = 'image/jpeg,image/png,image/webp,image/heic';
+
+  protected readonly canSend = computed(
+    () => !this.disabled() && (this.value().trim() !== '' || this.photo() !== null),
+  );
 
   /** "1,950 / 2,000" from `countFrom` characters on; empty before. */
   protected readonly count = computed(() => {
@@ -117,6 +144,29 @@ export class Composer {
   protected cancel(): void {
     this.focus();
     this.cancelReply.emit();
+  }
+
+  /** "Photo": the device's picker. */
+  protected openPicker(): void {
+    this.picker()?.nativeElement.click();
+  }
+
+  protected onPicked(input: HTMLInputElement): void {
+    const file = input.files?.[0];
+    // Emptied, so choosing the same file again is a change too.
+    input.value = '';
+    if (file) this.pickPhoto.emit(file);
+  }
+
+  /** "Remove photo" and "Dismiss" go with what they close: the focus goes back to "Photo". */
+  protected onRemovePhoto(): void {
+    this.choose()?.nativeElement.focus();
+    this.removePhoto.emit();
+  }
+
+  protected onDismissPhotoProblem(): void {
+    this.choose()?.nativeElement.focus();
+    this.dismissPhotoProblem.emit();
   }
 
   protected submit(event?: Event): void {

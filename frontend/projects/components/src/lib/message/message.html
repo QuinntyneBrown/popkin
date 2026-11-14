@@ -48,7 +48,18 @@
           ></button>
         }
       }
-      <p class="bubble__text">{{ text() }}</p>
+      @if (photo(); as p) {
+        @if (p.link) {
+          <a class="bubble__photo" [routerLink]="p.link" [attr.aria-label]="p.label">
+            <img [src]="p.url" [alt]="p.alt" />
+          </a>
+        } @else {
+          <span class="bubble__photo"><img [src]="p.url" [alt]="p.alt" /></span>
+        }
+      }
+      @if (text() || !photo()) {
+        <p class="bubble__text">{{ text() }}</p>
+      }
     </div>
     @if (mine()) {
       @switch (state()) {

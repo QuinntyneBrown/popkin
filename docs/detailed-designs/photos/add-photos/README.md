@@ -57,7 +57,8 @@ from 180 characters.
   ([Abuse limits](../../security/abuse-limits/README.md)). The checks run in this order:
   membership, wrapped up, caption, missing file, size, type. The request size limit is 20 MB,
   twice the largest photo, so a file a little over 10 MB is answered with `photo_too_large` and
-  not cut off.
+  not cut off; a body over 20 MB is `413 request_too_large`, since journey 13
+  ([Input validation and encoding](../../security/input-validation-and-encoding/README.md)).
 - `GET /api/popkins/{popkinId}/photos/summary` — the Popkin home's photos summary, which
   answered empty until this journey, now gives the latest 8 photos
   ([Popkin home](../../popkins/popkin-home/README.md)).

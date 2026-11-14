@@ -6,9 +6,11 @@ import { parity } from '../../fixtures/parity';
 import { GroupChatPage } from '../../pages/group-chat.page';
 import { MessageActions } from '../../pages/message-actions';
 import { reactStates } from '../../fixtures/react-states';
+import { chatPhotoStates } from '../../fixtures/chat-photo-states';
+import { ChatPhotos } from '../../pages/chat-photos';
 
-// The mock's field holds Add, Emoji and Photo, which come with later journeys; until then the
-// part the two share is "Send".
+// The mock's field holds Add and Emoji, which come with later journeys, beside Photo; until then
+// the part of the row the two share is "Send".
 parity('composer', [
   {
     key: 'groupChat',
@@ -35,5 +37,19 @@ parity('composer', [
     ...reactStates.groupChatReplying,
     name: 'reply',
     region: (page) => new MessageActions(page).replyBar,
+  },
+  // Journey 13: the photo chosen waits above the field with Remove photo (L2-026 AC1) ...
+  {
+    key: 'groupChatPhotoPreview',
+    ...chatPhotoStates.groupChatPhotoPreview,
+    name: 'photo-preview',
+    region: (page) => new ChatPhotos(page).preview,
+  },
+  // ... and a refused one is an alert that says why, with Dismiss (L2-031 AC2).
+  {
+    key: 'groupChatPhotoRefused',
+    ...chatPhotoStates.groupChatPhotoRefused,
+    name: 'photo-refused',
+    region: (page) => new ChatPhotos(page).refusal,
   },
 ]);

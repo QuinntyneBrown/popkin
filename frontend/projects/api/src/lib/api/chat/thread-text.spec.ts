@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   announcement,
   dayLabel,
+  messageLine,
   messageTime,
   noteParts,
   othersHere,
@@ -62,6 +63,18 @@ describe('othersHere', () => {
 describe('announcement (L2-027 AC6)', () => {
   it('names the sender before the text', () => {
     expect(announcement('Walt', 'Pancakes at 8:30')).toBe('Walt: Pancakes at 8:30');
+  });
+});
+
+describe('messageLine (L2-026)', () => {
+  const photo = { id: 'ph', url: '/f', width: 800, height: 600 };
+  it.each([
+    ['text alone', { text: 'Dock', photo: null }, 'Dock'],
+    ['a photo with text', { text: 'Dock', photo }, 'Dock'],
+    ['a photo alone', { text: '', photo }, 'Photo'],
+    ['nothing', { text: '', photo: null }, ''],
+  ])('reads %s as its line', (_case, message, line) => {
+    expect(messageLine(message)).toBe(line);
   });
 });
 

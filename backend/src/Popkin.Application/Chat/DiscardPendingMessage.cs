@@ -10,10 +10,12 @@ namespace Popkin.Application.Chat;
 /// "Delete" on a message whose send failed: the server may hold it with the answer lost, so the
 /// caller's message with that client message id is deleted if there is one (L2-028 AC1). It
 /// succeeds whatever the server holds, and changes nothing in a wrapped-up Popkin (L2-045 AC2).
+/// A photo it carried goes or stays as for "Delete" (L2-026).
 /// </summary>
 public sealed record DiscardPendingMessageCommand(Guid PopkinId, Guid ThreadId, Guid ClientMessageId) : IRequest;
 
-public sealed class DiscardPendingMessageCommandHandler(IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPopkinNotifier notifier)
+public sealed class DiscardPendingMessageCommandHandler(
+    IAppDbContext db, IMembershipGuard guard, TimeProvider clock, IPhotoStore store, IPopkinNotifier notifier)
     : IRequestHandler<DiscardPendingMessageCommand>
 {
     public async Task Handle(DiscardPendingMessageCommand request, CancellationToken cancellationToken)
@@ -35,7 +37,9 @@ public sealed class DiscardPendingMessageCommandHandler(IAppDbContext db, IMembe
         }
 
         message.Delete(clock.GetUtcNow());
+        var removed = await ChatPhotos.RemoveWithAsync(db, message, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
+        await ChatPhotos.DeleteFilesAsync(store, removed);
         await notifier.MessageDeleted(await ChatThreads.AudienceAsync(db, thread, cancellationToken), thread.Id, message.Id);
     }
 }

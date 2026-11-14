@@ -86,6 +86,7 @@
                 [text]="row.text"
                 [time]="row.time"
                 [state]="row.state"
+                [photo]="row.photo"
               ></div>
             }
           }
@@ -96,6 +97,11 @@
         slot="composer"
         label="Message everyone"
         [(value)]="text"
+        [photo]="thread.photo()?.preview ?? null"
+        [photoProblem]="thread.photoProblem()"
+        (pickPhoto)="thread.choosePhoto($event)"
+        (removePhoto)="thread.removePhoto()"
+        (dismissPhotoProblem)="thread.dismissPhotoProblem()"
         [closed]="
           header.readOnly
             ? 'This Popkin has wrapped up. Messages stay, but nobody can post new ones.'

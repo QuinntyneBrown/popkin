@@ -71,7 +71,7 @@ Policies apply to these endpoints, whose exact paths belong to the designs named
 | `messages` | `POST /api/popkins/{popkinId}/threads/{threadId}/messages` ([Send a message to everyone](../../chat/send-message-to-everyone/README.md), [Direct messages](../../chat/direct-messages/README.md)); `PUT …/experiences/{experienceId}/my-rating` and `PUT …/my-rating/comment` ([Rate an experience](../../experiences/rate-experience/README.md), [Comment on an experience](../../experiences/comment-on-experience/README.md)) |
 | `invite-codes` | `GET /api/invites/{code}` and `POST /api/invites/{code}/join` ([Preview an invite](../../invitations/preview-invite/README.md), [Join by code](../../invitations/join-by-code/README.md)) |
 | `address-checks` | `GET /api/addresses/{address}` ([Choose the address](../../popkins/choose-address/README.md)) |
-| `photos` | `POST /api/popkins/{popkinId}/photos` ([Add photos](../../photos/add-photos/README.md)); `POST /api/popkins/{popkinId}/experiences` and `PATCH …/experiences/{experienceId}` ([Share an experience](../../experiences/share-experience/README.md)) |
+| `photos` | `POST /api/popkins/{popkinId}/photos` ([Add photos](../../photos/add-photos/README.md)); `POST /api/popkins/{popkinId}/threads/{threadId}/photos` ([Send photos in chat](../../chat/send-photos-in-chat/README.md)); `POST /api/popkins/{popkinId}/experiences` and `PATCH …/experiences/{experienceId}` ([Share an experience](../../experiences/share-experience/README.md)) |
 
 ### Backend — Popkin API
 
@@ -181,6 +181,9 @@ The limits were built with the journeys that needed them, and part of this desig
   photos a person adds, because each may carry a picture; rating and commenting count with
   the messages they send. L2-053 names no limit for any of them. Deleting an experience is not
   limited.
+- Photos in chat, journey 13, added no policy either. The upload of a message's photo counts
+  under `photos` with the album's uploads, and the message that then carries it under
+  `messages`.
 
 ## Requirements
 

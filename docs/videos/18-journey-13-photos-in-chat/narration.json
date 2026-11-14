@@ -1,0 +1,24 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Show them, right in the thread. This is photos in chat."] },
+    { "id": "choose", "bars": 6, "lines": ["In the composer, choose Photo, then pick one on your device, or take one.", "It waits above the message field, with Remove photo, until you send it."] },
+    { "id": "send", "bars": 6, "lines": ["Send it with text, or without. In the thread, a photo is at most sixteen rem wide, at four by three, with any text under it."] },
+    { "id": "refused", "bars": 7, "lines": ["A file over ten megabytes is refused, and says why: This file is fourteen megabytes. Photos can be up to ten.", "So is one that isn't a JPEG, PNG, WebP or HEIC photo. Dismiss puts it away."] },
+    { "id": "live", "bars": 5, "lines": ["And a photo someone else sends arrives as it's sent. Here is Walt's, with no reload."] },
+    { "id": "open", "bars": 7, "lines": ["Choose a photo, and it opens full screen.", "Sent in Everyone, it is in Photos too, under the sender's name. From ten twenty-four pixels, a side panel says who, and when."] },
+    { "id": "dm", "bars": 5, "lines": ["In a direct message, it works the same way, but it stays between the two of you: not in Photos, and only you two can open it."] },
+    { "id": "grow", "bars": 6, "lines": [
+      { "text": "On a phone, the thread fills the screen.", "at": 0 },
+      { "text": "As it grows, the rail, the conversations and who is here now open beside it.", "at": 8 }
+    ] },
+    { "id": "readonly", "bars": 4, "lines": ["Once the Popkin wraps up, its photos stay, and still open. There is no Photo to send another."] },
+    { "id": "proof", "bars": 8, "lines": ["What no screen shows: location and device data are removed before a photo is stored, and its address is signed, and expires.", "The server checks the file's own bytes, whatever its name says. And once a photo is up, a message tried again doesn't upload it twice."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey thirteen. Popkin is a free platform for pop-up communities."] }
+  ]
+}

@@ -1,6 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Popkin.Api.RateLimiting;
 using Popkin.Application.Chat;
+using Popkin.Application.Invites;
+using Popkin.Domain;
 
 namespace Popkin.Api.Controllers;
 
@@ -43,5 +47,26 @@ public sealed class ThreadsController(ISender sender) : ControllerBase
     {
         await sender.Send(new MarkThreadReadCommand(popkinId, threadId, request.LastReadMessageId), cancellationToken);
         return NoContent();
+    }
+
+    /// <summary>What a multipart body may hold besides its photo: its boundaries and part headers.</summary>
+    public const long MultipartOverheadBytes = 64 * 1024;
+
+    /// <summary>
+    /// Uploads the photo a message of the thread will carry (L2-026): 201 with its id, which the
+    /// message then names. The body is at most a photo of 10 MB and its multipart overhead; a
+    /// larger one is 413. At most 60 a minute per person, as for the album.
+    /// </summary>
+    [HttpPost("{threadId:guid}/photos")]
+    [EnableRateLimiting(RateLimitPolicyNames.Photos)]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(Photo.MaxFileBytes + MultipartOverheadBytes)]
+    [RequestFormLimits(MultipartBodyLengthLimit = Photo.MaxFileBytes + MultipartOverheadBytes)]
+    public async Task<ActionResult<ChatPhotoDto>> UploadPhoto(Guid popkinId, Guid threadId, IFormFile? file, CancellationToken cancellationToken)
+    {
+        await using var content = file?.OpenReadStream();
+        var upload = file is null ? null : new PhotoUpload(content!, file.Length);
+        var photo = await sender.Send(new UploadThreadPhotoCommand(popkinId, threadId, upload), cancellationToken);
+        return Created($"/api/popkins/{popkinId}/photos/{photo.Id}", photo);
     }
 }

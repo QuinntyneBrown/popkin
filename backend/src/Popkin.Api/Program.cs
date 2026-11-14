@@ -24,6 +24,14 @@ builder.Services
         // the field it names (L2-052 AC1).
         options.InvalidModelStateResponseFactory = context =>
         {
+            // A body over the action's limit is 413, whether the server or the form reader stopped it.
+            if (RequestLimits.BodyTooLarge(context))
+            {
+                var tooLarge = new ProblemDetails { Status = 413, Title = "The request is too large." };
+                tooLarge.Extensions["code"] = "request_too_large";
+                return new ObjectResult(tooLarge) { StatusCode = 413, ContentTypes = { "application/problem+json" } };
+            }
+
             // A JSON value of the wrong type is reported twice: under its path (`$.keepPhotos`)
             // and under the name of the body's parameter. The path names the field.
             var invalid = context.ModelState.Where(e => e.Value?.Errors.Count > 0).Select(e => e.Key).ToList();

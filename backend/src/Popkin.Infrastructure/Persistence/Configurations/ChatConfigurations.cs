@@ -23,6 +23,9 @@ public sealed class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.Property(m => m.ReactionsVersion).IsConcurrencyToken();
         // A reply links to the message it answers; messages are soft-deleted, so the link never dangles.
         builder.HasOne<Message>().WithMany().HasForeignKey(m => m.ReplyToMessageId).OnDelete(DeleteBehavior.NoAction);
+        // A photo is on one message at most, even when two sends race. No foreign key: a photo
+        // removed with its album, or with its deleted message, leaves the message without one (L2-026, L2-045 AC4).
+        builder.HasIndex(m => m.PhotoId).IsUnique();
     }
 }
 

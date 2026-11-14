@@ -79,12 +79,22 @@ export interface MessageView {
   reactionsVersion: number;
   /** The message this one replies to; null when it replies to none (L2-025). */
   quote: QuoteView | null;
+  /** The photo it carries, with or without text (L2-026). */
+  photo: ChatPhotoView | null;
 }
 
 /** One emoji on a message and the members who chose it. */
 export interface ReactionSummary {
   emoji: string;
   membershipIds: string[];
+}
+
+/** A photo a message carries, at an expiring address (L2-026, L2-051 AC2). */
+export interface ChatPhotoView {
+  id: string;
+  url: string;
+  width: number;
+  height: number;
 }
 
 /** A message's reactions as they stand after a change, and the version of that change. */

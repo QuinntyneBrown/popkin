@@ -43,11 +43,20 @@ public sealed class Message
     /// </summary>
     public Guid? ReplyToMessageId { get; private set; }
 
-    public static Message Send(Guid threadId, Guid authorMembershipId, string text, Guid clientMessageId, DateTimeOffset now, Message? replyTo = null)
+    /// <summary>The photo the message carries, uploaded for its thread by its author; null for a message of text alone (L2-026).</summary>
+    public Guid? PhotoId { get; private set; }
+
+    public static Message Send(
+        Guid threadId, Guid authorMembershipId, string text, Guid clientMessageId, DateTimeOffset now, Message? replyTo = null, Photo? photo = null)
     {
         if (replyTo is not null && replyTo.ThreadId != threadId)
         {
             throw new ArgumentException("A reply answers a message of the same thread.", nameof(replyTo));
+        }
+
+        if (photo is not null && (photo.ThreadId != threadId || photo.UploaderMembershipId != authorMembershipId))
+        {
+            throw new ArgumentException("A message carries a photo its author uploaded for its thread.", nameof(photo));
         }
 
         return new Message
@@ -60,6 +69,7 @@ public sealed class Message
             SentAt = now,
             Kind = MessageKind.Member,
             ReplyToMessageId = replyTo?.Id,
+            PhotoId = photo?.Id,
         };
     }
 

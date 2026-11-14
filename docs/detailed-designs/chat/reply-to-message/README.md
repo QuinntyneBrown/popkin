@@ -63,7 +63,7 @@ deleted, the quote reads "Message deleted".
 
 Everything above, for messages of text, in Everyone and in a direct message (L2-023 AC3). The
 diagrams were not redrawn (known gap 69); what the reply bar and the quote show for a photo
-waits for journey 13.
+was settled by journey 13: "Photo".
 
 ### Open questions
 
@@ -75,9 +75,13 @@ Settled for journey 12:
 - A quoted message older than the loaded pages: the store loads earlier pages until it has it. A read centred on a message (`?around=`), with a gap that fills as the member scrolls, was the alternative; the simpler choice was taken, and it has no gap to draw.
 - Escape in the field cancels a reply; a failed reply keeps its quote and a retry sends it with it.
 
+Settled for journey 13 ([Send photos in chat](../send-photos-in-chat/README.md)):
+
+- The reply bar and the quote of a photo message with no text read "Photo"; with text, its text. A reply may carry a photo.
+- Built by journey 13: the quote the server answers reads "Photo" (`MessagePreview`), and a reply carries a photo. Not built: the reply bar, written by the client from the message, shows its empty text (known gap 76).
+
 Still open:
 
-- What the reply bar and the quote show for a photo without text: `<TO SUPPLY>`, with journey 13.
 - How many earlier pages a jump may load before it gives up: `<TO SUPPLY>`; none is set, and the pages are 50 messages each.
 
 ## Requirements

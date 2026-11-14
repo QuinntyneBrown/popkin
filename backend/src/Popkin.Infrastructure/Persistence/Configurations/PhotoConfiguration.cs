@@ -16,6 +16,8 @@ public sealed class PhotoConfiguration : IEntityTypeConfiguration<Photo>
         builder.Property(p => p.ContentType).HasMaxLength(50).IsRequired();
         // The album is read by the time a photo was taken, then its id.
         builder.HasIndex(p => new { p.PopkinId, p.TakenAt, p.Id });
+        // `ThreadId` has no foreign key: the thread and the photo both go with their Popkin, and
+        // SQL Server allows one cascade path only.
         builder.HasOne<PopkinSpace>().WithMany().HasForeignKey(p => p.PopkinId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Membership>().WithMany().HasForeignKey(p => p.UploaderMembershipId).OnDelete(DeleteBehavior.Restrict);
     }
