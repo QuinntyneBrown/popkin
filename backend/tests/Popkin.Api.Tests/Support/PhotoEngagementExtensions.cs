@@ -77,12 +77,12 @@ public static class PhotoEngagementExtensions
         return (db.PhotoReactions.Count(r => r.PhotoId == photoId), db.PhotoComments.Count(c => c.PhotoId == photoId));
     }
 
-    /// <summary>The stored keys of the photo's two files.</summary>
-    public static (string Display, string Thumbnail) FileKeysOf(this ApiFactory api, Guid photoId)
+    /// <summary>The stored keys of the photo's files: the display image, the thumbnail and the original size.</summary>
+    public static (string Display, string Thumbnail, string? Original) FileKeysOf(this ApiFactory api, Guid photoId)
     {
         using var scope = api.Services.CreateScope();
         var photo = scope.ServiceProvider.GetRequiredService<AppDbContext>().Photos.Single(p => p.Id == photoId);
-        return (photo.StorageKey, photo.ThumbnailKey);
+        return (photo.StorageKey, photo.ThumbnailKey, photo.OriginalKey);
     }
 
     /// <summary>One message of a thread, as the member reads it.</summary>

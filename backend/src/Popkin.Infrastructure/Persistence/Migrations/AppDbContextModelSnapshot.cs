@@ -507,6 +507,10 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<bool>("InAlbum")
                         .HasColumnType("bit");
 
+                    b.Property<string>("OriginalKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<Guid>("PopkinId")
                         .HasColumnType("uniqueidentifier");
 

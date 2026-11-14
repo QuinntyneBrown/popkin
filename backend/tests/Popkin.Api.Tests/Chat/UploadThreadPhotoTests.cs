@@ -33,7 +33,7 @@ public sealed class UploadThreadPhotoTests
         var url = photo.GetProperty("url").GetString()!;
         Assert.Contains("expires=", url);
         Assert.Equal(HttpStatusCode.OK, (await lakeside.Host.GetAsync(url)).StatusCode);
-        Assert.Equal(2, api.Photos.Files.Count);
+        Assert.Equal(3, api.Photos.Files.Count);
         Assert.All(api.Photos.Files.Values, file =>
         {
             using var stored = new MagickImage(file.Content);

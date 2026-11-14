@@ -47,7 +47,7 @@ public sealed class DeletePhotoCommandHandler(
         // After the commit: a file left behind is harmless, a photo without its files is not.
         try
         {
-            await PhotoFiles.DeleteAsync(store, photo.StorageKey, photo.ThumbnailKey);
+            await PhotoFiles.DeleteAsync(store, PhotoFiles.KeysOf(photo));
         }
         catch (Exception exception)
         {

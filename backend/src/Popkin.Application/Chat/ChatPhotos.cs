@@ -50,7 +50,7 @@ public static class ChatPhotos
     {
         if (removed is not null)
         {
-            await PhotoFiles.DeleteAsync(store, removed.StorageKey, removed.ThumbnailKey);
+            await PhotoFiles.DeleteAsync(store, PhotoFiles.KeysOf(removed));
         }
     }
 

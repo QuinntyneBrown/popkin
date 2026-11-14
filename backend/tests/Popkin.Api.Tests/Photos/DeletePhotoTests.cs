@@ -14,7 +14,7 @@ public sealed class DeletePhotoTests
 {
     // Given a photo Joel added to the album, with a reaction and a comment, and Mara with Lakeside open,
     // when Joel deletes it, then 204; it is gone from the album and the photo view (404
-    // photo_not_found); its reactions, its comments and both its files are gone, and its
+    // photo_not_found); its reactions, its comments and its three files are gone, and its
     // addresses no longer answer; and Mara is told PhotoDeleted with the Popkin and the photo.
     [Fact]
     public async Task The_uploader_deletes_their_photo_and_nothing_of_it_is_left()
@@ -37,6 +37,8 @@ public sealed class DeletePhotoTests
         Assert.Equal((0, 0), api.EngagementOf(photoId));
         Assert.False(api.Photos.Files.ContainsKey(keys.Display));
         Assert.False(api.Photos.Files.ContainsKey(keys.Thumbnail));
+        Assert.NotNull(keys.Original);
+        Assert.False(api.Photos.Files.ContainsKey(keys.Original));
         Assert.Equal(HttpStatusCode.NotFound, (await lakeside.Host.GetAsync(view.GetProperty("imageUrl").GetString())).StatusCode);
         var told = await marasHub.WaitForAsync("PhotoDeleted");
         Assert.Equal([lakeside.Id, photoId], told.Arguments.Select(a => a.GetGuid()));

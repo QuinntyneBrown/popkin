@@ -68,7 +68,7 @@ public sealed class RemoveWrappedUpAlbumsCommandHandler(
         {
             // The files first: a file whose photo is gone could never be found again. Deleting a
             // file twice is harmless, so a tick that fails here is simply made again.
-            foreach (var key in photos.SelectMany(p => new[] { p.StorageKey, p.ThumbnailKey }).Concat(exports.Select(e => e.StorageKey).OfType<string>()))
+            foreach (var key in photos.SelectMany(Photos.PhotoFiles.KeysOf).Concat(exports.Select(e => e.StorageKey).OfType<string>()))
             {
                 await store.DeleteAsync(key, CancellationToken.None);
             }

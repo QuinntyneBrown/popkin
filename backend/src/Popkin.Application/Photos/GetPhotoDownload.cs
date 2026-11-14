@@ -21,13 +21,13 @@ public sealed class GetPhotoDownloadQueryHandler(IAppDbContext db, IMembershipGu
     {
         var photo = (await PhotoAccess.RequireAsync(db, guard, request.PopkinId, request.PhotoId, cancellationToken)).Photo;
         var expiresAt = clock.GetUtcNow().Add(PhotoUrlSigner.Lifetime);
-        return new PhotoDownloadDto(store.GetDownloadUrl(photo.StorageKey, FileNameOf(photo)), expiresAt);
+        // A photo stored before Popkin kept the size it was added is saved as its display image.
+        return new PhotoDownloadDto(store.GetDownloadUrl(photo.OriginalKey ?? photo.StorageKey, FileNameOf(photo)), expiresAt);
     }
 
     /// <summary>
     /// `popkin-photo-{yyyyMMdd-HHmm}.{ext}`, from when it was taken (or added, when its file did
-    /// not say), in UTC, and the extension of the stored file.
+    /// not say), in UTC; every stored photo is a JPEG.
     /// </summary>
-    public static string FileNameOf(Photo photo) =>
-        $"popkin-photo-{photo.TakenAt.UtcDateTime:yyyyMMdd-HHmm}{Path.GetExtension(photo.StorageKey)}";
+    public static string FileNameOf(Photo photo) => $"popkin-photo-{photo.TakenAt.UtcDateTime:yyyyMMdd-HHmm}.jpg";
 }

@@ -28,7 +28,7 @@ public sealed class PhotoPrivacyTests
 
         await lakeside.Host.AddedPhotoAsync(lakeside.Id, upload);
 
-        Assert.Equal(2, api.Photos.Files.Count);
+        Assert.Equal(3, api.Photos.Files.Count);
         Assert.All(api.Photos.Files.Values, file =>
         {
             using var stored = new MagickImage(file.Content);
@@ -115,7 +115,7 @@ public sealed class PhotoPrivacyTests
         var second = await lakeside.Host.AddedPhotoAsync(lakeside.Id, TestPhotos.FromAPhone(), "Dock");
 
         var keys = api.Photos.Files.Keys.ToList();
-        Assert.Equal(4, keys.Count);
+        Assert.Equal(6, keys.Count);
         foreach (var photo in new[] { first, second })
         {
             // The id travels in addresses and events; the key must not follow from it.

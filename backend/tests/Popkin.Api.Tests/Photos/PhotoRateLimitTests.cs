@@ -32,7 +32,7 @@ public sealed class PhotoRateLimitTests
         Assert.Equal(TimeSpan.FromSeconds(20), refused.Headers.RetryAfter?.Delta);
         Assert.Equal(20, body.GetProperty("retryAfterSeconds").GetInt32());
         Assert.Equal(60, PhotoCount(api));
-        Assert.Equal(120, api.Photos.Files.Count);
+        Assert.Equal(180, api.Photos.Files.Count);
         Assert.Equal(HttpStatusCode.Created, (await joel.AddPhotoAsync(lakeside.Id, file)).StatusCode);
         // Reading is not counted: the album is still there for the member who is held back.
         Assert.Equal(HttpStatusCode.OK, (await lakeside.Host.GetAsync($"/api/popkins/{lakeside.Id}/photos")).StatusCode);

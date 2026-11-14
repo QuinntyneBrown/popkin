@@ -71,7 +71,8 @@ public sealed class AlbumExportTests
         using var api = new ApiFactory();
         var (lakeside, joel) = await WrappedUpWithTwoPhotosAsync(api);
         var displayImages = api.Photos.Files
-            .Where(f => f.Key.StartsWith($"popkins/{lakeside.Id:N}/", StringComparison.Ordinal) && !f.Key.Contains("-thumbnail", StringComparison.Ordinal))
+            .Where(f => f.Key.StartsWith($"popkins/{lakeside.Id:N}/", StringComparison.Ordinal) && !f.Key.Contains("-thumbnail", StringComparison.Ordinal)
+                && !f.Key.Contains("-original", StringComparison.Ordinal))
             .Select(f => f.Value.Content)
             .ToList();
         var exportId = (await StartedExportAsync(joel, lakeside.Id)).Id();

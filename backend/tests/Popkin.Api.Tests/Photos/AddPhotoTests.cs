@@ -45,8 +45,9 @@ public sealed class AddPhotoTests
         Assert.Equal("image/jpeg", thumbnail.Content.Headers.ContentType?.MediaType);
         using var small = new MagickImage(await thumbnail.Content.ReadAsByteArrayAsync());
         Assert.Equal((480u, 320u), (small.Width, small.Height));
-        // Two files are kept for a photo, the display image and the thumbnail, and not the upload.
-        Assert.Equal([(480u, 320u), (2048u, 1365u)], StoredSizes(api));
+        // Three files are kept for a photo, the thumbnail, the display image and the photo at the
+        // size it was added, for "Save photo" (L2-036 AC1), and not the upload itself.
+        Assert.Equal([(480u, 320u), (2048u, 1365u), (3000u, 2000u)], StoredSizes(api));
     }
 
     // Given a small photo and no caption,
@@ -86,7 +87,7 @@ public sealed class AddPhotoTests
         var response = await lakeside.Host.AddPhotoAsync(lakeside.Id, file, fileName: "photo.bin", contentType: "application/octet-stream");
 
         Assert.True(response.StatusCode == HttpStatusCode.Created, $"{type}: {response.StatusCode}");
-        Assert.Equal(2, api.Photos.Files.Count);
+        Assert.Equal(3, api.Photos.Files.Count);
         Assert.All(api.Photos.Files.Values, f =>
         {
             using var stored = new MagickImage(f.Content);

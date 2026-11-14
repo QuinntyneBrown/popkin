@@ -12,8 +12,10 @@ reloading.
 - **upload item** — one chosen file in the add-photos dialog, with its preview, caption and
   upload state
 - **display image** — the stored copy of a photo: a JPEG whose longest edge is at most 2048 px,
-  turned upright, with location and device metadata removed. The file the member chose is not
-  kept, so the display image is what "Save photo" will save (L2-036 AC1; see the open questions).
+  turned upright, with location and device metadata removed
+- **original** — a JPEG of the photo at the size it was added, turned upright, with location and
+  device metadata removed, which "Save photo" saves (L2-036 AC1). The file the member chose is
+  not kept.
 - **thumbnail** — smaller JPEG copy, longest edge at most 480 px, made at upload, served in
   lists (L2-055 AC4)
 - **Photo store** — object storage that holds the files; the Popkin database holds only their
@@ -101,9 +103,9 @@ from 180 characters.
   2. Refuses a wrapped-up Popkin.
   3. Checks the caption, that a file came, and its size.
   4. Passes the file to `IPhotoProcessor`, which refuses a type that is not allowed.
-  5. Writes the display image and the thumbnail to `IPhotoStore` under a random key that cannot
-     be guessed (L2-051 AC2): `popkins/{popkinId}/{random}.jpg` and the same key ending
-     `-thumbnail.jpg`.
+  5. Writes the display image, the thumbnail and the original to `IPhotoStore` under a random
+     key that cannot be guessed (L2-051 AC2): `popkins/{popkinId}/{random}.jpg` and the same key
+     ending `-thumbnail.jpg` and `-original.jpg`.
   6. Inserts the `Photo` and saves.
 
   When the save fails, the handler deletes the files it wrote. On success it pushes
@@ -111,10 +113,10 @@ from 180 characters.
 - **`IPhotoProcessor`** — in `Popkin.Application.Abstractions`, implemented in Infrastructure by
   `MagickPhotoProcessor` on Magick.NET, the library that already makes avatars. It reads the
   type from the file's bytes and refuses anything but JPEG, PNG, WebP or HEIC; HEIC is decoded
-  by the same library. It reads the capture time, then makes two JPEG files at quality 85,
-  turned upright, with all metadata removed (L2-031 AC6) and never enlarged: the display image,
-  longest edge 2048 px, and the thumbnail, longest edge 480 px. The file the member chose is
-  not kept.
+  by the same library. It reads the capture time, then makes three JPEG files at quality 85,
+  turned upright, with all metadata removed (L2-031 AC6) and never enlarged: the original, at
+  the size it was added, the display image, longest edge 2048 px, and the thumbnail, longest
+  edge 480 px. The file the member chose is not kept. A photo of a message is stored the same way.
 - **`IPhotoStore`** — `PutAsync`, `DeleteAsync` and `GetReadUrlAsync`, as settled by
   [Join a Popkin](../../invitations/join-popkin/README.md): a read address is signed by
   `PhotoUrlSigner`, expires after one hour and is not tied to a session. In Development the
@@ -122,7 +124,8 @@ from 180 characters.
   (L2-054 AC5); its provider is `<TO SUPPLY>`, and until it is chosen no photo can be added
   outside Development.
 - **Domain** — `Photo` (`Id`, `PopkinId`, `UploaderMembershipId`, `Caption?`, `TakenAt`,
-  `AddedAt`, `StorageKey`, `ThumbnailKey`, `Width`, `Height`, `ContentType`). `TakenAt` is the
+  `AddedAt`, `StorageKey`, `ThumbnailKey`, `OriginalKey?`, `Width`, `Height`, `ContentType`;
+  `OriginalKey` is null for a photo stored before journey 14). `TakenAt` is the
   capture time, EXIF `DateTimeOriginal` with `OffsetTimeOriginal` (a time without an offset is
   read as UTC), or `AddedAt` when the file has none. A capture time later than `AddedAt` is a
   camera clock that is wrong, so `TakenAt` is then `AddedAt`. `IAppDbContext` gains
@@ -135,9 +138,8 @@ from 180 characters.
 ### Open questions
 
 - Photo store provider for a deployed system: `<TO SUPPLY>` (known gap 9).
-- "Save photo" (journey 14) will save the display image, at most 2048 px, because the file the
-  member chose is not kept. Whether L2-036 AC1 needs the photo at the size it was added:
-  `<TO SUPPLY>`.
+"Save photo" needs the photo at the size it was added (L2-036 AC1): settled in journey 14 by
+storing the original beside the display image and the thumbnail.
 
 Settled while building: the rate limit on uploads (60 per person per minute), the message when
 more than 20 files are chosen, the imaging library (Magick.NET, with HEIC), and the sizes and

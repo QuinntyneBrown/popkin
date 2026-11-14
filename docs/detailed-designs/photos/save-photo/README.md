@@ -112,13 +112,19 @@ is read-only.
 
 - **`PhotosController`** — gains `GET …/download` and `DELETE …/{photoId}`.
 - **`GetPhotoDownloadQuery` / `GetPhotoDownloadQueryHandler`** — introduced. It checks membership
-  through `IMembershipGuard`, loads the `Photo` with the read guard of `GET …/photos/{photoId}`,
-  and asks `IPhotoStore.GetDownloadUrl(StorageKey, fileName)` for an attachment address. The
-  address lives for `PhotoUrlSigner`'s lifetime, one hour; `expiresAt` says when. `IPhotoStore`
-  already has `GetDownloadUrl`, used by the album's zip.
-- **`DeletePhotoCommand` / `DeletePhotoCommandHandler`** — introduced. It checks membership,
-  refuses a wrapped-up Popkin, and calls `Photo.CanBeDeletedBy(membership)`. In one unit of work
-  it takes these steps:
+  through `IMembershipGuard`, loads the `Photo` scoped to the Popkin, and asks
+  `IPhotoStore.GetDownloadUrl` for an attachment address of the original.
+
+  The original is a third stored file of each upload, album and chat alike: a JPEG at the size it
+  was added, turned upright and re-encoded without location or device data (L2-031 AC6), under
+  the photo's key ending `-original.jpg` (`Photo.OriginalKey`). A photo stored before journey 14
+  has none and is saved as its display image. The file is named
+  `popkin-photo-{yyyyMMdd-HHmm}.jpg` from `TakenAt` in UTC, and the address lives as long as any
+  signed address, one hour (`PhotoUrlSigner.Lifetime`). Deleting a photo and removing an album
+  that was not kept delete the original with the other files.
+- **`DeletePhotoCommand` / `DeletePhotoCommandHandler`** — introduced. It checks membership and
+  calls `Photo.CanBeDeletedBy(membership)`, which allows the uploader and the Host. In one unit of
+  work it takes these steps:
   1. Deletes the photo's `PhotoReaction` and `PhotoComment` rows.
   2. Sets `PhotoRemoved = true` and `PhotoId = null` on every `Message` that carried it.
   3. Deletes the `Photo`.
@@ -142,7 +148,6 @@ is read-only.
 - Mocks for the photo actions, the delete confirmation, failures and "Photo removed":
   `<TO SUPPLY>`.
 - Whether photos may be deleted after the Popkin wraps up: `<TO SUPPLY>`. L2-045 lists no delete.
-- File name of a saved photo and lifetime of the download address: `<TO SUPPLY>`.
 - Cleanup of files whose deletion failed, for example by a `Popkin.Worker` job: `<TO SUPPLY>`.
 - How an open thread learns its message lost its photo: decided (journey 14) — no message event is reused; `PhotoDeleted(popkinId, photoId)` goes to the photo's audience (the Popkin, or a direct message's two members) and the client marks the message whose `photo.id` it names `photoRemoved`, as the next read of the thread gives.
 

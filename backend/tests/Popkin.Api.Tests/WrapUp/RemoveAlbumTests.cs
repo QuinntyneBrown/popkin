@@ -28,7 +28,8 @@ public sealed class RemoveAlbumTests
         await lakeside.Host.AddedPhotoAsync(lakeside.Id, TestPhotos.WithLocation(MagickFormat.Jpeg, 400, 300));
         await lakeside.Host.AddedPhotoAsync(lakeside.Id, TestPhotos.WithLocation(MagickFormat.Jpeg, 300, 400));
         var experience = await lakeside.Host.SharedExperienceAsync(lakeside.Id, "Bonfire", picture: TestPhotos.WithLocation(MagickFormat.Jpeg, 200, 200));
-        var filesBeforeTheAlbum = AlbumFiles(api) - 4;
+        // Three files for each of the two photos.
+        var filesBeforeTheAlbum = AlbumFiles(api) - 6;
         await lakeside.Host.WrappedUpAsync(lakeside.Id, keepPhotos: false);
         (await lakeside.Host.PostAsync($"/api/popkins/{lakeside.Id}/recap/album-exports", null)).EnsureSuccessStatusCode();
         await api.SendAsync(new PrepareAlbumExportsCommand());

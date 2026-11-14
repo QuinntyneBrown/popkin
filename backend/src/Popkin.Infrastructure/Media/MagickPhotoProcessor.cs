@@ -38,11 +38,12 @@ public sealed class MagickPhotoProcessor : IPhotoProcessor
             var capturedAt = CaptureTime.Parse(
                 exif?.GetValue(ExifTag.DateTimeOriginal)?.Value, exif?.GetValue(ExifTag.OffsetTimeOriginal)?.Value);
             image.AutoOrient();
-            // The display image first, then the thumbnail from it: each step only makes it smaller.
+            // The size it was added first, then the display image, then the thumbnail from it: each step only makes it smaller.
+            var original = Rendition(image, uint.MaxValue);
             var display = Rendition(image, IPhotoProcessor.DisplaySide);
             var (width, height) = ((int)image.Width, (int)image.Height);
             var thumbnail = Rendition(image, IPhotoProcessor.ThumbnailSide);
-            return new ProcessedAlbumPhoto(display, thumbnail, width, height, capturedAt);
+            return new ProcessedAlbumPhoto(display, thumbnail, width, height, capturedAt, original);
         }
         catch (MagickException)
         {
