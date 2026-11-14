@@ -1,0 +1,23 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 3, "lines": ["Plans change after a Popkin starts. Now the Host can change it too."] },
+    { "id": "menu", "bars": 5, "lines": ["Mara hosts Lakeside Weekend. In Popkin settings she has four choices: edit the name and look, change how long it lasts, invite people, and wrap up."] },
+    { "id": "edit", "bars": 7, "lines": ["The weekend is running long. She renames it Lakeside Long Weekend, picks the party popper and plum.", "She saves, and the home shows the new name and colour at once."] },
+    { "id": "invalid", "bars": 3, "lines": ["Clear the name, and the field asks you to give your Popkin a name."] },
+    { "id": "length", "bars": 7, "lines": ["How long should it last? The weekend is chosen, so she picks Until a date: Monday at six.", "The time left now reads two days, six hours."] },
+    { "id": "live", "bars": 6, "lines": ["And everyone sees it. On another member's screen, the name, the colour and the time left change without a reload."] },
+    { "id": "banner", "bars": 4, "lines": ["In the last hour, the Host's Change on the banner opens the same choice."] },
+    { "id": "grow", "bars": 6, "lines": [
+      { "text": "On a phone, the dialog is a sheet from the bottom.", "at": 0 },
+      { "text": "On a bigger screen, it sits in the middle.", "at": 8 }
+    ] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: only the Host may change it, a wrapped-up Popkin can't be changed, and a late change never undoes a newer one.", "Still to come: the Popkin's own address."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey sixteen. Popkin is a free platform for pop-up communities."] }
+  ]
+}
