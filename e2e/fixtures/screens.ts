@@ -104,6 +104,7 @@ import { ScanToJoinDialog } from '../pages/scan-to-join.dialog';
 import { SignInPage } from '../pages/sign-in.page';
 import { PopkinCreatedPage } from '../pages/popkin-created.page';
 import { ServerErrorPage } from '../pages/server-error.page';
+import { JoinCodePage } from '../pages/join-code.page';
 import { SignUpPage } from '../pages/sign-up.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
 import { YourProfilePage } from '../pages/your-profile.page';
@@ -148,6 +149,12 @@ const portrait = path.join(__dirname, '../../docs/mocks/assets/images/call3.jpg'
 const profileRegions = (page: Page) => {
   const p = new YourProfilePage(page);
   return { topBar: p.topBar, heading: p.heading, photo: p.photo, field: p.nameField };
+};
+
+const joinCodePicture = (page: Page) => ({ picture: new JoinCodePage(page).picture });
+const joinCodeRegions = (page: Page) => {
+  const j = new JoinCodePage(page);
+  return { topBar: j.topBar, heading: j.heading, field: j.field };
 };
 
 const signUpRegions = (page: Page) => {
@@ -232,6 +239,12 @@ export const screenStates: ScreenState[] = [
     key: 'serverErrorWithReference',
     before: inviteFailsOnTheServer,
     regions: (page) => ({ emptyState: new ServerErrorPage(page).emptyState }),
+  },
+  {
+    key: 'joinCode',
+    before: asVisitor,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
   },
   {
     key: 'signUp',
