@@ -374,6 +374,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
+                    b.Property<Guid?>("PhotoId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("ReactionsVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("int");
@@ -393,6 +396,10 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PhotoId")
+                        .IsUnique()
+                        .HasFilter("[PhotoId] IS NOT NULL");
 
                     b.HasIndex("ReplyToMessageId");
 
@@ -494,6 +501,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<int>("Height")
                         .HasColumnType("int");
 
+                    b.Property<bool>("InAlbum")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("PopkinId")
                         .HasColumnType("uniqueidentifier");
 
@@ -504,6 +514,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("TakenAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ThreadId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ThumbnailKey")
                         .IsRequired()
