@@ -73,6 +73,15 @@ export const ICONS = {
     { path: 'M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2' },
   ],
   check: [{ path: 'M20 6 9 17l-5-5' }],
+  reply: [{ path: 'M20 18v-2a4 4 0 0 0-4-4H4' }, { path: 'm9 17-5-5 5-5' }],
+  'smile-plus': [
+    { path: 'M22 11v1a10 10 0 1 1-9-10' },
+    { path: 'M8 14s1.5 2 4 2 4-2 4-2' },
+    { line: [9, 9.01, 9, 9] },
+    { line: [15, 15.01, 9, 9] },
+    { path: 'M16 5h6' },
+    { path: 'M19 2v6' },
+  ],
   'check-circle': [{ circle: [12, 12, 10] }, { path: 'm9 12 2 2 4-4' }],
   message: [
     {
