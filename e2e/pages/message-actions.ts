@@ -63,9 +63,14 @@ export class MessageActions {
    * person's would, then lifts (L2-024 AC1).
    */
   async pressAndHold(message: Locator, opened: Locator): Promise<void> {
-    const bubble = message.locator('.bubble');
-    await bubble.dispatchEvent('pointerdown', { pointerType: 'touch', isPrimary: true, button: 0 });
+    // The thread behind an open dialog leaves the accessibility tree, so the finger lifts from
+    // the element it went down on.
+    const bubble = await message.locator('.bubble').elementHandle();
+    if (!bubble) throw new Error('The message has a bubble');
+    const touch = { pointerType: 'touch', isPrimary: true, button: 0 };
+    await bubble.dispatchEvent('pointerdown', touch);
     await opened.waitFor();
-    await bubble.dispatchEvent('pointerup', { pointerType: 'touch', isPrimary: true, button: 0 });
+    await bubble.dispatchEvent('pointerup', touch);
+    await bubble.dispose();
   }
 }

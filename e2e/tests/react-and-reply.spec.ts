@@ -60,7 +60,7 @@ test.describe('message actions (L2-024 AC1)', () => {
     const dialog = new ReactionsDialog(page);
 
     await new MessageActions(page).openByKeyboard(chat.message(ruths));
-    await expect(dialog.root).toBeVisible();
+    await expect(dialog.heading).toBeVisible();
     await page.keyboard.press('Escape');
 
     await expect(dialog.root).toHaveCount(0);
@@ -74,7 +74,7 @@ test.describe('message actions (L2-024 AC1)', () => {
     const chat = new GroupChatPage(page);
     const dialog = new ReactionsDialog(page);
 
-    await new MessageActions(page).pressAndHold(chat.message(ruths), dialog.root);
+    await new MessageActions(page).pressAndHold(chat.message(ruths), dialog.heading);
 
     await expect(dialog.quick).toHaveCount(5);
   });

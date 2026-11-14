@@ -150,8 +150,17 @@
                   [text]="row.text"
                   [time]="row.time"
                   [state]="row.state"
+                  [messageId]="row.id ?? undefined"
+                  [actionable]="actions.actionable(row)"
+                  [reactions]="row.reactions"
+                  [readOnly]="readOnly()"
+                  [quote]="row.quote"
+                  [marked]="!!row.id && row.id === store.marked()"
                   (retry)="retry(row)"
                   (discard)="discard(row)"
+                  (actions)="actions.open(row, accent())"
+                  (react)="actions.react(row, $event)"
+                  (goToQuote)="goToQuote($event)"
                 ></div>
               }
             }
@@ -168,6 +177,8 @@
         [label]="fieldLabel()"
         [closed]="readOnly() ? closedLine : undefined"
         [disabled]="state() === 'loading'"
+        [reply]="store.replyingTo()"
+        (cancelReply)="store.cancelReply()"
         (send)="send($event)"
       ></div>
     }

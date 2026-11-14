@@ -133,7 +133,7 @@ export class GroupChatPage {
 
   /** The text of every bubble, in the order shown. */
   texts(): Locator {
-    return this.messages.locator('.bubble');
+    return this.messages.locator('.bubble > p');
   }
 
   /** True when the bubble sits against the right edge of its row, as the member's own do. */
