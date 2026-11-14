@@ -43,6 +43,14 @@ public sealed class MessagesController(ISender sender) : ControllerBase
             : Ok(result.Message);
     }
 
+    /// <summary>Deletes the caller's own message for everyone in the thread (L2-024): 204.</summary>
+    [HttpDelete("{messageId:guid}")]
+    public async Task<IActionResult> Delete(Guid popkinId, Guid threadId, Guid messageId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeleteMessageCommand(popkinId, threadId, messageId), cancellationToken);
+        return NoContent();
+    }
+
     /// <summary>
     /// Adds the caller's reaction, the emoji URL-encoded in the path, and answers the message's
     /// whole summary; adding it again changes nothing (L2-024).

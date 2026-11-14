@@ -59,6 +59,13 @@ public sealed class Message
         Kind = MessageKind.System,
     };
 
-    /// <summary>Deletes the message. Deleting twice changes nothing.</summary>
-    public void Delete(DateTimeOffset now) => DeletedAt ??= now;
+    /// <summary>Deletes the message: its text is not kept. Deleting twice changes nothing.</summary>
+    public void Delete(DateTimeOffset now)
+    {
+        DeletedAt ??= now;
+        Text = "";
+    }
+
+    /// <summary>Only its author deletes a message (L2-024).</summary>
+    public bool CanBeDeletedBy(Membership membership) => AuthorMembershipId == membership.Id;
 }
