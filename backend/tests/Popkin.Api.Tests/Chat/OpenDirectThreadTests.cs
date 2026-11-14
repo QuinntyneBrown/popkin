@@ -36,7 +36,7 @@ public sealed class OpenDirectThreadTests
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var thread = await response.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal(
-            ["colour", "emoji", "endsAt", "hereNow", "id", "kind", "lastReadMessageId", "memberCount", "other", "popkinId", "popkinName", "presenceVersion", "readOnly", "unreadCount", "viewer"],
+            ["colour", "emoji", "endsAt", "hereNow", "id", "kind", "lastReadMessageId", "memberCount", "other", "popkinId", "popkinName", "popkinVersion", "presenceVersion", "readOnly", "unreadCount", "viewer"],
             thread.EnumerateObject().Select(p => p.Name).Order());
         Assert.NotEqual(await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id), thread.GetProperty("id").GetGuid());
         Assert.Equal(lakeside.Id, thread.GetProperty("popkinId").GetGuid());

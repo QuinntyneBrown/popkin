@@ -1,6 +1,7 @@
 using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
+using Popkin.Application.Popkins;
 
 namespace Popkin.Application.Abstractions;
 
@@ -43,6 +44,9 @@ public interface IPopkinNotifier
 
     /// <summary>The Popkin wrapped up. To every member of the Popkin with a connection open.</summary>
     Task PopkinWrappedUp(Guid popkinId);
+
+    /// <summary>The Host changed the Popkin's settings. To every member of the Popkin with a connection open.</summary>
+    Task PopkinChanged(Guid popkinId, PopkinDto popkin);
 
     /// <summary>Someone came onto the call. To the connections on the call.</summary>
     Task ParticipantJoined(Guid callId, CallParticipantDto participant);

@@ -1,9 +1,13 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PopkinHomeView } from '../../models/home';
 import { accentOf } from '../../models/popkin';
 import { membersLabel } from './home-text';
 import { POPKINS_API } from './popkins-api';
 import { timeLeft } from './time-left';
+import { applySettings } from './popkin-settings';
+import { PopkinSettingsView } from '../../models/popkin';
 import { photosGo, wrappedUpOn } from '../wrap-up/wrap-up-text';
 import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
 
@@ -16,6 +20,7 @@ import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
 export class PopkinFrame {
   private readonly popkins = inject(POPKINS_API);
   private readonly watch = inject(WrapUpWatch);
+  private readonly realtime = inject(POPKIN_REALTIME);
   private popkinId = '';
   private readonly popkin = signal<PopkinHomeView | null>(null);
 
@@ -57,10 +62,18 @@ export class PopkinFrame {
   });
   readonly photosRemoved = computed(() => !!this.popkin()?.photosRemovedAt);
 
+  constructor() {
+    this.realtime.popkinChanged$
+      .pipe(takeUntilDestroyed(inject(DestroyRef)))
+      .subscribe((change) => this.applySettings(change));
+  }
+
   open(popkinId: string): void {
     if (popkinId === this.popkinId && this.popkin()) return;
     this.popkinId = popkinId;
     this.popkin.set(null);
+    // The Host's changes reach the tabs too (L2-020 AC3, AC4).
+    this.realtime.start();
     this.popkins.getHome(popkinId).subscribe({
       next: (popkin) => {
         this.popkin.set(popkin);
@@ -69,6 +82,15 @@ export class PopkinFrame {
       },
       error: () => undefined,
     });
+  }
+
+  /** The Host's change of the Popkin's settings (L2-020 AC3, AC4). */
+  applySettings(change: PopkinSettingsView): void {
+    const held = this.popkin();
+    const changed = applySettings(held, change);
+    if (!changed || changed === held) return;
+    this.popkin.set(changed);
+    this.watch.look(changed.id, changed.endsAt);
   }
 
   dismissWarning(): void {

@@ -561,6 +561,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("LastActivityAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Length")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(40)

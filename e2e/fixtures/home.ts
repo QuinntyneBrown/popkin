@@ -84,6 +84,7 @@ export class Home {
     emoji: '🏕️',
     colour: 'Teal',
     status: 'Active' as 'Active' | 'WrappedUp',
+    length: 'TheWeekend' as string,
     endsAt: new Date(2026, 8, 13, 18, 0).toISOString() as string | null,
     wrappedUpAt: null as string | null,
     keepPhotos: true,
@@ -94,6 +95,7 @@ export class Home {
     viewerRole: 'Host' as 'Host' | 'Member',
     viewer: { membershipId: people.mara.membershipId, firstName: 'Mara' },
     unreadCount: 3,
+    version: 1,
   };
   /** The latest of the Everyone thread, oldest first; the API answers four at most. */
   latest: Line[] = [

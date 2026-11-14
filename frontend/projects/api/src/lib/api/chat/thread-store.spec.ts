@@ -1,3 +1,4 @@
+import { PopkinSettingsView } from '../../models/popkin';
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -55,6 +56,7 @@ const thread: ThreadView = {
   memberCount: 14,
   hereNow: 5,
   presenceVersion: 7,
+  popkinVersion: 3,
   readOnly: false,
   unreadCount: 3,
   lastReadMessageId: null,
@@ -235,6 +237,7 @@ describe('ThreadStore', () => {
     memberLeft$: new Subject<{ popkinId: string; membershipId: string }>(),
     reconnected$: new Subject<void>(),
     popkinWrappedUp$: new Subject<string>(),
+    popkinChanged$: new Subject<PopkinSettingsView>(),
     started: 0,
     start() {
       this.started++;
@@ -469,6 +472,44 @@ describe('ThreadStore', () => {
       chat.stored = range(1, 5);
       realtime.reconnected$.next();
       expect(store.newMessagesBelow()).toBe(true);
+    });
+  });
+
+  // L2-020 AC3, AC4: the header follows what the Host saves.
+  describe('the Host changes the Popkin', () => {
+    const change = (version: number, id = 'p'): PopkinSettingsView => ({
+      id,
+      name: 'Campfire Nights',
+      emoji: '🎉',
+      colour: 'Plum',
+      length: 'UntilDate',
+      endsAt: new Date(2026, 8, 14, 18, 0).toISOString(),
+      version,
+    });
+
+    it('shows a newer change in the header', () => {
+      store.open('p');
+
+      realtime.popkinChanged$.next(change(4));
+
+      expect(store.thread()).toMatchObject({
+        popkinName: 'Campfire Nights',
+        emoji: '🎉',
+        colour: 'Plum',
+        endsAt: change(4).endsAt,
+        popkinVersion: 4,
+      });
+    });
+
+    it.each([
+      ['no newer', change(3)],
+      ['of another Popkin', change(9, 'q')],
+    ])('drops a change %s', (_, dropped) => {
+      store.open('p');
+
+      realtime.popkinChanged$.next(dropped);
+
+      expect(store.thread()?.popkinName).toBe('Lakeside Weekend');
     });
   });
 

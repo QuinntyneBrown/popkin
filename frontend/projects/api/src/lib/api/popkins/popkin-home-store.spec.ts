@@ -11,6 +11,7 @@ import {
   PhotosSummaryView,
   PopkinHomeView,
 } from '../../models/home';
+import { PopkinSettingsView } from '../../models/popkin';
 import { CHAT_API } from '../chat/chat-api';
 import { EXPERIENCES_API } from '../experiences/experiences-api';
 import { PHOTOS_API } from '../photos/photos-api';
@@ -30,12 +31,14 @@ const home: PopkinHomeView = {
   keepPhotos: true,
   photosRemoveAt: null,
   photosRemovedAt: null,
+  length: 'TheWeekend',
   endsAt: new Date(2026, 8, 13, 18, 0).toISOString(),
   memberCount: 14,
   avatars: [avatar],
   viewerRole: 'Host',
   viewer: { membershipId: 'm-mara', firstName: 'Mara' },
   unreadCount: 3,
+  version: 1,
 };
 const mara: MemberView = {
   membershipId: 'm-mara',
@@ -107,6 +110,7 @@ describe('PopkinHomeStore', () => {
     photosAdded$: new Subject<{ popkinId: string; photoIds: string[] }>(),
     reconnected$: new Subject<void>(),
     popkinWrappedUp$: new Subject<string>(),
+    popkinChanged$: new Subject<PopkinSettingsView>(),
     started: 0,
     start() {
       this.started++;
@@ -393,5 +397,28 @@ describe('PopkinHomeStore', () => {
       realtime.photosAdded$.next({ popkinId: 'other', photoIds: ['x'] });
       expect(api.asked.photos).toBe(1);
     });
+  });
+
+  // L2-020 AC3, AC4: what the Host saves shows at once, for every member.
+  it('applies the Host’s newer change of the Popkin, and drops an older one', () => {
+    store.open('p');
+    const change = (version: number): PopkinSettingsView => ({
+      id: 'p',
+      name: 'Campfire Nights',
+      emoji: '🎉',
+      colour: 'Plum',
+      length: 'UntilDate',
+      endsAt: new Date(2026, 8, 14, 18, 0).toISOString(),
+      version,
+    });
+    realtime.popkinChanged$.next(change(1));
+    expect(store.popkin()?.name).toBe('Lakeside Weekend');
+
+    realtime.popkinChanged$.next(change(2));
+
+    expect(store.popkin()?.name).toBe('Campfire Nights');
+    expect(store.popkin()?.colour).toBe('Plum');
+    expect(store.timeLeftLine()).toBe('2 days 6 hrs left · Wraps up Mon, 6 pm');
+    expect(api.asked.home).toBe(1);
   });
 });

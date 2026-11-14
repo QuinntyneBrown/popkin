@@ -1,0 +1,35 @@
+<div
+  pk-dialog
+  heading="How long should it last?"
+  description="Everyone sees the new time left."
+  [accent]="data.accent"
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t change that.">{{ stillEnds }} Try again.</div>
+  }
+  <div
+    pk-choice-card
+    label="How long it lasts"
+    [options]="lengths"
+    [value]="length()"
+    (valueChange)="choose($event)"
+  ></div>
+  @if (length() === 'UntilDate') {
+    <button pk-date-button (click)="pickEnd()">{{ customEndText() }}</button>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="popkin"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="save()"
+  >
+    {{ busy() ? 'Saving…' : 'Save' }}
+  </button>
+  <button pk-button slot="footer" type="button" variant="quiet" [block]="true" (click)="cancel()">
+    Cancel
+  </button>
+</div>

@@ -4,6 +4,7 @@ using Popkin.Application.Abstractions;
 using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
+using Popkin.Application.Popkins;
 using Popkin.Application.Telemetry;
 
 namespace Popkin.Api.Hubs;
@@ -51,6 +52,9 @@ public sealed class SignalRPopkinNotifier(
 
     public Task PopkinWrappedUp(Guid popkinId) =>
         SendAsync(nameof(IPopkinClient.PopkinWrappedUp), () => Group(popkinId).PopkinWrappedUp(popkinId));
+
+    public Task PopkinChanged(Guid popkinId, PopkinDto popkin) =>
+        SendAsync(nameof(IPopkinClient.PopkinChanged), () => Group(popkinId).PopkinChanged(popkinId, popkin));
 
     public Task ParticipantJoined(Guid callId, CallParticipantDto participant) =>
         SendAsync(nameof(IPopkinClient.ParticipantJoined), () => Call(callId).ParticipantJoined(callId, participant));

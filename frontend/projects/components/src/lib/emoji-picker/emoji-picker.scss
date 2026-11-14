@@ -2,6 +2,13 @@
   display: block;
 }
 
+.field__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font: var(--text-label);
+  color: var(--color-fg-default);
+}
+
 .picker__heading {
   margin-top: var(--space-8);
   font: var(--text-label);
@@ -33,4 +40,8 @@
 .emoji-btn[aria-pressed='true'] {
   background: var(--color-bg-surface);
   box-shadow: 0 0 0 var(--border-width-ring) var(--accent-line);
+}
+
+.field__label + .emoji-grid {
+  margin-top: 0;
 }

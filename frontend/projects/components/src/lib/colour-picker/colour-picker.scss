@@ -2,6 +2,13 @@
   display: block;
 }
 
+.field__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font: var(--text-label);
+  color: var(--color-fg-default);
+}
+
 .picker__heading {
   margin-top: var(--space-8);
   font: var(--text-label);
@@ -36,4 +43,8 @@
   height: var(--space-3);
   border-radius: var(--radius-full);
   background: var(--color-fg-on-popkin);
+}
+
+.field__label + .swatches {
+  margin-top: 0;
 }

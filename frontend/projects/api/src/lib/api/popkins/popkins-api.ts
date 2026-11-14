@@ -3,7 +3,14 @@ import { Injectable, InjectionToken, inject } from '@angular/core';
 import { MyPopkinsView } from '../../models/my-popkins';
 import { Observable } from 'rxjs';
 import { MemberView, PopkinHomeView } from '../../models/home';
-import { CreatePopkinRequest, InviteView, PopkinCreatedView } from '../../models/popkin';
+import {
+  ChangeLengthRequest,
+  ChangeLookRequest,
+  CreatePopkinRequest,
+  InviteView,
+  PopkinCreatedView,
+  PopkinSettingsView,
+} from '../../models/popkin';
 import { WrapUpPreviewView, WrapUpResult } from '../../models/recap';
 
 /** Popkins (docs/detailed-designs/popkins). */
@@ -16,6 +23,10 @@ export interface PopkinsApi {
   getHome(popkinId: string): Observable<PopkinHomeView>;
   /** The members, the Host first. */
   getMembers(popkinId: string): Observable<MemberView[]>;
+  /** The Host changes the name, emoji and colour (L2-020 AC3). 403 `host_only`; 409 `popkin_wrapped_up`. */
+  changeLook(popkinId: string, request: ChangeLookRequest): Observable<PopkinSettingsView>;
+  /** The Host changes how long it lasts (L2-020 AC4). 403 `host_only`; 409 `popkin_wrapped_up`. */
+  changeLength(popkinId: string, request: ChangeLengthRequest): Observable<PopkinSettingsView>;
   /** What the wrap-up screen says of the recap to come. Host only: 403 `host_only`. */
   getWrapUpPreview(popkinId: string): Observable<WrapUpPreviewView>;
   /** Wraps the Popkin up (L2-043). 403 `host_only`; 409 `popkin_wrapped_up`. */
@@ -50,6 +61,20 @@ export class HttpPopkinsApi implements PopkinsApi {
 
   getMembers(popkinId: string): Observable<MemberView[]> {
     return this.http.get<MemberView[]>(`/api/popkins/${encodeURIComponent(popkinId)}/members`);
+  }
+
+  changeLook(popkinId: string, request: ChangeLookRequest): Observable<PopkinSettingsView> {
+    return this.http.patch<PopkinSettingsView>(
+      `/api/popkins/${encodeURIComponent(popkinId)}`,
+      request,
+    );
+  }
+
+  changeLength(popkinId: string, request: ChangeLengthRequest): Observable<PopkinSettingsView> {
+    return this.http.put<PopkinSettingsView>(
+      `/api/popkins/${encodeURIComponent(popkinId)}/length`,
+      request,
+    );
   }
 
   getWrapUpPreview(popkinId: string): Observable<WrapUpPreviewView> {

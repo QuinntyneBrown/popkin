@@ -47,6 +47,9 @@ export class PopkinHomePage {
   readonly chatTab: Locator;
   readonly unreadCount: Locator;
   readonly sidebarTimeLeft: Locator;
+  /** The Popkin's name and emoji in the sidebar, from 1024 px. */
+  readonly sidebarName: Locator;
+  readonly sidebarTile: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly identity: Locator;
   readonly inviteRegion: Locator;
@@ -111,6 +114,8 @@ export class PopkinHomePage {
     this.chatTab = this.nav.getByRole('link', { name: /^Chat/ });
     this.unreadCount = this.nav.locator('.badge [aria-hidden="true"]');
     this.sidebarTimeLeft = this.nav.locator('.time-left');
+    this.sidebarName = this.nav.locator('.popkin-nav__id-text strong');
+    this.sidebarTile = this.nav.locator('.popkin-nav__id .popkin-tile');
     this.identity = this.header.locator('.home-header__id');
     this.inviteRegion = this.actions.locator('.btn--secondary');
     this.stack = this.header.locator('.avatar-stack');

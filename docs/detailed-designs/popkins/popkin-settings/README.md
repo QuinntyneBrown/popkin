@@ -18,8 +18,11 @@ Popkin" lead to `invitations/invite-people`, the wrap-up screen (L2-043) and
 
 Journey 9, Wrap up, built the menu with the two rows it needed: "Invite people" for every
 member and "Wrap up" for the Host. Journey 18 added "Leave this Popkin", so a member's menu is
-whole. "Edit name and look" and "Change how long it lasts" are journey 16; nothing else of this
-design is built ([Built in journey 9](#built-in-journey-9), [Built in journey 18](#built-in-journey-18)).
+whole. Journey 16 added "Edit name and look" and "Change how long it lasts", so the Host's menu
+is whole too, and every member's open screens follow the change through `PopkinChanged`. The
+address of L2-066 is the one part not built: Popkin has no address yet
+([Built in journey 9](#built-in-journey-9), [Built in journey 18](#built-in-journey-18),
+[Built in journey 16](#built-in-journey-16)).
 
 A Popkin's address ([Choose the address](../choose-address/README.md)) is not part of its look.
 Renaming the Popkin leaves the address as it was, so printed QR codes and saved links keep
@@ -33,8 +36,8 @@ that cannot be edited, and no endpoint changes it.
 - `docs/mocks/dialogs/popkin-settings/default.html` (Host menu) and `member.html` (member menu),
   the whole menu.
 - `docs/mocks/dialogs/popkin-settings/host-now.html` and `member-now.html` — the menu as
-  journey 9 built it (`host-now.html` is still the Host's, until journey 16; a member's is
-  `member.html` from journey 18 on): "Invite people", with the hint "QR code and link", and, for the Host,
+  journey 9 built it (the Host's is `default.html` from journey 16 on, and a member's is
+  `member.html` from journey 18 on; `host-now.html` and `member-now.html` are kept as the record): "Invite people", with the hint "QR code and link", and, for the Host,
   "Wrap up", with the hint "End it now and send the recap".
 - `docs/mocks/dialogs/edit-popkin/default.html`, `busy.html` ("Saving…"), `invalid.html` ("Give
   your Popkin a name."), `failed.html` ("We couldn't save that. Your changes are still here. Try
@@ -144,6 +147,59 @@ that cannot be edited, and no endpoint changes it.
   ([Leave a Popkin](../leave-popkin/README.md)).
 - Playwright: the member's menu in `e2e/tests/popkin-settings.spec.ts`, and its row in the
   parity spec of `pk-menu-item`; the route `popkinSettingsMember` opens `member.html`.
+
+### Built in journey 16
+
+- **The length is stored.** `PopkinSpace.Length` (`PopkinLength`, saved as text) keeps the
+  length the Host chose, so "Change how long it lasts" opens with it chosen. `PopkinSpace.Start`
+  takes it, and the migration `AddPopkinLength` gives each existing Popkin `KeepItGoing` where
+  it has no end and `UntilDate` where it has one. `PopkinHomeDto` gains `length` and `version`.
+- **`PopkinInput`** (`Popkin.Application/Popkins/PopkinInput.cs`) holds the rules of L2-008 and
+  L2-009 that starting a Popkin and changing it share: `name_required`, `name_too_long`,
+  `emoji_not_allowed`, `colour_not_allowed`, `length_not_allowed` and `ends_at_out_of_range`.
+  `CreatePopkinCommandHandler` uses it too. It takes the place of the validators this design
+  named.
+- **`ChangePopkinLookCommand`** and **`ChangePopkinLengthCommand`**
+  (`Popkin.Application/Popkins/ChangePopkin.cs`), behind `PATCH /api/popkins/{popkinId}` and
+  `PUT /api/popkins/{popkinId}/length`. Each calls `IMembershipGuard.RequireHostAsync`: `404`
+  for a non-member, then `409` `popkin_wrapped_up`, then `403` `host_only`. Then
+  `PopkinSpace.ChangeLook` or `ChangeLength`, each of which raises `Version`. A save that meets
+  a wrap-up made at the same time answers `409` `popkin_wrapped_up` (the version is a
+  concurrency token). Both answer `PopkinDto` (`id`, `name`, `emoji`, `colour`, `length`,
+  `endsAt`, `version`) and send it as `PopkinChanged(popkinId, popkin)` to `popkin:{popkinId}`.
+  The command was named `UpdatePopkinLookCommand` here; it is `ChangePopkinLookCommand`, and
+  `PopkinsApi.updateLook` is `changeLook`.
+- **`PopkinChanged` is a state event with a version** (the shared real-time rules): a screen
+  applies it only when its version is higher than the one it holds, so a late event never
+  undoes a newer read. The Everyone thread's `ThreadDto` gains `popkinVersion` for the same
+  check. `applySettings` (`api/popkins/popkin-settings.ts`) holds the rule; `PopkinHomeStore`,
+  `PopkinFrame` (Photos, Experiences and the other screens in the frame) and `ThreadStore`
+  apply it, and the accent of the screen follows the colour.
+- **The menu.** The Host's rows are "Edit name and look" (hint "Name, emoji and colour") and
+  "Change how long it lasts" (hint "Wraps up Sun, 6 pm", or "No end date", from `lengthHint`),
+  then "Invite people" and "Wrap up". The route `popkinSettings` now opens `default.html`.
+- **`EditPopkinDialog`** — as designed, without the address. `pk-emoji-picker` and
+  `pk-colour-picker` gain a `label` input, which draws a field label in place of their heading,
+  as the mock does.
+- **`ChangeLengthDialog`** — as designed. The four options are `POPKIN_LENGTHS` (`api`), which
+  `HowLongPage` now shares. A failure says when it still wraps up, from `stillEnds`: "It still
+  wraps up Sunday at 6 pm.", or "It still keeps going.". Stacked over it, `EndDateDialog` is
+  labelled by `end-title` and `end-desc`: `pk-dialog` gains `titleId` and `descriptionId`, so
+  two open dialogs no longer share `dlg-title`.
+- **Focus.** Both dialogs give the focus back to the "Popkin settings" button that opened the
+  menu (L2-057 AC2).
+- **The banner of the last hour.** The Host's "Change" opens "Change how long it lasts" and is
+  named so: `pk-banner` gains `actionLabel`, the accessible name of its action (WCAG 2.5.3;
+  known gap 47, closed on the Popkin home).
+- Playwright: `e2e/tests/edit-popkin.spec.ts`, `change-length.spec.ts` and
+  `popkin-settings-live.spec.ts`, with `e2e/fixtures/settings.ts` and `settings-states.ts`, the
+  page objects `edit-popkin.dialog.ts` and `change-length.dialog.ts`, and the Host's "Change" in
+  `last-hour.spec.ts`. Parity: the states of both dialogs in `dialog.spec.ts`, the pickers'
+  `field` case and the choice card's `dialog` case. API tests: `EditPopkinLookTests` and
+  `ChangePopkinLengthTests`.
+- Not built: the address of L2-066 (AC1 to AC4), because Popkin has no address yet
+  ([Choose the address](../choose-address/README.md)); `address_cannot_change` and
+  `unknown_field` with it.
 
 The diagrams below were not redrawn (gap 53). They show the whole menu, four rows for the Host
 and two for any other member.

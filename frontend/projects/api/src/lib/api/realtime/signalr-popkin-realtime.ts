@@ -8,6 +8,7 @@ import {
 import { Observable, Subject } from 'rxjs';
 import { CallParticipantView, CallSignal } from '../../models/calls';
 import { MemberJoinedView, MessageView, ReactionSummary } from '../../models/chat';
+import { PopkinSettingsView } from '../../models/popkin';
 import { HUB_EVENTS, HUB_METHODS, HUB_URL, reconnectDelay } from './hub-events';
 import { PopkinRealtime, RealtimeState } from './popkin-realtime';
 
@@ -33,6 +34,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   private readonly left = new Subject<Of<'memberLeft$'>>();
   private readonly photos = new Subject<{ popkinId: string; photoIds: string[] }>();
   private readonly wrapped = new Subject<string>();
+  private readonly changed = new Subject<PopkinSettingsView>();
   private readonly back = new Subject<void>();
   private readonly callChange = new Subject<Of<'callChanged$'>>();
   private readonly callEnd = new Subject<Of<'callEnded$'>>();
@@ -53,6 +55,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   readonly memberLeft$ = this.left.asObservable();
   readonly photosAdded$ = this.photos.asObservable();
   readonly popkinWrappedUp$ = this.wrapped.asObservable();
+  readonly popkinChanged$ = this.changed.asObservable();
   readonly reconnected$ = this.back.asObservable();
   readonly callChanged$ = this.callChange.asObservable();
   readonly callEnded$ = this.callEnd.asObservable();
@@ -142,6 +145,9 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
         this.signals.next({ callId, fromMembershipId, signal }),
     );
     connection.on(HUB_EVENTS.popkinWrappedUp, (popkinId: string) => this.wrapped.next(popkinId));
+    connection.on(HUB_EVENTS.popkinChanged, (_popkinId: string, popkin: PopkinSettingsView) =>
+      this.changed.next(popkin),
+    );
     connection.onreconnecting(() => this.status.set('reconnecting'));
     connection.onreconnected(() => {
       this.connected();

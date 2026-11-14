@@ -47,6 +47,8 @@ export class Banner {
   readonly icon = input<IconName>();
   /** The words of the one action: "Join". None without it. */
   readonly action = input<string>();
+  /** The action's accessible name where its words say less: "Change how long it lasts". */
+  readonly actionLabel = input<string>();
   /** The route the action leads to. Without it the action is a button. */
   readonly actionLink = input<string | readonly unknown[]>();
   /** The action was chosen, where it is a button. */

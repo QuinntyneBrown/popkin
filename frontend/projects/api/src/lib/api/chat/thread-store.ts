@@ -139,6 +139,20 @@ export class ThreadStore {
       if (thread?.popkinId !== popkinId) return;
       this.header.set({ ...thread, memberCount: Math.max(1, thread.memberCount - 1) });
     });
+    // L2-020 AC3, AC4: the Host changed the Popkin's look or its end.
+    mine(this.realtime.popkinChanged$).subscribe((change) => {
+      const thread = this.header();
+      if (thread?.popkinId !== change.id || change.version <= thread.popkinVersion) return;
+      this.header.set({
+        ...thread,
+        popkinName: change.name,
+        emoji: change.emoji,
+        colour: change.colour,
+        endsAt: change.endsAt,
+        popkinVersion: change.version,
+      });
+      if (!thread.readOnly) this.watch.look(thread.popkinId, change.endsAt);
+    });
     mine(this.realtime.reconnected$).subscribe(() => this.catchUp());
     mine(this.outbox.sent$).subscribe((message) => {
       if (message.threadId !== this.header()?.id) return;

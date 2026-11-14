@@ -1,3 +1,6 @@
+import { ChangeLengthDialog } from '../../pages/change-length.dialog';
+import { settingsStates } from '../../fixtures/settings-states';
+import { EditPopkinDialog } from '../../pages/edit-popkin.dialog';
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { experienceStates } from '../../fixtures/experience-states';
 import { AddCommentDialog } from '../../pages/add-comment.dialog';
@@ -213,6 +216,23 @@ parity('dialog', [
     name: 'popkin-settings',
     region: (page) => new PopkinSettingsDialog(page).panel,
   },
+  // Edit name and look (journey 16): the focus starts in the name, as the mock's autofocus.
+  ...(['editPopkin', 'editPopkinBusy', 'editPopkinInvalid', 'editPopkinFailed'] as const).map(
+    (key) => ({
+      key,
+      ...settingsStates[key],
+      name: key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`),
+      region: (page: Page) => new EditPopkinDialog(page).panel,
+      prepare: (page: Page) => new EditPopkinDialog(page).name.focus(),
+    }),
+  ),
+  // Change how long it lasts (journey 16).
+  ...(['changeLength', 'changeLengthBusy', 'changeLengthFailed'] as const).map((key) => ({
+    key,
+    ...settingsStates[key],
+    name: key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`),
+    region: (page: Page) => new ChangeLengthDialog(page).panel,
+  })),
   // Sign out: the focus starts on "Stay signed in".
   {
     key: 'signOut',

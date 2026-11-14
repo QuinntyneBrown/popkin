@@ -6,16 +6,18 @@ export interface PopkinSettingsData {
   accent: string;
   /** The Popkin's name names the dialog. */
   name: string;
-  /** The Host may wrap it up; any other member may leave (L2-047 AC3). */
+  /** The Host may change it and wrap it up; any other member may leave (L2-047 AC3). */
   host: boolean;
+  /** When it wraps up, under "Change how long it lasts": "Wraps up Sun, 6 pm". */
+  lengthHint: string;
 }
 
-export type PopkinSetting = 'invite' | 'wrap-up' | 'leave';
+export type PopkinSetting = 'edit' | 'length' | 'invite' | 'wrap-up' | 'leave';
 
 /**
- * Popkin settings (L2-020 AC1, AC2): "Invite people" for every member, "Wrap up" for the Host
- * and "Leave this Popkin" for any other member. It closes with the one chosen. Journey 16 adds
- * the rest.
+ * Popkin settings (L2-020 AC1, AC2): "Edit name and look", "Change how long it lasts",
+ * "Invite people" and "Wrap up" for the Host; "Invite people" and "Leave this Popkin" for any
+ * other member. It closes with the one chosen.
  */
 @Component({
   selector: 'pk-popkin-settings-dialog',

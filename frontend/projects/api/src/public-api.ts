@@ -40,6 +40,7 @@ export * from './lib/api/popkins/time-left';
 export * from './lib/models/home';
 export * from './lib/api/popkins/home-text';
 export * from './lib/api/popkins/popkin-home-store';
+export * from './lib/api/popkins/popkin-settings';
 export * from './lib/api/photos/photos-api';
 export * from './lib/api/experiences/experiences-api';
 export * from './lib/api/experiences/experience-text';

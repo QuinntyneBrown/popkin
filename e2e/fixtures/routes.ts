@@ -167,8 +167,17 @@ export const routes = {
   },
   notFound: { app: '/no-such-screen', mock: 'pages/not-found/default.html' },
   // Journey 9, Wrap up.
-  popkinSettings: { app: home, mock: 'dialogs/popkin-settings/host-now.html' },
+  // The Host's whole menu from journey 16, Change Popkin settings.
+  popkinSettings: { app: home, mock: 'dialogs/popkin-settings/default.html' },
   popkinSettingsMember: { app: home, mock: 'dialogs/popkin-settings/member.html' },
+  // Journey 16, Change Popkin settings.
+  editPopkin: { app: home, mock: 'dialogs/edit-popkin/default.html' },
+  editPopkinBusy: { app: home, mock: 'dialogs/edit-popkin/busy.html' },
+  editPopkinInvalid: { app: home, mock: 'dialogs/edit-popkin/invalid.html' },
+  editPopkinFailed: { app: home, mock: 'dialogs/edit-popkin/failed.html' },
+  changeLength: { app: home, mock: 'dialogs/change-length/default.html' },
+  changeLengthBusy: { app: home, mock: 'dialogs/change-length/busy.html' },
+  changeLengthFailed: { app: home, mock: 'dialogs/change-length/failed.html' },
   leavePopkin: { app: home, mock: 'dialogs/leave-popkin/default.html' },
   leavePopkinBusy: { app: home, mock: 'dialogs/leave-popkin/busy.html' },
   leavePopkinFailed: { app: home, mock: 'dialogs/leave-popkin/failed.html' },

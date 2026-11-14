@@ -31,6 +31,8 @@ interface RecordedThread {
   memberCount: number;
   hereNow: number;
   presenceVersion: number;
+  /** Orders `PopkinChanged` (L2-020). */
+  popkinVersion: number;
   readOnly: boolean;
   unreadCount: number;
   lastReadMessageId: string | null;
@@ -279,6 +281,7 @@ export class Chat {
     memberCount: 14,
     hereNow: 5,
     presenceVersion: 1,
+    popkinVersion: 1,
     unreadCount: 0,
     lastReadMessageId: null,
     viewer: { membershipId: people.mara.membershipId, firstName: 'Mara' },
@@ -466,6 +469,11 @@ export class Chat {
   /** Someone else's message, stored and sent to the app over the hub. */
   async arrives(hub: Hub, added: ChatMessage): Promise<void> {
     this.messages.push(added);
+    // As the API counts it: a later read of the list includes it among the unread.
+    const fromOther = added.author.membershipId !== this.thread.viewer.membershipId;
+    if (added.threadId === threadId && added.kind === 'Member' && fromOther) {
+      this.thread.unreadCount += 1;
+    }
     await hub.push('MessageAdded', added);
   }
 

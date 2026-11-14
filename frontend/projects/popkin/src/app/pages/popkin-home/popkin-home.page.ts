@@ -1,4 +1,5 @@
 import { Dialog } from '@angular/cdk/dialog';
+import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,9 +16,11 @@ import {
   ErrorScreens,
   HomeSection,
   PopkinHomeStore,
+  PopkinSettingsView,
   UnreadTracker,
   accentOf,
   experiencesMeta,
+  lengthHint,
   memberName,
   membersLabel,
   messageTime,
@@ -49,6 +52,11 @@ import {
 } from '../../dialogs/popkin-settings/popkin-settings.dialog';
 import { InviteData, InviteDialog } from '../../dialogs/invite/invite.dialog';
 import { LeavePopkinData, LeavePopkinDialog } from '../../dialogs/leave-popkin/leave-popkin.dialog';
+import { EditPopkinData, EditPopkinDialog } from '../../dialogs/edit-popkin/edit-popkin.dialog';
+import {
+  ChangeLengthData,
+  ChangeLengthDialog,
+} from '../../dialogs/change-length/change-length.dialog';
 
 /** How many of what a section holds the home lists; the layout shows fewer on a narrow screen. */
 const MEMBERS_LISTED = 6;
@@ -98,6 +106,7 @@ export class PopkinHomePage {
   private readonly errors = inject(ErrorScreens);
   private readonly dialog = inject(Dialog);
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly popkin = this.store.popkin;
   protected readonly accent = computed(() => {
@@ -199,26 +208,79 @@ export class PopkinHomePage {
     });
   }
 
-  /**
-   * The Host's banner offers to change how long the Popkin lasts (L2-044 AC2). Until that
-   * dialog is built (journey 16), "Change" opens Popkin settings, where it will be.
-   */
+  /** The Host's banner of the last hour offers "Change how long it lasts" (L2-044 AC2). */
   protected readonly isHost = computed(() => this.popkin()?.viewerRole === 'Host');
 
-  /** "Popkin settings" (L2-020): what a member, or the Host, may do with the Popkin. */
+  /**
+   * "Popkin settings" (L2-020): what a member, or the Host, may do with the Popkin. The dialog a
+   * row opens gives the focus back to the button that opened the menu (L2-057 AC2).
+   */
   protected settings(): void {
     const popkin = this.popkin();
     if (!popkin) return;
+    const opener = this.document.activeElement as HTMLElement | null;
     const opened = this.dialog.open<PopkinSetting, PopkinSettingsData>(PopkinSettingsDialog, {
-      data: { accent: this.accent(), name: popkin.name, host: popkin.viewerRole === 'Host' },
+      data: {
+        accent: this.accent(),
+        name: popkin.name,
+        host: popkin.viewerRole === 'Host',
+        lengthHint: lengthHint(popkin.endsAt, new Date()),
+      },
       ariaLabelledBy: 'dlg-title',
       hasBackdrop: false,
       ariaModal: true,
     });
     opened.closed.subscribe((setting) => {
+      if (setting === 'edit') this.editLook(opener);
+      if (setting === 'length') this.changeLength(opener);
       if (setting === 'invite') this.invite();
       if (setting === 'wrap-up') void this.router.navigate(['/p', this.popkinId(), 'wrap-up']);
       if (setting === 'leave') this.leave(popkin.name);
+    });
+  }
+
+  /** "Edit name and look" (L2-020 AC3): what is saved shows on the home at once. */
+  private editLook(opener: HTMLElement | null): void {
+    const popkin = this.popkin();
+    if (!popkin) return;
+    const opened = this.dialog.open<PopkinSettingsView, EditPopkinData>(EditPopkinDialog, {
+      data: {
+        popkinId: this.popkinId(),
+        name: popkin.name,
+        emoji: popkin.emoji,
+        colour: popkin.colour,
+      },
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      autoFocus: '#pname',
+      restoreFocus: opener ?? true,
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((saved) => {
+      if (saved) this.store.applySettings(saved);
+    });
+  }
+
+  /** "Change how long it lasts" (L2-020 AC4): the time left on the home follows at once. */
+  protected changeLength(opener: HTMLElement | null = null): void {
+    const popkin = this.popkin();
+    if (!popkin) return;
+    const opened = this.dialog.open<PopkinSettingsView, ChangeLengthData>(ChangeLengthDialog, {
+      data: {
+        popkinId: this.popkinId(),
+        accent: this.accent(),
+        length: popkin.length,
+        endsAt: popkin.endsAt,
+      },
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      restoreFocus: opener ?? true,
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((saved) => {
+      if (saved) this.store.applySettings(saved);
     });
   }
 
