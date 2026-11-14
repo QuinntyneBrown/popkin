@@ -73,6 +73,8 @@ export interface MessageView {
   sentAt: string;
   /** Who chose each emoji, grouped by emoji in the order they were first chosen (L2-024). */
   reactions: ReactionSummary[];
+  /** Rises with every change to its reactions, so an older answer never wins. */
+  reactionsVersion: number;
   /** The message this one replies to; null when it replies to none (L2-025). */
   quote: QuoteView | null;
 }
@@ -81,6 +83,12 @@ export interface MessageView {
 export interface ReactionSummary {
   emoji: string;
   membershipIds: string[];
+}
+
+/** A message's reactions as they stand after a change, and the version of that change. */
+export interface MessageReactions {
+  version: number;
+  reactions: ReactionSummary[];
 }
 
 /** What a reply shows of the message it answers; a deleted one keeps only its id. */

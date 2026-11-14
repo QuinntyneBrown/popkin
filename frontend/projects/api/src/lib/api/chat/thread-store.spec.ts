@@ -8,6 +8,7 @@ import {
   MessagePageView,
   MessageView,
   PresenceView,
+  MessageReactions,
   ReactionSummary,
   ThreadView,
 } from '../../models/chat';
@@ -37,6 +38,7 @@ function message(n: number, author = 'Walt', extra: Partial<MessageView> = {}): 
     text: `message ${n}`,
     sentAt: new Date(2026, 8, 12, 9, 0, n).toISOString(),
     reactions: [],
+    reactionsVersion: 0,
     quote: null,
     ...extra,
   };
@@ -167,32 +169,29 @@ class FakeChat implements ChatApi {
   /** Each reaction asked for, as "+🥞 id-0001" or "-🥞 id-0001". */
   readonly reacted: string[] = [];
   /** The answer to the next reaction; by default what the server would hold. */
-  reactionAnswer: 'held' | 'fail' | Subject<ReactionSummary[]> = 'held';
+  reactionAnswer: 'held' | 'fail' | Subject<MessageReactions> = 'held';
 
-  react(_p: string, _t: string, messageId: string, emoji: string): Observable<ReactionSummary[]> {
+  react(_p: string, _t: string, messageId: string, emoji: string): Observable<MessageReactions> {
     return this.reaction('+', messageId, emoji);
   }
 
-  unreact(_p: string, _t: string, messageId: string, emoji: string): Observable<ReactionSummary[]> {
+  unreact(_p: string, _t: string, messageId: string, emoji: string): Observable<MessageReactions> {
     return this.reaction('-', messageId, emoji);
   }
 
-  private reaction(
-    how: '+' | '-',
-    messageId: string,
-    emoji: string,
-  ): Observable<ReactionSummary[]> {
+  private reaction(how: '+' | '-', messageId: string, emoji: string): Observable<MessageReactions> {
     this.reacted.push(`${how}${emoji} ${messageId}`);
     const answer = this.reactionAnswer;
     if (answer === 'fail') return throwError(() => new Error('down'));
     if (answer !== 'held') return answer;
     const stored = this.stored.find((m) => m.id === messageId);
-    if (!stored) return of([]);
+    if (!stored) return of({ version: 0, reactions: [] });
     const others = stored.reactions.find((r) => r.emoji === emoji)?.membershipIds ?? [];
     const ids = how === '+' ? [...new Set([...others, me])] : others.filter((id) => id !== me);
     const rest = stored.reactions.filter((r) => r.emoji !== emoji);
     stored.reactions = ids.length ? [...rest, { emoji, membershipIds: ids }] : rest;
-    return of(stored.reactions);
+    stored.reactionsVersion++;
+    return of({ version: stored.reactionsVersion, reactions: stored.reactions });
   }
 
   readonly deleted: string[] = [];
@@ -227,6 +226,7 @@ describe('ThreadStore', () => {
     reactionsChanged$: new Subject<{
       threadId: string;
       messageId: string;
+      version: number;
       reactions: ReactionSummary[];
     }>(),
     threadRead$: new Subject<string>(),
@@ -638,16 +638,19 @@ describe('ThreadStore', () => {
     });
 
     it('shows the member’s reaction at once, pressed, and keeps what the server answers (AC2)', () => {
-      const answer = new Subject<ReactionSummary[]>();
+      const answer = new Subject<MessageReactions>();
       chat.reactionAnswer = answer;
       store.toggleReaction('id-0001', '❤️');
       expect(chips()).toEqual(['🥞1', '❤️1*']);
       expect(chat.reacted).toEqual(['+❤️ id-0001']);
 
-      answer.next([
-        { emoji: '🥞', membershipIds: ['m-walt'] },
-        { emoji: '❤️', membershipIds: ['m-dev', me] },
-      ]);
+      answer.next({
+        version: 1,
+        reactions: [
+          { emoji: '🥞', membershipIds: ['m-walt'] },
+          { emoji: '❤️', membershipIds: ['m-dev', me] },
+        ],
+      });
       expect(chips()).toEqual(['🥞1', '❤️2*']);
     });
 
@@ -694,14 +697,53 @@ describe('ThreadStore', () => {
       realtime.reactionsChanged$.next({
         threadId: 't',
         messageId: 'id-0001',
+        version: 1,
         reactions: [{ emoji: '😂', membershipIds: ['m-dev', 'm-ruth'] }],
       });
       realtime.reactionsChanged$.next({
         threadId: 't-other',
         messageId: 'id-0001',
+        version: 2,
         reactions: [],
       });
       expect(chips()).toEqual(['😂2']);
+    });
+
+    it('never shows reactions older than those shown, whatever order they arrive in', () => {
+      const answer = new Subject<MessageReactions>();
+      chat.reactionAnswer = answer;
+      store.toggleReaction('id-0001', '❤️');
+      realtime.reactionsChanged$.next({
+        threadId: 't',
+        messageId: 'id-0001',
+        version: 3,
+        reactions: [{ emoji: '❤️', membershipIds: [me, 'm-dev'] }],
+      });
+      answer.next({ version: 2, reactions: [{ emoji: '❤️', membershipIds: [me] }] });
+      expect(chips()).toEqual(['❤️2*']);
+
+      realtime.reactionsChanged$.next({
+        threadId: 't',
+        messageId: 'id-0001',
+        version: 1,
+        reactions: [],
+      });
+      expect(chips()).toEqual(['❤️2*']);
+    });
+
+    it('does not put back old chips over newer ones when a reaction fails late', () => {
+      const answer = new Subject<MessageReactions>();
+      chat.reactionAnswer = answer;
+      store.failures$.subscribe(() => undefined);
+      store.toggleReaction('id-0001', '❤️');
+      realtime.reactionsChanged$.next({
+        threadId: 't',
+        messageId: 'id-0001',
+        version: 4,
+        reactions: [{ emoji: '🔥', membershipIds: ['m-dev'] }],
+      });
+      answer.error(new Error('down'));
+      expect(chips()).toEqual(['🔥1']);
     });
 
     it('does nothing in a Popkin that has wrapped up', () => {

@@ -78,8 +78,8 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
     );
     connection.on(
       HUB_EVENTS.reactionsChanged,
-      (threadId: string, messageId: string, reactions: ReactionSummary[]) =>
-        this.reactions.next({ threadId, messageId, reactions }),
+      (threadId: string, messageId: string, version: number, reactions: ReactionSummary[]) =>
+        this.reactions.next({ threadId, messageId, version, reactions }),
     );
     connection.on(HUB_EVENTS.threadRead, (threadId: string) => this.read.next(threadId));
     connection.on(

@@ -117,9 +117,11 @@ export class ThreadStore {
     mine(this.realtime.messageDeleted$).subscribe(({ threadId, messageId }) => {
       if (threadId === this.header()?.id) this.removeMessage(messageId);
     });
-    mine(this.realtime.reactionsChanged$).subscribe(({ threadId, messageId, reactions }) => {
-      if (threadId === this.header()?.id) this.setReactions(messageId, reactions);
-    });
+    mine(this.realtime.reactionsChanged$).subscribe(
+      ({ threadId, messageId, version, reactions }) => {
+        if (threadId === this.header()?.id) this.setReactions(messageId, reactions, version);
+      },
+    );
     mine(this.realtime.presenceChanged$).subscribe((presence) => {
       const thread = this.header();
       if (!thread || presence.popkinId !== thread.popkinId) return;
@@ -290,14 +292,18 @@ export class ThreadStore {
     const me = thread.viewer.membershipId;
     const before = message.reactions;
     const adding = !before.some((r) => r.emoji === emoji && r.membershipIds.includes(me));
-    this.setReactions(messageId, toggled(before, emoji, me, adding));
+    this.showReactions(messageId, toggled(before, emoji, me, adding));
     (adding ? this.chat.react : this.chat.unreact)
       .call(this.chat, thread.popkinId, thread.id, messageId, emoji)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (reactions) => this.setReactions(messageId, reactions),
+        next: ({ version, reactions }) => this.setReactions(messageId, reactions, version),
         error: () => {
-          this.setReactions(messageId, before);
+          // Put back what was there, unless the server has told of a newer change meanwhile.
+          const now = this.messages().find((shown) => shown.id === messageId);
+          if (now?.reactionsVersion === message.reactionsVersion) {
+            this.showReactions(messageId, before);
+          }
           this.failed.next({
             kind: 'reaction',
             retry: () => this.toggleReaction(messageId, emoji),
@@ -350,7 +356,19 @@ export class ThreadStore {
     if (this.reply()?.messageId === messageId) this.reply.set(null);
   }
 
-  private setReactions(messageId: string, reactions: ReactionSummary[]): void {
+  /** The server's reactions of a message, unless those shown are of a later change. */
+  private setReactions(messageId: string, reactions: ReactionSummary[], version: number): void {
+    this.messages.update((shown) =>
+      shown.map((message) =>
+        message.id === messageId && version > message.reactionsVersion
+          ? { ...message, reactions, reactionsVersion: version }
+          : message,
+      ),
+    );
+  }
+
+  /** The member's own change, shown before the server answers. */
+  private showReactions(messageId: string, reactions: ReactionSummary[]): void {
     this.messages.update((shown) =>
       shown.map((message) => (message.id === messageId ? { ...message, reactions } : message)),
     );

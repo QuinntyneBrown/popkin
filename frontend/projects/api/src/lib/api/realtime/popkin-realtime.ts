@@ -18,6 +18,7 @@ export interface PopkinRealtime {
   readonly reactionsChanged$: Observable<{
     threadId: string;
     messageId: string;
+    version: number;
     reactions: ReactionSummary[];
   }>;
   /** The member read this thread, here or on another device. */

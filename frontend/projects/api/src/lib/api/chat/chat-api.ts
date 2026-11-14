@@ -7,7 +7,7 @@ import {
   MessageView,
   PresenceView,
   ThreadView,
-  ReactionSummary,
+  MessageReactions,
 } from '../../models/chat';
 import { ChatPreviewView } from '../../models/home';
 
@@ -56,14 +56,14 @@ export interface ChatApi {
     threadId: string,
     messageId: string,
     emoji: string,
-  ): Observable<ReactionSummary[]>;
+  ): Observable<MessageReactions>;
   /** Removes the member's reaction with this emoji, if it is there, and answers the rest. */
   unreact(
     popkinId: string,
     threadId: string,
     messageId: string,
     emoji: string,
-  ): Observable<ReactionSummary[]>;
+  ): Observable<MessageReactions>;
   /** Deletes the member's own message for everyone. 403 `not_message_author`. */
   deleteMessage(popkinId: string, threadId: string, messageId: string): Observable<void>;
   /** Removes the member's own message of that name, if the server holds one. */
@@ -127,8 +127,8 @@ export class HttpChatApi implements ChatApi {
     threadId: string,
     messageId: string,
     emoji: string,
-  ): Observable<ReactionSummary[]> {
-    return this.http.put<ReactionSummary[]>(reaction(popkinId, threadId, messageId, emoji), null);
+  ): Observable<MessageReactions> {
+    return this.http.put<MessageReactions>(reaction(popkinId, threadId, messageId, emoji), null);
   }
 
   unreact(
@@ -136,8 +136,8 @@ export class HttpChatApi implements ChatApi {
     threadId: string,
     messageId: string,
     emoji: string,
-  ): Observable<ReactionSummary[]> {
-    return this.http.delete<ReactionSummary[]>(reaction(popkinId, threadId, messageId, emoji));
+  ): Observable<MessageReactions> {
+    return this.http.delete<MessageReactions>(reaction(popkinId, threadId, messageId, emoji));
   }
 
   deleteMessage(popkinId: string, threadId: string, messageId: string): Observable<void> {

@@ -54,6 +54,8 @@ export interface ChatMessage {
   sentAt: string;
   /** Who chose each emoji, in the order they were first chosen (L2-024). */
   reactions: { emoji: string; membershipIds: string[] }[];
+  /** Rises with every change to its reactions. */
+  reactionsVersion: number;
   /** The message it replies to (L2-025). */
   quote: {
     messageId: string;
@@ -113,6 +115,7 @@ export function message(
     text,
     sentAt: sentAt.toISOString(),
     reactions: [],
+    reactionsVersion: 0,
     quote: null,
     ...extra,
   };
@@ -367,7 +370,13 @@ export class Chat {
   /** Someone reacts, or takes a reaction back, and the app hears it over the hub (L2-024). */
   async reacts(hub: Hub, person: Person, target: ChatMessage, emoji: string): Promise<void> {
     toggle(target, emoji, person.membershipId);
-    await hub.push('ReactionsChanged', target.threadId, target.id, target.reactions);
+    await hub.push(
+      'ReactionsChanged',
+      target.threadId,
+      target.id,
+      target.reactionsVersion,
+      target.reactions,
+    );
   }
 
   /** Someone deletes their message elsewhere, and the app hears it over the hub. */
@@ -573,7 +582,9 @@ export class Chat {
       const target = held().find((m) => m.id === messageId);
       if (!target) return route.fulfill(asProblem(problem(404, 'message_not_found')));
       toggle(target, emoji, this.thread.viewer.membershipId, method === 'PUT');
-      return route.fulfill({ json: target.reactions });
+      return route.fulfill({
+        json: { version: target.reactionsVersion, reactions: target.reactions },
+      });
     }
     const one = /^messages\/([0-9a-f-]{36})$/.exec(what);
     if (one && method === 'DELETE') {
@@ -648,6 +659,7 @@ function toggle(target: ChatMessage, emoji: string, membershipId: string, adding
     target.reactions.push({ emoji, membershipIds: [membershipId] });
   }
   target.reactions = target.reactions.filter((r) => r.membershipIds.length > 0);
+  target.reactionsVersion++;
 }
 
 function asProblem(answer: { status: number; body?: unknown; headers?: Record<string, string> }) {
