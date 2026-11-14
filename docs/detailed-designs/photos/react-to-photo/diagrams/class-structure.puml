@@ -59,8 +59,8 @@ package "Popkin.Application" {
   class RemovePhotoReactionCommandHandler {
     +Handle(c: RemovePhotoReactionCommand): Task<IReadOnlyList<PhotoReactionDto>>
   }
-  class PhotoReactionValidator {
-    +AllowedEmoji: catalogue TO SUPPLY
+  class ReactionValidator <<chat>> {
+    +Require(emoji): the chat catalogue
   }
 }
 package "Popkin.Domain" {
@@ -80,7 +80,7 @@ PhotoViewPage ..> applyReactionToggle
 PhotoViewer --> "*" PhotoReactionView
 AddPhotoReactionCommandHandler ..> AddPhotoReactionCommand : handles
 RemovePhotoReactionCommandHandler ..> RemovePhotoReactionCommand : handles
-PhotoReactionValidator ..> AddPhotoReactionCommand : validates
+ReactionValidator ..> AddPhotoReactionCommand : validates the emoji
 AddPhotoReactionCommandHandler --> PhotoReaction : creates
 RemovePhotoReactionCommandHandler --> PhotoReaction : deletes
 Photo "1" *-- "*" PhotoReaction
