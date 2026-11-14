@@ -29,6 +29,11 @@ const recap = `${home}/recap`;
 // One the signed-in Host did not share: Ellie's idea, a beach day next summer.
 const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
 
+/** Where the suite serves the marketing site, a second application (ADR 0017). */
+export const MARKETING = 'http://localhost:4201';
+/** The app's address the marketing site is built with in development (`APP_URL`). */
+export const MARKETING_APP_URL = 'http://localhost:4200';
+
 export const routes = {
   account: { app: '/account', mock: 'pages/account/default.html' },
   accountLoading: { app: '/account', mock: 'pages/account/loading.html' },
@@ -42,6 +47,9 @@ export const routes = {
   deleteAccountConfirm: { app: '/account', mock: 'dialogs/delete-account/confirm.html' },
   deleteAccountBusy: { app: '/account', mock: 'dialogs/delete-account/busy.html' },
   landing: { app: '/', mock: 'pages/landing/default.html' },
+  // The marketing site (ADR 0017), a second application served on :4201.
+  marketingHome: { app: `${MARKETING}/`, mock: 'pages/marketing-home/default.html' },
+  marketingHomePlaying: { app: `${MARKETING}/`, mock: 'pages/marketing-home/playing.html' },
   welcome: { app: '/welcome', mock: 'pages/welcome/default.html' },
   signIn: { app: '/sign-in', mock: 'pages/sign-in/default.html' },
   signInInvalid: { app: '/sign-in', mock: 'pages/sign-in/invalid.html' },

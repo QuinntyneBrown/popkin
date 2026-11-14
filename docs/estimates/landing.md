@@ -3,3 +3,4 @@
 | Design | Effort | Complete |
 |---|---|---|
 | view-landing-page | 4 days | 100% |
+| marketing-site | 3 days | 100% |

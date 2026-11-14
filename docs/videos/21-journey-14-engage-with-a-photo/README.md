@@ -13,7 +13,7 @@ data. Photo actions, then "Delete this photo?", returns Mara to Photos with "Pho
 chat its message reads "Photo removed", and someone looking at it sees "This photo was removed".
 A wrapped-up Popkin keeps the reactions and comments, to read.
 
-- **Film:** [`20-journey-14-engage-with-a-photo.mp4`](20-journey-14-engage-with-a-photo.mp4),
+- **Film:** [`21-journey-14-engage-with-a-photo.mp4`](21-journey-14-engage-with-a-photo.mp4),
   1920×1080, 30 fps, 2 min 28 s. Captions: [`captions.vtt`](captions.vtt), not burned in.
 - **Voice:** Kokoro-82M (`af_heart`), run locally, from the same weights in `.cache/kokoro` as
   videos 01 to 19.
@@ -84,7 +84,7 @@ act the cuts are hard.
 From the repository root, with the app's dependencies installed (`README.md`):
 
 ```shell
-node tools/video-record/record.mjs docs/videos/20-journey-14-engage-with-a-photo
-.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/20-journey-14-engage-with-a-photo
-node tools/video-build/build.mjs docs/videos/20-journey-14-engage-with-a-photo --crf 23
+node tools/video-record/record.mjs docs/videos/21-journey-14-engage-with-a-photo
+.cache/video-venv/bin/python tools/video-audio/film_audio.py docs/videos/21-journey-14-engage-with-a-photo
+node tools/video-build/build.mjs docs/videos/21-journey-14-engage-with-a-photo --crf 23
 ```

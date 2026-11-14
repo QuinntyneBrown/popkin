@@ -178,6 +178,7 @@ Each design follows the source named below and marks the conflict in its own REA
 | Subsystem | Feature | L2 requirements |
 |-----------|---------|-----------------|
 | Landing | [View the landing page](landing/view-landing-page/README.md) | L2-001, L2-002, L2-061 |
+| Landing | [Marketing site](landing/marketing-site/README.md) | L2-079, L2-080, L2-081, L2-061 |
 | Accounts | [Sign up](accounts/sign-up/README.md) | L2-003 |
 | Accounts | [Confirm the code](accounts/confirm-code/README.md) | L2-004, L2-005 |
 | Accounts | [Sign in](accounts/sign-in/README.md) | L2-006 |

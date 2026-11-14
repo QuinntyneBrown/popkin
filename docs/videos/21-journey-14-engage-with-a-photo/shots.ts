@@ -12,13 +12,13 @@ import { PhotoViewPage } from '../../../e2e/pages/photo-view.page';
 import { detail, frame, shot, type Size, type Theme } from '../../../tools/video-record/shots';
 
 /**
- * The screenshots of video 20: journey 14, Engage with a photo, in the running app. Mara opens
+ * The screenshots of video 21: journey 14, Engage with a photo, in the running app. Mara opens
  * the dock photo of Lakeside Weekend in the photo view: they react, take a reaction back, choose
  * More reactions, see a failed reaction put back, comment in the Photo comments dialog on a phone
  * and in the side panel on a desktop, delete their own comment, save the photo and delete it.
  * The answers are those of `e2e/fixtures/photo-talk.ts`, `photos.ts` and `chat.ts`; the hub is
  * `e2e/fixtures/hub.ts` (ADR 0005, ADR 0010); no backend and no database ran. Not a test and not
- * a sweep: only `node tools/video-record/record.mjs docs/videos/20-journey-14-engage-with-a-photo`
+ * a sweep: only `node tools/video-record/record.mjs docs/videos/21-journey-14-engage-with-a-photo`
  * runs it.
  */
 

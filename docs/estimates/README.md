@@ -1,6 +1,6 @@
 # Estimates
 
-- Overall effort: 195 days
+- Overall effort: 198 days
 - Complete: 82%
 
 | Subsystem | Effort | Complete |
@@ -16,7 +16,7 @@
 | [calls](calls.md) | 13 days | 95% |
 | [experiences](experiences.md) | 17 days | 95% |
 | [wrap-up](wrap-up.md) | 14 days | 92% |
-| [landing](landing.md) | 4 days | 100% |
+| [landing](landing.md) | 7 days | 100% |
 
 ## Roadmap
 

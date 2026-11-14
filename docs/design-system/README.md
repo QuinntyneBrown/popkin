@@ -66,6 +66,7 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Idea cards](components/uses.html) | Data display | One card per Popkin colour. | Static (both themes) | pages/landing/default |
 | [Comparison table](components/compare.html) | Data display | Group chat beside Popkin. | Static (both themes) | pages/landing/default |
 | [Closing band](components/cta-band.html) | Layout | Heading, paragraph and the white button on coral. | Static (both themes) | pages/landing/default |
+| [Film](components/film.html) | Media | The pitch film: a still with a play button and its length, the film with its controls, and its chapters. | Static (both themes) | pages/marketing-home/default, pages/marketing-home/playing |
 | [Welcome](components/welcome.html) | Layout | Picture in the column (phone). Picture in the brand aside (from 768px). | Static (both themes) | pages/welcome/default |
 | [Action pair](components/action-pair.html) | Actions | Stacked. Side by side. | Static (both themes) | pages/welcome/default |
 | [Dialog and sheet](components/dialog.html) | Overlays | Confirmation: danger and a safe default. Form. | Default, Busy, Invalid, Failed | dialogs/invite/default, dialogs/leave-popkin/default, dialogs/edit-popkin/invalid |

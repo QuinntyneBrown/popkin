@@ -73,7 +73,9 @@ dialog, the dialogs of an experience (Share an experience, Add a comment, its ac
 deletion), the Popkin settings dialog (Edit name and look, Change how long it lasts, Invite people and
 Wrap up for the Host, and Invite people and Leave this Popkin for any other member), the Edit name
 and look and Change how long it lasts dialogs, the Leave Popkin dialog, the Sign out and Delete account dialogs, and the
-not-found, server-error and offline screens; the `components` library holds the `pk-*`
+not-found, server-error and offline screens; the marketing site (`frontend/projects/marketing`,
+ADR 0017) is one static page with the landing page's sections and the pitch film "Meet Popkin" in
+`pk-film`, linking to the app through `APP_URL`; the `components` library holds the `pk-*`
 components they use, `pk-keen-panel`, `pk-react-bar` and `pk-stage-button` among them, the blocks of the landing page (`pk-site-nav`, `pk-site-main`,
 `pk-site-footer`, `pk-hero`, `pk-band`, `pk-steps`, `pk-uses`, `pk-compare`, `pk-cta-band`) and
 of the welcome screen (`pk-welcome`, `pk-action-pair`, `pk-mark-picture`) and the parts of the
@@ -120,7 +122,7 @@ say so and propose the correction; do not work around it silently.
 ## Repository layout
 
 - `backend/` — .NET solution
-- `frontend/` — Angular workspace (`popkin`, `api`, `components`)
+- `frontend/` — Angular workspace (`popkin`, `marketing`, `api`, `components`)
 - `e2e/` — Playwright suite
 - `docs/assets/` — the logo and other images the docs share
 - `docs/mocks/` — static design reference (the source of truth for the UI)
@@ -175,6 +177,7 @@ popkin/
 │       │   ├── dialogs/               CDK dialogs
 │       │   ├── guards/
 │       │   └── toasts/
+│       ├── marketing/src/app/         the marketing site: one static page, no router, no API (ADR 0017)
 │       ├── api/src/lib/               service contracts, implementations, view models, helpers
 │       │   ├── api/
 │       │   └── models/
@@ -250,9 +253,11 @@ codebase's shape.
 
 ## Frontend architecture
 
-Workspace has three projects under `frontend/projects/`: `popkin` (the app), `api` (service
-contracts, implementations, view models, pure helpers) and `components` (`pk-*` UI atoms, the
-design system). A further application is added by its own ADR (ADR 0002).
+Workspace has four projects under `frontend/projects/`: `popkin` (the app), `marketing` (the
+marketing site, ADR 0017), `api` (service contracts, implementations, view models, pure helpers)
+and `components` (`pk-*` UI atoms, the design system). A further application is added by its own
+ADR (ADR 0002). The marketing site is static: one root that composes `pk-*` components, its copy
+in `content.ts`, every link to the app built from `APP_URL`, and no request to the API.
 
 ### Conventions enforced across the codebase
 
