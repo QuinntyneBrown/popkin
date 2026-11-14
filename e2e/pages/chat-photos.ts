@@ -35,9 +35,9 @@ export class ChatPhotos {
     await (await chooser).setFiles(file);
   }
 
-  /** The button that opens the photo a message carries. */
+  /** The link that opens the photo a message carries full screen. */
   photo(message: Locator): Locator {
-    return message.getByRole('button', { name: /^Open (your photo|photo from )/ });
+    return message.getByRole('link', { name: /^Open (your photo|photo from )/ });
   }
 
   /** The picture itself, named by its alt text. */
