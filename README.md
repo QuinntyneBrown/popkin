@@ -133,6 +133,10 @@ A deployed API also needs `Auth:CodeHashKey` (the key codes are hashed with), `I
 (the address invite links start with) and `App:Origin` (the web app's origin). Every setting, the
 proxy and the release steps are in [`docs/deployment.md`](docs/deployment.md).
 
+Every commit to `main` that passes CI is deployed to Azure by the `Deploy` workflow
+([ADR 0018](docs/adr/0018-deploy-to-azure-on-every-commit.md)): the app behind its proxy on
+Azure Container Apps, and the marketing site, separately, on an Azure Static Web App.
+
 ## Building and testing
 
 | What | Command | Where |
@@ -219,7 +223,7 @@ popkin/
 | [Architecture decisions](docs/adr/README.md) | The decisions that shape the code, one record each |
 | [AGENTS.md](AGENTS.md) | Repository layout, architecture rules and the required workflow |
 | [Detailed designs](docs/detailed-designs/README.md) | The shared architecture, the real-time rules, the known gaps and one design per feature |
-| [Deployment](docs/deployment.md) | The images, every setting, the proxy and a smoke test |
+| [Deployment](docs/deployment.md) | Azure, the images, every setting, the proxy, the release and a smoke test |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How a change is proposed, made and tested |
 
 ## Contributing

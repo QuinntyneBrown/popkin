@@ -1,0 +1,44 @@
+# The reverse proxy of ADR 0013, chosen by ADR 0018. TLS ends at the Container Apps ingress in
+# front of it, which also sends HTTP to HTTPS; Caddy listens on plain HTTP inside.
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+:8080 {
+	encode zstd gzip
+
+	# L2-054 AC1: HSTS on every response. The API's own UseHsts() never sees HTTPS behind the
+	# proxy, so the proxy adds it for the whole origin.
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	# The API and the hub, with WebSockets (Caddy upgrades them by itself). The Container Apps
+	# environment routes by host, so the API's own name is sent as Host.
+	@api path /api /api/* /hubs /hubs/*
+	handle @api {
+		reverse_proxy {$API_UPSTREAM} {
+			header_up Host {upstream_hostport}
+		}
+	}
+
+	# The web app's files, with the header set of Personal data protection.
+	handle {
+		root * /srv
+		header {
+			Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'"
+			X-Content-Type-Options nosniff
+			X-Frame-Options DENY
+			Referrer-Policy same-origin
+			Permissions-Policy "camera=(self), microphone=(self), geolocation=()"
+		}
+
+		# Hashed bundles never change; index.html and everything else is checked each time.
+		@hashed path_regexp -[A-Z0-9]{8}\.(js|css)$
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
+		header Cache-Control "no-cache"
+
+		try_files {path} /index.html
+		file_server
+	}
+}

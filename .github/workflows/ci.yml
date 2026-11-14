@@ -5,9 +5,14 @@ on:
     branches: [main]
   pull_request:
 
+# A newer push to a pull request cancels the older run; a run on main is never cancelled, since
+# it ends in a deployment (ADR 0018).
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
 
 jobs:
   backend:
@@ -80,3 +85,39 @@ jobs:
             e2e/playwright-report
             e2e/test-results
           retention-days: 7
+
+  images:
+    # ADR 0013: every pull request builds the images, and pushes none.
+    name: Build the images
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: backend
+          file: backend/src/Popkin.Api/Dockerfile
+          cache-from: type=gha,scope=popkin-api
+      - uses: docker/build-push-action@v7
+        with:
+          context: backend
+          file: backend/src/Popkin.Worker/Dockerfile
+          cache-from: type=gha,scope=popkin-worker
+      - uses: docker/build-push-action@v7
+        with:
+          context: frontend
+          file: infra/web/Dockerfile
+          build-contexts: web=infra/web
+          cache-from: type=gha,scope=popkin-web
+
+  deploy:
+    # ADR 0018: every commit to main that passes is deployed to Azure.
+    name: Deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [backend, frontend, e2e]
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
