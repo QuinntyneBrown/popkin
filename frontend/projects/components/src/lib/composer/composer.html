@@ -48,22 +48,25 @@
         [attr.maxlength]="maxLength()"
         [placeholder]="label()"
         [disabled]="disabled()"
+        [readOnly]="busy()"
         [value]="value()"
         (input)="value.set(field.value)"
         (keydown)="onKeydown($event)"
       ></textarea>
       <ng-content select="[slot=tools]" />
-      <button
-        #choose
-        pk-icon-button
-        class="composer__tool"
-        type="button"
-        icon="camera"
-        label="Photo"
-        [disabled]="disabled()"
-        (click)="openPicker()"
-      ></button>
-      <input #picker type="file" hidden [accept]="accept" (change)="onPicked(picker)" />
+      @if (photos()) {
+        <button
+          #choose
+          pk-icon-button
+          class="composer__tool"
+          type="button"
+          icon="camera"
+          label="Photo"
+          [disabled]="disabled()"
+          (click)="openPicker()"
+        ></button>
+        <input #picker type="file" hidden [accept]="accept" (change)="onPicked(picker)" />
+      }
     </div>
     <button
       pk-icon-button
@@ -71,7 +74,8 @@
       variant="send"
       icon="send"
       size="md"
-      label="Send"
+      [label]="sendLabel()"
+      [attr.aria-busy]="busy() ? 'true' : null"
       [disabled]="!canSend()"
     ></button>
   </form>

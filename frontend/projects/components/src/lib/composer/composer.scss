@@ -9,6 +9,15 @@
   background: var(--color-bg-canvas);
 }
 
+/* The field alone, inside a dialog or the photo view's side panel: no edge, fill or padding. */
+:host(.composer--inline) {
+  position: static;
+  z-index: auto;
+  padding: 0;
+  border-top: 0;
+  background: none;
+}
+
 /* The reply bar: an accent rule, "Replying to {first name}" and one line of the message. */
 .composer__reply {
   display: flex;
@@ -111,6 +120,8 @@
   border: 0;
   background: none;
   outline: none;
+  /* The field's own text colour, on its surface, wherever it sits: the dark stage too. */
+  color: var(--color-fg-default);
   font: var(--text-body);
   resize: none;
   overflow-y: auto;

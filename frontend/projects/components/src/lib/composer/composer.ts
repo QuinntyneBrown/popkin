@@ -41,6 +41,11 @@ export interface ComposerReply {
  *
  * With `closed` it is the closed form: no field and no Send, only the line that says why
  * nobody can post (L2-045 AC1).
+ *
+ * `inline` is the field alone, without the bar's edge, fill and padding: the field "Add a
+ * comment" of a photo's comments and of the photo view's side panel (L2-035). There `photos` is
+ * false (no "Photo"), `sendLabel` is "Post comment", and `busy` keeps the text while it posts:
+ * the field is read-only and the button is disabled and `aria-busy`.
  */
 @Component({
   selector: 'div[pk-composer]',
@@ -48,7 +53,7 @@ export interface ComposerReply {
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './composer.html',
   styleUrl: './composer.scss',
-  host: { class: 'composer' },
+  host: { class: 'composer', '[class.composer--inline]': 'inline()' },
 })
 export class Composer {
   readonly value = model('');
@@ -68,6 +73,14 @@ export class Composer {
   readonly photo = input<string | null>(null);
   /** Why the photo chosen was refused: "This file is 14 MB. Photos can be up to 10 MB." */
   readonly photoProblem = input<string | null>(null);
+  /** The field alone, inside another surface: a dialog or the photo view's side panel. */
+  readonly inline = input(false);
+  /** "Photo" in the field; false where a photo cannot be sent. */
+  readonly photos = input(true);
+  /** The name of the send button: "Send", "Post comment". */
+  readonly sendLabel = input('Send');
+  /** What was written is on its way: it stays, read-only, and cannot be sent again. */
+  readonly busy = input(false);
 
   /** The trimmed text to send. */
   readonly send = output<string>();
@@ -90,7 +103,7 @@ export class Composer {
   protected readonly accept = 'image/jpeg,image/png,image/webp,image/heic';
 
   protected readonly canSend = computed(
-    () => !this.disabled() && (this.value().trim() !== '' || this.photo() !== null),
+    () => !this.disabled() && !this.busy() && (this.value().trim() !== '' || this.photo() !== null),
   );
 
   /** "1,950 / 2,000" from `countFrom` characters on; empty before. */
