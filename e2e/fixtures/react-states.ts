@@ -74,6 +74,28 @@ export const reactStates = {
       await chat.message(lines.ellies).first().and(page.locator('.msg--marked')).waitFor();
     },
   },
-  groupChatDeletedQuote: { before: (page) => theMockChat(page) },
+  // Ellie deleted her message: it is gone, and Mara's reply quotes "Message deleted".
+  groupChatDeletedQuote: {
+    before: (page) =>
+      theMockChat(page, (chat) => {
+        const ellie = chat.messages.find((m) => m.text === lines.ellies);
+        if (!ellie) throw new Error('Ellie’s message is in the mock thread');
+        chat.messages = chat.messages
+          .filter((m) => m !== ellie)
+          .map((m) =>
+            m.quote?.messageId === ellie.id
+              ? {
+                  ...m,
+                  quote: {
+                    messageId: ellie.id,
+                    authorFirstName: null,
+                    snippet: null,
+                    deleted: true,
+                  },
+                }
+              : m,
+          );
+      }),
+  },
   groupChatReadOnly: wrapUpStates.groupChatReadOnly,
 } satisfies Partial<Record<RouteKey | 'groupChatReplying', ReactState>>;

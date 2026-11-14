@@ -1,4 +1,5 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Signal, inject, signal } from '@angular/core';
 import { MORE_REACTIONS, QUICK_REACTIONS } from 'api';
 import { DialogFrame, MenuItem, MenuList, Quote, ReactionGrid } from 'components';
@@ -23,7 +24,7 @@ export type MessageAction =
  */
 @Component({
   selector: 'pk-reactions-dialog',
-  imports: [DialogFrame, MenuItem, MenuList, Quote, ReactionGrid],
+  imports: [DialogFrame, MenuItem, MenuList, NgTemplateOutlet, Quote, ReactionGrid],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './reactions.dialog.html',
 })
