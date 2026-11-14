@@ -2,7 +2,7 @@ using Popkin.Domain;
 
 namespace Popkin.Application.Abstractions;
 
-/// <summary>Delivers a code over one channel. The SMS and email providers are `&lt;TO SUPPLY&gt;`.</summary>
+/// <summary>Delivers a code over one channel. Azure Communication Services sends both (ADR 0021).</summary>
 public interface ICodeSender
 {
     ContactChannel Channel { get; }

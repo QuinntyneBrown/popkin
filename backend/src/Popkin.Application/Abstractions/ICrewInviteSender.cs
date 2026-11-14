@@ -7,8 +7,8 @@ public sealed record CrewInviteMessage(string PopkinName, string HostFirstName, 
 
 /// <summary>
 /// Delivers the invite of a new Popkin to a member of an old one, over one channel, to the
-/// contact detail they sign in with (L2-046 AC5). The SMS and email providers are
-/// `&lt;TO SUPPLY&gt;`. Nothing it is given is ever logged (L2-054 AC3).
+/// contact detail they sign in with (L2-046 AC5). Azure Communication Services
+/// sends both channels (ADR 0021). Nothing it is given is ever logged (L2-054 AC3).
 /// </summary>
 public interface ICrewInviteSender
 {

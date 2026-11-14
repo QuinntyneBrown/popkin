@@ -72,9 +72,13 @@ requires (L2-006 AC2). The code-issuing command introduced here is shared with s
 - **Empty name** — "Enter a name so people know who you are.", the account mock's copy.
 - **Rate-limit copy** — the alert reads "That’s a lot of codes." with "Try again in N minutes."
   from `retryAfterSeconds`.
-- **Providers** — still `<TO SUPPLY>`. In Development `DevelopmentCodeSender` writes the code to
-  the log (never the destination); elsewhere, until a provider is configured,
-  `UnconfiguredCodeSender` fails every send with 503 `code_not_sent`. `Auth:DevelopmentCode`
+- **Providers** — Azure Communication Services
+  ([ADR 0021](../../../adr/0021-codes-and-invites-by-azure-communication-services.md)):
+  `EmailCodeSender` and `SmsCodeSender` hand the code to the service and throw
+  `CodeNotSentException` when it refuses. A channel is on when `Communication:Endpoint` and its
+  sender (`Communication:EmailSender`, `Communication:SmsSender`) are set. Otherwise, in
+  Development `DevelopmentCodeSender` writes the code to the log (never the destination), and
+  elsewhere `UnconfiguredCodeSender` fails every send with 503 `code_not_sent`. `Auth:DevelopmentCode`
   (Development only) makes every code the configured digits, so the API recorder can confirm a
   code it never sees; `eng/Start-E2eApi.ps1` sets it to 482913.
 - **Measurement** — a send that fails adds one to the counter `popkin.codes.send_failures`, with

@@ -143,7 +143,10 @@ Every endpoint answers `404` `popkin_not_found` to someone who is not a member (
   `SentAt`, unique on the pair. It is the record that an invite was sent, so a person is sent a
   Popkin's invite once however often the Host asks. An invite that could not be sent is not
   recorded, so it goes out when the Host asks again.
-- **`ICrewInviteSender`** — one per channel. `DevelopmentCrewInviteSender` sends nothing: it
+- **`ICrewInviteSender`** — one per channel. Where the channel's provider is configured,
+  `EmailCrewInviteSender` and `SmsCrewInviteSender` send it by Azure Communication Services
+  ([ADR 0021](../../../adr/0021-codes-and-invites-by-azure-communication-services.md)) and throw
+  `CrewInviteNotSentException` when the service refuses. Otherwise `DevelopmentCrewInviteSender` sends nothing: it
   writes one log line that names the channel. `UnconfiguredCrewInviteSender`, outside
   Development, throws `CrewInviteNotSentException`, so nothing is sent or recorded and the
   request is accepted all the same (known gap 51). No destination, link or name is logged
@@ -235,7 +238,8 @@ from the design as it first stood:
   kept a day. No limit on the zip's size was set.
 - Crew invites go to the contact detail a person signs in with. There is no in-app invitation.
   The `CrewInvites` table gives idempotency, and people already in the new Popkin are skipped.
-  No provider is chosen, so nothing real is sent anywhere (known gaps 1 and 51).
+  Since ADR 0021 an invite goes out by Azure Communication Services wherever the channel's
+  provider is configured (known gaps 1 and 51, closed).
 - The copy chosen in the build, not taken from the requirements: "Preparing the album…", "We
   couldn’t prepare the album" and "The photos are still there.", "Invites are on their way"
   and "Everyone from the last Popkin gets one.", "We couldn’t invite the crew" and "Share the

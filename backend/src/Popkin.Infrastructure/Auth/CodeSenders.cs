@@ -5,8 +5,8 @@ using Popkin.Domain;
 namespace Popkin.Infrastructure.Auth;
 
 /// <summary>
-/// Development only: writes the code to the log instead of sending it, because the SMS and
-/// email providers are `&lt;TO SUPPLY&gt;`. The destination is never logged (L2-054 AC3).
+/// Development only, where no Azure Communication Services sender is configured (ADR 0021):
+/// writes the code to the log instead of sending it. The destination is never logged (L2-054 AC3).
 /// </summary>
 public sealed class DevelopmentCodeSender(ContactChannel channel, ILogger<DevelopmentCodeSender> logger) : ICodeSender
 {
@@ -20,8 +20,8 @@ public sealed class DevelopmentCodeSender(ContactChannel channel, ILogger<Develo
 }
 
 /// <summary>
-/// Development only: says in the log that a crew invite was sent instead of sending it, because
-/// the SMS and email providers are `&lt;TO SUPPLY&gt;`. The destination, the link and the names
+/// Development only, where no Azure Communication Services sender is configured (ADR 0021): says
+/// in the log that a crew invite was not sent. The destination, the link and the names
 /// are never logged (L2-054 AC3).
 /// </summary>
 public sealed class DevelopmentCrewInviteSender(ContactChannel channel, ILogger<DevelopmentCrewInviteSender> logger) : ICrewInviteSender

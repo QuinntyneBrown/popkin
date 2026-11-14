@@ -21,6 +21,7 @@ in `infra/main.bicep`, in the same change.
 | The marketing site | Static Web App `swa-popkin-marketing` (Free) | Served at `popkin.community` and `www.popkin.community` through the front door; built with `https://app.popkin.community` as `APP_URL` |
 | The images | Container registry `popkin<suffix>` (Basic) | Tagged with the commit; pulled by `id-popkin` |
 | Logs | Log Analytics workspace `log-popkin` | The console log of every container |
+| Codes and crew invites | Communication Service `acs-popkin`, Email Communication Service `acs-popkin-email` | Email from `DoNotReply@popkin.community`, SMS from a toll-free number; `id-popkin` signs in with the role Communication and Email Service Owner ([ADR 0021](adr/0021-codes-and-invites-by-azure-communication-services.md), `infra/communication.bicep`) |
 
 All of it is in the resource group `rg-popkin`, in East US 2 but for the database, in Central US:
 East US 2 and East US take no new Azure SQL servers (`sqlLocation` in `infra/main.bicep`). To set up a new subscription or
@@ -52,6 +53,29 @@ A record. The certificates renew by themselves while those records stand. Should
 recreated, its name servers change: set the new ones at Namecheap (Domain List, Manage,
 Nameservers, Custom DNS); `az network dns zone show -g rg-popkin -n popkin.community --query nameServers`
 lists them.
+
+## Codes by email and SMS
+
+`infra/communication.bicep` declares both services, the email domain `popkin.community` with an
+Azure-managed domain beside it, and the records Azure checks the domain by: the ownership and SPF
+values in the apex's TXT record set and the two DKIM CNAMEs. Two steps are done by hand, once.
+
+1. **Check the domain for email.** After the first deploy that creates the records, start the
+   check:
+
+   ```bash
+   for t in Domain SPF DKIM DKIM2; do az communication email domain initiate-verification -g rg-popkin --email-service-name acs-popkin-email --domain-name popkin.community --verification-type $t; done
+   ```
+
+   When `az communication email domain show -g rg-popkin --email-service-name acs-popkin-email --domain-name popkin.community --query verificationStates`
+   reads `Verified` for all four, set `customEmailDomainVerified` to `true` in `infra/main.bicep`
+   and commit. Until then codes come from the Azure-managed domain, which sends few messages an
+   hour.
+2. **Buy and verify a toll-free number for SMS.** In the portal, `acs-popkin`, Phone numbers,
+   Get: a United States toll-free number with SMS. Submit its toll-free verification
+   (Regulatory documents); a number sends no text in the United States or Canada until it is
+   approved, which takes weeks. Then set `smsSender` in `infra/main.bicep` to the number as
+   `+1…` and commit. Until then a phone code answers 503 `code_not_sent`.
 
 ## Shape
 
@@ -94,16 +118,21 @@ lists them.
 | `MediaRelay:Urls` (a list: `MediaRelay:Urls:0`, `MediaRelay:Urls:1`, …) | API | A participant is handed no STUN or TURN server, so a group call connects only between browsers that reach each other directly, as on one machine or one network ([Group call](detailed-designs/calls/group-call/README.md)) |
 | `MediaRelay:Secret` | API | The servers of `MediaRelay:Urls` are handed out without a username or a credential, which a STUN server accepts and a TURN server refuses. It is the shared secret of the relay's TURN REST scheme (`use-auth-secret` and `static-auth-secret` in coturn): the API signs `{expiry}:{membershipId}` with HMAC-SHA1 and never calls the relay |
 | `MediaRelay:CredentialLifetime` | API | A TURN credential lives one hour (`01:00:00`); a value that is not a length of time stops the API at startup |
+| `Communication:Endpoint` | API | No code or crew invite is sent on either channel: outside Development every code request answers 503 `code_not_sent`; in Development the code is written to the log. The endpoint of `acs-popkin` ([ADR 0021](adr/0021-codes-and-invites-by-azure-communication-services.md)) |
+| `Communication:EmailSender` | API | Email codes and crew invites are not sent, as above. `DoNotReply@popkin.community` once the domain is checked |
+| `Communication:SmsSender` | API | Phone codes and crew invites are not sent, as above. The toll-free number, as `+1…` |
+| `Communication:ClientId` | API | The API signs in to Azure Communication Services with `DefaultAzureCredential` (`az login` on a developer's machine). The client ID of `id-popkin` |
 | `Proxy:KnownProxies`, `Proxy:KnownNetworks` (not built) | API | Every person shares the proxy's address and one allowance of 10 codes per 10 minutes, and the HTTPS redirect can loop ([Abuse limits](detailed-designs/security/abuse-limits/README.md)) |
 | `DataProtection:KeysPath` (not built) | API | The session cookie's keys die with the container, and every restart signs everyone out ([Sessions](detailed-designs/accounts/sessions/README.md)) |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` (not built) | API, Worker | Nothing is exported; the console log is all there is ([ADR 0012](adr/0012-opentelemetry.md)) |
 
-The SMS and email providers are not chosen: outside Development every code request answers 503
-`code_not_sent`. The photo store provider is not chosen either: outside Development a join with
+Codes and crew invites are sent by Azure Communication Services
+([ADR 0021](adr/0021-codes-and-invites-by-azure-communication-services.md)); a channel whose
+`Communication` settings are missing answers 503 `code_not_sent` outside Development. The photo store provider is not chosen either: outside Development a join with
 a photo fails, and a join without one works; the same holds for the album, where adding a photo
 fails. No setting was added for the album. Journey 9 added no setting either: outside
 Development an album export fails for want of a photo store, and "Pop up another with this crew"
-is accepted and sends no invite for want of an SMS or email provider. The Worker has no probe;
+is accepted and sends each invite on the channel its member signs in with. The Worker has no probe;
 its heartbeat is the gauge `popkin.wrap_up.last_tick` on the `Popkin` meter, which stops rising
 when it stops ticking, and `popkin.wrap_up.lateness` measures how long after its end date each
 Popkin was wrapped up ([ADR 0012](adr/0012-opentelemetry.md)). The media relay provider is not chosen either: any

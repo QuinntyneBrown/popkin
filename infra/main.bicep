@@ -8,6 +8,8 @@
 // - popkin.community (ADR 0020, domains.bicep): an Azure DNS zone and Azure Front Door, which
 //   serve the app at app.popkin.community and at every *.popkin.community address, and the
 //   marketing site at popkin.community and www.popkin.community.
+// - Azure Communication Services (ADR 0021, communication.bicep) sends the codes and crew
+//   invites by email and SMS.
 @description('The tag of the images to run: the commit being deployed.')
 param imageTag string
 
@@ -23,6 +25,12 @@ param location string = resourceGroup().location
 
 @description('The registered domain: the app at app.<domain> and *.<domain>, the marketing site at <domain> and www.<domain>.')
 param domain string = 'popkin.community'
+
+@description('Set once Azure has checked popkin.community for email (docs/deployment.md); codes are then sent from it.')
+param customEmailDomainVerified bool = false
+
+@description('The toll-free number SMS is sent from, as +1…, once its verification is approved; empty sends no text.')
+param smsSender string = ''
 
 @description('Azure SQL takes no new servers in some regions (East US 2 among them); the nearest that does.')
 param sqlLocation string = 'centralus'
@@ -112,6 +120,24 @@ resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
 // The app's own origin, on Front Door (ADR 0020). A Popkin's address, https://{address}.<domain>,
 // reaches the same app.
 var appOrigin = 'https://app.${domain}'
+module communication 'communication.bicep' = {
+  name: 'communication'
+  params: {
+    domain: domain
+    customEmailDomainVerified: customEmailDomainVerified
+    principalId: identity.properties.principalId
+  }
+}
+
+// ADR 0021: a channel without its sender stays unconfigured.
+var communicationEnv = concat(
+  [
+    { name: 'Communication__Endpoint', value: communication.outputs.endpoint }
+    { name: 'Communication__ClientId', value: identity.properties.clientId }
+    { name: 'Communication__EmailSender', value: communication.outputs.emailSender }
+  ],
+  empty(smsSender) ? [] : [{ name: 'Communication__SmsSender', value: smsSender }]
+)
 var connectionString = 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Database=${database.name};Authentication=Active Directory Managed Identity;User Id=${identity.properties.clientId};Encrypt=True;TrustServerCertificate=False;Connection Timeout=60'
 var databaseEnv = [
   { name: 'Database__Provider', value: 'SqlServer' }
@@ -170,7 +196,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
         {
           name: 'api'
           image: '${registry.properties.loginServer}/popkin-api:${imageTag}'
-          env: concat(databaseEnv, keyEnv, [
+          env: concat(databaseEnv, keyEnv, communicationEnv, [
             { name: 'App__Origin', value: appOrigin }
             { name: 'Invites__BaseUrl', value: '${appOrigin}/i' }
           ])

@@ -23,8 +23,8 @@ Popkin is one system of five containers:
 - **Photo store** — object storage for photo files. Provider: `<TO SUPPLY>`.
 
 External systems: an SMS provider and an email provider deliver six-digit codes, and a media
-relay (STUN/TURN) helps the browsers on a call reach each other. The SMS and email providers are
-`<TO SUPPLY>`. The media relay is any TURN server that takes shared-secret credentials, and a
+relay (STUN/TURN) helps the browsers on a call reach each other. Azure Communication Services is
+both the SMS and the email provider ([ADR 0021](../adr/0021-codes-and-invites-by-azure-communication-services.md)). The media relay is any TURN server that takes shared-secret credentials, and a
 call is a mesh of connections between browsers that Popkin's API signals and never carries
 ([ADR 0014](../adr/0014-calls-are-a-mesh.md)).
 
@@ -245,7 +245,7 @@ or design that settled it.
 
 | # | Open decision | Blocks | Settled by |
 |---|---|---|---|
-| 1 | SMS provider and email provider for the six-digit codes ([Sign up](accounts/sign-up/README.md)) | First deployment; journeys 1, 2 and 6 outside Development; the crew invites of journey 9, which are accepted and send nothing until a provider is chosen ([Recap](wrap-up/recap/README.md)) | |
+| 1 | SMS provider and email provider for the six-digit codes ([Sign up](accounts/sign-up/README.md)) | First deployment; journeys 1, 2 and 6 outside Development; the crew invites of journey 9, which are accepted and send nothing until a provider is chosen ([Recap](wrap-up/recap/README.md)) | [ADR 0021](../adr/0021-codes-and-invites-by-azure-communication-services.md): Azure Communication Services, email from `popkin.community` and SMS from a toll-free number. Phone codes wait for the number's verification. Closed |
 | 2 | Where `Auth:CodeHashKey` is stored and how it is rotated ([Personal data protection](security/personal-data-protection/README.md)) | First deployment | |
 | 3 | Reverse proxy product in front of the API ([ADR 0013](../adr/0013-deployment-shape.md)) | First deployment | |
 | 4 | Where the images run, where they are pushed and how a release is rolled back ([ADR 0013](../adr/0013-deployment-shape.md)) | First deployment | |
@@ -295,7 +295,7 @@ or design that settled it.
 | 48 | `dotnet format --verify-no-changes` reports whitespace in three files of `Popkin.Domain`: `Experience.cs`, `Membership.cs` and `Photo.cs`. They predate journey 9, which left them as they were | None; a formatting change of its own | |
 | 49 | The local API, on SQLite, stores a time to about 100 µs, because `AppDbContext` converts every `DateTimeOffset` to a sortable number there (`DateTimeOffsetToBinaryConverter`). A time read back can differ from the one written by less than that; SQL Server and the tests' InMemory provider keep it whole. Found in journey 9, which compares `EndsAt`, `WrappedUpAt` and `ExpiresAt` with the clock | None; local runs and recordings only | |
 | 50 | A timed wrap-up reaches an open screen late. The Worker wraps the Popkin up within a minute of its end, on a tick of 30 seconds, and the web app's clock check reads within 30 seconds after that: about a minute and a half after the end; 90 seconds, measured by hand. L2-044 AC4 asks for no reload and names no time. A device whose clock is behind is late by as much more ([ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md), [Time is up](wrap-up/time-is-up/README.md)) | None; a tighter time needs a record that supersedes ADR 0015 | |
-| 51 | A crew invite is delivered to nobody. In Development the sender writes one log line and sends nothing; outside Development no provider is configured, so nothing is sent and nothing is recorded as sent. The request is accepted with `202` either way, and the Host reads "Invites are on their way" ([Recap](wrap-up/recap/README.md)) | First deployment; with gap 1 | |
+| 51 | A crew invite is delivered to nobody. In Development the sender writes one log line and sends nothing; outside Development no provider is configured, so nothing is sent and nothing is recorded as sent. The request is accepted with `202` either way, and the Host reads "Invites are on their way" ([Recap](wrap-up/recap/README.md)) | First deployment; with gap 1 | [ADR 0021](../adr/0021-codes-and-invites-by-azure-communication-services.md): a crew invite goes out by Azure Communication Services on the channel its member signs in with. Closed |
 | 52 | A wrapped-up Popkin cannot be left, and nothing says whether it should be: Popkin settings opens from the home, and the home of a wrapped-up Popkin opens its recap ([Read-only Popkin](wrap-up/read-only-popkin/README.md), [Leave a Popkin](popkins/leave-popkin/README.md)) | Journey 18 | |
 | 53 | The diagrams of the four designs of Wrap up and of [Popkin settings](popkins/popkin-settings/README.md) were not redrawn after journey 9. They show `CurrentPopkinStore`, `TimeLeftClock`, `activePopkinGuard` and `wrappedUpInterceptor`, a backplane between the Worker and the hub, validator and exception classes, `album_not_kept`, and a settings menu of four rows; each design says so above its diagrams | None | |
 | 54 | Safety, Privacy and Help in the landing page's footer link to `/safety`, `/privacy` and `/help`, which have no screen, no requirement and no mock. Each shows the not-found screen ([View the landing page](landing/view-landing-page/README.md)) | First deployment: a public page that links to nothing; each needs a requirement and a mock first | |

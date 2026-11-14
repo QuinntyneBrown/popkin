@@ -1,6 +1,10 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Azure.Communication.Email;
+using Azure.Communication.Sms;
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -85,9 +89,39 @@ public static class DependencyInjection
         services.AddSingleton<IMediaRelayCredentials>(sp => new TurnCredentialIssuer(
             relayUrls, configuration["MediaRelay:Secret"], relayLifetime, sp.GetRequiredService<TimeProvider>()));
 
+        // Azure Communication Services sends codes and crew invites (ADR 0021). A channel is on
+        // when the endpoint and its sender are set; otherwise it falls back below.
+        var communicationEndpoint = configuration["Communication:Endpoint"];
+        var emailSender = configuration["Communication:EmailSender"];
+        var smsSender = configuration["Communication:SmsSender"];
+        TokenCredential? communicationCredential = null;
+        if (communicationEndpoint is { Length: > 0 })
+        {
+            communicationCredential = configuration["Communication:ClientId"] is { Length: > 0 } clientId
+                ? new ManagedIdentityCredential(ManagedIdentityId.FromUserAssignedClientId(clientId))
+                : new DefaultAzureCredential();
+        }
+
         foreach (var channel in Enum.GetValues<ContactChannel>())
         {
-            if (development)
+            var sender = channel == ContactChannel.Email ? emailSender : smsSender;
+            if (communicationCredential is not null && sender is { Length: > 0 })
+            {
+                var endpoint = new Uri(communicationEndpoint!);
+                if (channel == ContactChannel.Email)
+                {
+                    var client = new EmailClient(endpoint, communicationCredential);
+                    services.AddSingleton<ICodeSender>(new EmailCodeSender(client, sender));
+                    services.AddSingleton<ICrewInviteSender>(new EmailCrewInviteSender(client, sender));
+                }
+                else
+                {
+                    var client = new SmsClient(endpoint, communicationCredential);
+                    services.AddSingleton<ICodeSender>(new SmsCodeSender(client, sender));
+                    services.AddSingleton<ICrewInviteSender>(new SmsCrewInviteSender(client, sender));
+                }
+            }
+            else if (development)
             {
                 services.AddSingleton<ICodeSender>(sp => new DevelopmentCodeSender(channel, sp.GetRequiredService<ILogger<DevelopmentCodeSender>>()));
                 services.AddSingleton<ICrewInviteSender>(

@@ -31,6 +31,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0018](0018-deploy-to-azure-on-every-commit.md) | Every commit to main is deployed to Azure: Container Apps behind Caddy, Azure SQL, the marketing site on a Static Web App | Accepted |
 | [0019](0019-popkin-may-charge.md) | Popkin may charge one day: no claim that it is free; no advertising stays | Accepted |
 | [0020](0020-popkin-community-on-front-door.md) | popkin.community: an Azure DNS zone and Azure Front Door with managed certificates; the app at `app` and `*`, the marketing site at the apex and `www` | Accepted |
+| [0021](0021-codes-and-invites-by-azure-communication-services.md) | Codes and crew invites are sent by Azure Communication Services: SMS from a toll-free number, email from `popkin.community`, signed in with the managed identity | Accepted |
 
 ## Format
 
