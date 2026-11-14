@@ -27,8 +27,8 @@ instead" and "Scan a QR code instead".
 - `docs/mocks/dialogs/scan-to-join/denied.html` — "Popkin can't use your camera", "Allow the
   camera for Popkin in your browser's site settings, or type the code instead.", "Type the code
   instead", "Try the camera again".
-- `docs/mocks/pages/join-code/default.html` — "Got a code?", "Invite code or link", hint "It
-  looks like popk.in/lakeside.", "Find my Popkin", "Scan a QR code instead".
+- `docs/mocks/pages/join-code/default.html` — "Got a code?", "Invite code or link", hint "The
+  code is the last part of your invite link.", "Find my Popkin", "Scan a QR code instead".
 - `docs/mocks/pages/join-code/invalid.html` — "We can't find a Popkin with that code."
 - `docs/mocks/pages/join-code/submitting.html` — "Finding your Popkin…".
 - `docs/mocks/pages/join-code/blank.html` — "Find my Popkin" with nothing typed: the field marked
@@ -56,7 +56,7 @@ The scanner calls no endpoint: it opens the invite link on the Popkin's address,
 
 - **`ScanToJoinDialog`** (`dialogs/scan-to-join/scan-to-join.dialog.ts`, built in journey 6) —
   CDK dialog in `pk-dialog`, opened from My Popkins, by the "Scan to join" button of its top bar
-  and of its empty state; `JoinCodePage` will open it too. It provides `ScanToJoin`. The camera
+  and of its empty state, and by "Scan a QR code instead" on `JoinCodePage`. It provides `ScanToJoin`. The camera
   view and frame are `pk-scanner`, the `scanner` block of the mock
   (`docs/design-system/components/scanner.html`); when its video is ready the dialog starts the
   scan on it. States:
@@ -72,7 +72,7 @@ The scanner calls no endpoint: it opens the invite link on the Popkin's address,
     as a full page load when it is on an address; that arrives when addresses are built.
   Closing by Escape, "Close" or the backdrop stops every camera track and returns focus to the
   opener. "Type the code instead" closes the dialog and goes to `/join`, the screen of
-  journey 15; until that journey the link reaches the not-found screen.
+  journey 15.
 - **`ScanToJoin`** (`api` library, `invites/scan-to-join.ts`, with unit tests) — one per dialog.
   Its `state` is `starting`, `scanning`, `invalid`, `found` or `denied`, and `code` holds the
   invite code that was found. `retry()` goes back to waiting for the camera; `stop()` stops it,
@@ -87,8 +87,8 @@ The scanner calls no endpoint: it opens the invite link on the Popkin's address,
   loaded only when it is needed. Frames are decoded on the device and never sent anywhere.
 - **`JoinCodePage`** (`pages/join-code/join-code.page.ts`, route `/join`,
   `data-page="join-code"`, public) — composes `pk-top-bar`, `pk-text-field` "Invite code or
-  link" with its hint, `pk-button` "Find my Popkin" and `pk-link` "Scan a QR code instead"
-  (opens `ScanToJoinDialog`) (L2-015 AC5). "Find my Popkin":
+  link" with its hint, `pk-button` "Find my Popkin" and a quiet `pk-button` "Scan a QR code
+  instead" (opens `ScanToJoinDialog`) (L2-015 AC5). "Find my Popkin":
   - parses the text with `parseInviteInput`; text that yields no code is shown as not found;
   - reads "Finding your Popkin…" and is disabled while the lookup runs (L2-056 AC3);
   - sends the address with the lookup when the text carried one, so a code pasted on another
@@ -97,8 +97,11 @@ The scanner calls no endpoint: it opens the invite link on the Popkin's address,
     load (L2-065 AC6);
   - on `404` marks the field `aria-invalid` with "We can't find a Popkin with that code." and
     keeps what was typed (L2-015 AC6);
-  - on `429` says when the person may try again (L2-053 AC4); the copy is `<TO SUPPLY>`.
-  What a blank submit shows is `<TO SUPPLY>`; the design sends nothing for it.
+  - on `429` shows "That’s a lot of tries." with when the person may try again, "Try again in
+    9 minutes." (L2-053 AC4);
+  - on any other failure shows "We couldn’t look that up." and keeps what was typed.
+  A blank submit sends nothing and marks the field with "Type the code or paste the link from
+  your invite."
 - **`parseInviteInput` as built in journey 6** (`invites/invite-input.ts`, with unit tests) —
   `parseInviteInput(text, origin)` returns the invite code, or `null`. It accepts a bare code
   and an invite link of the app itself, `{origin}/i/{code}`, with or without the scheme, and
@@ -112,7 +115,7 @@ The scanner calls no endpoint: it opens the invite link on the Popkin's address,
   (L2-065 AC6). It returns `null` for any other host or path, for a host more than one label deep,
   for a label `addressProblem` refuses, and for a code outside the invite alphabet. The short
   form `popk.in/{code}` is no longer accepted: L2-065 replaced it before any link was given out.
-  The hint "It looks like popk.in/lakeside." needs new copy in the mock, `<TO SUPPLY>`.
+  The mock's hint reads "The code is the last part of your invite link." since journey 15.
 - **`InvitesApi.getPreview(code, address?)`** — shared with `invitations/preview-invite`.
 
 ### Backend
@@ -121,6 +124,26 @@ The scanner calls no endpoint: it opens the invite link on the Popkin's address,
   `invitations/preview-invite`. The `invite-codes` policy counts every lookup from one client
   address, typed or opened by link, and refuses the 21st within 10 minutes with `429` and
   `Retry-After` (L2-053 AC3), which bounds guessing of codes.
+
+### Built in journey 15
+
+- **`JoinCode`** (`api` library, `invites/join-code.ts`, with unit tests) — one per screen. Its
+  `state` is `idle`, `blank`, `finding`, `found`, `not-found`, `limited` or `failed`; `code` holds
+  the invite code found and `tryAgain` the time to wait ("Try again in 9 minutes.", from
+  `retryAfterSeconds`). `find(text)` sends nothing while a lookup runs, nothing for blank text and
+  nothing for text that holds no code; `edit()` takes the mark of `blank` and `not-found` away
+  when the text changes, and leaves a refusal for the rate until the next try is answered.
+- **`JoinCodePage`** at `/join` (public) — split from 768 px with the photograph beside it, the
+  field focused on open, the field `readonly` and the button busy while the lookup runs, the
+  alert of a refusal or a failure above the field. A match opens `/i/{code}` in the app, where
+  the invite preview of journey 2 goes on.
+- Reached from "Join with a code" on the welcome screen and from "Type the code instead" in
+  Scan to join; "Scan a QR code instead" opens that dialog.
+- **Not built**, because a Popkin's address is not built
+  ([Choose the address](../../popkins/choose-address/README.md)): sending the address with the
+  lookup (L2-065 AC4), loading `InviteUrl` on the address as a full page load and accepting a
+  link on an address (L2-065 AC6). `parseInviteInput` accepts a bare code and `{origin}/i/{code}`.
+- No backend change: the `invite-codes` rate limit and the preview existed.
 
 ## Requirements
 
