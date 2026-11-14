@@ -1,0 +1,33 @@
+<div
+  pk-dialog
+  heading="Delete this photo?"
+  description="It will be removed from Photos and from chat for everyone."
+  [accent]="data.accent"
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t delete this photo.">It’s still here. Try again.</div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="delete()"
+  >
+    {{ busy() ? 'Deleting…' : 'Delete photo' }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="secondary"
+    cdkFocusInitial
+    [block]="true"
+    (click)="keep()"
+  >
+    Cancel
+  </button>
+</div>

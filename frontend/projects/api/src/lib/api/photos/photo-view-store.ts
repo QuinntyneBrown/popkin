@@ -101,7 +101,6 @@ export class PhotoViewStore {
       next: ({ url }) => {
         const link = this.document.createElement('a');
         link.href = url;
-        link.download = '';
         link.rel = 'noopener';
         link.click();
         this.saving.set(false);

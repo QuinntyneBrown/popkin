@@ -83,6 +83,11 @@ export class PhotoAlbumPage {
     this.albumSkeleton = this.album.locator('[aria-hidden="true"]').first();
   }
 
+  /** The thumbnail that opens this photo, by its address. */
+  thumbnailOf(photoId: string): Locator {
+    return this.thumbnails.and(this.album.locator(`a[href$="/photos/${photoId}"]`));
+  }
+
   thumbnail(name: string): Locator {
     return this.album.getByRole('link', { name, exact: true }).first();
   }

@@ -1,0 +1,9 @@
+<div pk-dialog heading="More reactions" [accent]="data.accent">
+  <div
+    pk-reaction-grid
+    label="More reactions"
+    [options]="more"
+    [pressed]="data.pressed"
+    (react)="react($event)"
+  ></div>
+</div>

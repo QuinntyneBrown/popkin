@@ -40,6 +40,11 @@ export class ChatPhotos {
     return message.getByRole('link', { name: /^Open (your photo|photo from )/ });
   }
 
+  /** "Photo removed", in place of a photo deleted since it was sent (L2-036 AC3). */
+  removed(message: Locator): Locator {
+    return message.getByText('Photo removed', { exact: true });
+  }
+
   /** The picture itself, named by its alt text. */
   image(message: Locator): Locator {
     return this.photo(message).getByRole('img');
