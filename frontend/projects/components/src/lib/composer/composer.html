@@ -17,6 +17,26 @@
       ></button>
     </div>
   }
+  @if (photoProblem(); as problem) {
+    <div pk-alert class="composer__alert" action="Dismiss" (acted)="onDismissPhotoProblem()">
+      {{ problem }}
+    </div>
+  }
+  @if (photo(); as preview) {
+    <div class="composer__photo">
+      <img [src]="preview" alt="Photo to send" />
+      <button
+        pk-icon-button
+        class="composer__remove"
+        type="button"
+        variant="card"
+        icon="close"
+        size="md"
+        label="Remove photo"
+        (click)="onRemovePhoto()"
+      ></button>
+    </div>
+  }
   <form class="composer__row" (submit)="submit($event)">
     <ng-content select="[slot=start]" />
     <div class="composer__field">
@@ -33,6 +53,16 @@
         (keydown)="onKeydown($event)"
       ></textarea>
       <ng-content select="[slot=tools]" />
+      <button
+        #choose
+        pk-icon-button
+        type="button"
+        icon="camera"
+        label="Photo"
+        [disabled]="disabled()"
+        (click)="openPicker()"
+      ></button>
+      <input #picker type="file" hidden [accept]="accept" (change)="onPicked(picker)" />
     </div>
     <button
       pk-icon-button

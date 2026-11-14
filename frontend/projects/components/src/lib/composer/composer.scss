@@ -44,6 +44,32 @@
   display: block;
 }
 
+/* The photo preview: the chosen photo waits above the field until Send (L2-026 AC1). */
+.composer__photo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.composer__photo img {
+  width: var(--space-28);
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+}
+
+/* "Remove photo", beside the photo's top corner. */
+.composer__remove {
+  margin-top: calc(-1 * var(--space-1));
+}
+
+/* A refused photo: why, in the album's words, with Dismiss; nothing is previewed (L2-031 AC2). */
+.composer__alert {
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
 .composer__row {
   display: flex;
   align-items: center;
