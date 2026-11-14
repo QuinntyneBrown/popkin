@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Router } from '@angular/router';
 import {
   NewPopkinDraft,
+  POPKIN_LENGTHS,
   POPKINS_API,
   PopkinLength,
   accentOf,
@@ -42,17 +43,7 @@ export class HowLongPage {
 
   protected readonly draft = this.store.draft;
   protected readonly accent = computed(() => accentOf(this.draft().colour));
-  protected readonly lengths: ChoiceOption<PopkinLength>[] = [
-    { value: 'JustToday', icon: '☀️', title: 'Just today', sub: 'Wraps up at midnight' },
-    { value: 'TheWeekend', icon: '⛺', title: 'The weekend', sub: 'Wraps up Sunday, 6 pm' },
-    { value: 'UntilDate', icon: '📅', title: 'Until a date', sub: 'You pick when it ends' },
-    {
-      value: 'KeepItGoing',
-      icon: '🌱',
-      title: 'Keep it going',
-      sub: 'No end date. Wrap up whenever.',
-    },
-  ];
+  protected readonly lengths: ChoiceOption<PopkinLength>[] = [...POPKIN_LENGTHS];
 
   /** The end "Until a date" shows: the one picked, else the coming Sunday evening. */
   protected readonly customEnd = computed(() => {
@@ -87,8 +78,8 @@ export class HowLongPage {
   protected pickEnd(): void {
     const ref = this.dialog.open<Date, EndDateData>(EndDateDialog, {
       data: { endsAt: this.customEnd(), accent: this.accent() },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
+      ariaLabelledBy: 'end-title',
+      ariaDescribedBy: 'end-desc',
       autoFocus: '#day',
       // pk-dialog draws its own backdrop, as the mocks do.
       hasBackdrop: false,

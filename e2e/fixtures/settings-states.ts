@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { ChangeLengthDialog } from '../pages/change-length.dialog';
 import { EditPopkinDialog } from '../pages/edit-popkin.dialog';
 import { PopkinHomePage } from '../pages/popkin-home.page';
 import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
@@ -25,6 +26,15 @@ export async function openEditPopkin(page: Page): Promise<EditPopkinDialog> {
   const edit = new EditPopkinDialog(page);
   await expect(edit.heading).toBeVisible();
   return edit;
+}
+
+/** Opens "Change how long it lasts" from Popkin settings. */
+export async function openChangeLength(page: Page): Promise<ChangeLengthDialog> {
+  await new PopkinHomePage(page).settings.click();
+  await new PopkinSettingsDialog(page).changeLength.click();
+  const dialog = new ChangeLengthDialog(page);
+  await expect(dialog.heading).toBeVisible();
+  return dialog;
 }
 
 interface SettingsState {
@@ -56,6 +66,26 @@ export const settingsStates = {
       const edit = await openEditPopkin(page);
       await edit.save.click();
       await expect(edit.alert).toBeVisible();
+    },
+  },
+  changeLength: {
+    before: atHome(),
+    app: async (page) => void (await openChangeLength(page)),
+  },
+  changeLengthBusy: {
+    before: atHome((settings) => void settings.hold('length')),
+    app: async (page) => {
+      const dialog = await openChangeLength(page);
+      await dialog.save.click();
+      await expect(dialog.save).toBeDisabled();
+    },
+  },
+  changeLengthFailed: {
+    before: atHome((settings) => settings.fail('length')),
+    app: async (page) => {
+      const dialog = await openChangeLength(page);
+      await dialog.save.click();
+      await expect(dialog.alert).toBeVisible();
     },
   },
 } satisfies Partial<Record<RouteKey, SettingsState>>;

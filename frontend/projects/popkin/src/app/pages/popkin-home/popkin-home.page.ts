@@ -53,6 +53,10 @@ import {
 import { InviteData, InviteDialog } from '../../dialogs/invite/invite.dialog';
 import { LeavePopkinData, LeavePopkinDialog } from '../../dialogs/leave-popkin/leave-popkin.dialog';
 import { EditPopkinData, EditPopkinDialog } from '../../dialogs/edit-popkin/edit-popkin.dialog';
+import {
+  ChangeLengthData,
+  ChangeLengthDialog,
+} from '../../dialogs/change-length/change-length.dialog';
 
 /** How many of what a section holds the home lists; the layout shows fewer on a narrow screen. */
 const MEMBERS_LISTED = 6;
@@ -231,6 +235,7 @@ export class PopkinHomePage {
     });
     opened.closed.subscribe((setting) => {
       if (setting === 'edit') this.editLook(opener);
+      if (setting === 'length') this.changeLength(opener);
       if (setting === 'invite') this.invite();
       if (setting === 'wrap-up') void this.router.navigate(['/p', this.popkinId(), 'wrap-up']);
       if (setting === 'leave') this.leave(popkin.name);
@@ -251,6 +256,28 @@ export class PopkinHomePage {
       ariaLabelledBy: 'dlg-title',
       ariaDescribedBy: 'dlg-desc',
       autoFocus: '#pname',
+      restoreFocus: opener ?? true,
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((saved) => {
+      if (saved) this.store.applySettings(saved);
+    });
+  }
+
+  /** "Change how long it lasts" (L2-020 AC4): the time left on the home follows at once. */
+  protected changeLength(opener: HTMLElement | null = null): void {
+    const popkin = this.popkin();
+    if (!popkin) return;
+    const opened = this.dialog.open<PopkinSettingsView, ChangeLengthData>(ChangeLengthDialog, {
+      data: {
+        popkinId: this.popkinId(),
+        accent: this.accent(),
+        length: popkin.length,
+        endsAt: popkin.endsAt,
+      },
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
       restoreFocus: opener ?? true,
       hasBackdrop: false,
       ariaModal: true,
