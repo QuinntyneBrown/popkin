@@ -28,6 +28,7 @@ function message(
     sentAt: at.toISOString(),
     reactions: [],
     reactionsVersion: 0,
+    photo: null,
     quote: null,
     ...extra,
   };

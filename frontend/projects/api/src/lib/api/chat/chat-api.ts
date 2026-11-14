@@ -7,6 +7,7 @@ import {
   MessageView,
   PresenceView,
   ThreadView,
+  ChatPhotoView,
   MessageReactions,
 } from '../../models/chat';
 import { ChatPreviewView } from '../../models/home';
@@ -45,6 +46,7 @@ export interface ChatApi {
     clientMessageId: string,
     text: string,
     replyToMessageId?: string,
+    photoId?: string,
   ): Observable<MessageView>;
   /**
    * Adds the member's reaction with this emoji, if it is not there yet, and answers the
@@ -64,6 +66,11 @@ export interface ChatApi {
     messageId: string,
     emoji: string,
   ): Observable<MessageReactions>;
+  /**
+   * Uploads a photo for a message of this thread, before the message is sent (L2-026). 400
+   * `photo_type_not_allowed` or `photo_too_large`.
+   */
+  uploadPhoto(popkinId: string, threadId: string, file: File): Observable<ChatPhotoView>;
   /** Deletes the member's own message for everyone. 403 `not_message_author`. */
   deleteMessage(popkinId: string, threadId: string, messageId: string): Observable<void>;
   /** Removes the member's own message of that name, if the server holds one. */
@@ -114,12 +121,20 @@ export class HttpChatApi implements ChatApi {
     clientMessageId: string,
     text: string,
     replyToMessageId?: string,
+    photoId?: string,
   ): Observable<MessageView> {
     return this.http.post<MessageView>(`${thread(popkinId, threadId)}/messages`, {
       clientMessageId,
       text,
       ...(replyToMessageId ? { replyToMessageId } : {}),
+      ...(photoId ? { photoId } : {}),
     });
+  }
+
+  uploadPhoto(popkinId: string, threadId: string, file: File): Observable<ChatPhotoView> {
+    const body = new FormData();
+    body.append('file', file);
+    return this.http.post<ChatPhotoView>(`${thread(popkinId, threadId)}/photos`, body);
   }
 
   react(

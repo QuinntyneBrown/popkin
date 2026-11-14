@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MessageView } from '../../models/chat';
+import { ChatPhotoView, MessageView } from '../../models/chat';
 import { CHAT_API, ChatApi } from './chat-api';
 import { MessageOutbox, OUTBOX_STORAGE, OutboxEntry, OutboxStorage } from './message-outbox';
 import { NETWORK_STATUS, NetworkStatus } from './network-status';
@@ -29,9 +29,11 @@ class FakeChat implements Partial<ChatApi> {
     text: string;
     clientMessageId: string;
     replyTo?: string;
+    photoId?: string;
     answer: Subject<MessageView>;
   }[] = [];
   readonly discards: string[] = [];
+  readonly uploads: { file: File; answer: Subject<ChatPhotoView> }[] = [];
 
   send(
     _popkinId: string,
@@ -39,10 +41,22 @@ class FakeChat implements Partial<ChatApi> {
     clientMessageId: string,
     text: string,
     replyTo?: string,
+    photoId?: string,
   ) {
     const answer = new Subject<MessageView>();
-    this.sends.push({ text, clientMessageId, replyTo, answer });
+    this.sends.push({ text, clientMessageId, replyTo, photoId, answer });
     return answer.asObservable();
+  }
+
+  uploadPhoto(_popkinId: string, _threadId: string, file: File): Observable<ChatPhotoView> {
+    const answer = new Subject<ChatPhotoView>();
+    this.uploads.push({ file, answer });
+    return answer.asObservable();
+  }
+
+  uploaded(index: number, id: string): void {
+    this.uploads[index].answer.next({ id, url: `/api/files/${id}`, width: 800, height: 600 });
+    this.uploads[index].answer.complete();
   }
 
   discard(_popkinId: string, _threadId: string, clientMessageId: string): Observable<void> {
@@ -175,6 +189,89 @@ describe('MessageOutbox (L2-028)', () => {
     outbox.retry(reply.clientMessageId);
 
     expect(chat.sends[1].replyTo).toBe('id-7');
+  });
+
+  describe('a photo (L2-026 AC1)', () => {
+    const photo = new File(['jpeg'], 'dock.jpg', { type: 'image/jpeg' });
+
+    beforeEach(() => {
+      URL.createObjectURL = () => 'blob:dock';
+      URL.revokeObjectURL = vi.fn();
+    });
+
+    it('is uploaded first, then the message is sent with it, with or without text', () => {
+      outbox.enqueue('p', 't', '', undefined, photo);
+      expect(chat.uploads.map((upload) => upload.file)).toEqual([photo]);
+      expect(chat.sends).toEqual([]);
+
+      chat.uploaded(0, 'ph-1');
+
+      expect(chat.sends[0]).toMatchObject({ text: '', photoId: 'ph-1' });
+    });
+
+    it('shows on its way from the device, and is not written to the device', () => {
+      outbox.enqueue('p', 't', 'Dock', undefined, photo);
+      expect(outbox.entries()[0].photo).toEqual({ id: null, preview: 'blob:dock' });
+      expect(storage.held[0].photo).toEqual({ id: null });
+    });
+
+    it('is not uploaded again on a retry once it is up', () => {
+      const entry = outbox.enqueue('p', 't', '', undefined, photo);
+      chat.uploaded(0, 'ph-1');
+      chat.fail(0, 0);
+
+      outbox.retry(entry.clientMessageId);
+
+      expect(chat.uploads.length).toBe(1);
+      expect(chat.sends[1]).toMatchObject({ photoId: 'ph-1' });
+    });
+
+    it('marks the message "Not sent" when the upload fails, and uploads again on a retry', () => {
+      const entry = outbox.enqueue('p', 't', '', undefined, photo);
+      chat.uploads[0].answer.error(new HttpErrorResponse({ status: 0 }));
+      expect(states()).toEqual([':Failed']);
+
+      outbox.retry(entry.clientMessageId);
+
+      expect(chat.uploads.length).toBe(2);
+    });
+
+    it('marks a photo the API refuses "Not sent" and sends nothing', () => {
+      outbox.enqueue('p', 't', '', undefined, photo);
+      chat.uploads[0].answer.error(
+        new HttpErrorResponse({ status: 400, error: { code: 'photo_too_large' } }),
+      );
+      expect(outbox.entries()[0]).toMatchObject({ state: 'Failed', failure: 'rejected' });
+      expect(chat.sends).toEqual([]);
+    });
+
+    it('cannot be sent after a reload lost its file, and says "Not sent"', () => {
+      storage.held = [
+        {
+          clientMessageId: 'c-1',
+          popkinId: 'p',
+          threadId: 't',
+          text: '',
+          state: 'Waiting',
+          createdAt: new Date().toISOString(),
+          photo: { id: null },
+        },
+      ];
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: CHAT_API, useValue: chat },
+          { provide: NETWORK_STATUS, useValue: network },
+          { provide: OUTBOX_STORAGE, useValue: storage },
+        ],
+      });
+      const reloaded = TestBed.inject(MessageOutbox);
+
+      reloaded.sendWaiting();
+
+      expect(reloaded.entries()[0]).toMatchObject({ state: 'Failed', failure: 'rejected' });
+      expect(chat.uploads).toEqual([]);
+    });
   });
 
   it('deletes a message that failed, on the server too in case the answer was lost', () => {

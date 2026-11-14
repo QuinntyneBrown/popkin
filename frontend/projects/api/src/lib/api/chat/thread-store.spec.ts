@@ -9,6 +9,7 @@ import {
   MessagePageView,
   MessageView,
   PresenceView,
+  ChatPhotoView,
   MessageReactions,
   ReactionSummary,
   ThreadView,
@@ -40,6 +41,7 @@ function message(n: number, author = 'Walt', extra: Partial<MessageView> = {}): 
     sentAt: new Date(2026, 8, 12, 9, 0, n).toISOString(),
     reactions: [],
     reactionsVersion: 0,
+    photo: null,
     quote: null,
     ...extra,
   };
@@ -198,6 +200,12 @@ class FakeChat implements ChatApi {
 
   readonly deleted: string[] = [];
   deleteFails = false;
+  readonly uploads: File[] = [];
+
+  uploadPhoto(_p: string, _t: string, file: File): Observable<ChatPhotoView> {
+    this.uploads.push(file);
+    return of({ id: `ph-${this.uploads.length}`, url: '/api/files/ph', width: 800, height: 600 });
+  }
 
   deleteMessage(_p: string, _t: string, messageId: string): Observable<void> {
     this.deleted.push(messageId);

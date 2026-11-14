@@ -1,5 +1,5 @@
 import { Injectable, InjectionToken, inject, signal } from '@angular/core';
-import { Observable, Subject, timeout } from 'rxjs';
+import { Observable, Subject, map, of, switchMap, tap, timeout } from 'rxjs';
 import { MessageView } from '../../models/chat';
 import { toApiProblem } from '../problem';
 import { CHAT_API } from './chat-api';
@@ -20,6 +20,11 @@ export interface OutboxEntry {
   createdAt: string;
   /** The message it replies to, as its quote shows it (L2-025). */
   replyTo?: ReplyQuote;
+  /**
+   * The photo it carries (L2-026): its id once uploaded, and while on the device the address
+   * it shows from, which is never written down. The file itself is kept in memory only.
+   */
+  photo?: { id: string | null; preview?: string };
 }
 
 /** Where the outbox is kept on the device, so a reload loses nothing. */
@@ -50,6 +55,8 @@ export class MessageOutbox {
     this.storage.load().map((entry) => (entry.state === 'Sending' ? waiting(entry) : entry)),
   );
   private readonly inFlight = new Set<string>();
+  /** The photos not yet uploaded, by the name of their message. */
+  private readonly files = new Map<string, File>();
   private readonly sent = new Subject<MessageView>();
   private readonly limited = new Subject<number | undefined>();
   private readonly wrapped = new Subject<string>();
@@ -66,7 +73,13 @@ export class MessageOutbox {
     return this.held().filter((entry) => entry.threadId === threadId);
   }
 
-  enqueue(popkinId: string, threadId: string, text: string, replyTo?: ReplyQuote): OutboxEntry {
+  enqueue(
+    popkinId: string,
+    threadId: string,
+    text: string,
+    replyTo?: ReplyQuote,
+    photo?: File,
+  ): OutboxEntry {
     const entry: OutboxEntry = {
       clientMessageId: crypto.randomUUID(),
       popkinId,
@@ -75,7 +88,9 @@ export class MessageOutbox {
       state: this.network.online() ? 'Sending' : 'Waiting',
       createdAt: new Date().toISOString(),
       ...(replyTo ? { replyTo } : {}),
+      ...(photo ? { photo: { id: null, preview: URL.createObjectURL(photo) } } : {}),
     };
+    if (photo) this.files.set(entry.clientMessageId, photo);
     this.update((entries) => [...entries, entry]);
     this.pump(threadId);
     return entry;
@@ -92,6 +107,7 @@ export class MessageOutbox {
     const entry = this.find(clientMessageId);
     if (!entry) return;
     this.update((entries) => entries.filter((kept) => kept !== entry));
+    this.forget(entry);
     // The server may hold it with its answer lost; asking is safe whatever it holds.
     if (entry.failure === 'network') {
       this.chat
@@ -118,16 +134,37 @@ export class MessageOutbox {
     const next = this.forThread(threadId).find((entry) => entry.failure !== 'rejected');
     if (!next || next.state !== 'Sending') return;
 
+    // A photo whose file a reload lost cannot be sent; it stays to be deleted.
+    const file = this.files.get(next.clientMessageId);
+    if (next.photo && !next.photo.id && !file) {
+      this.change(next.clientMessageId, { state: 'Failed', failure: 'rejected' });
+      this.pump(threadId);
+      return;
+    }
+
     this.inFlight.add(threadId);
-    this.chat
-      .send(next.popkinId, threadId, next.clientMessageId, next.text, next.replyTo?.messageId)
-      .pipe(timeout(SEND_TIMEOUT_MS))
+    this.photoIdOf(next, file)
+      .pipe(
+        switchMap((photoId) =>
+          this.chat
+            .send(
+              next.popkinId,
+              threadId,
+              next.clientMessageId,
+              next.text,
+              next.replyTo?.messageId,
+              photoId,
+            )
+            .pipe(timeout(SEND_TIMEOUT_MS)),
+        ),
+      )
       .subscribe({
         next: (message) => {
           this.inFlight.delete(threadId);
           this.update((entries) =>
             entries.filter((entry) => entry.clientMessageId !== next.clientMessageId),
           );
+          this.forget(next);
           this.sent.next(message);
           this.pump(threadId);
         },
@@ -136,6 +173,28 @@ export class MessageOutbox {
           this.failed(next, error);
         },
       });
+  }
+
+  /** The photo's id: uploaded now, unless an earlier try already did; none for text alone. */
+  private photoIdOf(entry: OutboxEntry, file: File | undefined): Observable<string | undefined> {
+    if (!entry.photo) return of(undefined);
+    if (entry.photo.id) return of(entry.photo.id);
+    if (!file) return of(undefined);
+    return this.chat.uploadPhoto(entry.popkinId, entry.threadId, file).pipe(
+      timeout(SEND_TIMEOUT_MS),
+      tap((photo) =>
+        this.change(entry.clientMessageId, {
+          photo: { id: photo.id, preview: entry.photo?.preview },
+        }),
+      ),
+      map((photo) => photo.id),
+    );
+  }
+
+  /** A message that is sent or deleted needs its photo no more. */
+  private forget(entry: OutboxEntry): void {
+    this.files.delete(entry.clientMessageId);
+    if (entry.photo?.preview) URL.revokeObjectURL(entry.photo.preview);
   }
 
   private failed(entry: OutboxEntry, error: unknown): void {
@@ -172,7 +231,12 @@ export class MessageOutbox {
 
   private update(change: (entries: OutboxEntry[]) => OutboxEntry[]): void {
     this.held.update(change);
-    this.storage.save(this.held());
+    // An address made on this device means nothing after a reload.
+    this.storage.save(
+      this.held().map((entry) =>
+        entry.photo ? { ...entry, photo: { id: entry.photo.id } } : entry,
+      ),
+    );
   }
 }
 
