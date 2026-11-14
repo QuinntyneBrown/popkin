@@ -13,7 +13,7 @@ public sealed record MessageAuthorDto(Guid MembershipId, string FirstName, Avata
 /// A message as every member reads it. The same value travels the hub to everyone, so it says
 /// nothing about who is reading, and it names its Popkin and its thread, so a client that holds
 /// several knows where it belongs. `ClientMessageId` is null for a system message. `Reactions`
-/// is the message's summary of reactions (L2-024); `Quote` is that of the message a reply
+/// is the message's summary of reactions (L2-024), at `ReactionsVersion`; `Quote` is that of the message a reply
 /// answers, and null for a message that replies to nothing (L2-025).
 /// </summary>
 public sealed record MessageDto(
@@ -25,6 +25,7 @@ public sealed record MessageDto(
     MessageAuthorDto Author,
     string Text,
     DateTimeOffset SentAt,
+    int ReactionsVersion,
     IReadOnlyList<ReactionDto> Reactions,
     QuoteDto? Quote)
 {
@@ -43,6 +44,7 @@ public sealed record MessageDto(
             new MessageAuthorDto(author.Id, PersonName.FirstName(author.DisplayName), AvatarDto.Of(author, photos)),
             message.Text,
             message.SentAt,
+            message.ReactionsVersion,
             reactions ?? [],
             quote);
 }

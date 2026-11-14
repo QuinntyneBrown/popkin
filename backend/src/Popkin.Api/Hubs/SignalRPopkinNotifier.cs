@@ -23,8 +23,8 @@ public sealed class SignalRPopkinNotifier(
     public Task MessageDeleted(Audience audience, Guid threadId, Guid messageId) =>
         SendAsync(nameof(IPopkinClient.MessageDeleted), () => To(audience).MessageDeleted(threadId, messageId));
 
-    public Task ReactionsChanged(Audience audience, Guid threadId, Guid messageId, IReadOnlyList<ReactionDto> reactions) =>
-        SendAsync(nameof(IPopkinClient.ReactionsChanged), () => To(audience).ReactionsChanged(threadId, messageId, reactions));
+    public Task ReactionsChanged(Audience audience, Guid threadId, Guid messageId, int version, IReadOnlyList<ReactionDto> reactions) =>
+        SendAsync(nameof(IPopkinClient.ReactionsChanged), () => To(audience).ReactionsChanged(threadId, messageId, version, reactions));
 
     public Task ThreadRead(Guid personId, Guid threadId) =>
         SendAsync(nameof(IPopkinClient.ThreadRead), () => hub.Clients.User(personId.ToString()).ThreadRead(threadId));

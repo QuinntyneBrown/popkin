@@ -3,15 +3,16 @@ using Popkin.Api.Tests.Support;
 namespace Popkin.Api.Tests.Chat;
 
 /// <summary>
-/// `ReactionsChanged(threadId, messageId, reactions)` goes to the thread's audience: the Popkin
+/// `ReactionsChanged(threadId, messageId, version, reactions)` goes to the thread's audience: the Popkin
 /// for Everyone, and a direct message's two members alone (L2-024, L2-023 AC3, L2-051).
 /// </summary>
 public sealed class LiveReactionsTests
 {
     // Given a message in Everyone and another member with Popkin open,
     // when a member reacts with a heart, twice, and then takes it away,
-    // then the other receives ReactionsChanged with the summary as the reactor was answered,
-    // once for the reaction and once for taking it away: a repeat that changes nothing is not told.
+    // then the other receives ReactionsChanged with the version and the summary as the reactor
+    // was answered, once for the reaction and once, at a higher version, for taking it away: a
+    // repeat that changes nothing is not told.
     [Fact]
     public async Task A_reaction_in_Everyone_is_told_to_the_Popkin()
     {
@@ -31,11 +32,13 @@ public sealed class LiveReactionsTests
         var changed = await maraHub.WaitForAsync("ReactionsChanged");
         Assert.Equal(threadId, changed.Arguments[0].GetGuid());
         Assert.Equal(message, changed.Arguments[1].GetGuid());
-        Assert.Equal(reacted.GetRawText(), changed.Arguments[2].GetRawText());
+        Assert.Equal(reacted.Version(), changed.Arguments[2].GetInt32());
+        Assert.Equal(reacted.GetProperty("reactions").GetRawText(), changed.Arguments[3].GetRawText());
         await maraHub.WaitForAsync("MessageAdded", e => e.Arguments[0].Id() == marker.Id());
         var told = maraHub.ReceivedNamed("ReactionsChanged");
         Assert.Equal(2, told.Count);
-        Assert.Empty(told[1].Arguments[2].EnumerateArray());
+        Assert.True(told[1].Arguments[2].GetInt32() > told[0].Arguments[2].GetInt32());
+        Assert.Empty(told[1].Arguments[3].EnumerateArray());
     }
 
     // Given Mara, Walt and Ruth with Popkin open, and a message of the direct message between Mara and Walt,

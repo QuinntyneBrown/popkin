@@ -40,8 +40,67 @@ public sealed class ReactionTests
         Assert.Equal([ReactionExtensions.Chip("❤️", joelId)], await SummaryOf(again));
         Assert.Equal([ReactionExtensions.Chip("❤️", joelId, maraId), ReactionExtensions.Chip("😂", maraId)], summary.Summary());
         var read = (await joel.MessagesAsync(lakeside.Id, threadId)).GetProperty("items").EnumerateArray().Single(m => m.Id() == message);
-        Assert.Equal(summary.GetRawText(), read.GetProperty("reactions").GetRawText());
+        Assert.Equal(summary.GetProperty("reactions").GetRawText(), read.GetProperty("reactions").GetRawText());
     }
+
+    // Given a message, when members react, repeat a reaction, take one away and repeat that,
+    // then each change answers a reactions version one above the last, a repeat that changes
+    // nothing answers the same version, and the read of the message carries the last; a new
+    // message is at version 0.
+    [Fact]
+    public async Task Every_change_raises_the_reactions_version_and_a_repeat_does_not()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var threadId = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
+        var joel = await api.JoinedAsync(lakeside.Code, "Joel", "(415) 555-0123");
+        var sent = await lakeside.Host.SentMessageAsync(lakeside.Id, threadId, "Paddles are in the shed");
+        var message = sent.Id();
+
+        var versions = new List<int>
+        {
+            (await joel.ReactedAsync(lakeside.Id, threadId, message, "❤️")).Version(),
+            (await joel.ReactedAsync(lakeside.Id, threadId, message, "❤️")).Version(),
+            (await lakeside.Host.ReactedAsync(lakeside.Id, threadId, message, "🔥")).Version(),
+            await VersionOf(await joel.UnreactAsync(lakeside.Id, threadId, message, "❤️")),
+            await VersionOf(await joel.UnreactAsync(lakeside.Id, threadId, message, "❤️")),
+        };
+
+        Assert.Equal(0, sent.GetProperty("reactionsVersion").GetInt32());
+        Assert.Equal([1, 1, 2, 3, 3], versions);
+        var read = (await joel.MessagesAsync(lakeside.Id, threadId)).GetProperty("items").EnumerateArray().Single(m => m.Id() == message);
+        Assert.Equal(3, read.GetProperty("reactionsVersion").GetInt32());
+    }
+
+    // Given a message, when Joel reacts while Mara's reaction is saved at the same moment,
+    // then Joel's reaction is made again on the message as it now stands: both are kept, and
+    // each change has its own version.
+    [Fact]
+    public async Task Two_reactions_at_the_same_moment_are_both_kept_with_their_own_versions()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var threadId = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
+        var joel = await api.JoinedAsync(lakeside.Code, "Joel", "(415) 555-0123");
+        var maraId = await lakeside.Host.MembershipIdAsync(lakeside.Id);
+        var joelId = await joel.MembershipIdAsync(lakeside.Id);
+        var message = (await lakeside.Host.SentMessageAsync(lakeside.Id, threadId, "Paddles are in the shed")).Id();
+        var winner = 0;
+        api.Faults.LoseNextSaveTo = async () =>
+        {
+            winner = (await lakeside.Host.ReactedAsync(lakeside.Id, threadId, message, "🔥")).Version();
+            api.Clock.Advance(TimeSpan.FromSeconds(1));
+        };
+
+        var joels = await joel.ReactedAsync(lakeside.Id, threadId, message, "❤️");
+
+        Assert.Equal(1, winner);
+        Assert.Equal(2, joels.Version());
+        Assert.Equal([ReactionExtensions.Chip("🔥", maraId), ReactionExtensions.Chip("❤️", joelId)], joels.Summary());
+    }
+
+    private static async Task<int> VersionOf(HttpResponseMessage response) =>
+        (await response.Content.ReadFromJsonAsync<JsonElement>()).Version();
 
     // Given a message with a heart from Joel and from Mara,
     // when Joel takes his heart away, twice,

@@ -16,7 +16,7 @@ public sealed class SilentPopkinNotifier : IPopkinNotifier
 
     public Task MessageDeleted(Audience audience, Guid threadId, Guid messageId) => Task.CompletedTask;
 
-    public Task ReactionsChanged(Audience audience, Guid threadId, Guid messageId, IReadOnlyList<ReactionDto> reactions) => Task.CompletedTask;
+    public Task ReactionsChanged(Audience audience, Guid threadId, Guid messageId, int version, IReadOnlyList<ReactionDto> reactions) => Task.CompletedTask;
 
     public Task ThreadRead(Guid personId, Guid threadId) => Task.CompletedTask;
 

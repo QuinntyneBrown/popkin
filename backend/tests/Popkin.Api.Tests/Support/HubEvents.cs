@@ -21,7 +21,7 @@ public sealed class HubEvents : IAsyncDisposable
     [
         ("MessageAdded", 1),
         ("MessageDeleted", 2),
-        ("ReactionsChanged", 3),
+        ("ReactionsChanged", 4),
         ("ThreadRead", 1),
         ("PresenceChanged", 3),
         ("MemberJoined", 2),

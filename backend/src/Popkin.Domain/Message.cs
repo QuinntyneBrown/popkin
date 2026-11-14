@@ -74,6 +74,15 @@ public sealed class Message
         Kind = MessageKind.System,
     };
 
+    /// <summary>
+    /// Rises by one with every change to the message's reactions, so a client drops a summary
+    /// older than the one it holds; a repeat that changes nothing leaves it as it is.
+    /// </summary>
+    public int ReactionsVersion { get; private set; }
+
+    /// <summary>A reaction was added to the message or taken off it.</summary>
+    public void ReactionsChanged() => ReactionsVersion++;
+
     /// <summary>Deletes the message: its text is not kept. Deleting twice changes nothing.</summary>
     public void Delete(DateTimeOffset now)
     {

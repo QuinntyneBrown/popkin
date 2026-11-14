@@ -56,12 +56,12 @@ public sealed class MessagesController(ISender sender) : ControllerBase
     /// whole summary; adding it again changes nothing (L2-024).
     /// </summary>
     [HttpPut("{messageId:guid}/reactions/{emoji}")]
-    public async Task<ActionResult<IReadOnlyList<ReactionDto>>> React(Guid popkinId, Guid threadId, Guid messageId, string emoji, CancellationToken cancellationToken) =>
+    public async Task<ActionResult<MessageReactionsDto>> React(Guid popkinId, Guid threadId, Guid messageId, string emoji, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new AddReactionCommand(popkinId, threadId, messageId, emoji), cancellationToken));
 
     /// <summary>Takes the caller's reaction away and answers the summary; taking it again changes nothing (L2-024 AC3).</summary>
     [HttpDelete("{messageId:guid}/reactions/{emoji}")]
-    public async Task<ActionResult<IReadOnlyList<ReactionDto>>> Unreact(Guid popkinId, Guid threadId, Guid messageId, string emoji, CancellationToken cancellationToken) =>
+    public async Task<ActionResult<MessageReactionsDto>> Unreact(Guid popkinId, Guid threadId, Guid messageId, string emoji, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new RemoveReactionCommand(popkinId, threadId, messageId, emoji), cancellationToken));
 
     /// <summary>

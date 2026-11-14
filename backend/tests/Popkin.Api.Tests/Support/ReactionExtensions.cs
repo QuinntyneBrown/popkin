@@ -28,11 +28,17 @@ public static class ReactionExtensions
     public static Task<HttpResponseMessage> DeleteMessageAsync(this HttpClient member, Guid popkinId, Guid threadId, Guid messageId) =>
         member.DeleteAsync($"/api/popkins/{popkinId}/threads/{threadId}/messages/{messageId}");
 
-    /// <summary>A summary of reactions, one "{emoji} {membership ids}" per chip, in its order.</summary>
+    /// <summary>
+    /// A summary of reactions, one "{emoji} {membership ids}" per chip, in its order, from the
+    /// answer to a reaction or from the reactions of a message.
+    /// </summary>
     public static List<string> Summary(this JsonElement reactions) =>
-        reactions.EnumerateArray()
+        (reactions.ValueKind == JsonValueKind.Object ? reactions.GetProperty("reactions") : reactions).EnumerateArray()
             .Select(r => Chip(r.GetProperty("emoji").GetString()!, r.GetProperty("membershipIds").EnumerateArray().Select(id => id.GetGuid()).ToArray()))
             .ToList();
+
+    /// <summary>The reactions version of the answer to a reaction.</summary>
+    public static int Version(this JsonElement answer) => answer.GetProperty("version").GetInt32();
 
     public static string Chip(string emoji, params Guid[] membershipIds) => $"{emoji} {string.Join(",", membershipIds)}";
 }

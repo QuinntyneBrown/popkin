@@ -19,10 +19,11 @@ public interface IPopkinClient
     Task MessageDeleted(Guid threadId, Guid messageId);
 
     /// <summary>
-    /// A message's reactions changed (L2-024). A state: it carries the message's whole summary,
-    /// which replaces the one held; a read of the thread's messages recovers it.
+    /// A message's reactions changed (L2-024). A state: it carries the message's whole summary
+    /// and its reactions version, which only rises, and an event whose version is not above the
+    /// one held is dropped; a read of the thread's messages recovers it.
     /// </summary>
-    Task ReactionsChanged(Guid threadId, Guid messageId, IReadOnlyList<ReactionDto> reactions);
+    Task ReactionsChanged(Guid threadId, Guid messageId, int version, IReadOnlyList<ReactionDto> reactions);
 
     /// <summary>The person read a thread, here or on another device: its unread count is zero.</summary>
     Task ThreadRead(Guid threadId);

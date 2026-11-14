@@ -10,6 +10,9 @@ namespace Popkin.Application.Chat;
 /// </summary>
 public sealed record ReactionDto(string Emoji, IReadOnlyList<Guid> MembershipIds);
 
+/// <summary>A message's whole summary of reactions at its version, which rises with every change.</summary>
+public sealed record MessageReactionsDto(int Version, IReadOnlyList<ReactionDto> Reactions);
+
 /// <summary>The summaries of reactions, as every read of messages and every reaction answers them.</summary>
 public static class Reactions
 {

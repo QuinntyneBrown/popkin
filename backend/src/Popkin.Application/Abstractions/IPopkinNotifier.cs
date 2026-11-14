@@ -18,7 +18,7 @@ public interface IPopkinNotifier
     Task MessageDeleted(Audience audience, Guid threadId, Guid messageId);
 
     /// <summary>To the thread's audience: the Popkin for Everyone, the two members for a direct message.</summary>
-    Task ReactionsChanged(Audience audience, Guid threadId, Guid messageId, IReadOnlyList<ReactionDto> reactions);
+    Task ReactionsChanged(Audience audience, Guid threadId, Guid messageId, int version, IReadOnlyList<ReactionDto> reactions);
 
     /// <summary>To that person only, on every connection they hold.</summary>
     Task ThreadRead(Guid personId, Guid threadId);
