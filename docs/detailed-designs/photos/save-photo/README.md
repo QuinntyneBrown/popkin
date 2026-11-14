@@ -112,29 +112,29 @@ is read-only.
 
 - **`PhotosController`** — gains `GET …/download` and `DELETE …/{photoId}`.
 - **`GetPhotoDownloadQuery` / `GetPhotoDownloadQueryHandler`** — introduced. It checks membership
-  through `IMembershipGuard`, loads the `Photo` scoped to the Popkin, and asks
-  `IPhotoStore.GetDownloadUrl` for an attachment address of the original.
+  through `IMembershipGuard`, loads the `Photo` with the read guard of `GET …/photos/{photoId}`,
+  and asks `IPhotoStore.GetDownloadUrl` for an attachment address of the original.
 
   The original is a third stored file of each upload, album and chat alike: a JPEG at the size it
   was added, turned upright and re-encoded without location or device data (L2-031 AC6), under
   the photo's key ending `-original.jpg` (`Photo.OriginalKey`). A photo stored before journey 14
   has none and is saved as its display image. The file is named
   `popkin-photo-{yyyyMMdd-HHmm}.jpg` from `TakenAt` in UTC, and the address lives as long as any
-  signed address, one hour (`PhotoUrlSigner.Lifetime`). Deleting a photo and removing an album
-  that was not kept delete the original with the other files.
-- **`DeletePhotoCommand` / `DeletePhotoCommandHandler`** — introduced. It checks membership and
-  calls `Photo.CanBeDeletedBy(membership)`, which allows the uploader and the Host. In one unit of
-  work it takes these steps:
+  signed address, one hour (`PhotoUrlSigner.Lifetime`); `expiresAt` says when. Deleting a photo
+  and removing an album that was not kept delete the original with the other files.
+- **`DeletePhotoCommand` / `DeletePhotoCommandHandler`** — introduced. It checks membership,
+  refuses a wrapped-up Popkin, and calls `Photo.CanBeDeletedBy(membership)`. In one unit of work
+  it takes these steps:
   1. Deletes the photo's `PhotoReaction` and `PhotoComment` rows.
   2. Sets `PhotoRemoved = true` and `PhotoId = null` on every `Message` that carried it.
   3. Deletes the `Photo`.
 
-  After the commit it deletes the stored image and the thumbnail through
-  `IPhotoStore.DeleteAsync`; a file that fails to delete is logged without content and stays an
-  orphan. Then it sends `PhotoDeleted` to the photo's audience through `IPopkinNotifier`. How an
-  open thread learns which messages lost their photo is decided when it is built: by an existing
-  message event if one fits, or by `PhotoDeleted` alone, with the client marking every message
-  that carried the photo id. The choice is recorded here when made.
+  After the commit it deletes the original, the display image and the thumbnail through
+  `IPhotoStore.DeleteAsync`; a file that fails to delete is logged with the photo id only and
+  stays an orphan. Then it sends `PhotoDeleted(popkinId, photoId)` to the photo's audience (the
+  Popkin, or a direct message's two members) through `IPopkinNotifier`. No message event is
+  reused: an open thread marks the message whose `photo.id` it names as `photoRemoved`, as the
+  next read of the thread gives.
 - **Album removal** — `RemoveWrappedUpAlbumsCommandHandler` (journey 9) sets `PhotoRemoved` on
   the messages whose photos it removes, so a photo message with no text reads "Photo removed"
   rather than an empty bubble (known gap 74).
@@ -145,11 +145,28 @@ is read-only.
 
 ### Open questions
 
-- Mocks for the photo actions, the delete confirmation, failures and "Photo removed":
-  `<TO SUPPLY>`.
-- Whether photos may be deleted after the Popkin wraps up: `<TO SUPPLY>`. L2-045 lists no delete.
-- Cleanup of files whose deletion failed, for example by a `Popkin.Worker` job: `<TO SUPPLY>`.
-- How an open thread learns its message lost its photo: decided (journey 14) — no message event is reused; `PhotoDeleted(popkinId, photoId)` goes to the photo's audience (the Popkin, or a direct message's two members) and the client marks the message whose `photo.id` it names `photoRemoved`, as the next read of the thread gives.
+Settled by journey 14:
+
+- The mocks of the photo actions, the confirmation, its busy and failed states, the failed save,
+  "Photo removed" and a photo deleted while open now exist (listed above).
+- A wrapped-up Popkin refuses a delete with `409 popkin_wrapped_up`; saving works.
+- The saved file is named `popkin-photo-{yyyyMMdd-HHmm}.jpg` from `TakenAt`; the address lives one
+  hour. The time is written in UTC, as the API holds it; this is the simplest choice the contract
+  left open.
+- **The size of a saved photo** (L2-036 AC1, "at the size it was added"): each upload now keeps an
+  original-size file, without location or device data, and "Save photo" downloads it. A photo
+  stored before journey 14 has none and is saved at its display size, at most 2048 px.
+- Orphan files whose deletion failed are logged and left; their cleanup stays open, as for the
+  chat photos of known gap 71.
+- A photo deleted while it is open shows "This photo was removed" rather than leaving at once, so
+  the member sees why it went (the simplest truthful choice of contract decision 7).
+- After deleting a photo of a direct message, the page goes back to the direct message with the
+  same toast "Photo deleted.".
+- How an open thread learns a message lost its photo: by `PhotoDeleted` alone (see Backend).
+
+Still open:
+
+- The album's zip packs display images, not the originals.
 
 ## Requirements
 
