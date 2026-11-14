@@ -134,12 +134,13 @@ say so and propose the correction; do not work around it silently.
 - `docs/estimates/` — effort and percent complete per design
 - `docs/audits/` — audits of the codebase against its rules, each with the fixes it calls for
 - `docs/deployment.md` — how Popkin is deployed: the images, every setting, the proxy and a smoke
-  test (ADR 0013)
+  test (ADR 0013); every commit to main is deployed to Azure (ADR 0018)
+- `infra/` — the Azure infrastructure as Bicep and the web proxy's image (`infra/web/`)
 - `docs/personas/` — invented people who come across Popkin, one folder each: who they are,
   their journeys, and their feedback
 - `docs/journeys.md`, `docs/prompts/` — the user journeys and one implementation prompt per journey
 - `eng/` — local engineering scripts (`Test-Backend.ps1`, `Start-E2eApi.ps1`,
-  `Start-E2eWorker.ps1`)
+  `Start-E2eWorker.ps1`, `Initialize-Azure.ps1`)
 - `docs/videos/` — narrated videos, one folder each; `tools/` holds the scripts that build them
 
 ```
@@ -187,9 +188,10 @@ popkin/
 │   ├── fixtures/                      `pk-test.ts`, `routes.ts`, data fixtures
 │   ├── pages/                         one page object per screen or dialog
 │   └── tests/                         specs, with `visual/` for mock parity
+├── infra/                             Bicep for Azure, `web/` the proxy's image (ADR 0018)
 ├── eng/
 ├── docs/
-└── .github/workflows/                 `ci.yml`
+└── .github/workflows/                 `ci.yml`, `deploy.yml`
 ```
 
 See `README.md` for setup and development commands.

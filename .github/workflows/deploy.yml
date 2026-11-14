@@ -1,0 +1,141 @@
+name: Deploy
+
+# ADR 0018: every commit to main is deployed to Azure once CI passes. CI calls this workflow;
+# it can also be run by hand to deploy main again.
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+# One deployment at a time, never cancelled half-way.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.release.outputs.appUrl }}
+    env:
+      RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # OpenID Connect: GitHub's token is exchanged for Azure's; no Azure secret is stored here.
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy the registry
+        id: registry
+        run: |
+          outputs=$(az deployment group create --resource-group "$RESOURCE_GROUP" \
+            --name "registry-$IMAGE_TAG" --template-file infra/registry.bicep \
+            --query properties.outputs -o json)
+          echo "name=$(jq -r .name.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
+          echo "loginServer=$(jq -r .loginServer.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
+
+      - run: az acr login --name ${{ steps.registry.outputs.name }}
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Push popkin-api
+        uses: docker/build-push-action@v7
+        with:
+          context: backend
+          file: backend/src/Popkin.Api/Dockerfile
+          push: true
+          tags: ${{ steps.registry.outputs.loginServer }}/popkin-api:${{ github.sha }}
+          cache-from: type=gha,scope=popkin-api
+          cache-to: type=gha,mode=max,scope=popkin-api
+
+      - name: Push popkin-worker
+        uses: docker/build-push-action@v7
+        with:
+          context: backend
+          file: backend/src/Popkin.Worker/Dockerfile
+          push: true
+          tags: ${{ steps.registry.outputs.loginServer }}/popkin-worker:${{ github.sha }}
+          cache-from: type=gha,scope=popkin-worker
+          cache-to: type=gha,mode=max,scope=popkin-worker
+
+      - name: Push popkin-web
+        uses: docker/build-push-action@v7
+        with:
+          context: frontend
+          file: infra/web/Dockerfile
+          build-contexts: web=infra/web
+          push: true
+          tags: ${{ steps.registry.outputs.loginServer }}/popkin-web:${{ github.sha }}
+          cache-from: type=gha,scope=popkin-web
+          cache-to: type=gha,mode=max,scope=popkin-web
+
+      # The database, the API (migrated by its init container first), the Worker, the web
+      # proxy and the marketing site's host.
+      - name: Release
+        id: release
+        env:
+          AUTH_CODE_HASH_KEY: ${{ secrets.AUTH_CODE_HASH_KEY }}
+          PHOTOS_SIGNING_KEY: ${{ secrets.PHOTOS_SIGNING_KEY }}
+        run: |
+          outputs=$(az deployment group create --resource-group "$RESOURCE_GROUP" \
+            --name "popkin-$IMAGE_TAG" --template-file infra/main.bicep \
+            --parameters imageTag="$IMAGE_TAG" \
+              authCodeHashKey="$AUTH_CODE_HASH_KEY" photosSigningKey="$PHOTOS_SIGNING_KEY" \
+            --query properties.outputs -o json)
+          echo "appUrl=$(jq -r .appUrl.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
+          echo "marketingUrl=$(jq -r .marketingUrl.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
+          echo "marketingName=$(jq -r .marketingName.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
+
+      # ADR 0017: the marketing site, published on its own; its links lead to the deployed app.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build the marketing site
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run media:sync
+          npx ng build marketing --define "POPKIN_APP_URL='${{ steps.release.outputs.appUrl }}'"
+      - name: Read the marketing site's deployment token
+        id: swa
+        run: |
+          token=$(az staticwebapp secrets list --name "${{ steps.release.outputs.marketingName }}" \
+            --resource-group "$RESOURCE_GROUP" --query properties.apiKey -o tsv)
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+      - name: Publish the marketing site
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa.outputs.token }}
+          action: upload
+          app_location: frontend/dist/marketing/browser
+          skip_app_build: true
+          skip_api_build: true
+
+      # docs/deployment.md, Smoke test 1 to 3.
+      - name: Smoke test
+        env:
+          APP_URL: ${{ steps.release.outputs.appUrl }}
+          MARKETING_URL: ${{ steps.release.outputs.marketingUrl }}
+        run: |
+          for i in $(seq 1 30); do
+            curl -fsS "$APP_URL/api/health" | grep -q '"ok"' && break
+            echo "Waiting for the API ($i)"; sleep 10
+          done
+          curl -fsS -D - -o /dev/null "$APP_URL/api/health" | grep -i '^strict-transport-security'
+          test "$(curl -s -o /dev/null -w '%{http_code}' "${APP_URL/https:/http:}/api/health")" -ge 300
+          curl -fsS -o /dev/null "$APP_URL/sign-up"
+          curl -fsS -o /dev/null "$MARKETING_URL"
+          echo "The app: $APP_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "The marketing site: $MARKETING_URL" >> "$GITHUB_STEP_SUMMARY"
