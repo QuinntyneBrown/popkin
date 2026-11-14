@@ -1,6 +1,7 @@
 using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
+using Popkin.Application.Popkins;
 
 namespace Popkin.Application.Abstractions;
 
@@ -70,6 +71,14 @@ public interface IPopkinClient
     /// `GET /api/popkins/{popkinId}` recovers it.
     /// </summary>
     Task PopkinWrappedUp(Guid popkinId);
+
+    /// <summary>
+    /// The Host changed the Popkin's name, emoji, colour or length (L2-020 AC3, AC4). A state: it
+    /// carries the settings in full and the Popkin's version, which only rises, and an event
+    /// whose version is not above the one held is dropped. `GET /api/popkins/{popkinId}`
+    /// recovers it.
+    /// </summary>
+    Task PopkinChanged(Guid popkinId, PopkinDto popkin);
 
     /// <summary>
     /// Someone came onto the call. A fact, sent to the connections on the call; the one who

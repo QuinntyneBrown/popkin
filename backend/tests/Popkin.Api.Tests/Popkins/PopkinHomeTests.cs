@@ -42,7 +42,7 @@ public sealed class PopkinHomeTests
         Assert.Equal(
             [
                 "avatars", "colour", "emoji", "endsAt", "id", "keepPhotos", "memberCount", "name", "photosRemoveAt", "photosRemovedAt",
-                "status", "unreadCount", "viewer", "viewerRole", "wrappedUpAt",
+                "status", "unreadCount", "version", "viewer", "viewerRole", "wrappedUpAt",
             ],
             home.EnumerateObject().Select(p => p.Name).Order());
         Assert.Equal("Host", hostHome.GetProperty("viewerRole").GetString());

@@ -15,7 +15,7 @@ public sealed record PopkinViewerDto(Guid MembershipId, string FirstName);
 /// The header of the Popkin home: the Popkin's look, its end, how many members it has with the
 /// first few as avatars, who is reading and how many messages are new to them, in Everyone and
 /// in their direct messages of the Popkin (L2-019 AC1, AC7, L2-022 AC3); and, for the read-only states, when it wrapped up, whether its album is
-/// kept, and when its photos go or went (L2-045).
+/// kept, and when its photos go or went (L2-045); and the version that orders `PopkinChanged` (L2-020).
 /// </summary>
 public sealed record PopkinHomeDto(
     Guid Id,
@@ -32,7 +32,8 @@ public sealed record PopkinHomeDto(
     DateTimeOffset? WrappedUpAt,
     bool KeepPhotos,
     DateTimeOffset? PhotosRemoveAt,
-    DateTimeOffset? PhotosRemovedAt);
+    DateTimeOffset? PhotosRemovedAt,
+    long Version);
 
 /// <summary>The header of a Popkin's home, for any of its members (L2-019, L2-051 AC1).</summary>
 public sealed record GetPopkinHomeQuery(Guid PopkinId) : IRequest<PopkinHomeDto>;
@@ -67,6 +68,7 @@ public sealed class GetPopkinHomeQueryHandler(IAppDbContext db, IMembershipGuard
             popkin.WrappedUpAt,
             popkin.KeepPhotos,
             popkin.PhotosRemoveAt,
-            popkin.PhotosRemovedAt);
+            popkin.PhotosRemovedAt,
+            popkin.Version);
     }
 }

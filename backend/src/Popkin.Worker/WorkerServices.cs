@@ -2,6 +2,7 @@ using Popkin.Application.Abstractions;
 using Popkin.Application.Calls;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
+using Popkin.Application.Popkins;
 
 namespace Popkin.Worker;
 
@@ -31,6 +32,8 @@ public sealed class SilentPopkinNotifier : IPopkinNotifier
     public Task CallEnded(Audience audience, Guid callId, Guid? threadId) => Task.CompletedTask;
 
     public Task PopkinWrappedUp(Guid popkinId) => Task.CompletedTask;
+
+    public Task PopkinChanged(Guid popkinId, PopkinDto popkin) => Task.CompletedTask;
 
     public Task ParticipantJoined(Guid callId, CallParticipantDto participant) => Task.CompletedTask;
 

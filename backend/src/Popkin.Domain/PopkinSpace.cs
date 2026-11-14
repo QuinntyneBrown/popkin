@@ -93,6 +93,27 @@ public sealed class PopkinSpace
     public void ChangeInviteCode(string inviteCode) => InviteCode = inviteCode;
 
     /// <summary>
+    /// The Host gives the Popkin a new name, emoji or colour (L2-020 AC3). The version rises, so
+    /// a member who hears of an older look drops it.
+    /// </summary>
+    public void ChangeLook(string name, string emoji, PopkinColour colour)
+    {
+        RequireActive();
+        Name = name;
+        Emoji = emoji;
+        Colour = colour;
+        Version++;
+    }
+
+    private void RequireActive()
+    {
+        if (Status == PopkinStatus.WrappedUp)
+        {
+            throw new InvalidOperationException("A wrapped-up Popkin does not change.");
+        }
+    }
+
+    /// <summary>
     /// Wraps the Popkin up: from now on it is read-only (L2-045), and its photo album is kept or
     /// goes 30 days later, as chosen (L2-043 AC2). A Popkin wraps up once.
     /// </summary>
