@@ -65,7 +65,24 @@ export interface ChatMessage {
     snippet: string | null;
     deleted: boolean;
   } | null;
+  /** The photo it carries (L2-026). */
+  photo: ChatPhoto | null;
 }
+
+export interface ChatPhoto {
+  id: string;
+  url: string;
+  width: number;
+  height: number;
+}
+
+/** Dev's photo of the dock, as the mock draws it. */
+export const dockPhoto: ChatPhoto = {
+  id: '30000000-0000-4000-8000-000000000001',
+  url: '/photos/lake.jpg',
+  width: 1200,
+  height: 900,
+};
 
 const member = (name: string, initials: string, accent: string, photo?: string) => ({
   membershipId: `00000000-0000-4000-8000-${name.toLowerCase().padEnd(12, '0').slice(0, 12)}`,
@@ -119,6 +136,7 @@ export function message(
     reactions: [],
     reactionsVersion: 0,
     quote: null,
+    photo: null,
     ...extra,
   };
 }
@@ -127,7 +145,8 @@ export function message(
 export const quoteOf = (quoted: ChatMessage): NonNullable<ChatMessage['quote']> => ({
   messageId: quoted.id,
   authorFirstName: quoted.author.firstName,
-  snippet: quoted.text.split('\n')[0].slice(0, 120),
+  // A photo with no text is quoted as "Photo" (L2-026).
+  snippet: quoted.text.split('\n')[0].slice(0, 120) || (quoted.photo ? 'Photo' : ''),
   deleted: false,
 });
 
@@ -146,8 +165,8 @@ export const poppedIn = (who: typeof people.joel, at: Date): ChatMessage =>
   });
 
 /**
- * The thread the mocks draw, with its reactions and Mara's reply to Ellie; the photo comes with
- * journey 13. Mara's own Heart is on Walt's pancakes.
+ * The thread the mocks draw, with its reactions, Dev's photo of the dock and Mara's reply to
+ * Ellie. Mara's own Heart is on Walt's pancakes.
  */
 export function theMockThread(): ChatMessage[] {
   const { mara, walt, dev, ellie, ruth, joel } = people;
@@ -161,6 +180,7 @@ export function theMockThread(): ChatMessage[] {
       ],
     }),
     message(dev, 'Dock was glass this morning', saturday(8, 40), {
+      photo: dockPhoto,
       reactions: [{ emoji: '😍', membershipIds: [...ids(walt, ellie, ruth), ...others(5)] }],
     }),
     paddles,
@@ -300,7 +320,11 @@ export class Chat {
   hereNow = [people.walt, people.ellie, people.dev, people.mara, people.ruth];
 
   /** What the app sent, read and deleted, in order. */
-  readonly sent: { clientMessageId: string; text: string }[] = [];
+  readonly sent: { clientMessageId: string; text: string; photoId?: string }[] = [];
+  /** The photos uploaded for messages, in order, by size. */
+  readonly uploaded: number[] = [];
+  /** The next uploads are refused with this code, until a spec says otherwise. */
+  refuseUploads: 'photo_too_large' | 'photo_type_not_allowed' | null = null;
   readonly read: string[] = [];
   readonly discarded: string[] = [];
   /** Each reaction asked for, as "+❤️ {messageId}" or "-❤️ {messageId}". */
@@ -323,7 +347,7 @@ export class Chat {
   constructor(private readonly page: Page) {}
 
   async install(): Promise<void> {
-    await this.page.route('**/photos/call*.jpg', (route) =>
+    await this.page.route(/\/photos\/(call\d|lake)\.jpg$/, (route) =>
       route.fulfill({
         path: path.join(
           __dirname,
@@ -594,6 +618,15 @@ export class Chat {
         json: { version: target.reactionsVersion, reactions: target.reactions },
       });
     }
+    if (method === 'POST' && what === 'photos') {
+      this.uploaded.push(request.postDataBuffer()?.length ?? 0);
+      if (this.thread.readOnly) return route.fulfill(asProblem(problem(409, 'popkin_wrapped_up')));
+      if (this.refuseUploads) {
+        return route.fulfill(asProblem(problem(400, this.refuseUploads, { field: 'file' })));
+      }
+      const id = `30000000-0000-4000-8000-${String(100 + this.uploaded.length).padStart(12, '0')}`;
+      return route.fulfill({ status: 201, json: { ...dockPhoto, id } });
+    }
     const one = /^messages\/([0-9a-f-]{36})$/.exec(what);
     if (one && method === 'DELETE') {
       const messageId = one[1];
@@ -612,6 +645,7 @@ export class Chat {
         clientMessageId: string;
         text: string;
         replyToMessageId?: string;
+        photoId?: string;
       };
       this.sent.push(body);
       switch (this.failSends) {
@@ -636,6 +670,7 @@ export class Chat {
         clientMessageId: body.clientMessageId,
         threadId: id,
         quote: answered ? quoteOf(answered) : null,
+        photo: body.photoId ? { ...dockPhoto, id: body.photoId } : null,
       });
       held().push(added);
       return route.fulfill({ status: 201, json: added });
