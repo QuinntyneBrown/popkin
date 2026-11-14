@@ -1,6 +1,6 @@
 ## Purpose
 
-> Popkin is a free platform for pop-up communities. Spin up a private space in seconds, invite
+> Popkin is a platform for pop-up communities. Spin up a private space in seconds, invite
 > people by QR code, then chat, video call, share photos and rate experiences together.
 
 This is what Popkin is for. Before adding or changing anything, ask how it serves that purpose;

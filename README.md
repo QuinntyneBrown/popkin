@@ -1,7 +1,7 @@
 <h1 align="center">Popkin</h1>
 
 <p align="center">
-  <strong>A free platform for pop-up communities.</strong>
+  <strong>A platform for pop-up communities.</strong>
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
-Popkin is a free platform for pop-up communities. Spin up a private space in seconds, invite
+Popkin is a platform for pop-up communities. Spin up a private space in seconds, invite
 people by QR code, then chat, video call, share photos and rate experiences together.
 
 ## Contents
