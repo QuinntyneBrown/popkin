@@ -1,0 +1,21 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["You know the moment. Someone says: we should all get together."] },
+    { "id": "problem", "bars": 4, "lines": ["Then the group chat begins. Numbers added one by one, photos lost in the scroll, plans buried under replies."] },
+    { "id": "meet", "bars": 4, "lines": ["Meet Popkin. A private space for your people, popped up in seconds, and free."] },
+    { "id": "invite", "bars": 5, "lines": ["Hold up the QR code. Friends scan it, add their name, and they're in. No app to download."] },
+    { "id": "chat", "bars": 4, "lines": ["Chat with everyone. React, reply, or slip into a direct message."] },
+    { "id": "photos", "bars": 4, "lines": ["Every photo lands in one shared album, by the day, from everyone."] },
+    { "id": "call", "bars": 4, "lines": ["Can't all be in one place? One tap, and the whole group is on a call."] },
+    { "id": "rate", "bars": 5, "lines": ["Share what you did, and what you're keen to do next. Rate it together, and see the group's score."] },
+    { "id": "wrap", "bars": 5, "lines": ["And when it's over, it doesn't just fade out. You get a proper send-off: a recap, the best moment, and the album to keep."] },
+    { "id": "free", "bars": 5, "lines": ["Free. Like, actually free. No ads, no premium tier.", "It works in the browser, on a phone or a desktop."] },
+    { "id": "close", "bars": 5, "lines": ["Popkin. Your people, popped up in seconds. Start one tonight."] }
+  ]
+}
