@@ -59,7 +59,9 @@ public sealed class OpenDirectThreadTests
         Assert.Equal(["accent", "initials", "photoUrl"], other.GetProperty("avatar").EnumerateObject().Select(p => p.Name).Order());
         Assert.Equal("WB", other.GetProperty("avatar").GetProperty("initials").GetString());
         // Never a phone number or an email (L2-054 AC2).
-        Assert.DoesNotContain("555", thread.GetRawText());
+        // Matched on what a GUID never holds, so a random id cannot fail it.
+        Assert.DoesNotContain("(415)", thread.GetRawText());
+        Assert.DoesNotContain("+1415", thread.GetRawText());
     }
 
     // Given a direct message between two members,

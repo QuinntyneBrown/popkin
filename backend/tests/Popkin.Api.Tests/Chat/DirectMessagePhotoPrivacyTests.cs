@@ -94,6 +94,7 @@ public sealed class DirectMessagePhotoPrivacyTests
         Assert.Equal(direct.GetProperty("photo").GetProperty("id").GetGuid(), waltsDirect.Arguments[0].GetProperty("photo").GetProperty("id").GetGuid());
         await waltHub.WaitForAsync("MessageAdded", e => e.Arguments[0].GetProperty("id").GetGuid() == everyone.GetProperty("id").GetGuid());
         await ruthHub.WaitForAsync("MessageAdded", e => e.Arguments[0].GetProperty("id").GetGuid() == everyone.GetProperty("id").GetGuid());
+        await ruthHub.WaitForAsync("PhotosAdded", e => e.Arguments[1][0].GetGuid() == everyone.GetProperty("photo").GetProperty("id").GetGuid());
         Assert.DoesNotContain(ruthHub.ReceivedNamed("MessageAdded"), e => e.Arguments[0].GetProperty("id").GetGuid() == direct.GetProperty("id").GetGuid());
         Assert.Equal(
             [everyone.GetProperty("photo").GetProperty("id").GetGuid()],

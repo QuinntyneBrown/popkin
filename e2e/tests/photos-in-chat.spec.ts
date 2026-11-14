@@ -52,6 +52,8 @@ test.describe('choosing a photo (L2-026 AC1)', () => {
     await page.goto(chatUrl);
     const photos = new ChatPhotos(page);
 
+    // Photo is offered once the thread has opened; focusing does not wait for it as a click does.
+    await expect(photos.choose).toBeEnabled();
     await photos.choose.focus();
     const chooser = page.waitForEvent('filechooser');
     await page.keyboard.press('Enter');
@@ -131,9 +133,14 @@ test.describe('sending a photo (L2-026 AC1, AC2)', () => {
 
     const mine = chat.message('Look at the lake');
     await expect(photos.photo(mine)).toBeVisible();
-    const photo = await photos.image(mine).boundingBox();
-    const text = await mine.locator('.bubble > p').boundingBox();
-    expect(text && photo && text.y >= photo.y + photo.height).toBe(true);
+    // Measured together, as the message settles from sending to sent.
+    await expect
+      .poll(async () => {
+        const photo = await photos.image(mine).boundingBox();
+        const text = await chat.textOf(mine).boundingBox();
+        return !!text && !!photo && photo.height > 0 && text.y >= photo.y + photo.height;
+      })
+      .toBe(true);
   });
 
   for (const width of [360, 1280]) {

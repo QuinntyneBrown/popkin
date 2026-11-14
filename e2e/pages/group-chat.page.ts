@@ -107,6 +107,11 @@ export class GroupChatPage {
     return this.messages.filter({ has: this.page.locator('.bubble > p', { hasText: text }) });
   }
 
+  /** A message's own text, not its quote. */
+  textOf(message: Locator): Locator {
+    return message.locator('.bubble > p');
+  }
+
   nameOf(message: Locator): Locator {
     return message.locator('.msg__name');
   }
