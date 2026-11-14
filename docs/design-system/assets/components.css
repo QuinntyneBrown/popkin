@@ -366,6 +366,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .bubble__quote .truncate { display: block; }
 button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); border: 0; color: inherit; text-align: start; cursor: pointer; } /* a live quote: "Go to {first name}'s message" (L2-025 AC3) */
 .bubble__quote--deleted { font-style: italic; } /* "Message deleted", not a button (L2-025 AC4) */
+.bubble__removed { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2-5) var(--space-4); font: var(--text-body-sm); font-style: italic; color: var(--color-fg-muted); } /* "Photo removed" with the image-off icon, in place of a photo that was deleted; not a link (L2-036 AC3) */
+.msg--mine .bubble__removed { color: var(--color-fg-on-popkin); }
+.bubble__removed + p { padding-top: 0; } /* the text of the message, under the line */
 .msg--marked { background: var(--accent-tint); box-shadow: 0 0 0 var(--space-2) var(--accent-tint); } /* a quoted message after a jump, for 2 s: tint ... */
 .msg--marked .bubble { outline: var(--border-width-thick) solid var(--accent-line); outline-offset: var(--border-width-thick); } /* ... and an outline, so colour is not the only carrier (L2-057 AC5) */
 .bubble--failed { outline: var(--border-width-thick) dashed var(--color-danger-border); opacity: 0.85; }
@@ -500,6 +503,8 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
 .comment__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .comment__name { font: var(--font-weight-bold) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); }
 .comment__text { margin-top: var(--space-1); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed) var(--font-family-sans); }
+.comment__delete { margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0 0; color: var(--color-fg-muted); } /* "Delete comment", on one's own comment only (L2-035 AC5) */
+.photo-info .comment__delete { color: var(--color-fg-on-stage-muted); }
 
 /* ---------- Calls -------------------------------------------------------------------- */
 .call-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: var(--space-2); padding: 0 var(--space-2); min-height: var(--layout-call-min-height); }
@@ -1038,7 +1043,7 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
 @media (min-width: 80rem) { .recap { gap: var(--space-24); max-width: var(--layout-recap-max-xl); } }
 
 /* The stage: a call fills the screen and lists who is on it from XL; a photo gets a side panel from L. */
-.call-aside, .photo-info__by, .photo-info__comments, .icon-btn__label { display: none; }
+.call-aside, .photo-info__by, .photo-info__comments, .photo-info__composer, .icon-btn__label { display: none; }
 @media (min-width: 40rem) {
   .call-grid--pair { grid-template-columns: 1fr 1fr; }
   .call-grid--six { grid-template-columns: repeat(3, 1fr); }
@@ -1062,6 +1067,7 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
   .photo-info__by { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
   .photo-info__comments { display: block; flex: 1; margin-top: var(--space-6); padding-top: var(--space-1); border-top: var(--border-width-hairline) solid var(--color-bg-stage-control); }
   .photo-info__comments .text-caption { color: var(--color-fg-on-stage-muted); }
+  .photo-info__composer { display: block; margin-top: var(--space-4); } /* the field "Add a comment" in the side panel; below L the dialog has it (L2-058 AC11) */
 }
 @media (min-width: 80rem) {
   .screen--viewer { --pk-detail-width: var(--layout-list-pane-xl); }
