@@ -1,3 +1,5 @@
+import { joinCodeStates } from '../../fixtures/join-code';
+import { JoinCodePage } from '../../pages/join-code.page';
 import { experienceStates } from '../../fixtures/experience-states';
 import { ShareExperienceDialog } from '../../pages/share-experience.dialog';
 import { openTheScanner, scanSomethingElse, withACamera } from '../../fixtures/my-popkins';
@@ -78,5 +80,17 @@ parity('alert', [
     ...accountStates.deleteAccount,
     name: 'delete-account-hosted',
     region: (page) => new DeleteAccountDialog(page).hosted,
+  },
+  {
+    key: 'joinCodeLimited',
+    name: 'join-code-limited',
+    region: (page) => new JoinCodePage(page).alert,
+    ...joinCodeStates.joinCodeLimited,
+  },
+  {
+    key: 'joinCodeError',
+    name: 'join-code-error',
+    region: (page) => new JoinCodePage(page).alert,
+    ...joinCodeStates.joinCodeError,
   },
 ]);

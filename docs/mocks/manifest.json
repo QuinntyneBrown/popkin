@@ -217,7 +217,10 @@
       "states": [
         "default",
         "invalid",
-        "submitting"
+        "submitting",
+        "blank",
+        "error",
+        "limited"
       ],
       "not_applicable": {
         "loading": "The screen needs no request before it shows, so it has nothing to wait for.",

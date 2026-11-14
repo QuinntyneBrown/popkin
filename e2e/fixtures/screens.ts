@@ -15,7 +15,7 @@ import { WrapUpBanner } from '../pages/wrap-up-banner';
 import { wrapUpStates } from './wrap-up-states';
 import { leaveStates } from './leave-states';
 import path from 'node:path';
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { callStates } from './call-states';
 import { experienceStates } from './experience-states';
 import { AddCommentDialog } from '../pages/add-comment.dialog';
@@ -49,6 +49,7 @@ import {
 } from './home';
 import {
   asVisitor,
+  inviteCode,
   codeScreenAt24Seconds,
   howLongForLakeside,
   inviteFailsOnTheServer,
@@ -105,6 +106,8 @@ import { ScanToJoinDialog } from '../pages/scan-to-join.dialog';
 import { SignInPage } from '../pages/sign-in.page';
 import { PopkinCreatedPage } from '../pages/popkin-created.page';
 import { ServerErrorPage } from '../pages/server-error.page';
+import { JoinCodePage } from '../pages/join-code.page';
+import { joinCodeStates } from './join-code';
 import { SignUpPage } from '../pages/sign-up.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
 import { YourProfilePage } from '../pages/your-profile.page';
@@ -149,6 +152,12 @@ const portrait = path.join(__dirname, '../../docs/mocks/assets/images/call3.jpg'
 const profileRegions = (page: Page) => {
   const p = new YourProfilePage(page);
   return { topBar: p.topBar, heading: p.heading, photo: p.photo, field: p.nameField };
+};
+
+const joinCodePicture = (page: Page) => ({ picture: new JoinCodePage(page).picture });
+const joinCodeRegions = (page: Page) => {
+  const j = new JoinCodePage(page);
+  return { topBar: j.topBar, heading: j.heading, field: j.field };
 };
 
 const signUpRegions = (page: Page) => {
@@ -233,6 +242,42 @@ export const screenStates: ScreenState[] = [
     key: 'serverErrorWithReference',
     before: inviteFailsOnTheServer,
     regions: (page) => ({ emptyState: new ServerErrorPage(page).emptyState }),
+  },
+  {
+    key: 'joinCode',
+    ...joinCodeStates.joinCode,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeSubmitting',
+    ...joinCodeStates.joinCodeSubmitting,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeInvalid',
+    ...joinCodeStates.joinCodeInvalid,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeBlank',
+    ...joinCodeStates.joinCodeBlank,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeError',
+    ...joinCodeStates.joinCodeError,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeLimited',
+    ...joinCodeStates.joinCodeLimited,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
   },
   {
     key: 'signUp',

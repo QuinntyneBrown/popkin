@@ -17,10 +17,10 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first thirteen journeys, and journeys 16 to 20, are built; the rest is designed.** Journey
+**The first thirteen journeys, and journeys 15 to 20, are built; the rest is designed.** Journey
 1, Start a Popkin, journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin
 home, journey 5, Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an
-experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey 12, React and reply, journey 13, Photos in chat, journey 16, Change Popkin settings, journey
+experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey 12, React and reply, journey 13, Photos in chat, journey 15, Join by code, journey 16, Change Popkin settings, journey
 17, Manage account, journey 18, Leave a Popkin, journey 19, Delete account, and journey 20, Say
 keen, run end to end: the backend has sign up and sign in
 with a code, sessions, Popkin creation, the list of a person's Popkins, the invite preview, joining with a name and a photo,
@@ -55,7 +55,7 @@ sends no hub events
 (ADR 0015); the app has the screens of those journeys, the landing page at `/` (behind
 `signedOutGuard`, which sends a signed-in person to My Popkins), the welcome screen, the group
 chat screen, the Chat tab, the direct message, the Popkin home, the photo album and the photo
-view, the sign-in screen, My Popkins, the call screen (for the group call and for a direct
+view, the sign-in screen, Join with a code (`/join`), My Popkins, the call screen (for the group call and for a direct
 call), Experiences, the experience page, the wrap-up screen, the recap and the account
 (`/account`, with its theme of the device) among them, and no placeholder screen, built for the
 five form factors of L2-058, the read-only chat, Photos and Experiences of a wrapped-up Popkin,
@@ -77,7 +77,8 @@ Chat tab and the direct message (`pk-conversations`, `pk-conversation-row`, `pk-
 `pk-qr` (known gap 56); the `api` library has the chat's stores (`ThreadStore` with reactions, deletion, replies,
 the jump to a quote and the photo chosen, and the outbox's replies and photos, uploaded before
 their message), the reactions offered (`reactions.ts`), the store of the Chat tab
-(`ConversationsStore`) and its text (`conversation-text.ts`), the home's store, the album's stores, the store of My Popkins and its saved list, the QR scanner,
+(`ConversationsStore`) and its text (`conversation-text.ts`), the home's store, the album's stores, the store of My Popkins and its saved list, the QR scanner, the lookup of a code typed
+(`JoinCode`),
 the call session, its peer links (a mesh, ADR 0014) and the call banner's store, the stores of
 Experiences and of one experience, the recap's store (`RecapStore`, behind `RECAP_API`), the
 wrap-up watch (`WrapUpWatch`) and the wrap-up text (`wrap-up-text.ts`), the account's store
