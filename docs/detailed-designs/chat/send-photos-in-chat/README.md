@@ -33,7 +33,7 @@ location and device data removed.
 - `docs/mocks/pages/group-chat/photo-preview.html` — Mara has chosen a photo: the photo preview above the field (the image, alt "Photo to send", and the icon button "Remove photo"), the field empty and Send enabled (L2-026 AC1).
 - `docs/mocks/pages/group-chat/photo-refused.html` — the alert above the field, "This file is 14 MB. Photos can be up to 10 MB." with "Dismiss"; nothing is previewed and Send is disabled (L2-026 AC4, L2-031 AC2).
 - `docs/mocks/pages/direct-message/default.html` — Walt's photo message in a direct message, "Open photo from Walt" (L2-023 AC3).
-- `docs/mocks/pages/photo-view/direct.html` — the photo view of Walt's direct-message photo, opened from the chat: no previous or next, no caption, and no reactions or comments of its own; Close goes back to the direct message.
+- `docs/mocks/pages/photo-view/direct.html` — the photo view of Walt's direct-message photo, opened from the chat: no previous or next and no caption; since journey 14's design it takes reactions and comments of its own, for the two members (known gap 73). Close goes back to the direct message.
 - "Photo" in every composer mock leads to `photo-preview.html`, standing for the device's picker.
 - No mock draws a photo message that is sending. A sending message is drawn by no mock of text either; the app shows it a little fainter, with "Sending" in visually hidden text. A photo message that waits or fails takes the states of `group-chat/offline.html` and `failed-send.html`.
 
@@ -138,8 +138,8 @@ Settled for journey 13 (decisions 13 to 17 were taken while building it):
 Still open:
 
 - Removing orphaned chat photos after a period: `<TO SUPPLY>`, a `Popkin.Worker` job the expected home (known gap 71).
-- Whether a direct-message photo takes the photo reactions and comments of the album. The mock (`photo-view/direct.html`) draws none: its reactions live on its message. `<TO SUPPLY>` (known gap 73).
-- What a message whose photo is gone shows. The removal of an album that was not kept now removes the chat photos with it, and the message then reads with no photo, so a photo message with no text is an empty bubble; what the erasure of a deleted account does to chat photos is not decided either. `<TO SUPPLY>`, with "Photo removed" in journey 14 (known gap 74).
+- Whether a direct-message photo takes the photo reactions and comments of the album: yes, for its two members, settled by the design of journey 14 ([React to a photo](../../photos/react-to-photo/README.md), [Comment on a photo](../../photos/comment-on-photo/README.md)); `photo-view/direct.html` draws them. Known gap 73 closes when journey 14 is built.
+- What a message whose photo is gone shows. The removal of an album that was not kept now removes the chat photos with it, and the message then reads with no photo, so a photo message with no text is an empty bubble until journey 14 is built; its design sets `Message.PhotoRemoved` there too, so the message reads "Photo removed" (`group-chat/photo-removed`, [Save a photo](../../photos/save-photo/README.md)). What the erasure of a deleted account does to chat photos is not decided. Known gap 74.
 - The client's own "Photo" for a photo message with no text (known gap 76).
 - What "Shared between you", in the person pane of a direct message from 1024 px, lists, and whether its thumbnails open the photo view: the mock draws three plain thumbnails. `<TO SUPPLY>` (known gap 64).
 - "Photo removed", for a photo taken out of the album, is journey 14's.
