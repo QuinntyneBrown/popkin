@@ -4,7 +4,10 @@
 //   container runs `popkin migrate` before the new API starts.
 // - popkin-worker: one instance, no ingress.
 // - Azure SQL, signed in with the apps' managed identity; no password exists.
-// - The marketing site (ADR 0017): a Static Web App of its own, public, on its own address.
+// - The marketing site (ADR 0017): a Static Web App of its own.
+// - popkin.community (ADR 0020, domains.bicep): an Azure DNS zone and Azure Front Door, which
+//   serve the app at app.popkin.community and at every *.popkin.community address, and the
+//   marketing site at popkin.community and www.popkin.community.
 @description('The tag of the images to run: the commit being deployed.')
 param imageTag string
 
@@ -17,6 +20,9 @@ param authCodeHashKey string
 param photosSigningKey string
 
 param location string = resourceGroup().location
+
+@description('The registered domain: the app at app.<domain> and *.<domain>, the marketing site at <domain> and www.<domain>.')
+param domain string = 'popkin.community'
 
 @description('Azure SQL takes no new servers in some regions (East US 2 among them); the nearest that does.')
 param sqlLocation string = 'centralus'
@@ -103,7 +109,9 @@ resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
   }
 }
 
-var appOrigin = 'https://popkin-web.${environment.properties.defaultDomain}'
+// The app's own origin, on Front Door (ADR 0020). A Popkin's address, https://{address}.<domain>,
+// reaches the same app.
+var appOrigin = 'https://app.${domain}'
 var connectionString = 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Database=${database.name};Authentication=Active Directory Managed Identity;User Id=${identity.properties.clientId};Encrypt=True;TrustServerCertificate=False;Connection Timeout=60'
 var databaseEnv = [
   { name: 'Database__Provider', value: 'SqlServer' }
@@ -253,6 +261,15 @@ resource marketing 'Microsoft.Web/staticSites@2023-12-01' = {
   properties: {}
 }
 
-output appUrl string = appOrigin
-output marketingUrl string = 'https://${marketing.properties.defaultHostname}'
+module domains 'domains.bicep' = {
+  name: 'domains'
+  params: {
+    domain: domain
+    webHostName: web.properties.configuration.ingress.fqdn
+    marketingHostName: marketing.properties.defaultHostname
+  }
+}
+
+output appUrl string = domains.outputs.appOrigin
+output marketingUrl string = domains.outputs.marketingOrigin
 output marketingName string = marketing.name

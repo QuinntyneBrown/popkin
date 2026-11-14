@@ -12,11 +12,13 @@ in `infra/main.bicep`, in the same change.
 
 | Part | Azure resource | Notes |
 |---|---|---|
-| The app and its reverse proxy | Container App `popkin-web` | Image `popkin-web` (`infra/web/`): Caddy serving the built app and forwarding `/api` and `/hubs`; public, HTTPS only |
+| The front door | Azure Front Door Standard `afd-popkin` | Ends TLS with certificates it issues and renews; `app.popkin.community` and `*.popkin.community` go to `popkin-web`, `popkin.community` and `www.popkin.community` to the marketing site ([ADR 0020](adr/0020-popkin-community-on-front-door.md)) |
+| The domain's records | Azure DNS zone `popkin.community` | Every record of the domain; Namecheap, the registrar, names the zone's four name servers |
+| The app and its reverse proxy | Container App `popkin-web` | Image `popkin-web` (`infra/web/`): Caddy serving the built app and forwarding `/api` and `/hubs`; public, HTTPS only; reached through the front door |
 | The API | Container App `popkin-api` | Image `popkin-api`; exactly one replica; inside the environment only; its init container runs `popkin migrate` |
 | The Worker | Container App `popkin-worker` | Image `popkin-worker`; exactly one replica; no ingress |
 | The database | Azure SQL Database `popkin` (Basic) | Microsoft Entra authentication only; the apps' identity `id-popkin` signs in with no password |
-| The marketing site | Static Web App `swa-popkin-marketing` (Free) | Its own public address; built with the app's address as `APP_URL` |
+| The marketing site | Static Web App `swa-popkin-marketing` (Free) | Served at `popkin.community` and `www.popkin.community` through the front door; built with `https://app.popkin.community` as `APP_URL` |
 | The images | Container registry `popkin<suffix>` (Basic) | Tagged with the commit; pulled by `id-popkin` |
 | Logs | Log Analytics workspace `log-popkin` | The console log of every container |
 
@@ -35,8 +37,26 @@ OpenID Connect, its roles, and the GitHub environment `production` with these en
 
 The addresses of the app and the marketing site are in the summary of each Deploy run.
 
+## Addresses
+
+| Address | Serves |
+|---|---|
+| `https://app.popkin.community` | The Popkin web app (`frontend/projects/popkin`); `App:Origin`, and the host of invite links (`/i/{code}`) |
+| `https://{address}.popkin.community` | The same web app, for a Popkin's own address (L2-064); any name without a record of its own |
+| `https://popkin.community`, `https://www.popkin.community` | The marketing site (`frontend/projects/marketing`) |
+
+`infra/domains.bicep` holds the zone, the front door, its four custom domains with their managed
+certificates, the TXT records at `_dnsauth.<name>` that prove each one (the apex and the wildcard
+share `_dnsauth.popkin.community`), the CNAME records of `www`, `app` and `*`, and the apex's alias
+A record. The certificates renew by themselves while those records stand. Should the zone be
+recreated, its name servers change: set the new ones at Namecheap (Domain List, Manage,
+Nameservers, Custom DNS); `az network dns zone show -g rg-popkin -n popkin.community --query nameServers`
+lists them.
+
 ## Shape
 
+- Azure Front Door in front of everything public, routing by host (ADR 0020); it caches
+  nothing, so the hub's WebSockets pass through.
 - One reverse proxy on one origin. It serves the built web app
   (`frontend/dist/popkin/browser`, with `index.html` as the fallback for app routes) and forwards
   `/api` and `/hubs` to the API, with WebSockets allowed on `/hubs`. Product: Caddy
@@ -45,7 +65,7 @@ The addresses of the app and the marketing site are in the summary of each Deplo
   Azure Static Web App: the static files of `frontend/dist/marketing/browser`, built after
   `npm run media:sync`, which copies the pitch film and its pictures in first, with its headers in
   `staticwebapp.config.json`. It needs no setting at run time; the app's address its links use is
-  built in: `POPKIN_APP_URL` when the build defines it, `https://popkin.community` otherwise
+  built in: `POPKIN_APP_URL` when the build defines it, `https://app.popkin.community` otherwise
   (`environment.ts`). Nothing on that host reaches `/api` or `/hubs`.
 - **One** instance of the Popkin API ([ADR 0009](adr/0009-one-api-instance.md)). Do not scale it
   out: hub groups, presence and the rate limits live in its memory.
@@ -70,7 +90,7 @@ The addresses of the app and the marketing site are in the summary of each Deplo
 | `Invites:BaseUrl` | API | Invite links cannot be built |
 | `Photos:SigningKey` | API, Worker | Each refuses to start outside Development; with it, every photo address, and the address an album's zip downloads from, is signed and expires after an hour ([Join a Popkin](detailed-designs/invitations/join-popkin/README.md)). The API signs and checks; give the Worker the same value |
 | `Photos:Root` | API, Worker, Development only | Photo files go to a `popkin-photos` folder in the machine's temporary folder. The API and the Worker must name the same folder |
-| `App:Origin` | API | A change from a client that sends no `Sec-Fetch-Site` is refused with 403 `cross_site_request` |
+| `App:Origin` | API | A change from a client that sends no `Sec-Fetch-Site` is refused with 403 `cross_site_request`. `https://app.popkin.community` in production |
 | `MediaRelay:Urls` (a list: `MediaRelay:Urls:0`, `MediaRelay:Urls:1`, …) | API | A participant is handed no STUN or TURN server, so a group call connects only between browsers that reach each other directly, as on one machine or one network ([Group call](detailed-designs/calls/group-call/README.md)) |
 | `MediaRelay:Secret` | API | The servers of `MediaRelay:Urls` are handed out without a username or a credential, which a STUN server accepts and a TURN server refuses. It is the shared secret of the relay's TURN REST scheme (`use-auth-secret` and `static-auth-secret` in coturn): the API signs `{expiry}:{membershipId}` with HMAC-SHA1 and never calls the relay |
 | `MediaRelay:CredentialLifetime` | API | A TURN credential lives one hour (`01:00:00`); a value that is not a length of time stops the API at startup |
@@ -99,7 +119,7 @@ The Deploy workflow does each step, in order:
    `popkin-api` (`backend/src/Popkin.Api/Dockerfile`, with the `popkin` tool in `/app/cli`),
    `popkin-worker` (`backend/src/Popkin.Worker/Dockerfile`) and `popkin-web`
    (`infra/web/Dockerfile`, which builds the web app).
-2. Deploy `infra/main.bicep`. The new API revision's init container runs `popkin migrate`
+2. Deploy `infra/main.bicep`, with `infra/domains.bicep` (the zone and the front door). The new API revision's init container runs `popkin migrate`
    against the database before the API starts; the API never migrates on startup.
 3. The new API starts, then the Worker. Open hub connections drop and reconnect.
 4. Build the marketing site (`npm run media:sync`, then `ng build marketing --define
