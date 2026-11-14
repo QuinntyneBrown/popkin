@@ -23,6 +23,7 @@ import {
 import { toApiProblem } from '../problem';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { CHAT_API } from './chat-api';
+import { albumPhotoProblem } from '../photos/photo-rules';
 import { MessageOutbox } from './message-outbox';
 import { ReplyQuote, ThreadRow, mergeMessages, threadRows } from './thread-rows';
 import { announcement } from './thread-text';
@@ -66,6 +67,8 @@ export class ThreadStore {
   private readonly addedTo = new Subject<'mine' | 'theirs'>();
   private readonly failed = new Subject<ThreadFailure>();
   private readonly reply = signal<ReplyQuote | null>(null);
+  private readonly chosen = signal<{ file: File; preview: string } | null>(null);
+  private readonly refused = signal<string | null>(null);
   private readonly mark = signal<string | null>(null);
   private unmark?: ReturnType<typeof setTimeout>;
 
@@ -89,6 +92,10 @@ export class ThreadStore {
   readonly marked = this.mark.asReadonly();
   /** The message the member is replying to, for the bar above the field (L2-025 AC1). */
   readonly replyingTo = this.reply.asReadonly();
+  /** The photo chosen for the next message, and the address its preview shows from. */
+  readonly photo = this.chosen.asReadonly();
+  /** Why the photo chosen was refused; null when nothing was (L2-026 AC4). */
+  readonly photoProblem = this.refused.asReadonly();
   /** A reaction or a deletion that did not save, after what it changed is put back. */
   readonly failures$: Observable<ThreadFailure> = this.failed.asObservable();
 
@@ -168,6 +175,7 @@ export class ThreadStore {
     this.document.addEventListener('visibilitychange', visibility);
     this.destroyRef.onDestroy(() => {
       clearTimeout(this.unmark);
+      this.removePhoto();
       this.document.removeEventListener('visibilitychange', visibility);
       const thread = this.header();
       if (thread) this.unread.setReading(thread.id, false);
@@ -267,14 +275,45 @@ export class ThreadStore {
     this.reportRead();
   }
 
+  /** Sends the text, the photo chosen, or both (L2-021 AC5, L2-026 AC1). */
   send(text: string): void {
     const thread = this.header();
     const trimmed = text.trim();
-    if (!thread || !trimmed || thread.readOnly) return;
+    const photo = this.chosen();
+    if (!thread || thread.readOnly || (!trimmed && !photo)) return;
     this.today.set(new Date());
-    this.outbox.enqueue(thread.popkinId, thread.id, trimmed, this.reply() ?? undefined);
+    this.outbox.enqueue(
+      thread.popkinId,
+      thread.id,
+      trimmed,
+      this.reply() ?? undefined,
+      photo?.file,
+    );
     this.reply.set(null);
+    this.removePhoto();
     this.addedTo.next('mine');
+  }
+
+  /**
+   * The photo the member picked for the next message: shown above the field, or, when it is not
+   * one Popkin takes, refused with the reason (L2-026 AC1, AC4; L2-031 AC2).
+   */
+  choosePhoto(file: File): void {
+    if (this.header()?.readOnly) return;
+    const problem = albumPhotoProblem(file);
+    this.removePhoto();
+    this.refused.set(problem);
+    if (!problem) this.chosen.set({ file, preview: URL.createObjectURL(file) });
+  }
+
+  removePhoto(): void {
+    const photo = this.chosen();
+    if (photo) URL.revokeObjectURL(photo.preview);
+    this.chosen.set(null);
+  }
+
+  dismissPhotoProblem(): void {
+    this.refused.set(null);
   }
 
   /** The next message sent replies to this one, with its first name and one line (L2-025). */
