@@ -14,7 +14,7 @@ import { WrapUpBanner } from '../pages/wrap-up-banner';
 import { wrapUpStates } from './wrap-up-states';
 import { leaveStates } from './leave-states';
 import path from 'node:path';
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { callStates } from './call-states';
 import { experienceStates } from './experience-states';
 import { AddCommentDialog } from '../pages/add-comment.dialog';
@@ -48,6 +48,7 @@ import {
 } from './home';
 import {
   asVisitor,
+  inviteCode,
   codeScreenAt24Seconds,
   howLongForLakeside,
   inviteFailsOnTheServer,
@@ -105,6 +106,7 @@ import { SignInPage } from '../pages/sign-in.page';
 import { PopkinCreatedPage } from '../pages/popkin-created.page';
 import { ServerErrorPage } from '../pages/server-error.page';
 import { JoinCodePage } from '../pages/join-code.page';
+import { aVisitorWithACode, holdTheLookup } from './join-code';
 import { SignUpPage } from '../pages/sign-up.page';
 import { VerifyCodePage } from '../pages/verify-code.page';
 import { YourProfilePage } from '../pages/your-profile.page';
@@ -243,6 +245,21 @@ export const screenStates: ScreenState[] = [
   {
     key: 'joinCode',
     before: asVisitor,
+    regions: joinCodeRegions,
+    wideRegions: joinCodePicture,
+  },
+  {
+    key: 'joinCodeSubmitting',
+    before: async (page) => {
+      await aVisitorWithACode(page);
+      await holdTheLookup(page);
+    },
+    app: async (page) => {
+      const join = new JoinCodePage(page);
+      await join.code.fill(inviteCode);
+      await join.find.click();
+      await expect(join.find).toBeDisabled();
+    },
     regions: joinCodeRegions,
     wideRegions: joinCodePicture,
   },

@@ -1,8 +1,10 @@
 import { aCamera } from '../fixtures/camera';
-import { asVisitor } from '../fixtures/journeys';
+import { aVisitorWithACode, holdTheLookup, joinCodeUrl } from '../fixtures/join-code';
+import { asVisitor, inviteCode } from '../fixtures/journeys';
 import { maraWithPopkins } from '../fixtures/my-popkins';
 import { expect, test } from '../fixtures/pk-test';
 import { JoinCodePage } from '../pages/join-code.page';
+import { JoinInvitePage } from '../pages/join-invite.page';
 import { MyPopkinsPage } from '../pages/my-popkins.page';
 import { ScanToJoinDialog } from '../pages/scan-to-join.dialog';
 import { WelcomePage } from '../pages/welcome.page';
@@ -68,5 +70,46 @@ test.describe('Join with a code', () => {
 
     await expect(join.picture).toBeVisible();
     await expect(join.code).toBeVisible();
+  });
+
+  // L2-015 AC5: a match opens that Popkin's invite.
+  test('opens the invite of the code typed', async ({ page }) => {
+    await aVisitorWithACode(page);
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+
+    await join.code.fill(inviteCode.toUpperCase());
+    await join.find.click();
+
+    await expect(page).toHaveURL(`/i/${inviteCode}`);
+    await expect(new JoinInvitePage(page).root).toBeVisible();
+  });
+
+  test('opens the invite of a link pasted, by pressing Enter', async ({ page, baseURL }) => {
+    await aVisitorWithACode(page);
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+
+    await join.code.fill(`  ${baseURL}/i/${inviteCode}  `);
+    await join.code.press('Enter');
+
+    await expect(page).toHaveURL(`/i/${inviteCode}`);
+  });
+
+  // L2-056 AC3
+  test('reads "Finding your Popkin…" and cannot be sent twice while it looks', async ({ page }) => {
+    await aVisitorWithACode(page);
+    const release = await holdTheLookup(page);
+    await page.goto(joinCodeUrl);
+    const join = new JoinCodePage(page);
+    await join.code.fill(inviteCode);
+
+    await join.find.click();
+
+    await expect(join.find).toHaveText('Finding your Popkin…');
+    await expect(join.find).toBeDisabled();
+    await expect(join.code).toHaveAttribute('readonly', '');
+    release();
+    await expect(page).toHaveURL(`/i/${inviteCode}`);
   });
 });

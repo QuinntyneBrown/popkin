@@ -24,11 +24,19 @@
       placeholder="Code or link"
       hint="The code is the last part of your invite link."
       [formControl]="code"
+      [readonly]="join.state() === 'finding'"
     ></div>
   </form>
   <ng-container slot="actions">
-    <button pk-button variant="primary" type="submit" form="join-code" [block]="true">
-      Find my Popkin
+    <button
+      pk-button
+      variant="primary"
+      type="submit"
+      form="join-code"
+      [block]="true"
+      [busy]="join.state() === 'finding'"
+    >
+      {{ join.state() === 'finding' ? 'Finding your Popkin…' : 'Find my Popkin' }}
     </button>
     <button pk-button variant="quiet" type="button" [block]="true" (click)="scan()">
       Scan a QR code instead
