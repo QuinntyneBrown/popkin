@@ -1,0 +1,26 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["A heart says it. A reply answers one message. This is react and reply."] },
+    { "id": "hold", "bars": 6, "lines": ["Press and hold a message, or focus it and press Enter. Message actions opens.", "Five quick reactions, More reactions, Reply and Copy."] },
+    { "id": "react", "bars": 7, "lines": ["Pick the heart. A chip shows under the message: the heart, its count, and pressed, because it's yours.", "Choose your chip again, and your reaction goes. A chip that reaches zero goes too."] },
+    { "id": "live", "bars": 5, "lines": ["More reactions has twelve more, pancakes among them.", "And what the others choose shows as it happens."] },
+    { "id": "toasts", "bars": 5, "lines": ["If a reaction doesn't save, it goes back, and says so, with Try again.", "Copy puts the message on the clipboard."] },
+    { "id": "reply", "bars": 6, "lines": ["Reply shows Replying to Ruth, one line of her message, and Cancel reply.", "Send, and your reply carries a quote: her first name and one line."] },
+    { "id": "quote", "bars": 5, "lines": ["Choose a quote, and the thread goes to that message and marks it for two seconds, loading earlier messages if it must."] },
+    { "id": "delete", "bars": 6, "lines": ["On your own message, there is Delete too. It asks first: Delete this message?", "A reply to it stays, and its quote reads Message deleted."] },
+    { "id": "dm", "bars": 5, "lines": ["In a direct message, it all works the same way, and only the two of you see it."] },
+    { "id": "grow", "bars": 6, "lines": [
+      { "text": "On a phone, Message actions rises from the bottom.", "at": 0 },
+      { "text": "From a tablet up, it opens over the thread.", "at": 8 }
+    ] },
+    { "id": "readonly", "bars": 4, "lines": ["Once the Popkin wraps up, chips and quotes stay, but nothing can be changed."] },
+    { "id": "proof", "bars": 8, "lines": ["What no screen shows: one reaction per member per emoji, held by the API, and a version on each message's reactions, so an older update never wins.", "A direct message's reactions reach its two members alone, and no log carries the emoji."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey twelve. Popkin is a free platform for pop-up communities."] }
+  ]
+}
