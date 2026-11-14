@@ -31,6 +31,16 @@ instead" and "Scan a QR code instead".
   looks like popk.in/lakeside.", "Find my Popkin", "Scan a QR code instead".
 - `docs/mocks/pages/join-code/invalid.html` — "We can't find a Popkin with that code."
 - `docs/mocks/pages/join-code/submitting.html` — "Finding your Popkin…".
+- `docs/mocks/pages/join-code/blank.html` — "Find my Popkin" with nothing typed: the field marked
+  with "Type the code or paste the link from your invite.", and nothing sent. Drawn for journey 15.
+- `docs/mocks/pages/join-code/error.html` — the lookup failed: "We couldn’t look that up." with
+  "Check your connection and try again. What you typed is still here." Drawn for journey 15.
+- `docs/mocks/pages/join-code/limited.html` — too many codes tried (L2-053 AC3, AC4): "That’s a
+  lot of tries." with when to try again, "Try again in 9 minutes." Drawn for journey 15.
+- The screen is split from 768 px, with the photograph of sign up beside it (L2-058 AC10).
+- The hint reads "The code is the last part of your invite link." and the field's placeholder
+  "Code or link": the short form `popk.in/lakeside` the mocks first wrote is not a link Popkin
+  accepts. Settled for journey 15.
 
 ### API
 
