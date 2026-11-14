@@ -3,6 +3,16 @@
   margin-top: var(--space-8);
 }
 
+/* The list alone, in a dialog: the dialog's body spaces it. */
+:host(.comments--bare) {
+  margin-top: 0;
+}
+
+:host(.comments--bare) .divided,
+:host(.comments--bare) .comments__empty {
+  margin-top: 0;
+}
+
 .comments__heading {
   font: var(--text-h3);
 }

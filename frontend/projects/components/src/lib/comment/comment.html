@@ -1,5 +1,6 @@
 <span
   pk-avatar
+  [size]="avatarSize()"
   [initials]="avatar()?.initials ?? ''"
   [photo]="avatar()?.photoUrl"
   [blank]="!avatar()"
@@ -11,6 +12,19 @@
     @if (stars()) {
       <span pk-rating [value]="stars()" [prefix]="ratedText()"></span>
     }
+    @if (time()) {
+      <span class="text-caption">{{ time() }}</span>
+    }
   </div>
   <p class="comment__text">{{ text() }}</p>
 </div>
+@if (deletable()) {
+  <button
+    pk-icon-button
+    class="comment__delete"
+    type="button"
+    icon="trash"
+    [label]="deleteLabel()"
+    (click)="delete.emit()"
+  ></button>
+}
