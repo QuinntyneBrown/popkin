@@ -78,6 +78,7 @@ Settled for journey 12:
 Settled for journey 13 ([Send photos in chat](../send-photos-in-chat/README.md)):
 
 - The reply bar and the quote of a photo message with no text read "Photo"; with text, its text. A reply may carry a photo.
+- Built by journey 13: the quote the server answers reads "Photo" (`MessagePreview`), and a reply carries a photo. Not built: the reply bar, written by the client from the message, shows its empty text (known gap 76).
 
 Still open:
 

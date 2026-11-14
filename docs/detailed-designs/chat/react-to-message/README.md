@@ -97,8 +97,11 @@ Settled for journey 13 ([Send photos in chat](../send-photos-in-chat/README.md))
 
 - Deleting a photo message removes the message. A photo sent in Everyone stays in the album, where it was added under the sender; a photo sent in a direct message is removed from the photo store and the database.
 - The quote of Message actions reads "Photo" for a photo message with no text. Reactions work on a photo message as on any message; Copy copies the text and is not offered when there is none.
+- Built by journey 13: the deletion of a photo message and its photo, and reactions on it; the discard of a failed photo message treats its photo as Delete does. Not built: the quote of Message actions shows the empty text of a photo message with no text, and Copy is offered for it (known gap 76).
 
 Still open:
+
+- Nothing for this design.
 
 
 ## Requirements

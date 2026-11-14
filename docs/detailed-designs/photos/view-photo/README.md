@@ -100,7 +100,7 @@ its longest edge and its address lasts one hour.
 
 ### With journey 13, Photos in chat
 
-- A photo of a direct message opens here from its message, for its two members only; anyone else gets `404` `photo_not_found`. It is in no album, so `PreviousPhotoId` and `NextPhotoId` are null and the view offers no previous or next. It shows its sharer as any photo and offers no delete (journey 14). Mock: `docs/mocks/pages/photo-view/direct.html`, which draws no caption and none of the photo's own reactions or comments; whether it takes them is open (known gap 73) ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
+- A photo of a direct message opens here from its message, for its two members only; anyone else gets `404` `photo_not_found`. It is in no album, so `PreviousPhotoId` and `NextPhotoId` are null and the view offers no previous or next. It shows its sharer as any photo and offers no delete (journey 14); its `CanDelete` is true for its sharer alone, never for the Host, who looks after the album only. A chat photo that is on no message, or whose message was deleted, is `404` to everyone, its uploader too. Mock: `docs/mocks/pages/photo-view/direct.html`, which draws no caption and none of the photo's own reactions or comments; whether it takes them is open (known gap 73) ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
 - An Everyone photo opened from the chat is a photo of the album, and the default states cover it. Close and Escape go back to the screen the photo was opened from.
 
 ## Requirements

@@ -153,7 +153,7 @@ the hub reconnects (open decision 23 in [the register](../../README.md#known-gap
 
 ### With journey 13, Photos in chat
 
-- The photo count of a wrapped-up row counts the photos in the album only (`Photo.InAlbum`). The latest message of a card reads "{first name}: Photo", or "You: Photo", for a photo message with no text, and its text otherwise ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
+- The photo count of a wrapped-up row counts the photos in the album only (`Photo.InAlbum`). The latest message of a card reads "{first name}: Photo", or "You: Photo", for a photo message with no text, and its text otherwise ([Send photos in chat](../../chat/send-photos-in-chat/README.md)). The server writes "Photo"; the line `MyPopkinsStore` writes from a `MessageAdded` reads the message's empty text until the next read (known gap 76).
 
 ## Requirements
 

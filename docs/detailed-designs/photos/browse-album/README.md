@@ -106,7 +106,7 @@ where the member's device says it does; a thumbnail address lasts one hour.
 
 ### With journey 13, Photos in chat
 
-- The album lists only the photos in it (`Photo.InAlbum`). An album upload is in it at once; a photo sent in Everyone joins it under its sender when its message is sent, not when it is uploaded, with `PhotoAdded`; a photo sent in a direct message never does, and neither does a chat photo whose message was never sent ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
+- The album lists only the photos in it (`Photo.InAlbum`). An album upload is in it at once; a photo sent in Everyone joins it under its sender when its message is sent, not when it is uploaded, with `PhotosAdded`, and its `AddedAt` is then the time its message was sent; a photo sent in a direct message never does, and neither does a chat photo whose message was never sent ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).
 - The album summary of the home, the "Mine" filter and the counts read the same set.
 
 ## Requirements

@@ -88,7 +88,7 @@ Gaps found, each in [the register](../../README.md#known-gaps):
 
 ### With journey 13, Photos in chat
 
-- A conversation's latest line reads "Photo", or "You: Photo", for a photo message with no text, and its text otherwise (`conversation-text.ts`) ([Send photos in chat](../send-photos-in-chat/README.md)).
+- A conversation's latest line reads "Photo", or "You: Photo", for a photo message with no text, and its text otherwise (`conversation-text.ts`) ([Send photos in chat](../send-photos-in-chat/README.md)). The server writes "Photo" in the threads it answers; the line `ConversationsStore` writes from a `MessageAdded` reads the message's empty text until the next read (known gap 76).
 
 ## Requirements
 
