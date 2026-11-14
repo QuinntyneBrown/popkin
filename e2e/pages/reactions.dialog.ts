@@ -18,6 +18,10 @@ export class ReactionsDialog {
   readonly delete: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly body: Locator;
+  readonly quickGrid: Locator;
+  readonly moreGrid: Locator;
+  /** The danger row, Delete: a link in the mock, a button in the app. */
+  readonly deleteRow: Locator;
 
   constructor(page: Page) {
     this.root = page.getByRole('dialog', { name: 'Message actions' });
@@ -26,12 +30,15 @@ export class ReactionsDialog {
     this.close = this.root.getByRole('button', { name: 'Close' });
     this.body = this.root.locator('.dialog__body');
     this.quote = this.root.locator('.bubble__quote');
-    this.quick = this.root.getByRole('group', { name: 'Reactions' }).getByRole('button');
+    this.quickGrid = this.root.getByRole('group', { name: 'Reactions', exact: true });
+    this.moreGrid = this.root.getByRole('group', { name: 'More reactions' });
+    this.quick = this.quickGrid.getByRole('button');
     this.moreReactions = this.root.getByRole('button', { name: 'More reactions' });
-    this.more = this.root.getByRole('group', { name: 'More reactions' }).getByRole('button');
+    this.more = this.moreGrid.getByRole('button');
     this.reply = this.root.getByRole('button', { name: 'Reply', exact: true });
     this.copy = this.root.getByRole('button', { name: 'Copy', exact: true });
     this.delete = this.root.getByRole('button', { name: 'Delete', exact: true });
+    this.deleteRow = this.root.locator('.menu-list__item--danger');
   }
 
   /** The names of the quick reactions, in order. */
