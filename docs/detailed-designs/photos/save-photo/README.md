@@ -143,6 +143,26 @@ is read-only.
   the uploader always; the Host for a photo in the album (`InAlbum`); for a
   photo of a direct message, its sender only.
 
+### Built in journey 14
+
+- **Save** — `GET /api/popkins/{popkinId}/photos/{photoId}/download` (`GetPhotoDownload`)
+  answers an address of the original (`Photo.OriginalKey`, migration `AddPhotoOriginals`), an
+  original-size copy without location or device data, downloaded as an attachment named
+  `popkin-photo-{yyyyMMdd-HHmm}.jpg`. A photo stored before journey 14 is saved at its display
+  size. A failed save shows "We couldn’t save this photo.".
+- **Delete** — `DELETE /api/popkins/{popkinId}/photos/{photoId}` (`DeletePhoto`), by the uploader,
+  or the Host for an album photo (`Photo.CanBeDeletedBy`), else `403 photo_not_yours`. It deletes
+  the photo's reactions and comments, marks its messages `PhotoRemoved` (migration
+  `AddPhotoRemoved`), deletes its files after the commit and sends the hub event `PhotoDeleted`
+  to the album's members, or to a direct message's two. The removal of an album that was not
+  kept marks its messages `PhotoRemoved` too (known gap 74, closed).
+- **App** — "Save photo" and "Photo actions" (`PhotoActionsDialog`, "Delete photo") in the photo
+  view, `DeletePhotoDialog` ("Delete this photo?", with its busy and failed states) and the toast
+  "Photo deleted."; `PhotoViewStore` saves and deletes. `PhotoDeleted` reaches the album, the
+  Popkin home, the chat and the photo view, which reads "This photo was removed";
+  `pk-message` reads "Photo removed".
+- **Not built** — the album's zip still packs display images, not the originals (known gap 77).
+
 ### Open questions
 
 Settled by journey 14:
@@ -166,7 +186,7 @@ Settled by journey 14:
 
 Still open:
 
-- The album's zip packs display images, not the originals.
+- The album's zip packs display images, not the originals (known gap 77).
 
 ## Requirements
 

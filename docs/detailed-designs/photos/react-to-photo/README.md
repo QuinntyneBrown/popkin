@@ -104,6 +104,23 @@ photo does, for its two members only (known gap 73, closed by journey 14).
 - **Real time** — none. Other members with the photo open see the new counts on their next read
   of the photo; L2-034 asks for no live update.
 
+### Built in journey 14
+
+- **Backend** — `PhotoReaction` (migration `AddPhotoReactions`) and `ReactToPhoto`, behind
+  `PUT` and `DELETE /api/popkins/{popkinId}/photos/{photoId}/reactions/{emoji}`, checked against
+  chat's catalogue (`ReactionValidator`). Every action on a photo passes `PhotoAccess`, the one
+  read guard of a photo: `404 photo_not_found` to anyone who may not see it, the third member of
+  a direct message too; `409 popkin_wrapped_up` in a wrapped-up Popkin. `GetPhoto` answers the
+  reactions grouped by emoji with the caller's own marked.
+- **`applyReactionToggle`** (`api` library, `photos/photo-reactions.ts`, with unit tests) —
+  toggles one emoji of a photo's reactions on the device, as the server will.
+- **`PhotoViewStore`** — gives and takes back a reaction at once and puts the count back when
+  the server refuses; the page then shows "We couldn’t save your reaction.".
+- **`pk-react-bar`** with the five quick reactions and "More reactions", which opens
+  `PhotoReactionsDialog` (the catalogue's other emoji in `pk-reaction-grid`); the chips are
+  `pk-photo-viewer`'s. A wrapped-up Popkin shows the chips and no react bar.
+- A photo of a direct message takes reactions for its two members (known gap 73, closed by journey 14).
+
 ### Open questions
 
 Settled by journey 14:

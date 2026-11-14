@@ -121,6 +121,22 @@ journey 14).
 - **Real time** — none. A comment reaches others on their next read; L2-035 asks for no live
   update.
 
+### Built in journey 14
+
+- **Backend** — `PhotoComment` (migration `AddPhotoComments`) and `PhotoComments`, behind
+  `GET` and `POST /api/popkins/{popkinId}/photos/{photoId}/comments` and
+  `DELETE …/comments/{commentId}`, which only the author may send. Each passes `PhotoAccess`, so a
+  photo of a direct message takes comments for its two members alone (known gap 73, closed by journey 14); a
+  wrapped-up Popkin refuses posting and deleting with `409 popkin_wrapped_up`.
+- **`PhotoCommentsStore`** (`api` library, `photos/photo-comments-store.ts`, with unit tests) —
+  reads, adds and deletes a photo's comments for the dialog and the panel alike, with the time
+  of each comment (`commentTime`).
+- **Below 1024 px**, "Comment" opens `PhotoCommentsDialog`; **from 1024 px** the comments and
+  their field are beside the photo. `pk-comment` gained its time and "Delete comment", which asks
+  `DeleteCommentDialog` ("Delete this comment?"); `pk-comments` is a bare list, and
+  `pk-composer` can be the field alone. A wrapped-up Popkin shows the comments with no field and
+  no "Delete comment".
+
 ### Open questions
 
 Settled by journey 14:
