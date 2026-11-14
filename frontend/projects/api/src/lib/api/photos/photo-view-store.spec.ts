@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PhotoDetailView } from '../../models/photos';
 import { PhotoReaction } from './photo-reactions';
 import { PhotoViewStore } from './photo-view-store';
+import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PHOTOS_API } from './photos-api';
 
 const avatar = { initials: 'MO', accent: 'Coral', photoUrl: null } as const;
@@ -34,6 +35,7 @@ describe('PhotoViewStore', () => {
   let asked: string[];
   let downloads: Subject<{ url: string; expiresAt: string }>[];
   let deletions: Subject<void>[];
+  const photoDeleted = new Subject<{ popkinId: string; photoId: string }>();
   let reacted: { kind: 'add' | 'remove'; emoji: string; answer: Subject<PhotoReaction[]> }[];
   let store: PhotoViewStore;
 
@@ -61,6 +63,7 @@ describe('PhotoViewStore', () => {
     TestBed.configureTestingModule({
       providers: [
         PhotoViewStore,
+        { provide: POPKIN_REALTIME, useValue: { photoDeleted$: photoDeleted } },
         {
           provide: PHOTOS_API,
           useValue: {
@@ -274,11 +277,12 @@ describe('PhotoViewStore', () => {
     });
   });
 
-  it('shows a photo deleted while it is open as removed', () => {
+  it('shows a photo deleted while it is open as removed (L2-036 AC3)', () => {
     store.open('p', 'a');
-    store.removed('other');
+    photoDeleted.next({ popkinId: 'p', photoId: 'other' });
+    photoDeleted.next({ popkinId: 'q', photoId: 'a' });
     expect(store.state()).toBe('ready');
-    store.removed('a');
+    photoDeleted.next({ popkinId: 'p', photoId: 'a' });
     expect(store.state()).toBe('removed');
   });
 });

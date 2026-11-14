@@ -46,13 +46,24 @@ export class AlbumStore {
   readonly canAdd = computed(() => this.album()?.canAdd ?? true);
 
   constructor() {
-    const mine = takeUntilDestroyed(inject(DestroyRef));
+    const destroyRef = inject(DestroyRef);
+    const mine = takeUntilDestroyed(destroyRef);
     this.realtime.photosAdded$
       .pipe(
         filter((added) => added.popkinId === this.popkinId),
         mine,
       )
       .subscribe(() => this.refresh());
+    this.realtime.photoDeleted$
+      .pipe(
+        filter((deleted) => deleted.popkinId === this.popkinId),
+        takeUntilDestroyed(destroyRef),
+      )
+      .subscribe(({ photoId }) => {
+        // Gone at once, wherever it was; the counts follow from the album read again (L2-036 AC3).
+        this.items.update((items) => items.filter((item) => item.id !== photoId));
+        this.refresh();
+      });
     this.realtime.reconnected$.pipe(mine).subscribe(() => this.refresh());
   }
 

@@ -4,6 +4,8 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { PhotoDetailView } from '../../models/photos';
 import { photoName, photoTime } from './album-days';
 import { PhotoReaction, applyReactionToggle } from './photo-reactions';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PHOTOS_API } from './photos-api';
 
 /**
@@ -14,6 +16,14 @@ import { PHOTOS_API } from './photos-api';
 export class PhotoViewStore {
   private readonly api = inject(PHOTOS_API);
   private readonly document = inject(DOCUMENT);
+
+  constructor() {
+    inject(POPKIN_REALTIME)
+      .photoDeleted$.pipe(takeUntilDestroyed())
+      .subscribe(({ popkinId, photoId }) => {
+        if (popkinId === this.popkinId) this.removed(photoId);
+      });
+  }
 
   private popkinId = '';
   private photoId = '';
@@ -125,7 +135,7 @@ export class PhotoViewStore {
   }
 
   /** A photo was deleted by someone: the one open reads as removed (L2-036 AC3). */
-  removed(photoId: string): void {
+  private removed(photoId: string): void {
     if (photoId === this.photoId) {
       this.reading?.unsubscribe();
       this.state.set('removed');

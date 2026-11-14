@@ -112,6 +112,12 @@ export class PopkinHomeStore {
         mine,
       )
       .subscribe(() => this.readPhotos(true));
+    this.realtime.photoDeleted$
+      .pipe(
+        filter((deleted) => deleted.popkinId === this.popkinId),
+        mine,
+      )
+      .subscribe(() => this.readPhotos(true));
     this.realtime.reconnected$.pipe(mine).subscribe(() => {
       if (this.state() === 'ready') this.readAll(true);
     });

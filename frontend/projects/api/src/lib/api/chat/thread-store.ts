@@ -124,6 +124,9 @@ export class ThreadStore {
     mine(this.realtime.messageDeleted$).subscribe(({ threadId, messageId }) => {
       if (threadId === this.header()?.id) this.removeMessage(messageId);
     });
+    mine(this.realtime.photoDeleted$).subscribe(({ popkinId, photoId }) => {
+      if (popkinId === this.header()?.popkinId) this.photoRemoved(photoId);
+    });
     mine(this.realtime.reactionsChanged$).subscribe(
       ({ threadId, messageId, version, reactions }) => {
         if (threadId === this.header()?.id) this.setReactions(messageId, reactions, version);
@@ -363,6 +366,29 @@ export class ThreadStore {
           });
         },
       });
+  }
+
+  /**
+   * A photo was deleted: the messages that carried it read "Photo removed", and so do the quotes
+   * of those with no text, as the next read of the thread gives (L2-036 AC3).
+   */
+  private photoRemoved(photoId: string): void {
+    const carried = new Set(
+      this.messages()
+        .filter((message) => message.photo?.id === photoId)
+        .map((message) => message.id),
+    );
+    if (carried.size === 0) return;
+    this.messages.update((shown) =>
+      shown.map((message) => {
+        if (carried.has(message.id)) return { ...message, photo: null, photoRemoved: true };
+        const quote = message.quote;
+        if (quote && carried.has(quote.messageId) && quote.snippet === 'Photo') {
+          return { ...message, quote: { ...quote, snippet: 'Photo removed' } };
+        }
+        return message;
+      }),
+    );
   }
 
   /**

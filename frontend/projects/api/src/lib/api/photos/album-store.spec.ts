@@ -63,6 +63,7 @@ describe('AlbumStore', () => {
   const realtime = {
     state: signal('connected'),
     photosAdded$: new Subject<{ popkinId: string; photoIds: string[] }>(),
+    photoDeleted$: new Subject<{ popkinId: string; photoId: string }>(),
     reconnected$: new Subject<void>(),
     started: 0,
     start() {
@@ -303,6 +304,19 @@ describe('AlbumStore', () => {
 
       expect(ids()).toEqual(['s3', 's2', 's1', 'f1']);
       expect(store.line()).toBe('49 photos from 11 people');
+    });
+
+    it('a photo deleted leaves the album at once, later pages too (L2-036 AC3)', () => {
+      api.everyone = page([photo('s2', sat(9)), photo('s1', sat(7))], { nextCursor: 'c1' });
+      api.later['c1'] = page([photo('f1', fri(20))]);
+      store.open('p');
+      store.more();
+
+      api.everyone = page([photo('s1', sat(7))], { nextCursor: 'c1' });
+      realtime.photoDeleted$.next({ popkinId: 'p', photoId: 'f1' });
+      realtime.photoDeleted$.next({ popkinId: 'p', photoId: 's2' });
+
+      expect(ids()).toEqual(['s1']);
     });
 
     it('keeps the later pages already shown', () => {

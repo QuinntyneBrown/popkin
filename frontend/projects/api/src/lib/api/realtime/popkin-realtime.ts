@@ -38,6 +38,11 @@ export interface PopkinRealtime {
   /** Photos were added to a Popkin's album (L2-031 AC7). */
   readonly photosAdded$: Observable<{ popkinId: string; photoIds: string[] }>;
   /**
+   * A photo was deleted (L2-036 AC3): it leaves the album, and the messages that carried it read
+   * "Photo removed". Only its audience hears of it: a direct message's photo, its two members.
+   */
+  readonly photoDeleted$: Observable<{ popkinId: string; photoId: string }>;
+  /**
    * Who is on a call changed; `version` orders these (L2-029 AC2). `threadId` is the direct
    * message of a call between two members, which only those two hear of (L2-030 AC8), and
    * null for the Popkin's group call.

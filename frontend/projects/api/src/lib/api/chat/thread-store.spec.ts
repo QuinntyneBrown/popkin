@@ -238,6 +238,7 @@ describe('ThreadStore', () => {
     state: signal('connected'),
     messageAdded$: new Subject<MessageView>(),
     messageDeleted$: new Subject<{ threadId: string; messageId: string }>(),
+    photoDeleted$: new Subject<{ popkinId: string; photoId: string }>(),
     reactionsChanged$: new Subject<{
       threadId: string;
       messageId: string;
@@ -364,6 +365,22 @@ describe('ThreadStore', () => {
 
       realtime.messageAdded$.next(message(5, 'Mara'));
       expect(store.announcement()).toBe('Walt: message 4');
+    });
+
+    it('reads a message whose photo was deleted as "Photo removed" (L2-036 AC3)', () => {
+      const photo = { id: 'ph', url: '/f', width: 800, height: 600 };
+      realtime.messageAdded$.next(message(6, 'Dev', { text: '', photo }));
+      realtime.messageAdded$.next(
+        message(7, 'Walt', {
+          quote: { messageId: 'id-0006', authorFirstName: 'Dev', snippet: 'Photo', deleted: false },
+        }),
+      );
+      realtime.photoDeleted$.next({ popkinId: 'other', photoId: 'ph' });
+      expect(store.rows().at(-2)).toMatchObject({ photoRemoved: false });
+
+      realtime.photoDeleted$.next({ popkinId: 'p', photoId: 'ph' });
+      expect(store.rows().at(-2)).toMatchObject({ photo: null, photoRemoved: true });
+      expect(store.rows().at(-1)).toMatchObject({ quote: { snippet: 'Photo removed' } });
     });
 
     it('announces a photo with no text as "Photo" (L2-026)', () => {
