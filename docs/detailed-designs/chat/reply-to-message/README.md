@@ -19,30 +19,53 @@ deleted, the quote reads "Message deleted".
 
 **Screens and states:**
 
-- `docs/mocks/pages/group-chat/default.html` — reply bar "Replying to Ruth" with "Cancel reply"; a sent reply quoting Ellie ("Can someone grab the paddles from the shed?").
-- `docs/mocks/dialogs/reactions/default.html` — the "Reply" action.
-- No mock draws the brief mark on a quoted message after a jump, nor a "Message deleted" quote; both are `<TO SUPPLY>` mock states.
+- `docs/mocks/pages/group-chat/default.html` — the reply bar "Replying to Ruth" with one line of her message and the icon button "Cancel reply"; a sent reply whose quote of Ellie ("Can someone grab the paddles from the shed?") is a button named "Go to Ellie's message".
+- `docs/mocks/pages/group-chat/marked.html` — after that quote is chosen: Ellie's message focused and marked (`msg--marked`), with an outline as well as a tint.
+- `docs/mocks/pages/group-chat/deleted-quote.html` — Ellie deleted her message: it is gone from the thread, and the reply's quote reads "Message deleted" with no name and is not a button.
+- `docs/mocks/pages/group-chat/read-only.html` — in a wrapped-up Popkin the quote is still a button and still jumps.
+- `docs/mocks/dialogs/reactions/default.html` — the "Reply" action. The group chat's mocks stand for a direct message too (L2-023 AC3).
+
+**Parts the components reproduce:**
+
+- Reply bar — `div.composer__reply`: `strong` "Replying to {first name}", `span.truncate.text-muted` with one line of the message, and `button.icon-btn` `aria-label="Cancel reply"`.
+- Live quote — `button.bubble__quote` `type="button"` `aria-label="Go to {first name}'s message"`, holding `strong` with the first name and `span.truncate` with the snippet.
+- Deleted quote — `div.bubble__quote.bubble__quote--deleted` reading "Message deleted"; not focusable.
+- Marked message — `div.msg.msg--marked`, for 2 seconds, on the message that has focus.
 
 **API:**
 
-- `POST /api/popkins/{popkinId}/threads/{threadId}/messages` with `replyToMessageId` — 201 or 200 `MessageDto` with `Quote`; 400 `reply_not_found`; the other codes as in send-message-to-everyone.
-- `GET /api/popkins/{popkinId}/threads/{threadId}/messages?around={messageId}&limit=50` — 200 `MessagePageDto` centred on a message; 404 `message_not_found` when the message is not in the thread.
+- `POST /api/popkins/{popkinId}/threads/{threadId}/messages` with the optional `replyToMessageId` — 201 or 200 `MessageDto` with its `Quote`; 400 `reply_not_found` when it is not a message of the same thread (a deleted one is allowed); the other codes as in send-message-to-everyone.
+- `MessageDto.Quote` — `QuoteDto(Guid MessageId, string? AuthorFirstName, string? Snippet, bool Deleted)`, or null for a message that replies to nothing. When the quoted message is deleted, `Deleted` is true and the name and snippet are null (L2-025 AC4).
+- No read centred on a message: the pages are those of [Live messages](../live-messages/README.md), `?before={id}` and `?after={id}`.
 
 **Frontend (Popkin web app):**
 
-- **`GroupChatPage`** and **`DirectMessagePage`** — hold `replyTo: Signal<MessageView | null>`. `startReply` sets it when `ReactionsDialog` closes with `'reply'`; `cancelReply` clears it and keeps focus in the field. Sending clears it.
-- **`pk-composer`** — renders its `composer__reply` part when given a quote: a bold "Replying to {first name}", one truncated line of the message (or "Photo" for a photo without text, copy `<TO SUPPLY>`), and the icon button "Cancel reply" (L2-025 AC1). The composer moves focus to the field when the bar appears.
-- **`pk-message`** — renders `QuoteView { messageId, authorFirstName, snippet, deleted }` as its `bubble__quote` part (L2-025 AC2). A live quote is a button whose accessible name reads "Go to {first name}'s message" (copy `<TO SUPPLY>`); a deleted quote reads "Message deleted" and is not interactive (AC4).
-- **Jump** — the page scrolls the quoted message to the centre of the thread and focuses it. `ThreadStore.highlighted` marks it for a short time (duration `<TO SUPPLY>`) with an outline as well as a tint (L2-025 AC3, L2-057 AC5). Under `prefers-reduced-motion` the scroll is instant (L2-060 AC1).
-- **`ThreadStore.loadUntil(messageId)`** — when the quoted message is older than the loaded pages, the store fetches a page around it and keeps the window between that page and the loaded ones as a gap that fills as the member scrolls. The gap's presentation is `<TO SUPPLY>`.
-- **Pending replies** — `MessageOutbox` keeps `replyToMessageId` on the entry, so a pending, waiting or failed reply shows its quote, and a retry sends it again (failed-messages).
+- **`ThreadStore`** — holds `replyTo: Signal<MessageRow | null>`. `startReply(row)` sets it when `ReactionsDialog` closes with `'reply'`; `cancelReply()` clears it; `send(text)` sends with `replyToMessageId` and clears it. `MessageOutbox` keeps `replyToMessageId` on the entry, so a pending, waiting or failed reply shows its quote, and a retry sends it again with its quote (failed-messages).
+- **`pk-composer`** — renders its `composer__reply` part when given a reply: "Replying to {first name}", one truncated line of the message and the icon button "Cancel reply" (L2-025 AC1). The composer moves focus to the field when the bar shows; Escape in the field cancels the reply too.
+- **`pk-message`** — renders `MessageQuoteView { messageId, firstName, snippet, deleted }` as its `bubble__quote` part (L2-025 AC2): a live quote is a button named "Go to {first name}'s message" that raises `quoteChosen`; a deleted one reads "Message deleted" and is not a button (AC4).
+- **Jump** — `ThreadStore.jumpTo(messageId)`: when the message is older than the loaded pages, the store loads earlier pages until it holds it; then the page scrolls it to the centre of the thread, focuses it, and `ThreadStore.marked` names it for 2 seconds, which `pk-message` draws as `msg--marked`, an outline as well as a tint (L2-025 AC3, L2-057). Under `prefers-reduced-motion` the scroll is instant (L2-060). If the message cannot be found, because it was deleted meanwhile, nothing scrolls.
+- **Wrapped up** — a read-only thread shows quotes as they are, and they still jump (L2-045).
 
 **Backend:**
 
 - **`SendMessageCommand.ReplyToMessageId`** — optional. `SendMessageCommandHandler` loads the target; a target that does not exist or belongs to another thread is 400 `reply_not_found`. A deleted target is allowed and still links. `Message.ReplyTo(target)` sets the link.
-- **`QuoteDto`** — `MessageId`, `AuthorFirstName`, `Snippet` (the first line of the text, at most 120 characters, `<TO SUPPLY>` length), `HasPhoto`, `Deleted`. `GetMessagesQueryHandler` projects it with a left join on `ReplyToMessageId`; a deleted target yields `Deleted = true` with no name or snippet (L2-025 AC4).
-- **`GetMessagesQuery.Around`** — returns 25 messages before and 25 after the target, inclusive, in the same order and shape as other pages.
+- **`QuoteDto`** — projected by `GetMessagesQueryHandler` with a left join on `ReplyToMessageId`. `Snippet` is the first line of the quoted text, cut on the server to at most 120 characters.
 - **`MessageConfiguration`** — `ReplyToMessageId` is a self-reference with `DeleteBehavior.NoAction`; messages are soft-deleted (react-to-message), so the link never dangles.
+
+### Open questions
+
+Settled for journey 12:
+
+- The quote's accessible name: "Go to {first name}'s message"; a deleted quote reads "Message deleted" and is not a button.
+- The snippet: the first line of the text, at most 120 characters, cut on the server.
+- The mark: 2 seconds, an outline as well as a tint (`msg--marked`), drawn by `group-chat/marked.html`; the deleted quote is drawn by `group-chat/deleted-quote.html`.
+- A quoted message older than the loaded pages: the store loads earlier pages until it has it. A read centred on a message (`?around=`), with a gap that fills as the member scrolls, was the alternative; the simpler choice was taken, and it has no gap to draw.
+- Escape in the field cancels a reply; a failed reply keeps its quote and a retry sends it with it.
+
+Still open:
+
+- What the reply bar and the quote show for a photo without text: `<TO SUPPLY>`, with journey 13.
+- How many earlier pages a jump may load before it gives up: `<TO SUPPLY>`; none is set, and the pages are 50 messages each.
 
 ## Requirements
 
@@ -50,8 +73,18 @@ deleted, the quote reads "Message deleted".
 |-------|--------------|-------------|
 | `L2-025` | `L1-007` | Reply to a message: A reply quotes the message it answers. |
 | `L2-060` | `L1-014` | Motion is optional: Motion explains; it never gets in the way. |
+| `L2-023` | `L1-007` | Direct messages: Two members of one Popkin talk privately. |
+| `L2-045` | `L1-011` | A wrapped-up Popkin is read-only: Nothing new is added to a Popkin that has ended. |
+| `L2-057` | `L1-014` | Accessible to WCAG 2.2 AA: Everyone can use every screen. |
+
+From `L2-023` this feature realises AC3 for replies.
 
 ## Diagrams
+
+The diagrams below were not redrawn after the decisions of journey 12. They show a read
+`?around={messageId}`, `GetMessagesQuery.Around`, `QuoteDto.HasPhoto`, `loadUntil`,
+`highlighted` and `replyTo` on the page, where the design now loads earlier pages, has no
+`HasPhoto`, and keeps `replyTo`, `jumpTo` and `marked` in `ThreadStore` (known gap 69).
 
 ### System context
 
@@ -61,8 +94,9 @@ A member replies to a message with a quote through Popkin; no external system ta
 
 ### Containers
 
-The web app posts replies and loads pages around a quoted message through the Popkin API, which
-stores the link in `Message.ReplyToMessageId`.
+The web app posts replies and loads earlier pages up to a quoted message through the Popkin API,
+which stores the link in `Message.ReplyToMessageId`. The picture still shows a read around the
+message (known gap 69).
 
 ![C4 container view for replying to a message](diagrams/c4-container.png)
 
@@ -90,7 +124,8 @@ page holds `replyTo` and renders `QuoteView`, and `ThreadStore` loads the pages 
 
 ### Behaviour — jump to a quoted message
 
-Choosing a quote scrolls to the quoted message and marks it briefly (L2-025 AC3), loading a page
-around it first when it is older than the loaded pages; a deleted quote has nowhere to go (AC4).
+Choosing a quote scrolls to the quoted message and marks it for 2 seconds (L2-025 AC3), loading
+earlier pages first when it is older than the loaded pages; a deleted quote has nowhere to go
+(AC4). The picture still loads a page around the message (known gap 69).
 
 ![Sequence diagram for jumping to a quoted message](diagrams/sequence-jump-to-quote.png)
