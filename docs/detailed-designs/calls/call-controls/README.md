@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. Its members may hold a video call for the
+Popkin is a platform for pop-up communities. Its members may hold a video call for the
 whole Popkin. The feature [start or join a group call](../group-call/README.md) brings a member
 onto a call. This feature covers what the member sees and controls once there: the tiles of the
 people on the call, their own microphone and camera, leaving, and minimising the call to keep it

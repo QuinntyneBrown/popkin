@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities: a group spins up a private space, invites people
+Popkin is a platform for pop-up communities: a group spins up a private space, invites people
 by QR code, then chats, calls, shares photos and rates experiences together. Each such space is a
 *Popkin*, and the people in it are its *members*. This feature belongs to the chat subsystem and
 covers the one conversation every Popkin has from the moment it exists.

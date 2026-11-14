@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. Each Popkin has a shared photo album, called
+Popkin is a platform for pop-up communities. Each Popkin has a shared photo album, called
 Photos. This feature covers opening one photo from the album, the Popkin home strip or a chat
 message. The photo opens full screen on a dark stage, the same in both themes, so every photo
 reads the same way (L2-059 AC3). The member sees who added it and when, the whole photo without

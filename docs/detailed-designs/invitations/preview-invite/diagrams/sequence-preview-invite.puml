@@ -52,7 +52,7 @@ alt 200 and viewer is member, Popkin active (L2-012 AC4)
 else 200 and viewer is member, Popkin wrapped up (L2-016 AC3)
   page --> actor : navigate /recap on this host
 else 200, not a member, Open (L2-012 AC1, AC2)
-  page --> actor : "Mara invited you", emoji, colour, name, 5 avatars, "14 people", "Here until Sunday, 6 pm" (none when no end), "Join", "Free, no app to download."
+  page --> actor : "Mara invited you", emoji, colour, name, 5 avatars, "14 people", "Here until Sunday, 6 pm" (none when no end), "Join", "No app to download."
 else 200, not a member, WrappedUp (L2-016 AC1)
   page --> actor : Muted emoji, name, count, "This Popkin wrapped up on Sunday. What a time. Ask Mara for the next one.", no "Join"
 else 404 (L2-016 AC2)

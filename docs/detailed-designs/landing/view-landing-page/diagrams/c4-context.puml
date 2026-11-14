@@ -5,7 +5,7 @@ title System Context — View the landing page
 
 Person(visitor, "Visitor", "Someone without a session")
 Person(member, "Member", "A signed-in person who belongs to a Popkin")
-System(popkin, "Popkin", "Free platform for pop-up communities")
+System(popkin, "Popkin", "Platform for pop-up communities")
 
 Rel(visitor, popkin, "Learns what Popkin is, starts a Popkin or signs in using", "HTTPS")
 Rel(member, popkin, "Opens the landing address and is sent to My Popkins by", "HTTPS")

@@ -2,7 +2,8 @@
 
 ## Overview
 
-Popkin is free and needs no password, so its most exposed operations cost nothing to call: asking
+Anyone can sign up to Popkin and it needs no password, so its most exposed operations cost nothing
+to call: asking
 for a six-digit code, guessing an invite code and sending messages. Without limits, one person
 could flood a phone with codes, enumerate invite codes or drown a chat. This feature is the
 mechanism that caps those three operations per address or per member, and tells the person when

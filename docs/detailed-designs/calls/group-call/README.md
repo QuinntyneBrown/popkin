@@ -2,7 +2,7 @@
 
 ## Overview
 
-Popkin is a free platform for pop-up communities. Each Popkin is a private space for one group,
+Popkin is a platform for pop-up communities. Each Popkin is a private space for one group,
 and its members chat, call, share photos and rate experiences together. This feature covers how
 a call begins and ends. A member starts a video call for the whole Popkin with one tap, and
 others join it from a banner. A member also calls one other member from a direct message, a

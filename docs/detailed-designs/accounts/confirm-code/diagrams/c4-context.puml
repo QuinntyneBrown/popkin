@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title System Context — Confirm the six-digit code
 
 Person(visitor, "Visitor", "Holds a code sent to their phone or email")
-System(popkin, "Popkin", "Free platform for pop-up communities")
+System(popkin, "Popkin", "Platform for pop-up communities")
 System_Ext(sms, "SMS provider", "Delivers a new code by text; provider TO SUPPLY")
 System_Ext(email, "Email provider", "Delivers a new code by email; provider TO SUPPLY")
 

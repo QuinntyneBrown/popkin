@@ -192,7 +192,7 @@ The feature adds no endpoint and changes none.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-058` | `L1-014` | Responsive from 360 px: One layout serves every screen size. |
-| `L2-001` | `L1-001` | Landing page content: The landing page explains Popkin to a visitor in six sections, in this order: the hero, how it works, ideas, the comparison with a group chat, the statement that it is free, and the footer. |
+| `L2-001` | `L1-001` | Landing page content: The landing page explains Popkin to a visitor in six sections, in this order: the hero, how it works, ideas, the comparison with a group chat, the statement that it has no ads, and the footer. |
 
 `L2-001` is listed for its criteria 5 and 6, the landing columns that this feature's grid
 provides; the landing page's own design owns its content.
