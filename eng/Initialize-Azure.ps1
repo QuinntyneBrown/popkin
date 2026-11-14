@@ -44,11 +44,20 @@ if (-not $principalId) {
     $principalId = az ad sp create --id $appId --query id -o tsv
 }
 
-$subject = "repo:${Repository}:environment:$Environment"
-$existing = az ad app federated-credential list --id $appId --query "[?subject=='$subject'].name" -o tsv
-if (-not $existing) {
+# GitHub's token names the repository either by name or, for newer repositories and owners, by
+# name and immutable ID (`repo:owner@ownerId/name@repoId:...`). Both are trusted.
+$ids = gh api "repos/$Repository" | ConvertFrom-Json
+$owner, $name = $Repository -split '/'
+$subjects = [ordered]@{
+    "github-$Environment"     = "repo:${Repository}:environment:$Environment"
+    "github-$Environment-ids" = "repo:$owner@$($ids.owner.id)/$name@$($ids.id):environment:$Environment"
+}
+foreach ($credentialName in $subjects.Keys) {
+    $subject = $subjects[$credentialName]
+    $existing = az ad app federated-credential list --id $appId --query "[?subject=='$subject'].name" -o tsv
+    if ($existing) { continue }
     $credential = @{
-        name      = "github-$Environment"
+        name      = $credentialName
         issuer    = 'https://token.actions.githubusercontent.com'
         subject   = $subject
         audiences = @('api://AzureADTokenExchange')
