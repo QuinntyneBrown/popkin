@@ -1,0 +1,10 @@
+@if (deleted()) {
+  Message deleted
+} @else {
+  <strong>{{ name() }}</strong>
+  @if (truncate()) {
+    <span class="truncate">{{ snippet() }}</span>
+  } @else {
+    {{ snippet() }}
+  }
+}

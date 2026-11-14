@@ -53,6 +53,8 @@ export * from './lib/app-screen/app-screen';
 export * from './lib/day-divider/day-divider';
 export * from './lib/system-note/system-note';
 export * from './lib/message/message';
+export * from './lib/quote/quote';
+export * from './lib/reaction-grid/reaction-grid';
 export * from './lib/thread/thread';
 export * from './lib/composer/composer';
 export * from './lib/list-pane/list-pane';

@@ -19,6 +19,9 @@ import { SignOutDialog } from '../../pages/sign-out.dialog';
 import { EndDateDialog } from '../../pages/end-date.dialog';
 import { HowLongPage } from '../../pages/how-long.page';
 import { PopkinSettingsDialog } from '../../pages/popkin-settings.dialog';
+import { DeleteMessageDialog } from '../../pages/delete-message.dialog';
+import { ReactionsDialog } from '../../pages/reactions.dialog';
+import { reactStates } from '../../fixtures/react-states';
 
 const openEndDate = async (page: Page, today?: Date) => {
   await howLongForLakeside(page, today);
@@ -238,5 +241,35 @@ parity('dialog', [
     ...accountStates.deleteAccountBusy,
     name: 'delete-account-busy',
     region: (page) => new DeleteAccountDialog(page).panel,
+  },
+  // Journey 12: the message actions of theirs, of the member's own, with More reactions open.
+  {
+    key: 'reactions',
+    ...reactStates.reactions,
+    name: 'reactions',
+    region: (page) => new ReactionsDialog(page).panel,
+  },
+  {
+    key: 'reactionsMine',
+    ...reactStates.reactionsMine,
+    name: 'reactions-mine',
+    region: (page) => new ReactionsDialog(page).panel,
+  },
+  {
+    key: 'reactionsMore',
+    ...reactStates.reactionsMore,
+    name: 'reactions-more',
+    region: (page) => new ReactionsDialog(page).panel,
+  },
+  // Delete this message?: the focus starts on Keep.
+  {
+    key: 'deleteMessage',
+    ...reactStates.deleteMessage,
+    name: 'delete-message',
+    region: (page) => new DeleteMessageDialog(page).panel,
+    prepare: async (page) => {
+      await page.keyboard.press('Shift');
+      await new DeleteMessageDialog(page).keep.focus();
+    },
   },
 ]);

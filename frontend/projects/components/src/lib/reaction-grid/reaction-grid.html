@@ -1,0 +1,11 @@
+@for (option of options(); track option.emoji) {
+  <button
+    class="emoji-btn"
+    type="button"
+    [attr.aria-label]="'React ' + option.name.toLowerCase()"
+    [attr.aria-pressed]="pressed().includes(option.emoji)"
+    (click)="react.emit(option.emoji)"
+  >
+    {{ option.emoji }}
+  </button>
+}

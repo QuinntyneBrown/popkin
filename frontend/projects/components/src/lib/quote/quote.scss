@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  margin: var(--space-2) var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  font: var(--text-body-sm);
+}
+
+/* In your own bubble, on the Popkin colour. */
+:host-context(.msg--mine) {
+  background: var(--color-bg-quote-on-popkin);
+}
+
+/* At the top of the message actions it stands on its own. */
+:host-context(.dialog__body) {
+  margin: 0;
+}
+
+/* A live quote: "Go to {first name}'s message" (L2-025 AC3). */
+:host(button) {
+  width: calc(100% - 2 * var(--space-2));
+  border: 0;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+strong {
+  display: block;
+  font-weight: var(--font-weight-semibold);
+}
+
+.truncate {
+  display: block;
+}
+
+/* "Message deleted", not a button (L2-025 AC4). */
+:host(.bubble__quote--deleted) {
+  font-style: italic;
+}

@@ -205,6 +205,13 @@ export const routes = {
   directMessageError: { app: directMessage, mock: 'pages/direct-message/error.html' },
   directMessageReadOnly: { app: directMessage, mock: 'pages/direct-message/read-only.html' },
   directMessageCall: { app: directMessage, mock: 'pages/direct-message/call.html' },
+  // Journey 12, React and reply: the dialogs open over the Everyone thread.
+  reactions: { app: chat, mock: 'dialogs/reactions/default.html' },
+  reactionsMine: { app: chat, mock: 'dialogs/reactions/mine.html' },
+  reactionsMore: { app: chat, mock: 'dialogs/reactions/more.html' },
+  deleteMessage: { app: chat, mock: 'dialogs/delete-message/default.html' },
+  groupChatMarked: { app: chat, mock: 'pages/group-chat/marked.html' },
+  groupChatDeletedQuote: { app: chat, mock: 'pages/group-chat/deleted-quote.html' },
 } satisfies Record<string, ScreenRoute>;
 
 export type RouteKey = keyof typeof routes;
