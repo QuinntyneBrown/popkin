@@ -39,6 +39,9 @@ that cannot be edited, and no endpoint changes it.
   journey 9 built it (the Host's is `default.html` from journey 16 on, and a member's is
   `member.html` from journey 18 on; `host-now.html` and `member-now.html` are kept as the record): "Invite people", with the hint "QR code and link", and, for the Host,
   "Wrap up", with the hint "End it now and send the recap".
+- `docs/mocks/dialogs/popkin-settings/schedules.html` — the Host's menu while Schedules is on:
+  "Set the event" after "Change how long it lasts", with the event's label and days or "Not set"
+  ([Set the event](../../schedules/set-the-event/README.md), journey 22).
 - `docs/mocks/dialogs/edit-popkin/default.html`, `busy.html` ("Saving…"), `invalid.html` ("Give
   your Popkin a name."), `failed.html` ("We couldn't save that. Your changes are still here. Try
   again.").

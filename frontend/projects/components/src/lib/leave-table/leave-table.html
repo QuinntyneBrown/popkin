@@ -1,0 +1,68 @@
+<table class="leave">
+  <caption class="visually-hidden">
+    Who is off each day of
+    {{
+      label()
+    }}
+  </caption>
+  <colgroup>
+    @for (column of columns; track column) {
+      <col />
+    }
+  </colgroup>
+  <thead>
+    <tr>
+      <th scope="col">{{ label() }}</th>
+      @for (day of days(); track $index) {
+        <th scope="col" [class.is-event]="day.event" [class.is-weekend]="day.weekend">
+          @if (day.event) {
+            <span class="leave__event">{{ day.event }}</span>
+          }
+          <span class="leave__day">{{ day.weekday }}</span>
+          <span class="leave__date">{{ day.date }}</span>
+          @if (day.off; as off) {
+            <span class="leave__off" [class.leave__off--many]="day.many">{{ off }}</span>
+          } @else {
+            <span class="leave__off" aria-hidden="true">–</span>
+          }
+        </th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track $index) {
+      <tr>
+        <th scope="row">
+          <span class="leave__who">
+            <span
+              pk-avatar
+              size="sm"
+              [attr.data-accent]="row.avatar.accent"
+              [initials]="row.avatar.initials"
+              [photo]="row.avatar.photoUrl"
+            ></span>
+            <span class="truncate">{{ row.name }}</span>
+          </span>
+        </th>
+        @for (status of row.days; track $index) {
+          <td [class.is-event]="days()[$index]?.event">
+            @switch (status) {
+              @case ('Weekend') {
+                <span class="leave__cell" role="img" aria-label="Weekend"></span>
+              }
+              @case ('Off') {
+                <span class="leave__cell leave__cell--off">Off</span>
+              }
+              @case ('Tentative') {
+                <span class="leave__cell leave__cell--tentative">Tentative</span>
+              }
+              @default {
+                <span class="leave__cell leave__cell--working">Working</span>
+              }
+            }
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>

@@ -1,6 +1,7 @@
 using MediatR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
+using Popkin.Application.Schedules;
 using Popkin.Application.Security;
 using Popkin.Domain;
 
@@ -30,6 +31,7 @@ public sealed class LeavePopkinCommandHandler(
         }
 
         membership.Leave(clock.GetUtcNow());
+        await MemberSchedules.RemoveAsync(db, [membership.Id], cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
         await departures.AnnounceAsync(popkin.Id, membership, cancellationToken);

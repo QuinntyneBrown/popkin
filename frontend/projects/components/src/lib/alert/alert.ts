@@ -23,7 +23,7 @@ import { IconName } from '../icon/icons';
     '[class.alert--danger]': "variant() === 'danger'",
     '[class.alert--info]': "variant() === 'info'",
     '[class.alert--warning]': "variant() === 'warning'",
-    role: 'alert',
+    '[attr.role]': "announce() ? 'alert' : null",
   },
 })
 export class Alert {
@@ -34,6 +34,8 @@ export class Alert {
   readonly icon = input<IconName>('alert');
   /** The words of the button under the text: "Try again". None without it. */
   readonly action = input<string>();
+  /** Announced when it appears, as a failure is; off for a line that only informs. */
+  readonly announce = input(true);
   /** The button was chosen. */
   readonly acted = output<void>();
 }

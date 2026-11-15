@@ -169,6 +169,22 @@
           }
         </section>
 
+        @if (store.schedule().shown) {
+          <section
+            pk-section
+            slot="side"
+            heading="Schedule"
+            linkSuffix="of this week"
+            [link]="['/p', popkinId(), 'schedule', 'week']"
+          >
+            <a
+              pk-schedule-card
+              [routerLink]="['/p', popkinId(), 'schedule', 'week']"
+              [line]="store.schedule().line"
+            ></a>
+          </section>
+        }
+
         <section
           pk-section
           slot="side"
@@ -252,6 +268,7 @@
       [members]="membersLabel()"
       [timeLeft]="store.timeLeft()"
       [unread]="unreadCount()"
+      [schedule]="popkin()?.schedules ?? false"
     ></nav>
   </div>
 }

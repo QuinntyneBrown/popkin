@@ -16,6 +16,8 @@ import { CHAT_API } from '../chat/chat-api';
 import { EXPERIENCES_API } from '../experiences/experiences-api';
 import { PHOTOS_API } from '../photos/photos-api';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
+import { SCHEDULE_API } from '../schedule/schedule-api';
+import { ScheduleSummaryView } from '../../models/this-week';
 import { UnreadTracker } from '../chat/unread-tracker';
 import { PopkinHomeStore } from './popkin-home-store';
 import { POPKINS_API } from './popkins-api';
@@ -39,6 +41,8 @@ const home: PopkinHomeView = {
   viewer: { membershipId: 'm-mara', firstName: 'Mara' },
   unreadCount: 3,
   version: 1,
+  schedules: false,
+  event: null,
 };
 const mara: MemberView = {
   membershipId: 'm-mara',
@@ -67,7 +71,14 @@ class Fake {
     top: [{ id: 'e', name: 'Sunrise canoe', photoUrl: null, average: 4.8, ratingCount: 11 }],
   };
   members: MemberView[] | 'down' = [mara];
-  readonly asked = { home: 0, preview: 0, photos: 0, experiences: 0, members: 0 };
+  scheduleSummary: ScheduleSummaryView | 'missing' | 'down' = {
+    hasHours: true,
+    day: '2026-09-16',
+    everyoneFreeFrom: '19:30',
+  };
+  /** The days the summary was read from. */
+  readonly summariesFrom: string[] = [];
+  readonly asked = { home: 0, preview: 0, photos: 0, experiences: 0, members: 0, summary: 0 };
 
   private answer<T>(key: keyof Fake['asked'], value: T | 'missing' | 'down'): Observable<T> {
     this.asked[key]++;
@@ -94,6 +105,10 @@ class Fake {
       ],
     });
   getSummary = () => this.answer('photos', this.photos);
+  summary = (_: string, from: string) => {
+    this.summariesFrom.push(from);
+    return this.answer('summary', this.scheduleSummary);
+  };
 }
 
 describe('PopkinHomeStore', () => {
@@ -136,6 +151,7 @@ describe('PopkinHomeStore', () => {
           useValue: { getSummary: () => api['answer']('experiences', api.experiences) },
         },
         { provide: POPKIN_REALTIME, useValue: realtime },
+        { provide: SCHEDULE_API, useValue: api },
       ],
     });
     store = TestBed.inject(PopkinHomeStore);
@@ -428,5 +444,53 @@ describe('PopkinHomeStore', () => {
     expect(store.popkin()?.colour).toBe('Plum');
     expect(store.timeLeftLine()).toBe('2 days 6 hrs left · Wraps up Mon, 6 pm');
     expect(api.asked.home).toBe(1);
+  });
+
+  // L2-075 AC2, AC3: the home's Schedule section.
+  describe('the Schedule section', () => {
+    it('names the next evening everyone is free, from the viewer’s today, while Schedules is on', () => {
+      api.home = { ...home, schedules: true };
+      store.open('p');
+      expect(store.schedule()).toEqual({
+        shown: true,
+        line: 'Everyone’s free Wednesday from 7:30 pm',
+      });
+      expect(api.summariesFrom).toEqual(['2026-09-12']);
+    });
+
+    it('is not there, and not asked for, while Schedules is off', () => {
+      store.open('p');
+      expect(store.schedule().shown).toBe(false);
+      expect(api.asked.summary).toBe(0);
+    });
+
+    it('is not there while nobody has added their hours', () => {
+      api.home = { ...home, schedules: true };
+      api.scheduleSummary = { hasHours: false, day: '2026-09-12', everyoneFreeFrom: '17:00' };
+      store.open('p');
+      expect(store.schedule().shown).toBe(false);
+    });
+
+    it('is not there when it cannot be read, and the rest of the home is', () => {
+      api.home = { ...home, schedules: true };
+      api.scheduleSummary = 'missing';
+      store.open('p');
+      expect(store.schedule().shown).toBe(false);
+      expect(store.state()).toBe('ready');
+    });
+  });
+
+  describe('the event (L2-085)', () => {
+    it('holds the event the Host has just saved, and the one removed', () => {
+      api.home = { ...home, schedules: true };
+      store.open('p');
+      const event = { label: 'Lake weekend', firstDay: '2026-09-25', lastDay: '2026-09-27' };
+
+      store.applyEvent(event);
+      expect(store.popkin()?.event).toEqual(event);
+
+      store.applyEvent(null);
+      expect(store.popkin()?.event).toBeNull();
+    });
   });
 });

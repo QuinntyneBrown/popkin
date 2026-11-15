@@ -62,6 +62,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Invites:BaseUrl", "https://popk.in/");
         // Phone sign-in is on for every test but those of its switch (ADR 0023).
         builder.UseSetting("Features:PhoneSignIn", "true");
+        // Schedules is on for every test but those of its switch (ADR 0023).
+        builder.UseSetting("Features:Schedules", "true");
         foreach (var (key, value) in Settings)
         {
             builder.UseSetting(key, value);

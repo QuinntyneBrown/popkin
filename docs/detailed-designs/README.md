@@ -234,6 +234,10 @@ Each design follows the source named below and marks the conflict in its own REA
 | Accessibility | [Responsive layout](accessibility/responsive-layout/README.md) | L2-058 |
 | Accessibility | [Light and dark themes](accessibility/light-and-dark-themes/README.md) | L2-059 |
 | Accessibility | [Optional motion](accessibility/optional-motion/README.md) | L2-060 |
+| Schedules | [Time off](schedules/time-off/README.md) | L2-072, L2-073 |
+| Schedules | [This week](schedules/this-week/README.md) | L2-074, L2-075 (AC2, AC3) |
+| Schedules | [Set the event](schedules/set-the-event/README.md) | L2-085, L2-020 |
+| Schedules | [Schedules switch](schedules/schedules-switch/README.md) | L2-077 |
 
 Every L2 requirement from L2-001 to L2-067 is realised by at least one feature above.
 
@@ -330,6 +334,9 @@ Settled so far:
 | Decision | Settled by |
 |---|---|
 | How many API instances run | [ADR 0009](../adr/0009-one-api-instance.md): one |
+| What the event of time off is, and who sets it | [Set the event](schedules/set-the-event/README.md): a label and a first and last day the Host sets from Popkin settings (L2-085), journey 22 |
+| How Schedules is switched before the admin app exists | [Schedules switch](schedules/schedules-switch/README.md): the API setting `Features:Schedules` behind `IFeatureSwitches` ([ADR 0023](../adr/0023-features-switched-on-by-a-setting.md)); journey 23 moves it into the admin app behind the same interface |
+| Whose clock counts a day of the Schedule tab | [Time off](schedules/time-off/README.md): a day is a calendar date, the same for every member, and "today" is the viewer's, sent by the web app |
 | Whether TLS ends at a reverse proxy, and who serves the web app | [ADR 0013](../adr/0013-deployment-shape.md): the proxy does both |
 | The logging sink | [ADR 0012](../adr/0012-opentelemetry.md): OpenTelemetry, exported over OTLP |
 | The SignalR client package | Shared real-time rules above: `@microsoft/signalr` from npm, on the server's release line |

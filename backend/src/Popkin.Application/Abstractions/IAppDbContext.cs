@@ -44,5 +44,9 @@ public interface IAppDbContext
 
     DbSet<CrewInvite> CrewInvites { get; }
 
+    DbSet<TimeOffDay> TimeOffDays { get; }
+
+    DbSet<WorkingStretch> WorkingStretches { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

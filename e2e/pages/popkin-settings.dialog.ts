@@ -20,6 +20,8 @@ export class PopkinSettingsDialog {
   readonly changeLength: Locator;
   readonly invitePeople: Locator;
   /** The Host's only. */
+  /** "Set the event", with the event as its hint, for the Host while Schedules is on (L2-085). */
+  readonly setEvent: Locator;
   readonly wrapUp: Locator;
   /** A member's only: the danger row. */
   readonly leave: Locator;
@@ -36,6 +38,7 @@ export class PopkinSettingsDialog {
     this.editLook = this.items.filter({ hasText: 'Edit name and look' });
     this.changeLength = this.items.filter({ hasText: 'Change how long it lasts' });
     this.invitePeople = this.items.filter({ hasText: 'Invite people' });
+    this.setEvent = this.items.filter({ hasText: 'Set the event' });
     this.wrapUp = this.items.filter({ hasText: 'Wrap up' });
     this.leave = this.items.filter({ hasText: 'Leave this Popkin' });
   }

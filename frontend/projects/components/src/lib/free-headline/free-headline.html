@@ -1,0 +1,10 @@
+<div class="free__text">
+  <p class="free__headline">
+    {{ headline() }}
+    @if (time(); as time) {
+      <em>{{ time }}</em>
+    }
+  </p>
+  <p class="free__sub">{{ sub() }}</p>
+</div>
+<div class="free__action"><ng-content /></div>

@@ -19,6 +19,7 @@ import {
   PopkinSettingsView,
   UnreadTracker,
   accentOf,
+  eventHint,
   experiencesMeta,
   lengthHint,
   memberName,
@@ -35,6 +36,7 @@ import {
   ChatCard,
   EmptyState,
   ExperienceRow,
+  ScheduleCard,
   Home,
   HomeHeader,
   Icon,
@@ -57,6 +59,12 @@ import {
   ChangeLengthData,
   ChangeLengthDialog,
 } from '../../dialogs/change-length/change-length.dialog';
+import {
+  SetEventData,
+  SetEventDialog,
+  SetEventResult,
+} from '../../dialogs/set-event/set-event.dialog';
+import { Toaster } from '../../toasts/toaster';
 
 /** How many of what a section holds the home lists; the layout shows fewer on a narrow screen. */
 const MEMBERS_LISTED = 6;
@@ -79,6 +87,7 @@ const accent = (avatar: AvatarView) => accentOf(avatar.accent);
     ChatCard,
     EmptyState,
     ExperienceRow,
+    ScheduleCard,
     Home,
     HomeHeader,
     Icon,
@@ -107,6 +116,7 @@ export class PopkinHomePage {
   private readonly dialog = inject(Dialog);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
+  private readonly toaster = inject(Toaster);
 
   protected readonly popkin = this.store.popkin;
   protected readonly accent = computed(() => {
@@ -225,6 +235,7 @@ export class PopkinHomePage {
         name: popkin.name,
         host: popkin.viewerRole === 'Host',
         lengthHint: lengthHint(popkin.endsAt, new Date()),
+        eventHint: popkin.schedules ? eventHint(popkin.event) : undefined,
       },
       ariaLabelledBy: 'dlg-title',
       hasBackdrop: false,
@@ -233,6 +244,7 @@ export class PopkinHomePage {
     opened.closed.subscribe((setting) => {
       if (setting === 'edit') this.editLook(opener);
       if (setting === 'length') this.changeLength(opener);
+      if (setting === 'event') this.setEvent(opener);
       if (setting === 'invite') this.invite();
       if (setting === 'wrap-up') void this.router.navigate(['/p', this.popkinId(), 'wrap-up']);
       if (setting === 'leave') this.leave(popkin.name);
@@ -281,6 +293,26 @@ export class PopkinHomePage {
     });
     opened.closed.subscribe((saved) => {
       if (saved) this.store.applySettings(saved);
+    });
+  }
+
+  /** "Set the event" (L2-085): once saved, a toast says so (AC4); Popkin settings shows it. */
+  private setEvent(opener: HTMLElement | null): void {
+    const popkin = this.popkin();
+    if (!popkin) return;
+    const opened = this.dialog.open<SetEventResult, SetEventData>(SetEventDialog, {
+      data: { popkinId: this.popkinId(), accent: this.accent(), event: popkin.event },
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      autoFocus: '#elabel',
+      restoreFocus: opener ?? true,
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((result) => {
+      if (!result) return;
+      this.store.applyEvent(result.event);
+      if (result.event) this.toaster.show('success', 'Event saved');
     });
   }
 

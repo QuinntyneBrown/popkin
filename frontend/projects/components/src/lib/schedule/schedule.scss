@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-6) var(--space-4) var(--space-28);
+}
+
+.schedule__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.schedule__skeleton-days {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.schedule__skeleton-day {
+  flex: 1;
+  height: var(--space-20);
+}
+
+.schedule__skeleton-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (min-width: 48rem) {
+  :host {
+    padding: var(--space-6) var(--space-8) var(--space-10);
+  }
+}
+
+@media (min-width: 80rem) {
+  :host {
+    padding-inline: var(--space-10);
+  }
+}

@@ -1,0 +1,30 @@
+<div pk-dialog heading="My hours" [description]="description" [accent]="data.accent">
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t save that.">Your hours are still here. Try again.</div>
+  }
+  <div class="stack stack--sm">
+    @for (day of days(); track day.name; let i = $index) {
+      <div
+        pk-hours-row
+        [day]="day.name"
+        [weekday]="day.weekday"
+        [stretches]="day.stretches"
+        [error]="errors()[i]"
+        [disabled]="busy()"
+        (stretchesChange)="change(i, $event)"
+      ></div>
+    }
+  </div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="popkin"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy() || invalid()"
+    (click)="save()"
+  >
+    {{ busy() ? 'Saving…' : 'Save' }}
+  </button>
+</div>

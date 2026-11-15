@@ -1,0 +1,50 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+ul {
+  display: flex;
+  gap: var(--space-1-5);
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+ul a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  flex: none;
+  height: var(--space-10);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  color: var(--color-fg-muted);
+  font: var(--font-weight-semibold) var(--font-size-sm-plus) / 1 var(--font-family-sans);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+ul a:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+}
+
+ul a[aria-pressed='true'] {
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+}
+
+.weeks__dot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+}
+
+ul a[aria-pressed='true'] .weeks__dot {
+  background: var(--color-fg-inverse);
+}

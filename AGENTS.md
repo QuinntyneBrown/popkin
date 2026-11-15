@@ -17,12 +17,12 @@ Popkin is a .NET backend, an Angular frontend and a Playwright suite. The .NET b
 data and the rules; the Angular frontend provides the app, and Playwright covers behaviour (and,
 run by hand, visual parity with the design reference).
 
-**The first twenty journeys are built; the rest is designed.** Journey
+**Journeys 1 to 20 and journey 22 are built; the rest is designed.** Journey
 1, Start a Popkin, journey 2, Join by invite, journey 3, Chat with everyone, journey 4, Popkin
 home, journey 5, Share photos, journey 6, Come back, journey 7, Group call, journey 8, Rate an
 experience, journey 9, Wrap up, journey 10, Discover Popkin, journey 11, Direct message, journey 12, React and reply, journey 13, Photos in chat, journey 14, Engage with a photo, journey 15, Join by code, journey 16, Change Popkin settings, journey
-17, Manage account, journey 18, Leave a Popkin, journey 19, Delete account, and journey 20, Say
-keen, run end to end: the backend has sign up and sign in
+17, Manage account, journey 18, Leave a Popkin, journey 19, Delete account, journey 20, Say
+keen, and journey 22, Find a free evening, run end to end: the backend has sign up and sign in
 with a code, sessions, Popkin creation, the list of a person's Popkins, the invite preview, joining with a name and a photo,
 the photo store behind avatars, the Everyone thread, messages, reactions (adding one and taking it back, each message's
 summary at its `reactionsVersion` and the hub event `ReactionsChanged`), deleting one's own
@@ -53,14 +53,21 @@ recap, the album export as a zip, the removal of an album that was not kept, and
 invites), leaving a Popkin (`DELETE …/members/me`, refused to the Host with `403`
 `host_cannot_leave`, and the hub event `MemberLeft`), the account (reading it, a new name or
 photo shown wherever the person appears, and signing out of one device), deleting the account
-(what it wraps up, the deletion itself and the erasure of what is left within 30 days), with
-their migrations; the Worker hosts four jobs (`WrapUpDuePopkinsJob`,
+(what it wraps up, the deletion itself and the erasure of what is left within 30 days), the
+Schedule behind the switch `Features:Schedules` (ADR 0023: off unless `true`, every Schedules
+endpoint `404` `feature_off` while it is off, and `schedules` in the Popkin's header): time off
+for a week (`GET`/`PUT …/schedule/time-off`), this week and its evenings free (`GET
+…/schedule/week`), my working hours (`PUT …/schedule/hours/{membershipId}`), the home's summary
+(`GET …/schedule/summary`) and the event the Host sets (`PUT`/`DELETE …/event`), each change sent
+as the hub event `ScheduleChanged`, a member's own entries only (`403`), none once wrapped up
+(`409`), with their migrations; the Worker hosts four jobs (`WrapUpDuePopkinsJob`,
 `RemovePhotosOfWrappedUpPopkinsJob`, `PrepareAlbumExportsJob`, `PurgeDeletedAccountsJob`) and
 sends no hub events
 (ADR 0015); the app has the screens of those journeys, the landing page at `/` (behind
 `signedOutGuard`, which sends a signed-in person to My Popkins), the welcome screen, the group
 chat screen, the Chat tab, the direct message, the Popkin home, the photo album and the photo
-view, the sign-in screen, Join with a code (`/join`), My Popkins, the call screen (for the group call and for a direct
+view, the sign-in screen, Join with a code (`/join`), My Popkins, the Schedule's Time off
+(`/p/:popkinId/schedule`) and This week (`…/schedule/week`) with their off screen, the call screen (for the group call and for a direct
 call), Experiences, the experience page, the wrap-up screen, the recap and the account
 (`/account`, with its theme of the device) among them, and no placeholder screen, built for the
 five form factors of L2-058, the read-only chat, Photos and Experiences of a wrapped-up Popkin,
@@ -70,13 +77,17 @@ bar, its comments beside the photo from 1024 px, its removed state and its read-
 wrapped-up Popkin, the Photo actions, Delete this photo?, More reactions, Photo comments and
 Delete this comment? dialogs of a photo, the Scan to join
 dialog, the dialogs of an experience (Share an experience, Add a comment, its actions and its
-deletion), the Popkin settings dialog (Edit name and look, Change how long it lasts, Invite people and
-Wrap up for the Host, and Invite people and Leave this Popkin for any other member), the Edit name
-and look and Change how long it lasts dialogs, the Leave Popkin dialog, the Sign out and Delete account dialogs, and the
+deletion), the Popkin settings dialog (Edit name and look, Change how long it lasts, Set the event while Schedules is on, Invite
+people and Wrap up for the Host, and Invite people and Leave this Popkin for any other member), the Edit name
+and look and Change how long it lasts dialogs, the Set the event, Add my time off and My hours
+dialogs, the Leave Popkin dialog, the Sign out and Delete account dialogs, and the
 not-found, server-error and offline screens; the marketing site (`frontend/projects/marketing`,
 ADR 0017) is one static page with the landing page's sections and the pitch film "Meet Popkin" in
 `pk-film`, linking to the app through `APP_URL`; the `components` library holds the `pk-*`
-components they use, `pk-keen-panel`, `pk-react-bar` and `pk-stage-button` among them, the blocks of the landing page (`pk-site-nav`, `pk-site-main`,
+components they use, `pk-keen-panel`, `pk-react-bar` and `pk-stage-button` among them, the
+parts of the Schedule (`pk-plan-header`, `pk-view-nav`, `pk-leave-table`, `pk-leave-row`,
+`pk-chart-legend`, `pk-day-picker`, `pk-free-headline`, `pk-shifts`, `pk-hours-row`,
+`pk-schedule-card`), the blocks of the landing page (`pk-site-nav`, `pk-site-main`,
 `pk-site-footer`, `pk-hero`, `pk-band`, `pk-steps`, `pk-uses`, `pk-compare`, `pk-cta-band`) and
 of the welcome screen (`pk-welcome`, `pk-action-pair`, `pk-mark-picture`) and the parts of the
 Chat tab and the direct message (`pk-conversations`, `pk-conversation-row`, `pk-thread-pane`,
@@ -93,7 +104,8 @@ the call session, its peer links (a mesh, ADR 0014) and the call banner's store,
 Experiences and of one experience, the recap's store (`RecapStore`, behind `RECAP_API`), the
 wrap-up watch (`WrapUpWatch`) and the wrap-up text (`wrap-up-text.ts`), the account's store
 (`AccountStore`, behind `ACCOUNT_API`), its text (`account-text.ts`) and the theme of the device
-(`ThemePreferences`), and the real-time
+(`ThemePreferences`), the Schedule's stores (`TimeOffStore`, `ThisWeekStore`, behind
+`SCHEDULE_API`) and texts (`time-off-text.ts`, `this-week-text.ts`, `event-text.ts`), and the real-time
 client, with unit tests of its stores and pure helpers. Everything else exists as documents,
 not code: the requirements (`docs/specs/L1.md` and `L2.md`), a mock of every screen in every
 state (`docs/mocks/`), the design system (`docs/design-system/`), a detailed design per feature

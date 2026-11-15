@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — This week
+
+Person(member, "Member", "Enters working hours and finds the evening everyone is free")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences and schedules")
+
+Rel(member, popkin, "Reads this week, enters their hours and takes the plan to chat in")
+@enduml

@@ -19,6 +19,7 @@ import {
   accentOf,
   threadSub,
   timeLeft,
+  PopkinFrame,
 } from 'api';
 import {
   AppScreen,
@@ -57,7 +58,7 @@ import { ConversationList } from './conversation-list';
     ThreadPane,
     TopBar,
   ],
-  providers: [ConversationsStore, ConversationList, ThreadStore],
+  providers: [ConversationsStore, ConversationList, ThreadStore, PopkinFrame],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './conversations.page.html',
 })
@@ -89,7 +90,14 @@ export class ConversationsPage {
   });
   protected readonly unreadCount = computed(() => this.unread.forPopkin(this.popkinId()));
 
+  /** Whether the Schedule tab shows (L2-077 AC1). */
+  protected readonly frame = inject(PopkinFrame);
+
   constructor() {
+    effect(() => {
+      const popkinId = this.popkinId();
+      untracked(() => this.frame.open(popkinId));
+    });
     const minute = setInterval(() => this.now.set(new Date()), 60_000);
     inject(DestroyRef).onDestroy(() => clearInterval(minute));
 

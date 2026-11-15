@@ -43,6 +43,8 @@ export class PopkinFrame {
   /** Once it has wrapped up nothing new is added to it (L2-045). */
   readonly wrappedUp = computed(() => this.popkin()?.status === 'WrappedUp');
   readonly isHost = computed(() => this.popkin()?.viewerRole === 'Host');
+  /** Whether Schedules is on; off until the Popkin is read (L2-077 AC1). */
+  readonly schedules = computed(() => this.popkin()?.schedules ?? false);
   /** "Wrapped up Sun 13 Sep". */
   readonly wrappedUpOn = computed(() => {
     const at = this.popkin()?.wrappedUpAt;

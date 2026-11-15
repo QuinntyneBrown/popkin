@@ -7,6 +7,7 @@
     [attr.aria-checked]="kind() === 'radio' ? option.value === value() : null"
     [attr.aria-selected]="option.value === value()"
     [tabIndex]="option.value === value() ? 0 : -1"
+    [disabled]="disabled()"
     (click)="choose(option.value)"
     (keydown)="move($event, i)"
   >

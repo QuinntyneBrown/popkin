@@ -1,0 +1,33 @@
+<p class="visually-hidden">{{ text() }}</p>
+<div class="shifts__ticks" aria-hidden="true">
+  @for (tick of ticks; track tick.at) {
+    <span [style.left.%]="tick.at">{{ tick.label }}</span>
+  }
+</div>
+<ul class="shifts__rows">
+  @for (row of rows(); track $index) {
+    <li class="shifts__row">
+      <span class="shifts__who">
+        <span
+          pk-avatar
+          size="sm"
+          [attr.data-accent]="row.avatar.accent"
+          [initials]="row.avatar.initials"
+          [photo]="row.avatar.photoUrl"
+        ></span>
+        <span class="truncate">{{ row.name }}</span>
+      </span>
+      <span class="shifts__track" aria-hidden="true">
+        @if (tint() !== null) {
+          <span class="shifts__tint" [style.left.%]="tint()"></span>
+        }
+        @for (block of row.blocks; track $index) {
+          <span class="shifts__block" [style.left.%]="block.left" [style.width.%]="block.width">{{
+            block.label
+          }}</span>
+        }
+      </span>
+    </li>
+  }
+</ul>
+<figcaption pk-chart-legend class="shifts__legend" [keys]="legend()"></figcaption>

@@ -16,6 +16,7 @@ public sealed class PopkinSpaceConfiguration : IEntityTypeConfiguration<PopkinSp
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(10);
         builder.Property(p => p.Length).HasConversion<string>().HasMaxLength(12);
         builder.Property(p => p.InviteCode).HasMaxLength(64).IsRequired();
+        builder.Property(p => p.EventLabel).HasMaxLength(PopkinRules.MaxEventLabelLength);
         builder.HasIndex(p => p.InviteCode).IsUnique();
         // A counter the entity raises, not a `rowversion`, so SQL Server, SQLite and the tests'
         // InMemory provider all refuse the second of two wrap-ups alike.

@@ -298,7 +298,8 @@
         "L2-019",
         "L2-011",
         "L2-029",
-        "L2-044"
+        "L2-044",
+        "L2-075"
       ],
       "states": [
         "default",
@@ -308,7 +309,9 @@
         "partial",
         "ongoing",
         "last-hour",
-        "last-hour-member"
+        "last-hour-member",
+        "schedule",
+        "schedule-none"
       ]
     },
     {
@@ -726,6 +729,7 @@
         "empty",
         "error",
         "confirmed",
+        "other-week",
         "off"
       ]
     },
@@ -854,10 +858,12 @@
       "opens_from": "popkin-home",
       "requirements": [
         "L2-020",
-        "L2-047"
+        "L2-047",
+        "L2-085"
       ],
       "states": [
         "default",
+        "schedules",
         "member",
         "host-now",
         "member-now"
@@ -1196,6 +1202,21 @@
       "not_applicable": {
         "invalid": "The title rule and its message are the same as New story (new-story/invalid)."
       }
+    },
+    {
+      "id": "set-event",
+      "kind": "dialog",
+      "title": "Set the event",
+      "opens_from": "popkin-settings",
+      "requirements": [
+        "L2-085"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
     },
     {
       "id": "add-time-off",

@@ -104,6 +104,45 @@ public static class ApiExtensions
         await db.SaveChangesAsync();
     }
 
+    /// <summary>Sets the event straight in the store, for a read that shows it; `PUT …/event` is tested in `SetEventTests`.</summary>
+    public static async Task SetEventAsync(this ApiFactory api, Guid popkinId, string label, DateOnly firstDay, DateOnly lastDay)
+    {
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Popkins.Single(p => p.Id == popkinId).SetEvent(label, firstDay, lastDay);
+        await db.SaveChangesAsync();
+    }
+
+    /// <summary>Sets a member's working stretches for a day straight in the store, as "09:00" to "17:30"; `PUT …/hours` is tested in `MyHoursTests`.</summary>
+    public static async Task SetHoursAsync(this ApiFactory api, Guid popkinId, string displayName, DateOnly day, params (string Start, string End)[] stretches)
+    {
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var membership = db.Memberships.Single(m => m.PopkinId == popkinId && m.DisplayName == displayName);
+        for (var i = 0; i < stretches.Length; i++)
+        {
+            db.WorkingStretches.Add(WorkingStretch.Of(membership.Id, day, i, Minutes(stretches[i].Start), Minutes(stretches[i].End)));
+        }
+
+        await db.SaveChangesAsync();
+
+        static int Minutes(string time) => int.Parse(time[..2]) * 60 + int.Parse(time[3..]);
+    }
+
+    /// <summary>How many working stretches the store holds for a membership.</summary>
+    public static int WorkingStretchCount(this ApiFactory api, Guid membershipId)
+    {
+        using var scope = api.Services.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<AppDbContext>().WorkingStretches.Count(s => s.MembershipId == membershipId);
+    }
+
+    /// <summary>How many days of time off the store holds for a membership.</summary>
+    public static int TimeOffCount(this ApiFactory api, Guid membershipId)
+    {
+        using var scope = api.Services.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<AppDbContext>().TimeOffDays.Count(d => d.MembershipId == membershipId);
+    }
+
     public static int MembershipCount(this ApiFactory api)
     {
         using var scope = api.Services.CreateScope();

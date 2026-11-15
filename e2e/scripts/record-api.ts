@@ -171,6 +171,28 @@ await call('PUT', `/api/popkins/${created.id}/length`, {
   endsAt: sunday.toISOString(),
 });
 
+// The Schedule (journey 22, with Features:Schedules on): Mara sets the event, reads the week
+// of time off that holds it and adds hers, reads this week and enters her hours, and reads the
+// home's Schedule summary. The dates are the mocks'; the header above was read before the event.
+const schedule = `/api/popkins/${created.id}/schedule`;
+const marasId = members.find((m: { isViewer: boolean }) => m.isViewer).membershipId;
+await call('PUT', `/api/popkins/${created.id}/event`, {
+  label: 'Lake weekend',
+  firstDay: '2026-09-25',
+  lastDay: '2026-09-27',
+});
+await call('GET', `${schedule}/time-off?week=2026-09-21`);
+await call('PUT', `${schedule}/time-off/${marasId}`, {
+  week: '2026-09-21',
+  days: ['Working', 'Working', 'Working', 'Tentative', 'Off'],
+});
+await call('GET', `${schedule}/week?from=2026-09-12`);
+await call('PUT', `${schedule}/hours/${marasId}`, {
+  from: '2026-09-12',
+  days: [[], [], [{ start: '09:00', end: '17:30' }], [], [], [], []],
+});
+await call('GET', `${schedule}/summary?from=2026-09-12`);
+
 // Calls: no group call is under way, which is what the home and the thread read; then Mara
 // starts one, turns her camera off and leaves, which ends it (journey 7).
 const calls = `/api/popkins/${created.id}/calls`;

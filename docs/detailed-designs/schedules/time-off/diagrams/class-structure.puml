@@ -1,0 +1,70 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Time off
+
+package "Popkin.Domain" {
+  enum TimeOffKind {
+    Off
+    Tentative
+  }
+  class TimeOffDay {
+    +Guid MembershipId
+    +DateOnly Day
+    +TimeOffKind Kind
+  }
+  class Membership {
+    +Guid Id
+    +Guid PopkinId
+    +string DisplayName
+    +DateTimeOffset? LeftAt
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string? EventLabel
+    +DateOnly? EventFirstDay
+    +DateOnly? EventLastDay
+  }
+  class ScheduleRules {
+    +{static} MondayOf(day: DateOnly): DateOnly
+    +{static} IsWithinAYear(monday: DateOnly, today: DateOnly): bool
+  }
+}
+package "Popkin.Application" {
+  class GetTimeOffWeekQuery {
+    +Guid PopkinId
+    +DateOnly? Week
+  }
+  class SetTimeOffCommand {
+    +Guid PopkinId
+    +Guid MembershipId
+    +DateOnly Week
+    +string[] Days
+  }
+  class TimeOffWeekDto {
+    +DateOnly Week
+    +EventDto? Event
+    +TimeOffMemberDto[] Members
+    +bool CanEdit
+  }
+  interface IFeatureSwitches {
+    +IsOn(feature: Feature): bool
+    +Require(feature: Feature): void
+  }
+}
+PopkinSpace "1" *-- "many" Membership
+Membership "1" *-- "0..*" TimeOffDay
+TimeOffDay --> TimeOffKind
+SetTimeOffCommand ..> ScheduleRules
+GetTimeOffWeekQuery ..> TimeOffWeekDto
+SetTimeOffCommand ..> IFeatureSwitches
+GetTimeOffWeekQuery ..> IFeatureSwitches
+@enduml

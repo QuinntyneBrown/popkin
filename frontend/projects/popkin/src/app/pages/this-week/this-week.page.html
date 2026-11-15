@@ -1,0 +1,109 @@
+<div pk-app-screen [accent]="frame.accent()" layout="tab" body="flush">
+  <header pk-plan-header slot="header" heading="This week" [sub]="store.subtitle()">
+    <nav pk-view-nav slot="views" [views]="views()"></nav>
+    @if (store.mine() && store.state() !== 'off') {
+      <button pk-button type="button" variant="secondary" size="md" (click)="openMyHours($event)">
+        <svg pk-icon name="clock" size="md"></svg>My hours
+      </button>
+    }
+  </header>
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <div pk-schedule view="this-week" loadingText="Loading the hours…" [loading]="true"></div>
+    }
+    @case ('off') {
+      <div pk-schedule>
+        <div
+          pk-empty-state
+          icon="power"
+          heading="Schedules is switched off"
+          text="Popkin has turned this feature off for now. Nothing is lost: it comes back as it was when the feature is on again. Your host can ask Popkin to find out more."
+        >
+          <a pk-button variant="primary" size="md" [routerLink]="home()">
+            <svg pk-icon name="back" size="md"></svg>Back to {{ frame.name() }}
+          </a>
+        </div>
+      </div>
+    }
+    @case ('error') {
+      <div pk-schedule>
+        <div
+          pk-empty-state
+          icon="offline"
+          heading="We couldn’t load the hours"
+          text="It’s safe. Check your connection and try again."
+          [alert]="true"
+        >
+          <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+            <svg pk-icon name="retry" size="md"></svg>Try again
+          </button>
+        </div>
+      </div>
+    }
+    @case ('ready') {
+      @if (store.chosen(); as chosen) {
+        <div pk-schedule>
+          <div
+            pk-day-picker
+            note="Free means not working between 8 and 11 pm."
+            [link]="link()"
+            [days]="store.days()"
+          ></div>
+          <section
+            pk-free-headline
+            [headline]="chosen.headline.text"
+            [time]="chosen.headline.time"
+            [sub]="chosen.sub"
+          >
+            @if (chosen.empty) {
+              @if (store.mine()) {
+                <button
+                  pk-button
+                  type="button"
+                  variant="popkin"
+                  size="md"
+                  (click)="openMyHours($event)"
+                >
+                  <svg pk-icon name="clock" size="md"></svg>My hours
+                </button>
+              }
+            } @else {
+              <a
+                pk-button
+                size="md"
+                [variant]="chosen.action.variant"
+                [routerLink]="everyone()"
+                [queryParams]="{ draft: chosen.draft }"
+                ><svg pk-icon name="message" size="md"></svg>{{ chosen.action.label }}</a
+              >
+            }
+          </section>
+          @if (!chosen.empty) {
+            <figure
+              pk-shifts
+              [label]="chosen.shifts.label"
+              [text]="chosen.shifts.text"
+              [rows]="chosen.shifts.rows"
+              [tint]="chosen.shifts.tint"
+              [legend]="chosen.shifts.legend"
+            ></figure>
+          }
+        </div>
+      }
+    }
+  }
+
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    current="schedule"
+    [popkinId]="popkinId()"
+    [name]="frame.name()"
+    [emoji]="frame.emoji()"
+    [members]="frame.members()"
+    [timeLeft]="frame.timeLeft()"
+    [unread]="unreadCount()"
+    [schedule]="frame.schedules()"
+  ></nav>
+</div>

@@ -1,0 +1,64 @@
+<div
+  pk-dialog
+  heading="Set the event"
+  description="What you’re getting together for. Time off marks its days for everyone."
+  [accent]="data.accent"
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t save the event.">
+      What you entered is still here. Try again.
+    </div>
+  }
+  <div
+    pk-text-field
+    fieldId="elabel"
+    label="Label"
+    [maxlength]="labelMax"
+    [readonly]="busy()"
+    [error]="errorOf('label')"
+    [formControl]="fields.label"
+  ></div>
+  <div
+    pk-text-field
+    fieldId="efirst"
+    label="First day"
+    type="date"
+    [readonly]="busy()"
+    [error]="errorOf('firstDay')"
+    [formControl]="fields.firstDay"
+  ></div>
+  <div
+    pk-text-field
+    fieldId="elast"
+    label="Last day"
+    type="date"
+    [readonly]="busy()"
+    [error]="errorOf('lastDay')"
+    [formControl]="fields.lastDay"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="popkin"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy() || invalid()"
+    (click)="save()"
+  >
+    {{ busy() ? 'Saving…' : 'Save' }}
+  </button>
+  @if (data.event) {
+    <button
+      pk-button
+      slot="footer"
+      type="button"
+      variant="quiet"
+      [block]="true"
+      [disabled]="busy()"
+      (click)="remove()"
+    >
+      Remove the event
+    </button>
+  }
+</div>

@@ -58,6 +58,29 @@ public sealed class PopkinSpace
     /// </summary>
     public long Version { get; private set; }
 
+    /// <summary>What the group is getting together for, set by the Host; null when there is none (L2-085).</summary>
+    public string? EventLabel { get; private set; }
+
+    public DateOnly? EventFirstDay { get; private set; }
+
+    public DateOnly? EventLastDay { get; private set; }
+
+    /// <summary>The Host sets the event (L2-085); the rules of its fields are checked before.</summary>
+    public void SetEvent(string label, DateOnly firstDay, DateOnly lastDay)
+    {
+        EventLabel = label;
+        EventFirstDay = firstDay;
+        EventLastDay = lastDay;
+    }
+
+    /// <summary>The Host removes the event (L2-085 AC5).</summary>
+    public void RemoveEvent()
+    {
+        EventLabel = null;
+        EventFirstDay = null;
+        EventLastDay = null;
+    }
+
     public IReadOnlyCollection<Membership> Memberships => _memberships;
 
     /// <summary>

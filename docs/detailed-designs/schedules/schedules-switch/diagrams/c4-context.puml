@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Schedules switch
+
+Person(member, "Member", "Sees the Schedule tab, or not")
+Person(owner, "Owner", "Runs Popkin and sets its API settings")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences and schedules")
+
+Rel(owner, popkin, "Sets Features:Schedules of")
+Rel(member, popkin, "Uses the Schedule tab of")
+@enduml

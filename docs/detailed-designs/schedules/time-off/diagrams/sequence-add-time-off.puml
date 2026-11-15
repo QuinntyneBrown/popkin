@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Adding my time off
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "TimeOffPage" as page
+  participant "TimeOffStore" as store
+  participant "HttpScheduleApi" as client
+  participant "AddTimeOffDialog" as dialog
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ScheduleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "Handler" as handler
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Add my time off"
+page -> dialog : Open with the chosen week and my entries (L2-073 AC1)
+alt The week is more than a year ahead
+  dialog --> actor : "Save" disabled, "Time off can be entered up to a year ahead." (L2-073 AC5)
+end
+actor -> dialog : Choose Off, Tentative or Working for each weekday, then "Save"
+dialog -> dialog : "Saving…", disabled (L2-073 AC2)
+dialog -> client : setTimeOff(popkinId, myMembershipId, week, days)
+client -> controller : PUT /api/popkins/{popkinId}/schedule/time-off/{membershipId}
+controller -> handler : Send SetTimeOffCommand
+handler -> switches : Require(Schedules)
+handler -> guard : RequireActiveMemberAsync(popkinId)
+alt Wrapped up
+  controller --> client : 409 popkin_wrapped_up (L2-073 AC4)
+else Another member's id
+  controller --> client : 403 not_your_schedule (L2-073 AC4)
+else More than a year ahead
+  controller --> client : 400 too_far_ahead
+else Allowed
+  handler -> db : Replace the five weekdays; Working removes the row
+  handler -> notifier : ScheduleChanged(popkinId) to the Popkin group
+  controller --> client : 200 TimeOffWeekDto
+  client --> dialog : The week
+  dialog --> page : Close; my row shows the new entries
+  notifier -> store : ScheduleChanged on every other member's open screen
+  store -> client : timeOff(popkinId, week)
+  store --> page : The table shows it without a reload (L2-072 AC11)
+end
+alt Failure
+  client --> dialog : Error
+  dialog --> actor : Stays open with the choices; "We couldn't save that." (L2-073 AC3)
+end
+@enduml

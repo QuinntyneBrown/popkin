@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Set the event
+
+Container_Boundary(web, "Popkin web app") {
+  Component(menu, "PopkinSettingsDialog", "CDK dialog", "Set the event row for the Host")
+  Component(dialog, "SetEventDialog", "CDK dialog", "Label, first day, last day")
+  Component(text, "event-text.ts", "api library, pure", "Sep 25 – 27")
+  Component(client, "HttpScheduleApi", "Behind SCHEDULE_API", "setEvent, removeEvent")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ScheduleController", "ASP.NET Core controller", "PUT and DELETE event")
+  Component(cmd, "SetEventCommandHandler, RemoveEventCommandHandler", "MediatR handlers", "Host only, active Popkin")
+  Component(input, "EventInput", "Application rule", "Label 1 to 40, days in order, a year ahead")
+  Component(entity, "PopkinSpace", "Domain entity", "SetEvent, RemoveEvent")
+  ComponentDb(db, "Popkin database", "SQL Server", "Popkins")
+}
+Rel(menu, dialog, "Opens")
+Rel(dialog, text, "Words")
+Rel(dialog, client, "setEvent")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(ctrl, cmd, "Sends")
+Rel(cmd, input, "Checks")
+Rel(cmd, entity, "SetEvent")
+Rel(cmd, db, "Saves")
+@enduml

@@ -103,6 +103,11 @@ const BACK_ONLINE_MS = 5_000;
 export class GroupChatPage {
   /** The Popkin, from the route. */
   readonly popkinId = input.required<string>();
+  /**
+   * A message to start from, from the route's `?draft=`: "Plan dinner in chat" on This week
+   * (L2-074 AC7). It is put in the field, not sent.
+   */
+  readonly draft = input<string>();
 
   protected readonly store = inject(ThreadStore);
   protected readonly actions = inject(MessageActions);
@@ -144,7 +149,7 @@ export class GroupChatPage {
   protected readonly sentOnReturn = signal<number | null>(null);
 
   /** What the Popkin itself says once it has wrapped up: when it did (L2-045 AC1). */
-  private readonly frame = inject(PopkinFrame);
+  protected readonly frame = inject(PopkinFrame);
   protected readonly thread = this.store.thread;
   protected readonly readOnly = computed(() => !!this.thread()?.readOnly);
   private readonly watch = inject(WrapUpWatch);
@@ -217,11 +222,14 @@ export class GroupChatPage {
     effect(() => {
       if (this.state() === 'not-found') untracked(() => this.errors.showNotFound());
     });
+    // The frame says when it wrapped up, and whether the Schedule tab shows (L2-077 AC1).
     effect(() => {
-      if (this.readOnly()) untracked(() => this.frame.open(this.popkinId()));
+      const popkinId = this.popkinId();
+      untracked(() => this.frame.open(popkinId));
     });
 
-    // Once the thread is known: the draft left here earlier, the latest in view, and focus.
+    // Once the thread is known: the draft brought here or left here earlier, the latest in view,
+    // and focus.
     let opened = false;
     effect(() => {
       const thread = this.thread();
@@ -229,7 +237,7 @@ export class GroupChatPage {
       if (opened || !thread || (state !== 'ready' && state !== 'empty')) return;
       opened = true;
       untracked(() => {
-        if (!this.text()) this.text.set(this.drafts.get(thread.id));
+        if (!this.text()) this.text.set(this.draft() || this.drafts.get(thread.id));
         afterNextRender(
           () => {
             this.threadView()?.scrollToLatest('instant');

@@ -1,0 +1,58 @@
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Popkin.Api.RateLimiting;
+using Popkin.Application.Schedules;
+
+namespace Popkin.Api.Controllers;
+
+/// <summary>The Schedule tab of a Popkin: time off and this week (L1-018). Every action needs a session.</summary>
+[ApiController]
+[Route("api/popkins/{popkinId:guid}/schedule")]
+public sealed class ScheduleController(ISender sender) : ControllerBase
+{
+    /// <summary>
+    /// A week of the group's time off (L2-072): `week` names it by any of its days; without it,
+    /// the event's week, or else the week of the viewer's `today`.
+    /// </summary>
+    [HttpGet("time-off")]
+    public async Task<ActionResult<TimeOffWeekDto>> GetTimeOff(
+        Guid popkinId, [FromQuery] DateOnly? week, [FromQuery] DateOnly? today, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetTimeOffWeekQuery(popkinId, week, today), cancellationToken));
+
+    /// <summary>
+    /// Sets the caller's own time off for a week, Monday to Friday (L2-073), and answers the week.
+    /// Counted with messages.
+    /// </summary>
+    [HttpPut("time-off/{membershipId:guid}")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<TimeOffWeekDto>> SetTimeOff(
+        Guid popkinId, Guid membershipId, SetTimeOffRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SetTimeOffCommand(popkinId, membershipId, request.Week, request.Days), cancellationToken));
+
+    /// <summary>
+    /// This week (L2-074): seven days from `from`, the viewer's today, each evening's free count
+    /// and everyone's working stretches.
+    /// </summary>
+    [HttpGet("week")]
+    public async Task<ActionResult<ThisWeekDto>> GetThisWeek(Guid popkinId, [FromQuery] DateOnly? from, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetThisWeekQuery(popkinId, from), cancellationToken));
+
+    /// <summary>
+    /// The home's Schedule section (L2-075 AC2): whether anyone has hours in the seven days from
+    /// `from`, and the first evening everyone is free.
+    /// </summary>
+    [HttpGet("summary")]
+    public async Task<ActionResult<ScheduleSummaryDto>> GetSummary(Guid popkinId, [FromQuery] DateOnly? from, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetScheduleSummaryQuery(popkinId, from), cancellationToken));
+
+    /// <summary>
+    /// Sets the caller's own working hours for the seven days from `from` (L2-074 AC8), and answers
+    /// this week. Counted with messages.
+    /// </summary>
+    [HttpPut("hours/{membershipId:guid}")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<ThisWeekDto>> SetWorkingHours(
+        Guid popkinId, Guid membershipId, SetWorkingHoursRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SetWorkingHoursCommand(popkinId, membershipId, request.From, request.Days), cancellationToken));
+}

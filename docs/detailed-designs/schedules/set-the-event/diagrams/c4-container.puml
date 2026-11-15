@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Set the event
+
+Person(host, "Host", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Popkin settings menu and the Set the event dialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "PUT and DELETE .../event")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "PopkinSpace EventLabel, EventFirstDay, EventLastDay")
+}
+Rel(host, web, "Sets the label and days", "HTTPS")
+Rel(web, api, "Saves the event", "JSON/HTTPS, session cookie")
+Rel(api, db, "Updates the Popkin", "EF Core")
+Rel(api, web, "ScheduleChanged", "SignalR")
+@enduml

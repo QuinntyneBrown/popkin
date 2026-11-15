@@ -1,0 +1,47 @@
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  margin-top: var(--space-4);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+i {
+  display: inline-block;
+  width: var(--space-5);
+  height: var(--space-3);
+  border-radius: var(--radius-xs);
+}
+
+strong {
+  color: var(--accent-text);
+}
+
+.is-card {
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.is-tint {
+  background: var(--accent-tint);
+}
+
+.is-off {
+  background: var(--accent);
+}
+
+.is-tentative {
+  border: var(--border-width-thick) dashed var(--color-warning-border);
+  background: var(--color-warning-bg);
+}
+
+.is-working {
+  background: var(--color-bg-subtle);
+}

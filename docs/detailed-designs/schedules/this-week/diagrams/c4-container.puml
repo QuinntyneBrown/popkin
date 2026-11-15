@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — This week
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "This week page, My hours dialog, the home Schedule section")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET .../schedule/week, PUT .../schedule/hours, GET .../schedule/summary")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "WorkingStretch")
+}
+Rel(member, web, "Chooses a day, enters hours, plans dinner", "HTTPS")
+Rel(web, api, "Reads the week and the summary, saves my hours", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads and replaces working stretches", "EF Core")
+Rel(api, web, "ScheduleChanged", "SignalR")
+@enduml

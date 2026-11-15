@@ -27,6 +27,7 @@ import {
   WrapUpWatch,
   accentOf,
   timeLeft,
+  PopkinFrame,
 } from 'api';
 import {
   AppScreen,
@@ -81,7 +82,14 @@ import { MessageActions } from '../conversations/message-actions';
     Thread,
     TopBar,
   ],
-  providers: [ThreadStore, CallBannerStore, ConversationsStore, ConversationList, MessageActions],
+  providers: [
+    ThreadStore,
+    CallBannerStore,
+    ConversationsStore,
+    ConversationList,
+    MessageActions,
+    PopkinFrame,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './direct-message.page.html',
 })
@@ -160,7 +168,14 @@ export class DirectMessagePage {
       : null;
   });
 
+  /** Whether the Schedule tab shows (L2-077 AC1). */
+  protected readonly frame = inject(PopkinFrame);
+
   constructor() {
+    effect(() => {
+      const popkinId = this.popkinId();
+      untracked(() => this.frame.open(popkinId));
+    });
     const minute = setInterval(() => this.now.set(new Date()), 60_000);
     inject(DestroyRef).onDestroy(() => clearInterval(minute));
 

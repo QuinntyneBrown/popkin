@@ -1,0 +1,39 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Time off
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "TimeOffPage", "Angular page", "Header, month, week chips, table and legend")
+  Component(dialog, "AddTimeOffDialog", "CDK dialog", "Five radio groups, Save")
+  Component(store, "TimeOffStore", "api library", "State; reads again on ScheduleChanged and every minute")
+  Component(weeks, "schedule-weeks.ts, time-off-text.ts", "api library, pure", "Weeks of a month, counts and words")
+  Component(client, "HttpScheduleApi", "Behind SCHEDULE_API", "timeOff, setTimeOff")
+  Component(ui, "pk-view-nav, pk-month-nav, pk-week-chips, pk-leave-table, pk-chart-legend, pk-segmented-control", "components library", "Presentation")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ScheduleController", "ASP.NET Core controller", "GET and PUT time off")
+  Component(query, "GetTimeOffWeekQueryHandler", "MediatR handler", "Members and their days of one week")
+  Component(cmd, "SetTimeOffCommandHandler", "MediatR handler", "Replaces my five weekdays")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "404 feature_off")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 popkin_not_found, 409 popkin_wrapped_up")
+  Component(notifier, "IPopkinNotifier", "Application abstraction", "ScheduleChanged to the Popkin group")
+  ComponentDb(db, "Popkin database", "SQL Server", "TimeOffDay")
+}
+Rel(page, store, "Opens a week")
+Rel(page, dialog, "Opens")
+Rel(page, ui, "Composes")
+Rel(store, weeks, "Formats with")
+Rel(store, client, "timeOff")
+Rel(dialog, client, "setTimeOff")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(ctrl, query, "Sends GetTimeOffWeekQuery")
+Rel(ctrl, cmd, "Sends SetTimeOffCommand")
+Rel(query, switches, "Requires Schedules")
+Rel(cmd, switches, "Requires Schedules")
+Rel(query, guard, "Requires membership")
+Rel(cmd, guard, "Requires an active membership")
+Rel(cmd, notifier, "ScheduleChanged")
+Rel(query, db, "Reads")
+Rel(cmd, db, "Saves")
+@enduml

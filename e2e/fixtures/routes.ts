@@ -19,6 +19,8 @@ const photos = `${home}/photos`;
 // The photo the mocks open: the first of the album fixture.
 const photo = `${photos}/00000000-0000-4000-a000-000000000018`;
 const experiences = `${home}/experiences`;
+// The week of the mocks, Feb 15 – 21 2027.
+const timeOff = `${home}/schedule?week=2027-02-15`;
 // The experience the mocks open: the sunrise canoe to Heron Point.
 const experience = `${experiences}/00000000-0000-4000-a000-000000000081`;
 const wrapUp = `${home}/wrap-up`;
@@ -114,6 +116,8 @@ export const routes = {
   popkinHomeEmpty: { app: home, mock: 'pages/popkin-home/empty.html' },
   popkinHomeError: { app: home, mock: 'pages/popkin-home/error.html' },
   popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
+  popkinHomeSchedule: { app: home, mock: 'pages/popkin-home/schedule.html' },
+  popkinHomeScheduleNone: { app: home, mock: 'pages/popkin-home/schedule-none.html' },
   bannerInfo: { app: home, mock: 'notifications/banner/info.html' },
   videoCall: { app: call, mock: 'pages/video-call/default.html' },
   videoCallTwo: { app: `${directMessage}/call`, mock: 'pages/video-call/two.html' },
@@ -141,6 +145,40 @@ export const routes = {
   experiencesLoading: { app: experiences, mock: 'pages/experiences/loading.html' },
   experiencesEmpty: { app: experiences, mock: 'pages/experiences/empty.html' },
   experiencesError: { app: experiences, mock: 'pages/experiences/error.html' },
+  timeOff: { app: timeOff, mock: 'pages/time-off/default.html' },
+  timeOffLoading: { app: timeOff, mock: 'pages/time-off/loading.html' },
+  timeOffEmpty: { app: timeOff, mock: 'pages/time-off/empty.html' },
+  timeOffError: { app: timeOff, mock: 'pages/time-off/error.html' },
+  timeOffConfirmed: { app: timeOff, mock: 'pages/time-off/confirmed.html' },
+  timeOffOtherWeek: {
+    app: `${home}/schedule?week=2027-02-22`,
+    mock: 'pages/time-off/other-week.html',
+  },
+  timeOffOff: { app: timeOff, mock: 'pages/time-off/off.html' },
+  thisWeek: { app: `${home}/schedule/week?day=2026-09-16`, mock: 'pages/this-week/default.html' },
+  thisWeekWorking: {
+    app: `${home}/schedule/week?day=2026-09-15`,
+    mock: 'pages/this-week/working.html',
+  },
+  thisWeekEmpty: { app: `${home}/schedule/week`, mock: 'pages/this-week/empty.html' },
+  thisWeekLoading: { app: `${home}/schedule/week`, mock: 'pages/this-week/loading.html' },
+  thisWeekError: { app: `${home}/schedule/week`, mock: 'pages/this-week/error.html' },
+  myHours: { app: `${home}/schedule/week`, mock: 'dialogs/my-hours/default.html' },
+  myHoursBusy: { app: `${home}/schedule/week`, mock: 'dialogs/my-hours/busy.html' },
+  myHoursInvalid: { app: `${home}/schedule/week`, mock: 'dialogs/my-hours/invalid.html' },
+  myHoursFailed: { app: `${home}/schedule/week`, mock: 'dialogs/my-hours/failed.html' },
+  addTimeOff: { app: timeOff, mock: 'dialogs/add-time-off/default.html' },
+  addTimeOffBusy: { app: timeOff, mock: 'dialogs/add-time-off/busy.html' },
+  addTimeOffFailed: { app: timeOff, mock: 'dialogs/add-time-off/failed.html' },
+  addTimeOffInvalid: {
+    app: `${home}/schedule?week=2028-02-21`,
+    mock: 'dialogs/add-time-off/invalid.html',
+  },
+  popkinSettingsSchedules: { app: home, mock: 'dialogs/popkin-settings/schedules.html' },
+  setEvent: { app: home, mock: 'dialogs/set-event/default.html' },
+  setEventBusy: { app: home, mock: 'dialogs/set-event/busy.html' },
+  setEventInvalid: { app: home, mock: 'dialogs/set-event/invalid.html' },
+  setEventFailed: { app: home, mock: 'dialogs/set-event/failed.html' },
   experiencesDid: { app: experiences, mock: 'pages/experiences/did.html' },
   experiencesWant: { app: experiences, mock: 'pages/experiences/want.html' },
   experiencesNoResults: { app: experiences, mock: 'pages/experiences/no-results.html' },

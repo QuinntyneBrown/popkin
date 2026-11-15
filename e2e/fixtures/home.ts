@@ -96,6 +96,10 @@ export class Home {
     viewer: { membershipId: people.mara.membershipId, firstName: 'Mara' },
     unreadCount: 3,
     version: 1,
+    /** Schedules is off unless a spec turns it on: the earlier screens' mocks show no Schedule tab. */
+    schedules: false,
+    /** The event the Host set (L2-085), sent while Schedules is on. */
+    event: null as { label: string; firstDay: string; lastDay: string } | null,
   };
   /** The latest of the Everyone thread, oldest first; the API answers four at most. */
   latest: Line[] = [

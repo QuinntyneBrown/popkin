@@ -1,0 +1,40 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — This week
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ThisWeekPage", "Angular page", "Day buttons, headline, timeline")
+  Component(dialog, "MyHoursDialog", "CDK dialog", "Up to two stretches a day")
+  Component(home, "PopkinHomePage", "Angular page", "Schedule section")
+  Component(store, "ThisWeekStore", "api library", "State; reads again on ScheduleChanged and every minute")
+  Component(text, "this-week-text.ts", "api library, pure", "Headline, sentences, times, drafts")
+  Component(client, "HttpScheduleApi", "Behind SCHEDULE_API", "week, setHours, summary")
+  Component(ui, "pk-day-picker, pk-free-headline, pk-shifts, pk-hours-row, pk-chart-legend", "components library", "Presentation")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ScheduleController", "ASP.NET Core controller", "GET week and summary, PUT hours")
+  Component(query, "GetThisWeekQueryHandler", "MediatR handler", "Seven days of every member")
+  Component(summary, "GetScheduleSummaryQueryHandler", "MediatR handler", "The next free evening")
+  Component(cmd, "SetWorkingHoursCommandHandler", "MediatR handler", "Replaces my seven days")
+  Component(freedom, "EveningFreedom", "Domain service", "Who is free, free from, last off shift")
+  Component(hours, "WorkingHours", "Domain rule", "Quarter hours, at most two, no overlap")
+  ComponentDb(db, "Popkin database", "SQL Server", "WorkingStretch")
+}
+Rel(page, store, "Opens")
+Rel(page, dialog, "Opens")
+Rel(page, ui, "Composes")
+Rel(page, text, "Words")
+Rel(home, client, "summary")
+Rel(store, client, "week")
+Rel(dialog, client, "setHours")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(ctrl, query, "GetThisWeekQuery")
+Rel(ctrl, summary, "GetScheduleSummaryQuery")
+Rel(ctrl, cmd, "SetWorkingHoursCommand")
+Rel(query, freedom, "Each day")
+Rel(summary, freedom, "Each day")
+Rel(cmd, hours, "Checks")
+Rel(query, db, "Reads")
+Rel(cmd, db, "Saves")
+@enduml

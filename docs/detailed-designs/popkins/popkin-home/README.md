@@ -187,6 +187,14 @@ Tests: `PopkinHomeTests` and `HomeSummariesTests` in `Popkin.Api.Tests/Popkins/`
 `e2e/tests/popkin-home.spec.ts` and `e2e/tests/invite-dialog.spec.ts`, with the home's requests
 answered by `e2e/fixtures/home.ts` (ADR 0005).
 
+### With journey 22, Find a free evening
+
+- While Schedules is on, the side column starts with a "Schedule" section that names the next
+  evening everyone is free, or says none is, with "See all" to this week
+  (`docs/mocks/pages/popkin-home/schedule.html`, `schedule-none.html`); it is left out when the
+  switch is off or nobody has entered hours (L2-075 AC2, AC3,
+  [This week](../../schedules/this-week/README.md)). The header gains `schedules` and `event`.
+
 ### With journey 13, Photos in chat
 
 - The Photos section and its summary count and show the photos in the album only (`Photo.InAlbum`): never a direct-message photo. A photo message with no text reads "Photo" in the Chat card ([Send photos in chat](../../chat/send-photos-in-chat/README.md)).

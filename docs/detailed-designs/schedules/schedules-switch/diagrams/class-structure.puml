@@ -1,0 +1,37 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Schedules switch
+
+package "Popkin.Application" {
+  enum Feature {
+    Schedules
+  }
+  interface IFeatureSwitches {
+    +IsOn(feature: Feature): bool
+    +Require(feature: Feature): void
+  }
+  class FeatureOff {
+    +Status = 404
+    +Code = "feature_off"
+  }
+}
+package "Popkin.Infrastructure" {
+  class SettingsFeatureSwitches {
+    -IConfiguration configuration
+    +IsOn(feature: Feature): bool
+    +Require(feature: Feature): void
+  }
+}
+IFeatureSwitches <|.. SettingsFeatureSwitches
+IFeatureSwitches ..> Feature
+SettingsFeatureSwitches ..> FeatureOff : throws
+@enduml

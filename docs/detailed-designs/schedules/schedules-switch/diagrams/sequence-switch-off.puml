@@ -1,0 +1,35 @@
+@startuml
+title UML sequence behaviour — The switch goes off
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "TimeOffPage" as page
+  participant "TimeOffStore" as store
+  participant "HttpScheduleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ScheduleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SettingsFeatureSwitches" as switches
+  participant "Handler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+note over switches : The owner sets Features:Schedules to false
+store -> store : A minute after the last read (L2-077 AC4)
+store -> client : timeOff(popkinId, week)
+client -> controller : GET /api/popkins/{popkinId}/schedule/time-off?week=…
+controller -> handler : Send GetTimeOffWeekQuery
+handler -> switches : Require(Schedules)
+switches --> controller : 404 feature_off (L2-077 AC3)
+controller --> client : 404 ProblemDetails code feature_off
+store --> page : state off
+page --> actor : "Schedules is switched off", "Back to Cabin Week ’27" (L2-077 AC2)
+note over db : Time off, hours and the event stay (L2-077 AC5)
+@enduml
