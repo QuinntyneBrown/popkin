@@ -46,7 +46,6 @@ const home: PopkinHomeView = {
   schedules: false,
   plan: false,
   event: null,
-  plan: false,
 };
 const mara: MemberView = {
   membershipId: 'm-mara',
