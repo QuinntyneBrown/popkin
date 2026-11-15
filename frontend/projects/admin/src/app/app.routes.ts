@@ -42,6 +42,12 @@ export const routes: Routes = [
         title: 'Admins & roles · Popkin Admin',
       },
       {
+        path: 'features',
+        loadComponent: () => import('./pages/features/features.page').then((m) => m.FeaturesPage),
+        data: data({ shell: 'admin', page: 'features' }),
+        title: 'Features · Popkin Admin',
+      },
+      {
         path: 'audit',
         loadComponent: () => import('./pages/audit/audit.page').then((m) => m.AuditPage),
         data: data({ shell: 'admin', page: 'audit' }),

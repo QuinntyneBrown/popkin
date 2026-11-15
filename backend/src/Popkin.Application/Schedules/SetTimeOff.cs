@@ -25,7 +25,7 @@ public sealed class SetTimeOffCommandHandler(
 
     public async Task<TimeOffWeekDto> Handle(SetTimeOffCommand request, CancellationToken cancellationToken)
     {
-        features.Require(Feature.Schedules);
+        features.Require(Feature.Schedules, request.PopkinId);
         // Nothing new is added to a Popkin that has wrapped up (L2-045 AC2).
         var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
         if (request.MembershipId != membership.Id)

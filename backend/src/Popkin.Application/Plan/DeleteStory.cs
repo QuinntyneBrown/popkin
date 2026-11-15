@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
 using Popkin.Application.Security;
+using Popkin.Domain;
 
 namespace Popkin.Application.Plan;
 
@@ -14,7 +15,7 @@ public sealed class DeleteStoryCommandHandler(IAppDbContext db, IFeatureSwitches
 {
     public async Task Handle(DeleteStoryCommand request, CancellationToken cancellationToken)
     {
-        features.Require(Feature.Plan);
+        features.Require(Feature.Plan, request.PopkinId);
         // A wrapped-up Popkin's plan is read only (L2-070 AC7).
         var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
         var story = await PlanStories.RequireAsync(db, popkin.Id, request.StoryId, cancellationToken);

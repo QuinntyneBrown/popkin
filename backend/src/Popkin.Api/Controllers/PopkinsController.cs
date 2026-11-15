@@ -31,6 +31,11 @@ public sealed class PopkinsController(ISender sender) : ControllerBase
     public async Task<ActionResult<PopkinHomeDto>> GetHome(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetPopkinHomeQuery(popkinId), cancellationToken));
 
+    /// <summary>Which switched features the Popkin has, for a member's open screens (L2-076 AC10, L2-077 AC4).</summary>
+    [HttpGet("{popkinId:guid}/features")]
+    public async Task<ActionResult<PopkinFeaturesDto>> GetFeatures(Guid popkinId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetPopkinFeaturesQuery(popkinId), cancellationToken));
+
     public sealed record ChangePopkinLookRequest(string? Name, string? Emoji, string? Colour);
 
     /// <summary>The Host changes the Popkin's name, emoji and colour (L2-020 AC3, AC5).</summary>

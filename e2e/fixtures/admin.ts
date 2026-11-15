@@ -79,10 +79,22 @@ export const recordedMe = recordedBody<{ adminId: string; role: string; allowed:
   'GET /api/admin/me',
 );
 
+/** What only an Owner may do (L2-086): deletions, the platform and the admins. */
+const OWNER_ONLY = [
+  'StartDeletion',
+  'CancelDeletion',
+  'ChangeFeature',
+  'ChangeLimits',
+  'PublishAnnouncement',
+  'ManageAdmins',
+];
+
 /** The console as an admin of `role` sees it: the recorded admin with that role's actions. */
 export async function signedInAs(page: Page, role: 'Support' | 'Viewer'): Promise<void> {
   const allowed =
-    role === 'Viewer' ? ['ExportAuditLog'] : recordedMe.allowed.filter((a) => a !== 'ManageAdmins');
+    role === 'Viewer'
+      ? ['ExportAuditLog']
+      : recordedMe.allowed.filter((a) => !OWNER_ONLY.includes(a));
   await page.route('**/api/admin/me', (route) =>
     route.fulfill({ status: 200, json: { ...recordedMe, role, allowed } }),
   );
@@ -127,4 +139,111 @@ export async function theMockAdmins(page: Page): Promise<void> {
     }
     return route.fallback();
   });
+}
+
+/** A Popkin the features mocks name, as a chosen Popkin of a switch. */
+export const mockPopkin = (name: string, emoji: string, colour: string, code = '') => ({
+  popkinId: `mock-${name.split(' ')[0].toLowerCase()}`,
+  name,
+  emoji,
+  colour,
+  inviteCode: code,
+});
+
+/** The chosen Popkins of Schedules in the features mocks. */
+export const mockChosen = [
+  mockPopkin('Lakeside Weekend', '🏕️', 'Teal', 'LAKE-0148'),
+  mockPopkin('Sunday Brunch Club', '🥞', 'Coral', 'BRUN-0712'),
+  mockPopkin('Algarve Girls Weekend', '🏖️', 'Sky', 'ALGV-2207'),
+];
+
+/**
+ * The Features page of the mocks at noon on 14 July: Plan on for everyone since 1 July, and
+ * Schedules on in three chosen Popkins since 10:21 that morning, both set by Lena Fischer.
+ * `change` alters the answer before it is sent.
+ */
+export async function theMockFeatures(
+  page: Page,
+  change?: (features: MockFeature[]) => void,
+): Promise<MockFeature[]> {
+  // A running clock, so the add dialog's search waits its 300 ms; local times, so the page
+  // reads the mocks' hours in any time zone.
+  await page.clock.install({ time: new Date(2026, 6, 14, 12, 0) });
+  const features: MockFeature[] = [
+    {
+      feature: 'Plan',
+      mode: 'Everyone',
+      livePopkins: 3112,
+      chosen: [],
+      changedAt: new Date(2026, 6, 1, 9, 30).toISOString(),
+      changedByName: 'Lena Fischer',
+    },
+    {
+      feature: 'Schedules',
+      mode: 'Chosen',
+      livePopkins: 3112,
+      chosen: mockChosen.map(({ popkinId, name, emoji, colour }) => ({
+        popkinId,
+        name,
+        emoji,
+        colour,
+      })),
+      changedAt: new Date(2026, 6, 14, 10, 21).toISOString(),
+      changedByName: 'Lena Fischer',
+    },
+  ];
+  change?.(features);
+  await page.route('**/api/admin/features', (route) =>
+    route.request().method() === 'GET' ? route.fulfill({ json: { features } }) : route.fallback(),
+  );
+  return features;
+}
+
+export interface MockFeature {
+  feature: 'Plan' | 'Schedules';
+  mode: 'Off' | 'Chosen' | 'Everyone';
+  livePopkins: number;
+  chosen: { popkinId: string; name: string; emoji: string; colour: string }[];
+  changedAt: string | null;
+  changedByName: string | null;
+}
+
+/** Features after Schedules was turned off at 10:44, as `off.html` draws it. */
+export const theMockFeaturesOff = async (page: Page): Promise<void> => {
+  await theMockFeatures(page, (features) => {
+    Object.assign(features[1], {
+      mode: 'Off',
+      chosen: [],
+      changedAt: new Date(2026, 6, 14, 10, 44).toISOString(),
+    });
+  });
+};
+
+/** Features after Schedules was turned on for everyone at 10:44, as `everyone.html` draws it. */
+export const theMockFeaturesForEveryone = async (page: Page): Promise<void> => {
+  await theMockFeatures(page, (features) => {
+    Object.assign(features[1], {
+      mode: 'Everyone',
+      chosen: [],
+      changedAt: new Date(2026, 6, 14, 10, 44).toISOString(),
+    });
+  });
+};
+
+/** The four live Popkins the add dialog's mocks list for the search "a". */
+export const mockMatches = [
+  { ...mockPopkin('Class of 2015 Reunion', '🎓', 'Plum', 'GRAD-1507'), alreadyOn: false },
+  { ...mockPopkin('Bakery Launch Crew', '🥐', 'Amber', 'CRMB-0093'), alreadyOn: false },
+  { ...mockPopkin('Hackathon Team Owl', '🦉', 'Sky', 'OWLS-2238'), alreadyOn: false },
+  { ...mockPopkin('U10 Hornets Parents', '⚽', 'Leaf', 'HRNT-5561'), alreadyOn: false },
+];
+
+/** The add dialog's search answers `matches` for any text. */
+export async function searchingFeaturePopkins(
+  page: Page,
+  matches: unknown[] = mockMatches,
+): Promise<void> {
+  await page.route('**/api/admin/features/*/popkins/search**', (route) =>
+    route.fulfill({ json: matches }),
+  );
 }

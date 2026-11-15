@@ -1,7 +1,14 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { ADMIN_ACCESS_API, ADMIN_AUTH_API, HttpAdminAccessApi, HttpAdminAuthApi } from 'api';
+import {
+  ADMIN_ACCESS_API,
+  ADMIN_AUTH_API,
+  ADMIN_PLATFORM_API,
+  HttpAdminAccessApi,
+  HttpAdminAuthApi,
+  HttpAdminPlatformApi,
+} from 'api';
 import { routes } from './app.routes';
 import { adminAuthInterceptor } from './guards/admin-auth.interceptor';
 
@@ -13,5 +20,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([adminAuthInterceptor])),
     { provide: ADMIN_AUTH_API, useClass: HttpAdminAuthApi },
     { provide: ADMIN_ACCESS_API, useClass: HttpAdminAccessApi },
+    { provide: ADMIN_PLATFORM_API, useClass: HttpAdminPlatformApi },
   ],
 };

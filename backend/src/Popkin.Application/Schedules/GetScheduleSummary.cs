@@ -20,7 +20,7 @@ public sealed class GetScheduleSummaryQueryHandler(
 {
     public async Task<ScheduleSummaryDto> Handle(GetScheduleSummaryQuery request, CancellationToken cancellationToken)
     {
-        features.Require(Feature.Schedules);
+        features.Require(Feature.Schedules, request.PopkinId);
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
         var from = request.From ?? DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         var week = await ThisWeeks.ReadAsync(db, photos, popkin, membership, from, cancellationToken);

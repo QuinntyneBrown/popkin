@@ -30,6 +30,8 @@ public static class AuditActionLabels
         [AuditAction.TurnedFeatureOff] = "Turned feature off",
         [AuditAction.TurnedFeatureOnForEveryone] = "Turned feature on",
         [AuditAction.LimitedFeatureToChosen] = "Rolled out feature",
+        [AuditAction.AddedFeaturePopkin] = "Added Popkin to feature",
+        [AuditAction.RemovedFeaturePopkin] = "Removed Popkin from feature",
         [AuditAction.ChangedLimits] = "Changed limits",
         [AuditAction.PublishedAnnouncement] = "Published banner",
         [AuditAction.EndedAnnouncement] = "Took banner down",

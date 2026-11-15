@@ -43,7 +43,7 @@ public sealed class PlanRecapTests
         Assert.Equal(JsonValueKind.Null, (await lakeside.Host.ReadRecapAsync(lakeside.Id)).GetProperty("stories").ValueKind);
 
         using var off = new ApiFactory();
-        off.Settings["Features:Plan"] = "false";
+        await off.SwitchFeatureAsync(Feature.Plan, FeatureMode.Off);
         var other = await off.StartLakesideAsync();
         await off.SeedStoryAsync(other.Id, "Rent a 7-seat van", StoryColumn.Done, 5);
         await other.Host.WrappedUpAsync(other.Id);

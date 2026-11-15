@@ -1,0 +1,36 @@
+<div pk-dialog [heading]="'Add a Popkin to ' + feature.feature" [description]="description">
+  @if (state.status() === 'failed') {
+    <div pk-alert [heading]="failed.heading">{{ failed.text }}</div>
+  }
+  <div id="pick" pk-search-field label="Name or code" [(value)]="text"></div>
+  <ul
+    pk-pick-list
+    label="Live Popkins"
+    [options]="options()"
+    [notes]="notes()"
+    [disabled]="busy()"
+    [(value)]="picked"
+  ></ul>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="!picked()"
+    (click)="confirm()"
+  >
+    {{ busy() ? 'Adding…' : 'Add to ' + feature.feature }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    [block]="true"
+    [disabled]="busy()"
+    (click)="cancel()"
+  >
+    Cancel
+  </button>
+</div>

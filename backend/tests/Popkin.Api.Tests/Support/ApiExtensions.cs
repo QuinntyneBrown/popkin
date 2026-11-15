@@ -56,6 +56,18 @@ public static class ApiExtensions
         return new StartedPopkin(id, body.GetProperty("inviteCode").GetString()!, endsAt, hostPersonId, host);
     }
 
+    /// <summary>A person signs up and starts a Popkin of their own, Coral, for the weekend.</summary>
+    public static async Task<StartedPopkin> StartPopkinAsync(this ApiFactory api, string hostName, string phone, string name)
+    {
+        var host = await api.SignedUpAsync(hostName, phone);
+        var endsAt = api.Clock.GetUtcNow().AddDays(1);
+        var response = await host.PostAsJsonAsync("/api/popkins", new { name, emoji = "⚽", colour = "Coral", length = "TheWeekend", endsAt });
+        response.EnsureSuccessStatusCode();
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var id = body.GetProperty("id").GetGuid();
+        return new StartedPopkin(id, body.GetProperty("inviteCode").GetString()!, endsAt, api.StoredPopkin(id).HostPersonId, host);
+    }
+
     /// <summary>Joins through an invite code with a name and, when given, a photo file.</summary>
     public static Task<HttpResponseMessage> JoinAsync(this HttpClient client, string code, string displayName, byte[]? photo = null, string fileName = "me.jpg", string contentType = "image/jpeg")
     {

@@ -14,11 +14,11 @@ interface RecordedResponse {
 
 const recorded: Record<string, RecordedResponse> = responses;
 
-/** A Popkin's header: `GET /api/popkins/{id}`. */
-const header = /^GET \/api\/popkins\/[0-9a-f-]{36}$/;
+/** A Popkin's header, `GET /api/popkins/{id}`, and the switches its screens read every minute. */
+const header = /^GET \/api\/popkins\/[0-9a-f-]{36}(\/features)?$/;
 
 /**
- * The recording is made with Schedules and Plan on (eng/Start-E2eApi.ps1). The screens of the
+ * The recording is made with Schedules and Plan on (`popkin seed`, run by eng/Start-E2eApi.ps1). The screens of the
  * earlier journeys stand for a Popkin where they are off, as their mocks do (docs/mocks/README.md,
  * 8), so the recorded header is read with both off; a spec of Schedules or Plan answers the header
  * itself.

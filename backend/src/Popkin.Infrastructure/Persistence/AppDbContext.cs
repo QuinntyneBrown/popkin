@@ -63,6 +63,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<PlanChange> PlanChanges => Set<PlanChange>();
 
+    public DbSet<FeatureSetting> FeatureSettings => Set<FeatureSetting>();
+
+    public DbSet<FeatureChosenPopkin> FeatureChosenPopkins => Set<FeatureChosenPopkin>();
+
     /// <summary>The audit log cannot be edited, and an entry is deleted only at two years (L2-120 AC6).</summary>
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {

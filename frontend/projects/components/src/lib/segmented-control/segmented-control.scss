@@ -35,7 +35,29 @@
   box-shadow: none;
 }
 
-.segmented__option:disabled {
+.segmented__option:disabled,
+.segmented__option[aria-disabled='true'] {
   opacity: var(--opacity-disabled);
   cursor: not-allowed;
+}
+
+:host(.segmented--stretch) {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+:host(.segmented--stretch) .segmented__option {
+  white-space: nowrap;
+  justify-content: center;
+}
+
+@media (max-width: 47.99rem) {
+  :host(.segmented--stretch) {
+    display: flex;
+  }
+
+  :host(.segmented--stretch) .segmented__option {
+    flex: 1 1 auto;
+    padding-inline: var(--space-3);
+  }
 }

@@ -47,6 +47,8 @@ export class TimeOffPage {
   readonly offText: Locator;
   readonly backToPopkin: Locator;
   readonly nav: Locator;
+  /** The Schedule tab, there while Schedules is on (L2-077 AC1). */
+  readonly scheduleTab: Locator;
   readonly currentTab: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly body: Locator;
@@ -88,6 +90,7 @@ export class TimeOffPage {
     this.error = page.getByRole('alert').filter({ hasText: 'We couldn’t load time off' });
     this.tryAgain = this.error.getByRole('button', { name: 'Try again' });
     this.nav = page.getByRole('navigation', { name: 'Popkin' });
+    this.scheduleTab = this.nav.getByRole('link', { name: 'Schedule', exact: true });
     this.currentTab = this.nav.locator('[aria-current="page"]');
     this.off = page.locator('.empty').filter({
       has: page.getByRole('heading', { name: 'Schedules is switched off' }),

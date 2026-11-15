@@ -29,7 +29,9 @@ public static class DependencyInjection
     {
         services.AddPopkinDatabase(configuration);
         services.AddSingleton(TimeProvider.System);
-        services.AddSingleton<IFeatureSwitches, Features.SettingsFeatureSwitches>();
+        services.AddSingleton<Features.PlatformSnapshot>();
+        services.AddSingleton<IFeatureSwitches>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
+        services.AddSingleton<IPlatformSnapshot>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
 
         var development = environment?.IsDevelopment() ?? false;
         var developmentCode = configuration["Auth:DevelopmentCode"];

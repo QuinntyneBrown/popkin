@@ -36,7 +36,7 @@ public sealed class GetBurnDownQueryHandler(
     public async Task<BurnDownDto> Handle(GetBurnDownQuery request, CancellationToken cancellationToken)
     {
         // Before membership, so nothing of the feature answers while it is off (L2-077 AC3).
-        features.Require(Feature.Plan);
+        features.Require(Feature.Plan, request.PopkinId);
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
         var sprint = await db.Sprints.SingleOrDefaultAsync(s => s.PopkinId == popkin.Id, cancellationToken);
         if (sprint is null)

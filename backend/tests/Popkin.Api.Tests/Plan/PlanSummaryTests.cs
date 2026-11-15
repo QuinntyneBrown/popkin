@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Popkin.Api.Tests.Support;
+using Popkin.Domain;
 
 namespace Popkin.Api.Tests.Plan;
 
@@ -68,7 +69,7 @@ public sealed class PlanSummaryTests
         await (await stranger.PlanSummaryAsync(lakeside.Id)).AssertProblem(HttpStatusCode.NotFound, "popkin_not_found");
 
         using var off = new ApiFactory();
-        off.Settings["Features:Plan"] = "false";
+        await off.SwitchFeatureAsync(Feature.Plan, FeatureMode.Off);
         var other = await off.StartLakesideAsync();
         await (await other.Host.PlanSummaryAsync(other.Id)).AssertProblem(HttpStatusCode.NotFound, "feature_off");
     }

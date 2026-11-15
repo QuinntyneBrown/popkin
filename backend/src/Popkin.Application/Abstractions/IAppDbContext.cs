@@ -62,5 +62,9 @@ public interface IAppDbContext
 
     DbSet<PlanChange> PlanChanges { get; }
 
+    DbSet<FeatureSetting> FeatureSettings { get; }
+
+    DbSet<FeatureChosenPopkin> FeatureChosenPopkins { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -10,6 +10,8 @@ parity('admin-nav', [
     region: (page) => new AdminShell(page).accessGroup,
     before: theMockAdmins,
     widths: [1280],
+    // The groups above it differ from the mock's until every section is built.
+    snap: true,
   },
   {
     key: 'adminAdmins',

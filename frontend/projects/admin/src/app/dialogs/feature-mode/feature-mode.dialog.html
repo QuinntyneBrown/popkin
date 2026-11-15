@@ -1,0 +1,39 @@
+<div pk-dialog [heading]="text.heading" [description]="text.description">
+  @if (state.status() === 'failed') {
+    <div pk-alert [heading]="failed.heading">{{ failed.text }}</div>
+  }
+  <div
+    pk-textarea
+    fieldId="reason"
+    label="Reason, for the audit log"
+    optional="optional"
+    placeholder="e.g. Sync bug on Android 3.4.0"
+    [rows]="2"
+    [maxlength]="maxLength"
+    [error]="state.reasonError() ?? undefined"
+    [readonly]="busy()"
+    (changed)="reason.set($event)"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    [variant]="off ? 'danger' : 'primary'"
+    [block]="true"
+    [busy]="busy()"
+    (click)="confirm()"
+  >
+    {{ action() }}
+  </button>
+  <button
+    id="keep"
+    pk-button
+    slot="footer"
+    type="button"
+    [block]="true"
+    [disabled]="busy()"
+    (click)="cancel()"
+  >
+    {{ off ? 'Keep it on' : 'Cancel' }}
+  </button>
+</div>

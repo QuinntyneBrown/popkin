@@ -1,3 +1,4 @@
+using Popkin.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Popkin.Infrastructure.Persistence;
@@ -64,6 +65,9 @@ public sealed class CliTests
 
         await using var db = Open();
         Assert.Single(db.People, p => p.Name == "Mara Okafor");
+        // Plan and Schedules are on for everyone locally, so the recording covers them (ADR 0024).
+        Assert.Equal(FeatureMode.Everyone, Assert.Single(db.FeatureSettings, s => s.Feature == Feature.Schedules).Mode);
+        Assert.Equal(FeatureMode.Everyone, Assert.Single(db.FeatureSettings, s => s.Feature == Feature.Plan).Mode);
     }
 
     [Fact]

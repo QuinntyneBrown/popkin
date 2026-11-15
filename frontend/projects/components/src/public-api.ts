@@ -168,6 +168,8 @@ export * from './lib/page-head/page-head';
 export * from './lib/panel/panel';
 export * from './lib/data-table/data-table';
 export * from './lib/permission-table/permission-table';
+export * from './lib/feature-panel/feature-panel';
+export * from './lib/pick-list/pick-list';
 export * from './lib/admin-entry/admin-entry';
 export * from './lib/toolbar/toolbar';
 export * from './lib/select-field/select-field';

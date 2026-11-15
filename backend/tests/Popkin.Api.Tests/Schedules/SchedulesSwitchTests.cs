@@ -2,11 +2,12 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Popkin.Api.Tests.Support;
+using Popkin.Domain;
 
 namespace Popkin.Api.Tests.Schedules;
 
 /// <summary>
-/// The Schedules switch, `Features:Schedules` (ADR 0023): the header tells the app whether the
+/// The Schedules switch (ADR 0024): the header tells the app whether the
 /// Schedule tab shows, and while it is off every Schedules request is refused with 404
 /// `feature_off` (L2-072 AC1, L2-077 AC1, AC3).
 /// </summary>
@@ -32,7 +33,7 @@ public sealed class SchedulesSwitchTests
     public async Task While_Schedules_is_off_the_header_says_so_and_time_off_is_refused()
     {
         using var api = new ApiFactory();
-        api.Settings["Features:Schedules"] = "false";
+        await api.SwitchFeatureAsync(Feature.Schedules, FeatureMode.Off);
         var lakeside = await api.StartLakesideAsync();
 
         var header = await lakeside.Host.GetFromJsonAsync<JsonElement>($"/api/popkins/{lakeside.Id}");
@@ -54,7 +55,7 @@ public sealed class SchedulesSwitchTests
     public async Task While_Schedules_is_off_every_Schedules_request_is_refused(string method, string path)
     {
         using var api = new ApiFactory();
-        api.Settings["Features:Schedules"] = "false";
+        await api.SwitchFeatureAsync(Feature.Schedules, FeatureMode.Off);
         var lakeside = await api.StartLakesideAsync();
         var me = await lakeside.Host.MembershipIdAsync(lakeside.Id);
         var request = new HttpRequestMessage(new HttpMethod(method), $"/api/popkins/{lakeside.Id}/{path.Replace("{me}", me.ToString())}");
@@ -76,7 +77,7 @@ public sealed class SchedulesSwitchTests
     public async Task While_Schedules_is_off_a_stranger_learns_only_that_it_is_off()
     {
         using var api = new ApiFactory();
-        api.Settings["Features:Schedules"] = "false";
+        await api.SwitchFeatureAsync(Feature.Schedules, FeatureMode.Off);
         var lakeside = await api.StartLakesideAsync();
         var stranger = api.CreateBrowserClient();
         await stranger.SignUpAsync(api, "Joel Ferreira", "(415) 555-0123");

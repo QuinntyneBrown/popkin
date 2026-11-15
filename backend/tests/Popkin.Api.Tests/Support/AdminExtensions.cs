@@ -1,5 +1,9 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Popkin.Application.Abstractions;
+using Popkin.Domain;
+using Popkin.Infrastructure.Persistence;
 
 namespace Popkin.Api.Tests.Support;
 
@@ -49,5 +53,27 @@ public static class AdminExtensions
         var client = api.CreateBrowserClient();
         await client.SignInAsAdminAsync(api, email);
         return (client, id);
+    }
+
+    /// <summary>
+    /// Sets a feature's switch straight in the store, as an Owner would set it, and has the API
+    /// read it at its next request: the arrangement of a test about a feature, not about the switch.
+    /// </summary>
+    public static async Task SwitchFeatureAsync(this ApiFactory api, Feature feature, FeatureMode mode)
+    {
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var setting = db.FeatureSettings.SingleOrDefault(s => s.Feature == feature);
+        if (setting is null)
+        {
+            db.FeatureSettings.Add(FeatureSetting.Start(feature, mode, null, "Popkin", api.Clock.GetUtcNow()));
+        }
+        else
+        {
+            setting.ChangeMode(mode, null, "Popkin", api.Clock.GetUtcNow());
+        }
+
+        await db.SaveChangesAsync();
+        scope.ServiceProvider.GetRequiredService<IPlatformSnapshot>().Invalidate();
     }
 }

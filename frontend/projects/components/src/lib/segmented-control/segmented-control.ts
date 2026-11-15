@@ -28,6 +28,7 @@ export interface SegmentedOption<T extends string = string> {
     class: 'segmented',
     '[attr.role]': "kind() === 'radio' ? 'radiogroup' : 'tablist'",
     '[attr.aria-label]': 'label()',
+    '[class.segmented--stretch]': 'stretch()',
   },
 })
 export class SegmentedControl {
@@ -37,10 +38,18 @@ export class SegmentedControl {
   readonly value = model.required<string>();
   /** Every option is disabled, as in a dialog that cannot be saved. */
   readonly disabled = input(false);
+  /**
+   * Why the choice is switched off for this person (L2-086 AC2, AC3): every option is
+   * `aria-disabled` with the reason as its title, stays focusable and ignores a choice.
+   */
+  readonly disabledReason = input<string | null>(null);
+  /** Below 768 px the options share the full width, as a feature's modes do. */
+  readonly stretch = input(false);
 
   private readonly buttons = viewChildren<ElementRef<HTMLButtonElement>>('option');
 
   protected choose(value: string): void {
+    if (this.disabledReason()) return;
     this.value.set(value);
   }
 
@@ -50,7 +59,7 @@ export class SegmentedControl {
     event.preventDefault();
     const options = this.options();
     const next = (index + step + options.length) % options.length;
-    this.value.set(options[next].value);
+    if (!this.disabledReason()) this.value.set(options[next].value);
     this.buttons()[next].nativeElement.focus();
   }
 }

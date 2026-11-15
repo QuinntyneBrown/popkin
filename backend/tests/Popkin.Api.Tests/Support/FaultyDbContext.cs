@@ -76,6 +76,10 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<PlanChange> PlanChanges => inner.PlanChanges;
 
+    public DbSet<FeatureSetting> FeatureSettings => inner.FeatureSettings;
+
+    public DbSet<FeatureChosenPopkin> FeatureChosenPopkins => inner.FeatureChosenPopkins;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

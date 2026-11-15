@@ -109,6 +109,8 @@ if (!app.Environment.IsProduction())
 app.UseMiddleware<SameSiteRequestMiddleware>();
 app.UseRouting();
 app.UseAuthentication();
+// The switches every later reader asks, read again when stale (ADR 0024).
+app.UseMiddleware<Popkin.Api.Platform.PlatformSnapshotMiddleware>();
 // After authentication, so a limit counted per person can read who is asking.
 app.UseRateLimiter();
 app.UseAuthorization();

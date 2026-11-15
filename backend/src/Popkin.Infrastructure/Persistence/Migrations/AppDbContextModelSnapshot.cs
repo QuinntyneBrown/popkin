@@ -452,6 +452,55 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Popkin.Domain.FeatureChosenPopkin", b =>
+                {
+                    b.Property<string>("Feature")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("AddedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Feature", "PopkinId");
+
+                    b.HasIndex("PopkinId");
+
+                    b.ToTable("FeatureChosenPopkins", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.FeatureSetting", b =>
+                {
+                    b.Property<string>("Feature")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ChangedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChangedByName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.HasKey("Feature");
+
+                    b.ToTable("FeatureSettings", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Membership", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1186,6 +1235,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("MembershipId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.FeatureChosenPopkin", b =>
+                {
+                    b.HasOne("Popkin.Domain.PopkinSpace", null)
+                        .WithMany()
+                        .HasForeignKey("PopkinId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

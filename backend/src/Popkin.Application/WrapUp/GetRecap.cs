@@ -97,7 +97,7 @@ public sealed class GetRecapQueryHandler(IAppDbContext db, IMembershipGuard guar
     /// </summary>
     private async Task<RecapStoriesDto?> StoriesAsync(PopkinSpace popkin, CancellationToken cancellationToken)
     {
-        if (!features.IsOn(Feature.Plan))
+        if (!features.IsOn(Feature.Plan, popkin.Id))
         {
             return null;
         }

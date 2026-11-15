@@ -39,7 +39,7 @@ public sealed class GetThisWeekQueryHandler(IAppDbContext db, IFeatureSwitches f
     public async Task<ThisWeekDto> Handle(GetThisWeekQuery request, CancellationToken cancellationToken)
     {
         // The switch comes first: while it is off, nothing of the feature answers (L2-077 AC3).
-        features.Require(Feature.Schedules);
+        features.Require(Feature.Schedules, request.PopkinId);
         var (popkin, membership) = await guard.RequireMemberAsync(request.PopkinId, cancellationToken);
         var from = request.From ?? DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         return await ThisWeeks.ReadAsync(db, photos, popkin, membership, from, cancellationToken);

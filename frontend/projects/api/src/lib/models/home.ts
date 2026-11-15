@@ -38,6 +38,12 @@ export interface PopkinHomeView {
   event: EventView | null;
 }
 
+/** `GET /api/popkins/{id}/features`: the switched features this Popkin has (L2-077). */
+export interface PopkinFeaturesView {
+  plan: boolean;
+  schedules: boolean;
+}
+
 /** The latest of the Everyone thread, oldest first, without the notes the system writes. */
 export interface ChatPreviewView {
   threadId: string;

@@ -75,7 +75,7 @@ const photo = (n: number, file: string, caption: string) => ({
 });
 
 type Failure = 'server' | 'not-found';
-export type HomeRead = 'popkin' | 'preview' | 'photos' | 'experiences' | 'members';
+export type HomeRead = 'popkin' | 'preview' | 'photos' | 'experiences' | 'members' | 'features';
 
 export class Home {
   popkin = {
@@ -159,6 +159,7 @@ export class Home {
     photos: 0,
     experiences: 0,
     members: 0,
+    features: 0,
   };
   private readonly failing = new Map<HomeRead, Failure>();
   private readonly held = new Map<HomeRead, Promise<void>>();
@@ -187,6 +188,7 @@ export class Home {
           'photos/summary': 'photos',
           'experiences/summary': 'experiences',
           members: 'members',
+          features: 'features',
         } as Record<string, HomeRead>
       )[rest];
       return read && route.request().method() === 'GET'
@@ -276,6 +278,9 @@ export class Home {
     switch (read) {
       case 'popkin':
         return this.popkin;
+      // What an open screen reads every minute: the switches of the header (L2-077 AC4).
+      case 'features':
+        return { plan: this.popkin.plan, schedules: this.popkin.schedules };
       case 'preview':
         return { threadId, messages: this.latest.slice(-4), newCount: this.newCount };
       case 'photos':

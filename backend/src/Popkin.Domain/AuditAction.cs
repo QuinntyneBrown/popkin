@@ -26,6 +26,8 @@ public enum AuditAction
     TurnedFeatureOff,
     TurnedFeatureOnForEveryone,
     LimitedFeatureToChosen,
+    AddedFeaturePopkin,
+    RemovedFeaturePopkin,
     ChangedLimits,
     PublishedAnnouncement,
     EndedAnnouncement,
