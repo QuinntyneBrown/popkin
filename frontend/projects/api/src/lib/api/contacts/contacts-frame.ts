@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
 import { CONTACTS_API } from './contacts-api';
 import { countLine } from './contacts-text';
 
@@ -17,6 +18,20 @@ export class ContactsFrame {
     const people = this.people();
     return people === null ? '' : countLine(people);
   });
+
+  /**
+   * Whether Contacts is open, read before a Contacts page opens (ADR 0023): true once the
+   * summary answers, which it also keeps; false when switched off or when the API cannot say.
+   */
+  open(): Observable<boolean> {
+    return this.api.summary().pipe(
+      map((summary) => {
+        this.people.set(summary.people);
+        return true;
+      }),
+      catchError(() => of(false)),
+    );
+  }
 
   refresh(): void {
     this.api.summary().subscribe({

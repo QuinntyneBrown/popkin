@@ -29,8 +29,4 @@ export class ContactsTodayPage {
   protected readonly heading = computed(() => greeting(this.session()?.name ?? '', this.now));
   protected readonly day = longDay(this.now);
   protected readonly empty = computed(() => this.frame.people() === 0);
-
-  constructor() {
-    this.frame.refresh();
-  }
 }

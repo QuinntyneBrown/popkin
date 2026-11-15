@@ -57,4 +57,24 @@ describe('ContactsFrame', () => {
 
     expect(frame.people()).toBe(13);
   });
+
+  // ADR 0023
+  it('is open once the summary answers, and keeps it', () => {
+    let open: boolean | undefined;
+
+    frame.open().subscribe((answer) => (open = answer));
+
+    expect(open).toBe(true);
+    expect(frame.people()).toBe(13);
+  });
+
+  // ADR 0023: switched off, or the API cannot say
+  it('is closed when the summary fails', () => {
+    answer = 'down';
+    let open: boolean | undefined;
+
+    frame.open().subscribe((answer) => (open = answer));
+
+    expect(open).toBe(false);
+  });
 });

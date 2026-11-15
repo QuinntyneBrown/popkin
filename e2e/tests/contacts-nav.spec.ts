@@ -103,3 +103,24 @@ test.describe('the Contacts navigation', () => {
     ]);
   });
 });
+
+test.describe('Contacts while it is closed', () => {
+  // ADR 0023: the API owns the switch and the app asks before the page opens.
+  test('with Contacts switched off, /contacts goes back to My Popkins', async ({ page, pk }) => {
+    await contactsOff(page);
+
+    await pk.open('contactsTodayEmpty');
+
+    await expect(new MyPopkinsPage(page).root).toBeVisible();
+    await expect(new ContactsTodayPage(page).root).toHaveCount(0);
+  });
+
+  // ADR 0023: the safe answer is off
+  test('when the API cannot say, /contacts goes back to My Popkins', async ({ page, pk }) => {
+    await contactsUnknown(page);
+
+    await pk.open('contactsTodayEmpty');
+
+    await expect(new MyPopkinsPage(page).root).toBeVisible();
+  });
+});
