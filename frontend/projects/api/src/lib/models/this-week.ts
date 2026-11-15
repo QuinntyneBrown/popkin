@@ -26,6 +26,12 @@ export interface ThisWeekMemberView {
   days: StretchView[][];
 }
 
+/** `PUT …/schedule/hours/{membershipId}`: seven days from `from`, each up to two stretches. */
+export interface SetHoursBody {
+  from: string;
+  days: StretchView[][];
+}
+
 /** This week, `GET …/schedule/week?from=` (L2-074): seven days from the viewer's today. */
 export interface ThisWeekView {
   from: string;

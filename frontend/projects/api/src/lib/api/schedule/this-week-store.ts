@@ -3,7 +3,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { accentOf } from '../../models/popkin';
 import { EveningView, ThisWeekView } from '../../models/this-week';
-import { dateOf } from './schedule-weeks';
+import { HoursDay } from './my-hours';
+import { dateOf, weekLabel } from './schedule-weeks';
 import { SCHEDULE_API } from './schedule-api';
 import {
   ShiftBlock,
@@ -52,6 +53,15 @@ export interface ThisWeekChosen {
   /** The message the Everyone thread opens with (L2-074 AC7). */
   draft: string;
   shifts: ThisWeekShifts;
+}
+
+/** My hours for the seven days, as "My hours" opens on them (L2-074 AC8). */
+export interface MyHours {
+  membershipId: string;
+  from: string;
+  /** "Sep 12 – 18". */
+  label: string;
+  days: HoursDay[];
 }
 
 export type ThisWeekState = 'loading' | 'ready' | 'error' | 'off' | 'not-found';
@@ -105,6 +115,37 @@ export class ThisWeekStore {
     const view = this.view();
     return view ? chosenOf(view, this.index()) : null;
   });
+
+  /** My hours, while the Popkin can be changed; null otherwise. */
+  readonly mine = computed<MyHours | null>(() => {
+    const view = this.view();
+    const me = view?.canEdit ? view.members.find((member) => member.isMe) : undefined;
+    if (!view || !me) return null;
+    return {
+      membershipId: me.membershipId,
+      from: view.from,
+      label: weekLabel(view.from),
+      days: view.days.map((evening, i) => {
+        const date = dateOf(evening.date);
+        const stretches = me.days[i].map((stretch) => ({
+          start: stretch.start,
+          // A time field cannot hold 24:00: midnight at the end is 00:00.
+          end: stretch.end === '24:00' ? '00:00' : stretch.end,
+        }));
+        return {
+          name: `${shortDays[date.getDay()]} ${date.getDate()}`,
+          weekday: longDays[date.getDay()],
+          stretches: stretches.length ? stretches : [{ start: '', end: '' }],
+        };
+      }),
+    };
+  });
+
+  /** Shows this week as a save answered it. */
+  saved(view: ThisWeekView): void {
+    this.view.set(view);
+    this.state.set('ready');
+  }
 
   /** Opens this week from `today`, the viewer's, on `day`; another day of it reads nothing. */
   open(popkinId: string, day: string | undefined, today: string): void {

@@ -1,0 +1,49 @@
+@for (stretch of stretches(); track $index; let i = $index) {
+  <div class="hours-row">
+    <span class="hours-row__day">{{ i === 0 ? day() : '' }}</span>
+    <label>
+      <span class="visually-hidden">{{ weekday() }}{{ i === 0 ? '' : ' second' }} start</span>
+      <input
+        class="input"
+        type="time"
+        step="900"
+        [value]="stretch.start"
+        [disabled]="disabled()"
+        [attr.aria-invalid]="error() ? 'true' : null"
+        [attr.aria-describedby]="error() ? errorId() : null"
+        (input)="set(i, 'start', $event)"
+      />
+    </label>
+    <span class="hours-row__to" aria-hidden="true">to</span>
+    <label>
+      <span class="visually-hidden">{{ weekday() }}{{ i === 0 ? '' : ' second' }} end</span>
+      <input
+        class="input"
+        type="time"
+        step="900"
+        [value]="stretch.end"
+        [disabled]="disabled()"
+        [attr.aria-invalid]="error() ? 'true' : null"
+        [attr.aria-describedby]="error() ? errorId() : null"
+        (input)="set(i, 'end', $event)"
+      />
+    </label>
+  </div>
+}
+@if (error(); as error) {
+  <span class="field__error" [id]="errorId()"
+    ><svg pk-icon name="alert" size="sm"></svg><span>{{ error }}</span></span
+  >
+} @else if (canAdd()) {
+  <button
+    pk-button
+    class="hours-row__add"
+    type="button"
+    variant="quiet"
+    size="sm"
+    [disabled]="disabled()"
+    (click)="addAnother()"
+  >
+    <svg pk-icon name="plus" size="sm"></svg>Add another
+  </button>
+}

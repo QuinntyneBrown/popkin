@@ -48,6 +48,8 @@ export class Schedule {
   readonly hours = new Map<string, Map<string, Stretch[]>>();
   /** The days this week was read from, in order. */
   readonly weeksFrom: string[] = [];
+  /** The working hours saved, in order: whose, and the body sent. */
+  readonly hoursSaves: { membershipId: string; from: string; days: Stretch[][] }[] = [];
   canEdit = true;
   /** The weeks asked for, in order. */
   readonly asked: string[] = [];
@@ -165,6 +167,8 @@ export class Schedule {
     const url = new URL(route.request().url());
     const rest = url.pathname.split('/schedule/')[1];
     if (rest === 'week' && route.request().method() === 'GET') return this.readWeek(route, url);
+    const hours = rest.match(/^hours\/([^/]+)$/);
+    if (hours && route.request().method() === 'PUT') return this.saveHours(route, hours[1]);
     const saving = rest.match(/^time-off\/([^/]+)$/);
     if (saving && route.request().method() === 'PUT') return this.save(route, saving[1]);
     if (rest !== 'time-off' || route.request().method() !== 'GET') return route.fallback();
@@ -198,6 +202,21 @@ export class Schedule {
     const from = url.searchParams.get('from') ?? isoDate(thisWeekNow);
     this.weeksFrom.push(from);
     await route.fulfill({ json: this.thisWeek(from) });
+  }
+
+  /** `PUT …/schedule/hours/{membershipId}`: the seven days from `from` (L2-074 AC8). */
+  private async saveHours(route: Route, membershipId: string): Promise<void> {
+    const body = route.request().postDataJSON() as { from: string; days: Stretch[][] };
+    this.hoursSaves.push({ membershipId, ...body });
+    await this.heldSave;
+    if (this.failingSaves) return route.fulfill({ status: 500 });
+    body.days.forEach((stretches, i) => {
+      const day = addDays(body.from, i);
+      const mine = this.hours.get(membershipId) ?? new Map<string, Stretch[]>();
+      mine.set(day, stretches);
+      this.hours.set(membershipId, mine);
+    });
+    await route.fulfill({ json: this.thisWeek(body.from) });
   }
 
   /** `PUT …/time-off/{membershipId}`: Monday to Friday, Working taking a day back (L2-073). */

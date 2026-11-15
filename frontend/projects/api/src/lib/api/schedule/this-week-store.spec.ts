@@ -213,4 +213,58 @@ describe('ThisWeekStore', () => {
     store.open('p2', undefined, today);
     expect(store.state()).toBe('off');
   });
+  // L2-074 AC8: my hours for the seven days, as the dialog's fields hold them.
+  it('gives my hours for the seven days, a blank stretch for a day off and midnight as 00:00', () => {
+    const week = theWeek();
+    week.members[0].days = none.map((day, i) =>
+      i === 1
+        ? [
+            { start: '06:00', end: '10:00' },
+            { start: '18:00', end: '24:00' },
+          ]
+        : i === 3
+          ? [{ start: '09:00', end: '17:30' }]
+          : day,
+    );
+    answer = week;
+    store.open('p1', undefined, today);
+
+    const mine = store.mine();
+    expect(mine?.membershipId).toBe('m-mara');
+    expect(mine?.from).toBe(today);
+    expect(mine?.label).toBe('Sep 12 – 18');
+    expect(mine?.days.map((day) => day.name)).toEqual([
+      'Sat 12',
+      'Sun 13',
+      'Mon 14',
+      'Tue 15',
+      'Wed 16',
+      'Thu 17',
+      'Fri 18',
+    ]);
+    expect(mine?.days[0]).toEqual({
+      name: 'Sat 12',
+      weekday: 'Saturday',
+      stretches: [{ start: '', end: '' }],
+    });
+    expect(mine?.days[1].stretches).toEqual([
+      { start: '06:00', end: '10:00' },
+      { start: '18:00', end: '00:00' },
+    ]);
+    expect(mine?.days[3].stretches).toEqual([{ start: '09:00', end: '17:30' }]);
+  });
+
+  it('offers no hours of mine once the Popkin can no longer be changed', () => {
+    answer = { ...theWeek(), canEdit: false };
+    store.open('p1', undefined, today);
+    expect(store.mine()).toBeNull();
+  });
+
+  it('shows the week as saved', () => {
+    store.open('p1', undefined, today);
+    const week = theWeek();
+    week.days[0] = evening(today, { freeCount: 1, everyoneFreeFrom: null, working: ['Mara'] });
+    store.saved(week);
+    expect(store.days()[0].free).toBe('1/3 free');
+  });
 });

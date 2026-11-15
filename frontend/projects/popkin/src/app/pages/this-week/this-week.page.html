@@ -1,6 +1,11 @@
 <div pk-app-screen [accent]="frame.accent()" layout="tab" body="flush">
   <header pk-plan-header slot="header" heading="This week" [sub]="store.subtitle()">
     <nav pk-view-nav slot="views" [views]="views()"></nav>
+    @if (store.mine()) {
+      <button pk-button type="button" variant="secondary" size="md" (click)="openMyHours($event)">
+        <svg pk-icon name="clock" size="md"></svg>My hours
+      </button>
+    }
   </header>
 
   @switch (store.state()) {
@@ -37,7 +42,19 @@
             [time]="chosen.headline.time"
             [sub]="chosen.sub"
           >
-            @if (!chosen.empty) {
+            @if (chosen.empty) {
+              @if (store.mine()) {
+                <button
+                  pk-button
+                  type="button"
+                  variant="popkin"
+                  size="md"
+                  (click)="openMyHours($event)"
+                >
+                  <svg pk-icon name="clock" size="md"></svg>My hours
+                </button>
+              }
+            } @else {
               <a
                 pk-button
                 size="md"

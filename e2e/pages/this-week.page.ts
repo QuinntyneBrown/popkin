@@ -7,6 +7,8 @@ export class ThisWeekPage {
   readonly heading: Locator;
   /** "Sep 12 – 18 · everyone’s working hours". */
   readonly subtitle: Locator;
+  /** "My hours" in the header. */
+  readonly myHours: Locator;
   readonly views: Locator;
   readonly currentView: Locator;
   readonly timeOffView: Locator;
@@ -23,6 +25,8 @@ export class ThisWeekPage {
   readonly sentence: Locator;
   /** "Plan dinner in chat" or "Ask in chat anyway". */
   readonly chatAction: Locator;
+  /** "My hours" in the empty headline (L2-074 AC9). */
+  readonly freeMyHours: Locator;
   readonly shifts: Locator;
   readonly ticks: Locator;
   readonly rows: Locator;
@@ -44,6 +48,7 @@ export class ThisWeekPage {
     this.header = page.locator('header.plan-header');
     this.heading = this.header.getByRole('heading', { level: 1 });
     this.subtitle = this.header.locator('.plan-header__sub');
+    this.myHours = this.header.getByRole('button', { name: 'My hours' });
     this.views = page.getByRole('navigation', { name: 'Views' });
     this.currentView = this.views.locator('[aria-current="page"]');
     this.timeOffView = this.views.getByRole('link', { name: 'Time off' });
@@ -58,6 +63,7 @@ export class ThisWeekPage {
     this.headlineTime = this.headline.locator('em');
     this.sentence = this.free.locator('.free__sub');
     this.chatAction = this.free.getByRole('link');
+    this.freeMyHours = this.free.getByRole('button', { name: 'My hours' });
     this.shifts = page.locator('figure.shifts');
     this.ticks = this.shifts.locator('.shifts__ticks span');
     this.rows = this.shifts.locator('.shifts__row');

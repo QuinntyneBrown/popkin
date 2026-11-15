@@ -1,5 +1,6 @@
 import { parity } from '../../fixtures/parity';
-import { theMockTimeOff } from '../../fixtures/schedule';
+import { theMockThisWeek, theMockTimeOff } from '../../fixtures/schedule';
+import { ThisWeekPage } from '../../pages/this-week.page';
 import { TimeOffPage } from '../../pages/time-off.page';
 
 parity('plan-header', [
@@ -9,5 +10,12 @@ parity('plan-header', [
     name: 'schedule',
     region: (page) => new TimeOffPage(page).header,
     before: theMockTimeOff,
+  },
+  // This week: the views, the seven days and "My hours" (L2-074 AC1, AC8).
+  {
+    key: 'thisWeek',
+    name: 'this-week',
+    region: (page) => new ThisWeekPage(page).header,
+    before: theMockThisWeek,
   },
 ]);

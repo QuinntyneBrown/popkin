@@ -38,4 +38,13 @@ public sealed class ScheduleController(ISender sender) : ControllerBase
     public async Task<ActionResult<ThisWeekDto>> GetThisWeek(Guid popkinId, [FromQuery] DateOnly? from, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetThisWeekQuery(popkinId, from), cancellationToken));
 
+    /// <summary>
+    /// Sets the caller's own working hours for the seven days from `from` (L2-074 AC8), and answers
+    /// this week. Counted with messages.
+    /// </summary>
+    [HttpPut("hours/{membershipId:guid}")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<ThisWeekDto>> SetWorkingHours(
+        Guid popkinId, Guid membershipId, SetWorkingHoursRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SetWorkingHoursCommand(popkinId, membershipId, request.From, request.Days), cancellationToken));
 }
