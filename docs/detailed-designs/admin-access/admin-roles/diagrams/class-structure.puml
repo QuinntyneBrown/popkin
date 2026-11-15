@@ -1,0 +1,112 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Admin roles
+
+enum AdminRole {
+  Owner
+  Support
+  Viewer
+}
+enum AdminAction {
+  SuspendPerson
+  SignPersonOut
+  ExportPersonData
+  LogDataRequest
+  StartDeletion
+  CancelDeletion
+  WrapUpPopkin
+  ExtendPopkin
+  RemoveMember
+  ResetInvite
+  ReviewReports
+  RemoveContent
+  OpenModerationView
+  EndCall
+  RunJob
+  RetryExport
+  ChangeFeature
+  ChangeLimits
+  PublishAnnouncement
+  ManageAdmins
+  ExportAuditLog
+}
+enum AdminPermissionRow {
+  View
+  HelpPeople
+  Deletion
+  HelpPopkins
+  Moderation
+  Calls
+  Operations
+  Platform
+  Admins
+  AuditExport
+}
+class AdminPermissions <<static>> {
+  +Rows: IReadOnlyList<(AdminPermissionRow, AdminAction[])>
+  +Allows(role: AdminRole, action: AdminAction): bool
+  +AllowedFor(role: AdminRole): IReadOnlySet<AdminAction>
+}
+class Admin {
+  +Guid Id
+  +string Email
+  +string Name
+  +AdminRole Role
+  +DateTimeOffset? RemovedAt
+}
+interface ICurrentAdmin {
+  +Guid AdminId
+  +Guid SessionId
+}
+interface IAdminGuard {
+  +CurrentAdminAsync(ct): Task<Admin>
+  +RequireAsync(action: AdminAction, ct): Task<Admin>
+}
+class AdminGuard {
+  -Admin? loaded
+}
+class RoleNotAllowedException {
+  +403 role_not_allowed
+  +AdminRole Role
+  +AdminAction Action
+}
+class AdminMeDto {
+  +Guid Id
+  +string Name
+  +string Email
+  +AdminRole Role
+  +AdminAction[] Allowed
+}
+class AdminRolesDto {
+  +RoleCountsDto Counts
+  +AdminPermissionRowDto[] Rows
+}
+class AdminPermissionRowDto {
+  +AdminPermissionRow Row
+  +bool Owner
+  +bool Support
+  +bool Viewer
+}
+Admin --> AdminRole
+AdminPermissions ..> AdminRole
+AdminPermissions ..> AdminAction
+AdminPermissions ..> AdminPermissionRow
+AdminGuard ..|> IAdminGuard
+AdminGuard --> ICurrentAdmin : reads
+AdminGuard --> Admin : loads once per request
+AdminGuard ..> AdminPermissions : asks
+AdminGuard ..> RoleNotAllowedException : throws
+AdminMeDto --> AdminRole
+AdminRolesDto "1" *-- "10" AdminPermissionRowDto
+@enduml

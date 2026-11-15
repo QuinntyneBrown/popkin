@@ -1,0 +1,93 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Remove reported content or dismiss the report
+
+class Report {
+  +DateTimeOffset? ClosedAt
+  +ReportOutcome? Outcome
+  +Guid? ClosedByAdminId
+  +Close(outcome, adminId, now): void
+}
+class Message {
+  +string Text
+  +DateTimeOffset? RemovedByPopkinAt
+  +RemoveByPopkin(now): void
+  +RemovePhoto(): void
+}
+class ContentRemovalNotice {
+  +Guid Id
+  +Guid PersonId
+  +Guid PopkinId
+  +string PopkinName
+  +ReportedContentKind ContentKind
+  +ReportReason? Reason
+  +DateTimeOffset RemovedAt
+  +DateTimeOffset? SeenAt
+  +MarkSeen(now): void
+}
+class RemoveReportedContentCommand {
+  +string Kind
+  +Guid ContentId
+  +string Reason
+}
+class DismissReportCommand {
+  +string Kind
+  +Guid ContentId
+  +string? Reason
+}
+class ContentRemover {
+  +RemoveMessageAsync(message, now): Task<RemovedContent>
+  +RemovePhotoAsync(photo): Task<RemovedContent>
+  +RemoveExperienceAsync(experience): Task<RemovedContent>
+}
+class RemovedContent {
+  +ReportedContentKind Kind
+  +Guid PopkinId
+  +Audience Audience
+  +Guid AuthorPersonId
+  +IReadOnlyList<string> FileKeys
+}
+class ReportDecisionDto {
+  +string Kind
+  +Guid ContentId
+  +int ReportsClosed
+}
+interface IPopkinNotifier {
+  +MessageRemoved(audience, threadId, messageId)
+  +PhotoDeleted(audience, photoId)
+  +ExperienceRemoved(audience, experienceId)
+  +NoticeAdded(audience)
+}
+interface IAuditLog {
+  +Record(AuditRecord): void
+}
+class RemoveReportedContentCommandHandler
+class DismissReportCommandHandler
+class DeletePhotoCommandHandler <<existing>>
+class DeleteExperienceCommandHandler <<existing>>
+
+RemoveReportedContentCommandHandler ..> RemoveReportedContentCommand : handles
+DismissReportCommandHandler ..> DismissReportCommand : handles
+RemoveReportedContentCommandHandler --> ContentRemover : removes with
+DeletePhotoCommandHandler --> ContentRemover : removes with
+DeleteExperienceCommandHandler --> ContentRemover : removes with
+ContentRemover ..> Message : RemoveByPopkin
+ContentRemover ..> RemovedContent : returns
+RemoveReportedContentCommandHandler --> Report : Close(Removed)
+DismissReportCommandHandler --> Report : Close(Dismissed)
+RemoveReportedContentCommandHandler --> ContentRemovalNotice : adds
+RemoveReportedContentCommandHandler ..> IAuditLog
+DismissReportCommandHandler ..> IAuditLog
+RemoveReportedContentCommandHandler ..> IPopkinNotifier : after commit
+RemoveReportedContentCommandHandler ..> ReportDecisionDto : returns
+DismissReportCommandHandler ..> ReportDecisionDto : returns
+@enduml

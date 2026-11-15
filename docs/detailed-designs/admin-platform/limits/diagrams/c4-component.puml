@@ -1,0 +1,39 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Limits
+
+Container_Boundary(admin, "Popkin admin app") {
+  Component(page, "LimitsPage", "Angular page", "pk-limit-row, pk-save-bar")
+  Component(dialog, "SaveLimitsDialog", "CDK dialog", "Change list, required reason")
+  Component(store, "AdminLimitsStore", "api library", "Draft, unsaved count, validity")
+  Component(client, "ADMIN_PLATFORM_API", "api library contract", "HttpAdminPlatformApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminLimitsController", "ASP.NET Core controller", "Admin scheme only")
+  Component(handler, "ChangeLimitsCommandHandler", "MediatR handler", "Role, reason, audit per limit, one save")
+  Component(audit, "IAuditLog", "Application", "Record(AuditRecord)")
+  Component(mw, "PlatformSnapshotMiddleware", "ASP.NET Core middleware", "RefreshIfStaleAsync")
+  Component(snap, "PlatformSnapshot", "Infrastructure singleton", "ILimits over LimitDefaults and LimitSetting")
+  Component(rate, "AddPopkinRateLimits", "ASP.NET Core rate limiter", "Permits from ILimits in the partition key")
+  Component(upload, "UploadLimitFilter, RequestLimits", "ASP.NET Core filter", "Body size from ILimits; 413")
+  Component(codes, "CodeIssuer", "Application", "Codes per destination per hour")
+  Component(files, "PhotoFiles, ExperiencePictures, AvatarPhotos", "Application", "photo_too_large at the live size")
+  ComponentDb(db, "Popkin database", "SQL Server", "LimitSetting, AuditEntry")
+}
+Rel(page, store, "Edits")
+Rel(page, dialog, "Opens")
+Rel(dialog, store, "Saves through")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "PUT /api/admin/limits")
+Rel(ctrl, handler, "Sends ChangeLimitsCommand")
+Rel(handler, audit, "Records each change")
+Rel(handler, db, "Saves once", "EF Core")
+Rel(handler, snap, "Invalidate()")
+Rel(mw, snap, "Refreshes when older than 30 s")
+Rel(snap, db, "Reloads", "EF Core")
+Rel(rate, snap, "Get(MessagesPerMinute, ...)")
+Rel(upload, snap, "PhotoBytes, ProfilePictureBytes")
+Rel(codes, snap, "Get(CodesPerDestinationPerHour)")
+Rel(files, snap, "PhotoBytes, ProfilePictureBytes")
+@enduml

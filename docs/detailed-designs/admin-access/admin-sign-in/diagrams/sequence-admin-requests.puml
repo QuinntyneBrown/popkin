@@ -1,0 +1,55 @@
+@startuml
+title UML sequence behaviour — Every admin request is authenticated
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Caller" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "adminAuthInterceptor" as icpt
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminSessionCookieEvents" as events
+  participant "Admin controller" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ValidateAdminSessionCommandHandler" as validate
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> icpt : Any request to /api/admin/**
+icpt -> events : Request with or without __Host-popkin-admin
+alt no admin cookie
+  events -> events : RedirectToLogin: does the Popkin app scheme authenticate?
+  alt Popkin app session only (L2-078 AC3)
+    events --> icpt : 403 admin_session_required
+  else nothing
+    events --> icpt : 401
+  end
+else admin cookie
+  events -> validate : ValidateAdminSessionCommand(sessionId, adminId)
+  validate -> db : AdminSession live, Admin.RemovedAt null; touch LastActiveAt at most once a minute
+  alt revoked, expired or admin removed (L2-078 AC7)
+    validate --> events : false
+    events --> icpt : 401, admin cookie cleared
+  else live
+    validate --> events : true
+    events -> ctrl : Run the endpoint; its handler checks the role (L2-086)
+    ctrl --> icpt : Answer
+  end
+end
+alt 401
+  icpt --> actor : AdminSessionStore cleared, /sign-in?returnUrl=(current)
+end
+@enduml

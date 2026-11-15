@@ -1,0 +1,64 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — The deletion queue
+
+class Person {
+  +DateTimeOffset? DeletedAt
+  +Guid? DeletionStartedByAdminId
+  +DateOnly? ErasesOn
+  +DateTimeOffset? ErasedAt
+  +CancelDeletion(): void
+  +IsDueForErasure(now): bool
+  +Erase(now): void
+}
+class GetDeletionQueueQueryHandler {
+  +Handle(query): Task<DeletionQueueDto>
+}
+class DeletionQueueDto {
+  +List<DeletionQueueRowDto> Items
+}
+class DeletionQueueRowDto {
+  +Guid PersonId
+  +string Name
+  +string? Email
+  +DateTimeOffset RequestedAt
+  +string? StartedByAdminName
+  +DateOnly ErasesOn
+  +int DaysLeft
+}
+class CancelDeletionCommand {
+  +Guid PersonId
+  +string Reason
+}
+class CancelDeletionCommandHandler {
+  +Handle(command): Task
+}
+class PurgeDeletedAccountsCommandHandler {
+  +Handle(command): Task<int>
+}
+class PurgeDeletedAccountsJob {
+  +Period: 1 day, first tick at 03:00
+}
+class DeletionQueueStore <<api library>> {
+  +rows: Signal<DeletionRowView[]>
+  +state: loading | ready | empty | failed
+  +cancelled(personId): void
+}
+GetDeletionQueueQueryHandler --> Person : reads deleted, not erased
+GetDeletionQueueQueryHandler ..> DeletionQueueDto
+DeletionQueueDto "1" *-- "*" DeletionQueueRowDto
+CancelDeletionCommandHandler ..> CancelDeletionCommand : handles
+CancelDeletionCommandHandler --> Person : CancelDeletion
+PurgeDeletedAccountsJob ..> PurgeDeletedAccountsCommandHandler : sends
+PurgeDeletedAccountsCommandHandler --> Person : IsDueForErasure, Erase
+DeletionQueueStore ..> DeletionQueueDto
+@enduml

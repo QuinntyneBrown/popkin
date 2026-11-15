@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Dashboard
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+Person(member, "Member", "Uses the Popkin app")
+System(popkin, "Popkin", "Pop-up communities and the admin app that runs them")
+Rel(admin, popkin, "Reads how Popkin is doing and what is waiting", "HTTPS")
+Rel(member, popkin, "Joins, chats, calls and shares photos; each act feeds the figures", "HTTPS")
+@enduml

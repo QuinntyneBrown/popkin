@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Settings
+
+Person(admin, "Admin", "Any role")
+System_Ext(github, "GitHub Actions", "Deploy workflow")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin admin app", "Angular SPA, admin.popkin.community", "Settings page")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/admin/settings; IConfiguration")
+}
+Rel(admin, spa, "Opens Settings", "HTTPS")
+Rel(spa, api, "GET /api/admin/settings", "JSON/HTTPS, admin cookie")
+Rel(github, api, "Sets environment variables, Release__Commit and Release__DeployedAt", "infra/main.bicep")
+@enduml

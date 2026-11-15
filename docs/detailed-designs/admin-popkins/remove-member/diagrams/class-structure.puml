@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Remove a member
+
+class AdminRemoveMemberCommand {
+  +Guid PopkinId
+  +Guid MembershipId
+  +string? Reason
+}
+
+class AdminRemoveMemberCommandHandler {
+  +Handle(command: AdminRemoveMemberCommand): Task<AdminPopkinDto>
+}
+
+class Membership {
+  +Guid Id
+  +Guid PopkinId
+  +Guid PersonId
+  +MembershipRole Role
+  +string DisplayName
+  +DateTimeOffset? LeftAt
+  +DateTimeOffset? RemovedAt
+  +Leave(now): void
+  +Remove(now): void
+}
+
+class MemberDepartures {
+  +AnnounceAsync(popkinId, membership, ct): Task
+}
+
+interface IPopkinNotifier {
+  +MemberLeft(popkinId, membershipId): Task
+  +MembershipEnded(personId, popkinId): Task
+}
+
+interface IPopkinClient {
+  +MemberLeft(popkinId, membershipId): Task
+  +MembershipEnded(popkinId): Task
+}
+
+class SignalRPopkinNotifier {
+  +MembershipEnded(personId, popkinId): Task
+}
+
+interface IAuditLog {
+  +Record(record: AuditRecord): void
+}
+
+class MembershipWatch <<Angular, api library>> {
+  +start(): void
+  -close(popkinId): void
+}
+
+AdminRemoveMemberCommandHandler ..> AdminRemoveMemberCommand : handles
+AdminRemoveMemberCommandHandler --> Membership : Remove(now)
+AdminRemoveMemberCommandHandler ..> MemberDepartures : announces through
+AdminRemoveMemberCommandHandler ..> IPopkinNotifier : MembershipEnded
+AdminRemoveMemberCommandHandler ..> IAuditLog : records
+MemberDepartures ..> IPopkinNotifier : MemberLeft
+SignalRPopkinNotifier ..|> IPopkinNotifier
+SignalRPopkinNotifier ..> IPopkinClient : Clients.User(personId)
+MembershipWatch ..> IPopkinClient : receives MembershipEnded
+@enduml

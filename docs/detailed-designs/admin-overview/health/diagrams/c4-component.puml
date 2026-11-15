@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Health
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "HealthPage", "Angular page", "pk-service-health, pk-uptime, pk-status-pill")
+  Component(hstore, "HealthStore", "Signal store", "30 s refresh, Check now busy")
+  Component(text, "health-text.ts", "Pure helper", "Verdict and what members feel")
+  Component(client, "HttpAdminOverviewApi", "ADMIN_OVERVIEW_API", "health(), checkNow()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(sampler, "HealthSampler", "Hosted service", "Every 30 s runs the four checks")
+  Component(checks, "IServiceCheck x4", "ApiCheck, HubCheck, DatabaseCheck, PhotoStoreCheck", "State and one line of figures")
+  Component(ctrl, "AdminHealthController", "ASP.NET Core controller", "GET /api/admin/health, POST /api/admin/health/checks")
+  Component(handler, "GetAdminHealthQueryHandler / CheckHealthNowCommandHandler", "MediatR handlers", "Latest sample and 30 days of uptime")
+  ComponentDb(db, "Popkin database", "SQL Server", "HealthSample")
+}
+Rel(page, hstore, "Reads signals")
+Rel(hstore, text, "Words the verdict")
+Rel(hstore, client, "Calls")
+Rel(client, ctrl, "GET / POST", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends")
+Rel(sampler, checks, "Runs")
+Rel(handler, checks, "Runs on Check now")
+Rel(sampler, db, "Saves HealthSample", "EF Core")
+Rel(handler, db, "Reads samples", "EF Core")
+@enduml

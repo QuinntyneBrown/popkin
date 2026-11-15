@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — Open the actions of an item
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Thread, photo view or experience page" as page
+  participant "ReactionsDialog / PhotoActionsDialog / ExperienceActionsDialog" as actions
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController / PhotosController / ExperiencesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetMessages / GetPhoto / GetExperience handler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+page -> ctrl : GET the item (messages page, photo, experience)
+ctrl -> handler : Send query
+handler -> db : Read item and Reports by this membership
+db --> handler : Rows
+handler --> ctrl : Dto with ReportedByMe
+ctrl --> page : 200
+actor -> page : Press and hold a message, or choose "Photo actions" / the experience's actions
+page -> actions : Open with mine, reported, readOnly
+alt the member's own item (L2-108 AC5)
+  actions --> actor : No "Report"
+else someone else's item, not reported (L2-108 AC1)
+  actions --> actor : "Report" offered
+else already reported by this member (L2-108 AC4)
+  actions --> actor : "Reported", disabled
+end
+opt wrapped-up Popkin (L2-108 AC7)
+  actions --> actor : "Report" alone; no other action (L2-045)
+end
+@enduml

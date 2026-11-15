@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — The admin shell
+
+Person(admin, "Admin", "Signed in to the console")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA, frontend/projects/admin", "Sidebar or top bar and drawer, every page's frame, error screens")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/admin/me, GET /api/admin/waiting")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Admins, reports, job runs, album exports")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Reads the admin on every navigation; polls the waiting counts every 60 s", "JSON/HTTPS")
+Rel(api, db, "Counts", "EF Core")
+@enduml

@@ -1,0 +1,67 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Give a Popkin more time
+
+class AdminExtendPopkinCommand {
+  +Guid PopkinId
+  +int Days
+  +string? Reason
+  +{static} AllowedDays: int[] = 3, 7, 14, 30
+}
+
+class AdminExtendPopkinCommandHandler {
+  +Handle(command: AdminExtendPopkinCommand): Task<AdminPopkinDto>
+}
+
+class PopkinInput <<static>> {
+  +End(length, endsAt, now): DateTimeOffset?
+}
+
+class PopkinChanges <<static, internal>> {
+  +SaveAsync(db, notifier, popkin, ct): Task<PopkinDto>
+}
+
+class PopkinSpace {
+  +PopkinLength Length
+  +DateTimeOffset? EndsAt
+  +long Version
+  +ChangeLength(length, endsAt): void
+}
+
+class PopkinDto {
+  +Guid Id
+  +PopkinLength Length
+  +DateTimeOffset? EndsAt
+  +long Version
+}
+
+interface IAuditLog {
+  +Record(record: AuditRecord): void
+}
+
+interface IAdminGuard {
+  +RequireAsync(action: AdminAction): Task<Admin>
+}
+
+interface IPopkinNotifier {
+  +PopkinChanged(popkinId, popkin: PopkinDto): Task
+}
+
+AdminExtendPopkinCommandHandler ..> AdminExtendPopkinCommand : handles
+AdminExtendPopkinCommandHandler ..> IAdminGuard : uses
+AdminExtendPopkinCommandHandler ..> PopkinInput : applies L2-009 AC3
+AdminExtendPopkinCommandHandler --> PopkinSpace : ChangeLength(UntilDate, end + days)
+AdminExtendPopkinCommandHandler ..> IAuditLog : records old and new end
+AdminExtendPopkinCommandHandler ..> PopkinChanges : saves through
+PopkinChanges ..> IPopkinNotifier : notifies
+PopkinChanges ..> PopkinDto : sends
+@enduml

@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — What each role can do
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AdminsPage" as page
+  participant "AdminsStore" as store
+  participant "pk-permission-table" as table
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminMeController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminRolesQueryHandler" as q
+  participant "AdminPermissions" as perm
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "What each role can do"
+page -> store : loadRoles()
+store -> ctrl : GET /api/admin/roles
+ctrl -> q : GetAdminRolesQuery
+q -> perm : Rows, Allows(role, action) for each row and role
+q -> db : Count admins per role (RemovedAt null)
+q --> ctrl : AdminRolesDto
+ctrl --> store : 200
+store --> page : Rows with labels from role-table-text.ts
+page -> table : rows, counts
+table --> actor : One row per L2-086 row; each cell "Allowed" or "Not allowed" in words; "2 admins" under each role (L2-086 AC4)
+@enduml

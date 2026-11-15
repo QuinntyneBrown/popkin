@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — Retry failed exports
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AlbumExportsPage" as page
+  participant "AlbumExportsStore" as store
+  participant "HttpAdminOperationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminExportsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RetryAlbumExportsCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "AlbumExport" as export
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+box "Backend — Popkin Worker" #FFF4E5
+  participant "PrepareAlbumExportsCommandHandler" as prepare
+end box
+alt "Retry" on one export
+  actor -> page : Retry
+  page -> store : retry(exportId)
+  store -> client : retryExport(exportId)
+  client -> ctrl : POST /api/admin/exports/(exportId)/retry
+else "Retry {n} failed"
+  actor -> page : Retry {n} failed
+  page -> store : retryFailed()
+  store -> client : retryFailedExports()
+  client -> ctrl : POST /api/admin/exports/retry-failed
+end
+ctrl -> handler : Send RetryAlbumExportsCommand(exportId or null)
+handler -> guard : RequireAsync(RetryExport)
+alt Viewer
+  guard --> ctrl : 403 role_not_allowed
+else Owner or Support
+  handler -> db : The export, or every Failed export
+  alt the one export is not Failed
+    handler --> ctrl : 409 export_not_failed
+  else
+    loop each failed export
+      handler -> export : Retry(now): Preparing, StartedAt cleared, tries kept (L2-114 AC2)
+      handler -> audit : Record(RetryExport, AlbumExport, Popkin name, { tries }) (L2-114 AC4)
+    end
+    handler -> db : One SaveChangesAsync
+    handler --> ctrl : AlbumExportsRetriedDto(n, next run)
+    ctrl --> client : 200
+  end
+end
+store --> page : Rows read "Queued"; toast "{n} exports queued again", "Prepare album exports picks them up on its next run, at {time}."
+prepare -> db : Next tick: Begin (Building), then Ready or Fail(code) with Attempts + 1
+@enduml

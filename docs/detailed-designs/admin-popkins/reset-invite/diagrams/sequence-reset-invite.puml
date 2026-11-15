@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — Reset the invite
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinResetInviteDialog" as dialog
+  participant "AdminPopkinStore" as store
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AdminResetInviteCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "IInviteCodeGenerator" as codes
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : Choose "Reset code and QR"
+dialog --> actor : "Reset the invite?" naming the current code, focus in the reason (L2-107 AC1)
+actor -> dialog : Type a reason, choose "Reset code and QR"
+dialog -> store : resetInvite(reason)
+store -> client : resetInvite(popkinId, reason)
+client -> ctrl : POST /api/admin/popkins/{popkinId}/invite/reset
+ctrl -> handler : Send AdminResetInviteCommand
+handler -> handler : ReasonRules.Required(reason)
+handler -> guard : RequireAsync(ResetInvite)
+guard --> handler : allowed
+handler -> db : Load tracked PopkinSpace, Active
+handler -> codes : NewCode()
+codes --> handler : new code
+handler -> handler : PopkinSpace.ResetInvite(newCode); address untouched (L2-107 AC3)
+handler -> audit : Record(ResetInvite, reason, oldCode, newCode) (L2-107 AC4)
+handler -> db : SaveChangesAsync once
+alt saved
+  db --> handler : committed
+  handler --> ctrl : AdminPopkinDto with the new invite
+else unique index refuses a code drawn twice
+  db --> handler : DbUpdateException
+  handler -> codes : NewCode() again, up to the limit
+else wrapped up first
+  db --> handler : DbUpdateConcurrencyException
+  handler --> ctrl : 409 popkin_wrapped_up; nothing saved
+end
+ctrl --> client : 200, or ProblemDetails
+client --> store : Popkin
+store --> dialog : close
+store --> actor : New code and QR; toast "New code {code}", "The old code and QR stopped working." (L2-107 AC2)
+@enduml

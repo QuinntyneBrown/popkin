@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Admin roles
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "Disables what the role does not allow, with the reason")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Checks the role in every write handler; GET /api/admin/me, GET /api/admin/roles")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Admin.Role")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Reads the role on every navigation; sends actions", "JSON/HTTPS")
+Rel(api, db, "Reads the admin on every request", "EF Core")
+@enduml

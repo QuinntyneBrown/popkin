@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Live calls
+
+Person(admin, "Owner or Support admin", "Ends a call; a Viewer only reads")
+Person(member, "Member on a call", "Uses the Popkin app")
+System(popkin, "Popkin", "Pop-up communities and the admin app")
+System_Ext(relay, "Media relay", "STUN/TURN; carries no admin traffic")
+Rel(admin, popkin, "Sees the calls under way and ends one", "HTTPS")
+Rel(popkin, member, "Ends the call: This call was ended by Popkin", "SignalR")
+Rel(member, relay, "Media between browsers", "WebRTC")
+@enduml

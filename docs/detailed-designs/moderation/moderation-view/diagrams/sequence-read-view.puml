@@ -1,0 +1,71 @@
+@startuml
+title UML sequence behaviour — Read and remove within the view
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "ModerationViewPage" as page
+  participant "ModerationViewStore" as store
+  participant "HttpAdminModerationApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminModerationController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Moderation query handlers" as reads
+  participant "ModerationViewAccess" as access
+  participant "RemoveContentInViewCommandHandler" as remove
+  participant "ContentRemover" as remover
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+page -> store : load(viewId)
+store -> client : getView, getMessages, getAlbum, getExperiences
+client -> ctrl : GET /api/admin/moderation-views/(id)/messages, /photos, /experiences
+ctrl -> reads : Send query
+reads -> access : RequireOpenAsync(viewId)
+alt another admin's view
+  access --> reads : 404 moderation_view_not_found
+else closed (L2-111 AC4)
+  access --> reads : 403 moderation_view_closed
+else open
+  reads -> db : Everyone thread, album (InAlbum), experiences of the Popkin only
+  note right of reads : No thread id is taken: no direct message can be read (L2-111 AC3)
+  reads --> ctrl : Pages without reactions, comments or ratings
+end
+ctrl --> client : 200
+store --> page : open
+page --> actor : Banner: admin, reason, "Closes at {time}"; parts read-only, nothing to post (L2-111 AC2, AC3)
+opt remove an item (L2-110 AC1, AC2)
+  actor -> page : "Remove {kind}", reason, confirm
+  page -> client : remove(viewId, kind, contentId, reason)
+  client -> ctrl : POST /api/admin/moderation-views/(id)/removals
+  ctrl -> remove : Send RemoveContentInViewCommand
+  remove -> access : RequireOpenAsync(viewId)
+  remove -> remove : RequireAsync(RemoveContent), ReasonRules
+  remove -> db : Item in the view's Popkin, Everyone, album or experiences (404 content_not_found)
+  remove -> remover : Remove the item
+  remove -> remove : Close any open reports as Removed, add the author's notice
+  remove -> audit : Record(ContentRemoved, moderationViewId, reason)
+  remove -> db : One SaveChangesAsync
+  remove -> notifier : MessageRemoved / PhotoDeleted / ExperienceRemoved, NoticeAdded
+  remove --> ctrl : ContentRemovedDto
+  ctrl --> client : 200
+  store --> page : Item dropped from its part
+end
+@enduml

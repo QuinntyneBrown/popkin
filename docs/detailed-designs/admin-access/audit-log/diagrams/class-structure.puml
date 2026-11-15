@@ -1,0 +1,125 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Audit log
+
+class AuditEntry {
+  +Guid Id
+  +DateTimeOffset At
+  +Guid? AdminId
+  +string AdminName
+  +AuditAction Action
+  +AuditTargetKind TargetKind
+  +string TargetId
+  +string TargetName
+  +string? Reason
+  +string Details
+  +static Retention = 2 years
+  +static Write(at, adminId, adminName, record): AuditEntry
+}
+enum AuditTargetKind {
+  Person
+  Popkin
+  Report
+  Call
+  Job
+  AlbumExport
+  DataRequest
+  Feature
+  Limit
+  Announcement
+  Admin
+  ModerationView
+}
+enum AuditAction {
+  SuspendedPerson
+  LiftedSuspension
+  SignedPersonOut
+  ExportedPersonData
+  DownloadedPersonData
+  LoggedDataRequest
+  StartedDeletion
+  CancelledDeletion
+  WrappedUpPopkin
+  ExtendedPopkin
+  RemovedMember
+  ResetInvite
+  OpenedReport
+  RemovedContent
+  DismissedReport
+  OpenedModerationView
+  ClosedModerationView
+  EndedCall
+  RanJob
+  RetriedExport
+  TurnedFeatureOff
+  TurnedFeatureOnForEveryone
+  LimitedFeatureToChosen
+  ChangedLimits
+  PublishedAnnouncement
+  EndedAnnouncement
+  AddedAdmin
+  ChangedAdminRole
+  RemovedAdmin
+  ExportedAuditLog
+}
+class AuditRecord {
+  +AuditAction Action
+  +AuditTargetKind TargetKind
+  +string TargetId
+  +string TargetName
+  +string? Reason
+  +IReadOnlyDictionary<string, object?> Details
+}
+interface IAuditLog {
+  +Record(record: AuditRecord): void
+}
+class AuditLog {
+  -IAppDbContext db
+  -IAdminGuard guard
+  -TimeProvider clock
+}
+class AuditActionLabels <<static>> {
+  +Label(action): string
+  +Matching(search): AuditAction[]
+}
+class GetAuditEntriesQuery {
+  +string? Search
+  +Guid? AdminId
+  +string? Before
+}
+class AuditPageDto {
+  +AuditEntryDto[] Entries
+  +int Total
+  +string? Next
+}
+class AuditEntryDto {
+  +Guid Id
+  +DateTimeOffset At
+  +string AdminName
+  +AuditAction Action
+  +string ActionLabel
+  +AuditTargetKind TargetKind
+  +string TargetName
+  +string? Reason
+  +string? Summary
+}
+AuditEntry --> AuditAction
+AuditEntry --> AuditTargetKind
+AuditLog ..|> IAuditLog
+AuditLog ..> AuditRecord : takes
+AuditLog ..> AuditEntry : adds to IAppDbContext
+AuditPageDto "1" *-- "*" AuditEntryDto
+AuditEntryDto ..> AuditActionLabels : label
+GetAuditEntriesQuery ..> AuditPageDto : answers
+@enduml

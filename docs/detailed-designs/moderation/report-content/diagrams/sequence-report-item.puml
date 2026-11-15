@@ -1,0 +1,74 @@
+@startuml
+title UML sequence behaviour — Report an item
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ReportDialog" as dlg
+  participant "ReportDraft" as draft
+  participant "HttpReportsApi" as client
+  participant "ThreadStore / PhotoViewStore / ExperienceStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ReportsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "FileReportCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "ReportableContent" as reach
+  participant "Report" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dlg : Choose "Report" in the item's actions
+dlg --> actor : Five reasons, staff see the messages around it, the person is not told who (L2-108 AC2)
+actor -> dlg : Pick a reason, choose "Report"
+dlg -> draft : send(kind, contentId, reason)
+draft --> dlg : busy, reasons read-only
+draft -> client : fileReport(popkinId, kind, contentId, reason)
+client -> ctrl : POST /api/popkins/(id)/reports
+ctrl -> ctrl : Session required, rate limit "reports"
+ctrl -> handler : Send FileReportCommand
+handler -> guard : RequireMemberAsync(popkinId) (wrapped-up allowed, L2-108 AC7)
+alt not a member (L2-108 AC6)
+  guard --> handler : 404 popkin_not_found
+else member
+  handler -> reach : RequireAsync(membership, kind, contentId)
+  alt not in reach, deleted, removed or a system note (L2-108 AC6, L2-051)
+    reach --> handler : 404 content_not_found
+  else the member's own item (L2-108 AC5)
+    handler --> ctrl : 403 cannot_report_own
+  else already reported by this member
+    handler -> db : Find Report by reporter and item
+    handler --> ctrl : 200 first ReportReceiptDto
+  else new report
+    handler -> entity : Report.File(item, author, reporter, reason, now)
+    handler -> db : Save
+    handler --> ctrl : 201 ReportReceiptDto
+  end
+end
+ctrl --> client : Answer
+alt 200 or 201 (L2-108 AC3)
+  client --> draft : receipt
+  draft --> dlg : done
+  dlg -> store : markReported(contentId)
+  dlg --> actor : Dialog closes, toast "{Kind} reported."; the item stays where it is
+else any failure (L2-108 AC8)
+  client --> draft : ProblemDetails or network error
+  draft --> dlg : failed, reason kept
+  dlg --> actor : Stays open with the reason chosen, alert it could not be sent
+end
+@enduml

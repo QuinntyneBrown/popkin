@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — Sign a person out everywhere
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin or Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PersonPage" as page
+  participant "SignPersonOutDialog" as dlg
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPeopleController" as ctrl
+  participant "SignalRPopkinNotifier" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SignPersonOutCommandHandler" as handler
+  participant "SessionRevocation" as rev
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Popkin web app (the person)" as web
+end box
+actor -> page : "Sign out everywhere" (offered when at least one session is live, L2-097 AC3)
+page -> dlg : Open with the live session count
+dlg --> actor : "Sign Mara out everywhere?", "Ends all 3 sessions." (L2-097 AC1)
+actor -> dlg : Reason, "Sign out"
+dlg -> client : signOut(personId, reason)
+client -> ctrl : POST /api/admin/people/{personId}/sign-out { reason }
+ctrl -> handler : Send SignPersonOutCommand
+handler -> handler : IAdminGuard.RequireAsync(SignPersonOut); ReasonRules
+handler -> rev : RevokeAllAsync(personId, now)
+rev -> db : Live sessions
+rev --> handler : 3 revoked
+handler -> audit : Record(PersonSignedOut, Person, reason, { sessionsEnded: 3 }) (L2-097 AC4)
+handler -> db : One SaveChangesAsync
+db --> handler : Saved
+handler -> hub : SessionsEndedAsync(personId)
+hub -> web : SessionsEnded (the person's users only)
+web -> web : Read the session again: 401, sign-in screen
+handler --> ctrl : AdminPersonDto
+ctrl --> client : 200
+client --> dlg : Person
+dlg --> page : Close
+page --> actor : Sessions "Not signed in anywhere"; toast "Mara is signed out of every device" (L2-097 AC2)
+note over web, db : Any later request with an old cookie: SessionCookieEvents rejects it, 401 (L2-097 AC2, L2-050 AC3)
+@enduml

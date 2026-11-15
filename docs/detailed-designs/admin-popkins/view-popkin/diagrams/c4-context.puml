@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — A Popkin
+
+Person(admin, "Admin", "Owner, Support or Viewer; runs Popkin from the admin app")
+Person(member, "Member", "Person who belongs to a Popkin")
+System(popkin, "Popkin", "Pop-up communities and the admin app that runs them")
+
+Rel(admin, popkin, "Reads one Popkin's length, members, invite and counts in", "HTTPS")
+Rel(member, popkin, "Shares messages and photos that the admin does not see in", "HTTPS")
+@enduml

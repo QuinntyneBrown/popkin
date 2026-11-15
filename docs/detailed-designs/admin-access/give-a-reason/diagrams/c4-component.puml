@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — A reason for every change
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(dlg, "Action dialog (for example SuspendPersonDialog)", "CDK dialog", "pk-dialog, pk-alert, pk-reason-field, pk-button")
+  Component(state, "ActionDialogState", "Signal state (api)", "idle, busy, failed; reason kept")
+  Component(field, "pk-reason-field", "components", "Reason, for the audit log; 500 characters")
+  Component(toaster, "Toaster", "App service", "Confirms the change")
+  Component(client, "Area API (ADMIN_*_API)", "Contract + HTTP client", "Sends { ..., reason }")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "Admin controller", "Controller", "Binds the body")
+  Component(handler, "Write handler", "MediatR handler", "Guard, reason, change, audit")
+  Component(rules, "ReasonRules", "Application", "Required, Optional; 400 reason_required, reason_too_long")
+  Component(audit, "IAuditLog", "Application", "Records the reason with the change")
+}
+Rel(dlg, state, "Delegates confirm")
+Rel(dlg, field, "Composes")
+Rel(state, client, "Sends")
+Rel(dlg, toaster, "On success")
+Rel(client, ctrl, "HTTPS")
+Rel(ctrl, handler, "Command with Reason")
+Rel(handler, rules, "Validates")
+Rel(handler, audit, "Record(..., reason)")
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Health
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+System(popkin, "Popkin", "Pop-up communities and the admin app")
+System_Ext(blob, "Photo store", "Azure Blob Storage, container photos")
+System_Ext(sql, "Azure SQL Database", "The Popkin database")
+Rel(admin, popkin, "Reads the state of four services", "HTTPS")
+Rel(popkin, sql, "Checks every 30 s", "TDS")
+Rel(popkin, blob, "Checks every 30 s", "HTTPS")
+@enduml

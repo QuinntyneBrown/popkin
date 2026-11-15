@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System context — Export a person's data
+
+Person(adminp, "Admin", "Owner, Support or Viewer, signed in to the admin app")
+System(popkin, "Popkin", "Platform for pop-up communities, with its admin app")
+
+Rel(adminp, popkin, "Starts an export with a reason; downloads it when ready", "HTTPS")
+@enduml

@@ -1,0 +1,79 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — The admin shell
+
+class AdminNavGroup {
+  +string label
+  +AdminNavItem[] items
+}
+class AdminNavItem {
+  +string label
+  +string route
+  +string page
+  +string icon
+  +AdminWaitingKey? waiting
+}
+enum AdminWaitingKey {
+  reports
+  failedJobs
+  failedExports
+}
+class ADMIN_SECTIONS <<const>> {
+  Overview: Dashboard, Metrics, Health
+  People: People, Deletion queue, Data requests
+  Popkins: Popkins, Reports, Live calls
+  Operations: Jobs, Album exports
+  Platform: Features, Announcements, Limits, Settings
+  Access: Admins & roles, Audit log
+}
+class AdminWaitingStore {
+  +counts: Signal<AdminWaitingDto?>
+  +start(): void
+  +stop(): void
+  -poll every 60 s
+}
+class AdminWaitingDto {
+  +int reports
+  +int failedJobs
+  +int failedExports
+}
+class AdminShell <<pk-admin-shell>> {
+  +sections: AdminNavGroup[]
+  +current: string
+  +me: AdminMeDto
+  +waiting: AdminWaitingDto?
+  +notice: string?
+  +signOut: output
+  +openMenu: output
+}
+class MenuDialog {
+  +close on section, Escape, backdrop
+  +restore focus to Menu
+}
+class GetAdminWaitingQueryHandler {
+  +Handle(query): Task<AdminWaitingDto>
+}
+class ServerErrorState <<existing>> {
+  +string? reference
+  +string? retryUrl
+}
+ADMIN_SECTIONS "1" *-- "6" AdminNavGroup
+AdminNavGroup "1" *-- "*" AdminNavItem
+AdminNavItem --> AdminWaitingKey
+AdminShell ..> ADMIN_SECTIONS : renders
+AdminShell ..> AdminWaitingDto : shows counts
+AdminWaitingStore --> AdminWaitingDto
+MenuDialog ..> ADMIN_SECTIONS : renders
+GetAdminWaitingQueryHandler ..> AdminWaitingDto : returns
+@enduml

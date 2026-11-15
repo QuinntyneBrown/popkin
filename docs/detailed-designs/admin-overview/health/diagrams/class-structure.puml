@@ -1,0 +1,84 @@
+@startuml
+title Class structure — Health
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+enum ServiceName {
+  Api
+  RealtimeHub
+  Database
+  PhotoStorage
+}
+enum ServiceState {
+  Operational
+  Degraded
+  Down
+}
+class HealthSample {
+  +Guid Id
+  +DateTimeOffset At
+  +ServiceName Service
+  +ServiceState State
+  +string Figures
+}
+interface IServiceCheck {
+  +ServiceName Service
+  +CheckAsync(ct): Task<ServiceCheckResult>
+}
+class ServiceCheckResult {
+  +ServiceState State
+  +IReadOnlyDictionary<string,double> Figures
+}
+class ApiCheck
+class HubCheck
+class DatabaseCheck
+class PhotoStoreCheck
+class HealthSampler {
+  +{static} TimeSpan Period = 30 s
+  +{static} TimeSpan Keep = 30 days
+  #ExecuteAsync(ct): Task
+}
+class HealthChecks {
+  +RunAllAsync(now, ct): Task<IReadOnlyList<HealthSample>>
+}
+class Uptime {
+  +{static} IReadOnlyList<UptimeDayDto> Of(samples, from, to)
+}
+class AdminHealthDto {
+  +DateTimeOffset CheckedAt
+  +IReadOnlyList<ServiceHealthDto> Services
+}
+class ServiceHealthDto {
+  +ServiceName Service
+  +ServiceState State
+  +IReadOnlyDictionary<string,double> Figures
+  +double UptimePercent
+  +IReadOnlyList<UptimeDayDto> Days
+}
+class UptimeDayDto {
+  +DateOnly Day
+  +double UpShare
+  +ServiceState Worst
+}
+IServiceCheck <|.. ApiCheck
+IServiceCheck <|.. HubCheck
+IServiceCheck <|.. DatabaseCheck
+IServiceCheck <|.. PhotoStoreCheck
+IServiceCheck ..> ServiceCheckResult : returns
+HealthChecks "1" o-- "4" IServiceCheck
+HealthSampler --> HealthChecks : runs every 30 s
+HealthChecks ..> HealthSample : creates
+HealthSample --> ServiceName
+HealthSample --> ServiceState
+Uptime ..> HealthSample : reads
+AdminHealthDto "1" *-- "4" ServiceHealthDto
+ServiceHealthDto "1" *-- "30" UptimeDayDto
+@enduml

@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — See an announcement
+
+Container_Boundary(web, "Popkin web app") {
+  Component(root, "pk-root", "Application root", "Renders the banner above the routed page")
+  Component(banner, "pk-announcement", "components library", "role=status, icon and hidden word per style, Dismiss")
+  Component(store, "AnnouncementStore", "api library", "Polls every 60 s while signed in")
+  Component(session, "SessionStore", "api library", "Whether a session exists")
+  Component(dismissals, "AnnouncementDismissals", "api library", "localStorage popkin.announcement.dismissed")
+  Component(client, "ANNOUNCEMENT_API", "api library contract", "HttpAnnouncementApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AnnouncementController", "ASP.NET Core controller", "Popkin app session required")
+  Component(handler, "GetLiveAnnouncementQueryHandler", "MediatR handler", "TakenDownAt null, EndsAt later than now")
+  ComponentDb(db, "Popkin database", "SQL Server", "Announcement")
+}
+Rel(root, store, "Reads banner()")
+Rel(root, banner, "Renders")
+Rel(banner, root, "dismissed")
+Rel(store, session, "Reads")
+Rel(store, dismissals, "Reads and writes")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "GET /api/announcement")
+Rel(ctrl, handler, "Sends GetLiveAnnouncementQuery")
+Rel(handler, db, "Reads", "EF Core")
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Remove reported content or dismiss the report
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "ReportsPage", "Page", "Remove and dismiss")
+  Component(dlg, "RemoveReportedContentDialog", "CDK dialog", "pk-reason-field, ActionDialogState")
+  Component(rstore, "ReportsStore", "Signal store", "dismiss(), removeAndOpenNext()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminReportsController", "Controller, admin scheme", "removal, dismissal")
+  Component(rh, "RemoveReportedContentCommandHandler", "MediatR handler", "RemoveContent")
+  Component(dh, "DismissReportCommandHandler", "MediatR handler", "ReviewReports")
+  Component(remover, "ContentRemover", "Application service", "Message, photo, experience; shared with member deletion")
+  Component(guard, "IAdminGuard", "Abstraction", "RequireAsync(AdminAction)")
+  Component(audit, "IAuditLog", "Abstraction", "ContentRemoved, ReportDismissed")
+  Component(notifier, "IPopkinNotifier / SignalRPopkinNotifier", "Abstraction + Api", "Events to the audience")
+  Component(files, "IPhotoStore", "Abstraction", "DeleteAsync")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Container_Boundary(spa, "Popkin web app") {
+  Component(thread, "ThreadStore, AlbumStore, ExperiencesStore", "Signal stores", "Apply removal events")
+  Component(notices, "NoticesStore + ContentRemovedDialog", "Store + CDK dialog", "The author's notice")
+}
+Rel(page, dlg, "Opens")
+Rel(dlg, rstore, "remove(reason)")
+Rel(page, rstore, "dismiss()")
+Rel(rstore, ctrl, "HTTPS")
+Rel(ctrl, rh, "RemoveReportedContentCommand")
+Rel(ctrl, dh, "DismissReportCommand")
+Rel(rh, guard, "RemoveContent")
+Rel(dh, guard, "ReviewReports")
+Rel(rh, remover, "Removes the item")
+Rel(rh, audit, "Records")
+Rel(dh, audit, "Records")
+Rel(rh, db, "One save")
+Rel(dh, db, "One save")
+Rel(rh, files, "Deletes files after commit")
+Rel(rh, notifier, "Sends after commit")
+Rel(notifier, thread, "MessageRemoved, PhotoDeleted, ExperienceRemoved", "SignalR")
+Rel(notifier, notices, "NoticeAdded", "SignalR")
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Find Popkins
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+System_Boundary(popkin, "Popkin") {
+  Container(adminApp, "Popkin admin app", "Angular", "frontend/projects/admin at admin.popkin.community")
+  Container(api, "Popkin API", "ASP.NET Core", "/api/admin/** controllers, /api controllers and PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server", "Popkins, memberships and audit entries")
+}
+Rel(admin, adminApp, "Uses", "HTTPS")
+Rel(adminApp, api, "GET /api/admin/popkins", "JSON/HTTPS, admin session cookie")
+Rel(api, db, "Reads Popkins and memberships", "EF Core")
+@enduml

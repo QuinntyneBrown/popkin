@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Health
+
+Person(admin, "Admin", "Any admin role")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "HealthPage, polls every 30 s")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "HealthSampler; PopkinHub; GET /api/admin/health, POST /api/admin/health/checks")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "HealthSample")
+  Container(store, "Photo store", "Azure Blob Storage", "Photos and album zips")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Reads health, asks for a check", "JSON/HTTPS")
+Rel(api, db, "Probes and stores samples", "EF Core")
+Rel(api, store, "Probes", "HTTPS")
+@enduml

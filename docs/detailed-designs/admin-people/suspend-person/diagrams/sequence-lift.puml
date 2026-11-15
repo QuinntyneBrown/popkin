@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — Lift a suspension
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin or Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PersonPage" as page
+  participant "LiftSuspensionDialog" as dlg
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "LiftSuspensionCommandHandler" as handler
+  participant "Person" as person
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Lift suspension"
+page -> dlg : Open
+dlg --> actor : "Lift Tomás’s suspension?", reason focused (L2-096 AC1)
+actor -> dlg : Reason, "Lift suspension"
+dlg -> client : liftSuspension(personId, reason)
+client -> ctrl : POST /api/admin/people/{personId}/lift-suspension { reason }
+ctrl -> handler : Send LiftSuspensionCommand
+handler -> handler : IAdminGuard.RequireAsync(SuspendPerson); ReasonRules
+handler -> db : Person
+alt Not suspended
+  handler --> ctrl : 409 person_not_suspended
+else Suspended
+  handler -> person : LiftSuspension()
+  handler -> audit : Record(SuspensionLifted, Person, reason)
+  handler -> db : One SaveChangesAsync (L2-096 AC4)
+  handler --> ctrl : AdminPersonDto (no session, L2-096 AC2)
+  ctrl --> client : 200
+  client --> dlg : Person
+  dlg --> page : Close
+  page --> actor : "Active", "Tomás will need a new code to sign back in."; toast "Tomás Reyes can sign in again"
+end
+note over db : Memberships were never touched, so every Popkin is there at the next sign-in (L2-096 AC3)
+@enduml

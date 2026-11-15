@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — People
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "PeoplePage", "Angular page", "pk-search-field, pk-segmented-control, pk-data-table")
+  Component(pstore, "PeopleStore", "Signal store, api library", "Search, filter, pages, failure")
+  Component(client, "HttpAdminPeopleApi", "ADMIN_PEOPLE_API", "findPeople(search, status, after)")
+}
+Container_Boundary(apic, "Popkin API") {
+  Component(ctrl, "AdminPeopleController", "ASP.NET Core controller, Admin scheme", "GET /api/admin/people")
+  Component(handler, "FindPeopleQueryHandler", "MediatR handler", "Matches, counts and pages")
+  Component(guard, "IAdminGuard", "Application service", "CurrentAdminAsync: any admin may view")
+  Component(status, "PersonStatus", "Domain", "Active, Suspended, BeingDeleted")
+  ComponentDb(db, "Popkin database", "SQL Server", "People")
+}
+Rel(page, pstore, "Reads signals, sends search and filter")
+Rel(pstore, client, "Calls")
+Rel(client, ctrl, "GET ?search&status&after", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends FindPeopleQuery")
+Rel(handler, guard, "Requires an admin")
+Rel(handler, status, "Derives each status")
+Rel(handler, db, "Reads", "EF Core")
+@enduml

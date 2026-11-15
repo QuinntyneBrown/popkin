@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Admin sign in
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "SignInPage", "Page", "Staff email, then the code, in one route")
+  Component(nota, "NotAnAdminPage", "Page", "This account isn't an admin")
+  Component(store, "AdminSignInStore", "Signal store (api)", "Steps, busy states, tries left, lock")
+  Component(client, "AdminAuthApi", "ADMIN_AUTH_API", "requestCode, confirm, resend, signOut")
+  Component(sess, "AdminSessionStore", "Signal store (api)", "The signed-in admin")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminAuthController", "Controller", "/api/admin/auth")
+  Component(cookie, "AdminSessionCookie + AdminSessionCookieEvents", "Cookie scheme Admin", "__Host-popkin-admin, checked on every request")
+  Component(req, "RequestAdminCodeCommandHandler", "MediatR handler", "Lock check, then CodeIssuer")
+  Component(conf, "ConfirmAdminCodeCommandHandler", "MediatR handler", "Code, lock, admin, session")
+  Component(issuer, "CodeIssuer", "Existing service", "L2-005 limits, CodePurpose.AdminSignIn")
+  Component(lock, "AdminSignInLock", "Domain entity", "Three wrong codes, then 15 minutes")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(page, store, "Drives")
+Rel(store, client, "Calls")
+Rel(store, sess, "Sets the admin on success")
+Rel(page, nota, "Navigates on not_an_admin")
+Rel(client, ctrl, "HTTPS")
+Rel(ctrl, req, "RequestAdminCodeCommand")
+Rel(ctrl, conf, "ConfirmAdminCodeCommand")
+Rel(ctrl, cookie, "Signs in and out")
+Rel(req, lock, "Reads")
+Rel(req, issuer, "Issues")
+Rel(conf, lock, "Counts wrong codes")
+Rel(conf, db, "Saves code, lock, session")
+@enduml

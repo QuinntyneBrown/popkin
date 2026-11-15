@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Wrap up a Popkin now
+
+Container_Boundary(adminApp, "Popkin admin app") {
+  Component(dialog, "PopkinWrapUpDialog", "CDK dialog", "pk-reason-field, Wrap up, Cancel")
+  Component(state, "ActionDialogState", "Shared dialog state", "idle, busy, failed; reason kept")
+  Component(store, "AdminPopkinStore", "Signal store", "wrapUp(reason), toast")
+  Component(client, "HttpAdminPopkinsApi", "ADMIN_POPKINS_API", "Typed HTTP client")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminPopkinsController", "ASP.NET Core controller", "POST {popkinId}/wrap-up")
+  Component(handler, "AdminWrapUpPopkinCommandHandler", "MediatR handler", "Reason, role, wrap-up, audit, one save")
+  Component(reasons, "ReasonRules", "Application rule", "1 to 500 characters")
+  Component(guard, "IAdminGuard", "Application service", "RequireAsync(WrapUpPopkin)")
+  Component(wrap, "PopkinWrapUpService", "Application service", "PrepareAsync, AnnounceAsync")
+  Component(audit, "IAuditLog", "Application abstraction", "Adds the AuditEntry to the unit of work")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "Sends to popkin:{popkinId}")
+  ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace, Call, AuditEntry")
+}
+Rel(dialog, state, "Uses")
+Rel(dialog, store, "Confirms through")
+Rel(store, client, "wrapUp(popkinId, reason)")
+Rel(client, ctrl, "POST /api/admin/popkins/{popkinId}/wrap-up", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends AdminWrapUpPopkinCommand")
+Rel(handler, reasons, "Required(reason)")
+Rel(handler, guard, "RequireAsync")
+Rel(handler, wrap, "PrepareAsync(keepPhotos: true), AnnounceAsync")
+Rel(handler, audit, "Record(WrapUpPopkin)")
+Rel(handler, db, "SaveChangesAsync once", "EF Core")
+Rel(wrap, notifier, "CallEnded, PopkinWrappedUp")
+@enduml

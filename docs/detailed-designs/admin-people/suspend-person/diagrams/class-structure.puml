@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Suspend a person and lift it
+
+class Person {
+  +DateTimeOffset? SuspendedAt
+  +Guid? SuspendedByAdminId
+  +string? SuspensionReason
+  +StatusAt(): PersonStatus
+  +Suspend(adminId, reason, now): void
+  +LiftSuspension(): void
+}
+class Session {
+  +Revoke(now): void
+}
+class SuspendPersonCommand {
+  +Guid PersonId
+  +string Reason
+}
+class LiftSuspensionCommand {
+  +Guid PersonId
+  +string Reason
+}
+class SuspendPersonCommandHandler
+class LiftSuspensionCommandHandler
+interface IAdminGuard {
+  +CurrentAdminAsync(): Task<Admin>
+  +RequireAsync(action: AdminAction): Task<Admin>
+}
+interface IAuditLog {
+  +Record(record: AuditRecord): void
+}
+class ReasonRules {
+  +Normalise(reason): string
+}
+class AuditEntry {
+  +AuditAction Action
+  +AuditTargetKind TargetKind
+  +Guid TargetId
+  +string TargetName
+  +string? Reason
+  +string Details
+}
+enum AuditAction {
+  PersonSuspended
+  SuspensionLifted
+}
+interface IPopkinNotifier {
+  +SessionsEndedAsync(personId): Task
+}
+SuspendPersonCommandHandler ..> SuspendPersonCommand : handles
+LiftSuspensionCommandHandler ..> LiftSuspensionCommand : handles
+SuspendPersonCommandHandler --> Person : Suspend
+SuspendPersonCommandHandler --> Session : Revoke each live
+SuspendPersonCommandHandler ..> IAdminGuard
+SuspendPersonCommandHandler ..> ReasonRules
+SuspendPersonCommandHandler ..> IAuditLog
+SuspendPersonCommandHandler ..> IPopkinNotifier
+LiftSuspensionCommandHandler --> Person : LiftSuspension
+LiftSuspensionCommandHandler ..> IAuditLog
+IAuditLog ..> AuditEntry : adds
+AuditEntry --> AuditAction
+@enduml

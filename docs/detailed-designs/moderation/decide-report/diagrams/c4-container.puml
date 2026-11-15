@@ -1,0 +1,22 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Remove reported content or dismiss the report
+
+Person(admin, "Owner or Support admin", "Admin session")
+Person(member, "Member", "Popkin app session")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "Reports page, Remove this {kind}? dialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "POST removal and dismissal, PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Report, Message, Photo, Experience, ContentRemovalNotice, AuditEntry")
+  Container(store, "Photo store", "Azure Blob Storage", "Photo and picture files")
+  Container(spa, "Popkin web app", "Angular SPA", "Thread, album, experiences, removal notice")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Sends the decision", "JSON/HTTPS")
+Rel(api, db, "Removes, closes reports, adds notice and entry in one save", "EF Core")
+Rel(api, store, "Deletes the stored file after the commit")
+Rel(api, spa, "MessageRemoved, PhotoDeleted, ExperienceRemoved, NoticeAdded", "SignalR")
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Reads notices and recovery reads", "JSON/HTTPS")
+@enduml

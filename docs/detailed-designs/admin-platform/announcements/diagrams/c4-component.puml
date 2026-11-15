@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Announcements
+
+Container_Boundary(admin, "Popkin admin app") {
+  Component(page, "AnnouncementsPage", "Angular page", "Form, preview, Earlier banners")
+  Component(dialogs, "PublishAnnouncementDialog, TakeDownAnnouncementDialog", "CDK dialogs", "ActionDialogState")
+  Component(store, "AdminAnnouncementsStore", "api library", "Draft, count, validity, live state")
+  Component(client, "ADMIN_PLATFORM_API", "api library contract", "HttpAdminPlatformApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminAnnouncementsController", "ASP.NET Core controller", "Admin scheme only")
+  Component(query, "GetAdminAnnouncementsQueryHandler", "MediatR handler", "Live, earlier, audience")
+  Component(publish, "PublishAnnouncementCommandHandler, TakeDownAnnouncementCommandHandler", "MediatR handlers", "Role, rules, audit, one save")
+  Component(guard, "IAdminGuard", "Application", "RequireAsync(PublishAnnouncement)")
+  Component(audit, "IAuditLog", "Application", "Record(AuditRecord)")
+  Component(entity, "Announcement", "Domain entity", "Publish, TakeDown, IsLiveAt")
+  ComponentDb(db, "Popkin database", "SQL Server", "Announcement, AuditEntry")
+}
+Rel(page, store, "Reads and edits the draft")
+Rel(page, dialogs, "Opens")
+Rel(dialogs, store, "Confirms through")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, query, "Sends query")
+Rel(ctrl, publish, "Sends commands")
+Rel(publish, guard, "Checks the role")
+Rel(publish, entity, "Creates, takes down")
+Rel(publish, audit, "Records")
+Rel(publish, db, "Saves once", "EF Core")
+Rel(query, db, "Reads", "EF Core")
+@enduml

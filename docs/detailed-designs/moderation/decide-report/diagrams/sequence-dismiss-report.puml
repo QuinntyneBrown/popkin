@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — Dismiss the report
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "ReportsPage" as page
+  participant "ReportsStore" as rstore
+  participant "HttpAdminReportsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminReportsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DismissReportCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Keep it, dismiss report"
+page -> rstore : dismiss()
+rstore -> client : dismiss(kind, contentId)
+client -> ctrl : POST /api/admin/reports/(kind)/(contentId)/dismissal
+ctrl -> handler : Send DismissReportCommand
+handler -> guard : RequireAsync(ReviewReports)
+alt Viewer
+  guard --> handler : 403 role_not_allowed
+else Owner or Support
+  handler -> db : Open reports of the item (404 report_not_found)
+  handler -> handler : Report.Close(Dismissed) for each; the item is not touched (L2-110 AC3)
+  handler -> audit : Record(ReportDismissed, reportIds, report reasons) (L2-110 AC5)
+  handler -> db : One SaveChangesAsync
+  handler --> ctrl : ReportDecisionDto
+end
+ctrl --> client : Answer
+alt 200
+  rstore -> rstore : drop the item, open the next
+  page --> actor : Toast "Report dismissed", "The {kind} stays. The dismissal is in the audit log."
+else failure
+  page --> actor : The item stays open, danger toast
+end
+@enduml

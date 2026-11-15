@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Feature switches
+
+Person(owner, "Owner", "Admin")
+Person(member, "Member", "Belongs to a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "Features page and its dialogs")
+  Container(web, "Popkin web app", "Angular SPA", "Tabs and off screens, polled every 60 s")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/features, PlatformSnapshot, feature_off")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "FeatureSetting, FeatureChosenPopkin, AuditEntry; feature data kept while off")
+}
+Rel(owner, admin, "Chooses a mode", "HTTPS")
+Rel(admin, api, "GET, PUT, POST, DELETE /api/admin/features/**", "JSON/HTTPS, admin cookie")
+Rel(member, web, "Opens a Popkin", "HTTPS")
+Rel(web, api, "GET /api/popkins/{popkinId}/features every 60 s", "JSON/HTTPS")
+Rel(api, db, "Writes switches with their audit entry; reloads the snapshot", "EF Core")
+@enduml

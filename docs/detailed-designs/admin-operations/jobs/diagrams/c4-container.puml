@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Jobs
+
+Person(admin, "Admin", "Any admin role")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "JobsPage")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/admin/jobs, POST /api/admin/jobs/(job)/runs")
+  Container(worker, "Popkin Worker", ".NET worker service", "Four PeriodicJob loops; records runs; polls run requests")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "JobRun, JobRunRequest, AuditEntry")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Reads jobs, asks for a run", "JSON/HTTPS")
+Rel(api, db, "Reads JobRun; writes JobRunRequest and AuditEntry", "EF Core")
+Rel(worker, db, "Writes JobRun; picks up JobRunRequest", "EF Core")
+@enduml

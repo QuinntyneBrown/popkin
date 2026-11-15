@@ -1,0 +1,84 @@
+@startuml
+title Class structure — Metrics
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+enum DailyFigureKind {
+  PeopleActive
+  PopkinsStarted
+  MessagesSent
+  ApiRequests
+  ApiRequestsFailed
+}
+class DailyFigure {
+  +DateOnly Day
+  +DailyFigureKind Figure
+  +long Value
+  +DateTimeOffset UpdatedAt
+  +Add(amount: long, now): void
+}
+class PopkinMetrics {
+  +PersonActive(): void
+  +PopkinStarted(): void
+  +MessageSent(): void
+}
+class DailyFigureRecorder {
+  -MeterListener listener
+  -ConcurrentDictionary pending
+  +StartAsync(): Task
+  -FlushAsync(): Task
+}
+class GetAdminMetricsQuery {
+  +int Days
+}
+class GetAdminMetricsQueryHandler {
+  +Handle(query): Task<AdminMetricsDto>
+}
+class AdminMetricsDto {
+  +DateTimeOffset AsOf
+  +int Days
+  +PeopleActiveSeriesDto PeopleActive
+  +ErrorRateSeriesDto ErrorRate
+  +TotalSeriesDto PopkinsStarted
+  +TotalSeriesDto MessagesSent
+}
+class PeopleActiveSeriesDto {
+  +IReadOnlyList<DailyPointDto> Days
+  +double Average
+  +double Peak
+  +DateOnly PeakDay
+}
+class ErrorRateSeriesDto {
+  +IReadOnlyList<DailyPointDto> Days
+  +double Latest
+  +double Target = 0.003
+  +bool AboveTarget
+}
+class TotalSeriesDto {
+  +IReadOnlyList<DailyPointDto> Days
+  +long Total
+}
+class MetricsStore {
+  +days: Signal<7 | 14>
+  +state: Signal<LoadState>
+  +choose(days): void
+}
+DailyFigureRecorder ..> PopkinMetrics : listens to
+DailyFigureRecorder --> DailyFigure : upserts
+DailyFigure --> DailyFigureKind
+GetAdminMetricsQueryHandler ..> GetAdminMetricsQuery : handles
+GetAdminMetricsQueryHandler --> DailyFigure : reads
+GetAdminMetricsQueryHandler ..> AdminMetricsDto : returns
+AdminMetricsDto *-- PeopleActiveSeriesDto
+AdminMetricsDto *-- ErrorRateSeriesDto
+AdminMetricsDto "1" *-- "2" TotalSeriesDto
+MetricsStore ..> AdminMetricsDto : holds
+@enduml

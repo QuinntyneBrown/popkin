@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Read the metrics
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "MetricsPage" as page
+  participant "MetricsStore" as store
+  participant "HttpAdminOverviewApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminMetricsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminMetricsQueryHandler" as handler
+  participant "IAdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /metrics
+page -> store : load(14)
+store -> client : metrics(14)
+client -> ctrl : GET /api/admin/metrics?days=14
+ctrl -> handler : Send GetAdminMetricsQuery(14)
+handler -> guard : CurrentAdminAsync()
+handler -> db : DailyFigure for the last 14 London days
+db --> handler : Rows; missing days read as 0
+handler -> handler : Average and peak of PeopleActive; totals; error rate = failed / requests per day
+handler --> ctrl : AdminMetricsDto, today partial
+ctrl --> client : 200
+client --> store : Metrics view
+alt error rate above 0.3 % (L2-091 AC3)
+  store --> page : "Above 0.3% target" in words; trend--bad (danger colour)
+else
+  store --> page : Every chart drawn in ink
+end
+page --> actor : Four charts, each with a visually-hidden table of its days (L2-091 AC4)
+actor -> page : Choose "7 days" (L2-091 AC2)
+page -> store : choose(7)
+store -> client : metrics(7)
+client -> ctrl : GET /api/admin/metrics?days=7
+ctrl --> client : 200 AdminMetricsDto
+store --> page : Every chart shows the last seven days
+alt request fails or loads
+  store --> page : Skeletons, or message with "Try again" (L2-089 AC7)
+end
+@enduml

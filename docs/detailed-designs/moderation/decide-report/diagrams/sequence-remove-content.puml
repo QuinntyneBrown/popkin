@@ -1,0 +1,78 @@
+@startuml
+title UML sequence behaviour — Remove reported content
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "RemoveReportedContentDialog" as dlg
+  participant "ReportsStore" as rstore
+  participant "HttpAdminReportsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminReportsController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RemoveReportedContentCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "ContentRemover" as remover
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "IPhotoStore" as files
+end box
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ThreadStore / AlbumStore / ExperiencesStore" as web
+end box
+actor -> dlg : Choose "Remove {kind}"
+dlg --> actor : "Remove this {kind}?", focus in "Reason, for the audit log" (L2-110 AC1, L2-087 AC1)
+actor -> dlg : Type a reason, choose "Remove"
+alt reason empty or spaces (L2-087 AC2)
+  dlg --> actor : Nothing sent, "Give a reason; it goes in the audit log."
+else reason given
+  dlg --> actor : Remove busy, reason read-only (L2-087 AC4)
+  dlg -> client : remove(kind, contentId, reason)
+  client -> ctrl : POST /api/admin/reports/(kind)/(contentId)/removal
+  ctrl -> handler : Send RemoveReportedContentCommand
+  handler -> guard : RequireAsync(RemoveContent)
+  alt Viewer (L2-086 AC1)
+    guard --> handler : 403 role_not_allowed
+  else Owner or Support
+    handler -> handler : ReasonRules (400 reason_required, reason_too_long)
+    handler -> db : Open reports of the item (404 report_not_found)
+    handler -> remover : Remove message, photo or experience (wrapped-up allowed)
+    remover --> handler : RemovedContent (audience, file keys, author)
+    handler -> handler : Report.Close(Removed) for each open report (L2-110 AC2)
+    handler -> handler : Add ContentRemovalNotice for the author
+    handler -> audit : Record(ContentRemoved, reason, reportIds) (L2-110 AC5)
+    handler -> db : One SaveChangesAsync (L2-120 AC5)
+    handler -> files : Delete the stored files (L2-110 AC4)
+    handler -> notifier : MessageRemoved / PhotoDeleted / ExperienceRemoved to the audience
+    notifier -> web : Event to the thread's or Popkin's audience
+    web --> web : "Removed by Popkin", "Photo removed" or the experience gone, no reload
+    handler -> notifier : NoticeAdded to the author alone
+    handler --> ctrl : ReportDecisionDto
+  end
+  ctrl --> client : Answer
+  alt 200
+    client --> rstore : decision
+    rstore -> rstore : removeAndOpenNext()
+    dlg --> actor : Closes; toast "Message removed", the next report opens
+  else failure (L2-087 AC5)
+    dlg --> actor : Stays open, "That didn't go through", reason as typed
+  end
+end
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — The Worker builds the export
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Worker" #FFF4E5
+  participant "PreparePersonDataExportsJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "PreparePersonDataExportsCommandHandler" as handler
+  participant "PersonDataExportWriter" as writer
+  participant "DataRequest" as req
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "IPhotoStore" as store
+end box
+job -> handler : Tick: send PreparePersonDataExportsCommand
+handler -> db : Data requests Compiling, oldest first
+loop Each request
+  handler -> writer : WriteAsync(personId, temporary zip)
+  writer -> db : Person; memberships, left or not, with their Popkins
+  writer -> db : Messages, photo comments, experience comments, reactions, photos, experiences the person posted
+  note right of writer : Nothing another person posted; no quoted text of others (L2-100 AC3)
+  writer -> store : Open each photo file the person uploaded
+  writer --> handler : Zip written
+  handler -> store : SaveAsync(key, zip)
+  alt Saved
+    handler -> req : Ready(key, now)
+  else Failed
+    handler -> req : Fail()
+  end
+  handler -> db : SaveChangesAsync
+end
+handler -> db : Sent requests whose LinkExpiresAt has passed
+handler -> store : Delete each zip; clear StorageKey
+note over job : Sends no hub event (ADR 0015); Data requests reads again on its own
+@enduml

@@ -1,0 +1,71 @@
+@startuml
+title UML sequence behaviour — Remove a member
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinRemoveMemberDialog" as dialog
+  participant "AdminPopkinStore" as store
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AdminRemoveMemberCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "MemberDepartures" as departures
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomeStore (remaining member)" as others
+end box
+actor -> dialog : Choose "Remove Walt Brennan"
+dialog --> actor : "Remove Walt Brennan?", focus in the reason (L2-106 AC1)
+actor -> dialog : Type a reason, choose "Remove from Popkin"
+dialog -> store : removeMember(membershipId, reason)
+store -> client : removeMember(popkinId, membershipId, reason)
+client -> ctrl : POST .../members/{membershipId}/remove
+ctrl -> handler : Send AdminRemoveMemberCommand
+handler -> handler : ReasonRules.Required(reason)
+handler -> guard : RequireAsync(RemoveMember)
+guard --> handler : allowed
+handler -> db : Load Popkin (Active) and the active Membership
+alt the Host
+  handler --> ctrl : 403 host_cannot_be_removed (L2-106 AC3)
+else no active membership with that id
+  handler --> ctrl : 404 member_not_found
+else a member
+  handler -> handler : Membership.Remove(now): LeftAt and RemovedAt
+  handler -> db : MemberSchedules.RemoveAsync
+  handler -> audit : Record(RemoveMember, Popkin, reason, personId, memberName) (L2-106 AC5)
+  handler -> db : SaveChangesAsync once (L2-120 AC5)
+  db --> handler : committed
+  handler -> departures : AnnounceAsync(popkinId, membership)
+  departures -> departures : Off every call; out of presence and popkin:{popkinId}
+  departures -> notifier : MemberLeft(popkinId, membershipId)
+  notifier -> others : MemberLeft; member count down by one (L2-106 AC2)
+  handler -> notifier : MembershipEnded(personId, popkinId), to that person only
+  handler --> ctrl : AdminPopkinDto without the member
+end
+ctrl --> client : 200, or ProblemDetails
+client --> store : Popkin
+store --> dialog : close
+store --> actor : "9 people"; toast "Walt Brennan was removed from Lakeside Weekend"
+@enduml

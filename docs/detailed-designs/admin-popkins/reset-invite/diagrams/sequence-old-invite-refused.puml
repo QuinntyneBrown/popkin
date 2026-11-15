@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — The old invite is refused
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person with the old link" as person
+actor "Host" as host
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Join invite screen" as joinPage
+  participant "InviteDialog" as invite
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "InvitesController" as invites
+  participant "PopkinsController" as popkins
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetInvitePreviewQueryHandler" as preview
+  participant "GetInviteQueryHandler" as getInvite
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+person -> joinPage : Open the old invite link or scan the old QR
+joinPage -> invites : GET /api/invites/{oldCode}
+invites -> preview : Send GetInvitePreviewQuery
+preview -> db : Popkin where InviteCode = oldCode
+db --> preview : none
+preview --> invites : 404 invite_not_found
+invites --> joinPage : 404 invite_not_found, as for a code that never existed
+joinPage --> person : "We can't find that invite", "Start a Popkin", "Join with a code" (L2-016 AC2)
+host -> invite : Open "Invite people"
+invite -> popkins : GET /api/popkins/{popkinId}/invite
+popkins -> getInvite : Send GetInviteQuery
+getInvite -> db : The Popkin's InviteCode
+db --> getInvite : new code
+getInvite --> popkins : InviteDto with the new code and link
+popkins --> invite : 200
+invite --> host : The new code, link and QR (L2-107 AC1)
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Settings
+
+Container_Boundary(spa, "Popkin admin app") {
+  Component(page, "SettingsPage", "Angular page", "pk-settings-list, pk-search-field")
+  Component(store, "AdminSettingsStore", "api library", "Loads; filters by group, name or key")
+  Component(client, "ADMIN_PLATFORM_API", "api library contract", "HttpAdminPlatformApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminSettingsController", "ASP.NET Core controller", "Admin scheme only")
+  Component(handler, "GetAdminSettingsQueryHandler", "MediatR handler", "Any admin")
+  Component(catalog, "DeploymentSettingsCatalog", "Application", "Group, name, key, secret flag")
+  Component(reader, "ConfigurationDeploymentSettings", "Infrastructure", "IDeploymentSettings over IConfiguration; secrets as set or not set")
+  Component(config, "IConfiguration", "ASP.NET Core", "Environment variables and appsettings")
+}
+Rel(page, store, "Reads, filters")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "GET /api/admin/settings")
+Rel(ctrl, handler, "Sends GetAdminSettingsQuery")
+Rel(handler, catalog, "Walks")
+Rel(handler, reader, "Read(setting)")
+Rel(reader, config, "Reads key")
+@enduml

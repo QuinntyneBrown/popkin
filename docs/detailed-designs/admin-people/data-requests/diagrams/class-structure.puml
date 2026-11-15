@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Data requests
+
+class DataRequest {
+  +Guid Id
+  +Guid PersonId
+  +string PersonName
+  +DataRequestChannel Channel
+  +DateOnly ReceivedOn
+  +DateOnly DueOn
+  +DataRequestStatus Status
+  +DateTimeOffset? SentAt
+  +DateTimeOffset? LinkExpiresAt
+  +StartExport(): void
+  +MarkSent(now): void
+  +IsDueSoon(today): bool
+  +LinkExpired(now): bool
+}
+class DataRequestRules {
+  +{static} AnswerWithin: 30 days
+  +{static} DueSoonWithin: 7 days
+  +{static} LinkLifetime: 7 days
+}
+class LogDataRequestCommand {
+  +string Contact
+  +string Reason
+}
+class LogDataRequestCommandHandler
+class StartRequestExportCommand {
+  +Guid DataRequestId
+  +string Reason
+}
+class MarkDataRequestSentCommand {
+  +Guid DataRequestId
+}
+class GetDataRequestsQueryHandler {
+  +Handle(query): Task<DataRequestsDto>
+}
+class DataRequestsDto {
+  +int Open
+  +int Total
+  +List<DataRequestRowDto> Items
+}
+class DataRequestRowDto {
+  +Guid Id
+  +Guid PersonId
+  +string PersonName
+  +DataRequestChannel Channel
+  +DateOnly ReceivedOn
+  +DateOnly DueOn
+  +int DaysLeft
+  +bool DueSoon
+  +DataRequestStatus Status
+  +DateTimeOffset? LinkExpiresAt
+  +bool LinkExpired
+}
+class DataRequestsStore <<api library>> {
+  +rows: Signal<DataRequestRowView[]>
+  +open: Signal<number>
+  +state: loading | ready | empty | failed
+  +actionsFor(row): RequestAction[]
+}
+LogDataRequestCommandHandler ..> LogDataRequestCommand : handles
+LogDataRequestCommandHandler ..> DataRequest : Log, StartExport
+DataRequest ..> DataRequestRules
+GetDataRequestsQueryHandler ..> DataRequestsDto
+DataRequestsDto "1" *-- "*" DataRequestRowDto
+DataRequestsStore ..> DataRequestsDto
+StartRequestExportCommand ..> DataRequest
+MarkDataRequestSentCommand ..> DataRequest
+@enduml

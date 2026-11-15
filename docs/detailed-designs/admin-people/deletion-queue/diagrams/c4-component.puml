@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — The deletion queue
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "DeletionsPage", "Angular page", "pk-page-head, pk-data-table, pk-status-pill")
+  Component(qstore, "DeletionQueueStore", "Signal store, api library", "Rows, days left, cancel")
+  Component(dlg, "CancelDeletionDialog", "CDK dialog", "pk-reason-field, ActionDialogState")
+  Component(client, "HttpAdminPeopleApi", "ADMIN_PEOPLE_API", "deletions, cancelDeletion")
+}
+Container_Boundary(apic, "Popkin API") {
+  Component(ctrl, "AdminDeletionsController", "Admin scheme", "GET, POST cancel")
+  Component(query, "GetDeletionQueueQueryHandler", "MediatR handler", "Soonest erasure first")
+  Component(cancel, "CancelDeletionCommandHandler", "MediatR handler", "Owner only, reason, audit")
+  ComponentDb(db, "Popkin database", "SQL Server", "People, Admins, AuditEntries")
+}
+Container_Boundary(workerc, "Popkin Worker") {
+  Component(job, "PurgeDeletedAccountsJob", "PeriodicJob, daily at 03:00", "Sends PurgeDeletedAccountsCommand")
+  Component(purge, "PurgeDeletedAccountsCommandHandler", "MediatR handler", "Erases where ErasesOn has come")
+}
+Rel(page, qstore, "Reads")
+Rel(page, dlg, "Opens")
+Rel(qstore, client, "Calls")
+Rel(dlg, client, "Calls")
+Rel(client, ctrl, "HTTPS", "JSON")
+Rel(ctrl, query, "Sends GetDeletionQueueQuery")
+Rel(ctrl, cancel, "Sends CancelDeletionCommand")
+Rel(query, db, "Reads", "EF Core")
+Rel(cancel, db, "One SaveChangesAsync", "EF Core")
+Rel(job, purge, "Sends")
+Rel(purge, db, "Erases", "EF Core")
+@enduml

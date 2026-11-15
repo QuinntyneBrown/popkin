@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — The removed person's screens close
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Removed person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Group chat (open screen)" as screen
+  participant "PopkinRealtime" as realtime
+  participant "MembershipWatch" as watch
+  participant "MyPopkinsStore" as mine
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinHub" as hub
+  participant "PopkinsController" as popkins
+  participant "InvitesController" as invites
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IMembershipGuard" as guard
+  participant "JoinPopkinCommandHandler" as join
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt connected when the removal is saved
+  hub -> realtime : MembershipEnded(popkinId) on every connection of the person
+  realtime -> watch : membershipEnded$
+  realtime -> mine : drop the Popkin
+  watch -> screen : End any call session; close
+  watch --> actor : My Popkins with a toast (<TO SUPPLY> copy)
+else offline, then reconnected
+  realtime -> watch : reconnected$
+  watch -> popkins : GET /api/popkins/{popkinId}
+  popkins -> guard : RequireMemberAsync
+  guard -> db : Active membership?
+  db --> guard : none
+  guard --> popkins : 404 popkin_not_found (L2-047 AC4)
+  popkins --> watch : 404
+  watch --> actor : My Popkins, as above
+end
+actor -> screen : Any request in the Popkin
+screen -> popkins : GET or POST /api/popkins/{popkinId}/...
+popkins --> screen : 404 popkin_not_found (L2-106 AC2)
+opt the person opens the invite again
+  actor -> invites : POST /api/invites/{code}/join
+  invites -> join : Send JoinPopkinCommand
+  join -> db : Popkin by InviteCode; no active membership of the person
+  alt invite not reset
+    join -> db : New Membership; popped-in note
+    join --> invites : joined (L2-106 AC4)
+  else invite reset since
+    join --> invites : 404 invite_not_found (L2-107)
+  end
+  invites --> actor : Result
+end
+@enduml

@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — Wrap up a Popkin now
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinWrapUpDialog" as dialog
+  participant "AdminPopkinStore" as store
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AdminWrapUpPopkinCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "PopkinWrapUpService" as wrap
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+box "Frontend — Popkin web app" #E0F2FE
+  participant "WrapUpWatch" as watch
+end box
+actor -> dialog : Choose "Wrap up now"
+dialog --> actor : "Wrap up {Popkin} now?", focus in the reason (L2-104 AC1, L2-087 AC1)
+actor -> dialog : Type a reason, choose "Wrap up"
+dialog -> dialog : busy: button disabled, reason read-only (L2-087 AC4)
+dialog -> store : wrapUp(reason)
+store -> client : wrapUp(popkinId, reason)
+client -> ctrl : POST /api/admin/popkins/{popkinId}/wrap-up
+ctrl -> handler : Send AdminWrapUpPopkinCommand
+handler -> handler : ReasonRules.Required(reason)
+handler -> guard : RequireAsync(WrapUpPopkin)
+guard --> handler : Support allowed (L2-086)
+handler -> db : Load tracked PopkinSpace, Active
+handler -> wrap : PrepareAsync(popkin, keepPhotos: true)
+wrap -> db : Read the calls under way
+wrap --> handler : Popkin wrapped up, calls ended, not saved (L2-045 AC1)
+handler -> audit : Record(WrapUpPopkin, Popkin, reason, members, callsEnded)
+handler -> db : SaveChangesAsync: wrap-up, calls and audit entry together (L2-120 AC5)
+db --> handler : committed
+handler -> wrap : AnnounceAsync(popkin, calls)
+wrap -> notifier : CallEnded to each call's audience
+wrap -> notifier : PopkinWrappedUp to popkin:{popkinId} (L2-104 AC2)
+notifier -> watch : PopkinWrappedUp
+watch --> watch : Read the Popkin; open the recap
+handler --> ctrl : AdminPopkinDto, WrappedUp
+ctrl --> client : 200
+client --> store : Popkin
+store --> dialog : close
+store --> actor : Page "Wrapped up", no action; toast "{name} is wrapped up"
+@enduml

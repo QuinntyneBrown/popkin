@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — A suspended person signs in
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Suspended person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "SignInPage / VerifyCodePage" as page
+  participant "HttpAuthApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "CodeIssuer" as issuer
+  participant "ConfirmCodeCommandHandler" as confirm
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Email, "Send code"
+page -> client : requestCode(SignIn, email)
+client -> ctrl : POST /api/auth/codes
+ctrl -> issuer : IssueAsync (reads no Person, L2-006 AC2)
+issuer --> ctrl : CodeSentDto
+ctrl --> client : 200, as for anyone
+actor -> page : Six digits
+page -> client : confirm(verificationId, code)
+client -> ctrl : POST /api/auth/codes/{verificationId}/confirm
+ctrl -> confirm : Send ConfirmCodeCommand
+confirm -> db : Code matches; Person by email, not deleted
+alt Person.SuspendedAt is set
+  confirm -> db : Consume the code; no Session (L2-095 AC3)
+  confirm --> ctrl : 403 account_suspended
+  ctrl --> client : 403 ProblemDetails code account_suspended
+  client --> page : Suspended
+  page --> actor : The suspended screen: suspended, and how to contact Popkin; no reason (L2-095 AC3)
+else Not suspended
+  confirm --> ctrl : Session started
+end
+@enduml

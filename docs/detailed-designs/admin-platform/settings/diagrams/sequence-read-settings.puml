@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — An admin reads and searches the settings
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "SettingsPage" as page
+  participant "AdminSettingsStore" as store
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminSettingsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminSettingsQueryHandler" as handler
+  participant "DeploymentSettingsCatalog" as catalog
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ConfigurationDeploymentSettings" as reader
+  participant "IConfiguration" as config
+end box
+actor -> page : Opens Settings
+page -> store : load()
+store --> page : loading, skeletons (L2-118 AC5)
+store -> client : settings()
+client -> controller : GET /api/admin/settings, admin cookie
+alt No admin session or a Popkin app session
+  controller --> client : 401 or 403 (L2-078 AC3)
+else Admin
+  controller -> handler : Send GetAdminSettingsQuery
+  handler -> catalog : All, Release keys
+  loop Each setting
+    handler -> reader : Read(setting)
+    reader -> config : configuration[key]
+    alt Secret
+      reader --> handler : SecretSet or SecretNotSet, no value (L2-118 AC3)
+    else Not a secret
+      reader --> handler : Value, or NotSet
+    end
+  end
+  handler --> controller : AdminSettingsDto
+  controller --> client : 200
+  client --> store : ready
+  store --> page : Release, commit, deployed; groups (L2-118 AC1, AC2)
+end
+actor -> page : Types "photos" in "Find a setting"
+page -> store : filter("photos")
+alt Matches
+  store --> page : The group Photos only (L2-118 AC4)
+else None
+  store --> page : "No setting matches “photos”", search kept
+end
+@enduml

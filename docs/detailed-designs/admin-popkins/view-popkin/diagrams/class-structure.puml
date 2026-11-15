@@ -1,0 +1,97 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — A Popkin
+
+class GetAdminPopkinQuery {
+  +Guid PopkinId
+}
+
+class GetAdminPopkinQueryHandler {
+  +Handle(query: GetAdminPopkinQuery): Task<AdminPopkinDto>
+}
+
+class AdminPopkinDto {
+  +Guid Id
+  +string Name
+  +string Emoji
+  +PopkinColour Colour
+  +AdminPopkinStatus Status
+  +PopkinLength Length
+  +DateTimeOffset StartedAt
+  +DateTimeOffset? EndsAt
+  +DateTimeOffset? WrappedUpAt
+  +int? DaysLeft
+  +int? TotalDays
+  +int? PassedPercent
+  +AdminMemberDto Host
+  +int MemberCount
+  +IReadOnlyList<AdminMemberDto> Members
+  +AdminInviteDto Invite
+  +AdminActivityDto Activity
+  +long Version
+}
+
+class AdminMemberDto {
+  +Guid MembershipId
+  +Guid PersonId
+  +string Name
+  +MembershipRole Role
+  +DateTimeOffset JoinedAt
+  +AvatarDto Avatar
+}
+
+class AdminInviteDto {
+  +string Code
+  +string Link
+}
+
+class AdminActivityDto {
+  +int Messages
+  +int Photos
+  +IReadOnlyList<Feature> Features
+}
+
+class "popkinActions" as actions <<pure, Angular>> {
+  +popkinActions(popkin: AdminPopkinDto, me: AdminMeDto): PopkinActions
+}
+
+class PopkinActions <<TypeScript>> {
+  +giveMoreTime: ActionState
+  +wrapUp: ActionState
+  +removeMember(member): ActionState
+  +resetInvite: ActionState
+  +openModerationView: ActionState
+}
+
+class ActionState <<TypeScript>> {
+  +kind: 'hidden'|'enabled'|'disabled'
+  +reason?: string
+}
+
+class AdminMeDto {
+  +string Name
+  +string Email
+  +AdminRole Role
+  +IReadOnlyList<AdminAction> Allowed
+}
+
+GetAdminPopkinQueryHandler ..> GetAdminPopkinQuery : handles
+GetAdminPopkinQueryHandler ..> AdminPopkinDto : returns
+AdminPopkinDto "1" *-- "*" AdminMemberDto
+AdminPopkinDto *-- AdminInviteDto
+AdminPopkinDto *-- AdminActivityDto
+actions ..> AdminPopkinDto : reads
+actions ..> AdminMeDto : reads
+actions ..> PopkinActions : returns
+PopkinActions *-- ActionState
+note bottom of AdminPopkinDto : No field holds a message, photo, comment,\nreaction, experience, story, time off or hours (L2-078 AC4)
+@enduml

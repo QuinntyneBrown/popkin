@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Admin sign in
+
+Person(admin, "Admin", "Popkin staff with an @popkin.app email and a role")
+Person(other, "Not an admin", "Anyone else who reaches the console")
+System(popkin, "Popkin", "Pop-up communities; the console at admin.popkin.community")
+System_Ext(acs, "Azure Communication Services", "Emails the six-digit code")
+Rel(admin, popkin, "Signs in to the console with a code")
+Rel(other, popkin, "Confirms a code, sees This account isn't an admin")
+Rel(popkin, acs, "Sends the code to the staff email", "HTTPS")
+Rel(acs, admin, "Delivers the code", "Email")
+@enduml

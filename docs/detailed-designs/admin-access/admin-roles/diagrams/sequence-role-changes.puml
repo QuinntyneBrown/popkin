@@ -1,0 +1,47 @@
+@startuml
+title UML sequence behaviour — A changed role applies at the next page
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as owner
+actor "Admin whose role changes" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "Admin's open page" as page
+  participant "AdminSessionStore" as sess
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Admin controllers" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+owner -> ctrl : PUT /api/admin/admins/(id)/role Viewer (Admins & roles)
+ctrl -> db : Admin.ChangeRole(Viewer) and its audit entry
+actor -> page : Still on a page drawn for Support
+opt acts before navigating
+  page -> ctrl : POST an action Support could take
+  ctrl -> guard : RequireAsync(action)
+  guard -> db : Load Admin: Role is Viewer now
+  guard --> ctrl : 403 role_not_allowed (L2-086 AC1)
+  ctrl --> page : 403; the dialog fails, nothing changes
+end
+actor -> page : Open another page
+page -> sess : load() through adminSessionGuard
+sess -> ctrl : GET /api/admin/me
+ctrl --> sess : role Viewer
+sess --> actor : Viewer notice and disabled actions (L2-086 AC5)
+@enduml

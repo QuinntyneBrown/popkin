@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — A request meets a changed limit
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Composer, photo picker" as web
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlatformSnapshotMiddleware" as mw
+  participant "Rate limiter (Messages)" as rate
+  participant "UploadLimitFilter" as filter
+  participant "MessagesController, AccountController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AvatarPhotos" as avatar
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "PlatformSnapshot" as snap
+  database "Popkin database" as db
+end box
+actor -> web : Sends a message
+web -> mw : POST /api/popkins/{popkinId}/threads/{threadId}/messages
+mw -> snap : RefreshIfStaleAsync
+opt Older than 30 s or invalidated (L2-117 AC6)
+  snap -> db : Load LimitSetting
+  db --> snap : MessagesPerMinute = 20
+end
+mw -> rate : Continue
+rate -> snap : Get(MessagesPerMinute)
+snap --> rate : 20
+rate -> rate : Partition "{personId}|20", a new SlidingLogRateLimiter
+alt 21st message within a minute
+  rate --> web : 429 rate_limited, Retry-After (L2-053 AC2, AC5)
+else Within the limit
+  rate -> controller : Continue
+  controller --> web : 201
+end
+actor -> web : Chooses a new profile picture
+web -> web : Checks size against GET /api/limits/uploads
+web -> mw : PUT /api/account/photo
+mw -> filter : Continue
+filter -> snap : ProfilePictureBytes
+filter -> filter : MaxRequestBodySize = twice the limit
+alt Body over the allowance
+  filter --> web : 413 request_too_large (RequestLimits)
+else File over the limit
+  controller -> avatar : ReadAsync(upload)
+  avatar -> snap : ProfilePictureBytes
+  avatar --> web : 400 photo_too_large "A photo is at most {n} MB."
+end
+@enduml

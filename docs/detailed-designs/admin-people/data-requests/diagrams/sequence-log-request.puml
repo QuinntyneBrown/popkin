@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Log a data request
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin or Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "DataRequestsPage" as page
+  participant "LogDataRequestDialog" as dlg
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminDataRequestsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "LogDataRequestCommandHandler" as handler
+  participant "ContactRules" as contact
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Log a request"
+page -> dlg : Open
+dlg --> actor : "Log a data request", "Person’s email or phone", reason (L2-101 AC3)
+actor -> dlg : "sam@ortega.fam", reason, "Log and start export"
+dlg -> client : logRequest(contact, reason)
+client -> ctrl : POST /api/admin/data-requests { contact, reason }
+ctrl -> handler : Send LogDataRequestCommand
+handler -> handler : IAdminGuard.RequireAsync(LogDataRequest); ReasonRules
+handler -> contact : Normalise as email or phone (E.164)
+handler -> db : Person by email or phone, not erased
+alt No account
+  handler --> ctrl : 400 contact_not_found, field contact
+  ctrl --> client : 400 ProblemDetails
+  client --> dlg : Invalid
+  dlg --> actor : "No account has that email or phone. Check it against the request." (L2-101 AC4)
+else Found
+  handler -> handler : DataRequest.Log(person, channel, today, adminId, reason); StartExport()
+  handler -> audit : Record(DataRequestLogged, Person, reason, { dataRequestId, dueOn })
+  handler -> db : One SaveChangesAsync
+  handler --> ctrl : DataRequestRowDto (Compiling)
+  ctrl --> client : 201
+  client --> dlg : Row
+  dlg --> page : Close; the row goes on top
+  page --> actor : Toast "Request logged", "Sam Ortega’s export is compiling; it’s due 13 Aug." (L2-101 AC5)
+end
+note over handler : The contact typed goes in no log, metric or span
+@enduml

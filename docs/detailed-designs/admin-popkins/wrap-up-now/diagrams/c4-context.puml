@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Wrap up a Popkin now
+
+Person(admin, "Admin", "Owner, Support or Viewer; runs Popkin from the admin app")
+Person(member, "Member", "Person who belongs to a Popkin")
+System(popkin, "Popkin", "Pop-up communities and the admin app that runs them")
+
+Rel(admin, popkin, "Wraps a live Popkin up with a reason in", "HTTPS")
+Rel(member, popkin, "Receives the wrap-up and the recap in", "HTTPS")
+@enduml

@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Open the list of Popkins
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinsPage" as page
+  participant "AdminPopkinsStore" as store
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "FindPopkinsQueryHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "AdminPopkinStatuses" as status
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /popkins
+page -> store : load()
+store --> page : state loading: skeleton rows (L2-089 AC7)
+store -> client : find(show All, page 1)
+client -> ctrl : GET /api/admin/popkins?show=all&page=1
+ctrl -> ctrl : Authenticate admin session cookie (L2-078 AC3)
+alt no admin session, or a Popkin app session only
+  ctrl --> client : 401 or 403
+else admin session
+  ctrl -> handler : Send FindPopkinsQuery
+  handler -> guard : CurrentAdminAsync()
+  guard --> handler : Admin (no AdminAction needed to view)
+  handler -> db : Count live and wrapped up; read a page ordered by LastActivityAt desc
+  db --> handler : Popkins, Hosts, member counts
+  handler -> status : Of(popkin, now) per row
+  status --> handler : Live, Ending or WrappedUp with days left
+  handler --> ctrl : AdminPopkinListDto
+  ctrl --> client : 200 AdminPopkinListDto
+end
+alt 200
+  client --> store : rows and counts
+  store --> page : state ready
+  page --> actor : "3,112 live, 61,804 wrapped up" and the table (L2-102 AC1)
+else failure
+  client --> store : error
+  store --> page : state failed
+  page --> actor : "Couldn't load the Popkins", "Try again", "Open Health" (L2-102 AC5)
+end
+actor -> page : Choose a Popkin's name
+page --> actor : Navigate to /popkins/:popkinId (L2-102 AC4)
+@enduml

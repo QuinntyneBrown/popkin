@@ -1,0 +1,111 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Feature switches
+
+package "Popkin.Domain" {
+  enum Feature {
+    Plan
+    Schedules
+  }
+  enum FeatureMode {
+    Off
+    Chosen
+    Everyone
+  }
+  class FeatureSetting {
+    +Feature Feature
+    +FeatureMode Mode
+    +DateTimeOffset ChangedAt
+    +Guid ChangedByAdminId
+    +string ChangedByName
+    +ChangeMode(mode: FeatureMode, admin: Admin, now: DateTimeOffset): void
+  }
+  class FeatureChosenPopkin {
+    +Feature Feature
+    +Guid PopkinId
+    +DateTimeOffset AddedAt
+    +Guid AddedByAdminId
+  }
+}
+package "Popkin.Application" {
+  interface IFeatureSwitches {
+    +IsOn(feature: Feature, popkinId: Guid): bool
+    +Require(feature: Feature, popkinId: Guid): void
+  }
+  interface IPlatformSnapshot {
+    +RefreshIfStaleAsync(ct: CancellationToken): Task
+    +Invalidate(): void
+  }
+  class ChangeFeatureModeCommand {
+    +Feature Feature
+    +FeatureMode Mode
+    +string? Reason
+  }
+  class AddFeaturePopkinCommand {
+    +Feature Feature
+    +Guid PopkinId
+    +string? Reason
+  }
+  class ChangeFeatureModeCommandHandler {
+    +Handle(command: ChangeFeatureModeCommand): Task<AdminFeatureDto>
+  }
+  class AddFeaturePopkinCommandHandler {
+    +Handle(command: AddFeaturePopkinCommand): Task<AdminFeatureDto>
+  }
+  class AdminFeatureDto {
+    +Feature Feature
+    +FeatureMode Mode
+    +int LivePopkins
+    +ChosenPopkinDto[] Chosen
+    +DateTimeOffset? ChangedAt
+    +string? ChangedByName
+  }
+  interface IAdminGuard {
+    +RequireAsync(action: AdminAction): Task<Admin>
+  }
+  interface IAuditLog {
+    +Record(record: AuditRecord): void
+  }
+}
+package "Popkin.Infrastructure" {
+  class PlatformSnapshot {
+    +TimeSpan RefreshAfter = 30 s
+    -PlatformValues values
+    +IsOn(feature, popkinId): bool
+    +RefreshIfStaleAsync(ct): Task
+    +Invalidate(): void
+  }
+  class PlatformValues {
+    +Map<Feature, FeatureMode> Modes
+    +Map<Feature, Set<Guid>> Chosen
+    +DateTimeOffset LoadedAt
+  }
+}
+IFeatureSwitches <|.. PlatformSnapshot
+IPlatformSnapshot <|.. PlatformSnapshot
+PlatformSnapshot *-- PlatformValues
+PlatformSnapshot ..> FeatureSetting : reloads
+PlatformSnapshot ..> FeatureChosenPopkin : reloads
+FeatureSetting --> Feature
+FeatureSetting --> FeatureMode
+FeatureChosenPopkin --> Feature
+ChangeFeatureModeCommandHandler ..> ChangeFeatureModeCommand : handles
+AddFeaturePopkinCommandHandler ..> AddFeaturePopkinCommand : handles
+ChangeFeatureModeCommandHandler --> FeatureSetting : upserts
+AddFeaturePopkinCommandHandler --> FeatureChosenPopkin : adds
+ChangeFeatureModeCommandHandler ..> IAdminGuard
+ChangeFeatureModeCommandHandler ..> IAuditLog
+ChangeFeatureModeCommandHandler ..> IPlatformSnapshot : Invalidate
+ChangeFeatureModeCommandHandler ..> AdminFeatureDto : returns
+AddFeaturePopkinCommandHandler ..> IAdminGuard
+AddFeaturePopkinCommandHandler ..> IAuditLog
+@enduml

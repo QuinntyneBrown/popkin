@@ -1,0 +1,72 @@
+@startuml
+title UML sequence behaviour — Open a Popkin's page
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinPage" as page
+  participant "AdminPopkinStore" as store
+  participant "popkinActions" as actions
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminPopkinQueryHandler" as handler
+  participant "RecapCounts" as counts
+  participant "IFeatureSwitches" as switches
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /popkins/:popkinId
+page -> store : load(popkinId)
+store --> page : state loading: skeletons in the page's shape
+store -> client : get(popkinId)
+client -> ctrl : GET /api/admin/popkins/{popkinId}
+ctrl -> handler : Send GetAdminPopkinQuery
+handler -> db : Read PopkinSpace and active memberships
+alt no Popkin with that id
+  handler --> ctrl : 404 popkin_not_found
+else found
+  handler -> counts : MessagesAsync, PhotosAsync
+  counts -> db : COUNT, no row read (L2-078 AC4)
+  counts --> handler : counts
+  handler -> switches : IsOn(feature, popkinId) per feature
+  switches --> handler : features on
+  handler --> ctrl : AdminPopkinDto, no content field
+end
+ctrl --> client : 200 AdminPopkinDto, or ProblemDetails
+alt 200
+  client --> store : Popkin
+  store -> actions : popkinActions(popkin, me)
+  alt live
+    actions --> store : every action enabled; no Remove for the Host (L2-103 AC2)
+  else ending within 48 h
+    actions --> store : as live; status "2 days left" flagged in words (L2-103 AC3)
+  else wrapped up
+    actions --> store : every action hidden (L2-103 AC4)
+  else keeps going
+    actions --> store : "Give more time" hidden; no end date (L2-103 AC5)
+  end
+  store --> page : state ready
+  page --> actor : Length, Members, Invite and Activity (L2-103 AC1)
+else failure
+  client --> store : error
+  store --> page : state failed
+  page --> actor : "Couldn't load this Popkin" and "Try again" (L2-103 AC7)
+end
+@enduml

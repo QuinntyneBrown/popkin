@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Give a Popkin more time
+
+Container_Boundary(adminApp, "Popkin admin app") {
+  Component(dialog, "PopkinExtendDialog", "CDK dialog", "pk-choice-chips, pk-reason-field, Add {n} days")
+  Component(store, "AdminPopkinStore", "Signal store", "giveMoreTime(days, reason)")
+  Component(client, "HttpAdminPopkinsApi", "ADMIN_POPKINS_API", "Typed HTTP client")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminPopkinsController", "ASP.NET Core controller", "POST {popkinId}/more-time")
+  Component(handler, "AdminExtendPopkinCommandHandler", "MediatR handler", "Reason, days, role, end, audit")
+  Component(guard, "IAdminGuard", "Application service", "RequireAsync(ExtendPopkin)")
+  Component(input, "PopkinInput", "Application rule", "End(): at least an hour, under a year (L2-009 AC3)")
+  Component(changes, "PopkinChanges", "Application helper", "Save under the version, then PopkinChanged")
+  Component(audit, "IAuditLog", "Application abstraction", "Adds the AuditEntry")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "PopkinChanged to popkin:{popkinId}")
+  ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace, AuditEntry")
+}
+Container_Boundary(web, "Popkin web app") {
+  Component(apply, "applySettings", "Pure rule", "Applies PopkinChanged when its version is higher")
+}
+Rel(dialog, store, "Confirms through")
+Rel(store, client, "giveMoreTime(popkinId, days, reason)")
+Rel(client, ctrl, "POST /api/admin/popkins/{popkinId}/more-time", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends AdminExtendPopkinCommand")
+Rel(handler, guard, "RequireAsync")
+Rel(handler, input, "End(UntilDate, newEnd, now)")
+Rel(handler, audit, "Record(ExtendPopkin)")
+Rel(handler, changes, "SaveAsync")
+Rel(changes, db, "SaveChangesAsync", "EF Core")
+Rel(changes, notifier, "PopkinChanged")
+Rel(notifier, apply, "PopkinChanged", "SignalR")
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Moderation view
+
+Person(admin, "Owner or Support admin", "Admin session")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "Popkin page, open dialog, moderation view page")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/popkins/(id)/moderation-views, /api/admin/moderation-views/(id)/**")
+  Container(worker, "Popkin Worker", ".NET worker service", "CloseExpiredModerationViewsJob")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "ModerationView, Message, Photo, Experience, AuditEntry")
+  Container(store, "Photo store", "Azure Blob Storage", "Photo files")
+  Container(spa, "Popkin web app", "Angular SPA", "Members' screens")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Opens, reads, removes, closes", "JSON/HTTPS")
+Rel(api, db, "Reads Everyone, album, experiences; writes view and entries", "EF Core")
+Rel(api, store, "Signs read addresses, deletes removed files")
+Rel(worker, db, "Closes expired views, writes the closed entry", "EF Core")
+Rel(api, spa, "Removal events only", "SignalR")
+@enduml

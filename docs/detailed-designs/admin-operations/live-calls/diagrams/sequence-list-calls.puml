@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — List the calls under way
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "LiveCallsPage" as page
+  participant "LiveCallsStore" as store
+  participant "HttpAdminOperationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminCallsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetLiveCallsQueryHandler" as handler
+  participant "IAdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /calls
+page -> store : load()
+loop now, then every 10 s
+  store -> client : calls()
+  client -> ctrl : GET /api/admin/calls
+  ctrl -> handler : Send GetLiveCallsQuery
+  handler -> guard : CurrentAdminAsync() (any role may view)
+  handler -> db : Group calls with EndedAt null; their Popkin; participants on them; first to join is who started it
+  db --> handler : Rows
+  handler -> handler : Flag a call that has run over CallRules.LongCallAfter (L2-112 AC2)
+  handler --> ctrl : LiveCallsDto (no video, audio or chat)
+  ctrl --> client : 200
+  client --> store : Calls view
+end
+alt calls under way (L2-112 AC1)
+  store --> page : "{n} calls under way, {p} people on them. Updates every 10 seconds." and a row per call
+  page --> actor : Popkin, started by, avatars and count, started, length; "Over 3 hours" in words on a long call
+else no call (L2-112 AC5)
+  store --> page : "No one is on a call"
+end
+opt Viewer admin
+  page --> actor : "End call" disabled, "Viewer admins can't do this" (L2-086)
+end
+@enduml

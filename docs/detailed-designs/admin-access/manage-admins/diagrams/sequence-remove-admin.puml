@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — Remove an admin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+actor "Removed admin" as gone
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "RemoveAdminDialog" as dlg
+  participant "HttpAdminAccessApi" as client
+  participant "Removed admin's console" as theirs
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAdminsController" as ctrl
+  participant "AdminSessionCookieEvents" as events
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RemoveAdminCommandHandler" as handler
+  participant "IAuditLog" as log
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dlg : "Remove" on Hannah Cole's row
+dlg --> actor : "Remove Hannah Cole?", signed out now, past actions stay, "They were a Viewer.", optional reason (L2-119 AC6)
+actor -> dlg : "Remove admin"
+dlg --> actor : "Removing…"
+dlg -> client : removeAdmin(id, reason)
+client -> ctrl : POST /api/admin/admins/(id)/remove
+ctrl -> handler : RemoveAdminCommand
+handler -> handler : RequireAsync(ManageAdmins); not self (L2-119 AC7); not the last Owner (AC8), inside AdminRosterGate
+handler -> db : Admin.Remove(now); every AdminSession of the admin revoked
+handler -> log : Record(RemovedAdmin, Admin, id, name, reason, role Viewer)
+handler -> db : SaveChangesAsync once
+handler --> ctrl : 204
+ctrl --> dlg : 204
+dlg --> actor : Row gone; toast "Hannah Cole removed", "They're signed out of the console. Their past actions stay in the audit log."
+gone -> theirs : Any next action or navigation
+theirs -> events : Request with the revoked admin cookie
+events --> theirs : 401, cookie cleared (L2-078 AC7)
+theirs --> gone : "Sign in to the console"; a new code answers This account isn't an admin
+@enduml

@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — Open the queue
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "ReportsPage" as page
+  participant "ReportsStore" as store
+  participant "HttpAdminReportsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminReportsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetReportQueueQueryHandler" as handler
+  participant "IAdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open Reports (/reports?kind=)
+page -> store : load(kind)
+store --> page : loading, "Loading the reports…"
+store -> client : getQueue(kind)
+client -> ctrl : GET /api/admin/reports?kind=
+ctrl -> ctrl : Admin scheme: 401 no admin session, 403 Popkin app session (L2-078 AC3)
+ctrl -> handler : Send GetReportQueueQuery
+handler -> guard : CurrentAdminAsync() (any role reads, L2-086)
+handler -> db : Open reports grouped by item, counts per kind
+db --> handler : Groups
+handler --> ctrl : ReportQueueDto, most-reported first (L2-109 AC1)
+ctrl --> client : 200
+alt items waiting
+  client --> store : queue
+  store --> page : ready; "{n} waiting, most-reported first", counts per kind (L2-109 AC2)
+  store -> store : select(first item)
+  page --> actor : Queue with the first item opening
+else none waiting (L2-109 AC7)
+  store --> page : empty
+  page --> actor : "Queue is clear", "Nothing to review", "Open the audit log"
+else failure
+  client --> store : error
+  page --> actor : "Couldn't load the reports", "Try again", "Open Health"
+end
+opt admin chooses Messages, Photos or Experiences
+  actor -> page : Choose a kind
+  page -> store : load(kind), query parameter kept
+end
+@enduml

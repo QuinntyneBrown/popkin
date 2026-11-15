@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Settings
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+Person(owner, "Repository owner", "Sets the deployment's settings in infra/main.bicep")
+System(popkin, "Popkin", "Pop-up communities and the Popkin admin app")
+System_Ext(github, "GitHub Actions", "Deploy workflow, every commit to main")
+
+Rel(admin, popkin, "Reads the settings, read-only, in", "Popkin admin app")
+Rel(owner, github, "Commits settings to")
+Rel(github, popkin, "Deploys with its settings and release", "Bicep")
+@enduml

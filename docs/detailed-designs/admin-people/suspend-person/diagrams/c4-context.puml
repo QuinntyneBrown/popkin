@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System context — Suspend a person and lift it
+
+Person(adminp, "Admin", "Owner, Support or Viewer, signed in to the admin app")
+Person(member, "Person", "The suspended person")
+System(popkin, "Popkin", "Platform for pop-up communities, with its admin app")
+System_Ext(acs, "Azure Communication Services", "Sends six-digit codes by email and SMS")
+
+Rel(adminp, popkin, "Suspends a person, or lifts the suspension, with a reason", "HTTPS")
+Rel(member, popkin, "Is signed out; is refused a session while suspended", "HTTPS")
+Rel(popkin, acs, "Sends a code as for anyone", "HTTPS")
+@enduml

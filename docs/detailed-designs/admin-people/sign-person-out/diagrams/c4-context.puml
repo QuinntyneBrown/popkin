@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System context — Sign a person out everywhere
+
+Person(adminp, "Admin", "Owner, Support or Viewer, signed in to the admin app")
+Person(member, "Person", "The person signed out")
+System(popkin, "Popkin", "Platform for pop-up communities, with its admin app")
+
+Rel(adminp, popkin, "Ends every session of a person, with a reason", "HTTPS")
+Rel(member, popkin, "Next request refused; signs in again with a new code", "HTTPS")
+@enduml

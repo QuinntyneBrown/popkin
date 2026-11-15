@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Read Health and check now
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "HealthPage" as page
+  participant "HealthStore" as hstore
+  participant "HttpAdminOverviewApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminHealthController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminHealthQueryHandler" as query
+  participant "CheckHealthNowCommandHandler" as now
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /health
+page -> hstore : load()
+hstore -> client : health()
+client -> ctrl : GET /api/admin/health
+ctrl -> query : Send GetAdminHealthQuery
+query -> db : Latest sample per service; samples of the last 30 London days
+query -> query : Uptime per day and over 30 days
+query --> ctrl : AdminHealthDto
+ctrl --> client : 200
+client --> hstore : Health view
+alt every service Operational (L2-092 AC2)
+  hstore --> page : "All systems normal"
+else a service Degraded or Down (L2-092 AC3)
+  hstore --> page : "{Service} is degraded" or "is down" with what members feel
+end
+page --> actor : "Checked every 30 seconds · last check {time}", four service cards (L2-092 AC1)
+actor -> page : Choose "Check now" (L2-092 AC4)
+page --> actor : Button busy "Checking…"
+hstore -> client : checkNow()
+client -> ctrl : POST /api/admin/health/checks
+ctrl -> now : Send CheckHealthNowCommand
+now -> db : Run the four checks at once; save the samples
+now --> ctrl : AdminHealthDto
+ctrl --> client : 200
+hstore --> page : Fresh results; button idle
+loop every 30 s while open (L2-092 AC5)
+  hstore -> client : health()
+end
+alt the checks fail to load (L2-092 AC6)
+  hstore --> page : "Couldn't reach the health checks" with "Try again"
+end
+@enduml

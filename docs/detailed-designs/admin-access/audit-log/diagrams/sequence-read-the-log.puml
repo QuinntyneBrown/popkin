@@ -1,0 +1,63 @@
+@startuml
+title UML sequence behaviour — Read, search and filter the log
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin (any role)" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AuditPage" as page
+  participant "AuditLogStore" as store
+  participant "HttpAdminAccessApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAuditController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAuditEntriesQueryHandler" as q
+  participant "AuditActionLabels" as labels
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /audit
+page -> store : load()
+store --> page : Skeleton "Loading the audit log…"
+store -> client : audit(search: null, adminId: null)
+client -> ctrl : GET /api/admin/audit
+ctrl -> q : GetAuditEntriesQuery
+q -> db : Newest first by (At, Id), 50 entries, and the total
+q --> ctrl : AuditPageDto
+ctrl --> client : 200
+client --> store : Entries, total, next
+store --> page : Grouped by day ("Today", "Sun 13 Jul"); "Showing 50 of 1,284 actions" (L2-120 AC1, AC3)
+actor -> page : Type "suspended" in "Search actions, people or Popkins"
+page -> store : search("suspended") after 300 ms
+store -> client : audit(search: "suspended")
+client -> ctrl : GET /api/admin/audit?search=suspended
+ctrl -> q : Query
+q -> labels : Matching("suspended") gives SuspendedPerson
+q -> db : AdminName, TargetName or Reason contains the text, or Action in the matches
+q --> store : Matching entries (L2-120 AC2)
+actor -> page : Choose "Aiko Tanaka" in "Admin"
+store -> client : audit(search, adminId)
+alt nothing matches
+  store --> page : "No matching actions", search kept, "Clear filters"
+else matches
+  store --> page : "Showing 3 of 212 actions by Aiko Tanaka"
+end
+actor -> page : Choose "Older actions"
+store -> client : audit(search, adminId, before: next)
+client -> ctrl : GET /api/admin/audit?before=(cursor)
+ctrl --> store : The next page, appended
+@enduml

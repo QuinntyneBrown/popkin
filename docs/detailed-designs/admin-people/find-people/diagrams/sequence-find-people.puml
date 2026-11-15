@@ -1,0 +1,75 @@
+@startuml
+title UML sequence behaviour — Find a person
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PeoplePage" as page
+  participant "PeopleStore" as pstore
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "FindPeopleQueryHandler" as handler
+  participant "IAdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open People
+page -> pstore : load()
+pstore -> client : findPeople(search = "", status = all)
+client -> ctrl : GET /api/admin/people
+ctrl -> handler : Send FindPeopleQuery
+handler -> guard : CurrentAdminAsync() (any role may view, L2-086)
+guard --> handler : Admin
+handler -> db : Count by status; first page by LastSeenAt desc, Id
+db --> handler : Total, counts, rows
+handler --> ctrl : AdminPeoplePageDto
+ctrl --> client : 200 (no query string, no search text in telemetry, L2-093 AC6)
+client --> pstore : Page
+pstore --> page : rows, counts
+page --> actor : "48,210 accounts", rows with status in words (L2-093 AC1)
+actor -> page : Type "hannah@popkin"
+page -> pstore : setSearch(text), after 300 ms of quiet
+pstore -> client : findPeople(search, status)
+client -> ctrl : GET /api/admin/people?search=…
+ctrl -> handler : Send FindPeopleQuery
+handler -> db : Match name, email or phone digits
+db --> handler : No rows
+handler --> ctrl : Items empty
+ctrl --> client : 200
+client --> pstore : Page
+alt No match
+  pstore --> page : state no-results
+  page --> actor : "No one matches “hannah@popkin”", search kept, "Clear search" (L2-093 AC2)
+else Matches
+  pstore --> page : rows
+end
+opt "Load more"
+  page -> pstore : loadMore()
+  pstore -> client : findPeople(search, status, after = next)
+  client -> ctrl : GET /api/admin/people?after=…
+  ctrl --> client : Next page
+  client --> pstore : Rows appended
+end
+opt The request fails
+  client --> pstore : Error
+  pstore --> page : state failed
+  page --> actor : "Couldn’t load people", search kept, "Try again" (L2-093 AC5)
+end
+@enduml

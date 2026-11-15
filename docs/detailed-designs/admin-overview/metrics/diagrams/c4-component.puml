@@ -1,0 +1,25 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Metrics
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "MetricsPage", "Angular page", "pk-segmented-control, pk-headline-figure, pk-trend-chart")
+  Component(store, "MetricsStore", "Signal store", "Range 7 or 14 days")
+  Component(client, "HttpAdminOverviewApi", "ADMIN_OVERVIEW_API", "metrics(days)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(metrics, "PopkinMetrics", "Popkin meter", "popkin.people.active, popkin.popkins.started, popkin.messages.sent; http.server.request.duration")
+  Component(recorder, "DailyFigureRecorder", "Hosted MeterListener", "Sums the instruments per London day, flushes each minute")
+  Component(ctrl, "AdminMetricsController", "ASP.NET Core controller", "GET /api/admin/metrics?days=")
+  Component(handler, "GetAdminMetricsQueryHandler", "MediatR handler", "Four series, totals, average, peak, error-rate target")
+  ComponentDb(db, "Popkin database", "SQL Server", "DailyFigure")
+}
+Rel(page, store, "Reads signals")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "GET", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetAdminMetricsQuery")
+Rel(recorder, metrics, "Listens to")
+Rel(recorder, db, "Upserts DailyFigure", "EF Core")
+Rel(handler, db, "Reads DailyFigure", "EF Core")
+@enduml

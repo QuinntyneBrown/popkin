@@ -1,0 +1,78 @@
+@startuml
+title UML sequence behaviour — Confirm the code
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin or other person" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "SignInPage" as page
+  participant "AdminSignInStore" as store
+  participant "HttpAdminAuthApi" as client
+  participant "AdminSessionStore" as sess
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAuthController" as ctrl
+  participant "AdminSessionCookie" as cookie
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ConfirmAdminCodeCommandHandler" as handler
+  participant "AdminSignInLock" as lock
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Enter six digits (typed, pasted or autofilled)
+page -> store : confirm(code)
+store --> page : "Checking…", field read-only
+store -> client : confirm(verificationId, code)
+client -> ctrl : POST /api/admin/auth/codes/(id)/confirm
+ctrl -> handler : Send ConfirmAdminCodeCommand
+handler -> db : Load VerificationCode (Purpose AdminSignIn) and the lock of its destination
+alt lock.IsLocked(now) (L2-088 AC6)
+  handler --> ctrl : 429 admin_locked, lockedUntil; even a correct code is refused
+else expired or used (L2-004 AC4, L2-005 AC5)
+  handler --> ctrl : 400 code_expired or code_used
+else digits do not match
+  handler -> lock : RecordWrong(now)
+  handler -> db : Save attempt and lock
+  alt third wrong code
+    handler --> ctrl : 429 admin_locked, lockedUntil = now + 15 min
+  else fewer than three
+    handler --> ctrl : 400 code_mismatch, attemptsLeft (L2-088 AC5)
+  end
+else digits match
+  handler -> lock : Reset()
+  handler -> db : Find Admin by email, RemovedAt null
+  alt no admin (L2-078 AC2)
+    handler -> db : Consume code; no AdminSession
+    handler --> ctrl : 403 not_an_admin, same whether or not a Person exists
+  else admin
+    handler -> db : Consume code, Admin.SignedIn(now), add AdminSession (L2-078 AC1)
+    handler --> ctrl : ConfirmAdminCodeResult
+    ctrl -> cookie : SignInAsync: __Host-popkin-admin, Secure, HttpOnly, SameSite=Strict (L2-078 AC5)
+    ctrl --> client : 200 AdminMeDto
+  end
+end
+alt 200
+  client --> store : AdminMeDto
+  store -> sess : set(me)
+  page --> actor : The return address or the dashboard opens (L2-088 AC4)
+else 403 not_an_admin
+  page --> actor : /not-an-admin: "This account isn't an admin", "Go to Popkin", "Try another email"
+else 400 code_mismatch
+  page --> actor : Field cleared, "That code doesn't match. (n) tries left before the console locks for 15 minutes."
+else 429 admin_locked
+  page --> actor : "Too many wrong codes", "Try again at (time), or ask an Owner to check your account." Sign in and Send a new code disabled
+end
+@enduml

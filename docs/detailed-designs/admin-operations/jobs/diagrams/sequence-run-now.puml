@@ -1,0 +1,68 @@
+@startuml
+title UML sequence behaviour — Run a job now
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "JobsPage" as page
+  participant "JobsStore" as store
+  participant "HttpAdminOperationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminJobsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RunJobNowCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+box "Backend — Popkin Worker" #FFF4E5
+  participant "PeriodicJob" as job
+end box
+actor -> page : Open /jobs
+page -> store : load()
+store -> client : jobs()
+client -> ctrl : GET /api/admin/jobs
+ctrl --> client : 200 JobsDto
+store --> page : Four rows; a job that failed on its last run is opened (L2-113 AC1 to AC3)
+actor -> page : "Run now" for a job (L2-113 AC4)
+page -> store : run(job)
+store -> client : runJob(job)
+client -> ctrl : POST /api/admin/jobs/(job)/runs
+ctrl -> handler : Send RunJobNowCommand
+handler -> guard : RequireAsync(RunJob)
+alt Viewer
+  guard --> ctrl : 403 role_not_allowed
+else running already, or a request not yet taken
+  handler --> ctrl : 409 job_running
+else
+  handler -> db : Add JobRunRequest
+  handler -> audit : Record(RunJob, Job, job name, no reason) (L2-113 AC5)
+  handler -> db : One SaveChangesAsync
+  handler --> ctrl : JobRunRequestDto
+  ctrl --> client : 202
+end
+store --> page : Row reads "Running"; "Run now" replaced by "Running"
+job -> db : Takes the request within 5 s; runs the command once
+loop every 5 s while the job is asked or running
+  store -> client : jobs()
+  client -> ctrl : GET /api/admin/jobs
+  ctrl --> client : 200 JobsDto
+end
+store --> page : "OK" or "Failed" with the new last run and its log
+@enduml

@@ -1,0 +1,95 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Moderation view
+
+class ModerationView {
+  +{static} TimeSpan Length = 30 min
+  +Guid Id
+  +Guid AdminId
+  +Guid PopkinId
+  +string Reason
+  +DateTimeOffset OpenedAt
+  +DateTimeOffset ClosesAt
+  +DateTimeOffset? ClosedAt
+  +{static} Open(adminId, popkinId, reason, now): ModerationView
+  +IsOpen(now): bool
+  +Close(at): void
+}
+class ModerationViewAccess {
+  +RequireOpenAsync(viewId): Task<ModerationView>
+}
+class OpenModerationViewCommand {
+  +Guid PopkinId
+  +string Reason
+}
+class RemoveContentInViewCommand {
+  +Guid ViewId
+  +string Kind
+  +Guid ContentId
+  +string Reason
+}
+class CloseModerationViewCommand {
+  +Guid ViewId
+}
+class CloseExpiredModerationViewsCommand
+class GetModerationMessagesQuery {
+  +Guid ViewId
+  +Guid? Before
+}
+class GetModerationAlbumQuery {
+  +Guid ViewId
+}
+class GetModerationExperiencesQuery {
+  +Guid ViewId
+}
+class ModerationViewDto {
+  +Guid Id
+  +PopkinRefDto Popkin
+  +string AdminName
+  +string Reason
+  +DateTimeOffset OpenedAt
+  +DateTimeOffset ClosesAt
+}
+class CloseExpiredModerationViewsJob <<Worker>> {
+  +ExecuteAsync(token): Task
+}
+interface IAdminGuard {
+  +CurrentAdminAsync(): Task<Admin>
+  +RequireAsync(AdminAction): Task<Admin>
+}
+interface IAuditLog {
+  +Record(AuditRecord): void
+}
+class ContentRemover
+class ModerationViewStore <<api library>> {
+  +view: Signal<ModerationViewDto?>
+  +state: Signal<loading|open|closed|failed>
+  +part: Signal<everyone|photos|experiences>
+  +remove(kind, contentId, reason): Promise
+  +close(): Promise
+}
+
+OpenModerationViewCommand ..> ModerationView : opens
+OpenModerationViewCommand ..> IAdminGuard : OpenModerationView
+OpenModerationViewCommand ..> IAuditLog : ModerationViewOpened
+ModerationViewAccess --> ModerationView : IsOpen(now)
+GetModerationMessagesQuery ..> ModerationViewAccess
+GetModerationAlbumQuery ..> ModerationViewAccess
+GetModerationExperiencesQuery ..> ModerationViewAccess
+RemoveContentInViewCommand ..> ModerationViewAccess
+RemoveContentInViewCommand ..> ContentRemover
+RemoveContentInViewCommand ..> IAdminGuard : RemoveContent
+CloseModerationViewCommand ..> IAuditLog : ModerationViewClosed
+CloseExpiredModerationViewsJob ..> CloseExpiredModerationViewsCommand : sends each tick
+CloseExpiredModerationViewsCommand ..> IAuditLog : ModerationViewClosed at ClosesAt
+ModerationViewStore ..> ModerationViewDto
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Start a deletion
+
+Person(adminp, "Admin", "Owner, Support or Viewer")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "PersonPage, StartDeletionDialog")
+  Container(web, "Popkin web app", "Angular SPA", "Members see the wrap-up and the departure")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "StartDeletionCommandHandler, AccountDeletion, PopkinWrapUpService")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Person, memberships, sessions, Popkins, audit entries")
+}
+Rel(adminp, admin, "Starts a deletion", "HTTPS")
+Rel(admin, api, "POST /api/admin/people/{personId}/deletion", "JSON/HTTPS, admin cookie")
+Rel(api, db, "The deletion of L2-049 and the audit entry in one save", "EF Core")
+Rel(api, web, "PopkinWrappedUp, CallEnded, MemberLeft, SessionsEnded", "SignalR")
+@enduml

@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — Record the daily figures
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin API" #D1FADF
+  participant "SessionCookieEvents" as cookie
+  participant "MessagesController" as msgs
+  participant "DailyFigureRecorder" as recorder
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "PopkinMetrics" as metrics
+  participant "SendMessageCommandHandler" as send
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+cookie -> db : Person.LastActiveOn earlier than today's London day?
+alt first request of the day
+  cookie -> db : Set LastActiveOn = today
+  cookie -> metrics : PersonActive() (no dimension, L2-091 AC5)
+end
+msgs -> send : SendMessageCommand
+send -> db : Save the message
+send -> metrics : MessageSent() (no person, Popkin or content)
+metrics --> recorder : MeterListener measurement callback
+recorder -> recorder : Add to the pending total of (London day, figure)
+recorder -> recorder : http.server.request.duration: count ApiRequests; 5xx counts ApiRequestsFailed <TO SUPPLY>
+loop every minute
+  recorder -> db : Upsert DailyFigure(day, figure) += pending
+  db --> recorder : Saved; pending cleared
+end
+@enduml

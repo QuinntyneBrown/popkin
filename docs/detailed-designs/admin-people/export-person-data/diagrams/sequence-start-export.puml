@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Start an export
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin or Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PersonPage" as page
+  participant "ExportPersonDataDialog" as dlg
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "StartDataExportCommandHandler" as handler
+  participant "DataRequest" as req
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Export data"
+page -> dlg : Open
+dlg --> actor : "Export Mara’s data?", reason focused (L2-100 AC1)
+actor -> dlg : Reason, "Start export"
+dlg -> client : startExport(personId, reason)
+client -> ctrl : POST /api/admin/people/{personId}/data-export { reason }
+ctrl -> handler : Send StartDataExportCommand
+handler -> handler : IAdminGuard.RequireAsync(ExportPersonData); ReasonRules
+handler -> db : Person, not erased
+handler -> req : Log(person, Admin, today, adminId, reason); StartExport()
+handler -> audit : Record(DataExportStarted, Person, reason, { dataRequestId }) (L2-100 AC5)
+handler -> db : One SaveChangesAsync
+handler --> ctrl : AdminDataExportDto (Compiling)
+ctrl --> client : 201
+client --> dlg : Export
+dlg --> page : Close
+page --> actor : Their data "building"; toast "Export started", "It appears in Data requests in about 10 minutes." (L2-100 AC2)
+@enduml

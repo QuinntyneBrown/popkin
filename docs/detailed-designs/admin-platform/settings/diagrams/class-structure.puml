@@ -1,0 +1,74 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Settings
+
+package "Popkin.Application" {
+  class DeploymentSettingsCatalog {
+    +DeploymentSetting[] All
+    +DeploymentSetting ReleaseName
+    +DeploymentSetting ReleaseCommit
+    +DeploymentSetting ReleaseDeployedAt
+  }
+  class DeploymentSetting {
+    +string Group
+    +string Name
+    +string Key
+    +bool IsSecret
+    +bool IsList
+  }
+  enum SettingState {
+    Value
+    NotSet
+    SecretSet
+    SecretNotSet
+  }
+  class SettingReading {
+    +SettingState State
+    +string? Value
+  }
+  interface IDeploymentSettings {
+    +Read(setting: DeploymentSetting): SettingReading
+  }
+  class GetAdminSettingsQueryHandler {
+    +Handle(query): Task<AdminSettingsDto>
+  }
+  class AdminSettingsDto {
+    +ReleaseDto Release
+    +SettingGroupDto[] Groups
+  }
+  class SettingGroupDto {
+    +string Name
+    +SettingDto[] Settings
+  }
+  class SettingDto {
+    +string Name
+    +string Key
+    +SettingState State
+    +string? Value
+  }
+}
+package "Popkin.Infrastructure" {
+  class ConfigurationDeploymentSettings {
+    -IConfiguration configuration
+    +Read(setting): SettingReading
+  }
+}
+DeploymentSettingsCatalog *-- DeploymentSetting
+IDeploymentSettings <|.. ConfigurationDeploymentSettings
+ConfigurationDeploymentSettings ..> SettingReading : creates, never with a secret's value
+SettingReading --> SettingState
+GetAdminSettingsQueryHandler ..> DeploymentSettingsCatalog
+GetAdminSettingsQueryHandler ..> IDeploymentSettings
+GetAdminSettingsQueryHandler ..> AdminSettingsDto : returns
+AdminSettingsDto *-- SettingGroupDto
+SettingGroupDto *-- SettingDto
+@enduml

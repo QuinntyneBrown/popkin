@@ -1,0 +1,36 @@
+@startuml
+title UML sequence behaviour — Entries are deleted at 2 years
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Worker" #FFF4E5
+  participant "PurgeOldAuditEntriesJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "PurgeOldAuditEntriesCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "AppDbContext" as ctx
+  database "Popkin database" as db
+end box
+job -> handler : Daily tick: Send PurgeOldAuditEntriesCommand
+handler -> db : Entries with At <= now - 2 years, in batches of 1,000
+loop while a batch is found
+  handler -> ctx : RemoveRange(batch)
+  ctx -> ctx : Allowed: every entry is at least 2 years old (L2-120 AC6)
+  ctx -> db : Delete the batch
+end
+handler --> job : Count deleted (metric, no names)
+note over job : No API endpoint updates or deletes an entry;\nAppDbContext refuses an update always, and a delete younger than 2 years
+@enduml

@@ -1,0 +1,63 @@
+@startuml
+title UML sequence behaviour — The banner comes down
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AnnouncementsPage" as page
+  participant "TakeDownAnnouncementDialog" as dialog
+  participant "AdminAnnouncementsStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAnnouncementsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "TakeDownAnnouncementCommandHandler" as handler
+  participant "GetAdminAnnouncementsQueryHandler" as query
+  participant "Announcement" as entity
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt Taken down by an Owner
+  actor -> page : "Take it down now"
+  page -> dialog : "Take the banner down?" (L2-115 AC6)
+  actor -> dialog : "Take it down"
+  dialog -> store : takeDownAnnouncement(id)
+  store -> controller : POST /api/admin/announcements/{announcementId}/take-down
+  controller -> handler : Send TakeDownAnnouncementCommand
+  handler -> handler : IAdminGuard.RequireAsync(PublishAnnouncement)
+  handler -> db : Load the announcement
+  alt Not live any more
+    handler --> controller : 409 announcement_not_live
+  else Live
+    handler -> entity : TakeDown(admin, now)
+    handler -> audit : Record(TakeDownAnnouncement, Announcement id)
+    handler -> db : SaveChangesAsync
+    handler --> controller : AdminAnnouncementDto
+    controller --> store : 200
+    store --> page : Form empty, banner under "Earlier banners", toast "The banner is down"
+  end
+else The end time passes (L2-115 AC7)
+  page -> controller : GET /api/admin/announcements
+  controller -> query : Send GetAdminAnnouncementsQuery
+  query -> db : Announcements
+  query -> entity : IsLiveAt(now) is false once EndsAt has passed
+  query --> controller : live null; the banner first under earlier
+  controller --> page : 200
+end
+note over db : No job runs; the web app's next 60 s read finds no live banner
+@enduml

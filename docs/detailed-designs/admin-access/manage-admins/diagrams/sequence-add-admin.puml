@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Add an admin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AdminsPage" as page
+  participant "AddAdminDialog" as dlg
+  participant "HttpAdminAccessApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAdminsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddAdminCommandHandler" as handler
+  participant "IAuditLog" as log
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "Email IAdminInviteSender" as email
+end box
+actor -> page : Choose "Add admin" (Owners only; L2-119 AC10)
+page -> dlg : open
+dlg --> actor : "Add an admin", Staff email, Owner / Support / Viewer with their sentences (L2-119 AC2)
+actor -> dlg : Email and role, "Send invite"
+alt not a whole address or not @popkin.app (L2-119 AC3)
+  dlg --> actor : Nothing sent; "Use a @popkin.app address. Only Popkin staff can be admins."
+else valid
+  dlg --> actor : "Sending…", fields disabled
+  dlg -> client : addAdmin(email, role)
+  client -> ctrl : POST /api/admin/admins
+  ctrl -> handler : AddAdminCommand
+  handler -> handler : RequireAsync(ManageAdmins), StaffEmail rules
+  handler -> db : Admin with this email and RemovedAt null?
+  alt already an admin (L2-119 AC3)
+    handler --> ctrl : 400 admin_exists, field email
+    ctrl --> dlg : Field says the address is already an admin's
+  else new, or a removed admin's email
+    handler -> handler : Admin.Invite, or Reinvite of the removed row
+    handler -> log : Record(AddedAdmin, Admin, id, name, null, role)
+    handler -> email : SendAsync(email, invite) before saving
+    alt email not sent
+      handler --> ctrl : 503 invite_not_sent; nothing saved
+      ctrl --> dlg : Alert "We couldn't send the invite." "Nothing changed. Try again."
+    else sent
+      handler -> db : SaveChangesAsync: admin and entry (L2-119 AC11)
+      handler --> ctrl : 201 AdminRowDto (invited)
+      ctrl --> dlg : 201
+      dlg --> page : close(row)
+      page --> actor : Row "Invited · not signed in yet"; toast "Invite sent to (email)" (L2-119 AC4)
+    end
+  end
+end
+@enduml

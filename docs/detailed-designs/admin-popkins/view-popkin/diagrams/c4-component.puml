@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — A Popkin
+
+Container_Boundary(adminApp, "Popkin admin app") {
+  Component(page, "PopkinPage", "Angular page", "Length, Members, Invite, Activity panels")
+  Component(store, "AdminPopkinStore", "Signal store", "The AdminPopkinDto, state and toast")
+  Component(actions, "popkinActions", "Pure rule", "hidden, enabled or disabled with a reason")
+  Component(session, "AdminSessionStore", "Signal store", "AdminMeDto: role and allowed actions")
+  Component(client, "HttpAdminPopkinsApi", "ADMIN_POPKINS_API", "Typed HTTP client")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminPopkinsController", "ASP.NET Core controller", "GET {popkinId}")
+  Component(handler, "GetAdminPopkinQueryHandler", "MediatR handler", "Builds the DTO, no content")
+  Component(guard, "IAdminGuard", "Application service", "The current admin")
+  Component(counts, "RecapCounts", "Application helper", "Counts messages and photos in the database")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "Features on for this Popkin")
+  Component(links, "InviteLinkBuilder", "Application helper", "Invite link from the code")
+  ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace, Membership, Message, Photo")
+}
+Rel(page, store, "Reads the Popkin from")
+Rel(page, actions, "Decides each action with")
+Rel(actions, session, "Reads allowed actions from")
+Rel(store, client, "get(popkinId)")
+Rel(client, ctrl, "GET /api/admin/popkins/{popkinId}", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetAdminPopkinQuery")
+Rel(handler, guard, "CurrentAdminAsync()")
+Rel(handler, counts, "MessagesAsync, PhotosAsync")
+Rel(handler, switches, "IsOn(feature, popkinId)")
+Rel(handler, links, "Build(code)")
+Rel(handler, db, "Reads", "EF Core, AsNoTracking")
+Rel(counts, db, "COUNT only")
+@enduml

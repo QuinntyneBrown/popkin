@@ -1,0 +1,37 @@
+@startuml
+title UML sequence behaviour — The menu drawer under 1024 px
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "App (pk-admin-shell)" as shell
+  participant "Dialog (CDK)" as cdk
+  participant "MenuDialog" as menu
+  participant "Router" as router
+end box
+actor -> shell : Choose "Menu" in the top bar
+shell -> cdk : open(MenuDialog, left drawer, restoreFocus)
+cdk -> menu : Create with sections, current, waiting, me
+menu --> actor : Drawer takes focus; focus stays in it (L2-089 AC2)
+alt choose a section
+  actor -> menu : Choose "Reports"
+  menu -> cdk : close()
+  menu -> router : navigate /reports
+else Escape or backdrop
+  actor -> cdk : Escape or backdrop
+  cdk -> menu : close()
+end
+cdk --> actor : Focus returns to "Menu"
+@enduml

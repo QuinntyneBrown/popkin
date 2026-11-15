@@ -1,0 +1,61 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Start a deletion
+
+class Person {
+  +DateTimeOffset? DeletedAt
+  +Guid? DeletionStartedByAdminId
+  +DateOnly? ErasesOn
+  +MarkDeleted(now, adminId?): void
+}
+class AccountDeletion <<Application service>> {
+  +PrepareAsync(person, adminId?, now): Task<PreparedDeletion>
+  +AnnounceAsync(prepared): Task
+}
+class PreparedDeletion {
+  +List<PopkinSpace> WrappedUp
+  +List<Membership> Left
+  +int SessionsEnded
+}
+class StartDeletionCommand {
+  +Guid PersonId
+  +string Reason
+}
+class StartDeletionCommandHandler {
+  +Handle(command): Task<AdminPersonDto>
+}
+class DeleteAccountCommandHandler {
+  +Handle(command): Task
+}
+class PopkinWrapUpService {
+  +PrepareAsync(popkin, keepPhotos, ct): Task<PreparedWrapUp>
+  +AnnounceAsync(popkin, calls): Task
+}
+class MemberDepartures {
+  +AnnounceAsync(popkinId, membership, ct): Task
+}
+enum AdminAction {
+  StartDeletion
+}
+enum AuditAction {
+  DeletionStarted
+}
+StartDeletionCommandHandler ..> StartDeletionCommand : handles
+StartDeletionCommandHandler ..> AccountDeletion : uses
+DeleteAccountCommandHandler ..> AccountDeletion : uses
+AccountDeletion ..> PopkinWrapUpService
+AccountDeletion ..> MemberDepartures
+AccountDeletion --> Person : MarkDeleted
+AccountDeletion ..> PreparedDeletion : returns
+StartDeletionCommandHandler ..> AdminAction : RequireAsync
+StartDeletionCommandHandler ..> AuditAction : Record
+@enduml

@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — The author's notice
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Author" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "App root" as root
+  participant "NoticesStore" as store
+  participant "ContentRemovedDialog" as dlg
+  participant "HttpNoticesApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AccountController" as ctrl
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetNoticesQueryHandler / MarkNoticeSeenCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt a screen is open
+  hub -> store : NoticeAdded
+else no screen open
+  actor -> root : Signs in or opens the app later
+end
+store -> client : getNotices()
+client -> ctrl : GET /api/account/notices
+ctrl -> handler : GetNoticesQuery (current person only)
+handler -> db : Unseen ContentRemovalNotice rows
+handler --> ctrl : ContentRemovalNoticeDto[]
+ctrl --> client : 200
+client --> store : notices
+store --> root : oldest unseen
+root -> dlg : Open
+dlg --> actor : Which item in which Popkin was removed, and the reason (L2-110 AC2)
+actor -> dlg : "Got it"
+dlg -> client : markSeen(noticeId)
+client -> ctrl : POST /api/account/notices/(id)/seen
+ctrl -> handler : MarkNoticeSeenCommand
+handler -> db : SeenAt set (404 notice_not_found for another person's)
+ctrl --> client : 204
+opt reconnected
+  store -> client : getNotices() again (recovery read)
+end
+@enduml

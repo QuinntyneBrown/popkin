@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Suspend a person and lift it
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "PersonPage", "Angular page", "Access panel: Suspend or Lift suspension")
+  Component(dlg, "SuspendPersonDialog / LiftSuspensionDialog", "CDK dialogs", "pk-reason-field, ActionDialogState")
+  Component(client, "HttpAdminPeopleApi", "ADMIN_PEOPLE_API", "suspend, liftSuspension")
+}
+Container_Boundary(apic, "Popkin API") {
+  Component(ctrl, "AdminPeopleController", "Admin scheme", "POST suspend, lift-suspension")
+  Component(suspend, "SuspendPersonCommandHandler", "MediatR handler", "Suspend, revoke every session, audit")
+  Component(lift, "LiftSuspensionCommandHandler", "MediatR handler", "Lift, audit")
+  Component(guard, "IAdminGuard", "Application service", "RequireAsync(SuspendPerson)")
+  Component(reason, "ReasonRules", "Application", "1 to 500 characters")
+  Component(audit, "IAuditLog", "Application", "Record(AuditRecord)")
+  Component(notifier, "IPopkinNotifier", "Application", "SessionsEndedAsync(personId)")
+  Component(confirm, "ConfirmCodeCommandHandler", "MediatR handler", "403 account_suspended")
+  ComponentDb(db, "Popkin database", "SQL Server", "People, Sessions, AuditEntries")
+}
+Rel(page, dlg, "Opens")
+Rel(dlg, client, "Calls")
+Rel(client, ctrl, "POST", "JSON/HTTPS")
+Rel(ctrl, suspend, "Sends SuspendPersonCommand")
+Rel(ctrl, lift, "Sends LiftSuspensionCommand")
+Rel(suspend, guard, "Requires")
+Rel(suspend, reason, "Validates")
+Rel(suspend, audit, "Records")
+Rel(suspend, notifier, "After the save")
+Rel(suspend, db, "One SaveChangesAsync", "EF Core")
+Rel(lift, db, "One SaveChangesAsync", "EF Core")
+Rel(confirm, db, "Reads Person.SuspendedAt", "EF Core")
+@enduml

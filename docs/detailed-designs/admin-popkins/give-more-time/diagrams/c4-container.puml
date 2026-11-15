@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Give a Popkin more time
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+Person(member, "Member", "Person who belongs to a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(adminApp, "Popkin admin app", "Angular", "frontend/projects/admin at admin.popkin.community")
+  Container(webApp, "Popkin web app", "Angular", "frontend/projects/popkin")
+  Container(api, "Popkin API", "ASP.NET Core", "/api/admin/** controllers, /api controllers and PopkinHub")
+  Container(worker, "Popkin Worker", ".NET worker", "Wraps up the Popkins whose time is up; sends no hub events")
+  ContainerDb(db, "Popkin database", "SQL Server", "Popkins, memberships and audit entries")
+}
+Rel(admin, adminApp, "Uses", "HTTPS")
+Rel(member, webApp, "Uses", "HTTPS")
+Rel(adminApp, api, "POST /api/admin/popkins/{popkinId}/more-time", "JSON/HTTPS, admin session cookie")
+Rel(api, db, "Saves the new end and the audit entry", "EF Core")
+Rel(api, webApp, "PopkinChanged with its version", "SignalR, PopkinHub")
+Rel(worker, db, "Reads EndsAt at each run of WrapUpDuePopkinsJob", "EF Core")
+@enduml

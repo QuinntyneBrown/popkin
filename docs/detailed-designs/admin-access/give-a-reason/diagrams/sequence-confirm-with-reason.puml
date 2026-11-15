@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Confirm a change with a reason
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "SuspendPersonDialog" as dlg
+  participant "pk-reason-field" as field
+  participant "ActionDialogState" as state
+  participant "HttpAdminPeopleApi" as client
+  participant "Toaster" as toaster
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Admin controller" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Write handler" as handler
+  participant "ReasonRules" as rules
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dlg : Choose "Suspend" on the person's page
+dlg --> actor : Focus in "Reason, for the audit log", "Other admins see it in the audit log." (L2-087 AC1)
+actor -> field : Type a reason; no more than 500 characters accepted (L2-087 AC6)
+actor -> dlg : Choose "Suspend"
+dlg -> state : confirm(reason => api.suspend(id, reason))
+alt reason empty or only spaces (L2-087 AC2)
+  state --> field : reasonError "Give a reason; it goes in the audit log."
+  field --> actor : Field invalid, focus on it; nothing sent
+else reason given
+  state --> dlg : busy: action disabled and busy, reason read-only, Cancel disabled (L2-087 AC4)
+  state -> client : suspend(id, reason.trim())
+  client -> ctrl : POST with (reason)
+  ctrl -> handler : Command
+  handler -> handler : IAdminGuard.RequireAsync(SuspendPerson)
+  handler -> rules : Required(reason)
+  rules --> handler : trimmed reason, 1 to 500 characters
+  handler -> handler : Load target, apply the change
+  handler -> audit : Record(SuspendedPerson, Person, id, name, reason, details)
+  handler -> db : SaveChangesAsync: change and entry together
+  handler --> ctrl : Result
+  ctrl --> client : 200
+  client --> state : Done
+  state --> dlg : close(result)
+  dlg -> toaster : Confirm the change (L2-087 AC7)
+  toaster --> actor : Message; the audit log holds the reason with the change
+end
+@enduml

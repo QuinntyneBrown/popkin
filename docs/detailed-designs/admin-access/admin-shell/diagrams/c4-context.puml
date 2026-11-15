@@ -1,0 +1,9 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — The admin shell
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+System(popkin, "Popkin", "The console at admin.popkin.community and the Popkin API")
+Rel(admin, popkin, "Moves between the console's sections on any screen size")
+@enduml

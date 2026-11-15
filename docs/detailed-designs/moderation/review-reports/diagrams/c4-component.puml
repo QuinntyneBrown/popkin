@@ -1,0 +1,37 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Reports
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "ReportsPage", "Page", "/reports, kind filter, list and detail")
+  Component(comps, "pk-report-list, pk-report-item, pk-report-detail, pk-evidence", "components library", "Report review")
+  Component(rstore, "ReportsStore", "Signal store, api library", "Queue, filter, open item")
+  Component(session, "AdminSessionStore", "Signal store, api library", "allowed actions of the role")
+  Component(client, "AdminReportsApi / HttpAdminReportsApi", "Contract + HTTP client", "ADMIN_REPORTS_API")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminReportsController", "Controller, admin scheme", "GET queue, GET report")
+  Component(qh, "GetReportQueueQueryHandler", "MediatR handler", "Groups open reports by item")
+  Component(dh, "GetReportQueryHandler", "MediatR handler", "Item, context, reporters, history")
+  Component(ctx, "ReportContext", "Application service", "Five either side, same thread only")
+  Component(guard, "IAdminGuard", "Abstraction", "Current admin")
+  Component(audit, "IAuditLog", "Abstraction", "ReportRead entry")
+  Component(photos, "IPhotoStore", "Abstraction", "GetReadUrl")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(page, comps, "Composes")
+Rel(page, rstore, "Reads state")
+Rel(page, session, "Disables decisions by role")
+Rel(rstore, client, "getQueue(), getReport()")
+Rel(client, ctrl, "HTTPS")
+Rel(ctrl, qh, "GetReportQueueQuery")
+Rel(ctrl, dh, "GetReportQuery")
+Rel(qh, guard, "CurrentAdminAsync")
+Rel(dh, guard, "CurrentAdminAsync")
+Rel(dh, ctx, "Reads context")
+Rel(dh, audit, "Record(ReportRead)")
+Rel(dh, photos, "Image address")
+Rel(qh, db, "Reads")
+Rel(dh, db, "Reads, saves the entry")
+@enduml

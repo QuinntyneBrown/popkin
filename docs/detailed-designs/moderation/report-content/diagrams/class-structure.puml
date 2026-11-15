@@ -1,0 +1,98 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Report content
+
+enum ReportedContentKind {
+  Message
+  Photo
+  Experience
+}
+enum ReportReason {
+  Harassment
+  Spam
+  ChildFaceWithoutConsent
+  PrivateInformation
+  Inappropriate
+}
+enum ReportOutcome {
+  Removed
+  Dismissed
+}
+class Report {
+  +Guid Id
+  +Guid PopkinId
+  +ReportedContentKind ContentKind
+  +Guid ContentId
+  +Guid? ThreadId
+  +Guid AuthorMembershipId
+  +Guid AuthorPersonId
+  +Guid ReporterMembershipId
+  +Guid ReporterPersonId
+  +ReportReason Reason
+  +DateTimeOffset ReportedAt
+  +DateTimeOffset? ClosedAt
+  +ReportOutcome? Outcome
+  +Guid? ClosedByAdminId
+  +{static} File(...): Report
+  +Close(outcome, adminId, now): void
+}
+class FileReportCommand {
+  +Guid PopkinId
+  +string Kind
+  +Guid ContentId
+  +string Reason
+}
+class FileReportCommandHandler {
+  +Handle(command): Task<ReportReceipt>
+}
+class ReportableContent {
+  +RequireAsync(db, membership, kind, contentId): Task<ReportTarget>
+}
+class ReportTarget {
+  +ReportedContentKind Kind
+  +Guid ContentId
+  +Guid? ThreadId
+  +Membership Author
+}
+class ReportReceiptDto {
+  +string Kind
+  +Guid ContentId
+  +DateTimeOffset ReportedAt
+}
+class ReportReasons {
+  +{static} Parse(code): ReportReason
+  +{static} Code(reason): string
+}
+class "MessageDto / PhotoDetailDto / ExperienceDetailDto" as Reads {
+  +bool ReportedByMe
+}
+class ReportDraft <<api library>> {
+  +reason: Signal<string?>
+  +state: Signal<idle|busy|failed>
+  +send(): Promise<ReportReceipt>
+}
+class ReportDialog <<Popkin web app>> {
+  +data: ReportData
+}
+
+Report --> ReportedContentKind
+Report --> ReportReason
+Report --> ReportOutcome
+FileReportCommandHandler ..> FileReportCommand : handles
+FileReportCommandHandler ..> ReportableContent : resolves item
+ReportableContent ..> ReportTarget : returns
+FileReportCommandHandler --> Report : adds
+FileReportCommandHandler ..> ReportReasons : parses reason
+FileReportCommandHandler ..> ReportReceiptDto : returns
+ReportDialog --> ReportDraft : runs
+Reads ..> Report : ReportedByMe from
+@enduml

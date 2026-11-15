@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — The view closes
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "ModerationViewPage" as page
+  participant "ModerationViewStore" as store
+  participant "HttpAdminModerationApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminModerationController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ModerationViewAccess" as access
+  participant "CloseModerationViewCommandHandler" as close
+  participant "CloseExpiredModerationViewsCommandHandler" as expire
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Worker" #FFF4E5
+  participant "CloseExpiredModerationViewsJob" as job
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt the admin closes it
+  actor -> page : "Close the view"
+  page -> client : close(viewId)
+  client -> ctrl : POST /api/admin/moderation-views/(id)/close
+  ctrl -> close : Send CloseModerationViewCommand
+  close -> db : view.Close(now)
+  close -> audit : Record(ModerationViewClosed, closedBy admin) (L2-111 AC6)
+  close -> db : One SaveChangesAsync
+  ctrl --> client : 204
+  store --> page : closed
+else 30 minutes pass (L2-111 AC4)
+  store -> store : Timer reaches closesAt
+  store --> page : closed; content cleared from the screen
+  page --> actor : The view closed; open it again with a reason
+  opt a request arrives after closesAt
+    client -> ctrl : GET or POST to the view
+    ctrl -> access : RequireOpenAsync(viewId)
+    access --> ctrl : 403 moderation_view_closed
+    ctrl --> client : 403
+  end
+  job -> expire : Each tick, CloseExpiredModerationViewsCommand
+  expire -> db : Views with ClosedAt null and ClosesAt passed
+  expire -> db : view.Close(ClosesAt)
+  expire -> audit : Record(ModerationViewClosed at ClosesAt, closedBy time) (L2-111 AC6)
+  expire -> db : One SaveChangesAsync; no hub event (ADR 0015)
+end
+@enduml

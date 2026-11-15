@@ -1,0 +1,45 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Moderation view
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(ppage, "PopkinPage", "Page", "Open moderation view, disabled for a Viewer")
+  Component(odlg, "OpenModerationViewDialog", "CDK dialog", "pk-reason-field, ActionDialogState")
+  Component(vpage, "ModerationViewPage", "Page", "Banner, Everyone, Photos, Experiences, read-only")
+  Component(vstore, "ModerationViewStore", "Signal store", "Parts, paging, countdown to closesAt")
+  Component(client, "AdminModerationApi / HttpAdminModerationApi", "Contract + HTTP client", "ADMIN_MODERATION_API")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminModerationController", "Controller, admin scheme", "Open, read, remove, close")
+  Component(open, "OpenModerationViewCommandHandler", "MediatR handler", "OpenModerationView, reason")
+  Component(reads, "GetModerationMessages / Album / Experiences handlers", "MediatR handlers", "Everyone, album, experiences only")
+  Component(remove, "RemoveContentInViewCommandHandler", "MediatR handler", "RemoveContent")
+  Component(close, "CloseModerationViewCommandHandler", "MediatR handler", "Admin's close")
+  Component(access, "ModerationViewAccess", "Application service", "404 other admin, 403 moderation_view_closed")
+  Component(remover, "ContentRemover", "Application service", "Shared removal")
+  Component(audit, "IAuditLog", "Abstraction", "Opened, closed, removed")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "CloseExpiredModerationViewsJob", "Job loop", "Sends CloseExpiredModerationViewsCommand")
+}
+Rel(ppage, odlg, "Opens")
+Rel(odlg, client, "open(reason)")
+Rel(vpage, vstore, "Reads state")
+Rel(vstore, client, "messages, photos, experiences, remove, close")
+Rel(client, ctrl, "HTTPS")
+Rel(ctrl, open, "OpenModerationViewCommand")
+Rel(ctrl, reads, "Queries")
+Rel(ctrl, remove, "RemoveContentInViewCommand")
+Rel(ctrl, close, "CloseModerationViewCommand")
+Rel(reads, access, "RequireOpenAsync")
+Rel(remove, access, "RequireOpenAsync")
+Rel(remove, remover, "Removes")
+Rel(open, audit, "ModerationViewOpened")
+Rel(close, audit, "ModerationViewClosed")
+Rel(remove, audit, "ContentRemoved")
+Rel(open, db, "Saves")
+Rel(reads, db, "Reads")
+Rel(job, db, "Closes expired views via its handler")
+@enduml

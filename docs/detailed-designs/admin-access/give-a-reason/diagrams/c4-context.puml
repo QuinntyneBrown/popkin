@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — A reason for every change
+
+Person(admin, "Admin", "Owner or Support admin making a change")
+Person(other, "Other admins", "Read the reason in the audit log")
+System(popkin, "Popkin", "The console and the Popkin API")
+Rel(admin, popkin, "Confirms a change with a reason")
+Rel(other, popkin, "Reads who changed what and why")
+@enduml

@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Open a person
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PersonPage" as page
+  participant "PersonStore" as pstore
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminPersonQueryHandler" as handler
+  participant "IAdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose a person in People (L2-093 AC4)
+page -> pstore : load(personId)
+pstore -> client : person(personId)
+client -> ctrl : GET /api/admin/people/{personId}
+ctrl -> handler : Send GetAdminPersonQuery
+handler -> guard : CurrentAdminAsync()
+guard --> handler : Admin
+handler -> db : Person, live sessions, memberships not left with their Popkins
+db --> handler : Rows (no message, photo or experience is read, L2-094 AC5)
+alt Unknown or erased account
+  handler --> ctrl : 404 person_not_found (L2-094 AC8)
+  ctrl --> client : 404 ProblemDetails
+  client --> pstore : Not found
+  pstore --> page : state not-found
+  page --> actor : The admin app's not-found page
+else Found
+  handler --> ctrl : AdminPersonDto
+  ctrl --> client : 200 (contact details and addresses in no log, metric or span, L2-094 AC6)
+  client --> pstore : Person
+  pstore --> page : Person, and the actions its status and the role allow
+  page --> actor : Account, Popkins, Sessions, Access, Their data, Delete account (L2-094 AC1, AC2)
+end
+opt The request fails
+  client --> pstore : Error
+  pstore --> page : state failed
+  page --> actor : "Couldn’t load this person", "Try again", back to People (L2-094 AC7)
+end
+@enduml

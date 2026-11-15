@@ -1,0 +1,79 @@
+@startuml
+title UML sequence behaviour — End a call
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "EndCallDialog" as dlg
+  participant "LiveCallsStore" as store
+  participant "HttpAdminOperationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminCallsController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "EndCallByPopkinCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "Call" as call
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+box "Frontend — Popkin web app" #E0F2FE
+  participant "CallSession" as session
+end box
+actor -> dlg : "End call in {Popkin}"
+dlg --> actor : "End the call in {Popkin}?", all {n} people disconnected, focus in the reason (L2-112 AC3, L2-087 AC1)
+actor -> dlg : "End call"
+alt reason empty or only spaces (L2-087 AC2)
+  dlg --> actor : "Give a reason; it goes in the audit log." Nothing sent
+else reason given
+  dlg --> actor : "End call" busy, reason read-only (L2-087 AC4)
+  dlg -> client : endCall(callId, reason)
+  client -> ctrl : POST /api/admin/calls/(callId)/end { reason }
+  ctrl -> handler : Send EndCallByPopkinCommand
+  handler -> guard : RequireAsync(EndCall)
+  alt Viewer
+    guard --> ctrl : 403 role_not_allowed
+  else Owner or Support
+    handler -> handler : ReasonRules (400 reason_required, reason_too_long)
+    handler -> db : Load the call and the participants on it
+    alt call ended already
+      handler --> ctrl : 409 call_ended
+    else under way
+      handler -> call : End(on, now, EndedByPopkin)
+      handler -> audit : Record(EndCall, Call, Popkin name, reason, { people: n }) (L2-112 AC6)
+      handler -> db : One SaveChangesAsync: the end and its entry (L2-120 AC5)
+      handler -> notifier : CallEnded(audience, callId, threadId, EndedByPopkin)
+      notifier -> session : CallEnded to popkin:(popkinId)
+      session --> session : Close peer links; "This call was ended by Popkin" (L2-112 AC4)
+      handler --> ctrl : CallEndedByPopkinDto(name, n)
+      ctrl --> client : 200
+    end
+  end
+end
+alt 200
+  client --> dlg : Ended
+  dlg -> store : refresh(); the call leaves the list
+  dlg --> actor : Toast "Call ended in {Popkin}", "All {n} people were disconnected. They can start a new call."
+else 409 call_ended
+  dlg -> store : refresh()
+  dlg --> actor : Closes; the call is no longer listed
+else any other failure (L2-087 AC5)
+  dlg --> actor : "That didn't go through", "Nothing changed: the call is still running.", reason kept
+end
+@enduml

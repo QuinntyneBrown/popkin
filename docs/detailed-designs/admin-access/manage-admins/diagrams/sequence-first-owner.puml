@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — The first Owner is named by configuration
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "Deployment settings" as cfg
+box "Backend — Popkin API" #D1FADF
+  participant "AdminBootstrapper" as boot
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "EnsureFirstOwnerCommandHandler" as handler
+  participant "IAuditLog" as log
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+boot -> cfg : Read Admin:FirstOwner at API start
+alt not set
+  boot -> boot : Nothing to do; log that no first Owner is configured (no email in the log)
+else set
+  boot -> handler : EnsureFirstOwnerCommand(email)
+  handler -> db : Admin with this email and RemovedAt null?
+  alt already an admin
+    handler --> boot : Nothing changes, whatever the role
+  else not an admin (L2-119 AC9, L2-078 AC1)
+    handler -> handler : Admin.Invite(email, name, Owner, by null), or Reinvite of a removed row
+    handler -> log : Record(AddedAdmin) written by "Popkin", AdminId null
+    handler -> db : SaveChangesAsync
+    handler --> boot : Added
+  end
+end
+note over cfg : Changing the setting needs no release: the next start reads it
+@enduml

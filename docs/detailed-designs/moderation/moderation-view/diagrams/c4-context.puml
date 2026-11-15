@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Moderation view
+
+Person(admin, "Owner or Support admin", "Opens one Popkin's shared content for a reason")
+Person(member, "Member", "Is not told; sees a removal like any other")
+System(popkin, "Popkin", "Popkin app, admin app, Popkin API and Worker")
+Rel(admin, popkin, "Opens a read-only view for 30 minutes, removes an item")
+Rel(popkin, member, "Shows a removal without a reload")
+@enduml

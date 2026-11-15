@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — A person
+
+Person(adminp, "Admin", "Owner, Support or Viewer")
+Person(member, "Person", "Has a Popkin account")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "PersonPage, PersonStore, HttpAdminPeopleApi")
+  Container(web, "Popkin web app", "Angular SPA", "Signs in and makes requests")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "AdminPeopleController, GetAdminPersonQueryHandler, session activity")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "People, sessions, memberships, Popkins")
+}
+Rel(adminp, admin, "Opens a person", "HTTPS")
+Rel(admin, api, "GET /api/admin/people/{personId}", "JSON/HTTPS, admin cookie")
+Rel(member, web, "Uses Popkin", "HTTPS")
+Rel(web, api, "Signs in; every request", "JSON/HTTPS, session cookie")
+Rel(api, db, "Records session details; reads the person", "EF Core")
+@enduml

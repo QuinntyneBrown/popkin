@@ -1,0 +1,67 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Reset the invite
+
+class AdminResetInviteCommand {
+  +Guid PopkinId
+  +string? Reason
+}
+
+class AdminResetInviteCommandHandler {
+  +MaxDraws: int = <TO SUPPLY>
+  +Handle(command: AdminResetInviteCommand): Task<AdminPopkinDto>
+}
+
+interface IInviteCodeGenerator {
+  +NewCode(): string
+}
+
+class RandomInviteCodeGenerator {
+  -Alphabet: string
+  +NewCode(): string
+}
+
+class PopkinSpace {
+  +string InviteCode
+  +PopkinStatus Status
+  +long Version
+  +ResetInvite(newCode: string): void
+}
+
+class InviteLinkBuilder {
+  +Build(code: string): string
+}
+
+interface IAuditLog {
+  +Record(record: AuditRecord): void
+}
+
+class AuditRecord {
+  +AuditAction Action = ResetInvite
+  +AuditTargetKind TargetKind = Popkin
+  +string? Reason
+  +object Details = oldCode, newCode
+}
+
+class InviteProblems <<static>> {
+  +NotFound(): ProblemException
+}
+
+AdminResetInviteCommandHandler ..> AdminResetInviteCommand : handles
+AdminResetInviteCommandHandler ..> IInviteCodeGenerator : draws
+RandomInviteCodeGenerator ..|> IInviteCodeGenerator
+AdminResetInviteCommandHandler --> PopkinSpace : ResetInvite(newCode)
+AdminResetInviteCommandHandler ..> InviteLinkBuilder : builds the new link
+AdminResetInviteCommandHandler ..> IAuditLog : records
+IAuditLog ..> AuditRecord
+note right of InviteProblems : The old code matches no Popkin:\npreview and join answer 404 invite_not_found
+@enduml
