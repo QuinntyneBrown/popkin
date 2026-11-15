@@ -1,0 +1,9 @@
+<p class="report-detail__where">
+  <span pk-status>{{ kind() }}</span>
+  <span
+    >in <a [routerLink]="popkinLink()">{{ popkin() }}</a></span
+  >
+  <span class="report-detail__when">· {{ when() }}</span>
+</p>
+<h2 class="report-detail__title" [id]="headingId()">{{ reason() }}</h2>
+<div class="report-detail__body"><ng-content /></div>

@@ -1,0 +1,42 @@
+:host {
+  position: relative;
+  display: block;
+}
+
+.icon {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--color-fg-subtle);
+  pointer-events: none;
+}
+
+/* The design system's .input.input--pill, quiet until focused. */
+.input {
+  display: block;
+  width: 100%;
+  height: var(--control-height-md);
+  padding: 0 var(--space-4) 0 var(--space-12);
+  border: var(--border-width-thick) solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+  font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+  transition:
+    border-color var(--duration-fast) var(--ease-pop),
+    box-shadow var(--duration-fast) var(--ease-pop);
+}
+
+.input::placeholder {
+  color: var(--color-fg-subtle);
+  opacity: 1;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-focus);
+}

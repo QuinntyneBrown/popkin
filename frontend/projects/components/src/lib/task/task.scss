@@ -1,0 +1,154 @@
+:host {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: var(--space-18);
+  padding-block: var(--space-3);
+}
+
+:host(.task--card) {
+  min-height: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+}
+
+:host(.task--outline) {
+  align-items: center;
+  min-height: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+}
+
+.task__check {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--target-comfortable);
+  height: var(--target-comfortable);
+  margin: calc(-1 * var(--space-2));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.task__box {
+  display: grid;
+  place-items: center;
+  width: var(--space-7);
+  height: var(--space-7);
+  border: var(--border-width-thick) solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+}
+
+/* The tick shows only when done (the design system's .task__box .icon). */
+.task__tick {
+  display: none;
+  width: var(--space-4);
+  height: var(--space-4);
+  stroke-width: 3;
+}
+
+.task__check:hover .task__box {
+  border-color: var(--color-fg-muted);
+}
+
+.task__check[aria-pressed='true'] .task__box {
+  border-color: var(--color-success-solid);
+  background: var(--color-success-solid);
+  color: var(--color-fg-on-success);
+}
+
+.task__check[aria-pressed='true'] .task__tick {
+  display: block;
+}
+
+.task__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-7);
+  height: var(--space-7);
+  border-radius: var(--radius-full);
+  background: var(--accent-tint);
+  color: var(--accent-text);
+}
+
+.task__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.task__text {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug)
+    var(--font-family-sans);
+}
+
+.task__text a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.task__text a:hover {
+  color: inherit;
+  text-decoration: underline;
+}
+
+:host(.task--card) .task__text,
+:host(.task--outline) .task__text {
+  font-size: var(--font-size-md-minus);
+}
+
+.task__check[aria-pressed='true'] + .task__main .task__text {
+  color: var(--color-fg-subtle);
+  text-decoration: line-through;
+}
+
+.task__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.task__who {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  min-height: var(--space-8);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-default);
+  text-decoration: none;
+}
+
+.task__who:hover {
+  color: var(--color-fg-default);
+  text-decoration: underline;
+}
+
+/* The note and its icon, as the mocks' cluster with a --space-1 gap. */
+.task__note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.task__due {
+  flex: none;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+  white-space: nowrap;
+}
+
+.task__due--late {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-accent);
+}

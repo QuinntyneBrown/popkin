@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--color-fg-default);
+}
+
+:host(.trend--bad) {
+  color: var(--color-danger-fg);
+}
+
+.trend__grid {
+  stroke: var(--color-border-default);
+  stroke-dasharray: 3 5;
+}
+
+.trend__axis {
+  stroke: var(--color-border-default);
+}
+
+.trend__area {
+  fill: currentColor;
+  opacity: 0.08;
+}
+
+.trend__line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.trend__dot {
+  fill: var(--color-bg-surface);
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+.trend__label {
+  fill: var(--color-fg-subtle);
+  font: var(--font-weight-regular) var(--font-size-2xs) / 1 var(--font-family-sans);
+}

@@ -1,0 +1,19 @@
+@for (figure of figures(); track figure.value; let i = $index) {
+  <button
+    #tab
+    class="figure-tab"
+    type="button"
+    role="tab"
+    [attr.aria-selected]="figure.value === value()"
+    [attr.aria-controls]="controls()"
+    [tabIndex]="figure.value === value() ? 0 : -1"
+    (click)="value.set(figure.value)"
+    (keydown)="move($event, i)"
+  >
+    <span class="figure-tab__label">{{ figure.label }}</span>
+    <span class="figure-tab__value">{{ figure.figure }}</span>
+    @if (figure.delta) {
+      <span class="figure-tab__delta">{{ figure.delta }}</span>
+    }
+  </button>
+}

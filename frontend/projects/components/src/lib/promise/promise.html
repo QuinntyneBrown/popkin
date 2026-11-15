@@ -1,0 +1,15 @@
+<div class="promise__main">
+  <p class="row__title">{{ text() }}</p>
+  @if (when()) {
+    <p class="promise__when"><svg pk-icon name="bell" size="sm"></svg>{{ when() }}</p>
+  }
+</div>
+<button
+  pk-icon-button
+  type="button"
+  icon="close"
+  size="md"
+  label="Remove this promise"
+  title="Remove this promise"
+  (click)="removed.emit()"
+></button>

@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  padding: var(--space-5);
+}
+
+.report-detail__where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.report-detail__where a {
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+}
+
+.report-detail__where a:hover {
+  text-decoration: underline;
+}
+
+.report-detail__when {
+  color: var(--color-fg-subtle);
+}
+
+.report-detail__title {
+  margin-top: var(--space-3);
+  font: var(--text-h2);
+}
+
+/* The evidence and the key values each sit --space-5 under what comes before. */
+.report-detail__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}

@@ -54,6 +54,16 @@
   color: var(--color-danger-icon);
 }
 
+/* A loud announcement, such as an outage (docs/design-system/components/announcement-preview.html). */
+:host(.banner--loud) {
+  background: var(--color-warning-loud);
+  color: var(--color-constant-dark);
+}
+
+:host(.banner--loud) .banner__icon {
+  color: inherit;
+}
+
 .banner__text {
   flex: 1;
   min-width: 0;

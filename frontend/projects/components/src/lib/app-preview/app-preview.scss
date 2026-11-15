@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  overflow: hidden;
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-canvas);
+  box-shadow: var(--shadow-1);
+}
+
+.app-preview__head {
+  padding: var(--space-4) var(--space-5) var(--space-3);
+}
+
+.app-preview__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-5) var(--space-6);
+}
+
+.app-preview__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.app-preview__tile {
+  width: var(--space-12);
+  height: var(--space-12);
+  flex: none;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.app-preview__lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* A title line two thirds wide over a line a third wide, as the home's rows. */
+.app-preview__line {
+  width: 66%;
+  height: var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+}
+
+.app-preview__line + .app-preview__line {
+  width: 33%;
+}

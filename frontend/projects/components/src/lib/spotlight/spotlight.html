@@ -1,0 +1,39 @@
+@if (when() && !row()) {
+  <p class="spotlight__when" [class.spotlight__when--late]="late()">
+    <svg pk-icon size="md" [name]="whenIcon()"></svg>{{ when() }}
+  </p>
+}
+<div class="spotlight__id">
+  <ng-content select="[slot=avatar]" />
+  <div class="spotlight__text">
+    @if (when() && row()) {
+      <p class="spotlight__when" [class.spotlight__when--late]="late()">{{ when() }}</p>
+    }
+    <h2 class="spotlight__title" [id]="headingId()">{{ heading() }}</h2>
+    @if (sub()) {
+      <p class="spotlight__sub">{{ sub() }}</p>
+    }
+  </div>
+  @if (row() && actions()) {
+    <div class="spotlight__actions"><ng-container [ngTemplateOutlet]="actionSlot" /></div>
+  }
+</div>
+<ng-template #actionSlot><ng-content select="[slot=actions]" /></ng-template>
+@if (facts().length) {
+  <div class="spotlight__facts">
+    @for (fact of facts(); track fact.lead) {
+      <p class="spotlight__fact">
+        <svg pk-icon size="md" [name]="fact.icon"></svg
+        ><span
+          ><strong>{{ fact.lead }}</strong> {{ fact.text }}</span
+        >
+      </p>
+    }
+  </div>
+}
+@if (!row() && actions()) {
+  <div class="spotlight__actions"><ng-container [ngTemplateOutlet]="actionSlot" /></div>
+}
+@if (strip()) {
+  <div class="spotlight__strip"><ng-content select="[slot=strip]" /></div>
+}

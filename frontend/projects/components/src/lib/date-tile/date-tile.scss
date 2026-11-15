@@ -1,0 +1,36 @@
+:host {
+  display: grid;
+  place-content: center;
+  flex: none;
+  width: var(--space-14);
+  height: var(--space-14);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+  text-align: center;
+}
+
+:host(.date-tile--soon) {
+  background: var(--color-warning-loud);
+  color: var(--color-constant-dark);
+}
+
+:host(.date-tile--bare) {
+  width: var(--space-12);
+  height: auto;
+  background: none;
+}
+
+.date-tile__top {
+  font: var(--font-weight-bold) var(--font-size-2xs) / 1 var(--font-family-sans);
+  text-transform: uppercase;
+}
+
+:host(.date-tile--bare) .date-tile__top {
+  color: var(--color-fg-subtle);
+}
+
+.date-tile__day {
+  margin-top: var(--space-0-5);
+  font: var(--font-weight-black) var(--font-size-2xl) / 1 var(--font-family-display);
+}

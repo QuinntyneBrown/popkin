@@ -1,0 +1,22 @@
+:host {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-0-5);
+  height: var(--space-8);
+}
+
+.uptime__bar {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border-radius: var(--space-0-5);
+  background: var(--color-success-solid);
+}
+
+.uptime__bar--degraded {
+  background: var(--color-warning-solid);
+}
+
+.uptime__bar--down {
+  background: var(--color-danger-solid);
+}

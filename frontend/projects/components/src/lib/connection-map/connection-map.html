@@ -1,0 +1,55 @@
+<svg
+  class="connection-map__lines"
+  viewBox="0 0 1000 680"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+>
+  @for (line of lines(); track line.key) {
+    <svg:line
+      class="connection-map__line"
+      [class]="'connection-map__line--' + line.kind"
+      [class.connection-map__line--pending]="line.pending"
+      [class.connection-map__line--on]="line.on"
+      [class.connection-map__line--dim]="line.dim"
+      [attr.x1]="line.x1"
+      [attr.y1]="line.y1"
+      [attr.x2]="line.x2"
+      [attr.y2]="line.y2"
+    />
+  }
+</svg>
+<span class="connection-map__node connection-map__node--you" [style.--x]="0.5" [style.--y]="0.5">
+  <span class="connection-map__face"
+    ><span
+      pk-avatar
+      size="fill"
+      name="You"
+      [attr.data-accent]="youAccent()"
+      [photo]="youPhoto()"
+    ></span
+  ></span>
+  <span class="connection-map__name">You</span>
+</span>
+@for (person of people(); track person.id) {
+  <button
+    class="connection-map__node"
+    type="button"
+    [class.connection-map__node--dim]="dim().has(person.id)"
+    [attr.aria-pressed]="focus() === person.id"
+    [attr.aria-label]="person.name"
+    [style.--x]="person.x"
+    [style.--y]="person.y"
+    (click)="choose(person.id)"
+  >
+    <span class="connection-map__face"
+      ><span
+        pk-avatar
+        size="fill"
+        [attr.data-accent]="person.accent"
+        [name]="person.name"
+        [photo]="person.photo"
+      ></span
+    ></span>
+    <span class="connection-map__name" aria-hidden="true">{{ person.firstName }}</span>
+  </button>
+}

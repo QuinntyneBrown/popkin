@@ -1,0 +1,52 @@
+@if (variant() === 'outline') {
+  @if (icon(); as icon) {
+    <span class="task__icon"><svg pk-icon size="sm" [name]="icon"></svg></span>
+  }
+} @else {
+  <button
+    class="task__check"
+    type="button"
+    [attr.aria-pressed]="done()"
+    [attr.aria-label]="checkLabel()"
+    (click)="done.set(!done())"
+  >
+    <span class="task__box"><svg pk-icon class="task__tick" name="check"></svg></span>
+  </button>
+}
+<div class="task__main">
+  <p class="task__text">
+    @if (link(); as link) {
+      <a [routerLink]="link">{{ text() }}</a>
+    } @else {
+      {{ text() }}
+    }
+  </p>
+  @if (who() || note()) {
+    <p class="task__meta">
+      @if (who() && whoLink()) {
+        <a class="task__who" [routerLink]="whoLink()"
+          ><span
+            pk-avatar
+            size="2xs"
+            [attr.data-accent]="whoAccent()"
+            [name]="who() ?? ''"
+            [photo]="whoPhoto()"
+          ></span
+          >{{ who() }}</a
+        >
+      }
+      @if (note()) {
+        <span class="task__note" [class.task__due--late]="late() && !due()">
+          @if (noteIcon(); as noteIcon) {
+            <svg pk-icon size="sm" [name]="noteIcon"></svg>
+          }
+          {{ note() }}
+        </span>
+      }
+    </p>
+  }
+</div>
+@if (due()) {
+  <span class="task__due" [class.task__due--late]="late()">{{ due() }}</span>
+}
+<ng-content />

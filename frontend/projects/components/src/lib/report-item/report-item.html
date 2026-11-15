@@ -1,0 +1,6 @@
+<span class="report-item__icon"><svg pk-icon [name]="icon()" size="sm"></svg></span>
+<span class="report-item__text">
+  <span class="report-item__reason">{{ reason() }}</span>
+  <span class="report-item__where">{{ where() }}</span>
+  <span class="report-item__meta">{{ when() }}<ng-content select="[slot=count]" /></span>
+</span>

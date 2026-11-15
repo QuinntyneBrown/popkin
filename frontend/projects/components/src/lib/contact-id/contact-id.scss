@@ -1,0 +1,71 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.contact-id__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.contact-id__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-id__name {
+  font: var(--text-h1-compact);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.contact-id__sub {
+  margin-top: var(--space-0-5);
+  color: var(--color-fg-muted);
+}
+
+.contact-id__also {
+  margin-top: var(--space-1);
+  font: var(--text-body-sm);
+  color: var(--color-fg-subtle);
+}
+
+.contact-id__actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+/* Three buttons share a phone's width, so they keep less padding there. Scoped under the actions so
+   it outweighs the button's own size padding. */
+.contact-id__actions > .contact-id__action {
+  padding-inline: var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .contact-id__actions > .contact-id__action {
+    padding-inline: var(--space-5);
+  }
+}
+
+@media (min-width: 64rem) {
+  :host {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .contact-id__who {
+    gap: var(--space-5);
+  }
+
+  .contact-id__name {
+    font: var(--text-h1);
+  }
+
+  .contact-id__actions {
+    display: flex;
+  }
+}

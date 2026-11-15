@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--accent-tint);
+}
+
+.promise__main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The list row's title (the mocks' .row__title). */
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.promise__when {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-0-5);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}

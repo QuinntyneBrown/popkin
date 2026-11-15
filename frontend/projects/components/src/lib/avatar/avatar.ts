@@ -28,6 +28,7 @@ export interface PersonAvatar {
     '[class.avatar--64]': "size() === '64'",
     '[class.avatar--xl]': "size() === 'xl'",
     '[class.avatar--2xl]': "size() === '2xl'",
+    '[class.avatar--fill]': "size() === 'fill'",
     '[class.avatar--ring]': 'ring()',
     '[class.avatar--blank]': 'blank()',
     'aria-hidden': 'true',
@@ -41,9 +42,12 @@ export class Avatar {
   readonly photo = input<string | null>();
   /**
    * `36` is the 36 px avatar of a short row, as the design system names it; `64` the face of
-   * Closest in Contacts, at the base avatar's type.
+   * Closest in Contacts, at the base avatar's type. `fill` fills a box the parent sizes, as the
+   * connection map's faces are sized by the width of the screen.
    */
-  readonly size = input<'2xs' | 'xs' | 'sm' | '36' | 'base' | 'lg' | '64' | 'xl' | '2xl'>('base');
+  readonly size = input<'2xs' | 'xs' | 'sm' | '36' | 'base' | 'lg' | '64' | 'xl' | '2xl' | 'fill'>(
+    'base',
+  );
   /** A ring in the canvas colour, for avatars that overlap or sit on a picture. */
   readonly ring = input(false);
   /** No colour yet: the person has not joined, as in the photo picker. */

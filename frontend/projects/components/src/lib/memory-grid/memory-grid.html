@@ -1,0 +1,6 @@
+@for (memory of memories(); track memory.photo) {
+  <figure>
+    <img [src]="memory.photo" [alt]="memory.alt" />
+    <figcaption>{{ memory.caption }}</figcaption>
+  </figure>
+}

@@ -1,0 +1,17 @@
+<ng-template #words>
+  @if (text()) {
+    <p class="evidence__text">{{ text() }}</p>
+  }
+</ng-template>
+@if (stacked()) {
+  <span class="evidence__author"><ng-content select="[slot=avatar]" />{{ author() }}</span>
+  @if (photo()) {
+    <img class="evidence__image" [src]="photo()" [alt]="photoAlt()" />
+  }
+  <ng-container [ngTemplateOutlet]="words" />
+} @else {
+  <ng-container [ngTemplateOutlet]="words" />
+  @if (photo()) {
+    <img class="evidence__photo" [src]="photo()" [alt]="photoAlt()" />
+  }
+}
