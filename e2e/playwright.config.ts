@@ -2,7 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * One suite, two targets (AGENTS.md):
- * - default: the Angular app on :4200 and the marketing site on :4201 (ADR 0017). It never reaches the API: every /api request is answered
+ * - default: the Angular app on :4200, the marketing site on :4201 (ADR 0017) and the admin app
+ *   on :4202 (ADR 0024). It never reaches the API: every /api request is answered
  *   from fixtures/api/responses.json by Playwright API mocking (ADR 0005);
  * - PK_BASELINE=1: the static design reference in docs/mocks, served on :4300, used to render
  *   the visual baselines the app is then compared with (ADR 0003).
@@ -41,6 +42,14 @@ const appServer = {
 const marketingServer = {
   command: 'npm run start:marketing --prefix ../frontend',
   url: 'http://localhost:4201',
+  reuseExistingServer: !ci,
+  timeout: 240_000,
+};
+
+// The admin app (ADR 0016, ADR 0024), a further application of the same workspace.
+const adminServer = {
+  command: 'npm run start:admin --prefix ../frontend',
+  url: 'http://localhost:4202',
   reuseExistingServer: !ci,
   timeout: 240_000,
 };
@@ -85,5 +94,5 @@ export default defineConfig({
       },
     },
   ],
-  webServer: mocks ? [mocksServer] : [appServer, marketingServer],
+  webServer: mocks ? [mocksServer] : [appServer, marketingServer, adminServer],
 });

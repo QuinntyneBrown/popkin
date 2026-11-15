@@ -20,12 +20,14 @@ import { Icon } from '../icon/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './search-field.html',
   styleUrl: './search-field.scss',
-  host: { class: 'search' },
+  host: { class: 'search', '[class.search--toolbar]': "variant() === 'toolbar'" },
 })
 export class SearchField {
   /** The accessible name of the field and its placeholder. */
   readonly label = input.required<string>();
   readonly value = model('');
+  /** `toolbar` is the larger pill that grows to fill a toolbar's line. */
+  readonly variant = input<'default' | 'toolbar'>('default');
 
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 

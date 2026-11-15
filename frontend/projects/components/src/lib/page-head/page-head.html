@@ -1,0 +1,9 @@
+<div class="page-head__id">
+  <div class="page-head__text">
+    <h1 class="page-head__title">{{ heading() }}</h1>
+    @if (sub()) {
+      <p class="page-head__sub">{{ sub() }}</p>
+    }
+  </div>
+</div>
+<div class="page-head__actions"><ng-content select="[slot=actions]" /></div>

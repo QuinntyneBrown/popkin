@@ -39,6 +39,8 @@ $env:Invites__BaseUrl = 'https://popk.in/'
 # Phone sign-in is on, so the recording covers it; specs stub it off (L2-084, ADR 0023).
 $env:Features__PhoneSignIn = 'true'
 $env:Features__Schedules = 'true'
+# The first Owner of the admin app, whom the recorder signs in as (ADR 0024).
+$env:Admin__FirstOwner = 'lena.fischer@popkin.app'
 # Photo files of this run, beside its database, cleared with it.
 $photos = Join-Path $databaseDirectory 'photos'
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $photos

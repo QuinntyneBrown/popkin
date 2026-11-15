@@ -26,6 +26,18 @@
   font: var(--text-h3);
 }
 
+:host(.empty--panel) {
+  padding-block: var(--space-12);
+}
+
+:host(.empty--flush) {
+  padding: 0;
+}
+
+:host(.empty--flush) h1 {
+  margin-top: var(--space-4);
+}
+
 .empty__text {
   max-width: var(--layout-measure-sm);
   color: var(--color-fg-muted);

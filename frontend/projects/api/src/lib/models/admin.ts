@@ -1,0 +1,91 @@
+/** The admin app's answers (docs/detailed-designs/admin-access). */
+
+export type AdminRole = 'Owner' | 'Support' | 'Viewer';
+
+/** What a role may do (L2-086); the console disables what the signed-in admin's role does not allow. */
+export type AdminAction =
+  | 'SuspendPerson'
+  | 'SignPersonOut'
+  | 'ExportPersonData'
+  | 'LogDataRequest'
+  | 'StartDeletion'
+  | 'CancelDeletion'
+  | 'WrapUpPopkin'
+  | 'ExtendPopkin'
+  | 'RemoveMember'
+  | 'ResetInvite'
+  | 'DecideReport'
+  | 'OpenModerationView'
+  | 'EndCall'
+  | 'RunJob'
+  | 'RetryExport'
+  | 'ManageFeatures'
+  | 'ChangeLimits'
+  | 'ManageAnnouncements'
+  | 'ManageAdmins'
+  | 'ExportAuditLog'
+  | (string & {});
+
+/** `GET /api/admin/me`: the signed-in admin and what their role allows. */
+export interface AdminMe {
+  adminId: string;
+  name: string;
+  email: string;
+  role: AdminRole;
+  allowed: AdminAction[];
+}
+
+/** A code sent to a staff email; the same answer for every whole address (L2-088 AC3). */
+export interface AdminCodeSent {
+  verificationId: string;
+  sentTo: string;
+  expiresAt: string;
+  resendAvailableAt: string;
+}
+
+/** One action taken in the console (L2-120). */
+export interface AuditEntry {
+  id: number;
+  at: string;
+  /** Null for an action Popkin took itself, such as adding the first Owner. */
+  adminId: string | null;
+  adminName: string;
+  action: string;
+  actionLabel: string;
+  targetKind: string;
+  targetId: string;
+  targetName: string;
+  reason: string | null;
+  /** A JSON object of what changed, such as `{ "from": "Support", "to": "Viewer" }`. */
+  details: string;
+}
+
+/** A page of the audit log, newest first; `next` continues after its last entry. */
+export interface AuditPage {
+  entries: AuditEntry[];
+  total: number;
+  next: string | null;
+}
+
+export interface AuditQuery {
+  search?: string;
+  adminId?: string;
+  before?: string;
+}
+
+/** An admin as Admins & roles lists them (L2-119 AC1). */
+export interface AdminRow {
+  id: string;
+  name: string;
+  email: string;
+  role: AdminRole;
+  invited: boolean;
+  lastActiveAt: string | null;
+  isYou: boolean;
+  isLastOwner: boolean;
+}
+
+export interface AdminList {
+  count: number;
+  admins: AdminRow[];
+}

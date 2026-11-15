@@ -1,0 +1,29 @@
+<aside class="admin-shell__side">
+  <div
+    pk-admin-nav
+    [sections]="sections()"
+    [current]="current()"
+    [me]="me()"
+    [label]="label()"
+    (signOut)="signOut.emit()"
+  ></div>
+</aside>
+<div class="admin-shell__main">
+  <header class="admin-shell__bar">
+    <button
+      pk-icon-button
+      type="button"
+      icon="menu"
+      label="Open menu"
+      (click)="openMenu.emit()"
+    ></button>
+    <a pk-admin-brand routerLink="/" aria-label="Popkin Admin, dashboard"></a>
+    <span pk-env-tag class="admin-shell__env">{{ label() }}</span>
+  </header>
+  @if (notice()) {
+    <p class="admin-shell__notice">{{ notice() }}</p>
+  }
+  <main id="main" class="admin-shell__body" tabindex="-1">
+    <ng-content />
+  </main>
+</div>

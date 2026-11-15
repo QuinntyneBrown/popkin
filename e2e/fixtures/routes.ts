@@ -36,7 +36,26 @@ export const MARKETING = 'http://localhost:4201';
 /** The app's address the marketing site is built with in development (`APP_URL`). */
 export const MARKETING_APP_URL = 'http://localhost:4200';
 
+/** Where the suite serves the admin app, a further application (ADR 0016, ADR 0024). */
+export const ADMIN = 'http://localhost:4202';
+
 export const routes = {
+  adminSignIn: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/default.html' },
+  adminSignInInvalidEmail: {
+    app: `${ADMIN}/sign-in`,
+    mock: 'admin/pages/sign-in/invalid-email.html',
+  },
+  adminSignInSending: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/sending.html' },
+  adminSignInCode: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/code.html' },
+  adminSignInInvalid: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/invalid.html' },
+  adminSignInChecking: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/checking.html' },
+  adminSignInLocked: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/locked.html' },
+  adminNotAnAdmin: { app: `${ADMIN}/not-an-admin`, mock: 'admin/pages/not-an-admin/default.html' },
+  adminAudit: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/default.html' },
+  adminAuditFiltered: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/filtered.html' },
+  adminAuditNoResults: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/no-results.html' },
+  adminAuditLoading: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/loading.html' },
+  adminAuditError: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/error.html' },
   account: { app: '/account', mock: 'pages/account/default.html' },
   accountLoading: { app: '/account', mock: 'pages/account/loading.html' },
   accountError: { app: '/account', mock: 'pages/account/error.html' },

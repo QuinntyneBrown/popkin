@@ -1,0 +1,10 @@
+<label
+  [class]="variant() === 'toolbar' ? 'visually-hidden' : 'select-field__label'"
+  [for]="fieldId()"
+  >{{ label() }}</label
+>
+<select class="select-field__select" [id]="fieldId()" (change)="chose($event)">
+  @for (option of options(); track option.value) {
+    <option [value]="option.value" [selected]="option.value === value()">{{ option.label }}</option>
+  }
+</select>

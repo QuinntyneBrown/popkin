@@ -8,7 +8,8 @@
  * thread, Mara opens the Popkin's home, saves its settings as they were, starts a group call
  * and leaves it, she adds the album's first photo, she shares an experience, rates it and
  * comments on it, she wraps the Popkin up and reads its recap, and Dev leaves it. Then she gives her full name, reads her
- * account and saves a photo; Joel signs out; and Mara deletes her account. Each answer is keyed
+ * account and saves a photo; Joel signs out; and Mara deletes her account. Last, Lena Fischer
+ * signs in to the admin app and adds three admins. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -292,6 +293,20 @@ person = joel;
 await call('POST', '/api/auth/sign-out');
 person = mara;
 await call('DELETE', '/api/account');
+
+// The admin app (ADR 0024): Lena Fischer, the first Owner (Admin:FirstOwner in
+// eng/Start-E2eApi.ps1), signs in to the console with a code and adds the admins of the mocks.
+person = { cookie: '', record: true };
+const adminCode = await call('POST', '/api/admin/auth/codes', { email: 'lena.fischer@popkin.app' });
+await call('POST', `/api/admin/auth/codes/${adminCode.verificationId}/confirm`, { code: '482913' });
+await call('GET', '/api/admin/me');
+await call('GET', '/api/admin/waiting');
+await call('GET', '/api/admin/roles');
+await call('POST', '/api/admin/admins', { email: 'kwame.mensah@popkin.app', role: 'Support' });
+await call('POST', '/api/admin/admins', { email: 'marco.bianchi@popkin.app', role: 'Viewer' });
+await call('POST', '/api/admin/admins', { email: 'aiko.tanaka@popkin.app', role: 'Support' });
+await call('GET', '/api/admin/admins');
+await call('GET', '/api/admin/audit');
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

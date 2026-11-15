@@ -1,0 +1,74 @@
+:host {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: var(--space-10) var(--space-4);
+  background: var(--color-bg-subtle);
+}
+
+:host:focus {
+  outline: none;
+}
+
+.admin-entry__col {
+  width: 100%;
+  max-width: 26.25rem;
+}
+
+.admin-entry__brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-8);
+}
+
+.admin-entry__card {
+  padding: var(--space-6);
+  border: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.admin-entry__title {
+  font: var(--text-h1-compact);
+}
+
+.admin-entry__lead {
+  margin-top: var(--space-2);
+  color: var(--color-fg-muted);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.admin-entry__emphasis {
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-semibold);
+}
+
+.admin-entry__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.admin-entry__links {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.admin-entry__foot {
+  margin-top: var(--space-6);
+  text-align: center;
+  font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-subtle);
+}
+
+@media (min-width: 40rem) {
+  .admin-entry__card {
+    padding: var(--space-8);
+  }
+}

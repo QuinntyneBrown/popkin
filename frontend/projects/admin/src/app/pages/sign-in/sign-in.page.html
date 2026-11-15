@@ -1,0 +1,97 @@
+<main
+  pk-admin-entry
+  [heading]="store.step() === 'email' ? 'Sign in to the console' : 'Enter your code'"
+  [lead]="
+    store.step() === 'email'
+      ? 'We’ll email a six-digit code to your Popkin staff address.'
+      : 'Sent to '
+  "
+  [leadEmphasis]="store.step() === 'code' ? store.sentTo() : undefined"
+  [leadEnd]="store.step() === 'code' ? '. It works for 10 minutes.' : undefined"
+  [links]="store.step() === 'code'"
+>
+  @if (store.step() === 'email') {
+    <form class="stack stack--lg" novalidate (submit)="send($event)">
+      @if (store.emailProblem(); as problem) {
+        <div pk-alert heading="Check your email address">
+          <a pk-link href="#email" (click)="goToEmail($event)">{{ problem.summary }}</a>
+        </div>
+      } @else if (store.sendFailed()) {
+        <div pk-alert heading="We couldn’t send your code.">
+          Check your connection and try again.
+        </div>
+      }
+      <div
+        #emailField
+        pk-text-field
+        fieldId="email"
+        label="Staff email"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        [formControl]="email"
+        [readonly]="sending()"
+        [error]="store.emailProblem()?.error"
+      ></div>
+      <button pk-button variant="primary" type="submit" [block]="true" [busy]="sending()">
+        @if (sending()) {
+          Sending code…
+        } @else {
+          Email me a code<svg pk-icon name="arrow-right" size="sm"></svg>
+        }
+      </button>
+    </form>
+  } @else {
+    <form class="stack stack--lg" novalidate (submit)="submitCode($event)">
+      <div
+        #codeField
+        pk-text-field
+        fieldId="code"
+        label="Six-digit code"
+        variant="code"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        [maxlength]="6"
+        [digitsOnly]="true"
+        [announceError]="true"
+        [formControl]="code"
+        [readonly]="checking()"
+        [error]="store.codeError() ?? undefined"
+      ></div>
+      @if (locked()) {
+        <div pk-alert heading="Too many wrong codes" icon="lock">{{ store.lockedText() }}</div>
+      }
+      <button
+        pk-button
+        variant="primary"
+        type="submit"
+        [block]="true"
+        [busy]="checking()"
+        [disabled]="locked()"
+      >
+        {{ checking() ? 'Checking…' : 'Sign in' }}
+      </button>
+    </form>
+  }
+  <button
+    pk-link
+    slot="links"
+    type="button"
+    variant="text"
+    [compact]="true"
+    (click)="useAnotherEmail()"
+  >
+    Use another email
+  </button>
+  <button
+    pk-link
+    slot="links"
+    type="button"
+    variant="text"
+    [compact]="true"
+    [disabled]="!store.canResend() || locked()"
+    (click)="store.resend()"
+  >
+    Send a new code
+  </button>
+</main>

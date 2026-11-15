@@ -12,6 +12,11 @@
   text-decoration: none;
 }
 
+:host(.text-btn--compact) {
+  padding: 0;
+  font-size: var(--font-size-sm);
+}
+
 :host(.text-btn--accent),
 .text-btn__action {
   color: var(--color-fg-accent);

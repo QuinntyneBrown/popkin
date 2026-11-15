@@ -1,0 +1,14 @@
+<main pk-admin-entry>
+  <div
+    pk-empty-state
+    slot="card"
+    icon="lock"
+    heading="This account isn’t an admin"
+    text="Admins are set up by Popkin. If you were expecting to be one, ask an Owner. You can still use Popkin as usual."
+    [level]="1"
+    [flush]="true"
+  >
+    <a pk-button variant="primary" size="md" [href]="popkinAppUrl">Go to Popkin</a>
+    <a pk-button variant="secondary" size="md" routerLink="/sign-in">Try another email</a>
+  </div>
+</main>

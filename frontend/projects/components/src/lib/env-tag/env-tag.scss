@@ -1,0 +1,16 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  white-space: nowrap;
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+:host::before {
+  content: '';
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-danger-solid);
+}

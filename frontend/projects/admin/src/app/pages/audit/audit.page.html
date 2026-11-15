@@ -1,0 +1,97 @@
+<div
+  pk-page-head
+  heading="Audit log"
+  sub="Every action taken in this console, with who did it and why. Kept for 2 years; nobody can edit it."
+>
+  <a pk-button slot="actions" variant="secondary" size="sm" download [href]="store.exportUrl()"
+    ><svg pk-icon name="download" size="sm"></svg>Export CSV</a
+  >
+</div>
+<div pk-toolbar>
+  <div
+    pk-search-field
+    variant="toolbar"
+    label="Search actions, people or Popkins"
+    [value]="store.search()"
+    (valueChange)="store.setSearch($event)"
+  ></div>
+  <div
+    pk-select-field
+    variant="toolbar"
+    fieldId="who"
+    label="Admin"
+    [options]="adminOptions()"
+    [value]="store.adminId()"
+    (valueChange)="store.setAdmin($event)"
+  ></div>
+  @if (store.filtered()) {
+    <button pk-link type="button" variant="text" (click)="store.clearFilters()">
+      Clear filters
+    </button>
+  }
+</div>
+@if (store.status() === 'loading') {
+  <p class="visually-hidden" role="status">Loading the audit log…</p>
+}
+<section pk-panel [foot]="store.status() === 'ready'">
+  @switch (store.status()) {
+    @case ('no-results') {
+      <div
+        pk-empty-state
+        icon="search"
+        heading="No matching actions"
+        text="Try a person’s name, a Popkin, or an action such as “suspended”."
+        [compact]="true"
+        [panel]="true"
+      >
+        <button
+          pk-button
+          type="button"
+          variant="secondary"
+          size="md"
+          (click)="store.clearFilters()"
+        >
+          Clear filters
+        </button>
+      </div>
+    }
+    @case ('failed') {
+      <div
+        pk-empty-state
+        icon="server-error"
+        heading="Couldn’t load the audit log"
+        text="The admin API didn’t answer. Nothing has changed; try again, or check Health if it keeps happening."
+        [compact]="true"
+        [panel]="true"
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+          <svg pk-icon name="retry" size="sm"></svg>Try again
+        </button>
+        <a pk-button variant="secondary" size="md" routerLink="/health">Open Health</a>
+      </div>
+    }
+    @default {
+      <div
+        pk-data-table
+        label="Audit log"
+        [columns]="columns"
+        [groups]="groups()"
+        [loading]="store.status() === 'loading'"
+      ></div>
+    }
+  }
+  <span slot="foot">{{ store.showing() }}</span>
+  @if (store.next()) {
+    <button
+      pk-button
+      slot="foot"
+      type="button"
+      variant="secondary"
+      size="sm"
+      [busy]="store.loadingOlder()"
+      (click)="store.loadOlder()"
+    >
+      Older actions
+    </button>
+  }
+</section>

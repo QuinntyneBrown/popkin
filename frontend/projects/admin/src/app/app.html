@@ -1,0 +1,16 @@
+<a pk-skip-link>Skip to content</a>
+@if (routeData()?.shell === 'admin') {
+  <div
+    pk-admin-shell
+    [sections]="sections"
+    [current]="routeData()?.page"
+    [me]="me()"
+    [label]="label"
+    [notice]="notice()"
+    (signOut)="signOut()"
+  >
+    <router-outlet />
+  </div>
+} @else {
+  <router-outlet />
+}

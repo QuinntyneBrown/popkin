@@ -1,0 +1,59 @@
+@if (loading()) {
+  <div aria-hidden="true">
+    @for (row of skeletonRows; track row) {
+      <div class="data-table__skeleton">
+        @for (column of columns(); track $index) {
+          <span class="data-table__bar" [class.data-table__bar--lead]="$first"
+            ><span pk-skeleton shape="text" [width]="80"></span
+          ></span>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  <table class="data-table" [attr.aria-label]="label()">
+    <thead>
+      <tr>
+        @for (column of columns(); track $index) {
+          <th scope="col">{{ column }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (group of groups(); track $index) {
+        @if (group.label) {
+          <tr class="data-table__group">
+            <th scope="rowgroup" [attr.colspan]="columns().length">{{ group.label }}</th>
+          </tr>
+        }
+        @for (row of group.rows; track row.id) {
+          <tr>
+            @for (cell of row.cells; track $index) {
+              <td
+                [attr.data-label]="$first ? null : columns()[$index]"
+                [class.data-table__time]="cell.kind === 'time'"
+              >
+                @switch (cell.kind) {
+                  @case ('strong') {
+                    <strong>{{ cell.text }}</strong>
+                  }
+                  @case ('name') {
+                    <span>
+                      <span class="data-table__name">{{ cell.text }}</span>
+                      @if (cell.sub) {
+                        <span class="data-table__sub">{{ cell.sub }}</span>
+                      }
+                    </span>
+                  }
+                  @default {
+                    {{ cell.text }}
+                  }
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+}
