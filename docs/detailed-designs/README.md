@@ -214,6 +214,7 @@ Each design follows the source named below and marks the conflict in its own REA
 | Popkins | [Popkin home](popkins/popkin-home/README.md) | L2-019 |
 | Popkins | [Popkin settings](popkins/popkin-settings/README.md) | L2-020, L2-066 |
 | Popkins | [Leave a Popkin](popkins/leave-popkin/README.md) | L2-047 |
+| Popkins | [Choose a Popkin's features](popkins/choose-features/README.md) | L2-152, L2-153 |
 | Invitations | [Invite people](invitations/invite-people/README.md) | L2-011, L2-065 |
 | Invitations | [Preview an invite](invitations/preview-invite/README.md) | L2-012, L2-016, L2-065 |
 | Invitations | [Join a Popkin](invitations/join-popkin/README.md) | L2-013, L2-014 |

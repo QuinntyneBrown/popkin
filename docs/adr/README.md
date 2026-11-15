@@ -34,8 +34,9 @@ shares. Records 0009 to 0013 come from the audit
 | [0021](0021-codes-and-invites-by-azure-communication-services.md) | Codes and crew invites are sent by Azure Communication Services: SMS from a toll-free number, email from `popkin.community`, signed in with the managed identity | Accepted |
 | [0022](0022-photos-in-azure-blob-storage.md) | Photo files are kept in a private Azure Blob Storage container, signed in with the managed identity; the API still signs and serves every address | Accepted |
 | [0023](0023-features-switched-on-by-a-setting.md) | A feature that is not ready is switched on by an API setting under `Features:`, which the API enforces and the app asks for before a screen opens | Accepted |
-| [0024](0024-admins-moderation-and-switches-in-the-database.md) | Admins, moderation and feature switches are kept in the database: admin roles and sessions, an audit log in the same transaction, moderation only through reports and a recorded view, switches Off, chosen or everyone | Accepted |
+| [0024](0024-admins-moderation-and-switches-in-the-database.md) | Admins, moderation and feature switches are kept in the database: admin roles and sessions, an audit log in the same transaction, moderation only through reports and a recorded view, switches Off, chosen or everyone | Accepted, amended by 0026 |
 | [0025](0025-library-components-ahead-of-their-screens.md) | Library components may be built ahead of their screens: their parity spec and acceptance test come with the first screen that uses them | Accepted |
+| [0026](0026-the-host-chooses-a-popkins-features.md) | The Host chooses a Popkin's features within what the admin app offers: on only while offered and switched on, a row only for a feature switched off | Accepted |
 
 ## Format
 

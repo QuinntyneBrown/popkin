@@ -29,4 +29,5 @@ Ordered by value. Effort is days for an intermediate developer.
 | 23 | Switch a feature | An Owner turns Plan or Schedules off, on for chosen Popkins or on for everyone, with a reason for the audit log. | 5 |
 | 24 | Open the admin app | Staff sign in to the admin app with a code and read the audit log; an Owner adds, re-roles and removes admins. | 16 |
 | 25 | Keep in touch | Person keeps their own Contacts: adds the people who matter, logs what they talked about and promised, and is reminded of dates, follow-ups and habits. | 27 |
-| | **Total** | | **135** |
+| 26 | Choose the features | Person starting a Popkin switches Plan and Schedules on or off; the Host changes them later in Popkin settings. | 4 |
+| | **Total** | | **139** |
