@@ -39,10 +39,10 @@ public sealed class ValidateAdminSessionCommandHandler(IAppDbContext db, TimePro
 /// <summary>The signed-in admin (GET /api/admin/me).</summary>
 public sealed record GetAdminMeQuery : IRequest<AdminMeDto>;
 
-public sealed class GetAdminMeQueryHandler(IAppDbContext db, ICurrentAdmin current) : IRequestHandler<GetAdminMeQuery, AdminMeDto>
+public sealed class GetAdminMeQueryHandler(IAdminGuard guard) : IRequestHandler<GetAdminMeQuery, AdminMeDto>
 {
     public async Task<AdminMeDto> Handle(GetAdminMeQuery request, CancellationToken cancellationToken) =>
-        AdminMeDto.From(await db.Admins.AsNoTracking().SingleAsync(a => a.Id == current.AdminId, cancellationToken));
+        AdminMeDto.From(await guard.CurrentAdminAsync(cancellationToken));
 }
 
 /// <summary>Ends the caller's admin session; a Popkin app session is not touched (L2-088 AC8).</summary>
