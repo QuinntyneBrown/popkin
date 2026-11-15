@@ -46,6 +46,8 @@ public interface IAppDbContext
 
     DbSet<TimeOffDay> TimeOffDays { get; }
 
+    DbSet<Contact> Contacts { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }

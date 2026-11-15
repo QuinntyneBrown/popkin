@@ -1,0 +1,28 @@
+using System.Text.Json;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Popkin.Api.RateLimiting;
+using Popkin.Application.Contacts.People;
+
+namespace Popkin.Api.Controllers.Contacts;
+
+/// <summary>The people a person keeps in Contacts (L1-031). Only the caller's own are ever seen or changed (L2-122).</summary>
+[ApiController]
+[Route("api/contacts/people")]
+public sealed class ContactsPeopleController(ISender sender) : ControllerBase
+{
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+
+    /// <summary>
+    /// Add someone (L2-129): the part `contact` holds <see cref="SaveContactRequest"/> as JSON.
+    /// A resend under the same client id answers the contact the first made.
+    /// </summary>
+    [HttpPost]
+    [EnableRateLimiting(RateLimitPolicyNames.Photos)]
+    public async Task<ActionResult<ContactProfileDto>> Add([FromForm] string contact, CancellationToken cancellationToken)
+    {
+        var added = await sender.Send(new AddContactCommand(JsonSerializer.Deserialize<SaveContactRequest>(contact, Json)!), cancellationToken);
+        return Created($"/api/contacts/people/{added.Id}", added);
+    }
+}
