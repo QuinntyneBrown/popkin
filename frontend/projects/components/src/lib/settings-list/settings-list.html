@@ -1,0 +1,18 @@
+@for (entry of entries(); track entry.key) {
+  <div class="config__row">
+    <dt>
+      <span class="config__name">{{ entry.name }}</span>
+      <span class="config__key">{{ entry.key }}</span>
+    </dt>
+    @if (entry.secret) {
+      <dd class="config__value" [class.config__value--unset]="!entry.set">
+        {{ entry.set ? 'Set' : 'Not set'
+        }}<span class="visually-hidden"> (secret, value hidden)</span>
+      </dd>
+    } @else if (entry.value === undefined || entry.value === '') {
+      <dd class="config__value config__value--unset">Not set</dd>
+    } @else {
+      <dd class="config__value">{{ entry.value }}</dd>
+    }
+  </div>
+}

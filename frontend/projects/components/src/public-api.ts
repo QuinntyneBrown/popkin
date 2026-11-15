@@ -188,3 +188,5 @@ export * from './lib/history-item/history-item';
 export * from './lib/limit-row/limit-row';
 export * from './lib/save-bar/save-bar';
 export * from './lib/change-list/change-list';
+export * from './lib/settings-list/settings-list';
+export * from './lib/release-note/release-note';
