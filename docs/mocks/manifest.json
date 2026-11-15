@@ -290,6 +290,162 @@
       ]
     },
     {
+      "id": "contacts-today",
+      "kind": "page",
+      "title": "Contacts · Today",
+      "route": "/contacts",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "done"
+      ]
+    },
+    {
+      "id": "contacts-people",
+      "kind": "page",
+      "title": "Contacts · People",
+      "route": "/contacts/people",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "no-results",
+        "family"
+      ]
+    },
+    {
+      "id": "contact-profile",
+      "kind": "page",
+      "title": "Contact profile",
+      "route": "/contacts/people/:id",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "not-found",
+        "grace",
+        "milestones",
+        "follow-ups",
+        "memories"
+      ]
+    },
+    {
+      "id": "add-contact",
+      "kind": "page",
+      "title": "Add someone",
+      "route": "/contacts/people/new",
+      "requirements": [],
+      "states": [
+        "default",
+        "invalid",
+        "submitting",
+        "error",
+        "edit"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows: a new one starts blank, and an edit opens from the loaded profile.",
+        "empty": "The screen is a form; it has no collection that can be empty."
+      }
+    },
+    {
+      "id": "log-entry",
+      "kind": "page",
+      "title": "Log a conversation",
+      "route": "/contacts/people/:id/log",
+      "requirements": [],
+      "states": [
+        "default",
+        "milestone",
+        "invalid",
+        "submitting",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The form opens from a loaded profile with the person in hand; it needs no request.",
+        "empty": "The screen is a form; it has no collection that can be empty."
+      }
+    },
+    {
+      "id": "contacts-dates",
+      "kind": "page",
+      "title": "Contacts · Dates",
+      "route": "/contacts/dates",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "birthdays"
+      ]
+    },
+    {
+      "id": "contacts-follow-ups",
+      "kind": "page",
+      "title": "Contacts · Follow-ups",
+      "route": "/contacts/follow-ups",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "promises",
+        "done"
+      ]
+    },
+    {
+      "id": "contacts-habits",
+      "kind": "page",
+      "title": "Contacts · Habits",
+      "route": "/contacts/habits",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "kept"
+      ]
+    },
+    {
+      "id": "contacts-groups",
+      "kind": "page",
+      "title": "Contacts · Groups",
+      "route": "/contacts/groups",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "detail",
+        "start"
+      ]
+    },
+    {
+      "id": "contacts-connections",
+      "kind": "page",
+      "title": "Contacts · Connections",
+      "route": "/contacts/connections",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "none",
+        "family"
+      ]
+    },
+    {
       "id": "popkin-home",
       "kind": "page",
       "title": "Popkin home",
@@ -1301,6 +1457,137 @@
         "success": "An announcement reports nothing the person did.",
         "danger": "The loudest an announcement gets is a Warning."
       }
+    },
+    {
+      "id": "new-habit",
+      "kind": "dialog",
+      "title": "New habit",
+      "opens_from": "contacts-habits",
+      "requirements": [],
+      "states": [
+        "default",
+        "invalid",
+        "busy"
+      ]
+    },
+    {
+      "id": "add-date",
+      "kind": "dialog",
+      "title": "Add a date",
+      "opens_from": "contacts-dates",
+      "requirements": [],
+      "states": [
+        "default",
+        "invalid",
+        "busy"
+      ]
+    },
+    {
+      "id": "new-group",
+      "kind": "dialog",
+      "title": "New group",
+      "opens_from": "contacts-groups",
+      "requirements": [],
+      "states": [
+        "default",
+        "invalid",
+        "busy"
+      ]
+    },
+    {
+      "id": "connect-person",
+      "kind": "dialog",
+      "title": "Connect two people",
+      "opens_from": "contacts-connections",
+      "requirements": [],
+      "states": [
+        "default",
+        "invalid",
+        "busy",
+        "no-results"
+      ]
+    },
+    {
+      "id": "import-contacts",
+      "kind": "dialog",
+      "title": "Import from your Popkins",
+      "opens_from": "contacts-today",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy"
+      ],
+      "not_applicable": {
+        "invalid": "Each person is a tick box; with nobody ticked the button reads Import nobody and is off, so nothing can be invalid."
+      }
+    },
+    {
+      "id": "contact-actions",
+      "kind": "dialog",
+      "title": "Contact actions",
+      "opens_from": "contact-profile",
+      "requirements": [],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "busy": "A menu of links: choosing one goes straight to its screen or dialog, so nothing waits.",
+        "invalid": "A menu of links has nothing to type, so nothing can be invalid."
+      }
+    },
+    {
+      "id": "delete-contact",
+      "kind": "dialog",
+      "title": "Delete a contact",
+      "opens_from": "contact-profile",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "A confirmation has nothing to type."
+      }
+    },
+    {
+      "id": "add-memory",
+      "kind": "dialog",
+      "title": "Add to memories",
+      "opens_from": "contact-profile",
+      "requirements": [],
+      "states": [
+        "default",
+        "invalid",
+        "busy"
+      ]
+    },
+    {
+      "id": "group-add-people",
+      "kind": "dialog",
+      "title": "Add people to a group",
+      "opens_from": "contacts-groups",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy"
+      ],
+      "not_applicable": {
+        "invalid": "Each person is a tick box; with nobody new ticked the button is off."
+      }
+    },
+    {
+      "id": "contacts-toast",
+      "kind": "notification",
+      "title": "Contacts toasts",
+      "opens_from": "contacts-today",
+      "requirements": [],
+      "states": [
+        "info",
+        "success",
+        "warning",
+        "danger"
+      ]
     }
   ]
 }
