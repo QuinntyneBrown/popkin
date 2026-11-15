@@ -212,6 +212,8 @@ export const routes = {
   newStoryFailed: { app: plan, mock: 'dialogs/new-story/failed.html' },
   story: { app: plan, mock: 'dialogs/story/default.html' },
   storyDone: { app: plan, mock: 'dialogs/story/done.html' },
+  storyBusy: { app: plan, mock: 'dialogs/story/busy.html' },
+  storyFailed: { app: plan, mock: 'dialogs/story/failed.html' },
   thisWeek: { app: `${home}/schedule/week?day=2026-09-16`, mock: 'pages/this-week/default.html' },
   thisWeekWorking: {
     app: `${home}/schedule/week?day=2026-09-15`,

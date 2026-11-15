@@ -1,9 +1,11 @@
-<div
+<form
   pk-dialog
+  novalidate
   [heading]="data.story.title"
   [description]="line"
   [accent]="data.accent"
   [panel]="true"
+  (submit)="save($event)"
 >
   @if (failed()) {
     <div pk-alert heading="We couldn’t save that.">Your changes are still here. Try again.</div>
@@ -13,6 +15,7 @@
     fieldId="stitle"
     label="What needs doing?"
     [maxlength]="80"
+    [error]="titleError()"
     [readonly]="busy()"
     [formControl]="title"
   ></div>
@@ -78,4 +81,15 @@
       </button>
     </div>
   }
-</div>
+  <button
+    pk-button
+    slot="footer"
+    type="submit"
+    variant="popkin"
+    [block]="true"
+    [busy]="saving()"
+    [disabled]="busy()"
+  >
+    {{ saving() ? 'Saving…' : 'Save' }}
+  </button>
+</form>

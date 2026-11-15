@@ -60,4 +60,21 @@ export const planStates = {
     before: theMockPlan,
     app: async (page) => void (await openStory(page, 'Collect $150 deposits')),
   },
+  storyBusy: {
+    before: theMockPlan,
+    app: async (page) => {
+      const dialog = await openStory(page);
+      planOf(page).holdWrites();
+      await dialog.save.click();
+    },
+  },
+  storyFailed: {
+    before: theMockPlan,
+    app: async (page) => {
+      const dialog = await openStory(page);
+      planOf(page).failWrites();
+      await dialog.save.click();
+      await expect(dialog.failed).toBeVisible();
+    },
+  },
 } satisfies Partial<Record<RouteKey, PlanState>>;

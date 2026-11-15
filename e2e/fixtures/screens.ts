@@ -1258,6 +1258,8 @@ export const screenStates: ScreenState[] = [
   { key: 'newStoryFailed', ...planStates.newStoryFailed, regions: newStoryRegions },
   { key: 'story', ...planStates.story, regions: storyRegions },
   { key: 'storyDone', ...planStates.storyDone, regions: storyRegions },
+  { key: 'storyBusy', ...planStates.storyBusy, regions: storyRegions },
+  { key: 'storyFailed', ...planStates.storyFailed, regions: storyRegions },
   { key: 'addTimeOff', ...scheduleStates.addTimeOff, regions: addTimeOffRegions },
   { key: 'addTimeOffBusy', ...scheduleStates.addTimeOffBusy, regions: addTimeOffRegions },
   { key: 'addTimeOffInvalid', ...scheduleStates.addTimeOffInvalid, regions: addTimeOffRegions },

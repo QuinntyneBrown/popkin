@@ -62,6 +62,21 @@ public static class PlanExtensions
     public static Task<HttpResponseMessage> MoveStoryAsync(this HttpClient member, Guid popkinId, Guid storyId, string? column) =>
         member.PutAsJsonAsync($"/api/popkins/{popkinId}/plan/stories/{storyId}/column", new { column });
 
+    /// <summary>`PUT …/plan/stories/{storyId}`: saves a change to every field of a story (L2-070 AC3).</summary>
+    public static Task<HttpResponseMessage> SaveStoryAsync(
+        this HttpClient member,
+        Guid popkinId,
+        Guid storyId,
+        string? title,
+        string column = "ToDo",
+        int points = 2,
+        string tag = "Travel",
+        Guid? ownerMembershipId = null,
+        string? dueDate = null) =>
+        member.PutAsJsonAsync(
+            $"/api/popkins/{popkinId}/plan/stories/{storyId}",
+            new { title, column, points, ownerMembershipId, tag, dueDate });
+
     public static Task<JsonElement> PlanBoardAsync(this HttpClient member, Guid popkinId) =>
         member.GetFromJsonAsync<JsonElement>($"/api/popkins/{popkinId}/plan");
 

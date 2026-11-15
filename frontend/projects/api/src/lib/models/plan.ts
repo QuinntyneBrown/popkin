@@ -64,3 +64,13 @@ export interface NewStoryRequest {
   ownerMembershipId: string | null;
   tag: StoryTag;
 }
+
+/** `PUT …/plan/stories/{storyId}`: every field of a story, the due date as `yyyy-MM-dd` or null (L2-070 AC3, AC8). */
+export interface StoryRequest {
+  title: string;
+  column: StoryColumn;
+  points: number;
+  ownerMembershipId: string | null;
+  tag: StoryTag;
+  dueDate: string | null;
+}

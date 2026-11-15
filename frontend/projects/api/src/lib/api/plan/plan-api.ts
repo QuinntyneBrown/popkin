@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { NewStoryRequest, PlanBoardView, StoryColumn, StoryView } from '../../models/plan';
+import {
+  NewStoryRequest,
+  PlanBoardView,
+  StoryColumn,
+  StoryRequest,
+  StoryView,
+} from '../../models/plan';
 
 /**
  * A Popkin's Plan (docs/detailed-designs/plan). Every call answers 404 `popkin_not_found` for
@@ -12,6 +18,8 @@ export interface PlanApi {
   board(popkinId: string): Observable<PlanBoardView>;
   /** Adds a story to Backlog or To do (L2-069). */
   addStory(popkinId: string, request: NewStoryRequest): Observable<StoryView>;
+  /** Saves a change to every field of a story (L2-070 AC3). */
+  saveStory(popkinId: string, storyId: string, request: StoryRequest): Observable<StoryView>;
   /** Moves a story to another column, last in it: "Move to …" or "Mark done" (L2-070 AC2). */
   moveStory(popkinId: string, storyId: string, column: StoryColumn): Observable<StoryView>;
 }
@@ -28,6 +36,10 @@ export class HttpPlanApi implements PlanApi {
 
   addStory(popkinId: string, request: NewStoryRequest): Observable<StoryView> {
     return this.http.post<StoryView>(`${plan(popkinId)}/stories`, request);
+  }
+
+  saveStory(popkinId: string, storyId: string, request: StoryRequest): Observable<StoryView> {
+    return this.http.put<StoryView>(`${plan(popkinId)}/stories/${storyId}`, request);
   }
 
   moveStory(popkinId: string, storyId: string, column: StoryColumn): Observable<StoryView> {

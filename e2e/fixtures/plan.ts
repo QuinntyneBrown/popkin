@@ -111,6 +111,8 @@ export class Plan {
   readonly added: Record<string, unknown>[] = [];
   /** Each `PUT …/stories/{id}/column`, by the story's title. */
   readonly moves: { title: string; column: string }[] = [];
+  /** The bodies of `PUT …/stories/{id}`, in the order they came. */
+  readonly saves: Record<string, unknown>[] = [];
   private failing?: Failure;
   private writesFail = false;
   private held?: Promise<void>;
@@ -218,6 +220,8 @@ export class Plan {
     if (rest === '/stories' && method === 'POST') return this.add(route);
     const moving = rest.match(/^\/stories\/([^/]+)\/column$/);
     if (moving && method === 'PUT') return this.move(route, moving[1]);
+    const one = rest.match(/^\/stories\/([^/]+)$/);
+    if (one && method === 'PUT') return this.save(route, one[1]);
     return route.fallback();
   }
 
@@ -233,6 +237,31 @@ export class Plan {
     this.stories = [...this.stories.filter((s) => s.id !== id), moved];
     this.version++;
     return route.fulfill({ json: this.storyOf(moved) });
+  }
+
+  /** `PUT …/stories/{id}`: every field as sent; a story that moved goes last in its column (L2-070 AC3). */
+  private async save(route: Route, id: string): Promise<void> {
+    const body = route.request().postDataJSON() as Record<string, unknown>;
+    const found = this.stories.find((s) => s.id === id);
+    if (!found) return route.fulfill({ status: 404, json: problem(404, 'story_not_found').body });
+    this.saves.push(body);
+    await this.writesHeld;
+    if (this.writesFail) return route.fulfill({ status: 500 });
+    const saved: PlanStory = {
+      ...found,
+      title: String(body['title']).trim(),
+      column: body['column'] as Column,
+      points: Number(body['points']),
+      tag: body['tag'] as Tag,
+      ownerMembershipId: (body['ownerMembershipId'] as string | null) ?? null,
+      dueDate: (body['dueDate'] as string | null) ?? null,
+    };
+    this.stories =
+      saved.column === found.column
+        ? this.stories.map((s) => (s.id === id ? saved : s))
+        : [...this.stories.filter((s) => s.id !== id), saved];
+    this.version++;
+    return route.fulfill({ json: this.storyOf(saved) });
   }
 
   /** `POST …/plan/stories`: the story goes last in its column (L2-069 AC5). */

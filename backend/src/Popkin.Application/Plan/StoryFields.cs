@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
@@ -44,6 +45,19 @@ public static class StoryFields
         Enum.TryParse<StoryTag>(tag, ignoreCase: false, out var value) && Enum.IsDefined(value) && tag == value.ToString()
             ? value
             : throw ProblemException.Invalid("invalid_tag", "Choose a tag.", "tag");
+
+    /// <summary>Any calendar day as `yyyy-MM-dd`, or none (L2-070 AC8).</summary>
+    public static DateOnly? DueDate(string? dueDate)
+    {
+        if (string.IsNullOrWhiteSpace(dueDate))
+        {
+            return null;
+        }
+
+        return DateOnly.TryParseExact(dueDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var day)
+            ? day
+            : throw ProblemException.Invalid("invalid_due_date", "Choose a date.", "dueDate");
+    }
 
     /// <summary>Nobody, or someone who is still a member of the Popkin (L2-069 AC8).</summary>
     public static async Task<Guid?> OwnerAsync(IAppDbContext db, Guid popkinId, Guid? ownerMembershipId, CancellationToken cancellationToken)

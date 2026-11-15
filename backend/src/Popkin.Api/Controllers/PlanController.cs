@@ -27,6 +27,14 @@ public sealed class PlanController(ISender sender) : ControllerBase
         return Created($"/api/popkins/{popkinId}/plan/stories/{story.Id}", story);
     }
 
+    /// <summary>Saves a change to a story's title, column, points, owner, tag or due date (L2-070 AC3). Counted with the caller's messages.</summary>
+    [HttpPut("stories/{storyId:guid}")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<StoryDto>> SaveStory(Guid popkinId, Guid storyId, SaveStoryRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(
+            new SaveStoryCommand(popkinId, storyId, request.Title, request.Column, request.Points, request.OwnerMembershipId, request.Tag, request.DueDate),
+            cancellationToken));
+
     /// <summary>Moves a story to another column, last in it (L2-070 AC2). Counted with the caller's messages.</summary>
     [HttpPut("stories/{storyId:guid}/column")]
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]
@@ -35,5 +43,7 @@ public sealed class PlanController(ISender sender) : ControllerBase
 }
 
 public sealed record MoveStoryRequest(string? Column);
+
+public sealed record SaveStoryRequest(string? Title, string? Column, int? Points, Guid? OwnerMembershipId, string? Tag, string? DueDate);
 
 public sealed record AddStoryRequest(string? Title, string? Column, int? Points, Guid? OwnerMembershipId, string? Tag);

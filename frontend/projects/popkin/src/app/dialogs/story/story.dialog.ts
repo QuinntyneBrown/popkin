@@ -2,7 +2,16 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { PLAN_API, POPKINS_API, StoryColumn, StoryView, moveOf, storyLine, whoChipsOf } from 'api';
+import {
+  PLAN_API,
+  POPKINS_API,
+  StoryColumn,
+  StoryTag,
+  StoryView,
+  moveOf,
+  storyLine,
+  whoChipsOf,
+} from 'api';
 import {
   Alert,
   Button,
@@ -15,7 +24,7 @@ import {
   TextField,
   WhoChips,
 } from 'components';
-import { catchError, map, of } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 
 export interface StoryData {
   popkinId: string;
@@ -75,17 +84,48 @@ export class StoryDialog {
     { initialValue: [] },
   );
   protected readonly busy = signal(false);
+  protected readonly saving = signal(false);
   protected readonly failed = signal(false);
+  protected readonly titleError = signal<string | undefined>(undefined);
+
+  /** "Save": the rules of a new story apply; while it goes it reads "Saving…" (L2-070 AC3). */
+  protected save(event: Event): void {
+    event.preventDefault();
+    if (this.busy()) return;
+    const title = this.title.value.trim();
+    if (!title) {
+      this.titleError.set('Say what needs doing.');
+      return;
+    }
+    this.titleError.set(undefined);
+    this.send(
+      this.api.saveStory(this.data.popkinId, this.story.id, {
+        title,
+        column: this.where() as StoryColumn,
+        points: this.points(),
+        ownerMembershipId: this.owner(),
+        tag: this.tag() as StoryTag,
+        dueDate: this.due.value || null,
+      }),
+      true,
+    );
+  }
 
   /** "Move to {next column}" or "Mark done": at once, and the dialog closes (L2-070 AC2). */
   protected moveTo(column: StoryColumn): void {
     if (this.busy()) return;
+    this.send(this.api.moveStory(this.data.popkinId, this.story.id, column), false);
+  }
+
+  private send(request: Observable<StoryView>, saving: boolean): void {
     this.busy.set(true);
+    this.saving.set(saving);
     this.failed.set(false);
-    this.api.moveStory(this.data.popkinId, this.story.id, column).subscribe({
+    request.subscribe({
       next: (story) => this.ref.close(story),
       error: () => {
         this.busy.set(false);
+        this.saving.set(false);
         this.failed.set(true);
       },
     });
