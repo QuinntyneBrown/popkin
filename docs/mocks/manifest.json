@@ -729,6 +729,7 @@
         "empty",
         "error",
         "confirmed",
+        "other-week",
         "off"
       ]
     },

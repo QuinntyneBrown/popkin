@@ -1,0 +1,148 @@
+/* The wrap scrolls sideways below 640 px; the page does not (L2-072 AC9). */
+:host {
+  display: block;
+  overflow-x: auto;
+  margin-top: var(--space-5);
+}
+
+.leave {
+  width: 100%;
+  min-width: 40rem;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+
+.leave col:first-child {
+  width: 7rem;
+}
+
+.leave th,
+.leave td {
+  padding: var(--space-2) var(--space-1);
+  vertical-align: bottom;
+}
+
+.leave thead th {
+  padding-bottom: var(--space-3);
+}
+
+/* The member column stays in place while the days scroll. */
+.leave th[scope='row'],
+.leave thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  padding-right: var(--space-3);
+  background: var(--color-bg-canvas);
+  font-weight: var(--font-weight-regular);
+}
+
+.leave thead th:first-child {
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  color: var(--color-fg-subtle);
+}
+
+.leave tbody th,
+.leave tbody td {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.leave__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2-5);
+}
+
+.leave__who span:last-child {
+  min-width: 0;
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+}
+
+.leave__day {
+  display: block;
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  color: var(--color-fg-muted);
+  white-space: nowrap;
+}
+
+.leave__date {
+  display: block;
+  font: var(--font-weight-extrabold) var(--font-size-xl) / var(--line-height-tight)
+    var(--font-family-display);
+}
+
+.leave__off {
+  display: block;
+  font: var(--text-caption);
+  color: var(--color-fg-muted);
+  white-space: nowrap;
+}
+
+.leave__off--many {
+  color: var(--color-fg-default);
+  font-weight: var(--font-weight-bold);
+}
+
+.leave__event {
+  display: block;
+  margin-bottom: var(--space-1);
+  font: var(--font-weight-bold) var(--font-size-xs) / 1 var(--font-family-sans);
+  color: var(--accent-text);
+  white-space: nowrap;
+}
+
+.leave th.is-weekend .leave__day,
+.leave th.is-weekend .leave__date,
+.leave th.is-weekend .leave__off {
+  color: var(--color-fg-subtle);
+}
+
+.leave .is-event {
+  background: var(--accent-tint);
+}
+
+.leave thead .is-event {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.leave tbody tr:last-child .is-event {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding-bottom: var(--space-3);
+}
+
+.leave__cell {
+  display: grid;
+  place-items: center;
+  height: var(--space-10);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-md);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.leave__cell--off {
+  background: var(--accent);
+  color: var(--color-fg-on-popkin);
+  font-weight: var(--font-weight-bold);
+}
+
+.leave__cell--tentative {
+  border: var(--border-width-thick) dashed var(--color-warning-border);
+  background: var(--color-warning-bg);
+  color: var(--color-fg-default);
+}
+
+.leave__cell--working {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-subtle);
+  font-weight: var(--font-weight-regular);
+}
+
+@media (min-width: 48rem) {
+  .leave col:first-child {
+    width: 9.25rem;
+  }
+}

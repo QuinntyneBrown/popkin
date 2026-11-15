@@ -1,0 +1,14 @@
+@if (loading()) {
+  <p class="visually-hidden" role="status">{{ loadingText() }}</p>
+  <div class="schedule__skeleton" aria-hidden="true">
+    <span pk-skeleton shape="pill"></span>
+    <div class="schedule__skeleton-row">
+      <span pk-skeleton shape="pill"></span>
+      <span pk-skeleton shape="pill"></span>
+    </div>
+    <span pk-skeleton shape="card"></span>
+    <span pk-skeleton shape="card"></span>
+  </div>
+} @else {
+  <ng-content />
+}

@@ -87,3 +87,8 @@ export * from './lib/api/account/account-api';
 export * from './lib/api/theme/theme-preferences';
 export * from './lib/api/account/account-store';
 export * from './lib/api/account/account-text';
+export * from './lib/models/schedule';
+export * from './lib/api/schedule/schedule-api';
+export * from './lib/api/schedule/schedule-weeks';
+export * from './lib/api/schedule/time-off-text';
+export * from './lib/api/schedule/time-off-store';

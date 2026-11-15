@@ -1,6 +1,6 @@
 import { OfflinePage } from './pages/offline/offline.page';
 import { Routes } from '@angular/router';
-import { AlbumStore, ExperienceStore, ExperiencesStore, PopkinFrame } from 'api';
+import { AlbumStore, ExperienceStore, ExperiencesStore, PopkinFrame, TimeOffStore } from 'api';
 import { signedInGuard } from './guards/signed-in.guard';
 import { signedOutGuard } from './guards/signed-out.guard';
 import { signInChannelsResolver } from './guards/sign-in-channels.resolver';
@@ -163,6 +163,15 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/video-call/video-call.page').then((m) => m.VideoCallPage),
     data: data({ shell: 'bare', page: 'video-call' }),
     title: 'Group call · Popkin',
+  },
+  {
+    path: 'p/:popkinId/schedule',
+    pathMatch: 'full',
+    canActivate: [signedInGuard],
+    providers: [PopkinFrame, TimeOffStore],
+    loadComponent: () => import('./pages/time-off/time-off.page').then((m) => m.TimeOffPage),
+    data: data({ shell: 'app', page: 'time-off' }),
+    title: 'Time off · Popkin',
   },
   {
     path: 'p/:popkinId/experiences',

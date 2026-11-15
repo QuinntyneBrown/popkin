@@ -58,6 +58,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<CrewInvite> CrewInvites => inner.CrewInvites;
 
+    public DbSet<TimeOffDay> TimeOffDays => inner.TimeOffDays;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

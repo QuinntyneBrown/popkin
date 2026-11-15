@@ -1,0 +1,5 @@
+@for (view of views(); track view.link) {
+  <a [routerLink]="view.link" [attr.aria-current]="view.current ? 'page' : null">{{
+    view.label
+  }}</a>
+}

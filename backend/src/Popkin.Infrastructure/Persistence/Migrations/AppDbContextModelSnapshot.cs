@@ -618,6 +618,16 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset?>("EndsAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<DateOnly?>("EventFirstDay")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EventLabel")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<DateOnly?>("EventLastDay")
+                        .HasColumnType("date");
+
                     b.Property<Guid>("HostPersonId")
                         .HasColumnType("uniqueidentifier");
 
@@ -719,6 +729,24 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasIndex("MembershipId");
 
                     b.ToTable("ThreadReadStates", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.TimeOffDay", b =>
+                {
+                    b.Property<Guid>("MembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.HasKey("MembershipId", "Day");
+
+                    b.ToTable("TimeOffDays", (string)null);
                 });
 
             modelBuilder.Entity("Popkin.Domain.VerificationCode", b =>
@@ -1015,6 +1043,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasOne("Popkin.Domain.ChatThread", null)
                         .WithMany()
                         .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.TimeOffDay", b =>
+                {
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

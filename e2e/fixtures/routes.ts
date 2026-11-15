@@ -19,6 +19,8 @@ const photos = `${home}/photos`;
 // The photo the mocks open: the first of the album fixture.
 const photo = `${photos}/00000000-0000-4000-a000-000000000018`;
 const experiences = `${home}/experiences`;
+// The week of the mocks, Feb 15 – 21 2027.
+const timeOff = `${home}/schedule?week=2027-02-15`;
 // The experience the mocks open: the sunrise canoe to Heron Point.
 const experience = `${experiences}/00000000-0000-4000-a000-000000000081`;
 const wrapUp = `${home}/wrap-up`;
@@ -141,6 +143,15 @@ export const routes = {
   experiencesLoading: { app: experiences, mock: 'pages/experiences/loading.html' },
   experiencesEmpty: { app: experiences, mock: 'pages/experiences/empty.html' },
   experiencesError: { app: experiences, mock: 'pages/experiences/error.html' },
+  timeOff: { app: timeOff, mock: 'pages/time-off/default.html' },
+  timeOffLoading: { app: timeOff, mock: 'pages/time-off/loading.html' },
+  timeOffEmpty: { app: timeOff, mock: 'pages/time-off/empty.html' },
+  timeOffError: { app: timeOff, mock: 'pages/time-off/error.html' },
+  timeOffConfirmed: { app: timeOff, mock: 'pages/time-off/confirmed.html' },
+  timeOffOtherWeek: {
+    app: `${home}/schedule?week=2027-02-22`,
+    mock: 'pages/time-off/other-week.html',
+  },
   experiencesDid: { app: experiences, mock: 'pages/experiences/did.html' },
   experiencesWant: { app: experiences, mock: 'pages/experiences/want.html' },
   experiencesNoResults: { app: experiences, mock: 'pages/experiences/no-results.html' },

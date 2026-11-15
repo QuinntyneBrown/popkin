@@ -1,0 +1,31 @@
+<a
+  pk-icon-button
+  icon="back"
+  size="md"
+  label="Previous week"
+  [routerLink]="link()"
+  [queryParams]="{ week: previous() }"
+></a>
+<ul aria-label="Weeks in this month">
+  @for (week of weeks(); track week.week) {
+    <li>
+      <a
+        [routerLink]="link()"
+        [queryParams]="{ week: week.week }"
+        [attr.aria-pressed]="week.pressed"
+        >{{ week.label }}
+        @if (week.event) {
+          <span class="weeks__dot" role="img" aria-label="Event this week"></span>
+        }
+      </a>
+    </li>
+  }
+</ul>
+<a
+  pk-icon-button
+  icon="chevron-right"
+  size="md"
+  label="Next week"
+  [routerLink]="link()"
+  [queryParams]="{ week: next() }"
+></a>

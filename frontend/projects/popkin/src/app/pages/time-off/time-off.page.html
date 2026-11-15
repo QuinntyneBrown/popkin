@@ -1,0 +1,76 @@
+<div pk-app-screen [accent]="frame.accent()" layout="tab" body="flush">
+  <header pk-plan-header slot="header" heading="Schedule">
+    <nav pk-view-nav slot="views" [views]="views()"></nav>
+  </header>
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <div pk-schedule [loading]="true"></div>
+    }
+    @case ('error') {
+      <div pk-schedule>
+        <div
+          pk-empty-state
+          icon="offline"
+          heading="We couldn’t load time off"
+          text="It’s safe. Check your connection and try again."
+          [alert]="true"
+        >
+          <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+            <svg pk-icon name="retry" size="md"></svg>Try again
+          </button>
+        </div>
+      </div>
+    }
+    @case ('ready') {
+      @if (store.table(); as table) {
+        <div pk-schedule>
+          @if (store.nav(); as nav) {
+            <div
+              pk-month-nav
+              [link]="link()"
+              [month]="nav.month"
+              [year]="nav.year"
+              [previous]="nav.previousMonth"
+              [next]="nav.nextMonth"
+              [goTo]="nav.goTo"
+            ></div>
+            <div
+              pk-week-chips
+              [link]="link()"
+              [weeks]="nav.weeks"
+              [previous]="nav.previousWeek"
+              [next]="nav.nextWeek"
+            ></div>
+          }
+          @if (store.nobodyYet()) {
+            <div
+              pk-alert
+              variant="info"
+              icon="clock"
+              [announce]="false"
+              heading="Nobody has added time off yet."
+            >
+              Each of you adds your own; the table fills in as you go. Add yours to get it started.
+            </div>
+          }
+          <div pk-leave-table [label]="table.label" [days]="table.days" [rows]="table.rows"></div>
+          <div pk-chart-legend [keys]="legend"></div>
+        </div>
+      }
+    }
+  }
+
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    current="schedule"
+    [popkinId]="popkinId()"
+    [name]="frame.name()"
+    [emoji]="frame.emoji()"
+    [members]="frame.members()"
+    [timeLeft]="frame.timeLeft()"
+    [unread]="unreadCount()"
+    [schedule]="frame.schedules()"
+  ></nav>
+</div>

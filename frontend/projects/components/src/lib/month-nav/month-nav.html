@@ -1,0 +1,31 @@
+<div class="month-nav__month">
+  <a
+    pk-icon-button
+    icon="back"
+    size="md"
+    label="Previous month"
+    [routerLink]="link()"
+    [queryParams]="{ week: previous() }"
+  ></a>
+  <span class="month-nav__name">{{ month() }}</span>
+  <a
+    pk-icon-button
+    icon="chevron-right"
+    size="md"
+    label="Next month"
+    [routerLink]="link()"
+    [queryParams]="{ week: next() }"
+  ></a>
+</div>
+<span class="month-nav__year">{{ year() }}</span>
+@if (goTo(); as go) {
+  <a
+    pk-button
+    class="month-nav__go"
+    variant="secondary"
+    size="sm"
+    [routerLink]="link()"
+    [queryParams]="{ week: go.week }"
+    >{{ go.label }}</a
+  >
+}
