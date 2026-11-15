@@ -1,0 +1,7 @@
+@for (period of periods(); track $index) {
+  <span
+    class="keep-strip__cell"
+    [class.keep-strip__cell--kept]="period === 'kept'"
+    [class.keep-strip__cell--due]="period === 'due'"
+  ></span>
+}

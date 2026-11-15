@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.keep-strip__cell {
+  flex: 1;
+  height: var(--space-7);
+  border: var(--border-width-thick) solid var(--color-border-strong);
+  border-radius: var(--radius-xs);
+  background: none;
+}
+
+.keep-strip__cell--kept {
+  border-color: var(--color-success-solid);
+  background: var(--color-success-solid);
+}
+
+.keep-strip__cell--due {
+  border: var(--border-width-thick) dashed var(--color-danger-border);
+  background: none;
+}
+
+:host(.keep-strip--sm) .keep-strip__cell {
+  height: var(--space-6);
+}
