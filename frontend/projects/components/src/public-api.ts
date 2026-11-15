@@ -190,3 +190,5 @@ export * from './lib/save-bar/save-bar';
 export * from './lib/change-list/change-list';
 export * from './lib/settings-list/settings-list';
 export * from './lib/release-note/release-note';
+export * from './lib/health-summary/health-summary';
+export * from './lib/service-card/service-card';

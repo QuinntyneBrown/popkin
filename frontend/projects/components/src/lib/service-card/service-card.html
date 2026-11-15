@@ -1,0 +1,26 @@
+<div>
+  <div class="service__head">
+    <h2 class="service__name">{{ name() }}</h2>
+    <ng-content select="[slot=status]" />
+  </div>
+  @if (figure() || note()) {
+    <p class="service__note">
+      @if (figure()) {
+        <strong>{{ figure() }}</strong>
+        @if (note()) {
+          ·
+        }
+      }
+      {{ note() }}
+    </p>
+  }
+</div>
+<div>
+  <ng-content select="[slot=uptime]" />
+  @if (uptime()) {
+    <p class="service__scale">
+      <span>{{ from() }}</span><strong>{{ uptime() }}</strong
+      ><span>{{ to() }}</span>
+    </p>
+  }
+</div>
