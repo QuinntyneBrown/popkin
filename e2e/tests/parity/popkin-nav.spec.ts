@@ -1,5 +1,6 @@
 import { wrapUpStates } from '../../fixtures/wrap-up-states';
 import { theMockChat } from '../../fixtures/chat';
+import { ContactsTodayPage } from '../../pages/contacts-today.page';
 import { parity } from '../../fixtures/parity';
 import { GroupChatPage } from '../../pages/group-chat.page';
 import { PhotoAlbumPage } from '../../pages/photo-album.page';
@@ -19,5 +20,11 @@ parity('popkin-nav', [
     ...wrapUpStates.photoAlbumWrapped,
     name: 'wrapped',
     region: (page) => new PhotoAlbumPage(page).nav,
+  },
+  // Contacts (L2-121 AC3, AC4): five tabs on a phone, seven in the sidebar; nobody kept yet.
+  {
+    key: 'contactsTodayEmpty',
+    name: 'contacts',
+    region: (page) => new ContactsTodayPage(page).nav.root,
   },
 ]);

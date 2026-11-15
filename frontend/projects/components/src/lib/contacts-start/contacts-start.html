@@ -1,0 +1,4 @@
+<h2 class="contacts-start__heading" [id]="headingId">{{ heading() }}</h2>
+<p class="contacts-start__lead">{{ lead() }}</p>
+<div class="contacts-start__actions"><ng-content select="[slot=action]" /></div>
+<div class="contacts-start__note"><ng-content select="[slot=note]" /></div>

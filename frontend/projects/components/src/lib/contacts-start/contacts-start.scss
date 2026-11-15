@@ -1,0 +1,27 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--layout-measure);
+  padding-top: var(--space-6);
+}
+
+.contacts-start__heading {
+  font: var(--text-h1-compact);
+}
+
+.contacts-start__lead {
+  font: var(--text-body-lg);
+  color: var(--color-fg-muted);
+}
+
+.contacts-start__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.contacts-start__note:empty {
+  display: none;
+}

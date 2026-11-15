@@ -10,6 +10,7 @@ import {
   BurnDownStore,
   PlanBoardStore,
 } from 'api';
+import { contactsOpenGuard } from './guards/contacts-open.guard';
 import { signedInGuard } from './guards/signed-in.guard';
 import { signedOutGuard } from './guards/signed-out.guard';
 import { signInChannelsResolver } from './guards/sign-in-channels.resolver';
@@ -257,6 +258,15 @@ export const routes: Routes = [
         title: 'Photo · Popkin',
       },
     ],
+  },
+  {
+    path: 'contacts',
+    pathMatch: 'full',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-today/contacts-today.page').then((m) => m.ContactsTodayPage),
+    data: data({ shell: 'app', page: 'contacts-today' }),
+    title: 'Today · Contacts · Popkin',
   },
   {
     path: 'popkins',

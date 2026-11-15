@@ -66,8 +66,9 @@ without a second, no "To do today", "Recently" or "It's been a while" without en
 - **What counts as "a while", how far "Coming up" looks and how many it shows, and what "Last
   time:" quotes** are open (known gap 99). The mocks show Sam at 59 days and Joel at 33, and not
   Ben at 11 days or Grace at 10.
-- **The greeting.** Only "Morning" at 8:40 am is drawn; the greeting at other hours is `<TO
-  SUPPLY>`.
+- **The greeting.** Only "Morning" at 8:40 am is drawn. The owner chose the other hours:
+  "Morning" before noon, "Afternoon" until 6 pm and "Evening" after, by the device's clock
+  (L2-125 AC1); `greeting` in `contacts-text.ts` holds the rule.
 - **How many "Recently" shows.** The mock shows 5; the number is `<TO SUPPLY>`.
 - **When an entry happened.** "Recently" reads "Sun" and "Sat" for this week, but "Sep 11" (a
   Friday, 4 days ago) beside them; the rule for a weekday against a date is `<TO SUPPLY>`.
@@ -143,7 +144,9 @@ On `ContactsController` (`api/contacts`), one MediatR request:
   are first names joined with "and". Unit tested.
 - **`CONTACTS_API`** — `today(on)`; `importCandidates()` and `setFollowUpDone(id, done)` of the
   Import and Follow-ups designs.
-- **Components** — `pk-spotlight` with `pk-date-tile` (backlog row 19), `pk-task` (row 17) for
+- **Components** — `pk-contacts-start` (`section[pk-contacts-start]`, the empty state's heading,
+  lead, actions and note; its parity spec comes with the import design, which completes it),
+  `pk-spotlight` with `pk-date-tile` (backlog row 19), `pk-task` (row 17) for
   follow-ups and the overdue habit, `pk-contacts-page` (row 22), `pk-avatar-stack` (faces of a
   coming-up row), `pk-avatar`, `pk-page-head`, `pk-button`, `pk-empty-state`, `pk-skeleton`. The
   coming-up and recent rows are the design system's `list-row` and the drifting chips its

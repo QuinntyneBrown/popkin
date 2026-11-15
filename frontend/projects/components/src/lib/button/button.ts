@@ -26,7 +26,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, input } from '@
     '[attr.aria-pressed]': 'pressed() === null ? null : pressed()',
     '[attr.disabled]': 'busy() || disabled() ? "" : null',
     '[attr.aria-disabled]': 'disabledReason() ? "true" : null',
-    '[attr.title]': 'disabledReason() ?? null',
+    '[attr.title]': 'disabledReason() ?? title()',
   },
 })
 export class Button {
@@ -46,6 +46,8 @@ export class Button {
    * a keyboard or screen-reader user reaches the reason, its tooltip and its description.
    */
   readonly disabledReason = input<string | null>(null);
+  /** The tooltip of a button that shows its icon only on a narrow screen, such as "Contacts". */
+  readonly title = input<string | null>(null);
 
   constructor() {
     // A capture listener on the button runs before its consumer's (click), so it can stop it.

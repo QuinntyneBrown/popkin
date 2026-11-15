@@ -14,7 +14,8 @@ const ICONS: Record<ToastVariant, IconName> = {
 
 /**
  * Toast (docs/design-system/components/toast.html): confirms an action that changed nothing on
- * screen. It sits in the toast region, which announces it politely.
+ * screen. It sits in the toast region, which announces it politely. It says when it is held
+ * (hovered or focused) and released, so the one who shows it can keep it while it is read.
  */
 @Component({
   selector: 'div[pk-toast]',
@@ -27,6 +28,10 @@ const ICONS: Record<ToastVariant, IconName> = {
     '[class.toast--success]': "variant() === 'success'",
     '[class.toast--warning]': "variant() === 'warning'",
     '[class.toast--danger]': "variant() === 'danger'",
+    '(pointerenter)': 'held.emit()',
+    '(focusin)': 'held.emit()',
+    '(pointerleave)': 'released.emit()',
+    '(focusout)': 'released.emit()',
   },
 })
 export class Toast {
@@ -37,6 +42,10 @@ export class Toast {
   readonly action = input<string>();
   readonly acted = output<void>();
   readonly dismissed = output<void>();
+  /** Hovered or focused: a toast that leaves on its own waits (L2-124 AC2). */
+  readonly held = output<void>();
+  /** No longer hovered or focused. */
+  readonly released = output<void>();
 
   protected readonly icons = ICONS;
 }

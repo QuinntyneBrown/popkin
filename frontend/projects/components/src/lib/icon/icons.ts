@@ -49,6 +49,37 @@ export const ICONS = {
     { circle: [9, 9, 2] },
     { path: 'm21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21' },
   ],
+  /* The Contacts tabs (L2-121 AC3): Today, Follow-ups, Groups and Connections. */
+  sun: [
+    { circle: [12, 12, 4] },
+    { path: 'M12 2v2' },
+    { path: 'M12 20v2' },
+    { path: 'm4.93 4.93 1.41 1.41' },
+    { path: 'm17.66 17.66 1.41 1.41' },
+    { path: 'M2 12h2' },
+    { path: 'M20 12h2' },
+    { path: 'm6.34 17.66-1.41 1.41' },
+    { path: 'm19.07 4.93-1.41 1.41' },
+  ],
+  'list-checks': [
+    { path: 'm3 17 2 2 4-4' },
+    { path: 'm3 7 2 2 4-4' },
+    { path: 'M13 6h8' },
+    { path: 'M13 12h8' },
+    { path: 'M13 18h8' },
+  ],
+  'users-round': [
+    { path: 'M18 21a8 8 0 0 0-16 0' },
+    { circle: [10, 8, 5] },
+    { path: 'M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3' },
+  ],
+  network: [
+    { rect: [6, 6, 16, 16, 1] },
+    { rect: [6, 6, 2, 16, 1] },
+    { rect: [6, 6, 9, 2, 1] },
+    { path: 'M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3' },
+    { path: 'M12 12V8' },
+  ],
   cake: [
     { path: 'M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8' },
     { path: 'M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1' },
@@ -318,6 +349,13 @@ export const ICONS = {
     {
       path: 'M4.76 13.582A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 .244.473',
     },
+  ],
+  /* Contacts: the way in from My Popkins (L2-121 AC1). */
+  users: [
+    { path: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' },
+    { circle: [9, 7, 4] },
+    { path: 'M22 21v-2a4 4 0 0 0-3-3.87' },
+    { path: 'M16 3.13a4 4 0 0 1 0 7.75' },
   ],
   'user-plus': [
     { path: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' },

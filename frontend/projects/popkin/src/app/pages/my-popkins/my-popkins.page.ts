@@ -1,7 +1,9 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { MyPopkinsStore, SessionStore, accentOf, accountLabel } from 'api';
+import { CONTACTS_API, MyPopkinsStore, SessionStore, accentOf, accountLabel } from 'api';
+import { catchError, map, of } from 'rxjs';
 import {
   Avatar,
   Banner,
@@ -55,6 +57,17 @@ export class MyPopkinsPage {
   protected readonly name = computed(() => this.session()?.name ?? '');
   protected readonly photo = computed(() => this.session()?.photoUrl ?? null);
   protected readonly accountLabel = computed(() => accountLabel(this.name()));
+
+  /** Contacts is offered while the API says it is open; off when it cannot say (ADR 0023). */
+  protected readonly contactsOpen = toSignal(
+    inject(CONTACTS_API)
+      .summary()
+      .pipe(
+        map(() => true),
+        catchError(() => of(false)),
+      ),
+    { initialValue: false },
+  );
 
   /** "New Popkin" shows with the list and while it loads; the empty state has its own way. */
   protected readonly canStart = computed(

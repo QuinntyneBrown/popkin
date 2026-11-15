@@ -208,6 +208,7 @@ export * from './lib/keep-strip/keep-strip';
 export * from './lib/habit-row/habit-row';
 export * from './lib/group-browser/group-browser';
 export * from './lib/contacts-page/contacts-page';
+export * from './lib/contacts-start/contacts-start';
 export * from './lib/contacts-grid/contacts-grid';
 export * from './lib/list-head/list-head';
 export * from './lib/report-item/report-item';

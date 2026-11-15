@@ -1,0 +1,23 @@
+<div pk-app-screen accent="coral" layout="tab" body="fill">
+  <div pk-contacts-page>
+    <div pk-page-head slot="head" [heading]="heading()" [sub]="day"></div>
+    @if (empty()) {
+      <section
+        pk-contacts-start
+        heading="Who do you want to keep close?"
+        lead="Add the people who matter. Popkin remembers their birthdays, what you talked about and what you promised, then tells you when it’s time."
+      >
+        <a pk-button slot="action" variant="primary" size="md" routerLink="/contacts/people/new"
+          ><svg pk-icon name="user-plus" size="md"></svg>Add someone</a
+        >
+      </section>
+    }
+  </div>
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    place="contacts"
+    contactsCurrent="today"
+    [members]="frame.countLine()"
+  ></nav>
+</div>

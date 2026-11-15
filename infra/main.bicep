@@ -37,6 +37,9 @@ param smsSender string = ''
 @description('Phone sign-in (L2-084, ADR 0023): true once smsSender sends texts; until then sign-up and sign-in offer an email alone.')
 param phoneSignIn bool = false
 
+@description('Contacts (L1-029, ADR 0023): true once every Contacts design is built; until then My Popkins offers no Contacts and /api/contacts answers 404 feature_off.')
+param contacts bool = false
+
 @description('The staff email (@popkin.app) of the admin app\'s first Owner (L2-078 AC1, ADR 0024); empty adds nobody, so nobody can sign in to the admin app.')
 param adminFirstOwner string = ''
 
@@ -254,6 +257,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'App__Origin', value: appOrigin }
             { name: 'Invites__BaseUrl', value: '${appOrigin}/i' }
             { name: 'Features__PhoneSignIn', value: string(phoneSignIn) }
+            { name: 'Features__Contacts', value: string(contacts) }
             { name: 'Admin__Origin', value: adminOrigin }
             { name: 'Admin__FirstOwner', value: adminFirstOwner }
           ])

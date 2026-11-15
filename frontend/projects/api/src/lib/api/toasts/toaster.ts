@@ -17,14 +17,20 @@ export interface ToastAction {
   run: () => void;
 }
 
+/** How long a success or info toast stays, counted again from when it is let go. */
+const SHOWN_MS = 8_000;
+
 /**
  * Shows a toast for an action that succeeded without a visible change. Success and info leave
- * after 8 seconds; a failure stays until dismissed (L2-056 AC7).
+ * after 8 seconds, waiting while the toast is hovered or focused; a failure stays until
+ * dismissed (L2-056 AC7, L2-124 AC2, AC3).
  */
 @Injectable({ providedIn: 'root' })
 export class Toaster {
   private next = 0;
   private readonly state = signal<ToastMessage[]>([]);
+  /** The toasts that leave on their own, by id, with their timer; null while held. */
+  private readonly timers = new Map<number, ReturnType<typeof setTimeout> | null>();
 
   readonly toasts = this.state.asReadonly();
 
@@ -32,8 +38,28 @@ export class Toaster {
     const id = ++this.next;
     this.state.update((toasts) => [...toasts, { id, variant, heading, text, action }]);
     if (variant === 'success' || variant === 'info') {
-      setTimeout(() => this.dismiss(id), 8_000);
+      this.timers.set(
+        id,
+        setTimeout(() => this.dismiss(id), SHOWN_MS),
+      );
     }
+  }
+
+  /** The toast is hovered or focused: it waits (L2-124 AC2). */
+  hold(id: number): void {
+    if (!this.timers.has(id)) return;
+    clearTimeout(this.timers.get(id) ?? undefined);
+    this.timers.set(id, null);
+  }
+
+  /** The toast is let go: it leaves 8 seconds later. */
+  release(id: number): void {
+    if (!this.timers.has(id)) return;
+    clearTimeout(this.timers.get(id) ?? undefined);
+    this.timers.set(
+      id,
+      setTimeout(() => this.dismiss(id), SHOWN_MS),
+    );
   }
 
   /** The toast's action was chosen: it is done, and the toast goes. */
@@ -43,6 +69,8 @@ export class Toaster {
   }
 
   dismiss(id: number): void {
+    clearTimeout(this.timers.get(id) ?? undefined);
+    this.timers.delete(id);
     this.state.update((toasts) => toasts.filter((toast) => toast.id !== id));
   }
 }

@@ -2,10 +2,13 @@ import type { Locator, Page } from '@playwright/test';
 
 /** The toasts, over whatever screen is open (L2-056 AC7). */
 export class Toasts {
+  /** The polite live region the toasts stack in. */
+  readonly region: Locator;
   readonly toast: Locator;
   readonly dismiss: Locator;
 
   constructor(page: Page) {
+    this.region = page.locator('.toast-region');
     this.toast = page.locator('.toast');
     this.dismiss = this.toast.getByRole('button', { name: 'Dismiss' });
   }
