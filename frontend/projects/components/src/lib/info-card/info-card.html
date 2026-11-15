@@ -1,0 +1,32 @@
+@if (over()) {
+  <p class="info-card__over">
+    @if (overIcon(); as icon) {
+      <svg pk-icon [name]="icon" size="sm"></svg>
+    }
+    {{ over() }}
+  </p>
+}
+@if (heading()) {
+  @if (level() === 2) {
+    <h2 class="info-card__title" [id]="headingId">
+      <ng-container [ngTemplateOutlet]="title" />
+    </h2>
+  } @else {
+    <h3 class="info-card__title" [id]="headingId">
+      <ng-container [ngTemplateOutlet]="title" />
+    </h3>
+  }
+}
+<div class="info-card__body" [class.info-card__body--after]="hasHead()">
+  <ng-content />
+</div>
+@if (foot()) {
+  <p class="info-card__foot" [class.info-card__foot--late]="late()">{{ foot() }}</p>
+}
+<ng-template #title>
+  @if (link(); as to) {
+    <a [routerLink]="to">{{ heading() }}</a>
+  } @else {
+    {{ heading() }}
+  }
+</ng-template>

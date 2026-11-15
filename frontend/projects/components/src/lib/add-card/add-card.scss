@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--target-comfortable);
+  padding: var(--space-4);
+  border: var(--border-width-hairline) dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: none;
+  color: var(--color-fg-default);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+:host(:hover) {
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+}
+
+.icon {
+  color: var(--color-fg-muted);
+}

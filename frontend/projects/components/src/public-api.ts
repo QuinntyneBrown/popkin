@@ -194,3 +194,6 @@ export * from './lib/health-summary/health-summary';
 export * from './lib/service-card/service-card';
 export * from './lib/contact-list/contact-list';
 export * from './lib/closest/closest';
+export * from './lib/info-card/info-card';
+export * from './lib/info-line/info-line';
+export * from './lib/add-card/add-card';
