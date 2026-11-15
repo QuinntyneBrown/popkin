@@ -35,6 +35,8 @@ export class MyPopkinsPage {
   readonly newPopkin: Locator;
   readonly scanToJoin: Locator;
   readonly account: Locator;
+  /** The way into Contacts (L2-121 AC1), shown while Contacts is switched on. */
+  readonly contacts: Locator;
   readonly wrappedUpHeading: Locator;
   readonly wrappedUp: Locator;
   readonly loading: Locator;
@@ -64,6 +66,7 @@ export class MyPopkinsPage {
     this.newPopkin = page.getByRole('link', { name: 'New Popkin' }).locator('visible=true');
     this.scanToJoin = page.locator('.topbar').getByRole('button', { name: 'Scan to join' });
     this.account = page.getByRole('link', { name: /^Your account/ });
+    this.contacts = page.locator('.topbar').getByRole('link', { name: 'Contacts' });
     this.wrappedUpHeading = page.getByRole('heading', { name: 'Wrapped up' });
     this.wrappedUp = page.locator('.divided .row');
     this.loading = page.getByRole('status').filter({ hasText: 'Loading your Popkins…' });

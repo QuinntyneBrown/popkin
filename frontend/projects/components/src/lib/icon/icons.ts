@@ -319,6 +319,13 @@ export const ICONS = {
       path: 'M4.76 13.582A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 .244.473',
     },
   ],
+  /* Contacts: the way in from My Popkins (L2-121 AC1). */
+  users: [
+    { path: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' },
+    { circle: [9, 7, 4] },
+    { path: 'M22 21v-2a4 4 0 0 0-3-3.87' },
+    { path: 'M16 3.13a4 4 0 0 1 0 7.75' },
+  ],
   'user-plus': [
     { path: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' },
     { circle: [9, 7, 4] },

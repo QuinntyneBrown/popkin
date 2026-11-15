@@ -1,7 +1,7 @@
 # Estimates
 
-- Overall effort: 268 days
-- Complete: 83%
+- Overall effort: 335 days
+- Complete: 66%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
@@ -21,6 +21,7 @@
 | [admin-access](admin-access.md) | 16 days | 97% |
 | [plan](plan.md) | 17 days | 100% |
 | [admin-platform](admin-platform.md) | 16 days | 30% |
+| [contacts](contacts.md) | 67 days | 0% |
 
 ## Roadmap
 
@@ -28,3 +29,4 @@
 2. A Popkin's own address: choose it when starting, open a Popkin by it, keep it when the Popkin is renamed, and find an invite by a link on it.
 3. The SMS and email providers, which the crew invites need too.
 4. Reliability: a saved answer for every screen and an app that opens without a connection.
+5. Contacts, behind `Features:Contacts` until all sixteen designs are built, in the order of their pull requests: open, add, people, profile, privacy, delete, log, follow-ups, dates, memories, habits, Today, groups, connections, import and reminders.

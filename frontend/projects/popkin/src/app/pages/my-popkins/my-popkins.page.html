@@ -7,6 +7,17 @@
           ><svg pk-icon name="plus" size="md"></svg>New Popkin</a
         >
       }
+      @if (contactsOpen()) {
+        <a
+          pk-button
+          variant="quiet"
+          size="sm"
+          routerLink="/contacts"
+          aria-label="Contacts"
+          title="Contacts"
+          ><svg pk-icon name="users" size="md"></svg><span class="only-s-up">Contacts</span></a
+        >
+      }
       <button
         pk-icon-button
         type="button"

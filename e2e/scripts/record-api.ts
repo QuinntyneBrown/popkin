@@ -247,6 +247,9 @@ await call('POST', `${calls}/${joined.call.id}/leave`);
 // My Popkins: Mara's one active Popkin, as its card (journey 6).
 await call('GET', '/api/popkins');
 
+// Contacts, open while `Features:Contacts` is on (journey 25): Mara keeps nobody yet.
+await call('GET', '/api/contacts/summary');
+
 // Photos: Mara has added none, adds one with a caption, then reads the album and the photo.
 const album = `/api/popkins/${created.id}/photos`;
 await call('GET', `${album}?filter=mine`);

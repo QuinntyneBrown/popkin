@@ -65,6 +65,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Invites:BaseUrl", "https://popk.in/");
         // Phone sign-in is on for every test but those of its switch (ADR 0023).
         builder.UseSetting("Features:PhoneSignIn", "true");
+        // Contacts is on for every test but those of its switch (ADR 0023).
+        builder.UseSetting("Features:Contacts", "true");
         // The first Owner of the admin app (L2-078 AC1, L2-119 AC9).
         builder.UseSetting("Admin:FirstOwner", "owner@popkin.app");
         foreach (var (key, value) in Settings)
