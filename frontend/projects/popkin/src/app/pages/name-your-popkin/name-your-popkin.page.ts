@@ -8,6 +8,7 @@ import {
   PopkinColour,
   SessionStore,
   accentOf,
+  PopkinFeature,
 } from 'api';
 import {
   Button,
@@ -49,6 +50,10 @@ export class NameYourPopkinPage implements OnInit {
   protected readonly name = new FormControl(this.draft().name, { nonNullable: true });
   protected readonly accent = computed(() => accentOf(this.draft().colour));
   protected readonly ready = computed(() => this.draft().name.trim().length > 0);
+  /** The features a new Popkin is offered, from the route's resolver (L2-152). */
+  readonly offered = input<PopkinFeature[]>([]);
+  /** Step 2 of 4 while "What should it have?" follows, else 2 of 3 (L2-152 AC6). */
+  protected readonly steps = computed(() => (this.offered().length > 0 ? 4 : 3));
 
   constructor() {
     this.name.valueChanges.subscribe((name) => this.store.update({ name }));

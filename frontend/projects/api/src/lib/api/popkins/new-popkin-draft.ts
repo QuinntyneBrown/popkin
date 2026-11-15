@@ -13,6 +13,8 @@ export interface NewPopkinDraftState {
    * this crew" (L2-046 AC5). Null for a Popkin started on its own.
    */
   crewOf: string | null;
+  /** The features chosen on "What should it have?", both on at first (L2-152 AC1). */
+  features: { plan: boolean; schedules: boolean };
 }
 
 const FIRST: NewPopkinDraftState = {
@@ -22,11 +24,12 @@ const FIRST: NewPopkinDraftState = {
   length: 'TheWeekend',
   customEndsAt: null,
   crewOf: null,
+  features: { plan: true, schedules: true },
 };
 
 /**
- * The two steps of starting a Popkin share this draft, so going back keeps every choice
- * (L2-008 AC5) and a failed create keeps them too (L2-009 AC5). Its first state is an empty name,
+ * The steps of starting a Popkin share this draft, so going back keeps every choice
+ * (L2-008 AC5, L2-152 AC6) and a failed create keeps them too (L2-009 AC5, L2-152 AC5). Its first state is an empty name,
  * the first emoji and Coral (L2-008 AC6), and "The weekend" (L2-009 AC1).
  */
 @Injectable({ providedIn: 'root' })

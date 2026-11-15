@@ -17,7 +17,7 @@
   >
     <div pk-timeline start="Now" [span]="picture().span" [end]="picture().end"></div>
   </aside>
-  <header pk-top-bar slot="header" back="/new" [step]="3" [steps]="3"></header>
+  <header pk-top-bar slot="header" back="/new" [step]="3" [steps]="steps()"></header>
   @if (status() === 'failed') {
     <div pk-alert heading="We couldn’t pop it up.">
       Something went wrong on our side. Your choices are still here.
@@ -33,15 +33,21 @@
   @if (draft().length === 'UntilDate') {
     <button pk-date-button (click)="pickEnd()">{{ customEndText() }}</button>
   }
-  <button
-    pk-button
-    slot="footer"
-    variant="popkin"
-    type="button"
-    [block]="true"
-    [busy]="status() === 'popping'"
-    (click)="popItUp()"
-  >
-    {{ status() === 'popping' ? 'Popping it up…' : 'Pop it up' }}
-  </button>
+  @if (last()) {
+    <button
+      pk-button
+      slot="footer"
+      variant="popkin"
+      type="button"
+      [block]="true"
+      [busy]="status() === 'popping'"
+      (click)="popItUp()"
+    >
+      {{ status() === 'popping' ? 'Popping it up…' : 'Pop it up' }}
+    </button>
+  } @else {
+    <button pk-button slot="footer" variant="popkin" type="button" [block]="true" (click)="next()">
+      Next
+    </button>
+  }
 </div>

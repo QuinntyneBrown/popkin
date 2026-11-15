@@ -9,6 +9,9 @@ export class HowLongPage {
   readonly options: Locator;
   readonly endDate: Locator;
   readonly popItUp: Locator;
+  /** "Next" while a feature is offered to the new Popkin (L2-152 AC1). */
+  readonly next: Locator;
+  readonly steps: Locator;
   readonly alert: Locator;
   readonly back: Locator;
   /** Regions for the sweeps and the parity specs. */
@@ -30,6 +33,8 @@ export class HowLongPage {
     this.options = this.group.getByRole('radio');
     this.endDate = page.getByRole('button', { name: /^Ends / });
     this.popItUp = page.getByRole('button', { name: /Pop it up|Popping it up/ });
+    this.next = page.getByRole('button', { name: 'Next' });
+    this.steps = page.locator('.step-dots');
     this.alert = page.locator('.alert');
     this.back = page.getByRole('link', { name: 'Back' });
     this.checkedCard = page.locator('.option-card[aria-checked="true"]');

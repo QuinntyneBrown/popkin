@@ -53,6 +53,9 @@ export interface CreatePopkinRequest {
   length: PopkinLength;
   /** ISO date-time; null when it keeps going. */
   endsAt: string | null;
+  /** The features chosen, sent for the offered ones only; false switches one off (L2-152 AC7). */
+  plan?: boolean;
+  schedules?: boolean;
 }
 
 /**

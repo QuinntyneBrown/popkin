@@ -17,16 +17,21 @@ const recorded: Record<string, RecordedResponse> = responses;
 /** A Popkin's header, `GET /api/popkins/{id}`, and the switches its screens read every minute. */
 const header = /^GET \/api\/popkins\/[0-9a-f-]{36}(\/features)?$/;
 
+/** What a Popkin not yet created is offered, `GET /api/popkins/features` (L2-152 AC8). */
+const offered = 'GET /api/popkins/features';
+
 /**
  * The recording is made with Schedules and Plan on (`popkin seed`, run by eng/Start-E2eApi.ps1). The screens of the
  * earlier journeys stand for a Popkin where they are off, as their mocks do (docs/mocks/README.md,
- * 8), so the recorded header is read with both off; a spec of Schedules or Plan answers the header
- * itself.
+ * 8), so the recorded header is read with both off and nothing offered, and a new Popkin is
+ * offered neither; a spec of Schedules, Plan or choosing them answers these itself.
  */
 function featuresOff(key: string, body: unknown): unknown {
-  return header.test(key) && body && typeof body === 'object'
-    ? { ...body, schedules: false, plan: false }
-    : body;
+  if (key === offered) return { offered: [] };
+  if (!header.test(key) || !body || typeof body !== 'object') return body;
+  return key.endsWith('/features')
+    ? { ...body, schedules: false, plan: false, choices: [] }
+    : { ...body, schedules: false, plan: false };
 }
 
 /** Opens screens by route key against the app, or against the mocks when PK_BASELINE=1. */

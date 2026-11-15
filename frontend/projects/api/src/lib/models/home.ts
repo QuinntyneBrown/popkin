@@ -42,6 +42,27 @@ export interface PopkinHomeView {
 export interface PopkinFeaturesView {
   plan: boolean;
   schedules: boolean;
+  /** The Host's choice of each feature the admin app offers the Popkin (L2-153 AC8). */
+  choices: FeatureChoiceView[];
+}
+
+/** A feature a Popkin may have, as the API names it (L2-152, L2-153). */
+export type PopkinFeature = 'Plan' | 'Schedules';
+
+export interface FeatureChoiceView {
+  feature: PopkinFeature;
+  on: boolean;
+}
+
+/** The features a Popkin not yet created is offered: those on for everyone (L2-152 AC8). */
+export interface NewPopkinFeaturesView {
+  offered: PopkinFeature[];
+}
+
+/** The Host's change of the offered features; a feature left out is unchanged (L2-153). */
+export interface ChangeFeaturesRequest {
+  plan?: boolean;
+  schedules?: boolean;
 }
 
 /** The latest of the Everyone thread, oldest first, without the notes the system writes. */

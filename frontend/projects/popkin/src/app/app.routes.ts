@@ -13,6 +13,7 @@ import {
 import { contactsOpenGuard } from './guards/contacts-open.guard';
 import { signedInGuard } from './guards/signed-in.guard';
 import { signedOutGuard } from './guards/signed-out.guard';
+import { newPopkinFeaturesResolver } from './guards/new-popkin-features.resolver';
 import { signInChannelsResolver } from './guards/sign-in-channels.resolver';
 
 /**
@@ -73,6 +74,7 @@ export const routes: Routes = [
     canActivate: [signedInGuard],
     loadComponent: () =>
       import('./pages/name-your-popkin/name-your-popkin.page').then((m) => m.NameYourPopkinPage),
+    resolve: { offered: newPopkinFeaturesResolver },
     data: data({ shell: 'bare', page: 'name-your-popkin' }),
     title: 'Name your Popkin · Popkin',
   },
@@ -80,8 +82,18 @@ export const routes: Routes = [
     path: 'new/length',
     canActivate: [signedInGuard],
     loadComponent: () => import('./pages/how-long/how-long.page').then((m) => m.HowLongPage),
+    resolve: { offered: newPopkinFeaturesResolver },
     data: data({ shell: 'bare', page: 'how-long' }),
     title: 'How long should it last? · Popkin',
+  },
+  {
+    path: 'new/features',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/what-it-has/what-it-has.page').then((m) => m.WhatItHasPage),
+    resolve: { offered: newPopkinFeaturesResolver },
+    data: data({ shell: 'bare', page: 'what-it-has' }),
+    title: 'What should it have? · Popkin',
   },
   {
     path: 'p/:popkinId/created',
