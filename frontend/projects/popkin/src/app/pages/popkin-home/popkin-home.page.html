@@ -169,6 +169,35 @@
           }
         </section>
 
+        @if (store.plan().state !== 'hidden') {
+          <section
+            pk-section
+            slot="side"
+            heading="Plan"
+            linkSuffix="of the plan"
+            [link]="['/p', popkinId(), 'plan']"
+          >
+            @if (store.plan().state === 'ready') {
+              <div
+                pk-plan-card
+                [headline]="store.plan().headline"
+                [status]="store.plan().status"
+                [stories]="store.plan().biggest"
+              ></div>
+            } @else {
+              <div
+                pk-alert
+                slot="failure"
+                heading="The plan didn’t load."
+                action="Try again"
+                (acted)="store.retryPlan()"
+              >
+                The rest of the Popkin is fine.
+              </div>
+            }
+          </section>
+        }
+
         @if (store.schedule().shown) {
           <section
             pk-section
@@ -269,6 +298,7 @@
       [timeLeft]="store.timeLeft()"
       [unread]="unreadCount()"
       [schedule]="popkin()?.schedules ?? false"
+      [plan]="popkin()?.plan ?? false"
     ></nav>
   </div>
 }

@@ -1,0 +1,75 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Change a story
+
+package "Popkin.Domain" {
+  class Story {
+    +Guid Id
+    +StoryColumn Column
+    +int Points
+    +Guid? OwnerMembershipId
+    +DateOnly? DueDate
+    +Guid AddedByMembershipId
+    +int PointsLeft
+    +Change(title, column, points, owner, tag, dueDate, now): int
+    +MoveTo(column: StoryColumn, now): int
+    +CanBeRemovedBy(membership: Membership): bool
+  }
+  class Membership {
+    +Guid Id
+    +MembershipRole Role
+  }
+  class PlanChange {
+    +Guid StoryId
+    +DateTimeOffset At
+    +int Delta
+  }
+  class Sprint {
+    +long Version
+    +Changed(): void
+  }
+}
+package "Popkin.Application" {
+  class SaveStoryCommand {
+    +Guid PopkinId
+    +Guid StoryId
+    +string Title
+    +string Column
+    +int Points
+    +Guid? OwnerMembershipId
+    +string Tag
+    +DateOnly? DueDate
+  }
+  class MoveStoryCommand {
+    +Guid PopkinId
+    +Guid StoryId
+    +string Column
+  }
+  class DeleteStoryCommand {
+    +Guid PopkinId
+    +Guid StoryId
+  }
+  class PlanStories {
+    +{static} RequireStoryAsync(db, popkinId, storyId): Story
+    +{static} SaveAsync(db, notifier, sprint, change): long
+  }
+  class StoryInput
+}
+SaveStoryCommand ..> StoryInput
+SaveStoryCommand ..> PlanStories
+MoveStoryCommand ..> PlanStories
+DeleteStoryCommand ..> PlanStories
+PlanStories ..> Story
+PlanStories ..> PlanChange : appends when delta is not 0
+PlanStories ..> Sprint : raises Version
+Story ..> Membership : remover rule
+@enduml

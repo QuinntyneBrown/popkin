@@ -7,6 +7,8 @@ import {
   PopkinFrame,
   ThisWeekStore,
   TimeOffStore,
+  BurnDownStore,
+  PlanBoardStore,
 } from 'api';
 import { signedInGuard } from './guards/signed-in.guard';
 import { signedOutGuard } from './guards/signed-out.guard';
@@ -170,6 +172,24 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/video-call/video-call.page').then((m) => m.VideoCallPage),
     data: data({ shell: 'bare', page: 'video-call' }),
     title: 'Group call · Popkin',
+  },
+  {
+    path: 'p/:popkinId/plan',
+    pathMatch: 'full',
+    canActivate: [signedInGuard],
+    providers: [PopkinFrame, PlanBoardStore],
+    loadComponent: () => import('./pages/plan-board/plan-board.page').then((m) => m.PlanBoardPage),
+    data: data({ shell: 'app', page: 'plan-board' }),
+    title: 'Plan · Popkin',
+  },
+  {
+    path: 'p/:popkinId/plan/burn-down',
+    pathMatch: 'full',
+    canActivate: [signedInGuard],
+    providers: [PopkinFrame, BurnDownStore],
+    loadComponent: () => import('./pages/burn-down/burn-down.page').then((m) => m.BurnDownPage),
+    data: data({ shell: 'app', page: 'burn-down' }),
+    title: 'Burn-down · Popkin',
   },
   {
     path: 'p/:popkinId/schedule',

@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Moving or saving a story
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PlanBoardPage" as page
+  participant "StoryDialog" as dialog
+  participant "HttpPlanApi" as client
+  participant "PlanBoardStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlanController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IMembershipGuard" as guard
+  participant "Handler" as handler
+  participant "Story" as story
+  participant "PlanStories" as plan
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose a card
+alt Wrapped up
+  page --> actor : Nothing opens (L2-070 AC7)
+else Active
+  page -> dialog : Open with the story (L2-070 AC1)
+  alt "Move to To do", "Move to Doing" or "Mark done"
+    actor -> dialog : Choose it
+    dialog -> client : moveStory(popkinId, storyId, column)
+    client -> controller : PUT /api/popkins/{popkinId}/plan/stories/{storyId}/column
+  else "Save"
+    actor -> dialog : Change title, column, points, owner, tag or due date; "Save"
+    dialog -> client : saveStory(popkinId, storyId, input)
+    client -> controller : PUT /api/popkins/{popkinId}/plan/stories/{storyId}
+  end
+  dialog -> dialog : "Saving…", every action disabled
+  controller -> handler : Send MoveStoryCommand or SaveStoryCommand
+  handler -> guard : Require(Plan), RequireActiveMemberAsync
+  handler -> plan : RequireStoryAsync (404 story_not_found)
+  handler -> story : MoveTo or Change (the rules of L2-069 for a save, L2-070 AC3, AC8)
+  story --> handler : Delta = points left after − before
+  handler -> plan : Save
+  plan -> db : Story; PlanChange(delta) unless 0 (L2-070 AC5, AC6); Version + 1; one save
+  plan -> notifier : PlanChanged(popkinId, version)
+  controller --> client : 200 StoryDto
+  client --> dialog : The story
+  dialog --> page : Close with the story (L2-070 AC2)
+  page -> store : apply(story): the card shows the change, last in its new column
+end
+alt Failure
+  client --> dialog : Error
+  dialog --> actor : Stays open with the changes; "We couldn’t save that. Your changes are still here. Try again."
+end
+@enduml

@@ -1,0 +1,122 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Plan board
+
+package "Popkin.Domain" {
+  enum StoryColumn {
+    Backlog
+    ToDo
+    Doing
+    Done
+  }
+  enum StoryTag {
+    Travel
+    Stay
+    Food
+    Money
+    Fun
+  }
+  class PopkinSpace {
+    +Guid Id
+    +PopkinStatus Status
+  }
+  class Membership {
+    +Guid Id
+    +MembershipRole Role
+    +DateTimeOffset? LeftAt
+  }
+  class Story {
+    +Guid Id
+    +Guid PopkinId
+    +string Title
+    +StoryColumn Column
+    +int Points
+    +StoryTag Tag
+    +Guid? OwnerMembershipId
+    +DateOnly? DueDate
+    +Guid AddedByMembershipId
+    +DateTimeOffset AddedAt
+    +DateTimeOffset ColumnEnteredAt
+    +bool IsOpen
+    +int PointsLeft
+  }
+  class Sprint {
+    +Guid PopkinId
+    +string Name
+    +DateOnly FirstDay
+    +long Version
+    +DateOnly LastDay
+    +DaysLeft(today: DateOnly): int
+  }
+  class PlanChange {
+    +Guid Id
+    +Guid PopkinId
+    +Guid StoryId
+    +DateTimeOffset At
+    +int Delta
+  }
+  class PlanHistory {
+    +PointsLeftAtEndOf(day: DateOnly): int
+    +Days(today: DateOnly): int[]
+    +StartPoints: int
+    +{static} Ideal(start: int, i: int): int
+    +Behind(today: DateOnly): int
+  }
+}
+package "Popkin.Application" {
+  class GetPlanBoardQuery {
+    +Guid PopkinId
+  }
+  class PlanBoardDto {
+    +SprintDto? Sprint
+    +StoryDto[] Stories
+    +PlanProgressDto? Progress
+    +long Version
+  }
+  class SprintDto {
+    +string Name
+    +DateOnly FirstDay
+    +DateOnly LastDay
+    +int DaysLeft
+  }
+  class StoryDto {
+    +Guid Id
+    +string Title
+    +StoryColumn Column
+    +int Points
+    +StoryTag Tag
+    +AvatarDto? Owner
+    +DateOnly? DueDate
+    +int CommentCount
+    +Guid AddedByMembershipId
+    +bool CanDelete
+    +DateTimeOffset AddedAt
+  }
+  class PlanProgressDto {
+    +int PointsLeft
+    +int Behind
+    +int[] Sparkline
+  }
+}
+PopkinSpace "1" *-- "0..1" Sprint
+PopkinSpace "1" *-- "0..*" Story
+PopkinSpace "1" *-- "0..*" PlanChange
+Story --> StoryColumn
+Story --> StoryTag
+Story "0..*" --> "0..1" Membership : owner
+PlanHistory ..> PlanChange : sums
+PlanHistory ..> Sprint
+GetPlanBoardQuery ..> PlanBoardDto
+PlanBoardDto *-- SprintDto
+PlanBoardDto *-- StoryDto
+PlanBoardDto *-- PlanProgressDto
+@enduml

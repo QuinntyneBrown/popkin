@@ -56,5 +56,11 @@ public interface IAppDbContext
 
     DbSet<AuditEntry> AuditEntries { get; }
 
+    DbSet<Story> Stories { get; }
+
+    DbSet<Sprint> Sprints { get; }
+
+    DbSet<PlanChange> PlanChanges { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Add a story
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "New story dialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "POST .../plan/stories, hub event PlanChanged")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Story, Sprint, PlanChange")
+}
+Rel(member, web, "Chooses New story or a starter, fills it in", "HTTPS")
+Rel(web, api, "Adds the story", "JSON/HTTPS, session cookie")
+Rel(api, db, "Inserts the story, the sprint with the first, a PlanChange for To do", "EF Core")
+Rel(api, web, "PlanChanged to every member", "SignalR")
+@enduml

@@ -1,0 +1,35 @@
+<div
+  pk-dialog
+  heading="Delete this story?"
+  titleId="delete-story-title"
+  descriptionId="delete-story-desc"
+  description="This can’t be undone."
+  [accent]="data.accent"
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t delete the story.">It’s still on the board. Try again.</div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="delete()"
+  >
+    {{ busy() ? 'Deleting…' : 'Delete' }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="secondary"
+    cdkFocusInitial
+    [block]="true"
+    (click)="keep()"
+  >
+    Keep it
+  </button>
+</div>

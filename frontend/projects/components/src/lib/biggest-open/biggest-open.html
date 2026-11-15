@@ -1,0 +1,6 @@
+<h2>Biggest open</h2>
+@if (stories().length) {
+  <ol pk-biggest-rows [stories]="stories()"></ol>
+} @else {
+  <p class="biggest__empty">{{ empty() }}</p>
+}

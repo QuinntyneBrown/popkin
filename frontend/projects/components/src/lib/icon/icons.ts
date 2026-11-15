@@ -93,6 +93,13 @@ export const ICONS = {
     { path: 'm16 6-4-4-4 4' },
     { path: 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8' },
   ],
+  /** The Plan tab: a board of three columns. */
+  board: [
+    { rect: [18, 18, 3, 3, 2] },
+    { path: 'M8 7v7' },
+    { path: 'M12 7v4' },
+    { path: 'M16 7v9' },
+  ],
   calendar: [
     { path: 'M8 2v4' },
     { path: 'M16 2v4' },

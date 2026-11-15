@@ -27,3 +27,15 @@
   margin-left: var(--space-1-5);
   color: var(--color-fg-subtle);
 }
+
+/* The radio form (a setting, such as the theme) shows its choice inverted, as the mocks draw it. */
+.segmented__option[aria-checked='true'] {
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+  box-shadow: none;
+}
+
+.segmented__option:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}

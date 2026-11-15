@@ -28,6 +28,7 @@ const conversations = `${home}/chat`;
 // The direct message the mocks open: with Walt, by his membership (`people.walt` in chat.ts).
 const directMessage = `${conversations}/00000000-0000-4000-8000-walt00000000`;
 const recap = `${home}/recap`;
+const plan = `${home}/plan`;
 // One the signed-in Host did not share: Ellie's idea, a beach day next summer.
 const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
 
@@ -162,6 +163,7 @@ export const routes = {
   popkinHomeError: { app: home, mock: 'pages/popkin-home/error.html' },
   popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
   popkinHomeSchedule: { app: home, mock: 'pages/popkin-home/schedule.html' },
+  popkinHomePlan: { app: home, mock: 'pages/popkin-home/plan.html' },
   popkinHomeScheduleNone: { app: home, mock: 'pages/popkin-home/schedule-none.html' },
   bannerInfo: { app: home, mock: 'notifications/banner/info.html' },
   videoCall: { app: call, mock: 'pages/video-call/default.html' },
@@ -200,6 +202,30 @@ export const routes = {
     mock: 'pages/time-off/other-week.html',
   },
   timeOffOff: { app: timeOff, mock: 'pages/time-off/off.html' },
+  planBoard: { app: plan, mock: 'pages/plan-board/default.html' },
+  planBoardLoading: { app: plan, mock: 'pages/plan-board/loading.html' },
+  planBoardEmpty: { app: plan, mock: 'pages/plan-board/empty.html' },
+  planBoardError: { app: plan, mock: 'pages/plan-board/error.html' },
+  planBoardOff: { app: plan, mock: 'pages/plan-board/off.html' },
+  planBoardReadOnly: { app: plan, mock: 'pages/plan-board/read-only.html' },
+  burnDown: { app: `${plan}/burn-down`, mock: 'pages/burn-down/default.html' },
+  burnDownLoading: { app: `${plan}/burn-down`, mock: 'pages/burn-down/loading.html' },
+  burnDownEmpty: { app: `${plan}/burn-down`, mock: 'pages/burn-down/empty.html' },
+  burnDownError: { app: `${plan}/burn-down`, mock: 'pages/burn-down/error.html' },
+  burnDownOff: { app: `${plan}/burn-down`, mock: 'pages/burn-down/off.html' },
+  burnDownDone: { app: `${plan}/burn-down`, mock: 'pages/burn-down/done.html' },
+  newStory: { app: plan, mock: 'dialogs/new-story/default.html' },
+  newStoryBusy: { app: plan, mock: 'dialogs/new-story/busy.html' },
+  newStoryInvalid: { app: plan, mock: 'dialogs/new-story/invalid.html' },
+  newStoryFailed: { app: plan, mock: 'dialogs/new-story/failed.html' },
+  story: { app: plan, mock: 'dialogs/story/default.html' },
+  storyDone: { app: plan, mock: 'dialogs/story/done.html' },
+  storyBusy: { app: plan, mock: 'dialogs/story/busy.html' },
+  storyFailed: { app: plan, mock: 'dialogs/story/failed.html' },
+  storyNoDelete: { app: plan, mock: 'dialogs/story/no-delete.html' },
+  deleteStory: { app: plan, mock: 'dialogs/delete-story/default.html' },
+  deleteStoryBusy: { app: plan, mock: 'dialogs/delete-story/busy.html' },
+  deleteStoryFailed: { app: plan, mock: 'dialogs/delete-story/failed.html' },
   thisWeek: { app: `${home}/schedule/week?day=2026-09-16`, mock: 'pages/this-week/default.html' },
   thisWeekWorking: {
     app: `${home}/schedule/week?day=2026-09-15`,
@@ -293,6 +319,7 @@ export const routes = {
   recapError: { app: recap, mock: 'pages/wrapped-up/error.html' },
   recapExporting: { app: recap, mock: 'pages/wrapped-up/exporting.html' },
   recapPlain: { app: recap, mock: 'pages/wrapped-up/plain.html' },
+  recapPlan: { app: recap, mock: 'pages/wrapped-up/plan.html' },
   // The album was not kept: the recap under the banner that counts the days.
   recapGoing: { app: recap, mock: 'notifications/banner/persistent.html' },
   popkinHomeLastHour: { app: home, mock: 'pages/popkin-home/last-hour.html' },

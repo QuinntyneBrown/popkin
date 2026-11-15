@@ -194,6 +194,46 @@ await call('PUT', `${schedule}/hours/${marasId}`, {
 });
 await call('GET', `${schedule}/summary?from=2026-09-12`);
 
+// The Plan (journey 21, with Features:Plan on): Mara reads the board before any story, adds
+// three, moves the van to Doing, gives the cabin a due date, reads the board, the burn-down and
+// the home's Plan summary, and deletes a story she added. The recap, read last, counts them.
+const plan = `/api/popkins/${created.id}/plan`;
+await call('GET', plan);
+const cabin = await call('POST', `${plan}/stories`, {
+  title: 'Book the cabin at Pine Hollow',
+  column: 'ToDo',
+  points: 8,
+  ownerMembershipId: marasId,
+  tag: 'Stay',
+});
+const van = await call('POST', `${plan}/stories`, {
+  title: 'Rent a 7-seat van',
+  column: 'ToDo',
+  points: 5,
+  ownerMembershipId: null,
+  tag: 'Travel',
+});
+const kayaks = await call('POST', `${plan}/stories`, {
+  title: 'Kayak rental for two days',
+  column: 'Backlog',
+  points: 3,
+  ownerMembershipId: null,
+  tag: 'Fun',
+});
+await call('PUT', `${plan}/stories/${van.id}/column`, { column: 'Doing' });
+await call('PUT', `${plan}/stories/${cabin.id}`, {
+  title: 'Book the cabin at Pine Hollow',
+  column: 'ToDo',
+  points: 8,
+  ownerMembershipId: marasId,
+  tag: 'Stay',
+  dueDate: '2026-09-18',
+});
+await call('GET', plan);
+await call('GET', `${plan}/burn-down`);
+await call('GET', `${plan}/summary`);
+await call('DELETE', `${plan}/stories/${kayaks.id}`);
+
 // Calls: no group call is under way, which is what the home and the thread read; then Mara
 // starts one, turns her camera off and leaves, which ends it (journey 7).
 const calls = `/api/popkins/${created.id}/calls`;

@@ -26,6 +26,8 @@ export class DialogFrame {
   readonly titleId = input('dlg-title');
   /** The id of the description, which the CDK dialog's `ariaDescribedBy` names. */
   readonly descriptionId = input('dlg-desc');
+  /** A panel on the right of the screen from 768 px, as "New story" is beside the board (L2-069 AC7). */
+  readonly panel = input(false);
 
   protected readonly ref = inject(DialogRef);
 }

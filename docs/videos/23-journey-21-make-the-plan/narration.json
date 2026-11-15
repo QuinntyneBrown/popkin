@@ -1,0 +1,25 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 3, "lines": ["Who's doing what, and are we on track? Make the plan together."] },
+    { "id": "board", "bars": 6, "lines": ["The Plan tab opens on the plan board: Backlog, To do, Doing and Done, each with its stories and its points.", "The sprint chip says twenty-four points left, seven behind."] },
+    { "id": "new", "bars": 6, "lines": ["New story asks what needs doing, where it goes, how big it is, who's on it, and a tag.", "Add it, and it lands in To do."] },
+    { "id": "done", "bars": 6, "lines": ["Open a story to change it, move it on or mark it done.", "Mark the cabin done, and it moves to Done with a tick."] },
+    { "id": "live", "bars": 5, "lines": ["When someone else adds a story, your open board shows it, without a reload."] },
+    { "id": "burn", "bars": 6, "lines": ["The burn-down shows the points left each day against the ideal line.", "At this week's pace, the plan finishes on September thirtieth, four days late."] },
+    { "id": "biggest", "bars": 4, "lines": ["Beside the chart, the biggest stories still open."] },
+    { "id": "home", "bars": 5, "lines": ["The Popkin home shows the plan at a glance, and the recap counts the stories done."] },
+    { "id": "grow", "bars": 6, "lines": [
+      { "text": "On a phone, one column at a time, swiped sideways, with New story floating.", "at": 0 },
+      { "text": "On a desktop, all four columns side by side.", "at": 8 }
+    ] },
+    { "id": "off", "bars": 4, "lines": ["Plan has a switch. While it is off, the tab is gone and its screens say so. Nothing is lost."] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: only whoever added a story, its owner or the Host may delete it, and a wrapped-up Popkin's plan is read only.", "Every open board follows each change, live."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey twenty-one. Popkin is a platform for pop-up communities."] }
+  ]
+}

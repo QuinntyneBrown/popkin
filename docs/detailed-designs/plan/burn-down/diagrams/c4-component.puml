@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Burn-down
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "BurnDownPage", "Angular page", "Headline, forecast, chart, biggest open, empty, error, off")
+  Component(store, "BurnDownStore", "api library", "State; reads again on a higher PlanChanged, reconnected$ and every minute")
+  Component(text, "plan-text.ts, burn-chart.ts", "api library, pure", "Words, text alternative, the chart's geometry")
+  Component(client, "HttpPlanApi", "Behind PLAN_API", "burnDown")
+  Component(ui, "pk-plan-header, pk-view-nav, pk-badge, pk-burn-chart, pk-chart-legend, pk-biggest-open", "components library", "Presentation")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PlanController", "ASP.NET Core controller", "GET burn-down")
+  Component(query, "GetBurnDownQueryHandler", "MediatR handler", "BurnDownDto")
+  Component(history, "PlanHistory", "Domain, pure", "Days, start points, ideal, behind, forecast")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "404 feature_off")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 popkin_not_found")
+  ComponentDb(db, "Popkin database", "SQL Server", "Sprint, Story, PlanChange")
+}
+Rel(page, store, "Opens")
+Rel(page, ui, "Composes")
+Rel(store, text, "Formats with")
+Rel(store, client, "burnDown")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(ctrl, query, "Sends GetBurnDownQuery")
+Rel(query, switches, "Requires Plan")
+Rel(query, guard, "Requires membership")
+Rel(query, history, "Computes with")
+Rel(query, db, "Reads")
+@enduml

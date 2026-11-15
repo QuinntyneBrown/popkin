@@ -44,6 +44,8 @@ export interface RecapView {
     ratingCount: number;
     sharedBy: { firstName: string };
   } | null;
+  /** The stories done out of those made, while Plan is on and there were any (L2-075 AC4). */
+  stories: { done: number; made: number } | null;
 }
 
 /** The zip of a Popkin's album, as it is prepared (L2-046 AC4). */

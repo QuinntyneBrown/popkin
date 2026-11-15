@@ -37,6 +37,7 @@ function recap(extra: Partial<RecapView> = {}): RecapView {
       ratingCount: 11,
       sharedBy: { firstName: 'Mara' },
     },
+    stories: null,
     ...extra,
   };
 }
@@ -137,7 +138,14 @@ describe('RecapStore', () => {
       isHost: false,
       canSave: true,
       photosGo: null,
+      plan: null,
     });
+  });
+
+  it('counts the stories done out of the stories made (L2-075 AC4)', () => {
+    answer = recap({ stories: { done: 12, made: 14 } });
+    store.open('p');
+    expect(store.view()?.plan).toBe('12 of 14 stories done');
   });
 
   it('leaves the top-rated moment out when nothing was rated', () => {

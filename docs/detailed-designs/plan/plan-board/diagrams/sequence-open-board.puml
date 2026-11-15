@@ -1,0 +1,57 @@
+@startuml
+title UML sequence behaviour — Opening the board
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PlanBoardPage" as page
+  participant "PlanBoardStore" as store
+  participant "HttpPlanApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlanController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "GetPlanBoardQueryHandler" as handler
+  participant "PlanHistory" as history
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose the Plan tab (L2-068 AC1)
+page -> store : open(popkinId)
+store --> page : state loading: skeleton columns, "Loading the plan…" (L2-068 AC10)
+store -> client : board(popkinId)
+client -> controller : GET /api/popkins/{popkinId}/plan
+controller -> handler : Send GetPlanBoardQuery
+handler -> switches : Require(Plan)
+alt Plan is off
+  controller --> client : 404 feature_off (L2-077 AC3)
+  store --> page : state off: "Plan is switched off" (L2-077 AC2)
+else On
+  handler -> guard : RequireMemberAsync(popkinId)
+  alt Not a member
+    controller --> client : 404 popkin_not_found (L2-051)
+  else Member
+    handler -> db : Sprint, stories in board order with owners, the sprint's PlanChange rows
+    handler -> history : Sparkline, points left, behind for today (UTC)
+    controller --> client : 200 PlanBoardDto
+    client --> store : The board and its version
+    alt No stories
+      store --> page : state empty: "No stories yet" and the four starters (L2-068 AC9)
+    else Stories
+      store --> page : Sub-line, chip, four columns with counts and points, cards (L2-068 AC2 to AC7)
+    end
+  end
+end
+alt The read fails
+  store --> page : state error: "We couldn’t load the plan", "Try again"; the tabs stay (L2-068 AC11)
+end
+actor -> page : Choose the sprint chip
+page --> actor : The burn-down (L2-068 AC7)
+@enduml

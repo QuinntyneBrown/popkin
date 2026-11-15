@@ -1,0 +1,24 @@
+<span class="field__label" [id]="labelId()">{{ label() }}</span>
+<div
+  class="chips"
+  role="radiogroup"
+  [id]="fieldId()"
+  [attr.aria-labelledby]="labelId()"
+  [attr.aria-disabled]="disabled() ? 'true' : null"
+>
+  @for (option of options(); track option; let i = $index) {
+    <button
+      #option
+      class="tag-picker__opt"
+      type="button"
+      role="radio"
+      [attr.aria-checked]="option === value()"
+      [tabIndex]="option === value() ? 0 : -1"
+      (click)="choose(option)"
+      (keydown)="move($event, i)"
+    >
+      <span class="story-tag__dot" [attr.data-tag]="option.toLowerCase()" aria-hidden="true"></span
+      >{{ option }}
+    </button>
+  }
+</div>

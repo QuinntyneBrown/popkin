@@ -1,0 +1,38 @@
+@startuml
+title UML sequence behaviour — A change reaches an open board
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+box "Frontend — Popkin web app, another member's board" #E0F2FE
+  participant "PlanBoardPage" as page
+  participant "PlanBoardStore" as store
+  participant "HttpPlanApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlanController" as controller
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "PlanStories" as plan
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+note over plan : A member adds, moves, changes or deletes a story
+plan -> db : Story, one PlanChange when the points left change, Sprint.Version + 1, one save
+plan -> notifier : PlanChanged(popkinId, version)
+notifier -> hub : To popkin:{popkinId}, awaited
+hub -> store : PlanChanged(popkinId, 8)
+alt 8 is not above the version held
+  store -> store : Drop it: the board already shows it
+else Higher
+  store -> client : board(popkinId)
+  client -> controller : GET /api/popkins/{popkinId}/plan
+  controller --> client : 200 PlanBoardDto, version 8
+  store --> page : The board shows the change without a reload (L2-068 AC12)
+end
+note over store : reconnected$ and every 60 seconds read the board too, so a lost event is recovered
+@enduml

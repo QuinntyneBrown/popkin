@@ -1,0 +1,70 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-4) var(--space-28);
+}
+
+.burn__headline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+
+  strong {
+    font: var(--font-weight-black) var(--font-size-4xl) / var(--line-height-tight)
+      var(--font-family-display);
+    letter-spacing: var(--letter-spacing-tight);
+  }
+}
+
+.burn__badge {
+  font: var(--font-weight-extrabold) var(--font-size-xl) / 1 var(--font-family-display);
+  color: var(--accent-text);
+  white-space: nowrap;
+}
+
+.burn__forecast {
+  margin-top: var(--space-1);
+  font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+@media (min-width: 48rem) {
+  :host {
+    padding: var(--space-6) var(--space-8) var(--space-10);
+  }
+
+  .burn__headline strong {
+    font-size: var(--font-size-5xl);
+  }
+}
+
+@media (min-width: 64rem) {
+  :host {
+    flex-direction: row;
+    gap: var(--space-10);
+  }
+
+  .burn__main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // The aside of the loading state; `pk-biggest-open` sizes itself.
+  .burn__aside {
+    flex: none;
+    width: 20rem;
+  }
+}
+
+@media (min-width: 80rem) {
+  :host {
+    padding-inline: var(--space-10);
+  }
+
+  .burn__aside {
+    width: 22.5rem;
+  }
+}

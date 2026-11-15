@@ -1,0 +1,15 @@
+<div class="board__head">
+  <h2>{{ heading() }}</h2>
+  <span class="board__count"><span class="visually-hidden">stories: </span>{{ count() }}</span>
+  <span class="board__pts">{{ pointsLabel() }}</span>
+</div>
+@if (hint()) {
+  <p class="board__hint">{{ hint() }}</p>
+}
+@if (count() > 0) {
+  <ul class="board__list">
+    <ng-content />
+  </ul>
+} @else {
+  <p class="board__empty">Nothing here yet</p>
+}

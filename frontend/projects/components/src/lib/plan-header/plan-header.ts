@@ -19,4 +19,6 @@ export class PlanHeader {
   readonly heading = input.required<string>();
   /** A line under the name: "Sep 12 – 18 · everyone’s working hours". */
   readonly sub = input<string>();
+  /** The end of the line under the name, in bold: "14 days left". */
+  readonly subStrong = input<string>();
 }

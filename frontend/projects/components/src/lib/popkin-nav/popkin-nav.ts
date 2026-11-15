@@ -7,7 +7,7 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
 import { TimeLeft } from '../time-left/time-left';
 
 /** The places of a Popkin. */
-export type PopkinNavTab = 'home' | 'chat' | 'schedule' | 'photos' | 'experiences';
+export type PopkinNavTab = 'home' | 'chat' | 'plan' | 'schedule' | 'photos' | 'experiences';
 
 interface Tab {
   key: PopkinNavTab;
@@ -20,14 +20,15 @@ interface Tab {
 const TABS: readonly Tab[] = [
   { key: 'home', label: 'Home', icon: 'home', path: '' },
   { key: 'chat', label: 'Chat', icon: 'message', path: '/chat' },
+  { key: 'plan', label: 'Plan', icon: 'board', path: '/plan' },
   { key: 'schedule', label: 'Schedule', icon: 'calendar', path: '/schedule' },
   { key: 'photos', label: 'Photos', icon: 'photos', path: '/photos' },
   { key: 'experiences', label: 'Experiences', icon: 'experiences', path: '/experiences' },
 ];
 
 /**
- * Popkin tabs (docs/design-system/components/popkin-nav.html): Home, Chat, Schedule while
- * Schedules is on (L2-072 AC1, L2-077 AC1), Photos and Experiences. Along the bottom on a phone; from 768 px a rail at the side of the screen, and
+ * Popkin tabs (docs/design-system/components/popkin-nav.html): Home, Chat, Plan while Plan is on
+ * (L2-068 AC1), Schedule while Schedules is on (L2-072 AC1, L2-077 AC1), Photos and Experiences. Along the bottom on a phone; from 768 px a rail at the side of the screen, and
  * from 1024 px a sidebar that also names the Popkin and leads back to Your Popkins (L2-058 AC8).
  * `wide` is the navigation of a screen deeper than a tab, such as a thread: absent on a phone,
  * where the top bar has Back, and the same rail and sidebar from 768 px. It is a child of the
@@ -59,9 +60,13 @@ export class PopkinNav {
   readonly wide = input(false);
   /** Whether Schedules is on: the Schedule tab shows between Chat and Photos. */
   readonly schedule = input(false);
+  /** Whether Plan is on: the Plan tab shows between Chat and Schedule (or Photos). */
+  readonly plan = input(false);
 
   protected readonly tabs = computed(() =>
-    TABS.filter((tab) => tab.key !== 'schedule' || this.schedule()).map((tab) => ({
+    TABS.filter(
+      (tab) => (tab.key !== 'schedule' || this.schedule()) && (tab.key !== 'plan' || this.plan()),
+    ).map((tab) => ({
       ...tab,
       link: `/p/${this.popkinId()}${tab.path}`,
     })),

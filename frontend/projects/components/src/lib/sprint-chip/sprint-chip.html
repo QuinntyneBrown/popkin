@@ -1,0 +1,7 @@
+<svg pk-sparkline [line]="line()" [idealFrom]="idealFrom()"></svg>
+<span
+  ><strong>{{ headline() }}</strong>
+  @if (status(); as status) {
+    · {{ status }}
+  }
+</span>

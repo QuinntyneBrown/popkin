@@ -94,6 +94,24 @@
   }
 }
 
+/* From 768 px a panel stands on the right, the full height of the screen (L2-069 AC7). */
+@media (min-width: 48rem) {
+  .dialog--panel {
+    align-items: stretch;
+    justify-content: flex-end;
+    padding: 0;
+  }
+
+  .dialog--panel .dialog__panel {
+    width: 27.5rem;
+    max-width: none;
+    max-height: none;
+    border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    padding-top: var(--space-7);
+    animation: fade-in var(--duration-base) var(--ease-standard);
+  }
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

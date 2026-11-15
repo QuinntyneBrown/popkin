@@ -1,0 +1,160 @@
+<div pk-app-screen [accent]="frame.accent()" layout="tab" [body]="body()">
+  <header
+    pk-plan-header
+    slot="header"
+    heading="Our plan"
+    [sub]="store.sprint()?.line"
+    [subStrong]="readOnly() ? 'Wrapped up' : store.sprint()?.daysLeft"
+  >
+    <nav pk-view-nav slot="views" [views]="views()"></nav>
+    @if (store.chip(); as chip) {
+      <a
+        pk-sprint-chip
+        [routerLink]="burnDown()"
+        [headline]="chip.headline"
+        [status]="chip.status"
+        [line]="chip.sparkline.line"
+        [idealFrom]="chip.sparkline.ideal.y1"
+      ></a>
+    }
+    @if (canAdd()) {
+      <button
+        pk-button
+        type="button"
+        variant="popkin"
+        size="md"
+        class="only-m-up"
+        (click)="newStory()"
+      >
+        <svg pk-icon name="plus" size="md"></svg>New story
+      </button>
+    }
+  </header>
+
+  @if (readOnly()) {
+    <div
+      pk-banner
+      slot="banner"
+      icon="lock"
+      heading="This Popkin has wrapped up."
+      text="The plan stays, but nobody can change it."
+    ></div>
+  }
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <div pk-board [loading]="true"></div>
+    }
+    @case ('off') {
+      <div class="stack">
+        <div
+          pk-empty-state
+          icon="power"
+          heading="Plan is switched off"
+          text="Popkin has turned this feature off for now. Nothing is lost: it comes back as it was when the feature is on again. Your host can ask Popkin to find out more."
+        >
+          <a pk-button variant="primary" size="md" [routerLink]="home()">
+            <svg pk-icon name="back" size="md"></svg>Back to {{ frame.name() }}
+          </a>
+        </div>
+      </div>
+    }
+    @case ('error') {
+      <div class="stack">
+        <div
+          pk-empty-state
+          icon="offline"
+          heading="We couldn’t load the plan"
+          text="It’s safe. Check your connection and try again."
+          [alert]="true"
+        >
+          <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+            <svg pk-icon name="retry" size="md"></svg>Try again
+          </button>
+        </div>
+      </div>
+    }
+    @case ('ready') {
+      @if (store.empty()) {
+        <div class="stack">
+          <div
+            pk-empty-state
+            heading="No stories yet"
+            text="A story is one job someone can own. Start with the big four and split them up as you go."
+          >
+            @if (!readOnly()) {
+              <div class="cluster">
+                @for (starter of starters; track starter) {
+                  <button pk-chip type="button" [outline]="true" (click)="newStory(starter)">
+                    <svg pk-icon name="plus" size="sm"></svg>{{ starter }}
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div pk-board>
+          @for (column of store.columns(); track column.key) {
+            <section
+              pk-board-column
+              [heading]="column.heading"
+              [count]="column.count"
+              [points]="column.points"
+              [hint]="column.hint"
+              [backlog]="column.backlog"
+            >
+              @for (story of column.stories; track story.id) {
+                <li>
+                  @if (readOnly()) {
+                    <div
+                      pk-story-card
+                      [heading]="story.title"
+                      [tag]="story.tag"
+                      [points]="story.points"
+                      [owner]="story.owner"
+                      [due]="story.due"
+                      [done]="story.done"
+                    ></div>
+                  } @else {
+                    <button
+                      pk-story-card
+                      type="button"
+                      [heading]="story.title"
+                      [tag]="story.tag"
+                      [points]="story.points"
+                      [owner]="story.owner"
+                      [due]="story.due"
+                      [done]="story.done"
+                      (click)="openStory(story.id)"
+                    ></button>
+                  }
+                </li>
+              }
+            </section>
+          }
+        </div>
+      }
+    }
+  }
+
+  @if (canAdd()) {
+    <button pk-fab slot="fab" type="button" class="only-below-m" (click)="newStory()">
+      New story
+    </button>
+  }
+
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    current="plan"
+    [popkinId]="popkinId()"
+    [name]="frame.name()"
+    [emoji]="frame.emoji()"
+    [members]="frame.members()"
+    [timeLeft]="frame.timeLeft()"
+    [unread]="unreadCount()"
+    [schedule]="frame.schedules()"
+    [plan]="frame.plan()"
+  ></nav>
+</div>

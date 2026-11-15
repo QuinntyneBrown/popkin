@@ -6,6 +6,7 @@ namespace Popkin.Application.Abstractions;
 public enum Feature
 {
     Schedules,
+    Plan,
 }
 
 /// <summary>

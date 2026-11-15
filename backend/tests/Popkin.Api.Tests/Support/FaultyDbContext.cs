@@ -70,6 +70,12 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<AuditEntry> AuditEntries => inner.AuditEntries;
 
+    public DbSet<Story> Stories => inner.Stories;
+
+    public DbSet<Sprint> Sprints => inner.Sprints;
+
+    public DbSet<PlanChange> PlanChanges => inner.PlanChanges;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

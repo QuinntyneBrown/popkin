@@ -17,6 +17,8 @@ import { EXPERIENCES_API } from '../experiences/experiences-api';
 import { PHOTOS_API } from '../photos/photos-api';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { SCHEDULE_API } from '../schedule/schedule-api';
+import { PLAN_API } from '../plan/plan-api';
+import { PlanSummaryView, StoryView } from '../../models/plan';
 import { ScheduleSummaryView } from '../../models/this-week';
 import { UnreadTracker } from '../chat/unread-tracker';
 import { PopkinHomeStore } from './popkin-home-store';
@@ -42,6 +44,7 @@ const home: PopkinHomeView = {
   unreadCount: 3,
   version: 1,
   schedules: false,
+  plan: false,
   event: null,
 };
 const mara: MemberView = {
@@ -76,9 +79,22 @@ class Fake {
     day: '2026-09-16',
     everyoneFreeFrom: '19:30',
   };
+  planSummary: PlanSummaryView | null | 'off' | 'down' = {
+    pointsLeft: 24,
+    behind: 7,
+    biggest: [story('Book the cabin at Pine Hollow', 8), story('Rent a 7-seat van', 5)],
+  };
   /** The days the summary was read from. */
   readonly summariesFrom: string[] = [];
-  readonly asked = { home: 0, preview: 0, photos: 0, experiences: 0, members: 0, summary: 0 };
+  readonly asked = {
+    home: 0,
+    preview: 0,
+    photos: 0,
+    experiences: 0,
+    members: 0,
+    summary: 0,
+    plan: 0,
+  };
 
   private answer<T>(key: keyof Fake['asked'], value: T | 'missing' | 'down'): Observable<T> {
     this.asked[key]++;
@@ -105,6 +121,18 @@ class Fake {
       ],
     });
   getSummary = () => this.answer('photos', this.photos);
+  /** `GET …/plan/summary`: null is its 204, `off` its 404 `feature_off`. */
+  planSummaryOf = () => {
+    this.asked.plan++;
+    const summary = this.planSummary;
+    if (summary === 'off') {
+      return throwError(
+        () => new HttpErrorResponse({ status: 404, error: { code: 'feature_off' } }),
+      );
+    }
+    if (summary === 'down') return throwError(() => new HttpErrorResponse({ status: 500 }));
+    return of(summary);
+  };
   summary = (_: string, from: string) => {
     this.summariesFrom.push(from);
     return this.answer('summary', this.scheduleSummary);
@@ -127,6 +155,7 @@ describe('PopkinHomeStore', () => {
     reconnected$: new Subject<void>(),
     popkinWrappedUp$: new Subject<string>(),
     popkinChanged$: new Subject<PopkinSettingsView>(),
+    planChanged$: new Subject<{ popkinId: string; version: number }>(),
     started: 0,
     start() {
       this.started++;
@@ -152,6 +181,7 @@ describe('PopkinHomeStore', () => {
         },
         { provide: POPKIN_REALTIME, useValue: realtime },
         { provide: SCHEDULE_API, useValue: api },
+        { provide: PLAN_API, useValue: { summary: () => api.planSummaryOf() } },
       ],
     });
     store = TestBed.inject(PopkinHomeStore);
@@ -480,6 +510,69 @@ describe('PopkinHomeStore', () => {
     });
   });
 
+  // L2-075 AC1, AC3: the home's Plan section.
+  describe('the Plan section', () => {
+    it('says the points left, how far behind, and the biggest open, while Plan is on', () => {
+      api.home = { ...home, plan: true };
+      store.open('p');
+      const plan = store.plan();
+      expect(plan.state).toBe('ready');
+      expect(plan.headline).toBe('24 pts left');
+      expect(plan.status).toBe('7 behind');
+      expect(plan.biggest.map((s) => s.title)).toEqual([
+        'Book the cabin at Pine Hollow',
+        'Rent a 7-seat van',
+      ]);
+    });
+
+    it('is not there, and not asked for, while Plan is off', () => {
+      store.open('p');
+      expect(store.plan().state).toBe('hidden');
+      expect(api.asked.plan).toBe(0);
+    });
+
+    it('is not there before the first story, nor once Plan is switched off', () => {
+      api.home = { ...home, plan: true };
+      api.planSummary = null;
+      store.open('p');
+      expect(store.plan().state).toBe('hidden');
+
+      api.planSummary = 'off';
+      store.retryPlan();
+      expect(store.plan().state).toBe('hidden');
+      expect(store.state()).toBe('ready');
+    });
+
+    it('fails on its own, and tries again (L2-056)', () => {
+      api.home = { ...home, plan: true };
+      api.planSummary = 'down';
+      store.open('p');
+      expect(store.plan().state).toBe('error');
+      expect(store.state()).toBe('ready');
+
+      api.planSummary = { pointsLeft: 0, behind: -9, biggest: [] };
+      store.retryPlan();
+      expect(store.plan()).toEqual({
+        state: 'ready',
+        headline: 'All done',
+        status: null,
+        biggest: [],
+      });
+    });
+
+    it('reads again when its Popkin’s plan changes (L2-068 AC12)', () => {
+      api.home = { ...home, plan: true };
+      store.open('p');
+      api.planSummary = { pointsLeft: 16, behind: -1, biggest: [] };
+
+      realtime.planChanged$.next({ popkinId: 'other', version: 2 });
+      expect(store.plan().headline).toBe('24 pts left');
+      realtime.planChanged$.next({ popkinId: 'p', version: 2 });
+      expect(store.plan().headline).toBe('16 pts left');
+      expect(store.plan().status).toBe('1 ahead');
+    });
+  });
+
   describe('the event (L2-085)', () => {
     it('holds the event the Host has just saved, and the one removed', () => {
       api.home = { ...home, schedules: true };
@@ -494,3 +587,19 @@ describe('PopkinHomeStore', () => {
     });
   });
 });
+
+function story(title: string, points: number): StoryView {
+  return {
+    id: title,
+    title,
+    column: 'ToDo',
+    points,
+    tag: 'Travel',
+    owner: null,
+    dueDate: null,
+    commentCount: 0,
+    addedByMembershipId: 'm-mara',
+    canDelete: true,
+    addedAt: '2026-08-30T09:00:00Z',
+  };
+}

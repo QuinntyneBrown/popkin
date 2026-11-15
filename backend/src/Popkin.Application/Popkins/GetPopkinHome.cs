@@ -18,7 +18,8 @@ public sealed record PopkinViewerDto(Guid MembershipId, string FirstName);
 /// in their direct messages of the Popkin (L2-019 AC1, AC7, L2-022 AC3); and, for the read-only states, when it wrapped up, whether its album is
 /// kept, and when its photos go or went (L2-045); the version that orders `PopkinChanged` (L2-020); and
 /// whether Schedules is on, which shows the Schedule tab (L2-072 AC1, L2-077 AC1), and the event while it
-/// is, which "Popkin settings" shows (L2-085 AC1).
+/// is, which "Popkin settings" shows (L2-085 AC1); and whether Plan is on, which shows the Plan tab
+/// (L2-068 AC1, L2-077 AC1).
 /// </summary>
 public sealed record PopkinHomeDto(
     Guid Id,
@@ -39,7 +40,8 @@ public sealed record PopkinHomeDto(
     DateTimeOffset? PhotosRemovedAt,
     long Version,
     bool Schedules,
-    EventDto? Event);
+    EventDto? Event,
+    bool Plan);
 
 /// <summary>The header of a Popkin's home, for any of its members (L2-019, L2-051 AC1).</summary>
 public sealed record GetPopkinHomeQuery(Guid PopkinId) : IRequest<PopkinHomeDto>;
@@ -79,6 +81,7 @@ public sealed class GetPopkinHomeQueryHandler(IAppDbContext db, IMembershipGuard
             popkin.Version,
             features.IsOn(Feature.Schedules),
             // While Schedules is off nothing of it shows; the event is kept (L2-077 AC5).
-            features.IsOn(Feature.Schedules) ? EventDto.Of(popkin) : null);
+            features.IsOn(Feature.Schedules) ? EventDto.Of(popkin) : null,
+            features.IsOn(Feature.Plan));
     }
 }

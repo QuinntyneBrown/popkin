@@ -18,13 +18,14 @@ const recorded: Record<string, RecordedResponse> = responses;
 const header = /^GET \/api\/popkins\/[0-9a-f-]{36}$/;
 
 /**
- * The recording is made with Schedules on (eng/Start-E2eApi.ps1). The screens of the earlier
- * journeys stand for a Popkin where it is off, as their mocks do (docs/mocks/README.md, 8), so the
- * recorded header is read with it off; a spec of Schedules answers the header itself.
+ * The recording is made with Schedules and Plan on (eng/Start-E2eApi.ps1). The screens of the
+ * earlier journeys stand for a Popkin where they are off, as their mocks do (docs/mocks/README.md,
+ * 8), so the recorded header is read with both off; a spec of Schedules or Plan answers the header
+ * itself.
  */
-function schedulesOff(key: string, body: unknown): unknown {
+function featuresOff(key: string, body: unknown): unknown {
   return header.test(key) && body && typeof body === 'object'
-    ? { ...body, schedules: false }
+    ? { ...body, schedules: false, plan: false }
     : body;
 }
 
@@ -70,7 +71,7 @@ export const test = base.extend<{ pk: Pk; unanswered: string[]; hub: Hub }>({
         await route.abort();
         return;
       }
-      await route.fulfill({ status: answer.status, json: schedulesOff(key, answer.body) });
+      await route.fulfill({ status: answer.status, json: featuresOff(key, answer.body) });
     });
     await use(page);
   },

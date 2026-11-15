@@ -1,0 +1,39 @@
+:host {
+  display: block;
+}
+
+.field__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font: var(--text-label);
+  color: var(--color-fg-default);
+}
+
+.field__hint {
+  margin: 0 0 var(--space-2);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.pts-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.pts-group__opt {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  height: var(--control-height-md);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+  font: var(--font-weight-extrabold) var(--font-size-md-plus) / 1 var(--font-family-display);
+}
+
+/* The chosen size says so in its colour and in aria-checked. */
+.pts-group__opt[aria-checked='true'] {
+  background: var(--accent);
+  color: var(--color-fg-on-popkin);
+}

@@ -2,6 +2,12 @@ import { ChangeLengthDialog } from '../pages/change-length.dialog';
 import { EditPopkinDialog } from '../pages/edit-popkin.dialog';
 import { settingsStates } from './settings-states';
 import { scheduleStates } from './schedule-states';
+import { planStates } from './plan-states';
+import { BurnDownPage } from '../pages/burn-down.page';
+import { PlanBoardPage } from '../pages/plan-board.page';
+import { NewStoryDialog } from '../pages/new-story.dialog';
+import { StoryDialog } from '../pages/story.dialog';
+import { DeleteStoryDialog } from '../pages/delete-story.dialog';
 import { AddTimeOffDialog } from '../pages/add-time-off.dialog';
 import { MyHoursDialog } from '../pages/my-hours.dialog';
 import { SetEventDialog } from '../pages/set-event.dialog';
@@ -204,6 +210,37 @@ const timeOffRegions = (page: Page) => {
 /** An error or the off screen: the mocks draw its empty state without the Schedule's frame. */
 const timeOffEmptyRegions = (page: Page) => ({
   header: new TimeOffPage(page).header,
+  state: page.locator('main .empty'),
+});
+const newStoryRegions = (page: Page) => {
+  const dialog = new NewStoryDialog(page);
+  return { header: dialog.heading, body: dialog.body, footer: dialog.footer };
+};
+const storyRegions = (page: Page) => {
+  const dialog = new StoryDialog(page);
+  return { header: dialog.heading, body: dialog.body, footer: dialog.footer };
+};
+const deleteStoryRegions = (page: Page) => {
+  const dialog = new DeleteStoryDialog(page);
+  return { header: dialog.heading, body: dialog.body, footer: dialog.footer };
+};
+const planBoardRegions = (page: Page) => {
+  const plan = new PlanBoardPage(page);
+  return { header: plan.header, board: plan.board };
+};
+/** The empty, error and off states: the mocks draw an empty state under the Plan's header. */
+const planEmptyRegions = (page: Page) => ({
+  header: new PlanBoardPage(page).header,
+  state: page.locator('main .empty'),
+});
+/** The burn-down: its header, and the chart with "Biggest open" (L2-071). */
+const burnDownRegions = (page: Page) => {
+  const burnDown = new BurnDownPage(page);
+  return { header: burnDown.header, burn: burnDown.burn };
+};
+/** The burn-down's empty, error and off states: an empty state under its header. */
+const burnDownEmptyRegions = (page: Page) => ({
+  header: new BurnDownPage(page).header,
   state: page.locator('main .empty'),
 });
 const thisWeekRegions = (page: Page) => {
@@ -1226,6 +1263,35 @@ export const screenStates: ScreenState[] = [
   { key: 'timeOffConfirmed', ...scheduleStates.timeOffConfirmed, regions: timeOffRegions },
   { key: 'timeOffOtherWeek', ...scheduleStates.timeOffOtherWeek, regions: timeOffRegions },
   { key: 'timeOffOff', ...scheduleStates.timeOffOff, regions: timeOffEmptyRegions },
+  { key: 'planBoard', ...planStates.planBoard, regions: planBoardRegions },
+  { key: 'planBoardLoading', ...planStates.planBoardLoading, regions: planBoardRegions },
+  { key: 'planBoardEmpty', ...planStates.planBoardEmpty, regions: planEmptyRegions },
+  { key: 'planBoardError', ...planStates.planBoardError, regions: planEmptyRegions },
+  { key: 'planBoardOff', ...planStates.planBoardOff, regions: planEmptyRegions },
+  { key: 'planBoardReadOnly', ...planStates.planBoardReadOnly, regions: planBoardRegions },
+  { key: 'burnDown', ...planStates.burnDown, regions: burnDownRegions },
+  { key: 'burnDownLoading', ...planStates.burnDownLoading, regions: burnDownRegions },
+  { key: 'burnDownEmpty', ...planStates.burnDownEmpty, regions: burnDownEmptyRegions },
+  { key: 'burnDownError', ...planStates.burnDownError, regions: burnDownEmptyRegions },
+  { key: 'burnDownOff', ...planStates.burnDownOff, regions: burnDownEmptyRegions },
+  { key: 'burnDownDone', ...planStates.burnDownDone, regions: burnDownRegions },
+  {
+    key: 'popkinHomePlan',
+    ...planStates.popkinHomePlan,
+    regions: (page) => ({ plan: new PopkinHomePage(page).plan }),
+  },
+  { key: 'newStory', ...planStates.newStory, regions: newStoryRegions },
+  { key: 'newStoryBusy', ...planStates.newStoryBusy, regions: newStoryRegions },
+  { key: 'newStoryInvalid', ...planStates.newStoryInvalid, regions: newStoryRegions },
+  { key: 'newStoryFailed', ...planStates.newStoryFailed, regions: newStoryRegions },
+  { key: 'story', ...planStates.story, regions: storyRegions },
+  { key: 'storyDone', ...planStates.storyDone, regions: storyRegions },
+  { key: 'storyBusy', ...planStates.storyBusy, regions: storyRegions },
+  { key: 'storyFailed', ...planStates.storyFailed, regions: storyRegions },
+  { key: 'storyNoDelete', ...planStates.storyNoDelete, regions: storyRegions },
+  { key: 'deleteStory', ...planStates.deleteStory, regions: deleteStoryRegions },
+  { key: 'deleteStoryBusy', ...planStates.deleteStoryBusy, regions: deleteStoryRegions },
+  { key: 'deleteStoryFailed', ...planStates.deleteStoryFailed, regions: deleteStoryRegions },
   { key: 'addTimeOff', ...scheduleStates.addTimeOff, regions: addTimeOffRegions },
   { key: 'addTimeOffBusy', ...scheduleStates.addTimeOffBusy, regions: addTimeOffRegions },
   { key: 'addTimeOffInvalid', ...scheduleStates.addTimeOffInvalid, regions: addTimeOffRegions },
@@ -1281,6 +1347,7 @@ export const screenStates: ScreenState[] = [
   { key: 'recap', ...wrapUpStates.recap, regions: recapRegions },
   { key: 'recapHost', ...wrapUpStates.recapHost, regions: recapRegions },
   { key: 'recapPlain', ...wrapUpStates.recapPlain, regions: recapRegions },
+  { key: 'recapPlan', ...wrapUpStates.recapPlan, regions: recapRegions },
   { key: 'recapExporting', ...wrapUpStates.recapExporting, regions: recapRegions },
   {
     key: 'recapLoading',

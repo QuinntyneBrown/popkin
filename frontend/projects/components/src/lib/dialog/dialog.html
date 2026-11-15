@@ -1,7 +1,7 @@
 <!-- Choosing outside closes it by pointer; the keyboard has Escape and Close (L2-057 AC2). -->
 
 <div class="backdrop" aria-hidden="true" (click)="ref.close()"></div>
-<div class="dialog">
+<div class="dialog" [class.dialog--panel]="panel()">
   <div class="dialog__panel">
     <div class="dialog__grip" aria-hidden="true"></div>
     <div class="dialog__header">

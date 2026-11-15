@@ -34,6 +34,7 @@ export class PopkinFrame {
     const popkin = this.popkin();
     return popkin ? membersLabel(popkin.memberCount) : '';
   });
+  readonly memberCount = computed(() => this.popkin()?.memberCount ?? 0);
   readonly timeLeft = computed(() => {
     const popkin = this.popkin();
     return popkin?.endsAt && popkin.status === 'Active'
@@ -45,6 +46,8 @@ export class PopkinFrame {
   readonly isHost = computed(() => this.popkin()?.viewerRole === 'Host');
   /** Whether Schedules is on; off until the Popkin is read (L2-077 AC1). */
   readonly schedules = computed(() => this.popkin()?.schedules ?? false);
+  /** Whether Plan is on; off until the Popkin is read (L2-077 AC1). */
+  readonly plan = computed(() => this.popkin()?.plan ?? false);
   /** "Wrapped up Sun 13 Sep". */
   readonly wrappedUpOn = computed(() => {
     const at = this.popkin()?.wrappedUpAt;

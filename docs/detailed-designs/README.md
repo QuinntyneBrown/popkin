@@ -93,6 +93,10 @@ audit [Learnings from BombRMan](../audits/learnings-from-bombrman.md), improveme
   version that only rises (a counter on the aggregate); the client keeps the highest version it
   has seen for that aggregate and drops anything older. A **fact event** is final and idempotent:
   applying it twice, or before the fact it refers to arrives, ends in the same state.
+- **A state event may carry its version alone** when its state is too large to send whole.
+  `PlanChanged(popkinId, version)` is one: the client reads the state again (the board, the
+  burn-down or the home's summary) when the version is above the one it holds, and drops it
+  otherwise ([Plan board](plan/plan-board/README.md)).
 - **State may be coalesced; an edge never is.** "The microphone is now off" replaces the state
   before it. A message, a WebRTC `offer`, `answer` or ICE `candidate` must each arrive: none is
   coalesced, deduplicated by content or dropped under load. When a limit is hit, the action
@@ -254,6 +258,12 @@ Each design follows the source named below and marks the conflict in its own REA
 | Schedules | [This week](schedules/this-week/README.md) | L2-074, L2-075 (AC2, AC3) |
 | Schedules | [Set the event](schedules/set-the-event/README.md) | L2-085, L2-020 |
 | Schedules | [Schedules switch](schedules/schedules-switch/README.md) | L2-077 |
+| Plan | [Plan board](plan/plan-board/README.md) | L2-068, L2-070 (AC5 to AC7) |
+| Plan | [Add a story](plan/add-a-story/README.md) | L2-069 |
+| Plan | [Change a story](plan/change-a-story/README.md) | L2-070 |
+| Plan | [Burn-down](plan/burn-down/README.md) | L2-071 |
+| Plan | [Plan on the home and in the recap](plan/plan-on-the-home-and-recap/README.md) | L2-075 (AC1, AC3, AC4) |
+| Plan | [Plan switch](plan/plan-switch/README.md) | L2-077 |
 | Admin access | [Admin sign in](admin-access/admin-sign-in/README.md) | L2-088, L2-078 |
 | Admin access | [The admin shell](admin-access/admin-shell/README.md) | L2-089, L2-078 |
 | Admin access | [Admin roles](admin-access/admin-roles/README.md) | L2-086 |
@@ -425,6 +435,8 @@ or design that settled it.
 | 94 | Whether Live calls lists direct calls; the design lists group calls only ([Live calls](admin-operations/live-calls/README.md)) | Live calls | |
 | 95 | The jobs' periods: Prepare album exports runs every 2 seconds in code, against "every 5 minutes" in L2-114, which would also break L2-046 AC4; the Jobs mock's periods differ from the code's; the Worker's 5-second poll of run requests is the design's proposal ([Jobs](admin-operations/jobs/README.md), [Album exports](admin-operations/album-exports/README.md)) | Jobs | |
 | 96 | Values the admin designs leave `<TO SUPPLY>`: the page size and search delay of People and Popkins; a person export's format, how long a ready export and a sent data request are kept, and whether downloading an export asks for its own reason (L2-100 AC5); how often a colliding invite code is drawn again; each limit's maximum; how a release is named; a banner's default and latest end, how many earlier banners are listed, whether suspended people count in its audience and how two publishes at once are kept apart; whether removing a chosen Popkin is confirmed, the Chosen dialog's copy with none chosen and a never-changed switch's copy; the reports rate limit, the queue's paging, what the moderation view shows of reactions and comments, which reason the author's notice names and the view job's tick; the copy of the Report dialog, the moderation view, the admin invite and code emails and the console's label outside production. Each design marks its own | The matching slices | |
+| 97 | Comments on a story. L2-068 says they come later; until they do, `StoryDto.commentCount` is always 0 and no card or dialog shows a count ([Plan board](plan/plan-board/README.md)) | Comments on a story; nothing of journey 21 | |
+| 98 | Editing the sprint, and more than one sprint. A Popkin has one sprint, "Planning sprint", from the day of its first story for 28 days, and nobody changes it (L2-068) ([Plan board](plan/plan-board/README.md)) | Nothing of journey 21 | |
 
 Settled so far:
 
@@ -434,6 +446,7 @@ Settled so far:
 | How a switched-off admin action is drawn | [Admin roles](admin-access/admin-roles/README.md), built in journey 24: `aria-disabled`, still focusable, ignoring activation, with the reason as its `title` (tooltip and accessible description) |
 | How many API instances run | [ADR 0009](../adr/0009-one-api-instance.md): one |
 | What the event of time off is, and who sets it | [Set the event](schedules/set-the-event/README.md): a label and a first and last day the Host sets from Popkin settings (L2-085), journey 22 |
+| How Plan keeps the points left of each day, and how Plan is switched | [Plan board](plan/plan-board/README.md): an append-only log, `PlanChange`, summed to the end of any day, with no job; [Plan switch](plan/plan-switch/README.md): `Features:Plan` behind `IFeatureSwitches` |
 | How Schedules is switched before the admin app exists | [Schedules switch](schedules/schedules-switch/README.md): the API setting `Features:Schedules` behind `IFeatureSwitches` ([ADR 0023](../adr/0023-features-switched-on-by-a-setting.md)); journey 23 moves it into the admin app behind the same interface |
 | Whose clock counts a day of the Schedule tab | [Time off](schedules/time-off/README.md): a day is a calendar date, the same for every member, and "today" is the viewer's, sent by the web app |
 | Whether TLS ends at a reverse proxy, and who serves the web app | [ADR 0013](../adr/0013-deployment-shape.md): the proxy does both |

@@ -23,6 +23,13 @@ parity('recap', [
     name: 'plain',
     region: (page) => new RecapPage(page).recap,
   },
+  // With Plan on, "The plan" counts the stories done (L2-075 AC4).
+  {
+    key: 'recapPlan',
+    ...wrapUpStates.recapPlan,
+    name: 'plan',
+    region: (page) => new RecapPage(page).plan,
+  },
   // The album is being prepared: the first action is busy, over the count.
   {
     key: 'recapExporting',

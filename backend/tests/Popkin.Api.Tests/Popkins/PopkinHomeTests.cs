@@ -41,7 +41,7 @@ public sealed class PopkinHomeTests
         Assert.Equal(0, home.GetProperty("unreadCount").GetInt32());
         Assert.Equal(
             [
-                "avatars", "colour", "emoji", "endsAt", "event", "id", "keepPhotos", "length", "memberCount", "name", "photosRemoveAt", "photosRemovedAt", "schedules",
+                "avatars", "colour", "emoji", "endsAt", "event", "id", "keepPhotos", "length", "memberCount", "name", "photosRemoveAt", "photosRemovedAt", "plan", "schedules",
                 "status", "unreadCount", "version", "viewer", "viewerRole", "wrappedUpAt",
             ],
             home.EnumerateObject().Select(p => p.Name).Order());

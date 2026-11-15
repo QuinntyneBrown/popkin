@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Plan switch
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Tabs from the header, off screen from feature_off")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Features:Plan, IFeatureSwitches")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Stories, sprint and its history, kept while off")
+}
+Rel(member, web, "Opens a Popkin", "HTTPS")
+Rel(web, api, "Reads the header, the board and the burn-down", "JSON/HTTPS")
+Rel(api, db, "Reads; never deletes on a switch", "EF Core")
+@enduml

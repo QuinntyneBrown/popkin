@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+h2 {
+  font: var(--text-h3);
+}
+
+.biggest__empty {
+  margin-top: var(--space-2);
+  color: var(--color-fg-muted);
+}
+
+@media (min-width: 64rem) {
+  :host {
+    flex: none;
+    width: 20rem;
+  }
+}
+
+@media (min-width: 80rem) {
+  :host {
+    width: 22.5rem;
+  }
+}

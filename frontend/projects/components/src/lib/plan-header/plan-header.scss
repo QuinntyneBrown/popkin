@@ -35,6 +35,11 @@ h1 {
   gap: var(--space-2);
 }
 
+/* No actions, as while the board loads: the row takes no gap for them. */
+.plan-header__actions:empty {
+  display: none;
+}
+
 @media (min-width: 40rem) {
   .plan-header__row {
     flex-direction: row;

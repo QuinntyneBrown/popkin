@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Plan board
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Plan board page, PlanBoardStore")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET .../plan, hub event PlanChanged")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Story, Sprint, PlanChange")
+}
+Rel(member, web, "Opens the Plan tab", "HTTPS")
+Rel(web, api, "Reads the board", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads stories, the sprint and its changes", "EF Core")
+Rel(api, web, "PlanChanged(popkinId, version)", "SignalR")
+@enduml

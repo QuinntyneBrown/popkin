@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Change a story
+
+Person(member, "Member", "Moves, changes and marks stories done")
+Person(remover, "Remover", "Who added the story, its owner or the Host")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences, plan and schedules")
+
+Rel(member, popkin, "Changes stories in")
+Rel(remover, popkin, "Deletes a story in")
+@enduml

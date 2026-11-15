@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Plan board
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "PlanBoardPage", "Angular page", "Header, chip, board, empty, error, off, read-only")
+  Component(store, "PlanBoardStore", "api library", "State; reads again on a higher PlanChanged, reconnected$ and every minute")
+  Component(text, "plan-text.ts, sparkline.ts", "api library, pure", "Sub-line, counts, labels, the sparkline's path")
+  Component(client, "HttpPlanApi", "Behind PLAN_API", "board")
+  Component(rt, "SignalRPopkinRealtime", "api library", "planChanged, reconnected$")
+  Component(ui, "pk-plan-header, pk-view-nav, pk-sprint-chip, pk-sparkline, pk-board, pk-board-column, pk-story-card", "components library", "Presentation")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PlanController", "ASP.NET Core controller", "GET .../plan")
+  Component(query, "GetPlanBoardQueryHandler", "MediatR handler", "Sprint, stories, progress, version")
+  Component(history, "PlanHistory", "Domain, pure", "Points left by day, ideal, behind")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "404 feature_off")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 popkin_not_found")
+  Component(notifier, "IPopkinNotifier", "Application abstraction", "PlanChanged to the Popkin group")
+  ComponentDb(db, "Popkin database", "SQL Server", "Story, Sprint, PlanChange")
+}
+Rel(page, store, "Opens")
+Rel(page, ui, "Composes")
+Rel(store, text, "Formats with")
+Rel(store, client, "board")
+Rel(store, rt, "Listens")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(ctrl, query, "Sends GetPlanBoardQuery")
+Rel(query, switches, "Requires Plan")
+Rel(query, guard, "Requires membership")
+Rel(query, history, "Computes progress with")
+Rel(query, db, "Reads")
+Rel(notifier, rt, "PlanChanged", "SignalR")
+@enduml

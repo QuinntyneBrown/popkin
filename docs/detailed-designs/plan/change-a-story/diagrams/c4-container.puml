@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Change a story
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Story dialog, Delete this story?")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "PUT, PUT .../column, DELETE .../plan/stories/{storyId}; PlanChanged")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Story, Sprint, PlanChange")
+}
+Rel(member, web, "Chooses a card, moves, saves or deletes", "HTTPS")
+Rel(web, api, "Sends the change", "JSON/HTTPS, session cookie")
+Rel(api, db, "Updates or deletes the story, appends a PlanChange", "EF Core")
+Rel(api, web, "PlanChanged to every member", "SignalR")
+@enduml

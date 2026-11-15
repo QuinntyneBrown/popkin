@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Burn-down
+
+Person(member, "Member", "Wants to know whether the plan is on track")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences, plan and schedules")
+
+Rel(member, popkin, "Reads the burn-down and the forecast in")
+@enduml

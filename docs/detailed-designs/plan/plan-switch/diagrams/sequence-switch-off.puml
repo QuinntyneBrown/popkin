@@ -1,0 +1,37 @@
+@startuml
+title UML sequence behaviour — The switch goes off
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PlanBoardPage" as page
+  participant "PlanBoardStore" as store
+  participant "HttpPlanApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlanController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SettingsFeatureSwitches" as switches
+  participant "GetPlanBoardQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+note over switches : The owner sets Features:Plan to false
+store -> store : A minute after the last read (L2-077 AC4)
+store -> client : board(popkinId)
+client -> controller : GET /api/popkins/{popkinId}/plan
+controller -> handler : Send GetPlanBoardQuery
+handler -> switches : Require(Plan)
+switches --> controller : 404 feature_off (L2-077 AC3)
+controller --> client : 404 ProblemDetails code feature_off
+store --> page : state off
+page --> actor : "Plan is switched off", "Back to Cabin Week ’27" (L2-077 AC2)
+note over db : Stories, the sprint and its history stay (L2-077 AC5)
+actor -> page : Any other screen of the Popkin
+page --> actor : The header says plan false: no Plan tab, Schedule follows Chat (L2-077 AC1)
+@enduml

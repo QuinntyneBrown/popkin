@@ -51,6 +51,16 @@ export class PopkinHomePage {
   readonly currentTab: Locator;
   readonly chatTab: Locator;
   readonly scheduleTab: Locator;
+  /** "Plan": the points left, how far behind, the biggest open stories (L2-075 AC1). */
+  readonly plan: Locator;
+  readonly planCard: Locator;
+  readonly planList: Locator;
+  readonly planHeadline: Locator;
+  readonly planStatus: Locator;
+  readonly planBiggest: Locator;
+  readonly planSeeAll: Locator;
+  /** The Plan tab, while Plan is on (L2-068 AC1). */
+  readonly planTab: Locator;
   readonly unreadCount: Locator;
   readonly sidebarTimeLeft: Locator;
   /** The Popkin's name and emoji in the sidebar, from 1024 px. */
@@ -112,6 +122,13 @@ export class PopkinHomePage {
     this.scheduleCard = this.schedule.locator('a.card');
     this.scheduleLine = this.scheduleCard.locator('.row__title');
     this.scheduleSeeAll = this.schedule.getByRole('link', { name: 'See all of this week' });
+    this.plan = this.section('Plan');
+    this.planCard = this.plan.locator('.card');
+    this.planList = this.plan.getByRole('list', { name: 'Biggest open' });
+    this.planHeadline = this.planCard.locator('strong');
+    this.planStatus = this.planCard.locator('.text-accent');
+    this.planBiggest = this.planList.locator('li');
+    this.planSeeAll = this.plan.getByRole('link', { name: 'See all of the plan' });
     this.memberRows = this.members.getByRole('listitem');
     this.memberNames = this.members.locator('.row__main');
     this.hostLabel = this.memberRows.first().locator('.row__role');
@@ -123,6 +140,7 @@ export class PopkinHomePage {
     this.currentTab = this.nav.locator('ul a[aria-current="page"]');
     this.chatTab = this.nav.getByRole('link', { name: /^Chat/ });
     this.scheduleTab = this.nav.getByRole('link', { name: 'Schedule', exact: true });
+    this.planTab = this.nav.getByRole('link', { name: 'Plan', exact: true });
     this.unreadCount = this.nav.locator('.badge [aria-hidden="true"]');
     this.sidebarTimeLeft = this.nav.locator('.time-left');
     this.sidebarName = this.nav.locator('.popkin-nav__id-text strong');

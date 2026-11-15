@@ -1,0 +1,36 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Change a story
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "PlanBoardPage", "Angular page", "Opens the story; apply or remove")
+  Component(dialog, "StoryDialog", "CDK dialog", "Fields, due date, move, Mark done, Save, Delete")
+  Component(confirm, "DeleteStoryDialog", "CDK dialog", "Delete this story?")
+  Component(store, "PlanBoardStore", "api library", "apply(story), remove(storyId)")
+  Component(text, "plan-text.ts", "api library, pure", "nextMove, storySummary")
+  Component(client, "HttpPlanApi", "Behind PLAN_API", "saveStory, moveStory, deleteStory")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PlanController", "ASP.NET Core controller", "PUT, PUT column, DELETE; rate-limited")
+  Component(handlers, "SaveStory, MoveStory, DeleteStory handlers", "MediatR handlers", "Change or delete one story")
+  Component(input, "StoryInput", "Application", "400 invalid_story")
+  Component(plan, "PlanStories", "Application", "404 story_not_found, PlanChange, version, PlanChanged")
+  Component(story, "Story", "Domain", "Change, MoveTo, CanBeRemovedBy")
+  Component(guard, "IMembershipGuard", "Application abstraction", "409 popkin_wrapped_up")
+  ComponentDb(db, "Popkin database", "SQL Server", "Story, Sprint, PlanChange")
+}
+Rel(page, dialog, "Opens")
+Rel(dialog, confirm, "Opens")
+Rel(dialog, text, "Words from")
+Rel(dialog, client, "saveStory, moveStory")
+Rel(confirm, client, "deleteStory")
+Rel(page, store, "apply, remove")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(ctrl, handlers, "Sends")
+Rel(handlers, guard, "Requires an active membership")
+Rel(handlers, input, "Checks a save with")
+Rel(handlers, story, "Changes; 403 not_your_story")
+Rel(handlers, plan, "Saves through")
+Rel(plan, db, "Saves")
+@enduml

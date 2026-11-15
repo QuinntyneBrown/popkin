@@ -24,8 +24,9 @@ switch the admin app keeps, Off, on for chosen Popkins or on for everyone, behin
 ### Screens and states
 
 - Every screen of a Popkin shows the tabs Home, Chat, Schedule, Photos and Experiences when
-  Schedules is on, and Home, Chat, Photos and Experiences when it is off (L2-077 AC1). Plan is not
-  built, so Schedule follows Chat (L2-072 AC1).
+  Schedules is on, and Home, Chat, Photos and Experiences when it is off (L2-077 AC1). Schedule
+  follows Plan when Plan is on, and Chat when it is off (L2-072 AC1,
+  [Plan switch](../../plan/plan-switch/README.md)).
 - `docs/mocks/pages/time-off/off.html` — "Schedules is switched off", that the Popkin's host can
   ask Popkin to find out more, and "Back to Cabin Week ’27"; no time off or hours (L2-077 AC2).
   This week shows the same.
@@ -50,7 +51,8 @@ switch the admin app keeps, Off, on for chosen Popkins or on for everyone, behin
 ### Frontend (`frontend/projects/`)
 
 - **`PopkinFrame.schedules`** — from the header; false until it is read and when it fails.
-- **`pk-popkin-nav`** — input `schedule` (bool) adds the Schedule tab between Chat and Photos,
+- **`pk-popkin-nav`** — input `schedule` (bool) adds the Schedule tab between Plan (or Chat while
+  Plan is off) and Photos,
   with the calendar icon; `current` gains `'schedule'`.
 - **Every page with tabs** passes `[schedule]="frame.schedules()"`.
 - **`TimeOffStore`, `ThisWeekStore`** — a `404` `feature_off` is the state `off`; the page shows

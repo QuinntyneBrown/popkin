@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Plan on the home and in the recap
+
+Container_Boundary(web, "Popkin web app") {
+  Component(home, "PopkinHomePage", "Angular page", "Plan section when shown")
+  Component(homeStore, "PopkinHomeStore", "api library", "plan(): shown, points left, badge, biggest")
+  Component(recap, "RecapStore", "api library", "storiesLine")
+  Component(text, "plan-text.ts", "api library, pure", "homeLine, badge, recapLine")
+  Component(frame, "PopkinFrame", "api library", "plan from the header")
+  Component(ui, "pk-section, pk-plan-card, pk-recap", "components library", "Presentation")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PlanController", "ASP.NET Core controller", "GET summary, 204 with no story")
+  Component(summary, "GetPlanSummaryQueryHandler", "MediatR handler", "Points left, behind, biggest")
+  Component(recapQuery, "GetRecapQueryHandler", "MediatR handler", "stories: Done, Made, or null")
+  Component(history, "PlanHistory", "Domain, pure", "Behind for today")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "Require, IsOn")
+}
+Rel(home, homeStore, "Reads")
+Rel(home, ui, "Composes")
+Rel(homeStore, frame, "Asks only when plan is on")
+Rel(homeStore, text, "Formats with")
+Rel(recap, text, "Formats with")
+Rel(homeStore, ctrl, "GET summary", "HTTPS JSON")
+Rel(ctrl, summary, "Sends GetPlanSummaryQuery")
+Rel(summary, switches, "Require(Plan)")
+Rel(summary, history, "Computes with")
+Rel(recapQuery, switches, "IsOn(Plan)")
+Rel(recap, recapQuery, "GET recap", "HTTPS JSON")
+@enduml
