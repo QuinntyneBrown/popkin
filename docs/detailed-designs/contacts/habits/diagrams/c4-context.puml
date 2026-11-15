@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Habits
+
+Person(person, "Person", "Signed in to Popkin; owns their Contacts")
+Person_Ext(contact, "Contact", "Someone the person keeps a rhythm with; told nothing")
+System(popkin, "Popkin", "Pop-up communities, with Contacts: the person's own address book")
+
+Rel(person, popkin, "Starts habits and says when one was kept in", "Popkin web app")
+Rel(popkin, person, "Reminds when a habit is due or slips (Reminders, gap 104)")
+Rel(person, contact, "Calls, meets and catches up with")
+@enduml

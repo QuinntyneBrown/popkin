@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — People
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactsPeoplePage", "Angular page", "pk-search-field, pk-filter-chips, pk-closest, pk-contact-row")
+  Component(store, "PeopleStore", "api library", "search, circle; counts, closest, shown, noResults")
+  Component(text, "people-text.ts", "api library", "matchesName, next-date line, Last talked")
+  Component(frame, "ContactsFrame", "api library", "Count line for the page head")
+  Component(client, "CONTACTS_API", "api library contract", "people(on)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsController", "ASP.NET Core controller", "GET api/contacts/people")
+  Component(handler, "GetPeopleQueryHandler", "MediatR handler", "Contacts with next key date and last talk")
+  Component(occ, "KeyDate.NextOccurrence", "Domain", "Next occurrence on or after on")
+  Component(owned, "OwnedQueries.OwnedBy", "Application", "WHERE OwnerId = caller")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contact, KeyDate, TimelineEntry")
+}
+Rel(page, store, "Reads state; sets search and circle")
+Rel(page, frame, "Count line")
+Rel(store, text, "matchesName")
+Rel(store, client, "people(device day)")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetPeopleQuery")
+Rel(handler, owned, "Every read")
+Rel(handler, occ, "Next key date")
+Rel(owned, db, "Filtered reads", "EF Core")
+@enduml

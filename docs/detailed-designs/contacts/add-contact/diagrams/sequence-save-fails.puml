@@ -1,0 +1,57 @@
+@startuml
+title UML sequence behaviour — The save is refused or fails
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactFormPage" as page
+  participant "ContactFormStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddContactCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : "Save"
+alt No name
+  page -> store : save()
+  store --> page : invalid
+  page --> actor : "One thing to fix", "Name: add a name so you can find them later." (L2-129 AC4)
+else Offline
+  store -> outbox : enqueue
+  outbox --> actor : "You're offline", "What you add is kept on this phone and saved when you're back." (L2-123 AC4)
+else Sent
+  store -> outbox : enqueue
+  outbox -> client : addContact(request, photo)
+  client -> controller : POST /api/contacts/people
+  controller -> handler : Send AddContactCommand
+  handler -> photos : SaveAsync(avatar)
+  handler -> db : SaveChangesAsync
+  db --> handler : Exception
+  handler -> photos : DeleteAsync(avatar key)
+  handler --> controller : 500, nothing saved
+  controller --> client : ProblemDetails
+  client --> store : failed
+  store --> page : Every value and the photo kept
+  page --> actor : "We couldn't save Femi. Everything you typed is still here. Check your connection and try Save again." (L2-129 AC6)
+end
+@enduml

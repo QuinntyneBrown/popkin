@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Follow-ups
+
+Person(person, "Person", "Signed in to Popkin; owns their Contacts")
+Person_Ext(contact, "Contact", "Someone the person keeps in Contacts; told nothing")
+System(popkin, "Popkin", "Pop-up communities, with Contacts: the person's own address book")
+
+Rel(person, popkin, "Lists, adds and ticks off follow-ups in", "Popkin web app")
+Rel(person, contact, "Does what they said they would for")
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Follow-ups
+
+Person(person, "Person", "Owns their Contacts")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Follow-ups page, FollowUpsStore, ContactsOutbox")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/contacts/follow-ups")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "FollowUp, Contact, TimelineEntry")
+}
+Rel(person, web, "Opens /contacts/follow-ups", "HTTPS")
+Rel(web, api, "GET, POST /api/contacts/follow-ups; PUT .../{id}/done", "JSON/HTTPS")
+Rel(api, db, "Reads and writes the owner's follow-ups", "EF Core")
+@enduml

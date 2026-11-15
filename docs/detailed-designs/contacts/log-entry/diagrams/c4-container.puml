@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Log a conversation or milestone
+
+Person(owner, "Person", "Logs what passes with a contact")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Log page, profile tabs, ContactsOutbox")
+  Container(api, "Popkin API", "ASP.NET Core", "/api/contacts/** endpoints")
+  ContainerDb(db, "Popkin database", "SQL Server", "TimelineEntry, FollowUp, KeyDate")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "Milestone photos")
+}
+Rel(owner, web, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON or multipart/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, store, "Saves and signs addresses", "HTTPS")
+@enduml

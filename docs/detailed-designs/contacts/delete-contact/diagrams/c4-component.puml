@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Delete a contact
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactProfilePage, ContactFormPage", "Angular pages", "Open the dialog")
+  Component(dialog, "DeleteContactDialog", "CDK dialog", "idle, busy, failed")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsPeopleController", "ASP.NET Core controller", "/api/contacts/people/{contactId}")
+  Component(handler, "DeleteContactCommandHandler", "MediatR handler", "One save, then the files")
+  Component(guard, "IContactGuard", "Application", "RequireOwnedAsync; 404 contact_not_found")
+  Component(removal, "ContactRemoval", "Application", "Tables that hold a contact's rows")
+  Component(photos, "IPhotoStore", "Application abstraction", "DeleteAsync(key)")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contacts tables")
+}
+Rel(page, dialog, "Opens with id, first name, counts")
+Rel(dialog, client, "deleteContact(contactId)")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, handler, "Sends DeleteContactCommand")
+Rel(handler, guard, "Checks ownership")
+Rel(handler, removal, "Lists the rows")
+Rel(handler, db, "Removes and saves once", "EF Core")
+Rel(handler, photos, "Deletes each file after the save")
+@enduml

@@ -183,7 +183,8 @@ depends on one says so.
     - A profile's key date is "Birthday", not "Grace's birthday".
     - A milestone's yearly date nudges "on the day", the Milestones default (L2-134, L2-139).
     - A habit's rhythm is "Weekly", "Every 2 weeks" or "Monthly", as New habit offers; the list's
-      "Every Sunday" and "First Saturday of the month" became "Weekly" and "Monthly", and New
+      "Every Sunday", "Every month" and "First Saturday of the month" became "Weekly" and
+      "Monthly", "Sunday call with Mum" became "Sunday call with Ada", and New
       habit no longer says "On Wednesdays" (L2-145).
     - A connection reads in the person's own words ("Married", "Partner"), not "Chidi is his
       husband".
@@ -192,12 +193,13 @@ depends on one says so.
     - The date reminder's message no longer says "You asked to hear a week ahead".
     - A contact is named, never given a pronoun, since nobody enters one ("Keep Chidi",
       "Grace is into") (L2-122 AC4).
+    - A memory on the timeline reads as its caption ("Hot sauce night"), with no note of its own.
     - Groups has a Clubs heading only when a club exists (L2-146); the mocks draw none.
     - On a phone, Connections is reached from Groups; People's "Connections" shows from medium
       screens.
 
     What the mocks leave unsaid is open in `docs/detailed-designs/README.md`, Known gaps 99 to
-    110, and no requirement assumes it. Sam's and Joel's "It's been a while" chips open Chidi's
+    118, and no requirement assumes it. Sam's and Joel's "It's been a while" chips open Chidi's
     log, like the other undrawn profiles; each opens a log for that person (L2-125 AC7).
 
 ## Checking and screenshots

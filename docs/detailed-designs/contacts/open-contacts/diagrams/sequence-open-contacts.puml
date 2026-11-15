@@ -1,0 +1,57 @@
+@startuml
+title UML sequence behaviour — A person opens Contacts
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Signed-in person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "MyPopkinsPage" as my
+  participant "ContactsTodayPage" as page
+  participant "pk-popkin-nav" as nav
+  participant "ContactsFrame" as frame
+  participant "lateOrDueToday" as late
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetContactsSummaryQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> my : Chooses "Contacts" (L2-121 AC1)
+my -> page : Navigate to /contacts (L2-121 AC2)
+page -> frame : refresh()
+frame -> client : summary()
+client -> controller : GET /api/contacts/summary
+controller -> handler : Send GetContactsSummaryQuery
+handler -> db : Count Contact where OwnerId = PersonId
+db --> handler : 13
+handler --> controller : ContactsSummaryDto
+alt Request fails
+  controller --> client : Error or no answer
+  frame --> nav : Keeps the last counts
+else Answered
+  controller --> client : 200 { people: 13 }
+  frame -> client : followUps()
+  client --> frame : GET /api/contacts/follow-ups (Follow-ups design)
+  frame -> late : lateOrDueToday(followUps, device day)
+  late --> frame : 2
+  frame -> nav : members "13 people · only you", due 2
+  nav --> actor : Today current; badge "2 follow-ups late or due today" (L2-121 AC3, AC5)
+end
+note over nav : On a phone: Today, People, Dates, Follow-ups and Groups (L2-121 AC4)
+@enduml

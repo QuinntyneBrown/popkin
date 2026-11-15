@@ -1,0 +1,63 @@
+@startuml
+title UML sequence behaviour — The map, a focus and a filter
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsConnectionsPage" as page
+  participant "ConnectionsStore" as store
+  participant "linesFor" as rules
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ConnectionsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetConnectionMapQueryHandler" as handler
+  participant "Connection" as second
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Opens /contacts/connections
+page -> store : load()
+store -> client : connectionMap()
+client -> controller : GET /api/contacts/connections
+controller -> handler : Send GetConnectionMapQuery
+handler -> db : Connections and their contacts where OwnerId = PersonId (L2-122 AC1)
+handler --> controller : ConnectionMapDto
+alt Read fails
+  controller --> client : Error
+  page --> actor : "We couldn’t load your connections", "Try again"
+else No connections
+  page --> actor : "Your map starts with you", "Connect two people" (L2-149 AC5)
+else Connections
+  controller --> client : 200
+  client --> store : ConnectionMapDto
+  store -> rules : linesFor(connections, everyone, none)
+  page --> actor : "You" at the centre, a face per contact, "Tap anyone to see their people" (L2-149 AC1, AC2)
+  actor -> page : Chooses Chidi
+  page -> store : choose(Chidi)
+  store -> rules : linesFor(connections, filter, Chidi)
+  page --> actor : Chidi's lines on, the rest dim; panel "Chidi Okafor", "Brother", "Tomás Reyes · Married" (L2-149 AC3)
+  actor -> page : Chooses Chidi again, or "Clear the focus"
+  page -> store : choose(Chidi) or clear()
+  page --> actor : Everyone shown
+  actor -> page : "Family"
+  page -> store : filter = family
+  store -> rules : linesFor(connections, family, none)
+  page --> actor : Only Family and Partner lines (L2-149 AC4)
+end
+@enduml

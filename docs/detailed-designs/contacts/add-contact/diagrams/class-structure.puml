@@ -1,0 +1,112 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Add or edit someone
+
+package "Popkin.Domain" {
+  class Contact {
+    +Guid Id
+    +Guid OwnerId
+    +Guid ClientId
+    +string Name
+    +string? PhotoKey
+    +{static} Create(ownerId, clientId, name, details, now): Contact
+    +ChangeDetails(details: ContactDetails): void
+    +ChangePhoto(key: string): void
+  }
+  class ContactDetails <<record>> {
+    +string? KnownAs
+    +ContactCircle? Circle
+    +string? Phone
+    +string? Email
+    +string? City
+    +string[] Loves
+  }
+  class KeyDate {
+    +Guid Id
+    +Guid ContactId
+    +KeyDateKind Kind
+    +string? Title
+    +int Day
+    +int Month
+    +int? Year
+    +bool EveryYear
+    +ReminderLead Lead
+  }
+  enum ReminderLead {
+    OnTheDay
+    OneDayBefore
+    ThreeDaysBefore
+    OneWeekBefore
+    TwoWeeksBefore
+    OneMonthBefore
+  }
+  class Connection {
+    +Guid Id
+    +Guid ContactId
+    +Guid OtherContactId
+    +ConnectionKind Kind
+    +string Words
+  }
+  class ContactGroupMember {
+    +Guid GroupId
+    +Guid ContactId
+  }
+  class ContactRules <<static>>
+}
+package "Popkin.Application" {
+  class SaveContactRequest {
+    +Guid ClientId
+    +string Name
+    +ContactCircle? Circle
+    +string[] Loves
+    +KeyDateDraftDto[] KeyDates
+    +ConnectionDraftDto[] Connections
+    +Guid[] GroupIds
+  }
+  class AddContactCommand {
+    +SaveContactRequest Request
+    +UploadedFile? Photo
+  }
+  class EditContactCommand {
+    +Guid ContactId
+    +SaveContactRequest Request
+  }
+  class AddContactCommandHandler {
+    +Handle(command): Task<ContactProfileDto>
+  }
+  class EditContactCommandHandler {
+    +Handle(command): Task<ContactProfileDto>
+  }
+  class SaveContactValidator
+  interface IContactGuard
+  interface IPhotoProcessor
+  interface IPhotoStore
+}
+Contact *-- ContactDetails
+Contact "1" *-- "*" KeyDate
+KeyDate --> ReminderLead
+Contact "1" o-- "*" Connection
+Contact "1" o-- "*" ContactGroupMember
+AddContactCommand --> SaveContactRequest
+EditContactCommand --> SaveContactRequest
+AddContactCommandHandler ..> AddContactCommand : handles
+EditContactCommandHandler ..> EditContactCommand : handles
+SaveContactValidator ..> ContactRules
+AddContactCommandHandler ..> SaveContactValidator
+EditContactCommandHandler ..> SaveContactValidator
+AddContactCommandHandler ..> IContactGuard
+EditContactCommandHandler ..> IContactGuard
+AddContactCommandHandler ..> IPhotoProcessor
+AddContactCommandHandler ..> IPhotoStore
+AddContactCommandHandler --> Contact : creates
+EditContactCommandHandler --> Contact : changes
+@enduml

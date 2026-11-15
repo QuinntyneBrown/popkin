@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Reminders
+
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "SendContactRemindersJob", "PeriodicJob", "Sends one command per tick")
+}
+Container_Boundary(app, "Popkin Application") {
+  Component(handler, "SendContactRemindersCommandHandler", "MediatR handler", "Decides what is due; adds reminders once; sends")
+  Component(clock, "IOwnerClock", "Application service", "The owner's 9 am and Monday")
+  Component(pushSender, "IPhoneNotificationSender", "Port", "<TO SUPPLY> implementation")
+  Component(mail, "IContactsEmailSender", "Port", "Week-ahead email by Azure Communication Services")
+  Component(metrics, "PopkinMetrics", "Meter Popkin", "Sent, failures, lateness, last tick")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactRemindersController", "ASP.NET Core controller", "GET reminders, POST dismissal")
+  Component(read, "GetContactRemindersQueryHandler", "MediatR handler", "Owner's undismissed reminders")
+  Component(dismiss, "DismissContactReminderCommandHandler", "MediatR handler", "Dismisses one")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "ContactReminder, ContactWeeklyEmail")
+Rel(job, handler, "Sends SendContactRemindersCommand")
+Rel(handler, clock, "LocalNow(ownerId)")
+Rel(handler, db, "Reads due dates, writes reminders", "EF Core")
+Rel(handler, pushSender, "SendAsync")
+Rel(handler, mail, "SendWeekAheadAsync")
+Rel(handler, metrics, "Records")
+Rel(ctrl, read, "Sends GetContactRemindersQuery")
+Rel(ctrl, dismiss, "Sends DismissContactReminderCommand")
+Rel(read, db, "Reads", "EF Core")
+Rel(dismiss, db, "Writes", "EF Core")
+@enduml

@@ -1,0 +1,92 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — People
+
+package "Popkin.Domain" {
+  enum ContactCircle {
+    Family
+    Friends
+    Work
+    Neighbours
+    Clubs
+  }
+  class Contact {
+    +Guid OwnerId
+    +string Name
+    +string KnownAs
+    +ContactCircle Circle
+    +bool IsClosest
+    +string? PhotoKey
+  }
+  class KeyDate {
+    +Guid ContactId
+    +NextOccurrence(on: DateOnly): DateOnly?
+  }
+}
+package "Popkin.Application" {
+  class GetPeopleQuery {
+    +DateOnly On
+  }
+  class GetPeopleQueryHandler {
+    +Handle(query: GetPeopleQuery): Task<PeopleDto>
+  }
+  class PeopleDto {
+    +ContactRowDto[] Contacts
+  }
+  class ContactRowDto {
+    +Guid Id
+    +string Name
+    +string FirstName
+    +string KnownAs
+    +ContactCircle Circle
+    +bool IsClosest
+    +string? PhotoUrl
+    +string Initials
+    +string Accent
+    +NextDateDto? NextDate
+    +DateOnly? LastTalkedOn
+    +int? LastTalkedDays
+  }
+  class NextDateDto {
+    +int Month
+    +int Day
+    +KeyDateKind Kind
+    +string Title
+    +int InDays
+  }
+}
+package "Popkin web app (api library)" {
+  class PeopleStore {
+    +state: ContactsPageState
+    +search: WritableSignal<string>
+    +circle: WritableSignal<ContactCircle | all>
+    +counts: Signal<Record<string, number>>
+    +closest: Signal<ContactRowDto[]>
+    +shown: Signal<ContactRowDto[]>
+    +listName: Signal<string>
+    +noResults: Signal<boolean>
+    +retry(): void
+  }
+  class PeopleText {
+    +matchesName(contact, text): boolean
+  }
+}
+Contact --> ContactCircle
+GetPeopleQueryHandler ..> GetPeopleQuery : handles
+GetPeopleQueryHandler ..> Contact : OwnedBy(caller)
+GetPeopleQueryHandler ..> KeyDate : soonest NextOccurrence(On)
+GetPeopleQueryHandler ..> PeopleDto : returns
+PeopleDto *-- ContactRowDto
+ContactRowDto *-- NextDateDto
+PeopleStore ..> PeopleDto
+PeopleStore ..> PeopleText
+@enduml

@@ -1,0 +1,116 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Log a conversation or milestone
+
+package "Popkin.Domain" {
+  enum TimelineEntryKind {
+    Conversation
+    Milestone
+  }
+  enum TalkChannel {
+    InPerson
+    Phone
+    Video
+    Messages
+  }
+  enum MilestoneKind {
+    NewJob
+    Wedding
+    NewBaby
+    Moved
+    Graduated
+    SomethingElse
+  }
+  class TimelineEntry {
+    +Guid Id
+    +Guid OwnerId
+    +Guid ContactId
+    +Guid ClientId
+    +TimelineEntryKind Kind
+    +TalkChannel? Channel
+    +MilestoneKind? MilestoneKind
+    +DateTimeOffset OccurredAt
+    +string? Title
+    +string Note
+    +string? PhotoKey
+    +string? ThumbnailKey
+    +{static} LogConversation(...): TimelineEntry
+    +{static} LogMilestone(...): TimelineEntry
+  }
+  class FollowUp {
+    +Guid Id
+    +Guid ContactId
+    +string Text
+    +DateOnly DueOn
+    +bool IsPromise
+    +Guid? SourceEntryId
+    +DateTimeOffset? DoneAt
+    +{static} Promise(entry: TimelineEntry, text: string, dueOn: DateOnly): FollowUp
+  }
+  class KeyDate {
+    +KeyDateKind Kind
+    +bool EveryYear
+    +ReminderLead Lead
+    +Guid? SourceEntryId
+  }
+  class ReminderPreferences {
+    +DefaultFor(kind: KeyDateKind): ReminderLead
+  }
+}
+package "Popkin.Application" {
+  class LogConversationCommand {
+    +Guid ContactId
+    +Guid ClientId
+    +TalkChannel Channel
+    +DateTimeOffset LoggedAt
+    +string Note
+    +PromiseInput[] Promises
+  }
+  class LogMilestoneCommand {
+    +Guid ContactId
+    +Guid ClientId
+    +MilestoneKind Kind
+    +string Title
+    +DateOnly HappenedOn
+    +string? Note
+    +bool EveryYear
+    +UploadedFile? Photo
+  }
+  class LogConversationCommandHandler {
+    +Handle(command: LogConversationCommand): Task<TimelineEntryDto>
+  }
+  class LogMilestoneCommandHandler {
+    +Handle(command: LogMilestoneCommand): Task<TimelineEntryDto>
+  }
+  class GetContactTimelineQueryHandler {
+    +Handle(query: GetContactTimelineQuery): Task<TimelineDto>
+  }
+  interface IContactGuard {
+    +RequireOwnedAsync(contactId: Guid): Task<Contact>
+  }
+}
+TimelineEntry --> TimelineEntryKind
+TimelineEntry --> TalkChannel
+TimelineEntry --> MilestoneKind
+FollowUp "*" --> "0..1" TimelineEntry : promised in
+KeyDate "0..1" --> "0..1" TimelineEntry : remembered from
+LogConversationCommandHandler ..> LogConversationCommand : handles
+LogMilestoneCommandHandler ..> LogMilestoneCommand : handles
+LogConversationCommandHandler --> TimelineEntry : adds
+LogConversationCommandHandler --> FollowUp : adds promises
+LogMilestoneCommandHandler --> TimelineEntry : adds
+LogMilestoneCommandHandler --> KeyDate : adds when EveryYear
+LogMilestoneCommandHandler ..> ReminderPreferences : Milestone default
+LogConversationCommandHandler ..> IContactGuard
+LogMilestoneCommandHandler ..> IContactGuard
+GetContactTimelineQueryHandler ..> TimelineEntry : reads
+@enduml

@@ -1,0 +1,71 @@
+@startuml
+title UML sequence behaviour — The owner imports people from their Popkins
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsTodayPage" as today
+  participant "ImportContactsDialog" as dialog
+  participant "ImportContactsStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsImportController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetImportCandidatesQueryHandler" as query
+  participant "ImportContactsCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> today : "Import from your Popkins" (L2-125 AC8)
+today -> dialog : Open
+dialog -> store : load()
+store -> client : importCandidates()
+client -> controller : GET /api/contacts/import
+controller -> query : Send GetImportCandidatesQuery
+query -> db : Caller's memberships not left; other members not left
+db --> query : Popkins and people
+query -> query : Drop the caller, deleted accounts, people already in Contacts; count distinct (L2-151 AC2)
+query --> controller : ImportCandidatesDto total 23
+controller --> client : 200
+store --> dialog : Everyone ticked
+dialog --> actor : Three Popkins, their people ticked, "Import 23 people" (L2-151 AC1)
+opt Unticks Walt under Lakeside Weekend
+  actor -> dialog : Untick
+  dialog -> store : toggle(personId)
+  store --> dialog : Walt unticked in both Popkins; "Import 22 people"
+end
+actor -> dialog : "Import {n} people"
+dialog --> actor : "Importing {n} people…" (L2-123 AC5)
+store -> client : importPeople(clientId, personIds)
+client -> controller : POST /api/contacts/import
+controller -> handler : Send ImportContactsCommand
+handler -> db : ImportBatch for this client id?
+alt A resend
+  handler --> controller : The first result
+else New
+  handler -> db : Recompute the candidates
+  handler -> handler : Every id is a candidate; drop duplicates
+  handler -> db : Add one Contact per person with PersonId; ImportBatch
+  handler -> db : SaveChangesAsync, one transaction
+  handler --> controller : ImportResultDto
+end
+controller --> client : 200
+store --> dialog : Close
+dialog --> actor : People opens with the imported contacts (L2-151 AC4)
+note over db : Nobody imported is told; no Popkin row changes (L2-122 AC3)
+@enduml

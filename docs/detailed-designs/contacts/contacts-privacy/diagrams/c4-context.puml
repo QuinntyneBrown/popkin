@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Only you see your Contacts
+
+Person(owner, "Owner", "Signed-in person who keeps the Contacts")
+Person(other, "Another signed-in person", "May share Popkins with the owner")
+Person(contact, "Contact", "Kept by the owner; may have a Popkin account")
+Person(admin, "Admin", "Runs Popkin from the admin app")
+System(popkin, "Popkin", "Pop-up communities, and each person's own Contacts")
+
+Rel(owner, popkin, "Reads and changes their own Contacts in", "Popkin web app")
+Rel(other, popkin, "Is refused the owner's Contacts as not found by", "Popkin web app")
+Rel(admin, popkin, "Sees no Contacts in", "Popkin admin app")
+Rel(popkin, contact, "Tells nothing")
+@enduml

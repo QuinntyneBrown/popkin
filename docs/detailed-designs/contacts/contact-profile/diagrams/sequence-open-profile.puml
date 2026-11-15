@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — The owner opens a contact's profile
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactProfilePage" as page
+  participant "ContactProfileStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetContactProfileQueryHandler" as handler
+  participant "IContactGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : Opens /contacts/people/:contactId
+page -> store : load(contactId, name from the opening screen)
+store --> actor : "Loading Chidi's profile…" (L2-123 AC1)
+store -> client : profile(contactId)
+client -> controller : GET /api/contacts/people/{contactId}
+controller -> handler : Send GetContactProfileQuery
+handler -> guard : RequireOwnedAsync(contactId)
+alt Not the caller's, or no such contact (L2-122 AC1)
+  guard --> controller : 404 contact_not_found
+  controller --> client : ProblemDetails
+  store --> actor : "This person isn't in your contacts", "Go to People"; no actions (L2-122 AC2)
+else Owned
+  guard --> handler : Contact
+  handler -> db : Key dates, habit and its last 12 periods, connections, groups, counts
+  handler -> db : A shared Popkin through Membership, when PersonId is set
+  db --> handler : Rows of this owner only
+  handler -> photos : GetReadUrl(photo keys)
+  handler --> controller : ContactProfileDto
+  controller --> client : 200
+  alt Request fails
+    store --> actor : "We couldn't load Chidi's profile", "Try again" (L2-123 AC2)
+  else Loaded
+    store --> page : ready
+    page --> actor : Header, actions, key dates, habit, About, People around, history tabs (L2-128 AC1–AC8)
+  end
+end
+@enduml

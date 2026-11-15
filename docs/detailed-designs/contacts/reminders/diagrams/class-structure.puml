@@ -1,0 +1,99 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Reminders
+
+package "Popkin.Domain" {
+  class ContactReminder {
+    +Guid Id
+    +Guid OwnerId
+    +Guid KeyDateId
+    +DateOnly OccursOn
+    +DateOnly DueOn
+    +DateTimeOffset CreatedAt
+    +DateTimeOffset? NotifiedAt
+    +DateTimeOffset? DismissedAt
+    +Dismiss(now: DateTimeOffset): void
+    +MarkNotified(now: DateTimeOffset): void
+  }
+  class ContactWeeklyEmail {
+    +Guid OwnerId
+    +DateOnly WeekOf
+    +DateTimeOffset SentAt
+  }
+  class KeyDate {
+    +Guid Id
+    +ReminderLead Lead
+    +NextOccurrence(today: DateOnly): DateOnly?
+    +ReminderDay(occursOn: DateOnly): DateOnly
+  }
+  class ReminderPreferences {
+    +bool PhoneNotifications
+    +bool MondayEmail
+  }
+}
+package "Popkin.Application" {
+  class SendContactRemindersCommand
+  class ContactRemindersResult {
+    +int Added
+    +int PhoneSent
+    +int EmailsSent
+    +int Failed
+  }
+  class SendContactRemindersCommandHandler {
+    +Handle(command: SendContactRemindersCommand): Task<ContactRemindersResult>
+  }
+  interface IOwnerClock {
+    +Today(ownerId: Guid): DateOnly
+    +LocalNow(ownerId: Guid): DateTimeOffset
+  }
+  interface IPhoneNotificationSender {
+    +SendAsync(ownerId: Guid, reminder: PhoneReminder, ct: CancellationToken): Task
+  }
+  interface IContactsEmailSender {
+    +SendWeekAheadAsync(destination: string, email: WeekAheadEmail, ct: CancellationToken): Task
+  }
+  class GetContactRemindersQueryHandler {
+    +Handle(query: GetContactRemindersQuery): Task<ContactReminderDto[]>
+  }
+  class DismissContactReminderCommandHandler {
+    +Handle(command: DismissContactReminderCommand): Task
+  }
+}
+package "Popkin.Infrastructure" {
+  class NoPhoneNotificationSender
+  class AcsContactsEmailSender
+}
+package "Popkin.Worker" {
+  abstract class "PeriodicJob<TResponse>" as PeriodicJob {
+    #NewCommand(): IRequest<TResponse>
+  }
+  class SendContactRemindersJob {
+    #NewCommand(): IRequest<ContactRemindersResult>
+  }
+}
+PeriodicJob <|-- SendContactRemindersJob
+SendContactRemindersJob ..> SendContactRemindersCommand : sends
+SendContactRemindersCommandHandler ..> SendContactRemindersCommand : handles
+SendContactRemindersCommandHandler ..> ContactRemindersResult : returns
+SendContactRemindersCommandHandler ..> IOwnerClock
+SendContactRemindersCommandHandler ..> KeyDate : reads
+SendContactRemindersCommandHandler ..> ReminderPreferences : reads
+SendContactRemindersCommandHandler --> ContactReminder : adds once
+SendContactRemindersCommandHandler --> ContactWeeklyEmail : records
+SendContactRemindersCommandHandler ..> IPhoneNotificationSender
+SendContactRemindersCommandHandler ..> IContactsEmailSender
+IPhoneNotificationSender <|.. NoPhoneNotificationSender
+IContactsEmailSender <|.. AcsContactsEmailSender
+ContactReminder "*" --> "1" KeyDate
+DismissContactReminderCommandHandler --> ContactReminder : dismisses
+GetContactRemindersQueryHandler ..> ContactReminder : reads
+@enduml

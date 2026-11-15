@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Connections
+
+Person(person, "Person", "Signed in to Popkin; owns their Contacts")
+Person_Ext(contact, "Contact", "Someone on the person's map; told nothing")
+System(popkin, "Popkin", "Pop-up communities, with Contacts: the person's own address book")
+
+Rel(person, popkin, "Draws and filters the map, connects two people in", "Popkin web app")
+Rel(person, contact, "Knows")
+@enduml

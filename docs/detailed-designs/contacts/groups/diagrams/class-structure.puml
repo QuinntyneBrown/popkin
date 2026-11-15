@@ -1,0 +1,104 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Groups
+
+package "Popkin.Domain" {
+  enum GroupKind {
+    Household
+    SmallGroup
+    Team
+    Club
+  }
+  class ContactGroup {
+    +Guid Id
+    +Guid OwnerId
+    +string Name
+    +GroupKind Kind
+    +string Emoji
+    +string? Note
+    +Guid? PopkinId
+    +Guid ClientId
+    +DateTimeOffset CreatedAt
+    +Make(owner, name, kind, note, contacts, clientId, now): ContactGroup
+    +Add(contacts): void
+    +LinkTo(popkinId: Guid): void
+  }
+  class ContactGroupMember {
+    +Guid GroupId
+    +Guid ContactId
+    +DateTimeOffset AddedAt
+  }
+  class Contact {
+    +string Name
+    +string? Phone
+    +string? Email
+    +Guid? PersonId
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string InviteCode
+  }
+  class GroupRules <<static>> {
+    +Name(value: string?): string
+    +Note(value: string?): string?
+  }
+}
+package "Popkin.Application" {
+  class MakeGroupCommand {
+    +Guid ClientId
+    +string? Name
+    +string? Kind
+    +string? Note
+    +Guid[] ContactIds
+  }
+  class InviteGroupToPopkinCommand {
+    +Guid GroupId
+    +Guid PopkinId
+  }
+  class InviteGroupToPopkinCommandHandler
+  class MakeGroupCommandHandler
+  class AddGroupPeopleCommandHandler
+  class GetGroupsQueryHandler
+  interface ICrewInviteSender {
+    +Channel: ContactChannel
+    +SendAsync(destination, invite, ct): Task
+  }
+  class CrewInviteMessage {
+    +string PopkinName
+    +string HostFirstName
+    +string Link
+  }
+  interface IMembershipGuard {
+    +RequireHostAsync(popkinId, ct)
+  }
+  interface IContactGuard {
+    +RequireOwnedAsync(id, ct)
+  }
+}
+
+ContactGroup --> GroupKind
+ContactGroup "1" *-- "*" ContactGroupMember : members
+ContactGroupMember "*" --> "1" Contact
+ContactGroup "*" --> "0..1" PopkinSpace : linked Popkin
+ContactGroup ..> GroupRules : validates with
+MakeGroupCommandHandler ..> MakeGroupCommand : handles
+MakeGroupCommandHandler --> ContactGroup : makes
+AddGroupPeopleCommandHandler --> ContactGroup : Add
+InviteGroupToPopkinCommandHandler ..> InviteGroupToPopkinCommand : handles
+InviteGroupToPopkinCommandHandler ..> IMembershipGuard : Host only
+InviteGroupToPopkinCommandHandler ..> IContactGuard : owner only
+InviteGroupToPopkinCommandHandler --> ContactGroup : LinkTo
+InviteGroupToPopkinCommandHandler ..> ICrewInviteSender : sends
+ICrewInviteSender ..> CrewInviteMessage
+GetGroupsQueryHandler ..> ContactGroup : reads
+@enduml

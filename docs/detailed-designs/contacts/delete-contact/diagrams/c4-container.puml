@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Delete a contact
+
+Person(owner, "Owner", "Signed-in person")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "DeleteContactDialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "DELETE /api/contacts/people/{contactId}")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Contacts tables; Popkin tables untouched")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "Contact photo, memory photos and files")
+}
+Rel(owner, web, "Confirms Delete {first name}", "HTTPS")
+Rel(web, api, "DELETE", "JSON/HTTPS, session cookie")
+Rel(api, db, "Removes the contact's rows in one save", "EF Core")
+Rel(api, store, "Deletes the stored files after the save", "IPhotoStore")
+@enduml

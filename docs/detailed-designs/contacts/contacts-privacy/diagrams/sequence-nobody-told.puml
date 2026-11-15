@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — A contact is added and nobody is told
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara (owner)" as actor
+actor "Femi (has an account)" as femi
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Add someone page" as page
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Contacts controller" as controller
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Add contact handler" as handler
+  participant "ICurrentPerson" as current
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Saves Femi Bankole
+page -> outbox : enqueue with clientId
+outbox -> client : Add the contact
+client -> controller : POST /api/contacts/people
+controller -> handler : Send the add command
+handler -> current : PersonId
+current --> handler : Mara
+handler -> db : Insert Contact with OwnerId = Mara
+handler -> db : SaveChangesAsync
+handler --> controller : The contact
+controller --> client : 201
+note over hub, femi : No hub event, notification, email or text (L2-122 AC3)
+hub -[hidden]-> femi
+note over handler : Logs and spans carry the route template only, never the name
+@enduml

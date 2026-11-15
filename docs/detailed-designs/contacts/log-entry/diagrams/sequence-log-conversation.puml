@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — Log a conversation
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsLogEntryPage" as page
+  participant "LogEntryStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactTimelineController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "LogConversationCommandHandler" as handler
+  participant "IContactGuard" as guard
+  participant "TimelineEntry / FollowUp" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Log" on Chidi's profile
+page --> actor : "Talked with Chidi", "Today, 8:40 am" (L2-133 AC1)
+actor -> page : Channel, note, a promise with its day; "Save"
+page -> store : save()
+alt Note empty
+  store --> page : invalid
+  page --> actor : "One thing to fix", "What did you talk about: write a line or two…" (L2-133 AC4)
+else Valid
+  page --> actor : "Saving…" disabled (L2-123 AC5)
+  store -> outbox : logConversation(contactId, body with clientId)
+  outbox -> client : POST /api/contacts/people/{id}/conversations
+  client -> ctrl : HTTPS request
+  ctrl -> handler : Send LogConversationCommand
+  handler -> guard : RequireOwnedAsync(contactId)
+  guard --> handler : Contact, or 404 contact_not_found
+  handler -> db : Entry with this clientId?
+  db --> handler : None
+  handler -> entity : LogConversation(...); FollowUp.Promise(...) per promise (L2-133 AC2)
+  handler -> db : Save once
+  db --> handler : Committed
+  handler --> ctrl : TimelineEntryDto
+  ctrl --> client : 201
+  alt Saved
+    store --> page : saved
+    page --> actor : Profile opens with the entry at the top (L2-133 AC5)
+  else Save fails
+    store --> page : failed, every field kept
+    page --> actor : "We couldn't save this." "Your note is still here…" (L2-133 AC6)
+  else Offline
+    outbox --> actor : "You're offline"; sent when back (L2-123 AC4)
+  end
+end
+@enduml

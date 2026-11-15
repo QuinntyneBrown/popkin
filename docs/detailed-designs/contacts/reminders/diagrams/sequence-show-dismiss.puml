@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Show and dismiss a reminder
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Contacts page" as frame
+  participant "ContactRemindersStore" as store
+  participant "Toaster" as toaster
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactRemindersController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetContactRemindersQueryHandler" as read
+  participant "DismissContactReminderCommandHandler" as dismiss
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> frame : Open a Contacts page, or return to the window
+frame -> store : load()
+store -> client : reminders()
+client -> ctrl : GET /api/contacts/reminders
+ctrl -> read : Send GetContactRemindersQuery
+read -> db : Owner's undismissed reminders
+db --> read : Rows
+read --> ctrl : ContactReminderDto[]
+ctrl --> client : 200
+store -> toaster : show info toast, hold(id)
+toaster --> actor : pk-toast "Grace turns 33 on Saturday", "Open Grace's profile" (L2-140 AC1)
+alt "Open Grace's profile"
+  frame --> actor : Profile opens; the message stays until dismissed
+else Dismiss
+  toaster -> store : dismiss(id), hidden at once
+  store -> client : dismissReminder(id)
+  client -> ctrl : POST /api/contacts/reminders/{id}/dismissal
+  ctrl -> dismiss : Send DismissContactReminderCommand
+  dismiss -> db : Owner's reminder; Dismiss(now); save
+  db --> dismiss : Committed, or 404 reminder_not_found
+  dismiss --> ctrl : Done
+  ctrl --> client : 204
+  opt Request fails
+    store -> toaster : Reminder shown again
+  end
+end
+@enduml

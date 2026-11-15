@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Key dates
+
+Person(owner, "Person", "Owner of the key dates")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Dates page and Add a date dialog")
+  Container(api, "Popkin API", "ASP.NET Core", "/api/contacts/** endpoints")
+  Container(worker, "Popkin Worker", ".NET worker", "Reads key dates to send reminders")
+  ContainerDb(db, "Popkin database", "SQL Server", "KeyDate, ReminderPreferences")
+}
+Rel(owner, web, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(worker, db, "Reads key dates", "EF Core")
+@enduml

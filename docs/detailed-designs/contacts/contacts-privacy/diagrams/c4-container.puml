@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Only you see your Contacts
+
+Person(owner, "Owner", "Signed-in person")
+Person(other, "Another signed-in person", "Holds a link to the owner's contact")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Contacts pages; the not-found screen")
+  Container(admin, "Popkin admin app", "Angular SPA", "No Contacts screen")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/contacts/**: owned reads, IContactGuard, 404 contact_not_found")
+  Container(worker, "Popkin Worker", ".NET worker", "SendContactRemindersJob, to the owner only")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Every Contacts row with OwnerId")
+}
+Rel(owner, web, "Opens their Contacts", "HTTPS")
+Rel(other, web, "Opens the link", "HTTPS")
+Rel(web, api, "GET /api/contacts/**", "JSON/HTTPS, session")
+Rel(admin, api, "/api/admin/**: reads no Contacts table", "JSON/HTTPS")
+Rel(api, db, "Reads and writes WHERE OwnerId = caller", "EF Core")
+Rel(worker, db, "Reads due reminders by owner", "EF Core")
+@enduml

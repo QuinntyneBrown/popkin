@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Add or edit someone
+
+Person(owner, "Owner", "Signed-in person who keeps their own Contacts")
+Person_Ext(contact, "Contact", "Someone the owner adds; never told")
+System(popkin, "Popkin", "Pop-up communities, with each person's own Contacts")
+
+Rel(owner, popkin, "Adds or edits a contact with dates, connections and groups in", "Popkin web app")
+Rel(popkin, contact, "Sends nothing to")
+@enduml

@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Change a reminder default
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsDatesPage" as page
+  participant "DatesStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ReminderPreferencesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SaveReminderPreferencesCommandHandler" as handler
+  participant "ReminderPreferences" as prefs
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Birthdays: remind me" = "2 weeks before"
+page -> store : changeDefault(Birthday, TwoWeeksBefore)
+store -> client : saveReminderPreferences(whole preferences)
+client -> ctrl : PUT /api/contacts/reminder-preferences
+ctrl -> handler : Send SaveReminderPreferencesCommand
+handler -> db : Owner's row
+db --> handler : Row, or none
+handler -> prefs : Defaults(ownerId) when none; set BirthdayLead
+handler -> db : Save once; no KeyDate changes (L2-139 AC2)
+db --> handler : Committed
+handler --> ctrl : ReminderPreferencesDto
+ctrl --> client : 200
+alt Saved
+  store --> page : New default; the next birthday starts with it
+else Save fails
+  store --> page : Earlier value kept
+  page --> actor : Error message with "Try again" (L2-124 AC3)
+end
+@enduml

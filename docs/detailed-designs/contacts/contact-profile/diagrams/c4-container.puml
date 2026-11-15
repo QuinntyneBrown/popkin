@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — A contact's profile
+
+Person(owner, "Owner", "Signed-in person")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "ContactProfilePage, ContactActionsDialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/contacts/people/{contactId}")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Contact, KeyDate, Habit, Connection, ContactGroupMember, Membership")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "Contact photos under random keys")
+}
+Rel(owner, web, "Opens /contacts/people/:contactId", "HTTPS")
+Rel(web, api, "GET the profile, DELETE closest", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads the owner's rows only", "EF Core")
+Rel(api, store, "Signs an expiring read address", "IPhotoStore")
+@enduml

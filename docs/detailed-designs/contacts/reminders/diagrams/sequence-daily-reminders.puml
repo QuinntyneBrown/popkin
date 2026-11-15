@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — Daily reminders
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "SendContactRemindersJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendContactRemindersCommandHandler" as handler
+  participant "IOwnerClock" as clock
+  participant "KeyDate" as entity
+  participant "IPhoneNotificationSender" as push
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+time -> job : Period elapses
+job -> handler : Send SendContactRemindersCommand
+handler -> db : Owners with key dates
+db --> handler : Owners
+loop Each owner
+  handler -> clock : LocalNow(ownerId)
+  clock --> handler : Local time (zone <TO SUPPLY>, gap 104)
+  opt From 9 am
+    handler -> db : Key dates and existing reminders
+    db --> handler : Rows
+    handler -> entity : NextOccurrence(today), ReminderDay(occurrence)
+    entity --> handler : Due when reminder day <= today <= occurrence
+    handler -> db : Add ContactReminder once per (KeyDateId, OccursOn) (L2-140 AC1)
+    opt PhoneNotifications on (L2-140 AC2)
+      handler -> push : SendAsync(ownerId, reminder)
+      push --> handler : Sent, or failure counted
+    end
+    handler -> db : MarkNotified; save this owner
+    db --> handler : Committed
+  end
+end
+handler --> job : ContactRemindersResult
+job -> job : Ticked(); no hub event (ADR 0015)
+@enduml

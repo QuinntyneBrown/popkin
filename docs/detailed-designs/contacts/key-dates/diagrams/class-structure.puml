@@ -1,0 +1,114 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Key dates
+
+package "Popkin.Domain" {
+  enum KeyDateKind {
+    Birthday
+    Anniversary
+    Milestone
+    Other
+  }
+  enum ReminderLead {
+    OnTheDay
+    OneDayBefore
+    ThreeDaysBefore
+    OneWeekBefore
+    TwoWeeksBefore
+    OneMonthBefore
+  }
+  class KeyDate {
+    +Guid Id
+    +Guid OwnerId
+    +Guid ContactId
+    +Guid ClientId
+    +KeyDateKind Kind
+    +string Title
+    +int Month
+    +int Day
+    +int? Year
+    +bool EveryYear
+    +ReminderLead Lead
+    +Guid? SourceEntryId
+    +NextOccurrence(today: DateOnly): DateOnly?
+    +ReminderDay(occursOn: DateOnly): DateOnly
+    +YearsOn(occursOn: DateOnly): int?
+    +ChangeLead(lead: ReminderLead): void
+  }
+  class ReminderPreferences {
+    +Guid OwnerId
+    +ReminderLead BirthdayLead
+    +ReminderLead AnniversaryLead
+    +ReminderLead MilestoneLead
+    +bool PhoneNotifications
+    +bool MondayEmail
+    +{static} Defaults(ownerId: Guid): ReminderPreferences
+    +DefaultFor(kind: KeyDateKind): ReminderLead
+  }
+  class Contact {
+    +Guid Id
+    +Guid OwnerId
+    +string FirstName
+  }
+}
+package "Popkin.Application" {
+  interface IContactGuard {
+    +RequireOwnedAsync(contactId: Guid): Task<Contact>
+  }
+  interface IOwnerClock {
+    +Today(ownerId: Guid): DateOnly
+    +LocalNow(ownerId: Guid): DateTimeOffset
+  }
+  class AddKeyDateCommand {
+    +Guid ContactId
+    +Guid ClientId
+    +KeyDateKind Kind
+    +string? Title
+    +int Month
+    +int Day
+    +int? Year
+    +bool EveryYear
+    +ReminderLead Lead
+  }
+  class AddKeyDateCommandHandler {
+    +Handle(command: AddKeyDateCommand): Task<KeyDateRowDto>
+  }
+  class GetContactDatesQueryHandler {
+    +Handle(query: GetContactDatesQuery): Task<ContactDatesDto>
+  }
+  class SaveReminderPreferencesCommandHandler {
+    +Handle(command: SaveReminderPreferencesCommand): Task<ReminderPreferencesDto>
+  }
+  class KeyDateRowDto {
+    +Guid Id
+    +Guid ContactId
+    +string FirstName
+    +KeyDateKind Kind
+    +string Title
+    +DateOnly OccursOn
+    +int DaysLeft
+    +int? Years
+    +ReminderLead Lead
+  }
+}
+KeyDate --> KeyDateKind
+KeyDate --> ReminderLead
+KeyDate "*" --> "1" Contact : for
+ReminderPreferences --> ReminderLead
+AddKeyDateCommandHandler ..> AddKeyDateCommand : handles
+AddKeyDateCommandHandler ..> IContactGuard
+AddKeyDateCommandHandler --> KeyDate : adds
+AddKeyDateCommandHandler ..> KeyDateRowDto : returns
+GetContactDatesQueryHandler ..> KeyDate : reads
+GetContactDatesQueryHandler ..> ReminderPreferences : reads
+SaveReminderPreferencesCommandHandler --> ReminderPreferences : upserts
+@enduml

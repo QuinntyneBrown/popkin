@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — Making a group and adding people
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "NewGroupDialog" as dialog
+  participant "GroupAddPeopleDialog" as add
+  participant "GroupsStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "GroupsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "MakeGroupCommandHandler" as handler
+  participant "IContactGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : "New group"
+dialog --> actor : "Name", "What kind", "Who’s in", "Note", "Make the group" (L2-147 AC1)
+actor -> dialog : "Add people"
+dialog -> add : Open to pick, no save
+actor -> add : Ticks Grace and Ruth
+add --> dialog : Picked contacts
+actor -> dialog : "Make the group" with no name
+dialog --> actor : "Name: give the group a name." (L2-147 AC2)
+actor -> dialog : Name, kind, note, "Make the group"
+dialog --> actor : "Making it…"
+dialog -> store : make(request)
+store -> client : makeGroup({ clientId, name, kind, note, contactIds })
+client -> controller : POST /api/contacts/groups
+controller -> handler : Send MakeGroupCommand
+handler -> guard : RequireOwnedAsync for each contact
+alt A contact not the person's
+  guard --> controller : 404 contact_not_found
+else All owned
+  handler -> handler : GroupRules: 400 name_required, name_too_long
+  handler -> db : Add ContactGroup and members, SaveChangesAsync
+  controller --> client : 201 GroupDto
+  dialog --> actor : Closes; the group shows under its kind
+end
+== Later, on an open group ==
+actor -> add : "Add people" on Thursday Night Group
+add --> actor : "Add people to Thursday Night Group"; members ticked, disabled, "In the group" (L2-147 AC3)
+actor -> add : Ticks Dev and Priya, "Add 2 people"
+add -> store : addPeople(groupId, [Dev, Priya])
+store -> client : addGroupPeople(groupId, contactIds)
+client -> controller : POST /api/contacts/groups/{groupId}/members
+controller --> client : 200 GroupDto, existing members unchanged
+@enduml

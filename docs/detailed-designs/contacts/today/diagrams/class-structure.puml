@@ -1,0 +1,101 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Today
+
+package "Popkin.Domain" {
+  class KeyDate {
+    +Guid OwnerId
+    +KeyDateKind Kind
+    +string Title
+    +int Day
+    +int Month
+    +int? Year
+    +bool EveryYear
+    +NextOccurrence(on: DateOnly): DateOnly?
+    +YearsOn(day: DateOnly): int?
+  }
+  class FollowUp {
+    +string Text
+    +DateOnly DueOn
+    +bool IsPromise
+    +DateTimeOffset? DoneAt
+  }
+  class Habit {
+    +HabitRhythm Rhythm
+    +IsOverdue(on: DateOnly): bool
+  }
+  class TimelineEntry
+  class Contact
+}
+package "Popkin.Application" {
+  class GetTodayQuery {
+    +DateOnly On
+  }
+  class GetTodayQueryHandler {
+    +Handle(query: GetTodayQuery): Task<TodayDto>
+  }
+  class TodayRules {
+    +{static} ComingUpDays: <TO SUPPLY>
+    +{static} ComingUpMax: <TO SUPPLY>
+    +{static} RecentMax: <TO SUPPLY>
+    +{static} DriftDays: <TO SUPPLY>
+  }
+  class TodayDto {
+    +string FirstName
+    +int People
+    +SpotlightDto? Next
+    +ComingUpDto[] ComingUp
+    +TodayFollowUpDto[] FollowUps
+    +OverdueHabitDto[] OverdueHabits
+    +RecentEntryDto[] Recently
+    +DriftingDto[] Drifting
+  }
+  class SpotlightDto {
+    +int Month
+    +int Day
+    +int InDays
+    +string Title
+    +string Line
+    +ContactFaceDto Contact
+    +string? Phone
+    +string? Loves
+    +string? LastTime
+  }
+  class ContactFaceDto {
+    +Guid Id
+    +string Name
+    +string FirstName
+    +string? PhotoUrl
+    +string Initials
+    +string Accent
+  }
+}
+package "Popkin web app (api library)" {
+  class TodayStore {
+    +state: ContactsPageState
+    +today: Signal<TodayDto | null>
+    +retry(): void
+    +toggle(followUpId: string): void
+  }
+}
+GetTodayQueryHandler ..> GetTodayQuery : handles
+GetTodayQueryHandler ..> TodayRules
+GetTodayQueryHandler ..> KeyDate : NextOccurrence(On)
+GetTodayQueryHandler ..> TodayDto : returns
+GetTodayQueryHandler ..> FollowUp : open, due on or before On
+GetTodayQueryHandler ..> Habit : IsOverdue(On)
+GetTodayQueryHandler ..> TimelineEntry : latest
+GetTodayQueryHandler ..> Contact
+TodayDto *-- SpotlightDto
+SpotlightDto --> ContactFaceDto
+TodayStore ..> TodayDto
+@enduml

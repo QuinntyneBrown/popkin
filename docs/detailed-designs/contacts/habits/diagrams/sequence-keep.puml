@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — We met up, and Undo
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsHabitsPage" as page
+  participant "HabitsStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "HabitsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "KeepHabitCommandHandler" as handler
+  participant "Habit" as second
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "We met up" on Lunch with Chidi
+page -> store : keep(id)
+store --> page : "Logged for this fortnight" at once
+store -> outbox : POST kept { clientId, keptOn = device today }
+outbox -> client : keepHabit(id, keptOn, clientId)
+client -> controller : POST /api/contacts/habits/{id}/kept
+controller -> handler : Send KeepHabitCommand
+handler -> db : Load the habit for PersonId
+alt Another person's
+  handler --> controller : 404 habit_not_found
+else keptOn more than one day from today (TimeProvider)
+  handler --> controller : 400 kept_on_out_of_range
+else Kept already with this clientId
+  handler --> controller : The existing keep
+else Valid
+  handler -> second : Keep(keptOn, clientId)
+  second --> handler : HabitKept; DueOn() = Sep 29
+  handler -> db : SaveChangesAsync
+  handler --> controller : HabitKeptDto
+end
+controller --> client : 201
+client --> store : keptId, habit
+page --> actor : Toast "Lunch with Chidi logged", "Your next one is due by Tue, Sep 29.", "Undo" (L2-144 AC1)
+opt Undo
+  actor -> page : "Undo"
+  page -> store : undo()
+  store -> outbox : DELETE kept
+  outbox -> client : unkeepHabit(id, keptId)
+  client -> controller : DELETE /api/contacts/habits/{id}/kept/{keptId}
+  controller -> handler : Send UnkeepHabitCommand
+  handler -> second : Unkeep(keptId)
+  handler -> db : SaveChangesAsync
+  controller --> client : 200 HabitDto
+  page --> actor : The habit as it was: overdue again (L2-144 AC2)
+end
+@enduml

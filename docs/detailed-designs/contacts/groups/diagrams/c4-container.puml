@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Groups
+
+Person(person, "Person", "Owns their Contacts")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Groups page, New group, Add people, Name your Popkin")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/contacts/groups, /api/popkins")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "ContactGroup, ContactGroupMember, PopkinSpace, Membership")
+}
+System_Ext(acs, "Azure Communication Services", "SMS and email")
+Rel(person, web, "Opens /contacts/groups", "HTTPS")
+Rel(web, api, "GET, POST /api/contacts/groups/**; POST /api/popkins", "JSON/HTTPS")
+Rel(api, db, "Reads and writes the owner's groups; links a Popkin", "EF Core")
+Rel(api, acs, "Sends each member the Popkin's invite", "ICrewInviteSender")
+@enduml

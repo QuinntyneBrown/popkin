@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Habits
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactsHabitsPage", "Angular page", "pk-spotlight, pk-habit-row, pk-keep-strip")
+  Component(dialog, "NewHabitDialog", "CDK dialog", "pk-text-field, pk-choice-chips, pk-form-summary")
+  Component(store, "HabitsStore", "api library", "leading, rows, keep, undo, toast")
+  Component(rules, "habit-rules", "api library, pure", "habitDue, habitKeeping")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi via ContactsOutbox")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "HabitsController", "ASP.NET Core controller", "One MediatR request per endpoint")
+  Component(handlers, "GetHabits, StartHabit, KeepHabit, UnkeepHabit handlers", "MediatR handlers", "Owner's rows only")
+  Component(guard, "IContactGuard", "Application", "RequireOwnedAsync: 404 contact_not_found")
+  Component(entity, "Habit, HabitKept, HabitSchedule", "Domain", "Due day = last time + rhythm")
+  ComponentDb(db, "Popkin database", "SQL Server", "Habit, HabitKept")
+}
+Rel(page, store, "Reads and calls")
+Rel(page, dialog, "Opens")
+Rel(dialog, store, "start")
+Rel(store, rules, "Decides overdue and the strip with")
+Rel(store, client, "Loads, keeps, undoes")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, handlers, "Sends query or command")
+Rel(handlers, guard, "Checks the contact")
+Rel(handlers, entity, "Starts, keeps, unkeeps")
+Rel(handlers, db, "Reads and saves", "EF Core")
+@enduml

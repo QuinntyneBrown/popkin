@@ -1,0 +1,63 @@
+@startuml
+title UML sequence behaviour — Connecting two people
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ConnectPersonDialog" as page
+  participant "ConnectionsStore" as store
+  participant "linesFor" as rules
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ConnectionsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ConnectCommandHandler" as handler
+  participant "IContactGuard" as second
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Connect" in Chidi's panel
+page --> actor : "Connect Chidi to…", "Search your people", "Who", kinds, "In your words" (L2-150 AC1)
+actor -> page : Searches "Femi"
+page --> actor : "No one called “Femi” in your contacts", "Add “Femi”" (L2-150 AC3)
+actor -> page : "Connect" with nobody chosen
+page --> actor : "Who: pick who Chidi is connected to." (L2-150 AC2)
+actor -> page : Chooses Ada, "Family", "Mum", "Connect"
+page --> actor : "Connecting…"
+page -> store : connect(request)
+store -> client : connect({ clientId, contactId, otherContactId, kind, words })
+client -> controller : POST /api/contacts/connections
+controller -> handler : Send ConnectCommand
+handler -> second : RequireOwnedAsync(contactId), RequireOwnedAsync(otherContactId)
+alt Either not the person's
+  second --> controller : 404 contact_not_found
+else Both owned
+  handler -> db : Pair already connected, in either order?
+  alt Yes
+    handler --> controller : 409 already_connected
+  else No
+    handler -> handler : Connection.Connect: 400 connection_to_self; ConnectionRules.Words
+    handler -> db : Add Connection, SaveChangesAsync
+    handler --> controller : ConnectionDto
+    controller --> client : 201
+    client --> store : Add the line
+    page --> actor : Closes; the line shows on the map and both profiles with "Mum" (L2-150 AC4)
+  end
+end
+note over page, db : Neither contact is told (L2-122 AC3)
+@enduml

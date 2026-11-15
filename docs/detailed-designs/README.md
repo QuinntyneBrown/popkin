@@ -128,6 +128,7 @@ A design that states a number names the instrument that shows it
 | L2-044 AC1 | A Popkin wraps up within 1 minute of its end | `popkin.wrap_up.lateness`, now minus `EndsAt` at wrap-up | [Time is up](wrap-up/time-is-up/README.md) |
 | L2-053 | Limits hold | `popkin.rate_limit.rejections`, by policy | [Abuse limits](security/abuse-limits/README.md) |
 | L2-003 | A code arrives | `popkin.codes.send_failures`, by channel | [Sign up](accounts/sign-up/README.md) |
+| L2-140 AC1 | A reminder arrives at 9 am | `popkin.contacts.reminders.lateness`, now minus the owner's 9 am at sending | [Reminders](contacts/reminders/README.md) |
 
 A dimension is always one of a fixed set of values; an id, an address or anything a person typed
 is never one (L2-054 AC3).
@@ -299,9 +300,26 @@ Each design follows the source named below and marks the conflict in its own REA
 | Admin platform | [See an announcement](admin-platform/see-announcement/README.md) | L2-116 |
 | Admin platform | [Limits](admin-platform/limits/README.md) | L2-117 |
 | Admin platform | [Settings](admin-platform/settings/README.md) | L2-118 |
+| Contacts | [Open Contacts](contacts/open-contacts/README.md) | L2-121, L2-123, L2-124 |
+| Contacts | [Only you see your Contacts](contacts/contacts-privacy/README.md) | L2-122 |
+| Contacts | [Today](contacts/today/README.md) | L2-125 |
+| Contacts | [People](contacts/people/README.md) | L2-126, L2-127 |
+| Contacts | [A contact's profile](contacts/contact-profile/README.md) | L2-128, L2-131 |
+| Contacts | [Add or edit someone](contacts/add-contact/README.md) | L2-129, L2-130 |
+| Contacts | [Delete a contact](contacts/delete-contact/README.md) | L2-132 |
+| Contacts | [Log a conversation or milestone](contacts/log-entry/README.md) | L2-133, L2-134, L2-135 |
+| Contacts | [Memories and files](contacts/memories/README.md) | L2-136 |
+| Contacts | [Key dates](contacts/key-dates/README.md) | L2-137, L2-138, L2-139 |
+| Contacts | [Reminders](contacts/reminders/README.md) | L2-140 |
+| Contacts | [Follow-ups](contacts/follow-ups/README.md) | L2-141, L2-142 |
+| Contacts | [Habits](contacts/habits/README.md) | L2-143, L2-144, L2-145 |
+| Contacts | [Groups](contacts/groups/README.md) | L2-146, L2-147, L2-148 |
+| Contacts | [Connections](contacts/connections/README.md) | L2-149, L2-150 |
+| Contacts | [Import from your Popkins](contacts/import-from-popkins/README.md) | L2-151 |
 
 Every L2 requirement from L2-001 to L2-067 is realised by at least one feature above, and so is
-every admin requirement, L2-076 to L2-078 and L2-086 to L2-120.
+every admin requirement, L2-076 to L2-078 and L2-086 to L2-120, and every Contacts requirement,
+L2-121 to L2-151.
 
 ## The admin app
 
@@ -329,6 +347,82 @@ amends [ADR 0016](../adr/0016-admin-app.md):
   `Features:Schedules` is retired; `Features:PhoneSignIn` stays a setting (ADR 0023).
 - **What every person sees** (a switch, an announcement) is polled every 60 seconds; no event goes
   to all connections.
+
+## Contacts
+
+The Contacts designs (`contacts/`, L1-029 to L1-038) share one architecture. Contacts is a
+person's own address book inside the Popkin web app; it adds no container.
+
+- **One owner.** Every Contacts row carries `OwnerId`, the `Person` who made it. Each handler reads
+  and writes only rows whose `OwnerId` is `ICurrentPerson.PersonId`. `IContactGuard.RequireOwnedAsync`
+  loads a contact, group or other Contacts row for its owner and answers `404` `contact_not_found`
+  (or `group_not_found`, `follow_up_not_found`, `habit_not_found`) for any other person's, so a contact's existence is never disclosed, as
+  `popkin_not_found` does for a Popkin (L2-122). Nothing in Contacts is shared with another person
+  or an admin, and nothing tells a contact anything. The one message a contact can receive is an
+  ordinary Popkin invite, sent when the owner starts a Popkin with a group (L2-148 AC3); it says
+  nothing of Contacts.
+- **Owned rows.** Each Contacts entity implements `IOwnedByPerson`, and every query starts from
+  `OwnedQueries.OwnedBy(personId)` ([Only you see your Contacts](contacts/contacts-privacy/README.md)).
+- **The device's day.** "Today" is the owner's day, not the server's: each Contacts read that
+  depends on it takes `?on=yyyy-MM-dd` from the device and answers `400` `invalid_date` for
+  anything else, which also fixes the day for recordings and tests. The web app's rules (due
+  buckets, overdue habits, the badge) use the same day.
+- **A resend saves once.** Each write carries a `clientId`; the row implements `IClientWrite`,
+  a unique index on (`OwnerId`, `ClientId`) keeps one, and a resend answers with the row already
+  saved (`ClientWrites.FindAsync`, [Open Contacts](contacts/open-contacts/README.md)).
+- **Entities** (`Popkin.Domain`, one table each): `Contact` (name, how the owner knows them, a
+  `ContactCircle`, phone, email, city, how they met, loves, photo key, `IsClosest`, the
+  `PersonId` of the account it was imported from, if any); `KeyDate` (a `KeyDateKind`, title, day,
+  month, optional year, `EveryYear`, a `ReminderLead`); `ReminderPreferences` (one per owner: a
+  default `ReminderLead` per kind, `PhoneNotifications`, `MondayEmail`); `TimelineEntry` (a
+  conversation with its `TalkChannel`, or a milestone with its `MilestoneKind`); `Memory` (a photo,
+  a file or a note); `FollowUp` (text, due day, `IsPromise`, the entry it came from, `DoneAt`);
+  `Habit` and `HabitKept` (a `HabitRhythm` of weekly, every 2 weeks or monthly, and each period
+  kept); `ContactGroup` and `ContactGroupMember` (a `GroupKind`, an emoji, a note, an optional
+  linked `PopkinId`); `Connection` (two contacts, a `ConnectionKind`, the owner's words); `ContactReminder` (one per key
+  date and day it falls on) and `ContactWeeklyEmail` (one per owner and week), which the reminders
+  job writes so each is sent once ([Reminders](contacts/reminders/README.md)). The names
+  avoid the existing `ContactChannel`, which is how a `Person` signs in.
+- **Handlers** live in `Popkin.Application/Contacts/`, one folder per feature. Controllers are
+  `Popkin.Api/Controllers/Contacts/*Controller.cs` under `/api/contacts/**`, behind the default
+  authenticated policy; each sends one MediatR request.
+- **Files.** A contact's photo and a memory's photo or file go to `IPhotoStore` under a random key,
+  read through an address that expires, as the album's photos are (ADR 0022).
+- **No hub events.** Contacts has one reader, its owner. A screen reads again when it opens and
+  after its own writes; another device of the owner sees a change on its next read. Contacts adds
+  nothing to `IPopkinClient` (L2-051).
+- **Offline.** A write made offline waits in `ContactsOutbox`, modelled on the chat's
+  `MessageOutbox`, and is sent in order when the connection returns (L2-123 AC4). Deleting a contact and importing are sent at once,
+  not queued: each shows its own failure (L2-132 AC3) or depends on what the API holds.
+- **Reminders** are the Worker's: `SendContactRemindersJob` (a `PeriodicJob`) finds the reminders
+  and Monday emails that are due and sends them. It finds the owner's 9 am through `IOwnerClock`;
+  reads use the device's day instead. The in-app reminder is read by Today. The phone
+  notification channel, the email's provider for Contacts and the owner's time zone are open
+  (known gaps 1 and 104).
+- **Web app.** The pages are `frontend/projects/popkin/src/app/pages/contacts-*`, the dialogs
+  `app/dialogs/` as usual, on routes `/contacts`, `/contacts/people`, `/contacts/people/new`,
+  `/contacts/people/:id`, `/contacts/people/:id/edit`, `/contacts/people/:id/log`,
+  `/contacts/dates`, `/contacts/follow-ups`, `/contacts/habits`, `/contacts/groups` and
+  `/contacts/connections`, with `shell: 'app'` and the Contacts `pk-popkin-nav`, except the
+  forms with their own top bar, `/contacts/people/new`, `/contacts/people/:id/edit` and
+  `/contacts/people/:id/log`, which use `shell: 'bare'`. A profile sets the route data
+  `phoneTabs: false`, so a phone shows only its back link (L2-121 AC6). A profile's history tab
+  is in its query, `?view=timeline|follow-ups|memories`, and an open group is
+  `/contacts/groups?group={id}`. The Follow-ups badge of the navigation counts with the
+  `lateOrDueToday` rule of [Follow-ups](contacts/follow-ups/README.md) (L2-121 AC5). The `api` library
+  holds `CONTACTS_API` (`ContactsApi`, `HttpContactsApi`) and one store per screen under
+  `frontend/projects/api/src/lib/api/contacts/`, with the rules (due buckets, overdue habits,
+  counts) unit tested (ADR 0011).
+- **Components.** The Contacts components are in [the component backlog](../component-backlog.md)
+  (rows 12 to 22): `pk-contact-row`, `pk-contact-id`, `pk-info-card`, `pk-contact-timeline`,
+  `pk-form-sections`, `pk-task`, `pk-keep-strip`, `pk-spotlight` with its date tile,
+  `pk-group-browser`, `pk-connection-map` and `pk-contacts-layout`. Each design names the ones its
+  screens compose, beside the components already built.
+- **Words.** A contact is named by first name, never a pronoun (L2-122 AC4). No log, metric or span
+  carries a contact's name, phone, email, note or any text the owner typed.
+- **Deleting** a contact and deleting an account remove the same rows through `ContactRemoval`
+  ([Delete a contact](contacts/delete-contact/README.md)); an account takes its Contacts with it
+  (L2-049).
 
 ## Known gaps
 
@@ -443,12 +537,20 @@ or design that settled it.
 | 102 | A contact's fields: the length of each, the form of a phone and an email, whether a birthday keeps its year and what shows without it, where "How you met" is entered (the profile shows it; the form has no field), and the form's "Things they love" as one comma-separated field (L2-128, L2-129) | Add someone, Edit | |
 | 103 | Key dates: how far ahead Dates looks (the mocks stop at December, leaving January's birthday out); changing a date's day once added; the kinds, since Add a date offers Birthday, Anniversary and Something else while Dates filters Milestones and lists a work anniversary; how a one-off date such as "Iris is one month old" arises (L2-137, L2-138) | Dates, Add a date | |
 | 104 | Reminders: what a phone notification and the Monday email say, where the email goes for a person who signs in with a phone number, the time zone of "9 am", whether habits and follow-ups notify too, and how a promise's "Remind me {day}" reaches the person (L2-140) | Reminders; phone notifications and email need their providers (gap 1) | |
-| 105 | Habits: which day a weekly or monthly habit falls on, how "kept" and "{n} weeks running" are counted, and editing, pausing or ending a habit (L2-143, L2-145) | Habits, New habit | |
+| 105 | Habits: which day a weekly or monthly habit falls on, how "kept" and "{n} weeks running" are counted, and editing, pausing or ending a habit (L2-143, L2-145); the mock's "11 weeks running" sits beside a missed week ([Habits](contacts/habits/README.md)) | Habits, New habit | |
 | 106 | Log and follow-ups: a conversation's title and length (the timeline shows them; the form has neither); changing "Today, 8:40 am"; the promise editor ("Add a promise or follow-up" is undrawn); what "Worth remembering" suggests; the person and day of a follow-up added on Follow-ups; editing and deleting a log entry or a follow-up (L2-133, L2-135, L2-141, L2-142) | Log, Follow-ups | |
 | 107 | Memories: the File and Note forms, the files accepted and their size, a note's length, and editing or deleting a memory (L2-136) | Memories | |
 | 108 | Groups: how a group is linked to a Popkin (the mock's "Thursday Night Group" has 4 people and the Popkin 9; "Tigers U9" against "Tigers U9 Parents"), renaming, deleting and taking people out of a group, and what a profile's group chip opens (L2-146, L2-148) | Groups, Open and Start a Popkin | |
 | 109 | Connections: whether a connection reads both ways and in whose words; how the line to "You" is made; how a promised introduction becomes a dotted line; which contacts the map leaves out; what "Connect two people" asks when no contact is chosen (L2-149, L2-150) | Connections, Connect | |
-| 110 | Import and delete: what Import brings over (name, photo, phone, email?), whether wrapped-up Popkins and people already in Contacts are offered, and whether Import is offered again once Contacts has people; what deleting a contact does to their key dates, habit, connections and groups (L2-132, L2-151); how many contacts, groups and habits a person may keep; whether Contacts syncs between a person's devices beyond the offline queue (L2-123 AC4) | Import, Delete, Contacts' storage | |
+| 110 | Import and delete: what Import brings over (name, photo, phone, email?), whether wrapped-up Popkins and people already in Contacts are offered, and whether Import is offered again once Contacts has people; what deleting a contact does to their key dates, habit, connections and groups (L2-132, L2-151); how many contacts, groups and habits a person may keep; whether Contacts syncs between a person's devices beyond the offline queue (L2-123 AC4) | Import, Delete, Contacts' storage | Until settled, the designs take: a deleted contact takes its key dates, habit and kept periods, both ends of each connection and its group memberships, and every group and other contact stays ([Delete a contact](contacts/delete-contact/README.md)); Import brings the name only, offers every Popkin the owner has not left, wrapped up or not, and never imports a person already in Contacts ([Import from your Popkins](contacts/import-from-popkins/README.md)) |
+| 111 | Today, People and profile copy: the greeting outside the morning; how many entries "Recently" shows; when a day reads as a weekday ("Sun") or a date ("Sep 11"); the words for one ("1 people", a badge of one follow-up); a People row with no conversation logged; who writes a key date's title ("Mum's birthday" by relation, "Grace's birthday" by name); what "Last time:" quotes, since "she asked you…" uses a pronoun (L2-122 AC4) unless it is the owner's own text; the loading and failure copy of a profile opened by its address before the name is known ([Today](contacts/today/README.md), [People](contacts/people/README.md)) | Today, People, profile | |
+| 112 | Add someone and Edit: changing or removing the photo in Edit; the toast after Add someone, which no requirement asks for, uses a pronoun and has an "Undo" that undoes nothing named; that the form reads the owner's groups before it shows, where the manifest says it needs no request; whether "Add "{name}"" fills in Name ([Add or edit someone](contacts/add-contact/README.md)) | Add someone, Edit | |
+| 113 | Key dates: a field for a date's line ("Hackney Town Hall, 2 pm", "Ben & Kate's daughter"); one date for two contacts ("Chidi & Tomás's anniversary"); what "For" starts with and "Change" opens when Add a date opens from Dates; the default lead time of "Something else"; the reminder day of "1 month before" and of 29 February in a year without it; how near a date is to show "in {n} days" ([Key dates](contacts/key-dates/README.md)) | Dates, Add a date | |
+| 114 | Reminders: which follow-ups the message names; the words for any date but a birthday whose year is known; the phone notification channel (Web Push, or SMS through Azure Communication Services), which needs its own ADR, and until it is accepted `NoPhoneNotificationSender` sends nothing; the Worker's new settings (`Communication:*`, `Addresses:BaseDomain`) and the fifth job in `JobCatalogue`, where L2-113 names four ([Reminders](contacts/reminders/README.md)) | Reminders, Jobs | |
+| 115 | Follow-ups: where "This week" ends (Saturday in the mocks, or the device's week); whether "Follow-ups {n}" on a profile counts open follow-ups or all ([Follow-ups](contacts/follow-ups/README.md)) | Follow-ups, profile | |
+| 116 | Groups: choosing a group's emoji; the length of a group's name; the title of Add people for a group that has no name yet ([Groups](contacts/groups/README.md)) | Groups, New group | |
+| 117 | Import and delete copy: a failed import, a candidate list that fails or loads, a way back after "Tick nobody", how many people show before "Show {n} more"; the delete sentence when a count is zero; what removes a stored file a delete failed to remove; what erasing an account does to the contacts others imported from it ([Import from your Popkins](contacts/import-from-popkins/README.md), [Delete a contact](contacts/delete-contact/README.md)) | Import, Delete | |
+| 118 | Whether `ContactsOutbox` holds photos, so a milestone or memory photo taken offline waits like the rest ([Memories and files](contacts/memories/README.md)) | Offline Contacts | |
 
 Settled so far:
 

@@ -1,0 +1,46 @@
+@startuml
+title UML sequence behaviour — Open Memories & files
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactProfilePage" as page
+  participant "ContactMemoriesStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactMemoriesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetMemoriesQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "IPhotoStore" as photos
+end box
+actor -> page : "Memories & files"
+page -> store : load(contactId)
+store -> client : memories(contactId)
+client -> ctrl : GET /api/contacts/people/{id}/memories
+ctrl -> handler : Send GetMemoriesQuery
+handler -> db : Owner's memories of the contact
+db --> handler : Rows, or 404 contact_not_found
+handler -> photos : GetReadUrl per photo, GetDownloadUrl per file
+photos --> handler : Addresses that expire
+handler --> ctrl : MemoriesDto
+ctrl --> client : 200
+client --> store : Memories
+page --> actor : "Photos, files and notes you've kept about Chidi. Private to you."; photos, files, notes (L2-136 AC1)
+@enduml

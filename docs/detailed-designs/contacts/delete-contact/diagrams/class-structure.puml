@@ -1,0 +1,76 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Delete a contact
+
+package "Popkin.Domain" {
+  class Contact {
+    +Guid Id
+    +Guid OwnerId
+    +string? PhotoKey
+  }
+  class TimelineEntry {
+    +string? PhotoKey
+    +string? ThumbnailKey
+  }
+  class FollowUp
+  class Memory {
+    +string? FileKey
+    +string? ThumbnailKey
+  }
+  class KeyDate
+  class Habit
+  class HabitKept
+  class Connection {
+    +Guid ContactId
+    +Guid OtherContactId
+  }
+  class ContactGroupMember
+  class ContactGroup
+}
+package "Popkin.Application" {
+  class DeleteContactCommand {
+    +Guid ContactId
+  }
+  class DeleteContactCommandHandler {
+    +Handle(command): Task
+  }
+  class ContactRemoval <<static>> {
+    +RowsOf(db: IAppDbContext, contactIds): RemovalSet
+  }
+  class RemovalSet {
+    +object[] Rows
+    +string[] FileKeys
+  }
+  interface IContactGuard {
+    +RequireOwnedAsync(contactId, ct): Task<Contact>
+  }
+  interface IPhotoStore {
+    +DeleteAsync(key, ct): Task
+  }
+  interface IAppDbContext
+}
+Contact "1" *-- "*" TimelineEntry
+Contact "1" *-- "*" FollowUp
+Contact "1" *-- "*" Memory
+Contact "1" *-- "*" KeyDate
+Contact "1" *-- "0..1" Habit
+Habit "1" *-- "*" HabitKept
+Contact "1" *-- "*" Connection
+Contact "1" *-- "*" ContactGroupMember
+ContactGroupMember "*" --> "1" ContactGroup : group stays
+DeleteContactCommandHandler ..> DeleteContactCommand : handles
+DeleteContactCommandHandler ..> IContactGuard
+DeleteContactCommandHandler ..> ContactRemoval
+ContactRemoval ..> RemovalSet : returns
+DeleteContactCommandHandler ..> IAppDbContext : one save
+DeleteContactCommandHandler ..> IPhotoStore : after the save
+@enduml

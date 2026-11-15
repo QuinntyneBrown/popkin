@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — The owner deletes a contact
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactProfilePage" as page
+  participant "DeleteContactDialog" as dialog
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DeleteContactCommandHandler" as handler
+  participant "IContactGuard" as guard
+  participant "ContactRemoval" as removal
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : "Delete Chidi" in More for Chidi
+page -> dialog : Open with id, "Chidi", counts 5, 1, 7
+dialog --> actor : "Delete Chidi?", "Chidi's profile, 5 timeline entries, 1 follow-up and 7 memories and files go for good…" (L2-132 AC1)
+actor -> dialog : "Delete Chidi"
+dialog --> actor : "Deleting…" (L2-123 AC5)
+dialog -> client : deleteContact(contactId)
+client -> controller : DELETE /api/contacts/people/{contactId}
+controller -> handler : Send DeleteContactCommand
+handler -> guard : RequireOwnedAsync(contactId)
+alt Not the caller's or already gone (L2-122 AC1)
+  guard --> controller : 404 contact_not_found
+  controller --> client : ProblemDetails
+  dialog --> actor : failed alert
+else Owned
+  guard --> handler : Contact
+  handler -> removal : RowsOf(contact)
+  removal -> db : Timeline, follow-ups, memories, key dates, habit, connections, group members
+  removal --> handler : Rows and file keys
+  handler -> db : Remove all; SaveChangesAsync, one transaction (L2-132 AC2)
+  db --> handler : Committed
+  loop Each stored file
+    handler -> photos : DeleteAsync(key)
+  end
+  handler --> controller : Done
+  controller --> client : 204
+  client --> dialog : deleted
+  dialog --> page : Close
+  page --> actor : People opens without Chidi (L2-132 AC2)
+end
+note over db : No Popkin, Membership or Person changes; Chidi is not told (L2-122 AC3)
+@enduml

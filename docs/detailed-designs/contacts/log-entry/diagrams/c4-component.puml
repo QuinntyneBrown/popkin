@@ -1,0 +1,26 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Log a conversation or milestone
+
+Container(web, "Popkin web app", "Angular", "ContactsLogEntryPage, LogEntryStore, ContactTimelineStore")
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactTimelineController", "ASP.NET Core controller", "Conversations, milestones, timeline")
+  Component(conv, "LogConversationCommandHandler", "MediatR handler", "Saves the entry and its promises once")
+  Component(mile, "LogMilestoneCommandHandler", "MediatR handler", "Saves the milestone, its photo and its yearly date")
+  Component(time, "GetContactTimelineQueryHandler", "MediatR handler", "Entries and photo memories, newest first")
+  Component(guard, "IContactGuard", "Application service", "404 contact_not_found")
+  Component(photo, "IPhotoProcessor / IPhotoStore", "Ports", "Clean and keep a photo")
+  ComponentDb(db, "Popkin database", "SQL Server", "TimelineEntry, FollowUp, KeyDate, Memory")
+}
+Rel(web, ctrl, "Calls", "HTTPS")
+Rel(ctrl, conv, "Sends LogConversationCommand")
+Rel(ctrl, mile, "Sends LogMilestoneCommand")
+Rel(ctrl, time, "Sends GetContactTimelineQuery")
+Rel(conv, guard, "RequireOwnedAsync")
+Rel(mile, guard, "RequireOwnedAsync")
+Rel(mile, photo, "Processes and saves")
+Rel(conv, db, "Writes", "EF Core")
+Rel(mile, db, "Writes", "EF Core")
+Rel(time, db, "Reads", "EF Core")
+@enduml

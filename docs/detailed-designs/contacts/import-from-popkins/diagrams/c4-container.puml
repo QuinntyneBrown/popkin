@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Import from your Popkins
+
+Person(owner, "Owner", "Signed-in person")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "ImportContactsDialog, from Today and People")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET and POST /api/contacts/import")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Membership, PopkinSpace, Person read; Contact, ImportBatch written")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "Member avatars, read only")
+}
+Rel(owner, web, "Ticks people, Import {n} people", "HTTPS")
+Rel(web, api, "GET candidates, POST personIds", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads shared memberships; writes the owner's contacts once", "EF Core")
+Rel(api, store, "Signs avatar addresses", "IPhotoStore")
+@enduml

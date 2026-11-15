@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — A follow-up is ticked done on Today
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsTodayPage" as page
+  participant "TodayStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "Toaster" as toaster
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Follow-ups controller" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Follow-up done handler" as handler
+  participant "IContactGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Mark done: Return Ruth's ladder"
+page -> store : toggle(followUpId)
+store --> page : done at once; "Mark not done: Return Ruth's ladder"
+store -> toaster : success "Marked done", "Return Ruth's ladder.", "Undo" (L2-124 AC4)
+store -> outbox : enqueue follow-up done
+outbox -> client : The Follow-ups design's write
+client -> controller : JSON/HTTPS
+controller -> handler : Send the command
+handler -> db : FollowUp by Id, OwnedBy(Mara)
+alt Not the owner's
+  handler --> controller : 404
+else Owned
+  handler -> db : DoneAt = now; SaveChangesAsync
+  handler --> controller : The follow-up
+end
+controller --> client : Answer
+alt Refused
+  outbox --> store : Failed
+  store --> page : Open again
+  store -> toaster : danger "We couldn't save that follow-up", "Try again" (L2-124 AC3)
+else Saved
+  outbox --> store : Confirmed
+end
+opt "Undo" within 8 s
+  actor -> toaster : "Undo"
+  toaster -> store : toggle(followUpId)
+  store --> page : Open again
+  store -> outbox : enqueue follow-up open
+end
+@enduml

@@ -1,0 +1,84 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Memories and files
+
+package "Popkin.Domain" {
+  enum MemoryKind {
+    Photo
+    File
+    Note
+  }
+  class Memory {
+    +Guid Id
+    +Guid OwnerId
+    +Guid ContactId
+    +Guid ClientId
+    +MemoryKind Kind
+    +string? Caption
+    +string? FileKey
+    +string? ThumbnailKey
+    +string? FileName
+    +string? ContentType
+    +long? SizeBytes
+    +string? Text
+    +DateTimeOffset? TakenAt
+    +DateTimeOffset AddedAt
+    +DateTimeOffset UpdatedAt
+    +{static} AddPhoto(...): Memory
+  }
+}
+package "Popkin.Application" {
+  class MemoryPhotoRules {
+    +{static} long MaxBytes = 25 MB
+    +{static} string[] Types
+  }
+  class AddPhotoMemoryCommand {
+    +Guid ContactId
+    +Guid ClientId
+    +UploadedFile File
+    +string? Caption
+  }
+  class AddPhotoMemoryCommandHandler {
+    +Handle(command: AddPhotoMemoryCommand): Task<PhotoMemoryDto>
+  }
+  class GetMemoriesQueryHandler {
+    +Handle(query: GetMemoriesQuery): Task<MemoriesDto>
+  }
+  class MemoriesDto {
+    +PhotoMemoryDto[] Photos
+    +FileMemoryDto[] Files
+    +NoteMemoryDto[] Notes
+  }
+  interface IPhotoProcessor {
+    +MakeAlbumPhoto(upload: ReadOnlyMemory<byte>): ProcessedAlbumPhoto?
+  }
+  interface IPhotoStore {
+    +SaveAsync(key, content, contentType, ct): Task
+    +DeleteAsync(key, ct): Task
+    +GetReadUrl(key): string
+    +GetDownloadUrl(key, fileName): string
+  }
+  interface IContactGuard {
+    +RequireOwnedAsync(contactId: Guid): Task<Contact>
+  }
+}
+Memory --> MemoryKind
+AddPhotoMemoryCommandHandler ..> AddPhotoMemoryCommand : handles
+AddPhotoMemoryCommandHandler ..> MemoryPhotoRules
+AddPhotoMemoryCommandHandler ..> IContactGuard
+AddPhotoMemoryCommandHandler ..> IPhotoProcessor
+AddPhotoMemoryCommandHandler ..> IPhotoStore
+AddPhotoMemoryCommandHandler --> Memory : adds
+GetMemoriesQueryHandler ..> Memory : reads
+GetMemoriesQueryHandler ..> IPhotoStore
+GetMemoriesQueryHandler ..> MemoriesDto : returns
+@enduml

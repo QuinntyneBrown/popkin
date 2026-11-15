@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Add or edit someone
+
+Person(owner, "Owner", "Signed-in person")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "ContactFormPage, ContactsOutbox")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "POST and PUT /api/contacts/people")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Contact, KeyDate, Connection, ContactGroupMember")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "contacts/ avatars under random keys")
+}
+Rel(owner, web, "Fills the form, Save", "HTTPS")
+Rel(web, api, "multipart: contact JSON and optional photo", "HTTPS, session cookie")
+Rel(api, store, "Writes the avatar", "IPhotoStore")
+Rel(api, db, "Saves the contact and its rows once", "EF Core")
+@enduml

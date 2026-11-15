@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Habits
+
+Person(person, "Person", "Owns their Contacts")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Habits page, New habit dialog, HabitsStore")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/contacts/habits")
+  Container(worker, "Popkin Worker", ".NET worker service", "SendContactRemindersJob reads due days (Reminders)")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Habit, HabitKept, Contact")
+}
+Rel(person, web, "Opens /contacts/habits", "HTTPS")
+Rel(web, api, "GET, POST /api/contacts/habits; POST, DELETE .../kept", "JSON/HTTPS")
+Rel(api, db, "Reads and writes the owner's habits", "EF Core")
+Rel(worker, db, "Reads due habits", "EF Core")
+@enduml

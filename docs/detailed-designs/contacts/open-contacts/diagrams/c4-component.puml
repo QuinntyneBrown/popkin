@@ -1,0 +1,40 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Open Contacts
+
+Container_Boundary(web, "Popkin web app") {
+  Component(my, "MyPopkinsPage", "Angular page", "Contacts button in the top bar")
+  Component(pages, "Contacts pages", "Angular pages", "contacts-today, contacts-people and the rest")
+  Component(nav, "pk-popkin-nav (place contacts)", "components", "Tabs, count line, Follow-ups badge")
+  Component(frame, "ContactsFrame", "api library", "people, due, countLine, dueLabel; refresh()")
+  Component(late, "lateOrDueToday", "api library (Follow-ups)", "Open follow-ups due on or before the device day")
+  Component(outbox, "ContactsOutbox", "api library", "Ordered writes, kept offline, sent on backOnline$")
+  Component(toaster, "Toaster", "api library", "Toasts; hold and release")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsController", "ASP.NET Core controller", "api/contacts")
+  Component(handler, "GetContactsSummaryQueryHandler", "MediatR handler", "Counts the owner's contacts")
+  Component(fu, "Follow-ups list handler", "MediatR handler", "GET api/contacts/follow-ups (Follow-ups design)")
+  Component(writes, "Contacts create handlers", "MediatR handlers", "ClientWrites.FindAsync: a resend saves once")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contact, FollowUp; unique (OwnerId, ClientId)")
+}
+Rel(my, pages, "routerLink /contacts")
+Rel(pages, nav, "Compose")
+Rel(pages, frame, "refresh() on open")
+Rel(nav, frame, "Reads the counts")
+Rel(pages, outbox, "Writes through")
+Rel(outbox, toaster, "Offline and failure toasts")
+Rel(outbox, frame, "refresh() after a confirmed write")
+Rel(frame, client, "summary(), followUps()")
+Rel(frame, late, "Badge count")
+Rel(outbox, client, "Write with clientId")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(client, fu, "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetContactsSummaryQuery")
+Rel(client, writes, "Create requests, through each feature's controller")
+Rel(handler, db, "CountAsync", "EF Core")
+Rel(writes, db, "Saves once", "EF Core")
+Rel(fu, db, "Owner's follow-ups", "EF Core")
+@enduml

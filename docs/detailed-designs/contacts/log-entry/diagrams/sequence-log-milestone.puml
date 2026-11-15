@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — Log a milestone
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsLogEntryPage" as page
+  participant "LogEntryStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactTimelineController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "LogMilestoneCommandHandler" as handler
+  participant "IContactGuard" as guard
+  participant "IPhotoProcessor" as proc
+  participant "ReminderPreferences" as prefs
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : "Milestone"
+page --> actor : "Chidi's milestone", "What kind", "What happened?", "When", "Photo", "Note" (L2-134 AC1)
+actor -> page : "New job", text, day, photo; "Remember this every year" on
+page --> actor : "Adds "Chidi's work anniversary" to your dates, with a nudge on the day."
+actor -> page : "Save"
+page -> store : save()
+store -> client : logMilestone(contactId, multipart)
+client -> ctrl : POST /api/contacts/people/{id}/milestones
+ctrl -> handler : Send LogMilestoneCommand
+handler -> guard : RequireOwnedAsync(contactId)
+guard --> handler : Contact
+opt Photo
+  handler -> handler : MemoryPhotoRules; 400 photo_too_large over 25 MB
+  handler -> proc : MakeAlbumPhoto(upload)
+  proc --> handler : Display and thumbnail
+  handler -> photos : SaveAsync under random keys
+end
+handler -> db : Add TimelineEntry (Milestone)
+opt Every year (L2-134 AC2)
+  handler -> prefs : DefaultFor(Milestone)
+  prefs --> handler : Lead ("On the day" at first)
+  handler -> db : Add KeyDate(Milestone, EveryYear, SourceEntryId)
+end
+handler -> db : Save once
+db --> handler : Committed; on failure the stored photo is deleted
+handler --> ctrl : TimelineEntryDto with keyDateId
+ctrl --> client : 201
+client --> store : saved
+page --> actor : Profile opens with the milestone on the timeline (L2-134 AC3)
+@enduml

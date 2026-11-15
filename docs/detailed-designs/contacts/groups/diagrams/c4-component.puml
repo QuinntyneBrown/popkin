@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Groups
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactsGroupsPage", "Angular page", "pk-group-browser, pk-contact-row, pk-info-card")
+  Component(dialogs, "NewGroupDialog, GroupAddPeopleDialog", "CDK dialogs", "pk-text-field, pk-choice-chips, pk-search-field")
+  Component(store, "GroupsStore", "api library", "byKind, open, make, addPeople")
+  Component(start, "NameYourPopkinPage, HowLongPage, NewPopkinDraft", "Start a Popkin", "groupOf; invites once made")
+  Component(client, "CONTACTS_API, POPKINS_API", "api library contracts", "HttpContactsApi, HttpPopkinsApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "GroupsController", "ASP.NET Core controller", "One MediatR request per endpoint")
+  Component(handlers, "GetGroups, MakeGroup, AddGroupPeople handlers", "MediatR handlers", "Owner's rows only")
+  Component(invite, "InviteGroupToPopkinCommandHandler", "MediatR handler", "Host check, LinkTo, invites")
+  Component(guards, "IContactGuard, IMembershipGuard", "Application", "group_not_found, host_only")
+  Component(sender, "ICrewInviteSender", "Application abstraction", "SMS or email, by channel")
+  ComponentDb(db, "Popkin database", "SQL Server", "ContactGroup, ContactGroupMember")
+}
+Rel(page, store, "Reads and calls")
+Rel(page, dialogs, "Opens")
+Rel(dialogs, store, "Saves through")
+Rel(page, start, "Start a Popkin with them: /new?group={id}")
+Rel(store, client, "Calls")
+Rel(start, client, "createPopkin, then invitePopkinGroup")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, handlers, "Sends query or command")
+Rel(ctrl, invite, "Sends InviteGroupToPopkinCommand")
+Rel(handlers, guards, "Checks contacts")
+Rel(invite, guards, "Checks group and Host")
+Rel(invite, sender, "Sends each invite")
+Rel(handlers, db, "Reads and saves", "EF Core")
+Rel(invite, db, "Saves the link", "EF Core")
+@enduml

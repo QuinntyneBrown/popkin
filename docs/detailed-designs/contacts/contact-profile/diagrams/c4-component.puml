@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — A contact's profile
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactProfilePage", "Angular page", "pk-contact-id, pk-info-card, pk-keep-strip, pk-view-nav")
+  Component(menu, "ContactActionsDialog", "CDK dialog", "pk-menu-list")
+  Component(store, "ContactProfileStore", "api library", "loading, ready, failed, notFound")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsPeopleController", "ASP.NET Core controller", "/api/contacts/people")
+  Component(query, "GetContactProfileQueryHandler", "MediatR handler", "Profile, dates, habit, people around, counts")
+  Component(cmd, "TakeOutOfClosestCommandHandler", "MediatR handler", "Contact.LeaveClosest()")
+  Component(guard, "IContactGuard", "Application", "RequireOwnedAsync; 404 contact_not_found")
+  Component(photos, "IPhotoStore", "Application abstraction", "GetReadUrl(key)")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contacts tables, Membership")
+}
+Rel(page, store, "Reads")
+Rel(page, menu, "Opens")
+Rel(menu, store, "Take out of Closest")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, query, "Sends GetContactProfileQuery")
+Rel(ctrl, cmd, "Sends TakeOutOfClosestCommand")
+Rel(query, guard, "Checks ownership")
+Rel(cmd, guard, "Checks ownership")
+Rel(query, photos, "Signs photo addresses")
+Rel(query, db, "Reads", "EF Core")
+Rel(cmd, db, "Saves once", "EF Core")
+@enduml

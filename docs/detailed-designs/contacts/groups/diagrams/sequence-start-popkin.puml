@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — Start a Popkin with them
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsGroupsPage" as page
+  participant "NameYourPopkinPage / HowLongPage" as start
+  participant "HttpPopkinsApi / HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinsController / GroupsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "InviteGroupToPopkinCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "ContactGroup" as group
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "ICrewInviteSender" as sender
+  database "Popkin database" as db
+end box
+participant "Group member" as member
+actor -> page : "Start a Popkin with them" on Sheffield lot
+page -> start : /new?group={groupId}
+start -> start : NewPopkinDraft.groupOf; name = "Sheffield lot" (L2-148 AC3)
+actor -> start : Emoji, colour, "Looks good", length, "Pop it up"
+start -> client : createPopkin(request)
+client -> controller : POST /api/popkins
+controller --> client : 201 PopkinCreatedDto
+start -> client : invitePopkinGroup(groupId, popkinId)
+start --> actor : Opens the created screen without waiting
+client -> controller : POST /api/contacts/groups/{groupId}/popkin
+controller -> handler : Send InviteGroupToPopkinCommand
+handler -> db : Load the group for PersonId (else 404 group_not_found)
+handler -> guard : RequireHostAsync(popkinId)
+alt Not the Host
+  guard --> controller : 403 host_only
+else Host of an active Popkin
+  handler -> group : LinkTo(popkinId)
+  alt Linked to another Popkin
+    group --> controller : 409 group_linked_elsewhere
+  else Already linked to this Popkin
+    handler --> controller : 202, nothing sent again
+  else Linked now
+    loop Each member with a phone, else an email
+      handler -> sender : SendAsync(destination, CrewInviteMessage)
+      sender -> member : Invite link by SMS or email
+    end
+    handler -> db : SaveChangesAsync
+    handler --> controller : 202 Accepted
+  end
+end
+note over page, member : Next time the group opens, "Open “Sheffield lot”" shows (L2-148 AC1)
+@enduml

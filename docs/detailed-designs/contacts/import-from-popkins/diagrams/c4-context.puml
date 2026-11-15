@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Import from your Popkins
+
+Person(owner, "Owner", "Signed-in person who keeps their own Contacts")
+Person_Ext(member, "Fellow member", "Shares a Popkin with the owner; never told")
+System(popkin, "Popkin", "Pop-up communities, with each person's own Contacts")
+
+Rel(owner, popkin, "Imports the people of their Popkins in", "Popkin web app")
+Rel(member, popkin, "Belongs to a shared Popkin in")
+Rel(popkin, member, "Sends nothing to")
+@enduml

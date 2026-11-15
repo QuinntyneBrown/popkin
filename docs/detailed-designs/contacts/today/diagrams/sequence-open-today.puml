@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Today opens
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsTodayPage" as page
+  participant "TodayStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetTodayQueryHandler" as handler
+  participant "KeyDate" as occ
+  participant "TodayRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Opens /contacts at 8:40 am, 15 Sep
+page --> actor : "Morning, Mara", "Tuesday, 15 September", skeletons, "Loading your day…" (L2-123 AC1)
+page -> store : load()
+store -> client : today("2026-09-15")
+client -> controller : GET /api/contacts/today?on=2026-09-15
+controller -> handler : Send GetTodayQuery
+handler -> db : Owner's contacts, key dates, open follow-ups, habits, latest entries (OwnedBy)
+db --> handler : Rows
+handler -> occ : NextOccurrence(on), each key date
+occ --> handler : Occurrences; InDays counted from on
+handler -> rules : Order and cut
+handler --> controller : TodayDto
+alt Request fails
+  controller --> client : Error or no answer
+  store --> page : failed
+  page --> actor : "We couldn't load your day", "Try again" (L2-123 AC2)
+else People is 0
+  controller --> client : 200 { people: 0 }
+  store -> client : importCandidates()
+  client --> store : total 23
+  page --> actor : "Who do you want to keep close?", "Add someone", "Import from your Popkins" (L2-125 AC8)
+else Ready
+  controller --> client : 200 TodayDto
+  client --> store : ready
+  page --> actor : Spotlight "Grace's birthday" in 4 days (L2-125 AC2)
+  page --> actor : Coming up, To do today, Recently (L2-125 AC3 to AC6)
+  page --> actor : "It's been a while with Sam and Joel." (L2-125 AC7)
+end
+@enduml

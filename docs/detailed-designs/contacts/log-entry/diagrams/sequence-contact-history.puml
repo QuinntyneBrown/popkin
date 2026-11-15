@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — A contact's history
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactProfilePage" as page
+  participant "ContactTimelineStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactTimelineController" as ctrl
+  participant "Follow-ups endpoints" as fu
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetContactTimelineQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "IPhotoStore" as photos
+end box
+actor -> page : Open the profile, "Timeline"
+page -> store : load(contactId, all)
+store -> client : timeline(contactId, all)
+client -> ctrl : GET /api/contacts/people/{id}/timeline?show=all
+ctrl -> handler : Send GetContactTimelineQuery
+handler -> db : Owner's entries and photo memories for the contact
+db --> handler : Rows, or 404 contact_not_found
+handler -> photos : GetReadUrl per photo
+photos --> handler : Addresses that expire
+handler --> ctrl : TimelineDto newest first
+ctrl --> client : 200
+alt Nothing logged
+  page --> actor : "Nothing logged with Femi yet" and "Log a conversation" (L2-135 AC2)
+else Entries
+  page --> actor : Day, kind, "Phone", title, note, photo (L2-135 AC1)
+end
+actor -> page : "Milestones"
+page -> store : filter(milestones)
+store --> page : Milestones only
+actor -> page : "Follow-ups {n}"
+page -> client : Follow-ups of this contact
+client -> fu : Endpoints of Follow-ups, filtered to the contact
+fu --> client : Open follow-ups
+page --> actor : Each with its kind, day and tick; "Add a follow-up for Chidi" (L2-135 AC3)
+@enduml

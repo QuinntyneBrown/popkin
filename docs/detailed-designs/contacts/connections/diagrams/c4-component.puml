@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Connections
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactsConnectionsPage", "Angular page", "pk-connection-map, pk-choice-chips, panel")
+  Component(dialog, "ConnectPersonDialog", "CDK dialog", "pk-search-field, pk-pick-list, pk-choice-chips")
+  Component(store, "ConnectionsStore", "api library", "filter, focus, lines, panel, connect")
+  Component(rules, "linesFor", "api library, pure", "Filter table and focus")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi via ContactsOutbox")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ConnectionsController", "ASP.NET Core controller", "One MediatR request per endpoint")
+  Component(handlers, "GetConnectionMapQueryHandler, ConnectCommandHandler", "MediatR handlers", "Owner's rows only")
+  Component(guard, "IContactGuard", "Application", "RequireOwnedAsync: 404 contact_not_found")
+  Component(entity, "Connection", "Domain entity", "Connect: pair order, no self")
+  ComponentDb(db, "Popkin database", "SQL Server", "Connection")
+}
+Rel(page, store, "Reads and calls")
+Rel(page, dialog, "Opens with the focused contact")
+Rel(dialog, store, "connect")
+Rel(store, rules, "Decides the lines with")
+Rel(store, client, "Loads and connects")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, handlers, "Sends query or command")
+Rel(handlers, guard, "Checks both contacts")
+Rel(handlers, entity, "Creates")
+Rel(handlers, db, "Reads and saves", "EF Core")
+@enduml

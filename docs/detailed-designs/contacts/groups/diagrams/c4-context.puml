@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Groups
+
+Person(person, "Person", "Signed in to Popkin; owns their Contacts")
+Person_Ext(member, "Group member", "A contact in a group; receives only a Popkin invite")
+System(popkin, "Popkin", "Pop-up communities, with Contacts: the person's own address book")
+System_Ext(acs, "Azure Communication Services", "SMS and email provider")
+
+Rel(person, popkin, "Makes groups, opens or starts their Popkin in", "Popkin web app")
+Rel(popkin, acs, "Sends the new Popkin's invite via")
+Rel(acs, member, "Delivers the invite link to", "SMS or email")
+@enduml
