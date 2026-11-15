@@ -1347,6 +1347,7 @@ export const screenStates: ScreenState[] = [
   { key: 'recap', ...wrapUpStates.recap, regions: recapRegions },
   { key: 'recapHost', ...wrapUpStates.recapHost, regions: recapRegions },
   { key: 'recapPlain', ...wrapUpStates.recapPlain, regions: recapRegions },
+  { key: 'recapPlan', ...wrapUpStates.recapPlan, regions: recapRegions },
   { key: 'recapExporting', ...wrapUpStates.recapExporting, regions: recapRegions },
   {
     key: 'recapLoading',

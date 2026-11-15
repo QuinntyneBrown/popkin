@@ -319,6 +319,7 @@ export const routes = {
   recapError: { app: recap, mock: 'pages/wrapped-up/error.html' },
   recapExporting: { app: recap, mock: 'pages/wrapped-up/exporting.html' },
   recapPlain: { app: recap, mock: 'pages/wrapped-up/plain.html' },
+  recapPlan: { app: recap, mock: 'pages/wrapped-up/plan.html' },
   // The album was not kept: the recap under the banner that counts the days.
   recapGoing: { app: recap, mock: 'notifications/banner/persistent.html' },
   popkinHomeLastHour: { app: home, mock: 'pages/popkin-home/last-hour.html' },

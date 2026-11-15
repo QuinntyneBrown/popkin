@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BurnDownView, StoryView } from '../../models/plan';
 import {
   chipStatus,
+  recapLine,
   badgeLabel,
   biggestEmpty,
   burnHeadline,
@@ -32,6 +33,16 @@ function story(title: string, column: StoryView['column'], points: number): Stor
     addedAt: '2026-08-30T09:00:00Z',
   };
 }
+
+describe('recapLine (L2-075 AC4)', () => {
+  it.each([
+    [12, 14, '12 of 14 stories done'],
+    [0, 3, '0 of 3 stories done'],
+    [1, 1, '1 of 1 story done'],
+  ])('says %i of %i as "%s"', (done, made, line) => {
+    expect(recapLine(done, made)).toBe(line);
+  });
+});
 
 describe('chipStatus (L2-068 AC7)', () => {
   it.each([

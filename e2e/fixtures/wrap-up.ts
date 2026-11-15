@@ -98,6 +98,8 @@ export class WrapUp {
       ratingCount: number;
       sharedBy: { firstName: string };
     } | null,
+    /** The stories done out of those made, while Plan is on and there were any (L2-075 AC4). */
+    stories: null as { done: number; made: number } | null,
   };
   /** What starting the album's zip answers, then what each look at its progress does. */
   zip: AlbumExport[] = [preparing(0), preparing(12), ready()];

@@ -1,3 +1,4 @@
+import { recapLine } from '../plan/plan-text';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { Subject, Subscription, timer } from 'rxjs';
 import { AvatarView } from '../../models/invite';
@@ -40,6 +41,8 @@ export interface RecapScreen {
   isHost: boolean;
   /** There are photos to save. */
   canSave: boolean;
+  /** "12 of 14 stories done", while Plan is on and there were stories (L2-075 AC4). */
+  plan: string | null;
   photosGo: { lead: string; text: string } | null;
 }
 
@@ -87,6 +90,7 @@ export class RecapStore {
       isHost: recap.isHost,
       canSave: recap.photoCount > 0 && !recap.photosRemovedAt,
       photosGo: recap.photosRemovedAt ? null : photosGo(recap.photosRemoveAt, new Date()),
+      plan: recap.stories ? recapLine(recap.stories.done, recap.stories.made) : null,
     };
   });
   /** The album's zip while it is prepared, with how far it is in hundredths; null otherwise. */

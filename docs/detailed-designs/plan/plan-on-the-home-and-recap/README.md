@@ -53,14 +53,14 @@ design adds to the [Popkin home](../../popkins/popkin-home/README.md) and the
   and `ready` otherwise. A quiet read that fails keeps what is shown.
 - **`PopkinHomePage`** — the section (`pk-section`, heading "Plan", `linkSuffix="of the plan"`,
   the link to the board) with `pk-plan-card` inside.
-- **`RecapStore`** — `storiesLine` from `stories`, or nothing.
+- **`RecapStore`** — the view's `plan`, "12 of 14 stories done" from `stories`, or null.
 - **`plan-text.ts`** — `homeLine` ("24 pts left"), `badge`, `recapLine` ("12 of 14 stories done",
   "1 of 1 story done").
 - **`PLAN_API.summary`**; **`RECAP_API`**'s `RecapDto` gains `stories`.
 - **Components**: `pk-plan-card` (`.card.biggest`: the points left and the status, then
-  `pk-biggest-rows` as an `ol` named "Biggest open", without a heading). `pk-biggest-rows` holds
-  the rows that `pk-biggest-open` lists on the burn-down too and `pk-recap`'s card
-  "The plan" with the stories line.
+  `pk-biggest-rows` as an `ol` named "Biggest open", without a heading), whose rows
+  `pk-biggest-open` lists on the burn-down too; and `pk-recap`'s card "The plan"
+  (`.recap__plan`, the board icon in a tile) with the stories line, from its `plan` input.
 
 ### Backend (`backend/src/`)
 

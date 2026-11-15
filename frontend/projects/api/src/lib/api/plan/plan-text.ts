@@ -134,6 +134,11 @@ export function burnHeadline(pointsLeft: number): string {
 }
 
 /** "7 behind", "3 ahead" or "On track" (L2-071 AC2). */
+/** The recap's "12 of 14 stories done", "1 of 1 story done" (L2-075 AC4). */
+export function recapLine(done: number, made: number): string {
+  return `${done} of ${made} ${made === 1 ? 'story' : 'stories'} done`;
+}
+
 /** The sprint chip's status: "7 behind", "3 ahead" or "on track" (L2-068 AC7). */
 export function chipStatus(behind: number): string {
   return behind === 0 ? 'on track' : badgeLabel(behind);

@@ -25,6 +25,8 @@ export class RecapPage {
   /** The top-rated moment; absent when nothing was rated. */
   readonly moment: Locator;
   readonly momentLink: Locator;
+  /** "The plan": "12 of 14 stories done" (L2-075 AC4). */
+  readonly plan: Locator;
   readonly actions: Locator;
   readonly saveTheAlbum: Locator;
   /** The same button while the album is prepared. */
@@ -62,6 +64,7 @@ export class RecapPage {
     this.statValues = this.stats.locator('.stat__value');
     this.firstStat = this.stats.locator('> div').first();
     this.moment = this.recap.locator('.recap__moment');
+    this.plan = this.recap.locator('.recap__plan');
     // The card is the link.
     this.momentLink = this.moment;
     this.actions = this.recap.locator('.recap__actions');

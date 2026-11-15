@@ -43,6 +43,47 @@
   margin-top: var(--space-3);
 }
 
+/* "The plan": a card of one row, its board icon in a tile (L2-075 AC4). */
+.recap__plan {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.recap__plan-tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+}
+
+.recap__plan-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.recap__plan-label {
+  display: block;
+  color: var(--accent-text);
+  font-size: var(--font-size-sm-plus);
+  font-weight: var(--font-weight-semibold);
+}
+
+.recap__plan-line {
+  display: block;
+  font: var(--font-weight-extrabold) var(--font-size-md-plus) / var(--line-height-snug)
+    var(--font-family-display);
+}
+
 .recap__actions {
   display: flex;
   flex-direction: column;

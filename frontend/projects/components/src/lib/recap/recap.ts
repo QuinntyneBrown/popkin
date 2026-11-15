@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AvatarStack, StackAvatar } from '../avatar-stack/avatar-stack';
 import { ExperienceRow } from '../experience-row/experience-row';
+import { Icon } from '../icon/icon';
 import { Polaroids } from '../polaroids/polaroids';
 import { RouterLink } from '@angular/router';
 import { Skeleton } from '../skeleton/skeleton';
@@ -41,7 +42,7 @@ export interface RecapMoment {
  */
 @Component({
   selector: 'div[pk-recap]',
-  imports: [AvatarStack, ExperienceRow, Polaroids, RouterLink, Skeleton, Stat, StatPair],
+  imports: [AvatarStack, ExperienceRow, Icon, Polaroids, RouterLink, Skeleton, Stat, StatPair],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './recap.html',
   styleUrl: './recap.scss',
@@ -69,4 +70,6 @@ export class Recap {
   /** The top-rated experience. Left out when nothing was rated. */
   readonly moment = input<RecapMoment | null>(null);
   readonly momentLabel = input('Top-rated moment');
+  /** "12 of 14 stories done", while Plan is on and there were stories (L2-075 AC4). */
+  readonly plan = input<string | null>(null);
 }

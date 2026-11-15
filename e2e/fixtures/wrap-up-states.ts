@@ -111,6 +111,12 @@ export const wrapUpStates = {
       wrapUp.recap = { ...wrapUp.recap, photoCount: 0, photos: [], topRated: null };
     }),
   },
+  /** With Plan on: "12 of 14 stories done", in the Sky of Cabin Week ’27 (L2-075 AC4). */
+  recapPlan: {
+    before: member((wrapUp) => {
+      wrapUp.recap = { ...wrapUp.recap, colour: 'Sky', stories: { done: 12, made: 14 } };
+    }),
+  },
   recapGoing: {
     before: member((wrapUp) => {
       wrapUp.wrap(false);

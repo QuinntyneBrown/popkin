@@ -30,6 +30,15 @@
         }
       </dl>
     </div>
+    @if (plan(); as plan) {
+      <div class="recap__plan">
+        <span class="recap__plan-tile"><svg pk-icon name="board" size="md"></svg></span>
+        <span class="recap__plan-text">
+          <span class="recap__plan-label">The plan</span>
+          <span class="recap__plan-line">{{ plan }}</span>
+        </span>
+      </div>
+    }
     @if (moment(); as top) {
       <a
         pk-experience-row
