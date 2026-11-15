@@ -7,7 +7,8 @@
       "title": "Admin sign in",
       "route": "admin.popkin.community/sign-in",
       "requirements": [
-        "L2-078"
+        "L2-078",
+        "L2-088"
       ],
       "states": [
         "default",
@@ -46,7 +47,9 @@
       "kind": "page",
       "title": "Not found",
       "route": "admin.popkin.community/*",
-      "requirements": [],
+      "requirements": [
+        "L2-089"
+      ],
       "states": [
         "default"
       ],
@@ -61,7 +64,9 @@
       "kind": "page",
       "title": "Server error",
       "route": "admin.popkin.community/*",
-      "requirements": [],
+      "requirements": [
+        "L2-089"
+      ],
       "states": [
         "default"
       ],
@@ -76,7 +81,9 @@
       "kind": "page",
       "title": "Dashboard",
       "route": "admin.popkin.community/",
-      "requirements": [],
+      "requirements": [
+        "L2-090"
+      ],
       "states": [
         "default",
         "metric-popkins",
@@ -93,7 +100,9 @@
       "kind": "dialog",
       "title": "Menu",
       "opens_from": "dashboard",
-      "requirements": [],
+      "requirements": [
+        "L2-089"
+      ],
       "states": [
         "default"
       ],
@@ -107,7 +116,9 @@
       "kind": "page",
       "title": "People",
       "route": "admin.popkin.community/people",
-      "requirements": [],
+      "requirements": [
+        "L2-093"
+      ],
       "states": [
         "default",
         "suspended",
@@ -125,7 +136,15 @@
       "kind": "page",
       "title": "Person",
       "route": "admin.popkin.community/people/:personId",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-094",
+        "L2-095",
+        "L2-096",
+        "L2-097",
+        "L2-098",
+        "L2-100"
+      ],
       "states": [
         "default",
         "suspended",
@@ -149,7 +168,10 @@
       "kind": "dialog",
       "title": "Suspend a person",
       "opens_from": "person",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-095"
+      ],
       "states": [
         "default",
         "busy",
@@ -163,7 +185,10 @@
       "kind": "dialog",
       "title": "Lift a suspension",
       "opens_from": "person",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-096"
+      ],
       "states": [
         "default",
         "busy",
@@ -177,7 +202,10 @@
       "kind": "dialog",
       "title": "Sign a person out",
       "opens_from": "person",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-097"
+      ],
       "states": [
         "default",
         "busy",
@@ -191,7 +219,10 @@
       "kind": "dialog",
       "title": "Start a deletion",
       "opens_from": "person",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-098"
+      ],
       "states": [
         "default",
         "busy",
@@ -205,7 +236,10 @@
       "kind": "dialog",
       "title": "Export a person’s data",
       "opens_from": "person",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-100"
+      ],
       "states": [
         "default",
         "busy",
@@ -219,7 +253,10 @@
       "kind": "page",
       "title": "Deletion queue",
       "route": "admin.popkin.community/deletions",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-099"
+      ],
       "states": [
         "default",
         "viewer",
@@ -237,7 +274,10 @@
       "kind": "dialog",
       "title": "Cancel a deletion",
       "opens_from": "deletions",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-099"
+      ],
       "states": [
         "default",
         "busy",
@@ -250,7 +290,10 @@
       "kind": "page",
       "title": "Data requests",
       "route": "admin.popkin.community/data-requests",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-101"
+      ],
       "states": [
         "default",
         "viewer",
@@ -268,7 +311,10 @@
       "kind": "dialog",
       "title": "Log a data request",
       "opens_from": "data-requests",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-101"
+      ],
       "states": [
         "default",
         "busy",
@@ -281,7 +327,9 @@
       "kind": "page",
       "title": "Popkins",
       "route": "admin.popkin.community/popkins",
-      "requirements": [],
+      "requirements": [
+        "L2-102"
+      ],
       "states": [
         "default",
         "ending",
@@ -299,7 +347,15 @@
       "kind": "page",
       "title": "Popkin",
       "route": "admin.popkin.community/popkins/:popkinId",
-      "requirements": [],
+      "requirements": [
+        "L2-078",
+        "L2-086",
+        "L2-103",
+        "L2-104",
+        "L2-105",
+        "L2-106",
+        "L2-107"
+      ],
       "states": [
         "default",
         "ending",
@@ -321,7 +377,10 @@
       "kind": "dialog",
       "title": "Wrap up a Popkin now",
       "opens_from": "popkin",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-104"
+      ],
       "states": [
         "default",
         "busy",
@@ -335,7 +394,10 @@
       "kind": "dialog",
       "title": "Give a Popkin more time",
       "opens_from": "popkin",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-105"
+      ],
       "states": [
         "default",
         "busy",
@@ -349,7 +411,10 @@
       "kind": "dialog",
       "title": "Remove a member",
       "opens_from": "popkin",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-106"
+      ],
       "states": [
         "default",
         "busy",
@@ -363,7 +428,10 @@
       "kind": "dialog",
       "title": "Reset the invite",
       "opens_from": "popkin",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-107"
+      ],
       "states": [
         "default",
         "busy",
@@ -377,7 +445,11 @@
       "kind": "page",
       "title": "Reports",
       "route": "admin.popkin.community/reports",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-109",
+        "L2-110"
+      ],
       "states": [
         "default",
         "photo",
@@ -398,7 +470,10 @@
       "kind": "dialog",
       "title": "Remove reported content",
       "opens_from": "reports",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-110"
+      ],
       "states": [
         "default",
         "busy",
@@ -412,7 +487,10 @@
       "kind": "page",
       "title": "Live calls",
       "route": "admin.popkin.community/calls",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-112"
+      ],
       "states": [
         "default",
         "viewer",
@@ -430,7 +508,10 @@
       "kind": "dialog",
       "title": "End a call",
       "opens_from": "calls",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-112"
+      ],
       "states": [
         "default",
         "busy",
@@ -444,7 +525,9 @@
       "kind": "page",
       "title": "Metrics",
       "route": "admin.popkin.community/metrics",
-      "requirements": [],
+      "requirements": [
+        "L2-091"
+      ],
       "states": [
         "default",
         "7-days",
@@ -460,7 +543,9 @@
       "kind": "page",
       "title": "Health",
       "route": "admin.popkin.community/health",
-      "requirements": [],
+      "requirements": [
+        "L2-092"
+      ],
       "states": [
         "default",
         "all-good",
@@ -478,7 +563,10 @@
       "kind": "page",
       "title": "Jobs",
       "route": "admin.popkin.community/jobs",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-113"
+      ],
       "states": [
         "default",
         "collapsed",
@@ -496,7 +584,10 @@
       "kind": "page",
       "title": "Album exports",
       "route": "admin.popkin.community/exports",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-114"
+      ],
       "states": [
         "default",
         "retried",
@@ -514,7 +605,7 @@
       "requirements": [
         "L2-076",
         "L2-077",
-        "L2-078"
+        "L2-086"
       ],
       "states": [
         "default",
@@ -603,7 +694,10 @@
       "kind": "page",
       "title": "Announcements",
       "route": "admin.popkin.community/announcements",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-115"
+      ],
       "states": [
         "default",
         "warning",
@@ -622,7 +716,9 @@
       "kind": "dialog",
       "title": "Publish a banner",
       "opens_from": "announcements",
-      "requirements": [],
+      "requirements": [
+        "L2-115"
+      ],
       "states": [
         "default",
         "busy",
@@ -638,7 +734,9 @@
       "kind": "dialog",
       "title": "Take the banner down",
       "opens_from": "announcements",
-      "requirements": [],
+      "requirements": [
+        "L2-115"
+      ],
       "states": [
         "default",
         "busy",
@@ -654,7 +752,10 @@
       "kind": "page",
       "title": "Limits",
       "route": "admin.popkin.community/limits",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-117"
+      ],
       "states": [
         "default",
         "edited",
@@ -673,7 +774,10 @@
       "kind": "dialog",
       "title": "Save new limits",
       "opens_from": "limits",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-117"
+      ],
       "states": [
         "default",
         "busy",
@@ -687,7 +791,9 @@
       "kind": "page",
       "title": "Settings",
       "route": "admin.popkin.community/settings",
-      "requirements": [],
+      "requirements": [
+        "L2-118"
+      ],
       "states": [
         "default",
         "filtered",
@@ -704,7 +810,10 @@
       "kind": "page",
       "title": "Admins & roles",
       "route": "admin.popkin.community/admins",
-      "requirements": [],
+      "requirements": [
+        "L2-086",
+        "L2-119"
+      ],
       "states": [
         "default",
         "roles",
@@ -724,7 +833,9 @@
       "kind": "dialog",
       "title": "Add an admin",
       "opens_from": "admins",
-      "requirements": [],
+      "requirements": [
+        "L2-119"
+      ],
       "states": [
         "default",
         "invalid",
@@ -737,7 +848,10 @@
       "kind": "dialog",
       "title": "Change an admin’s role",
       "opens_from": "admins",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-119"
+      ],
       "states": [
         "default",
         "busy",
@@ -752,7 +866,10 @@
       "kind": "dialog",
       "title": "Remove an admin",
       "opens_from": "admins",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-119"
+      ],
       "states": [
         "default",
         "busy",
@@ -767,7 +884,9 @@
       "kind": "page",
       "title": "Audit log",
       "route": "admin.popkin.community/audit",
-      "requirements": [],
+      "requirements": [
+        "L2-120"
+      ],
       "states": [
         "default",
         "filtered",
