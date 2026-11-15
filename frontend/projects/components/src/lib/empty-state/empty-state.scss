@@ -36,6 +36,7 @@
 
 :host(.empty--flush) h1 {
   margin-top: var(--space-4);
+  font: var(--text-h1-compact);
 }
 
 .empty__text {
@@ -69,5 +70,6 @@
 .empty__code {
   margin-top: var(--space-3);
   font: var(--text-caption);
-  color: var(--color-fg-subtle);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-fg-muted);
 }

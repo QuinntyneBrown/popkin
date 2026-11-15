@@ -49,4 +49,17 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'error',
+    loadComponent: () =>
+      import('./pages/server-error/server-error.page').then((m) => m.ServerErrorPage),
+    data: data({ shell: 'bare', page: 'server-error' }),
+    title: 'Something went wrong · Popkin Admin',
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./pages/not-found/not-found.page').then((m) => m.NotFoundPage),
+    data: data({ shell: 'bare', page: 'not-found' }),
+    title: 'No page here · Popkin Admin',
+  },
 ];

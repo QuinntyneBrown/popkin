@@ -1,3 +1,4 @@
+import { Dialog } from '@angular/cdk/dialog';
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -7,6 +8,7 @@ import { AdminShell, SkipLink, Toast, ToastRegion } from 'components';
 import { filter, map } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AdminRouteData } from './app.routes';
+import { MenuData, MenuDialog } from './dialogs/menu/menu.dialog';
 
 /**
  * The admin app's root: the skip link, and the routed page, inside the console's frame for
@@ -24,6 +26,7 @@ export class App {
   private readonly document = inject(DOCUMENT);
   private readonly session = inject(AdminSessionStore);
   protected readonly toaster = inject(Toaster);
+  private readonly dialog = inject(Dialog);
 
   protected readonly sections = ADMIN_SECTIONS;
   protected readonly label = environment.consoleLabel;
@@ -52,6 +55,25 @@ export class App {
     effect(() => {
       const page = this.routeData()?.page;
       if (page) this.document.body.dataset['page'] = page;
+    });
+  }
+
+  /** The sections in a drawer below 1024 px; focus returns to "Open menu" (L2-089 AC2). */
+  protected openMenu(): void {
+    const ref = this.dialog.open<'signOut', MenuData>(MenuDialog, {
+      data: {
+        sections: this.sections,
+        current: this.routeData()?.page,
+        me: this.me(),
+        label: this.label,
+      },
+      ariaLabel: 'Menu',
+      // pk-admin-drawer draws its own backdrop.
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    ref.closed.subscribe((result) => {
+      if (result === 'signOut') this.signOut();
     });
   }
 

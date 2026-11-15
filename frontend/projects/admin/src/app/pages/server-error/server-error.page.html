@@ -1,0 +1,15 @@
+<main pk-admin-entry>
+  <div
+    pk-empty-state
+    slot="card"
+    icon="alert"
+    heading="Something went wrong on our side"
+    text="The console couldn’t finish that. Nothing was changed. Try again in a moment; if it keeps happening, check Health."
+    [code]="code"
+    [level]="1"
+    [flush]="true"
+  >
+    <a pk-button variant="primary" size="md" [routerLink]="retryUrl">Try again</a>
+    <a pk-button variant="secondary" size="md" routerLink="/health">Open Health</a>
+  </div>
+</main>

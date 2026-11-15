@@ -1,0 +1,11 @@
+<div pk-admin-drawer (closed)="ref.close()">
+  <div
+    pk-admin-nav
+    [sections]="data.sections"
+    [current]="data.current"
+    [me]="data.me"
+    [label]="data.label"
+    (chosen)="ref.close()"
+    (signOut)="ref.close('signOut')"
+  ></div>
+</div>

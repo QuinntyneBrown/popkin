@@ -157,6 +157,7 @@ export * from './lib/admin-brand/admin-brand';
 export * from './lib/env-tag/env-tag';
 export * from './lib/admin-nav/admin-nav';
 export * from './lib/admin-shell/admin-shell';
+export * from './lib/admin-drawer/admin-drawer';
 export * from './lib/page-head/page-head';
 export * from './lib/panel/panel';
 export * from './lib/data-table/data-table';

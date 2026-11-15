@@ -1,0 +1,12 @@
+<div class="backdrop" aria-hidden="true" (click)="closed.emit()"></div>
+<aside class="admin-drawer">
+  <button
+    pk-icon-button
+    class="admin-drawer__close"
+    type="button"
+    icon="close"
+    label="Close menu"
+    (click)="closed.emit()"
+  ></button>
+  <ng-content />
+</aside>
