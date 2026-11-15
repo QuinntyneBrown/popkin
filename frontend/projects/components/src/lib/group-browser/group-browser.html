@@ -1,0 +1,50 @@
+<nav class="group-browser__list" aria-label="Your groups">
+  @for (kind of kinds(); track kind.kind) {
+    <h2 class="group-browser__kind">{{ kind.kind }}</h2>
+    <ul>
+      @for (group of kind.groups; track group.id) {
+        <li>
+          <a
+            class="row group-browser__item"
+            [routerLink]="group.link"
+            [attr.aria-current]="group.id === currentId() ? 'true' : null"
+          >
+            <span
+              pk-popkin-tile
+              size="sm"
+              [emoji]="group.emoji"
+              [attr.data-accent]="group.accent"
+            ></span>
+            <span class="row__main">
+              <span class="row__title">{{ group.name }}</span>
+              <span class="row__text">{{ group.members }}</span>
+            </span>
+            <svg pk-icon class="group-browser__chevron" name="chevron-right" size="md"></svg>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</nav>
+@if (open(); as group) {
+  <section class="group-browser__detail" [attr.aria-label]="group.name">
+    @if (backLink(); as back) {
+      <a class="group-browser__back" [routerLink]="back">
+        <svg pk-icon name="back" size="md"></svg>{{ backLabel() }}
+      </a>
+    }
+    <div class="group-browser__id">
+      <span pk-popkin-tile size="lg" [emoji]="group.emoji" [attr.data-accent]="group.accent"></span>
+      <div class="group-browser__head">
+        <p class="group-browser__over">{{ group.kind }}</p>
+        <h2 #name class="group-browser__name" tabindex="-1">{{ group.name }}</h2>
+      </div>
+    </div>
+    <div class="group-browser__actions">
+      <ng-content select="[slot=actions]" />
+    </div>
+    <div class="group-browser__parts">
+      <ng-content />
+    </div>
+  </section>
+}

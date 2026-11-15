@@ -205,3 +205,4 @@ export * from './lib/person-pick/person-pick';
 export * from './lib/kind-grid/kind-grid';
 export * from './lib/keep-strip/keep-strip';
 export * from './lib/habit-row/habit-row';
+export * from './lib/group-browser/group-browser';
