@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Popkin.Api.RateLimiting;
 using Popkin.Application.Contacts.People;
+using Popkin.Application.Invites;
 
 namespace Popkin.Api.Controllers.Contacts;
 
@@ -16,13 +17,17 @@ public sealed class ContactsPeopleController(ISender sender) : ControllerBase
 
     /// <summary>
     /// Add someone (L2-129): the part `contact` holds <see cref="SaveContactRequest"/> as JSON.
-    /// A resend under the same client id answers the contact the first made.
+    /// The optional part `photo` is their photo. A resend under the same client id answers the
+    /// contact the first made.
     /// </summary>
     [HttpPost]
     [EnableRateLimiting(RateLimitPolicyNames.Photos)]
-    public async Task<ActionResult<ContactProfileDto>> Add([FromForm] string contact, CancellationToken cancellationToken)
+    public async Task<ActionResult<ContactProfileDto>> Add([FromForm] string contact, IFormFile? photo, CancellationToken cancellationToken)
     {
-        var added = await sender.Send(new AddContactCommand(JsonSerializer.Deserialize<SaveContactRequest>(contact, Json)!), cancellationToken);
+        await using var content = photo?.OpenReadStream();
+        var upload = photo is null ? null : new PhotoUpload(content!, photo.Length);
+        var added = await sender.Send(
+            new AddContactCommand(JsonSerializer.Deserialize<SaveContactRequest>(contact, Json)!, upload), cancellationToken);
         return Created($"/api/contacts/people/{added.Id}", added);
     }
 }

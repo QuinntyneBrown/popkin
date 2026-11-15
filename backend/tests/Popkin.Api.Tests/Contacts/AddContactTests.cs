@@ -4,6 +4,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using ImageMagick;
 using Popkin.Api.Tests.Support;
 
 namespace Popkin.Api.Tests.Contacts;
@@ -108,5 +109,50 @@ public sealed class AddContactTests
         var response = await mara.AddContactAsync(ContactsExtensions.Named("Femi Bankole"));
 
         await response.AssertProblem(HttpStatusCode.NotFound, "feature_off");
+    }
+
+    [Fact]
+    public async Task Given_a_photo_when_Mara_adds_Femi_with_it_then_his_profile_shows_it_without_its_location()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+
+        var response = await mara.AddContactAsync(ContactsExtensions.Named("Femi Bankole"), TestPhotos.WithLocation(MagickFormat.Jpeg, 3000, 2000));
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var photoUrl = (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("photoUrl").GetString()!;
+        var file = await api.CreateBrowserClient().GetAsync(photoUrl);
+        using var stored = new MagickImage(await file.Content.ReadAsByteArrayAsync());
+        Assert.Null(stored.GetExifProfile());
+        Assert.Equal(512u, stored.Width);
+    }
+
+    [Fact]
+    public async Task Given_a_file_that_is_not_an_image_when_Mara_adds_Femi_with_it_then_it_is_refused_and_nothing_is_kept()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+
+        var response = await mara.AddContactAsync(ContactsExtensions.Named("Femi Bankole"), "not a photo at all"u8.ToArray());
+
+        var problem = await response.AssertProblem(HttpStatusCode.BadRequest, "photo_type_not_allowed");
+        Assert.Equal("photo", problem.GetProperty("field").GetString());
+        Assert.Empty(api.Photos.Files);
+        Assert.Equal(0, await mara.ContactsCountAsync());
+    }
+
+    [Fact]
+    public async Task Given_the_save_fails_when_Mara_adds_Femi_with_a_photo_then_the_photo_is_not_kept()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+        api.Faults.FailSaves = true;
+
+        var response = await mara.AddContactAsync(ContactsExtensions.Named("Femi Bankole"), TestPhotos.WithLocation(MagickFormat.Jpeg));
+
+        api.Faults.FailSaves = false;
+        Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+        Assert.Empty(api.Photos.Files);
+        Assert.Equal(0, await mara.ContactsCountAsync());
     }
 }
