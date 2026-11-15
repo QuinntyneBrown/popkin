@@ -1162,7 +1162,9 @@
         "default",
         "mine",
         "more",
-        "reported"
+        "reported",
+        "current",
+        "current-more"
       ],
       "not_applicable": {
         "busy": "A reaction shows at once and is undone with a message if it fails to save.",
@@ -1340,7 +1342,8 @@
         "default",
         "host",
         "report",
-        "reported"
+        "reported",
+        "current-host"
       ],
       "not_applicable": {
         "busy": "Each row opens another dialog; nothing is sent from this one.",

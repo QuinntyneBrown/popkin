@@ -339,6 +339,7 @@ export const routes = {
   experienceDetailError: { app: experience, mock: 'pages/experience-detail/error.html' },
   experienceActions: { app: experience, mock: 'dialogs/experience-actions/default.html' },
   experienceActionsHost: { app: idea, mock: 'dialogs/experience-actions/host.html' },
+  experienceActionsCurrentHost: { app: idea, mock: 'dialogs/experience-actions/current-host.html' },
   deleteExperience: { app: experience, mock: 'dialogs/delete-experience/default.html' },
   deleteExperienceBusy: { app: experience, mock: 'dialogs/delete-experience/busy.html' },
   deleteExperienceFailed: { app: experience, mock: 'dialogs/delete-experience/failed.html' },
@@ -419,6 +420,8 @@ export const routes = {
   directMessageCall: { app: directMessage, mock: 'pages/direct-message/call.html' },
   // Journey 12, React and reply: the dialogs open over the Everyone thread.
   reactions: { app: chat, mock: 'dialogs/reactions/default.html' },
+  reactionsCurrent: { app: chat, mock: 'dialogs/reactions/current.html' },
+  reactionsCurrentMore: { app: chat, mock: 'dialogs/reactions/current-more.html' },
   reactionsMine: { app: chat, mock: 'dialogs/reactions/mine.html' },
   reactionsMore: { app: chat, mock: 'dialogs/reactions/more.html' },
   deleteMessage: { app: chat, mock: 'dialogs/delete-message/default.html' },

@@ -187,7 +187,12 @@ export const experienceStates = {
     },
   },
   experienceActions: { before: at(), app: async (page) => void (await openActions(page)) },
-  experienceActionsHost: { before: at(), app: async (page) => void (await openActions(page)) },
+  experienceActionsHost: {
+    before: at((all) => {
+      all.find(canoeId).by = people.walt;
+    }),
+    app: async (page) => void (await openActions(page)),
+  },
   deleteExperience: { before: at(), app: async (page) => void (await openDelete(page)) },
   deleteExperienceBusy: {
     before: at((all) => void all.holdChange('delete')),
