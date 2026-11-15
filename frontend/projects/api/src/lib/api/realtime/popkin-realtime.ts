@@ -40,6 +40,11 @@ export interface PopkinRealtime {
    * id of the Popkin, whose open Schedule reads itself again.
    */
   readonly scheduleChanged$: Observable<string>;
+  /**
+   * Someone added, moved, changed or deleted a story (L2-068 AC12): the Popkin and the plan's
+   * version, which an open screen of Plan reads itself again for when it is above its own.
+   */
+  readonly planChanged$: Observable<{ popkinId: string; version: number }>;
   /** Photos were added to a Popkin's album (L2-031 AC7). */
   readonly photosAdded$: Observable<{ popkinId: string; photoIds: string[] }>;
   /**

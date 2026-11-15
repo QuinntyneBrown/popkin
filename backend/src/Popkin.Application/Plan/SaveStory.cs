@@ -12,7 +12,7 @@ public sealed record SaveStoryCommand(
     : IRequest<StoryDto>;
 
 public sealed class SaveStoryCommandHandler(
-    IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPhotoStore photos, TimeProvider clock)
+    IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPopkinNotifier notifier, IPhotoStore photos, TimeProvider clock)
     : IRequestHandler<SaveStoryCommand, StoryDto>
 {
     public async Task<StoryDto> Handle(SaveStoryCommand request, CancellationToken cancellationToken)
@@ -32,6 +32,7 @@ public sealed class SaveStoryCommandHandler(
         story.Change(title, column, points, tag, owner, due, clock.GetUtcNow());
         sprint.Changed();
         await db.SaveChangesAsync(cancellationToken);
+        await notifier.PlanChanged(popkin.Id, sprint.Version);
 
         var owners = await PlanStories.OwnersAsync(db, [story], cancellationToken);
         return PlanStories.Of(story, owners, membership, photos);

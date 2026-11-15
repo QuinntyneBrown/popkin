@@ -11,7 +11,7 @@ public sealed record AddStoryCommand(Guid PopkinId, string? Title, string? Colum
     : IRequest<StoryDto>;
 
 public sealed class AddStoryCommandHandler(
-    IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPhotoStore photos, TimeProvider clock)
+    IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPopkinNotifier notifier, IPhotoStore photos, TimeProvider clock)
     : IRequestHandler<AddStoryCommand, StoryDto>
 {
     public async Task<StoryDto> Handle(AddStoryCommand request, CancellationToken cancellationToken)
@@ -30,7 +30,8 @@ public sealed class AddStoryCommandHandler(
         var sprint = await db.Sprints.SingleOrDefaultAsync(s => s.PopkinId == popkin.Id, cancellationToken);
         if (sprint is null)
         {
-            db.Sprints.Add(Sprint.Start(popkin.Id, PlanDays.DayOf(now)));
+            sprint = Sprint.Start(popkin.Id, PlanDays.DayOf(now));
+            db.Sprints.Add(sprint);
         }
         else
         {
@@ -40,6 +41,7 @@ public sealed class AddStoryCommandHandler(
         var story = Story.Add(popkin.Id, title, column, points, tag, owner, membership.Id, now);
         db.Stories.Add(story);
         await db.SaveChangesAsync(cancellationToken);
+        await notifier.PlanChanged(popkin.Id, sprint.Version);
 
         var owners = await PlanStories.OwnersAsync(db, [story], cancellationToken);
         return PlanStories.Of(story, owners, membership, photos);

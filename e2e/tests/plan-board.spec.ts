@@ -110,7 +110,10 @@ test.describe('the plan board', () => {
   });
 
   // L2-068 AC11
-  test('says the plan could not be loaded, keeps the tabs, and tries again', async ({ page }) => {
+  test('says the plan could not be loaded, keeps the tabs, and tries again', async ({
+    page,
+    hub,
+  }) => {
     const plan = await maraWithAPlan(page);
     plan.fail();
     await page.goto(planUrl);
@@ -118,6 +121,11 @@ test.describe('the plan board', () => {
 
     await expect(board.error).toBeVisible();
     await expect(board.nav).toBeVisible();
+    // The board reads itself again once the hub connects (L2-068 AC12); that read fails too, so
+    // only "Try again" brings it back.
+    await hub.connected();
+    await expect.poll(() => plan.reads).toBeGreaterThanOrEqual(2);
+    await expect(board.error).toBeVisible();
     plan.recover();
     await board.tryAgain.click();
 

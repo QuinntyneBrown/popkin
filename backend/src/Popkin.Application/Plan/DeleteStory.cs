@@ -9,7 +9,7 @@ namespace Popkin.Application.Plan;
 /// <summary>Deletes a story, for the person who added it, its owner or the Host (L2-070 AC4).</summary>
 public sealed record DeleteStoryCommand(Guid PopkinId, Guid StoryId) : IRequest;
 
-public sealed class DeleteStoryCommandHandler(IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard)
+public sealed class DeleteStoryCommandHandler(IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPopkinNotifier notifier)
     : IRequestHandler<DeleteStoryCommand>
 {
     public async Task Handle(DeleteStoryCommand request, CancellationToken cancellationToken)
@@ -27,5 +27,6 @@ public sealed class DeleteStoryCommandHandler(IAppDbContext db, IFeatureSwitches
         db.Stories.Remove(story);
         sprint.Changed();
         await db.SaveChangesAsync(cancellationToken);
+        await notifier.PlanChanged(popkin.Id, sprint.Version);
     }
 }

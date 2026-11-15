@@ -164,4 +164,46 @@ describe('PlanBoardStore', () => {
 
     expect(store.columns()[1].stories.map((s) => s.title)).toEqual(['Cabin']);
   });
+
+  describe('live (L2-068 AC12)', () => {
+    it('reads again when the plan of its Popkin changes past the version it holds', () => {
+      answer = { ...empty, version: 3 };
+      store.open('p1');
+
+      realtime.planChanged$.next({ popkinId: 'p1', version: 4 });
+
+      expect(reads).toBe(2);
+    });
+
+    it('drops a change it already holds, or one of another Popkin', () => {
+      answer = { ...empty, version: 3 };
+      store.open('p1');
+
+      realtime.planChanged$.next({ popkinId: 'p1', version: 3 });
+      realtime.planChanged$.next({ popkinId: 'p1', version: 2 });
+      realtime.planChanged$.next({ popkinId: 'p2', version: 9 });
+
+      expect(reads).toBe(1);
+    });
+
+    it('reads again when the connection comes back', () => {
+      store.open('p1');
+
+      realtime.reconnected$.next();
+
+      expect(reads).toBe(2);
+    });
+
+    it('keeps the board it shows while it reads again', () => {
+      const later = new Subject<PlanBoardView>();
+      answer = { ...empty, version: 3 };
+      store.open('p1');
+      answer = later;
+
+      realtime.planChanged$.next({ popkinId: 'p1', version: 4 });
+
+      expect(store.state()).toBe('ready');
+      expect(store.view()?.version).toBe(3);
+    });
+  });
 });

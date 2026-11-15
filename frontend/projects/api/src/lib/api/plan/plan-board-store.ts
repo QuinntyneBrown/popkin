@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subscription, interval } from 'rxjs';
+import { Subscription, filter, interval, merge } from 'rxjs';
 import { PlanBoardView, StoryView } from '../../models/plan';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PLAN_API } from './plan-api';
@@ -10,8 +10,9 @@ import { columnsOf, daysLeftLabel, sprintLine } from './plan-text';
 export type PlanBoardState = 'loading' | 'ready' | 'error' | 'off' | 'not-found';
 
 /**
- * The plan board of one Popkin (L2-068): read when it opens, and again each minute, so an open
- * board follows the Plan switch within one (L2-077 AC4).
+ * The plan board of one Popkin (L2-068): read when it opens, again each minute, so an open
+ * board follows the Plan switch within one (L2-077 AC4), and again, quietly, when its plan
+ * changes past the version it holds or the connection comes back (L2-068 AC12).
  */
 @Injectable()
 export class PlanBoardStore {
@@ -34,6 +35,21 @@ export class PlanBoardStore {
     const sprint = this.view()?.sprint;
     return sprint ? { line: sprintLine(sprint), daysLeft: daysLeftLabel(sprint.daysLeft) } : null;
   });
+
+  constructor() {
+    merge(
+      this.realtime.planChanged$.pipe(
+        filter((changed) => changed.popkinId === this.popkinId),
+        filter((changed) => changed.version > (this.view()?.version ?? 0)),
+      ),
+      this.realtime.reconnected$,
+    )
+      .pipe(
+        filter(() => !!this.popkinId),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => this.read());
+  }
 
   open(popkinId: string): void {
     if (popkinId !== this.popkinId) this.view.set(null);

@@ -94,6 +94,13 @@ public interface IPopkinClient
     Task ScheduleChanged(Guid popkinId);
 
     /// <summary>
+    /// A member added, moved, changed or deleted a story (L2-068 AC12). A state hint: the version
+    /// rises with every change, and a screen of Plan reads itself again when it is above the one
+    /// it holds. `GET /api/popkins/{popkinId}/plan` recovers it.
+    /// </summary>
+    Task PlanChanged(Guid popkinId, long version);
+
+    /// <summary>
     /// Someone came onto the call. A fact, sent to the connections on the call; the one who
     /// joined has the participants from the answer to their join.
     /// </summary>

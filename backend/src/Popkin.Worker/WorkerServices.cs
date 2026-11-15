@@ -39,6 +39,8 @@ public sealed class SilentPopkinNotifier : IPopkinNotifier
 
     public Task ScheduleChanged(Guid popkinId) => Task.CompletedTask;
 
+    public Task PlanChanged(Guid popkinId, long version) => Task.CompletedTask;
+
     public Task ParticipantJoined(Guid callId, CallParticipantDto participant) => Task.CompletedTask;
 
     public Task ParticipantLeft(Guid callId, Guid membershipId) => Task.CompletedTask;

@@ -23,6 +23,7 @@ export const HUB_EVENTS = {
   popkinWrappedUp: 'PopkinWrappedUp',
   popkinChanged: 'PopkinChanged',
   scheduleChanged: 'ScheduleChanged',
+  planChanged: 'PlanChanged',
 } as const;
 
 /** What the app asks of `PopkinHub`, by the names the server gives its methods. */
