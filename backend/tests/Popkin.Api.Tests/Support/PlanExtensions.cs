@@ -86,6 +86,10 @@ public static class PlanExtensions
     public static Task<HttpResponseMessage> DeleteStoryAsync(this HttpClient member, Guid popkinId, Guid storyId) =>
         member.DeleteAsync($"/api/popkins/{popkinId}/plan/stories/{storyId}");
 
+    /// <summary>`GET …/plan/burn-down` (L2-071).</summary>
+    public static Task<HttpResponseMessage> BurnDownAsync(this HttpClient member, Guid popkinId) =>
+        member.GetAsync($"/api/popkins/{popkinId}/plan/burn-down");
+
     public static Task<JsonElement> PlanBoardAsync(this HttpClient member, Guid popkinId) =>
         member.GetFromJsonAsync<JsonElement>($"/api/popkins/{popkinId}/plan");
 

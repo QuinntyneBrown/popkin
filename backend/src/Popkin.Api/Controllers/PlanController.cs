@@ -16,6 +16,11 @@ public sealed class PlanController(ISender sender) : ControllerBase
     public async Task<ActionResult<PlanBoardDto>> GetBoard(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetPlanBoardQuery(popkinId), cancellationToken));
 
+    /// <summary>The burn-down (L2-071): the points left, how far behind or ahead, the forecast, each day and the biggest open stories.</summary>
+    [HttpGet("burn-down")]
+    public async Task<ActionResult<BurnDownDto>> GetBurnDown(Guid popkinId, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetBurnDownQuery(popkinId), cancellationToken));
+
     /// <summary>Adds a story to Backlog or To do (L2-069). Counted with the caller's messages.</summary>
     [HttpPost("stories")]
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]
