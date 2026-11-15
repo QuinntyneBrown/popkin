@@ -1,0 +1,32 @@
+Sign in as admin - Admin signs in with a code.
+Manage admins - Add, remove and list admins.
+Admin roles - Limit what each admin may do.
+Switch a feature - Turn Plan or Schedules off, on.
+Feature rollout - Enable a feature for chosen Popkins.
+Dashboard - Key counts of people, Popkins, activity.
+Find a person - Search people by name or contact.
+View a person - Their account, Popkins and sessions.
+Suspend a person - Block sign-in, keep their data.
+Restore a person - Lift a suspension.
+Sign a person out - End all of their sessions.
+Delete an account - Start deletion on a person's behalf.
+Find a Popkin - Search Popkins by name or code.
+View a Popkin - Host, members, length, status.
+Wrap up a Popkin - End a Popkin early.
+Extend a Popkin - Give a Popkin more time.
+Remove a member - Take a person out of a Popkin.
+Reset an invite - Replace a Popkin's code and QR.
+Reports - Review content members have reported.
+Remove content - Delete a message, photo or experience.
+Calls under way - See and end live calls.
+Jobs - Status and last run of Worker jobs.
+Run a job - Start a Worker job now.
+Album exports - See and retry pending exports.
+Deletion queue - Accounts awaiting erasure and their dates.
+Data requests - Export a person's data on request.
+Audit log - Every admin action, who and when.
+Settings - Read the deployed system's settings.
+Limits - Set upload sizes and rate limits.
+Announcements - Show a banner to every person.
+Health - API, hub, database and storage status.
+Metrics - Usage and error trends over time.

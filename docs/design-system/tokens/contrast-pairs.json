@@ -480,6 +480,18 @@
       "bg": "--color-bg-surface",
       "min": 1,
       "note": "hairline dividers: decorative, never the only edge of a control"
+    },
+    {
+      "fg": "--color-fg-subtle",
+      "bg": "--color-bg-subtle",
+      "min": 4.5,
+      "note": "admin: captions on the sand page and in a selected list row"
+    },
+    {
+      "fg": "--color-constant-dark",
+      "bg": "--color-warning-loud",
+      "min": 4.5,
+      "note": "admin: a loud announcement's text on its sun banner"
     }
   ]
 }

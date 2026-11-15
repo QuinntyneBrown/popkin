@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin sign in · code — Popkin Admin mocks</title>
+<meta name="mock:kind" content="page">
+<meta name="mock:screen" content="sign-in">
+<meta name="mock:state" content="code">
+<meta name="mock:requirements" content="L2-078">
+<meta name="description" content="Enter the six-digit code sent to lena@popkin.app.">
+<link rel="stylesheet" href="../../../../design-system/tokens/tokens.css">
+<link rel="stylesheet" href="../../../../design-system/assets/components.css">
+<link rel="stylesheet" href="../../../assets/mock.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<main id="main" class="admin-entry" data-accent="coral"><div class="admin-entry__col"><div class="admin-entry__brand"><span class="admin-brand"><svg class="mark" viewBox="0 0 64 64" aria-hidden="true"><defs><mask id="bite-4" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="#fff"/><circle cx="49" cy="15" r="14.5" fill="#000"/></mask></defs><g mask="url(#bite-4)" fill="currentColor" stroke="currentColor"><circle cx="26" cy="38" r="22" stroke="none"/><path d="M11 47 L4.5 60.5 L20 56 Z" stroke-width="3" stroke-linejoin="round"/></g><circle cx="49" cy="15" r="9.5" fill="currentColor"/></svg><span class="wordmark" role="img" aria-label="popkin"><span aria-hidden="true">popk<span class="wordmark__i">ı</span>n</span></span><span class="topbar__app">Admin</span></span></div><div class="admin-entry__card"><h1>Enter your code</h1><p class="admin-entry__lead">Sent to <strong>lena@popkin.app</strong>. It works for 10 minutes.</p><form class="admin-entry__form" novalidate><div class="field"><label class="field__label" for="code">Six-digit code</label><input class="input input--code" id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value=""></div><a class="btn btn--primary btn--block" href="../../pages/dashboard/default.html">Sign in</a><div class="admin-entry__links"><a class="text-btn" href="default.html">Use another email</a><button class="text-btn" type="button">Send a new code</button></div></form></div><p class="admin-entry__foot">Production console. Every action is recorded in the audit log.</p></div></main><p class="mock-note" style="position: fixed; bottom: 5rem; right: 1rem; max-width: 20rem;">The code field takes a pasted code and fills from the one-time-code autofill. Sign in opens the dashboard.</p>
+<nav class="mock-bar" aria-label="Mock navigation">
+  <a class="mock-bar__home" href="../../index.html" aria-label="All admin mocks">⌂</a>
+  <span class="mock-bar__screen">Admin sign in</span>
+  <ul class="mock-bar__states"><li><a href="default.html">default</a></li><li><a href="invalid-email.html">invalid-email</a></li><li><a href="sending.html">sending</a></li><li><a href="code.html" aria-current="page">code</a></li><li><a href="invalid.html">invalid</a></li><li><a href="checking.html">checking</a></li><li><a href="locked.html">locked</a></li></ul>
+  <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
+  <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
+</nav>
+<script src="../../../assets/mock.js"></script>
+</body>
+</html>

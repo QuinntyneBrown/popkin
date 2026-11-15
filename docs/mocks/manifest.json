@@ -750,60 +750,6 @@
       ]
     },
     {
-      "id": "admin-features",
-      "kind": "page",
-      "title": "Features (admin)",
-      "route": "admin.popkin.community/features",
-      "requirements": [
-        "L2-076",
-        "L2-077",
-        "L2-078"
-      ],
-      "states": [
-        "default",
-        "loading",
-        "error",
-        "off"
-      ],
-      "not_applicable": {
-        "empty": "The two switches always exist; there is no empty list."
-      }
-    },
-    {
-      "id": "admin-sign-in",
-      "kind": "page",
-      "title": "Admin sign in",
-      "route": "admin.popkin.community/sign-in",
-      "requirements": [
-        "L2-078"
-      ],
-      "states": [
-        "default"
-      ],
-      "not_applicable": {
-        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
-        "empty": "The screen lists nothing; it has no collection that can be empty.",
-        "error": "The invalid, submitting and failed states are the sign-in screen's (sign-in/invalid, sign-in/submitting, sign-up/error); only the chrome differs."
-      }
-    },
-    {
-      "id": "admin-denied",
-      "kind": "page",
-      "title": "Not an admin",
-      "route": "admin.popkin.community/not-an-admin",
-      "requirements": [
-        "L2-078"
-      ],
-      "states": [
-        "default"
-      ],
-      "not_applicable": {
-        "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
-        "empty": "The screen lists nothing; it has no collection that can be empty.",
-        "error": "This screen is itself the refusal."
-      }
-    },
-    {
       "id": "invite",
       "kind": "dialog",
       "title": "Invite",
@@ -1247,23 +1193,6 @@
         "invalid",
         "failed"
       ]
-    },
-    {
-      "id": "turn-off-feature",
-      "kind": "dialog",
-      "title": "Turn off a feature",
-      "opens_from": "admin-features",
-      "requirements": [
-        "L2-076"
-      ],
-      "states": [
-        "default",
-        "busy",
-        "failed"
-      ],
-      "not_applicable": {
-        "invalid": "The dialog has no field to fill in."
-      }
     },
     {
       "id": "toast",
