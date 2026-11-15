@@ -25,6 +25,8 @@
       [heading]="toast.heading"
       [text]="toast.text"
       (dismissed)="toaster.dismiss(toast.id)"
+      (held)="toaster.hold(toast.id)"
+      (released)="toaster.release(toast.id)"
     ></div>
   }
 </div>
