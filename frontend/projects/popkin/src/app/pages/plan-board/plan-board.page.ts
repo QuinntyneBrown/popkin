@@ -11,7 +11,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { ErrorScreens, PlanBoardStore, PopkinFrame, StoryView, UnreadTracker } from 'api';
 import { NewStoryData, NewStoryDialog } from '../../dialogs/new-story/new-story.dialog';
-import { StoryData, StoryDialog } from '../../dialogs/story/story.dialog';
+import { StoryClosed, StoryData, StoryDialog } from '../../dialogs/story/story.dialog';
 import {
   AppScreen,
   Board,
@@ -101,7 +101,7 @@ export class PlanBoardPage {
   protected openStory(id: string): void {
     const story = this.store.view()?.stories.find((s) => s.id === id);
     if (!story) return;
-    const opened = this.dialog.open<StoryView, StoryData>(StoryDialog, {
+    const opened = this.dialog.open<StoryClosed, StoryData>(StoryDialog, {
       data: { popkinId: this.popkinId(), accent: this.frame.accent(), story },
       ariaLabelledBy: 'dlg-title',
       ariaDescribedBy: 'dlg-desc',
@@ -109,8 +109,9 @@ export class PlanBoardPage {
       hasBackdrop: false,
       ariaModal: true,
     });
-    opened.closed.subscribe((changed) => {
-      if (changed) this.store.moved(changed);
+    opened.closed.subscribe((closed) => {
+      if (closed === 'deleted') this.store.removed(id);
+      else if (closed) this.store.moved(closed);
     });
   }
 

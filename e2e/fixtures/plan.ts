@@ -113,6 +113,8 @@ export class Plan {
   readonly moves: { title: string; column: string }[] = [];
   /** The bodies of `PUT …/stories/{id}`, in the order they came. */
   readonly saves: Record<string, unknown>[] = [];
+  /** The titles of the stories each `DELETE …/stories/{id}` named. */
+  readonly deletes: string[] = [];
   private failing?: Failure;
   private writesFail = false;
   private held?: Promise<void>;
@@ -222,6 +224,7 @@ export class Plan {
     if (moving && method === 'PUT') return this.move(route, moving[1]);
     const one = rest.match(/^\/stories\/([^/]+)$/);
     if (one && method === 'PUT') return this.save(route, one[1]);
+    if (one && method === 'DELETE') return this.delete(route, one[1]);
     return route.fallback();
   }
 
@@ -262,6 +265,21 @@ export class Plan {
         : [...this.stories.filter((s) => s.id !== id), saved];
     this.version++;
     return route.fulfill({ json: this.storyOf(saved) });
+  }
+
+  /** `DELETE …/stories/{id}`: for the person who added it, its owner or the Host (L2-070 AC4). */
+  private async delete(route: Route, id: string): Promise<void> {
+    const found = this.stories.find((s) => s.id === id);
+    if (!found) return route.fulfill({ status: 404, json: problem(404, 'story_not_found').body });
+    this.deletes.push(found.title);
+    await this.writesHeld;
+    if (this.writesFail) return route.fulfill({ status: 500 });
+    if (!this.storyOf(found).canDelete) {
+      return route.fulfill({ status: 403, json: problem(403, 'not_your_story').body });
+    }
+    this.stories = this.stories.filter((s) => s.id !== id);
+    this.version++;
+    return route.fulfill({ status: 204 });
   }
 
   /** `POST …/plan/stories`: the story goes last in its column (L2-069 AC5). */
@@ -347,6 +365,13 @@ export async function maraWithAPlan(
 /** The board of the mocks: fourteen stories, 14 days left. */
 export async function theMockPlan(page: Page): Promise<void> {
   await maraWithAPlan(page);
+}
+
+/** The mocks' board as Sam sees it: Sam is not the Host, so a story Sam did not add or own has no "Delete" (L2-070 AC4). */
+export async function thePlanAsSam(page: Page): Promise<void> {
+  await maraWithAPlan(page, (plan) => {
+    plan.viewer = sam.membershipId;
+  });
 }
 
 /** A Popkin with no stories yet, and so no sprint (L2-068 AC9). */

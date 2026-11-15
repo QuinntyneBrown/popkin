@@ -63,6 +63,13 @@ export class PlanBoardStore {
     });
   }
 
+  /** A story this member deleted goes from the board at once (L2-070 AC4). */
+  removed(storyId: string): void {
+    this.view.update((view) =>
+      view ? { ...view, stories: view.stories.filter((s) => s.id !== storyId) } : view,
+    );
+  }
+
   retry(): void {
     this.view.set(null);
     this.read();

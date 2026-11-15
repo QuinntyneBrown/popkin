@@ -40,6 +40,15 @@ public sealed class PlanController(ISender sender) : ControllerBase
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]
     public async Task<ActionResult<StoryDto>> MoveStory(Guid popkinId, Guid storyId, MoveStoryRequest request, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new MoveStoryCommand(popkinId, storyId, request.Column), cancellationToken));
+
+    /// <summary>Deletes a story, for the person who added it, its owner or the Host (L2-070 AC4). Counted with the caller's messages.</summary>
+    [HttpDelete("stories/{storyId:guid}")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<IActionResult> DeleteStory(Guid popkinId, Guid storyId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeleteStoryCommand(popkinId, storyId), cancellationToken);
+        return NoContent();
+    }
 }
 
 public sealed record MoveStoryRequest(string? Column);

@@ -214,6 +214,10 @@ export const routes = {
   storyDone: { app: plan, mock: 'dialogs/story/done.html' },
   storyBusy: { app: plan, mock: 'dialogs/story/busy.html' },
   storyFailed: { app: plan, mock: 'dialogs/story/failed.html' },
+  storyNoDelete: { app: plan, mock: 'dialogs/story/no-delete.html' },
+  deleteStory: { app: plan, mock: 'dialogs/delete-story/default.html' },
+  deleteStoryBusy: { app: plan, mock: 'dialogs/delete-story/busy.html' },
+  deleteStoryFailed: { app: plan, mock: 'dialogs/delete-story/failed.html' },
   thisWeek: { app: `${home}/schedule/week?day=2026-09-16`, mock: 'pages/this-week/default.html' },
   thisWeekWorking: {
     app: `${home}/schedule/week?day=2026-09-15`,

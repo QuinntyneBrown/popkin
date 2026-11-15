@@ -1,4 +1,4 @@
-import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { DIALOG_DATA, Dialog, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -25,6 +25,11 @@ import {
   WhoChips,
 } from 'components';
 import { Observable, catchError, map, of } from 'rxjs';
+import {
+  DELETE_STORY,
+  DeleteStoryData,
+  DeleteStoryDialog,
+} from '../delete-story/delete-story.dialog';
 
 export interface StoryData {
   popkinId: string;
@@ -32,10 +37,14 @@ export interface StoryData {
   story: StoryView;
 }
 
+/** The story as saved or moved, or `'deleted'` once it is gone (L2-070 AC4). */
+export type StoryClosed = StoryView | 'deleted';
+
 /**
  * A story (L2-070): titled with it, it shows its column, points, owner, tag and due date, and
  * moves it on or marks it done at once. It closes with the story as saved; a failure keeps it
- * open. A sheet on a phone and a panel beside the board from 768 px, as "New story" is.
+ * open. "Delete", for the person who added it, its owner or the Host, asks first and closes it
+ * with `'deleted'`. A sheet on a phone and a panel beside the board from 768 px, as "New story" is.
  */
 @Component({
   selector: 'pk-story-dialog',
@@ -56,7 +65,8 @@ export interface StoryData {
 })
 export class StoryDialog {
   protected readonly data = inject<StoryData>(DIALOG_DATA);
-  private readonly ref = inject<DialogRef<StoryView>>(DialogRef);
+  private readonly ref = inject<DialogRef<StoryClosed>>(DialogRef);
+  private readonly dialog = inject(Dialog);
   private readonly api = inject(PLAN_API);
   private readonly popkins = inject(POPKINS_API);
 
@@ -115,6 +125,18 @@ export class StoryDialog {
   protected moveTo(column: StoryColumn): void {
     if (this.busy()) return;
     this.send(this.api.moveStory(this.data.popkinId, this.story.id, column), false);
+  }
+
+  /** "Delete": "Delete this story?" first; once it is gone, so is this dialog (L2-070 AC4). */
+  protected remove(): void {
+    if (this.busy()) return;
+    const confirm = this.dialog.open<boolean, DeleteStoryData>(DeleteStoryDialog, {
+      data: { popkinId: this.data.popkinId, storyId: this.story.id, accent: this.data.accent },
+      ...DELETE_STORY,
+    });
+    confirm.closed.subscribe((deleted) => {
+      if (deleted) this.ref.close('deleted');
+    });
   }
 
   private send(request: Observable<StoryView>, saving: boolean): void {

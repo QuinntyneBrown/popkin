@@ -6,6 +6,7 @@ import { planStates } from './plan-states';
 import { PlanBoardPage } from '../pages/plan-board.page';
 import { NewStoryDialog } from '../pages/new-story.dialog';
 import { StoryDialog } from '../pages/story.dialog';
+import { DeleteStoryDialog } from '../pages/delete-story.dialog';
 import { AddTimeOffDialog } from '../pages/add-time-off.dialog';
 import { MyHoursDialog } from '../pages/my-hours.dialog';
 import { SetEventDialog } from '../pages/set-event.dialog';
@@ -216,6 +217,10 @@ const newStoryRegions = (page: Page) => {
 };
 const storyRegions = (page: Page) => {
   const dialog = new StoryDialog(page);
+  return { header: dialog.heading, body: dialog.body, footer: dialog.footer };
+};
+const deleteStoryRegions = (page: Page) => {
+  const dialog = new DeleteStoryDialog(page);
   return { header: dialog.heading, body: dialog.body, footer: dialog.footer };
 };
 const planBoardRegions = (page: Page) => {
@@ -1260,6 +1265,10 @@ export const screenStates: ScreenState[] = [
   { key: 'storyDone', ...planStates.storyDone, regions: storyRegions },
   { key: 'storyBusy', ...planStates.storyBusy, regions: storyRegions },
   { key: 'storyFailed', ...planStates.storyFailed, regions: storyRegions },
+  { key: 'storyNoDelete', ...planStates.storyNoDelete, regions: storyRegions },
+  { key: 'deleteStory', ...planStates.deleteStory, regions: deleteStoryRegions },
+  { key: 'deleteStoryBusy', ...planStates.deleteStoryBusy, regions: deleteStoryRegions },
+  { key: 'deleteStoryFailed', ...planStates.deleteStoryFailed, regions: deleteStoryRegions },
   { key: 'addTimeOff', ...scheduleStates.addTimeOff, regions: addTimeOffRegions },
   { key: 'addTimeOffBusy', ...scheduleStates.addTimeOffBusy, regions: addTimeOffRegions },
   { key: 'addTimeOffInvalid', ...scheduleStates.addTimeOffInvalid, regions: addTimeOffRegions },

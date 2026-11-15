@@ -142,4 +142,26 @@ describe('PlanBoardStore', () => {
     expect(store.columns()[1].stories).toEqual([]);
     expect(store.columns()[2].stories.map((s) => s.title)).toEqual(['Cabin', 'Kayak', 'Van']);
   });
+
+  it('drops a story it deleted at once (L2-070 AC4)', () => {
+    const story = (id: string, column: StoryView['column']): StoryView => ({
+      id,
+      title: id,
+      column,
+      points: 2,
+      tag: 'Travel',
+      owner: null,
+      dueDate: null,
+      commentCount: 0,
+      addedByMembershipId: 'm1',
+      canDelete: true,
+      addedAt: '2026-09-12T09:00:00Z',
+    });
+    answer = { ...empty, stories: [story('Van', 'ToDo'), story('Cabin', 'ToDo')] };
+    store.open('p1');
+
+    store.removed('Van');
+
+    expect(store.columns()[1].stories.map((s) => s.title)).toEqual(['Cabin']);
+  });
 });

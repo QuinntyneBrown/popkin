@@ -22,6 +22,8 @@ export interface PlanApi {
   saveStory(popkinId: string, storyId: string, request: StoryRequest): Observable<StoryView>;
   /** Moves a story to another column, last in it: "Move to …" or "Mark done" (L2-070 AC2). */
   moveStory(popkinId: string, storyId: string, column: StoryColumn): Observable<StoryView>;
+  /** Deletes a story: 403 `not_your_story` for anyone but the person who added it, its owner or the Host (L2-070 AC4). */
+  deleteStory(popkinId: string, storyId: string): Observable<void>;
 }
 
 export const PLAN_API = new InjectionToken<PlanApi>('PlanApi');
@@ -44,6 +46,10 @@ export class HttpPlanApi implements PlanApi {
 
   moveStory(popkinId: string, storyId: string, column: StoryColumn): Observable<StoryView> {
     return this.http.put<StoryView>(`${plan(popkinId)}/stories/${storyId}/column`, { column });
+  }
+
+  deleteStory(popkinId: string, storyId: string): Observable<void> {
+    return this.http.delete<void>(`${plan(popkinId)}/stories/${storyId}`);
   }
 }
 

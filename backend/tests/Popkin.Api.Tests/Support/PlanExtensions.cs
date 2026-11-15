@@ -77,6 +77,10 @@ public static class PlanExtensions
             $"/api/popkins/{popkinId}/plan/stories/{storyId}",
             new { title, column, points, ownerMembershipId, tag, dueDate });
 
+    /// <summary>`DELETE …/plan/stories/{storyId}` (L2-070 AC4).</summary>
+    public static Task<HttpResponseMessage> DeleteStoryAsync(this HttpClient member, Guid popkinId, Guid storyId) =>
+        member.DeleteAsync($"/api/popkins/{popkinId}/plan/stories/{storyId}");
+
     public static Task<JsonElement> PlanBoardAsync(this HttpClient member, Guid popkinId) =>
         member.GetFromJsonAsync<JsonElement>($"/api/popkins/{popkinId}/plan");
 

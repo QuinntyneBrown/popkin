@@ -1,11 +1,13 @@
 import type { Page } from '@playwright/test';
 import type { RouteKey } from './routes';
 import { expect } from '@playwright/test';
+import { DeleteStoryDialog } from '../pages/delete-story.dialog';
 import {
   openNewStory,
   openStory,
   planOf,
   theMockPlan,
+  thePlanAsSam,
   thePlanEmpty,
   thePlanFailing,
   thePlanLoading,
@@ -75,6 +77,35 @@ export const planStates = {
       planOf(page).failWrites();
       await dialog.save.click();
       await expect(dialog.failed).toBeVisible();
+    },
+  },
+  storyNoDelete: {
+    before: thePlanAsSam,
+    app: async (page) => void (await openStory(page, 'Rent a 7-seat van')),
+  },
+  deleteStory: {
+    before: theMockPlan,
+    app: async (page) => {
+      await (await openStory(page)).delete.click();
+      await new DeleteStoryDialog(page).keep.waitFor();
+    },
+  },
+  deleteStoryBusy: {
+    before: theMockPlan,
+    app: async (page) => {
+      await (await openStory(page)).delete.click();
+      planOf(page).holdWrites();
+      await new DeleteStoryDialog(page).delete.click();
+    },
+  },
+  deleteStoryFailed: {
+    before: theMockPlan,
+    app: async (page) => {
+      await (await openStory(page)).delete.click();
+      planOf(page).failWrites();
+      const confirm = new DeleteStoryDialog(page);
+      await confirm.delete.click();
+      await expect(confirm.failed).toBeVisible();
     },
   },
 } satisfies Partial<Record<RouteKey, PlanState>>;

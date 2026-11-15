@@ -92,4 +92,17 @@
   >
     {{ saving() ? 'Saving…' : 'Save' }}
   </button>
+  @if (data.story.canDelete) {
+    <button
+      pk-button
+      slot="footer"
+      type="button"
+      variant="quiet"
+      [block]="true"
+      [disabled]="busy()"
+      (click)="remove()"
+    >
+      Delete
+    </button>
+  }
 </form>
