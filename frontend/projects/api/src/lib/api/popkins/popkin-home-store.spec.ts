@@ -42,6 +42,7 @@ const home: PopkinHomeView = {
   unreadCount: 3,
   version: 1,
   schedules: false,
+  plan: false,
   event: null,
 };
 const mara: MemberView = {

@@ -4,8 +4,9 @@
   id="main"
   [class.thread]="body() === 'thread' || body() === 'thread-end'"
   [class.thread--end]="body() === 'thread-end'"
-  [class.screen__body]="body() === 'plain' || body() === 'flush'"
+  [class.screen__body]="body() === 'plain' || body() === 'flush' || body() === 'fill'"
   [class.screen__body--flush]="body() === 'flush'"
+  [class.screen__body--fill]="body() === 'fill'"
   [attr.aria-label]="mainLabel() || null"
   tabindex="-1"
 >

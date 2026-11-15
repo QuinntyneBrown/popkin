@@ -1,10 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, interval } from 'rxjs';
 import { PlanBoardView } from '../../models/plan';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PLAN_API } from './plan-api';
+import { columnsOf, daysLeftLabel, sprintLine } from './plan-text';
 
 export type PlanBoardState = 'loading' | 'ready' | 'error' | 'off' | 'not-found';
 
@@ -24,6 +25,15 @@ export class PlanBoardStore {
 
   readonly view = signal<PlanBoardView | null>(null);
   readonly state = signal<PlanBoardState>('loading');
+  /** The four columns with their cards (L2-068 AC3 to AC6). */
+  readonly columns = computed(() => columnsOf(this.view()?.stories ?? []));
+  /** A Popkin with no stories yet offers the four starters (L2-068 AC9). */
+  readonly empty = computed(() => this.view()?.stories.length === 0);
+  /** "Planning sprint · Aug 30 – Sep 26 · " and, in bold, "14 days left" (L2-068 AC2). */
+  readonly sprint = computed(() => {
+    const sprint = this.view()?.sprint;
+    return sprint ? { line: sprintLine(sprint), daysLeft: daysLeftLabel(sprint.daysLeft) } : null;
+  });
 
   open(popkinId: string): void {
     if (popkinId !== this.popkinId) this.view.set(null);

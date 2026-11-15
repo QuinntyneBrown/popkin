@@ -44,9 +44,10 @@ export class AppScreen {
   /**
    * What `main` is: a `thread` of messages from the top, a thread whose content sits at its end
    * (`thread-end`, while it loads), a `plain` body for an empty state or an error, or a `flush`
-   * body whose content reaches the sides and the header above it, as the Popkin home does.
+   * body whose content reaches the sides and the header above it, as the Popkin home does, or a
+   * `fill` body whose content reaches every edge and takes the height left, as the plan board does.
    */
-  readonly body = input<'thread' | 'thread-end' | 'plain' | 'flush'>('thread');
+  readonly body = input<'thread' | 'thread-end' | 'plain' | 'flush' | 'fill'>('thread');
   /** The accessible name of `main`: "Messages" while it shows them. */
   readonly mainLabel = input<string>();
 }

@@ -226,3 +226,38 @@ export async function maraWithAPlan(
   plans.set(page, plan);
   return plan;
 }
+
+/*
+ * The states of the board the mocks draw, for the sweeps and the parity specs: each is the step
+ * before the page opens.
+ */
+
+/** The board of the mocks: fourteen stories, 14 days left. */
+export async function theMockPlan(page: Page): Promise<void> {
+  await maraWithAPlan(page);
+}
+
+/** A Popkin with no stories yet, and so no sprint (L2-068 AC9). */
+export async function thePlanEmpty(page: Page): Promise<void> {
+  await maraWithAPlan(page, (plan) => {
+    plan.stories = [];
+    plan.sprint = null;
+    plan.progress = null;
+  });
+}
+
+export async function thePlanLoading(page: Page): Promise<void> {
+  const plan = await maraWithAPlan(page);
+  plan.hold();
+}
+
+export async function thePlanFailing(page: Page): Promise<void> {
+  const plan = await maraWithAPlan(page);
+  plan.fail();
+}
+
+/** Plan switched off while the tab was open (L2-077 AC2). */
+export async function thePlanOff(page: Page): Promise<void> {
+  const plan = await maraWithAPlan(page);
+  plan.fail('off');
+}

@@ -23,8 +23,10 @@
 }
 
 .popkin-nav__tabs {
+  /* Four tabs, or six with Plan and Schedule on (L2-077): one column each. */
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
 }
 
 .popkin-nav__tab {

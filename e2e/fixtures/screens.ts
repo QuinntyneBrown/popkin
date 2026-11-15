@@ -2,6 +2,8 @@ import { ChangeLengthDialog } from '../pages/change-length.dialog';
 import { EditPopkinDialog } from '../pages/edit-popkin.dialog';
 import { settingsStates } from './settings-states';
 import { scheduleStates } from './schedule-states';
+import { planStates } from './plan-states';
+import { PlanBoardPage } from '../pages/plan-board.page';
 import { AddTimeOffDialog } from '../pages/add-time-off.dialog';
 import { MyHoursDialog } from '../pages/my-hours.dialog';
 import { SetEventDialog } from '../pages/set-event.dialog';
@@ -204,6 +206,15 @@ const timeOffRegions = (page: Page) => {
 /** An error or the off screen: the mocks draw its empty state without the Schedule's frame. */
 const timeOffEmptyRegions = (page: Page) => ({
   header: new TimeOffPage(page).header,
+  state: page.locator('main .empty'),
+});
+const planBoardRegions = (page: Page) => {
+  const plan = new PlanBoardPage(page);
+  return { header: plan.header, board: plan.board };
+};
+/** The empty, error and off states: the mocks draw an empty state under the Plan's header. */
+const planEmptyRegions = (page: Page) => ({
+  header: new PlanBoardPage(page).header,
   state: page.locator('main .empty'),
 });
 const thisWeekRegions = (page: Page) => {
@@ -1226,6 +1237,11 @@ export const screenStates: ScreenState[] = [
   { key: 'timeOffConfirmed', ...scheduleStates.timeOffConfirmed, regions: timeOffRegions },
   { key: 'timeOffOtherWeek', ...scheduleStates.timeOffOtherWeek, regions: timeOffRegions },
   { key: 'timeOffOff', ...scheduleStates.timeOffOff, regions: timeOffEmptyRegions },
+  { key: 'planBoard', ...planStates.planBoard, regions: planBoardRegions },
+  { key: 'planBoardLoading', ...planStates.planBoardLoading, regions: planBoardRegions },
+  { key: 'planBoardEmpty', ...planStates.planBoardEmpty, regions: planEmptyRegions },
+  { key: 'planBoardError', ...planStates.planBoardError, regions: planEmptyRegions },
+  { key: 'planBoardOff', ...planStates.planBoardOff, regions: planEmptyRegions },
   { key: 'addTimeOff', ...scheduleStates.addTimeOff, regions: addTimeOffRegions },
   { key: 'addTimeOffBusy', ...scheduleStates.addTimeOffBusy, regions: addTimeOffRegions },
   { key: 'addTimeOffInvalid', ...scheduleStates.addTimeOffInvalid, regions: addTimeOffRegions },

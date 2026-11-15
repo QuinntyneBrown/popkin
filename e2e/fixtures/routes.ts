@@ -28,6 +28,7 @@ const conversations = `${home}/chat`;
 // The direct message the mocks open: with Walt, by his membership (`people.walt` in chat.ts).
 const directMessage = `${conversations}/00000000-0000-4000-8000-walt00000000`;
 const recap = `${home}/recap`;
+const plan = `${home}/plan`;
 // One the signed-in Host did not share: Ellie's idea, a beach day next summer.
 const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
 
@@ -200,6 +201,11 @@ export const routes = {
     mock: 'pages/time-off/other-week.html',
   },
   timeOffOff: { app: timeOff, mock: 'pages/time-off/off.html' },
+  planBoard: { app: plan, mock: 'pages/plan-board/default.html' },
+  planBoardLoading: { app: plan, mock: 'pages/plan-board/loading.html' },
+  planBoardEmpty: { app: plan, mock: 'pages/plan-board/empty.html' },
+  planBoardError: { app: plan, mock: 'pages/plan-board/error.html' },
+  planBoardOff: { app: plan, mock: 'pages/plan-board/off.html' },
   thisWeek: { app: `${home}/schedule/week?day=2026-09-16`, mock: 'pages/this-week/default.html' },
   thisWeekWorking: {
     app: `${home}/schedule/week?day=2026-09-15`,

@@ -9,7 +9,19 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ErrorScreens, PlanBoardStore, PopkinFrame, UnreadTracker } from 'api';
-import { AppScreen, Button, EmptyState, Icon, PlanHeader, PopkinNav, ViewNav } from 'components';
+import {
+  AppScreen,
+  Board,
+  BoardColumn,
+  Button,
+  Chip,
+  EmptyState,
+  Icon,
+  PlanHeader,
+  PopkinNav,
+  StoryCard,
+  ViewNav,
+} from 'components';
 
 /**
  * The plan board (L2-068): the first view of the Plan tab, four columns of stories and the
@@ -17,7 +29,20 @@ import { AppScreen, Button, EmptyState, Icon, PlanHeader, PopkinNav, ViewNav } f
  */
 @Component({
   selector: 'pk-plan-board-page',
-  imports: [AppScreen, Button, EmptyState, Icon, PlanHeader, PopkinNav, RouterLink, ViewNav],
+  imports: [
+    AppScreen,
+    Board,
+    BoardColumn,
+    Button,
+    Chip,
+    EmptyState,
+    Icon,
+    PlanHeader,
+    PopkinNav,
+    RouterLink,
+    StoryCard,
+    ViewNav,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './plan-board.page.html',
 })
@@ -36,6 +61,19 @@ export class PlanBoardPage {
     { label: 'Board', link: `/p/${this.popkinId()}/plan`, current: true },
     { label: 'Burn-down', link: `/p/${this.popkinId()}/plan/burn-down`, current: false },
   ]);
+  /** The big four a Popkin with no stories starts with (L2-068 AC9). */
+  protected readonly starters = [
+    'Pick the dates',
+    'Find somewhere to stay',
+    'Sort out getting there',
+    'Set a budget',
+  ];
+  /** The board fills the screen to its edges; an empty state or an error sits in a padded body. */
+  protected readonly body = computed(() =>
+    this.store.state() === 'loading' || (this.store.state() === 'ready' && !this.store.empty())
+      ? 'fill'
+      : 'plain',
+  );
   protected readonly unreadCount = computed(() => this.unread.forPopkin(this.popkinId()));
 
   constructor() {

@@ -1,0 +1,139 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  font: inherit;
+  text-align: left;
+  box-shadow: var(--shadow-1);
+  transition: scale var(--duration-fast) var(--ease-pop);
+}
+
+:host(button) {
+  cursor: pointer;
+}
+
+:host(button:active) {
+  scale: var(--scale-press);
+}
+
+:host(button:focus-visible) {
+  outline: var(--border-width-ring) solid var(--color-border-focus);
+  outline-offset: var(--border-width-thick);
+}
+
+.story-card__title {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / var(--line-height-snug)
+    var(--font-family-sans);
+}
+
+:host(.story-card--done) .story-card__title {
+  color: var(--color-fg-muted);
+}
+
+.story-card__tick {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-4);
+  height: var(--space-4);
+  margin-top: var(--space-0-5);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: var(--color-fg-on-popkin);
+
+  .icon {
+    width: var(--space-3);
+    height: var(--space-3);
+    stroke-width: 3.5;
+  }
+}
+
+.story-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.story-card__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  white-space: nowrap;
+}
+
+.story-tag__dot {
+  width: var(--space-2-5);
+  height: var(--space-2-5);
+  border-radius: var(--radius-full);
+  background: var(--color-fg-subtle);
+
+  &[data-tag='travel'] {
+    background: var(--color-tag-travel);
+  }
+
+  &[data-tag='stay'] {
+    background: var(--color-tag-stay);
+  }
+
+  &[data-tag='food'] {
+    background: var(--color-tag-food);
+  }
+
+  &[data-tag='money'] {
+    background: var(--color-tag-money);
+  }
+
+  &[data-tag='fun'] {
+    background: var(--color-tag-fun);
+  }
+}
+
+.story-card__end {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  margin-left: auto;
+}
+
+.story-card__pts {
+  display: inline-grid;
+  place-items: center;
+  height: var(--space-6);
+  min-width: var(--space-6);
+  padding: 0 var(--space-1-5);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+  font: var(--font-weight-extrabold) var(--font-size-sm) / 1 var(--font-family-display);
+}
+
+.story-card__owner {
+  display: inline-flex;
+}
+
+.story-card__owner--none {
+  display: grid;
+  place-items: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border: var(--border-width-thick) dashed var(--color-border-default);
+  border-radius: var(--radius-full);
+  color: var(--color-fg-subtle);
+
+  .icon {
+    width: var(--space-3);
+    height: var(--space-3);
+    stroke-width: 3;
+  }
+}

@@ -1,0 +1,32 @@
+<span class="story-card__title">
+  @if (done()) {
+    <span class="story-card__tick"><svg pk-icon name="check"></svg></span>
+  }
+  {{ heading() }}
+</span>
+<span class="story-card__meta">
+  <span class="story-card__tag">
+    <span class="story-tag__dot" [attr.data-tag]="tagKey()" aria-hidden="true"></span>{{ tag() }}
+  </span>
+  @if (due() && !done()) {
+    <span>{{ due() }}</span>
+  }
+  <span class="story-card__end">
+    <span class="story-card__pts" [attr.aria-label]="pointsLabel()">{{ points() }}</span>
+    @if (owner(); as owner) {
+      <span class="story-card__owner" role="img" [attr.aria-label]="owner.name">
+        <span
+          pk-avatar
+          size="2xs"
+          [initials]="owner.initials"
+          [photo]="owner.photo"
+          [attr.data-accent]="owner.accent"
+        ></span>
+      </span>
+    } @else {
+      <span class="story-card__owner story-card__owner--none" role="img" aria-label="No one yet">
+        <svg pk-icon name="plus"></svg>
+      </span>
+    }
+  </span>
+</span>

@@ -3,7 +3,12 @@
   <div class="plan-header__title">
     <h1>{{ heading() }}</h1>
     @if (sub(); as sub) {
-      <p class="plan-header__sub">{{ sub }}</p>
+      <p class="plan-header__sub">
+        {{ sub }}
+        @if (subStrong(); as strong) {
+          <strong>{{ strong }}</strong>
+        }
+      </p>
     }
   </div>
   <div class="plan-header__actions"><ng-content /></div>

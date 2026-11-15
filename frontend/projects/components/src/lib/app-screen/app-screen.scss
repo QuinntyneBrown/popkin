@@ -31,6 +31,11 @@
   padding-inline: 0;
 }
 
+/* A body its content fills to every edge, as the plan board's columns do. */
+.screen__body--fill {
+  padding: 0;
+}
+
 /* The screen's main as a thread: a column of messages (pk-thread holds the rows). */
 .thread {
   flex: 1;

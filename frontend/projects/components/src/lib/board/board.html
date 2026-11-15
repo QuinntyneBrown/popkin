@@ -1,0 +1,15 @@
+@if (loading()) {
+  <p class="visually-hidden" role="status">Loading the plan…</p>
+  @for (column of [1, 2, 3, 4]; track column) {
+    <section class="board__skeleton" aria-hidden="true">
+      <div class="board__skeleton-head"><span pk-skeleton shape="text" [width]="40"></span></div>
+      <div class="board__skeleton-list">
+        <span pk-skeleton shape="card"></span>
+        <span pk-skeleton shape="card"></span>
+        <span pk-skeleton shape="card"></span>
+      </div>
+    </section>
+  }
+} @else {
+  <ng-content />
+}

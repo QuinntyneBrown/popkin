@@ -33,7 +33,8 @@ module.exports = defineConfig([
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
     rules: {
-      // pk-logo renders its own named content, and pk-icon-button names itself from `label`.
+      // pk-logo renders its own named content, pk-icon-button names itself from `label`, and the
+      // cards and rows below draw their own text from their inputs.
       '@angular-eslint/template/elements-content': [
         'error',
         {
@@ -42,6 +43,7 @@ module.exports = defineConfig([
             'pk-chat-card',
             'pk-conversation-row',
             'pk-schedule-card',
+            'pk-story-card',
             'label',
           ],
         },
