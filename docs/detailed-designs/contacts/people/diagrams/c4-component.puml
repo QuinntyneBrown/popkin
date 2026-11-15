@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title Components — People
 
 Container_Boundary(web, "Popkin web app") {
-  Component(page, "ContactsPeoplePage", "Angular page", "pk-search-field, pk-filter-chips, pk-closest, pk-contact-row")
+  Component(page, "ContactsPeoplePage", "Angular page", "pk-search-field, pk-filter-chips, pk-closest, pk-contact-list")
   Component(store, "PeopleStore", "api library", "search, circle; counts, closest, shown, noResults")
   Component(text, "people-text.ts", "api library", "matchesName, next-date line, Last talked")
   Component(frame, "ContactsFrame", "api library", "Count line for the page head")

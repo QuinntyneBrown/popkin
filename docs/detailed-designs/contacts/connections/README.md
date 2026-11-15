@@ -115,8 +115,8 @@ MediatR request. Nothing tells either contact (L2-122 AC3).
 
 - **`ContactsConnectionsPage`** (`pages/contacts-connections/contacts-connections.page.ts`, route
   `/contacts/connections`, `shell: 'app'`, `page: 'contacts-connections'`) — composes
-  `pk-contacts-layout`, `pk-page-head` with the "Groups" back link below medium screens,
-  `pk-choice-chips` as toggle chips for the filter, `pk-connection-map`, the panel's `pk-contact-row`
+  `pk-contacts-page`, `pk-page-head` with the "Groups" back link below medium screens,
+  `pk-choice-chips` as toggle chips for the filter, `pk-connection-map`, the panel's `pk-contact-list`
   list with `pk-button` "Open profile", "Connect" and `pk-icon-button` "Clear the focus",
   `pk-empty-state` and `pk-skeleton`.
 - **`ConnectPersonDialog`** (`dialogs/connect-person/connect-person.dialog.ts`) — `pk-dialog`

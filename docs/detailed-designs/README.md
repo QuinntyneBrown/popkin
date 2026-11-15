@@ -413,11 +413,15 @@ person's own address book inside the Popkin web app; it adds no container.
   holds `CONTACTS_API` (`ContactsApi`, `HttpContactsApi`) and one store per screen under
   `frontend/projects/api/src/lib/api/contacts/`, with the rules (due buckets, overdue habits,
   counts) unit tested (ADR 0011).
-- **Components.** The Contacts components are in [the component backlog](../component-backlog.md)
-  (rows 12 to 22): `pk-contact-row`, `pk-contact-id`, `pk-info-card`, `pk-contact-timeline`,
-  `pk-form-sections`, `pk-task`, `pk-keep-strip`, `pk-spotlight` with its date tile,
-  `pk-group-browser`, `pk-connection-map` and `pk-contacts-layout`. Each design names the ones its
-  screens compose, beside the components already built.
+- **Components.** The Contacts components are rows 12 to 26 of
+  [the component backlog](../component-backlog.md). Built in the library (ADR 0025):
+  `pk-contacts-page` and `pk-contacts-grid`, `pk-list-head`, `pk-contact-list` and `pk-closest`,
+  `pk-info-card` and `pk-add-card`, `pk-form-sections` with `pk-form-section`, `pk-date-entry`,
+  `pk-person-pick` and `pk-kind-grid`, `pk-keep-strip` and `pk-habit-row`, and
+  `pk-group-browser`. Still to build: `pk-contact-id`, `pk-contact-timeline`, `pk-task`,
+  `pk-spotlight` with its date tile, `pk-connection-map`, and the rows the designs added
+  (`pk-filter-chips`, `pk-list-row`, a link form of `pk-who-chips`, `pk-tick-list`). Each design
+  names the ones its screens compose.
 - **Words.** A contact is named by first name, never a pronoun (L2-122 AC4). No log, metric or span
   carries a contact's name, phone, email, note or any text the owner typed.
 - **Deleting** a contact and deleting an account remove the same rows through `ContactRemoval`

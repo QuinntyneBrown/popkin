@@ -130,8 +130,8 @@ MediatR request. Another person's group answers `404` `group_not_found` (L2-122 
 ### Frontend (Popkin web app)
 
 - **`ContactsGroupsPage`** (`pages/contacts-groups/contacts-groups.page.ts`, route
-  `/contacts/groups`, `shell: 'app'`, `page: 'contacts-groups'`) — composes `pk-contacts-layout`,
-  `pk-page-head`, `pk-group-browser`, `pk-contact-row` for each member, `pk-info-card` for the
+  `/contacts/groups`, `shell: 'app'`, `page: 'contacts-groups'`) — composes `pk-contacts-page`,
+  `pk-page-head`, `pk-group-browser`, `pk-contact-list` for each member, `pk-info-card` for the
   note, `pk-empty-state` and `pk-skeleton`. The open group is the query parameter `?group={id}`,
   so the phone's back link and the browser's Back close it (proposal, `<TO SUPPLY>`).
 - **`NewGroupDialog`** (`dialogs/new-group/new-group.dialog.ts`) — `pk-dialog`, `pk-text-field`
@@ -140,7 +140,7 @@ MediatR request. Another person's group answers `404` `group_not_found` (L2-122 
   "Making it…".
 - **`GroupAddPeopleDialog`** (`dialogs/group-add-people/group-add-people.dialog.ts`) —
   `pk-search-field` "Search your people" over the person's contacts (matching is gap 101), a tick
-  list of `pk-contact-row` where members are ticked, disabled and "In the group", and "Add {n}
+  list of `pk-contact-list` where members are ticked, disabled and "In the group", and "Add {n}
   people" / "Adding…", off with nobody new ticked. New group uses it to pick, without a save.
 - **"Start a Popkin with them"** links to `/new?group={groupId}`. `NameYourPopkinPage` reads it
   into `NewPopkinDraft.groupOf` and fills the name with the group's name. `HowLongPage`, which
@@ -173,7 +173,7 @@ MediatR request. Another person's group answers `404` `group_not_found` (L2-122 
   "Open", the empty and error states, New group invalid and busy, Add people with the button off,
   and "Start a Popkin with them" reaching Name your Popkin with the name filled and the invite
   request sent after the Popkin is made. `routes.ts` gains every state of the three screens.
-- Parity: `pk-group-browser`, `pk-contact-row` in its tick form, `pk-info-card`.
+- Parity: `pk-group-browser`, `pk-contact-list` in its tick form, `pk-info-card`.
 
 ## Requirements
 

@@ -113,7 +113,7 @@ default authenticated policy; each sends one MediatR request. Another person's f
 
 - **`ContactsFollowUpsPage`** (`pages/contacts-follow-ups/contacts-follow-ups.page.ts`, route
   `/contacts/follow-ups`, `shell: 'app'`, `page: 'contacts-follow-ups'`) — composes
-  `pk-contacts-layout`, `pk-page-head`, `pk-task` for the quick add and each row,
+  `pk-contacts-page`, `pk-page-head`, `pk-task` for the quick add and each row,
   `pk-segmented-control` (`kind="tabs"`, "Everything", "Promises"), the bucket headings with
   their counts, `pk-button` "Show {n} done" / "Hide done", `pk-empty-state` for the empty and
   error states, and `pk-skeleton` while loading. The Overdue heading is marked late by its words

@@ -33,13 +33,12 @@ Popkin uses no custom tooltips.
 | 21 | Connection map | Draws who knows whom: your people as faces linked by relationship. | 2 days | |
 | 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell. | 0.5 days | Built, parity pending |
 | 23 | Filter chips | Pressed-button filters with counts, such as the circles on People; `pk-choice-chips` is a radio group. | To estimate | |
-| 24 | Closest | The row of closest contacts' faces at the head of People. | To estimate | |
-| 25 | List row | The design system's `list-row`, not built yet, for rows on Today and in groups. | To estimate | |
-| 26 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today. | To estimate | |
-| 27 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins; it needs a design-system page. | To estimate | |
+| 24 | List row | The design system's `list-row`, not built yet, for rows on Today and in groups. | To estimate | |
+| 25 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today. | To estimate | |
+| 26 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins; it needs a design-system page. | To estimate | |
 
-Total: 27 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
-27 came from the Contacts designs and are not estimated yet.
+Total: 26 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
+26 came from the Contacts designs and are not estimated yet.
 
 The even-numbered components were built on 15 November 2026, in the library only, before their
 screens ([ADR 0025](adr/0025-library-components-ahead-of-their-screens.md)): each one's parity

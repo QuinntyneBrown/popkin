@@ -120,7 +120,7 @@ MediatR request. Another person's habit answers `404` `habit_not_found` (propose
 ### Frontend (Popkin web app)
 
 - **`ContactsHabitsPage`** (`pages/contacts-habits/contacts-habits.page.ts`, route
-  `/contacts/habits`, `shell: 'app'`, `page: 'contacts-habits'`) — composes `pk-contacts-layout`,
+  `/contacts/habits`, `shell: 'app'`, `page: 'contacts-habits'`) — composes `pk-contacts-page`,
   `pk-page-head` with the "Today" back link below medium screens, `pk-spotlight` for the overdue
   habit, `pk-habit-row` per habit, `pk-empty-state` and `pk-skeleton`. "New habit" opens
   `NewHabitDialog`.

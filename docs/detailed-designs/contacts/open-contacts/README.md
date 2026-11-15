@@ -169,7 +169,7 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
   `released` on `pointerleave` and `focusout` (L2-124 AC2).
 - **`CONTACTS_API`** — `summary()`, with `followUps()` of the Follow-ups design; every write method takes the `clientId` its outbox entry
   carries. `HttpContactsApi` implements it.
-- **`pk-contacts-layout`** (component backlog row 22) — the `contacts-page` body and the
+- **`pk-contacts-page`** (component backlog row 22) — the `contacts-page` body and the
   `contacts-grid` columns every Contacts page composes inside `pk-app-screen`.
 
 ### Tests

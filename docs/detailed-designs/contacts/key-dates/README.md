@@ -146,7 +146,7 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
 
 - **`ContactsDatesPage`** (`pages/contacts-dates/contacts-dates.page.ts`, route
   `/contacts/dates`, data `{ shell: 'app', page: 'contacts-dates' }`) — composes
-  `pk-contacts-layout` (aside variant), `pk-page-head`, `pk-choice-chips` for the filter, one
+  `pk-contacts-page` (aside variant), `pk-page-head`, `pk-choice-chips` for the filter, one
   `pk-section` per month of rows with the date tile of `pk-spotlight`, `pk-avatar-stack` and the
   reminder text, `pk-info-card` "Reminders" with three `pk-select-field` and the switches,
   `pk-skeleton` while loading, and `pk-empty-state` for empty and failed.

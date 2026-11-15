@@ -123,7 +123,7 @@ Every endpoint is on `ContactsPeopleController` (`Popkin.Api/Controllers/Contact
 
 - **`ContactProfilePage`** (`app/pages/contact-profile/contact-profile.page.ts` and `.html`),
   route `/contacts/people/:contactId`, data `{ shell: 'app', page: 'contact-profile', phoneTabs:
-  false }`. It composes `pk-contacts-layout`, `pk-contact-id` (header, actions and the facts of
+  false }`. It composes `pk-contacts-page`, `pk-contact-id` (header, actions and the facts of
   "About {first name}"), `pk-info-card` (the habit, or its add card), `pk-keep-strip`,
   `pk-list-row` for key dates and connections, `pk-chip` for groups, `pk-view-nav` for the
   history tabs, `pk-skeleton`, and `pk-empty-state` for the error and not-found states. "Message"
@@ -158,7 +158,7 @@ Every endpoint is on `ContactsPeopleController` (`Popkin.Api/Controllers/Contact
   load with "Try again", not found, the menu and taking Chidi out of Closest. Responses are
   recorded from `GET /api/contacts/people/{contactId}` after `popkin seed` adds Mara's Contacts
   cast, idempotently; `routes.ts` gains each state.
-- Parity for `pk-contact-id`, `pk-info-card`, `pk-keep-strip` and `pk-contacts-layout`.
+- Parity for `pk-contact-id`, `pk-info-card`, `pk-keep-strip` and `pk-contacts-page`.
 
 ## Requirements
 

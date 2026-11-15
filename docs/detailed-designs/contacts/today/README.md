@@ -129,7 +129,7 @@ On `ContactsController` (`api/contacts`), one MediatR request:
 
 - **`ContactsTodayPage`** (`pages/contacts-today/contacts-today.page.ts` and `.html`, route
   `/contacts`, `shell: 'app'`, `page: 'contacts-today'`) — composes `pk-app-screen`,
-  `pk-popkin-nav` for Contacts with `today` current, `pk-contacts-layout` (`lead` grid),
+  `pk-popkin-nav` for Contacts with `today` current, `pk-contacts-page` (`lead` grid),
   `pk-page-head`, and by state: `pk-skeleton` shapes beside the status line, `pk-empty-state`
   with "Try again" as an alert, the empty section, or the page.
 - **`TodayStore`** (`api/src/lib/api/contacts/today-store.ts`) — `ContactsPageState`, loads with
@@ -144,7 +144,7 @@ On `ContactsController` (`api/contacts`), one MediatR request:
 - **`CONTACTS_API`** — `today(on)`; `importCandidates()` and `setFollowUpDone(id, done)` of the
   Import and Follow-ups designs.
 - **Components** — `pk-spotlight` with `pk-date-tile` (backlog row 19), `pk-task` (row 17) for
-  follow-ups and the overdue habit, `pk-contacts-layout` (row 22), `pk-avatar-stack` (faces of a
+  follow-ups and the overdue habit, `pk-contacts-page` (row 22), `pk-avatar-stack` (faces of a
   coming-up row), `pk-avatar`, `pk-page-head`, `pk-button`, `pk-empty-state`, `pk-skeleton`. The
   coming-up and recent rows are the design system's `list-row` and the drifting chips its
   `who-chip` as a link; neither is built.

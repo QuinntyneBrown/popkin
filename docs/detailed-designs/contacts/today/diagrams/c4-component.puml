@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title Components — Today
 
 Container_Boundary(web, "Popkin web app") {
-  Component(page, "ContactsTodayPage", "Angular page", "pk-spotlight, pk-task, pk-contacts-layout, pk-popkin-nav")
+  Component(page, "ContactsTodayPage", "Angular page", "pk-spotlight, pk-task, pk-contacts-page, pk-popkin-nav")
   Component(store, "TodayStore", "api library", "loading, ready, empty, failed; toggle(followUpId)")
   Component(text, "today-text.ts", "api library", "Greeting, days left, days late, rhythms")
   Component(outbox, "ContactsOutbox", "api library", "Sends the follow-up write in order")

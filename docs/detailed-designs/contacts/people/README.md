@@ -97,9 +97,9 @@ On `ContactsController` (`api/contacts`), one MediatR request:
 
 - **`ContactsPeoplePage`** (`pages/contacts-people/contacts-people.page.ts` and `.html`, route
   `/contacts/people`, `shell: 'app'`, `page: 'contacts-people'`) — composes `pk-app-screen`,
-  `pk-popkin-nav` for Contacts with `people` current, `pk-contacts-layout`, `pk-page-head` with
+  `pk-popkin-nav` for Contacts with `people` current, `pk-contacts-page`, `pk-page-head` with
   the count line from `ContactsFrame`, then by state: `pk-search-field` (kept while loading),
-  `pk-filter-chips`, the Closest strip, the column heads and `pk-contact-row` per contact;
+  `pk-filter-chips`, the Closest strip, the column heads and `pk-contact-list` per contact;
   `pk-skeleton` rows beside the status line; `pk-empty-state` for failed (alert, "Try again"),
   empty and no results (status, "Add “{name}”").
 - **`PeopleStore`** (`api/src/lib/api/contacts/people-store.ts`) — `ContactsPageState`; `search`
@@ -110,12 +110,11 @@ On `ContactsController` (`api/contacts`), one MediatR request:
 - **`people-text.ts`** (api library) — `matchesName(contact, text)`, the next-date line, "Last
   talked {when}", "No one called “{name}”" and "Add “{name}”". Unit tested.
 - **`CONTACTS_API`** — `people(on)`.
-- **Components** — `pk-contact-row` (component backlog row 12; its design-system page,
+- **Components** — `pk-contact-list` (component backlog row 12; its design-system page,
   `contact-row.html`, also draws the `closest` strip, built with it as `pk-closest`), new
   `pk-filter-chips` (`div[pk-filter-chips]`, the mock's `chips` block: a `role="group"` with a
-  label and `pk-chip` buttons carrying `aria-pressed` and a count), `pk-chip` (changed: gains
-  `count`, drawn as `chip__count`), `pk-search-field`, `pk-page-head`, `pk-button`,
-  `pk-empty-state`, `pk-skeleton`, `pk-contacts-layout` (row 22). `pk-choice-chips` is not used:
+  label and `pk-chip` buttons carrying `aria-pressed` and a count), `pk-chip` (its `count`, built), `pk-search-field`, `pk-page-head`, `pk-button`,
+  `pk-empty-state`, `pk-skeleton`, `pk-contacts-page` (row 22). `pk-choice-chips` is not used:
   it is a radio group with `aria-checked`, and the mock's circles are pressed buttons.
 
 ### Tests
@@ -134,7 +133,7 @@ On `ContactsController` (`api/contacts`), one MediatR request:
   the empty, delayed and failed answers; `routes.ts` gains `contactsPeople`, `contactsPeopleFamily`,
   `contactsPeopleNoResults`, `contactsPeopleLoading`, `contactsPeopleEmpty` and
   `contactsPeopleError`.
-- Parity: `contact-row`, `closest`, `filter-chips` and `chip` with a count.
+- Parity: `contact-list`, `closest`, `filter-chips` and `chip` with a count.
 
 ## Requirements
 

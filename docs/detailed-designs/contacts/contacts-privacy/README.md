@@ -107,7 +107,7 @@ Every Contacts endpoint is under `/api/contacts/**`, on a controller in
   profile's design) — gains the state `not-found`, set on `404` with code `contact_not_found`
   (read through `toApiProblem`) or on an `id` that is not a `Guid`. Unit tested.
 - **The profile page** (built by the profile's design, a `.page.ts` and `.page.html` under
-  `pages/`, route data `shell: 'app'`, `page: 'contact-profile'`) — in `not-found` it composes `pk-contacts-layout`,
+  `pages/`, route data `shell: 'app'`, `page: 'contact-profile'`) — in `not-found` it composes `pk-contacts-page`,
   the "People" back link and `pk-empty-state` (`icon`, `level` 1, alert) with `a pk-button
   variant="primary" size="md" routerLink="/contacts/people"` "Go to People". The edit and log
   pages compose the same block from `contacts-text.ts` in the same state.

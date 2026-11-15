@@ -4,7 +4,7 @@ LAYOUT_WITH_LEGEND()
 title Components — Groups
 
 Container_Boundary(web, "Popkin web app") {
-  Component(page, "ContactsGroupsPage", "Angular page", "pk-group-browser, pk-contact-row, pk-info-card")
+  Component(page, "ContactsGroupsPage", "Angular page", "pk-group-browser, pk-contact-list, pk-info-card")
   Component(dialogs, "NewGroupDialog, GroupAddPeopleDialog", "CDK dialogs", "pk-text-field, pk-choice-chips, pk-search-field")
   Component(store, "GroupsStore", "api library", "byKind, open, make, addPeople")
   Component(start, "NameYourPopkinPage, HowLongPage, NewPopkinDraft", "Start a Popkin", "groupOf; invites once made")
