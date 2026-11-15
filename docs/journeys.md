@@ -27,4 +27,5 @@ Ordered by value. Effort is days for an intermediate developer.
 | 21 | Make the plan | Members add stories to the plan board, move them to Done and read the burn-down. | 8 |
 | 22 | Find a free evening | Members enter time off and working hours and see when everyone is free. | 8 |
 | 23 | Switch a feature | Admin signs in to the admin app and turns Plan or Schedules off and on. | 5 |
-| | **Total** | | **92** |
+| 24 | Open the admin app | Staff sign in to the admin app with a code and read the audit log; an Owner adds, re-roles and removes admins. | 16 |
+| | **Total** | | **108** |
