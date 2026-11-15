@@ -50,6 +50,7 @@ public sealed class SchedulesSwitchTests
     [InlineData("PUT", "schedule/time-off/{me}")]
     [InlineData("GET", "schedule/week?from=2026-09-12")]
     [InlineData("PUT", "schedule/hours/{me}")]
+    [InlineData("GET", "schedule/summary?from=2026-09-12")]
     public async Task While_Schedules_is_off_every_Schedules_request_is_refused(string method, string path)
     {
         using var api = new ApiFactory();

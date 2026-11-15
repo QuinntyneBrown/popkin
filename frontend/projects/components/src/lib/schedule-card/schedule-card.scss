@@ -1,0 +1,26 @@
+/* A card that is one link, set in from the sides of its section. */
+:host {
+  display: block;
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+  color: inherit;
+  text-decoration: none;
+  transition: scale var(--duration-fast) var(--ease-pop);
+}
+
+:host(:hover) {
+  color: inherit;
+}
+
+:host(:active) {
+  scale: var(--scale-press);
+}
+
+.row__title {
+  margin: 0;
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}

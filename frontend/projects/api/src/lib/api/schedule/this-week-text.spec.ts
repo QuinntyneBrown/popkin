@@ -7,6 +7,7 @@ import {
   draftOf,
   freeLabel,
   headlineOf,
+  homeLineOf,
   legendOf,
   listOf,
   sentenceOf,
@@ -194,4 +195,22 @@ describe('legendOf', () => {
     });
     expect(legendOf(someWorking(['Dev']), 6)).toEqual({ allFree: null, time: null });
   });
+});
+
+describe('homeLineOf', () => {
+  // L2-075 AC2: the home's Schedule section.
+  it.each([
+    [
+      { hasHours: true, day: '2026-09-16', everyoneFreeFrom: '19:30' },
+      'Everyone’s free Wednesday from 7:30 pm',
+    ],
+    [
+      { hasHours: true, day: '2026-09-13', everyoneFreeFrom: '17:00' },
+      'Everyone’s free Sunday from 5 pm',
+    ],
+    [
+      { hasHours: true, day: null, everyoneFreeFrom: null },
+      'No evening this week is free for everyone',
+    ],
+  ])('%j reads %s', (summary, line) => expect(homeLineOf(summary)).toBe(line));
 });

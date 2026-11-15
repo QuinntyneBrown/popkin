@@ -1,4 +1,4 @@
-import { addDays, weekLabel } from './schedule-weeks';
+import { addDays, dateOf, weekLabel } from './schedule-weeks';
 
 /*
  * What this week says (docs/detailed-designs/schedules/this-week): the headline of the chosen
@@ -207,4 +207,19 @@ function timeOf(minutes: number): string {
 
 function percentOf(minutes: number): number {
   return ((minutes - noon) / (midnight - noon)) * 100;
+}
+
+const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/**
+ * The home's Schedule line (L2-075 AC2): "Everyone’s free Wednesday from 7:30 pm", or "No
+ * evening this week is free for everyone".
+ */
+export function homeLineOf(summary: {
+  day: string | null;
+  everyoneFreeFrom: string | null;
+}): string {
+  if (!summary.day || !summary.everyoneFreeFrom) return 'No evening this week is free for everyone';
+  const weekday = weekdays[dateOf(summary.day).getDay()];
+  return `Everyone’s free ${weekday} from ${clockTime(summary.everyoneFreeFrom)}`;
 }

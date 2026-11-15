@@ -116,6 +116,8 @@ export const routes = {
   popkinHomeEmpty: { app: home, mock: 'pages/popkin-home/empty.html' },
   popkinHomeError: { app: home, mock: 'pages/popkin-home/error.html' },
   popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
+  popkinHomeSchedule: { app: home, mock: 'pages/popkin-home/schedule.html' },
+  popkinHomeScheduleNone: { app: home, mock: 'pages/popkin-home/schedule-none.html' },
   bannerInfo: { app: home, mock: 'notifications/banner/info.html' },
   videoCall: { app: call, mock: 'pages/video-call/default.html' },
   videoCallTwo: { app: `${directMessage}/call`, mock: 'pages/video-call/two.html' },

@@ -143,6 +143,7 @@ export * from './lib/field-label/field-label';
 export * from './lib/plan-header/plan-header';
 export * from './lib/leave-row/leave-row';
 export * from './lib/hours-row/hours-row';
+export * from './lib/schedule-card/schedule-card';
 export * from './lib/day-picker/day-picker';
 export * from './lib/free-headline/free-headline';
 export * from './lib/shifts/shifts';

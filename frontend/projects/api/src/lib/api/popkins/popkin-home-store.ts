@@ -14,6 +14,9 @@ import { UnreadTracker } from '../chat/unread-tracker';
 import { EXPERIENCES_API } from '../experiences/experiences-api';
 import { PHOTOS_API } from '../photos/photos-api';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
+import { isoDate } from '../schedule/schedule-weeks';
+import { SCHEDULE_API } from '../schedule/schedule-api';
+import { homeLineOf } from '../schedule/this-week-text';
 import { timeLeftLine } from './home-text';
 import { applySettings } from './popkin-settings';
 import { POPKINS_API } from './popkins-api';
@@ -31,6 +34,14 @@ export type HomeSection = 'chat' | 'photos' | 'experiences' | 'members';
 
 const loading = { state: 'loading', data: null } as const;
 
+/** The Schedule section (L2-075 AC2, AC3): shown with its line, or left out. */
+export interface HomeSchedule {
+  shown: boolean;
+  line: string;
+}
+
+const noSchedule: HomeSchedule = { shown: false, line: '' };
+
 /**
  * The home of one Popkin (docs/detailed-designs/popkins/popkin-home): its header and four
  * sections, each read on its own, kept current by what the hub says and by the clock. One per
@@ -42,6 +53,7 @@ export class PopkinHomeStore {
   private readonly chatApi = inject(CHAT_API);
   private readonly photosApi = inject(PHOTOS_API);
   private readonly experiencesApi = inject(EXPERIENCES_API);
+  private readonly scheduleApi = inject(SCHEDULE_API);
   private readonly realtime = inject(POPKIN_REALTIME);
   private readonly unread = inject(UnreadTracker);
   private readonly watch = inject(WrapUpWatch);
@@ -58,6 +70,8 @@ export class PopkinHomeStore {
   readonly popkin = signal<PopkinHomeView | null>(null);
   readonly chat = signal<Section<ChatPreviewView>>(loading);
   readonly photos = signal<Section<PhotosSummaryView>>(loading);
+  /** Left out while Schedules is off, nobody has hours, or it cannot be read. */
+  readonly schedule = signal<HomeSchedule>(noSchedule);
   readonly experiences = signal<Section<ExperiencesSummaryView>>(loading);
   readonly members = signal<Section<MemberView[]>>(loading);
 
@@ -181,11 +195,28 @@ export class PopkinHomeStore {
         this.popkin.set(popkin);
         this.watch.look(popkin.id, popkin.endsAt);
         this.state.set('ready');
+        this.readSchedule(popkin.schedules);
       },
       error: (error: unknown) => {
         if (notFound(error)) this.state.set('not-found');
         else if (!quietly) this.state.set('error');
       },
+    });
+  }
+
+  /** The seven days from the viewer's today, read only while Schedules is on (L2-077 AC6). */
+  private readSchedule(on: boolean): void {
+    if (!on) {
+      this.schedule.set(noSchedule);
+      return;
+    }
+    this.scheduleApi.summary(this.popkinId, isoDate(new Date())).subscribe({
+      next: (summary) =>
+        this.schedule.set(
+          summary.hasHours ? { shown: true, line: homeLineOf(summary) } : noSchedule,
+        ),
+      // The section is left out; the rest of the home is not affected.
+      error: () => this.schedule.set(noSchedule),
     });
   }
 

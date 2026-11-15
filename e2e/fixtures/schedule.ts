@@ -48,6 +48,8 @@ export class Schedule {
   readonly hours = new Map<string, Map<string, Stretch[]>>();
   /** The days this week was read from, in order. */
   readonly weeksFrom: string[] = [];
+  /** The days the home's summary was read from, in order. */
+  readonly summariesFrom: string[] = [];
   /** The working hours saved, in order: whose, and the body sent. */
   readonly hoursSaves: { membershipId: string; from: string; days: Stretch[][] }[] = [];
   canEdit = true;
@@ -167,6 +169,9 @@ export class Schedule {
     const url = new URL(route.request().url());
     const rest = url.pathname.split('/schedule/')[1];
     if (rest === 'week' && route.request().method() === 'GET') return this.readWeek(route, url);
+    if (rest === 'summary' && route.request().method() === 'GET') {
+      return this.readSummary(route, url);
+    }
     const hours = rest.match(/^hours\/([^/]+)$/);
     if (hours && route.request().method() === 'PUT') return this.saveHours(route, hours[1]);
     const saving = rest.match(/^time-off\/([^/]+)$/);
@@ -188,6 +193,21 @@ export class Schedule {
     const monday = mondayOf(day);
     this.asked.push(monday);
     await route.fulfill({ json: this.week(monday) });
+  }
+
+  /** `GET …/schedule/summary?from=`: the home's Schedule section (L2-075 AC2). */
+  private async readSummary(route: Route, url: URL): Promise<void> {
+    const from = url.searchParams.get('from') ?? isoDate(scheduleNow);
+    this.summariesFrom.push(from);
+    const week = this.thisWeek(from);
+    const free = week.days.find((day) => day.everyoneFreeFrom !== null);
+    await route.fulfill({
+      json: {
+        hasHours: week.members.some((member) => member.days.some((day) => day.length > 0)),
+        day: free?.date ?? null,
+        everyoneFreeFrom: free?.everyoneFreeFrom ?? null,
+      },
+    });
   }
 
   /** `GET …/schedule/week?from=`: seven days from the viewer's today (L2-074). */
@@ -411,6 +431,17 @@ export async function maraThisWeek(
   await schedule.install();
   schedules.set(page, schedule);
   return schedule;
+}
+
+/** Dev works every evening of the mocks' week: no evening is free for everyone (L2-075 AC2). */
+export function devWorksEveryEvening(schedule: Schedule): void {
+  for (let i = 0; i < 7; i++) {
+    schedule.works(theSix[2].membershipId, addDays('2026-09-12', i), ['14:00', '22:00']);
+  }
+}
+
+export async function theHomeWithNoEveningFree(page: Page): Promise<void> {
+  await maraThisWeek(page, devWorksEveryEvening);
 }
 
 /** The states of this week the mocks draw: each is the step before the page opens. */

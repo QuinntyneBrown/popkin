@@ -35,6 +35,11 @@ export class PopkinHomePage {
   readonly experienceCards: Locator;
   readonly shareOne: Locator;
   readonly members: Locator;
+  /** "Schedule": the next evening everyone is free (L2-075 AC2). */
+  readonly schedule: Locator;
+  readonly scheduleCard: Locator;
+  readonly scheduleLine: Locator;
+  readonly scheduleSeeAll: Locator;
   readonly memberRows: Locator;
   readonly memberNames: Locator;
   readonly hostLabel: Locator;
@@ -103,6 +108,10 @@ export class PopkinHomePage {
     this.experienceCards = this.experiences.locator('a.card');
     this.shareOne = this.experiences.getByRole('link', { name: 'Share one' });
     this.members = this.section('Members');
+    this.schedule = this.section('Schedule');
+    this.scheduleCard = this.schedule.locator('a.card');
+    this.scheduleLine = this.scheduleCard.locator('.row__title');
+    this.scheduleSeeAll = this.schedule.getByRole('link', { name: 'See all of this week' });
     this.memberRows = this.members.getByRole('listitem');
     this.memberNames = this.members.locator('.row__main');
     this.hostLabel = this.memberRows.first().locator('.row__role');

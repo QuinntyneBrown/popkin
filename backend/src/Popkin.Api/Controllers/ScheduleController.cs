@@ -39,6 +39,14 @@ public sealed class ScheduleController(ISender sender) : ControllerBase
         Ok(await sender.Send(new GetThisWeekQuery(popkinId, from), cancellationToken));
 
     /// <summary>
+    /// The home's Schedule section (L2-075 AC2): whether anyone has hours in the seven days from
+    /// `from`, and the first evening everyone is free.
+    /// </summary>
+    [HttpGet("summary")]
+    public async Task<ActionResult<ScheduleSummaryDto>> GetSummary(Guid popkinId, [FromQuery] DateOnly? from, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetScheduleSummaryQuery(popkinId, from), cancellationToken));
+
+    /// <summary>
     /// Sets the caller's own working hours for the seven days from `from` (L2-074 AC8), and answers
     /// this week. Counted with messages.
     /// </summary>

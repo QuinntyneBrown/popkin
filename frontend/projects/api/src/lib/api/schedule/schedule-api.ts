@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SetTimeOffBody, TimeOffWeekView } from '../../models/schedule';
-import { SetHoursBody, ThisWeekView } from '../../models/this-week';
+import { ScheduleSummaryView, SetHoursBody, ThisWeekView } from '../../models/this-week';
 
 /**
  * A Popkin's Schedule (docs/detailed-designs/schedules). Every call answers 404
@@ -34,6 +34,9 @@ export interface ScheduleApi {
    * AC8). Refused with 403 for another member and 409 `popkin_wrapped_up` once wrapped up.
    */
   setHours(popkinId: string, membershipId: string, body: SetHoursBody): Observable<ThisWeekView>;
+
+  /** The home's Schedule section (L2-075 AC2): seven days from `from`, the viewer's today. */
+  summary(popkinId: string, from: string): Observable<ScheduleSummaryView>;
 }
 
 export const SCHEDULE_API = new InjectionToken<ScheduleApi>('ScheduleApi');
@@ -61,6 +64,12 @@ export class HttpScheduleApi implements ScheduleApi {
 
   setHours(popkinId: string, membershipId: string, body: SetHoursBody): Observable<ThisWeekView> {
     return this.http.put<ThisWeekView>(`${schedule(popkinId)}/hours/${membershipId}`, body);
+  }
+
+  summary(popkinId: string, from: string): Observable<ScheduleSummaryView> {
+    return this.http.get<ScheduleSummaryView>(`${schedule(popkinId)}/summary`, {
+      params: { from },
+    });
   }
 }
 

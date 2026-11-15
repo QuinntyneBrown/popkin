@@ -4,6 +4,7 @@
 // there while it is off.
 import { homeNow, homeUrl, maraAtHome } from '../fixtures/home';
 import { popkinId } from '../fixtures/chat';
+import { Schedule } from '../fixtures/schedule';
 import { expect, test } from '../fixtures/pk-test';
 import { PopkinHomePage } from '../pages/popkin-home.page';
 
@@ -17,6 +18,8 @@ test.describe('the Schedule tab', () => {
   // L2-072 AC1
   test('is between Chat and Photos and opens time off while Schedules is on', async ({ page }) => {
     await maraAtHome(page, (home) => (home.popkin.schedules = true));
+    // Nobody has hours yet: the home asks for its Schedule section and leaves it out.
+    await new Schedule(page).install();
     await page.goto(homeUrl);
     const home = new PopkinHomePage(page);
 

@@ -26,6 +26,15 @@ export interface ThisWeekMemberView {
   days: StretchView[][];
 }
 
+/** `GET …/schedule/summary?from=`: the home's Schedule section (L2-075 AC2, AC3). */
+export interface ScheduleSummaryView {
+  /** Anyone has hours in the seven days; without, the section is left out. */
+  hasHours: boolean;
+  /** The first day everyone is free in the evening, `YYYY-MM-DD`, or null. */
+  day: string | null;
+  everyoneFreeFrom: string | null;
+}
+
 /** `PUT …/schedule/hours/{membershipId}`: seven days from `from`, each up to two stretches. */
 export interface SetHoursBody {
   from: string;
