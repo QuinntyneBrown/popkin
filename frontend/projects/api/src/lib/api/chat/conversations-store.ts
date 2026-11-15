@@ -1,7 +1,7 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { messageLine } from './thread-text';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { merge } from 'rxjs';
+import { Subscription, merge } from 'rxjs';
 import { AvatarView } from '../../models/invite';
 import { ConversationsView, MessageView } from '../../models/chat';
 import { toApiProblem } from '../problem';
@@ -91,6 +91,8 @@ export class ConversationsStore {
       });
   }
 
+  private reading?: Subscription;
+
   /** Reads the threads of a Popkin, and starts listening. */
   open(popkinId: string): void {
     this.popkinId = popkinId;
@@ -105,7 +107,9 @@ export class ConversationsStore {
   private read(quietly: boolean): void {
     if (!quietly) this.phase.set('loading');
     const popkinId = this.popkinId;
-    this.chat
+    // A later read cancels an earlier one, whose answer would be older (L2-022 AC2).
+    this.reading?.unsubscribe();
+    this.reading = this.chat
       .listThreads(popkinId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -135,6 +139,11 @@ export class ConversationsStore {
   private onAdded(message: MessageView): void {
     const view = this.view();
     if (!view || message.popkinId !== this.popkinId) return;
+    // A read under way began before this message: its answer would put the list back as it was.
+    if (this.reading && !this.reading.closed) {
+      this.read(true);
+      return;
+    }
     this.now.set(new Date());
     const isMine = message.author.membershipId === view.viewerMembershipId;
 

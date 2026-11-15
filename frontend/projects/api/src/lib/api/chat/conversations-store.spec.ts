@@ -73,7 +73,8 @@ const from = (threadId: string, membershipId: string, firstName: string, text: s
   }) as MessageView;
 
 describe('ConversationsStore (L2-022)', () => {
-  let answer: ConversationsView | 'down' | 'not-found';
+  let answer: ConversationsView | 'down' | 'not-found' | 'held';
+  let held: Subject<ConversationsView>[];
   let asked: number;
   let messages: Subject<MessageView>;
   let deleted: Subject<{ threadId: string; messageId: string }>;
@@ -85,12 +86,18 @@ describe('ConversationsStore (L2-022)', () => {
     asked++;
     if (answer === 'down') return throwError(() => new HttpErrorResponse({ status: 500 }));
     if (answer === 'not-found') return throwError(() => new HttpErrorResponse({ status: 404 }));
+    if (answer === 'held') {
+      const reply = new Subject<ConversationsView>();
+      held.push(reply);
+      return reply;
+    }
     return of(answer);
   };
 
   beforeEach(() => {
     vi.useFakeTimers({ now: new Date(2026, 8, 12, 12, 0) });
     answer = list;
+    held = [];
     asked = 0;
     messages = new Subject();
     deleted = new Subject();
@@ -118,6 +125,42 @@ describe('ConversationsStore (L2-022)', () => {
   afterEach(() => {
     TestBed.resetTestingModule();
     vi.useRealTimers();
+  });
+
+  it('keeps the latest read when an earlier one answers after it', () => {
+    store.open('p');
+    answer = 'held';
+    // Connected again: the list is read again; then a new direct message asks for it once more.
+    reconnected.next();
+    messages.next(from('t-ruth', 'm-ruth', 'Ruth', 'Boat leaves in five'));
+    const withRuth = {
+      ...list,
+      direct: [
+        {
+          ...walt,
+          threadId: 't-ruth',
+          other: { ...walt.other, membershipId: 'm-ruth', displayName: 'Ruth Lindqvist' },
+        },
+        ...list.direct,
+      ],
+    };
+    held[1].next(withRuth);
+    held[0].next(list);
+
+    expect(store.rows()[0].name).toBe('Ruth Lindqvist');
+  });
+
+  it('reads again when a message arrives while a read is under way, so the older answer is not kept', () => {
+    store.open('p');
+    answer = 'held';
+    reconnected.next();
+    messages.next(from(dev.threadId, dev.other.membershipId, 'Dev', 'Heron at the dock!'));
+
+    expect(held).toHaveLength(2);
+    held[0].next(list);
+    const devFirst = { ...list, direct: [dev, ...list.direct.filter((d) => d !== dev)] };
+    held[1].next(devFirst);
+    expect(store.rows()[0].name).toBe(dev.other.displayName);
   });
 
   it('is loading until the threads arrive', () => {
