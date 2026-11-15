@@ -49,6 +49,12 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();
 
+    public DbSet<Admin> Admins => Set<Admin>();
+
+    public DbSet<AdminSession> AdminSessions => Set<AdminSession>();
+
+    public DbSet<AdminSignInLock> AdminSignInLocks => Set<AdminSignInLock>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

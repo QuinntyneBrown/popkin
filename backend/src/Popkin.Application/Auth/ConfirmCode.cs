@@ -27,7 +27,7 @@ public sealed class ConfirmCodeCommandHandler(IAppDbContext db, TimeProvider clo
     {
         var now = clock.GetUtcNow();
         var code = await db.VerificationCodes.FirstOrDefaultAsync(c => c.Id == request.VerificationId, cancellationToken);
-        if (code is null || code.IsExpired(now))
+        if (code is null || code.Purpose == CodePurpose.AdminSignIn || code.IsExpired(now))
         {
             throw new ProblemException(400, "code_expired", "That code has expired.");
         }

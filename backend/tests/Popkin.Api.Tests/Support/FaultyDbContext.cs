@@ -62,6 +62,12 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;
 
+    public DbSet<Admin> Admins => inner.Admins;
+
+    public DbSet<AdminSession> AdminSessions => inner.AdminSessions;
+
+    public DbSet<AdminSignInLock> AdminSignInLocks => inner.AdminSignInLocks;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)
