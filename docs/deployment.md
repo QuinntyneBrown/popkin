@@ -183,5 +183,8 @@ To deploy `main` again without a commit, run the Deploy workflow by hand.
    security policy on the response.
 2. The same request over HTTP is redirected to HTTPS once, not in a loop.
 3. The landing page loads, and a deep link such as `/sign-up` loads after a reload.
-4. Sign up with a code, start a Popkin and see its QR invite (journey 1).
-5. Open the invite link in a private window, sign up as someone else and join (journey 2).
+4. `https://admin.popkin.community/` serves the admin app, not the app: its page carries
+   `X-Robots-Tag: noindex, nofollow`, which popkin-web adds to the admin app's files alone
+   ([ADR 0024](adr/0024-admins-moderation-and-switches-in-the-database.md)).
+5. Sign up with a code, start a Popkin and see its QR invite (journey 1).
+6. Open the invite link in a private window, sign up as someone else and join (journey 2).
