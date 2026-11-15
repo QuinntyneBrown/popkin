@@ -92,6 +92,7 @@ jobs:
               authCodeHashKey="$AUTH_CODE_HASH_KEY" photosSigningKey="$PHOTOS_SIGNING_KEY" \
             --query properties.outputs -o json)
           echo "appUrl=$(jq -r .appUrl.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
+          echo "adminUrl=$(jq -r .adminUrl.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
           echo "marketingUrl=$(jq -r .marketingUrl.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
           echo "marketingName=$(jq -r .marketingName.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
 
@@ -123,10 +124,11 @@ jobs:
           skip_app_build: true
           skip_api_build: true
 
-      # docs/deployment.md, Smoke test 1 to 3.
+      # docs/deployment.md, Smoke test 1 to 4.
       - name: Smoke test
         env:
           APP_URL: ${{ steps.release.outputs.appUrl }}
+          ADMIN_URL: ${{ steps.release.outputs.adminUrl }}
           MARKETING_URL: ${{ steps.release.outputs.marketingUrl }}
         run: |
           for i in $(seq 1 30); do
@@ -136,6 +138,10 @@ jobs:
           curl -fsS -D - -o /dev/null "$APP_URL/api/health" | grep -i '^strict-transport-security'
           test "$(curl -s -o /dev/null -w '%{http_code}' "${APP_URL/https:/http:}/api/health")" -ge 300
           curl -fsS -o /dev/null "$APP_URL/sign-up"
+          # ADR 0024: the admin app's files alone carry X-Robots-Tag, so its presence proves
+          # admin.<domain> reached the admin app and not the app.
+          curl -fsS -D - -o /dev/null "$ADMIN_URL/" | grep -i '^x-robots-tag: noindex'
           curl -fsS -o /dev/null "$MARKETING_URL"
           echo "The app: $APP_URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "The admin app: $ADMIN_URL" >> "$GITHUB_STEP_SUMMARY"
           echo "The marketing site: $MARKETING_URL" >> "$GITHUB_STEP_SUMMARY"

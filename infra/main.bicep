@@ -358,5 +358,6 @@ module domains 'domains.bicep' = {
 }
 
 output appUrl string = domains.outputs.appOrigin
+output adminUrl string = adminOrigin
 output marketingUrl string = domains.outputs.marketingOrigin
 output marketingName string = marketing.name
