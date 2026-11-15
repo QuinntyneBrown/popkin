@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /**
- * Plan header (docs/design-system/components/plan-header.html): the head of a tab with views,
+ * Plan header (docs/design-system/components/schedule.html): the head of a tab with views,
  * such as Schedule. It names the tab (the screen's `h1`) under its views, and holds the tab's
  * actions beside the name from 640 px.
  *

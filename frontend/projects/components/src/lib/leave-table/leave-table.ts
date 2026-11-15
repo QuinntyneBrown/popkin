@@ -27,7 +27,7 @@ export interface LeaveTableRow {
 }
 
 /**
- * Leave table (docs/design-system/components/leave-table.html): a week of a group's time off, a
+ * Leave table (docs/design-system/components/schedule.html): a week of a group's time off, a
  * row per member and a column per day (L2-072 AC2). Each weekday cell says Off, Tentative or
  * Working; a weekend cell is named "Weekend". The event's days are tinted and headed with its
  * label. Below 640 px the table scrolls sideways inside its wrap with the member column fixed,

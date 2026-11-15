@@ -9,7 +9,7 @@ export interface LegendKey {
 }
 
 /**
- * Chart legend (docs/design-system/components/chart-legend.html): what each fill of a chart or
+ * Chart legend (docs/design-system/components/schedule.html): what each fill of a chart or
  * table means. The words say it; the swatch beside them only repeats it.
  */
 @Component({

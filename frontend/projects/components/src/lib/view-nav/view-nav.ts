@@ -9,7 +9,7 @@ export interface ViewLink {
 }
 
 /**
- * View nav (docs/design-system/components/view-nav.html): the views of one tab, such as "Time
+ * View nav (docs/design-system/components/schedule.html): the views of one tab, such as "Time
  * off" and "This week" of Schedule. Links, the one shown marked `aria-current="page"`; the row
  * scrolls sideways when it does not fit.
  */
