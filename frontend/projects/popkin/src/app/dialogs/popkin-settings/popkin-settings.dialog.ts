@@ -15,13 +15,19 @@ export interface PopkinSettingsData {
    * hides the row: Schedules is off (L2-020 AC1, L2-085).
    */
   eventHint?: string;
+  /**
+   * What is switched on under "Features", "Plan and Schedules" or "All off"; undefined hides the
+   * row: the admin app offers the Popkin no feature (L2-153 AC1).
+   */
+  featuresHint?: string;
 }
 
-export type PopkinSetting = 'edit' | 'length' | 'event' | 'invite' | 'wrap-up' | 'leave';
+export type PopkinSetting =
+  'edit' | 'length' | 'event' | 'features' | 'invite' | 'wrap-up' | 'leave';
 
 /**
  * Popkin settings (L2-020 AC1, AC2): "Edit name and look", "Change how long it lasts",
- * "Set the event" while Schedules is on, "Invite people" and "Wrap up" for the Host; "Invite people" and "Leave this Popkin" for any
+ * "Set the event" while Schedules is on, "Features" while a feature is offered (L2-153), "Invite people" and "Wrap up" for the Host; "Invite people" and "Leave this Popkin" for any
  * other member. It closes with the one chosen.
  */
 @Component({

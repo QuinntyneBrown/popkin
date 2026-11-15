@@ -1,15 +1,14 @@
 import { Dialog } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
 import {
+  NewPopkinCreator,
   NewPopkinDraft,
   POPKIN_LENGTHS,
-  POPKINS_API,
+  PopkinFeature,
   PopkinLength,
   accentOf,
-  comingSundayEvening,
   formatEnd,
-  resolveEndsAt,
 } from 'api';
 import {
   Alert,
@@ -23,9 +22,11 @@ import {
   TopBar,
 } from 'components';
 import { EndDateData, EndDateDialog } from '../../dialogs/end-date/end-date.dialog';
-import { Toaster } from 'api';
 
-/** The second step of starting a Popkin: when it wraps up (L2-009). */
+/**
+ * The third step of starting a Popkin: when it wraps up (L2-009). While a feature is offered,
+ * "Next" opens "What should it have?"; otherwise it is the last step and pops it up (L2-152).
+ */
 @Component({
   selector: 'pk-how-long-page',
   imports: [Alert, Button, ChoiceCard, DateButton, Screen, SplitAside, Timeline, TopBar],
@@ -34,21 +35,25 @@ import { Toaster } from 'api';
 })
 export class HowLongPage {
   private readonly store = inject(NewPopkinDraft);
+  private readonly creator = inject(NewPopkinCreator);
   private readonly dialog = inject(Dialog);
-  private readonly popkins = inject(POPKINS_API);
   private readonly router = inject(Router);
-  private readonly toaster = inject(Toaster);
 
-  protected readonly status = signal<'idle' | 'popping' | 'failed'>('idle');
+  /** The features a new Popkin is offered, from the route's resolver (L2-152). */
+  readonly offered = input<PopkinFeature[]>([]);
+  /** Whether "What should it have?" follows (L2-152 AC1, AC2). */
+  protected readonly last = computed(() => this.offered().length === 0);
+  protected readonly steps = computed(() => (this.last() ? 3 : 4));
 
+  protected readonly status = this.creator.status;
   protected readonly draft = this.store.draft;
   protected readonly accent = computed(() => accentOf(this.draft().colour));
   protected readonly lengths: ChoiceOption<PopkinLength>[] = [...POPKIN_LENGTHS];
 
   /** The end "Until a date" shows: the one picked, else the coming Sunday evening. */
   protected readonly customEnd = computed(() => {
-    const picked = this.draft().customEndsAt;
-    return picked ? new Date(picked) : comingSundayEvening(new Date());
+    this.draft();
+    return this.creator.customEnd();
   });
   protected readonly customEndText = computed(() => `Ends ${formatEnd(this.customEnd())}`);
 
@@ -71,6 +76,10 @@ export class HowLongPage {
     return { icon: option.icon, title: option.title, ...pictures[length] };
   });
 
+  constructor() {
+    this.creator.clear();
+  }
+
   protected choose(length: string): void {
     this.store.update({ length: length as PopkinLength });
   }
@@ -90,44 +99,12 @@ export class HowLongPage {
     });
   }
 
-  /** Creates the Popkin; a failure keeps every choice (L2-009 AC4, AC5). */
-  protected popItUp(): void {
-    if (this.status() === 'popping') return;
-    const draft = this.draft();
-    const endsAt = resolveEndsAt(draft.length, new Date(), this.customEnd());
-    this.status.set('popping');
-    this.popkins
-      .createPopkin({
-        name: draft.name.trim(),
-        emoji: draft.emoji,
-        colour: draft.colour,
-        length: draft.length,
-        endsAt: endsAt?.toISOString() ?? null,
-      })
-      .subscribe({
-        next: (created) => {
-          if (draft.crewOf) this.inviteCrew(created.id, draft.crewOf);
-          void this.router.navigateByUrl(`/p/${created.id}/created`).then(() => this.store.reset());
-        },
-        error: () => this.status.set('failed'),
-      });
+  protected next(): void {
+    void this.router.navigateByUrl('/new/features');
   }
 
-  /** "Pop up another with this crew" (L2-046 AC5): the new Popkin is there either way. */
-  private inviteCrew(popkinId: string, crewOf: string): void {
-    this.popkins.inviteCrew(popkinId, crewOf).subscribe({
-      next: () =>
-        this.toaster.show(
-          'success',
-          'Invites are on their way',
-          'Everyone from the last Popkin gets one.',
-        ),
-      error: () =>
-        this.toaster.show(
-          'danger',
-          'We couldn’t invite the crew',
-          'Share the code or the link with them instead.',
-        ),
-    });
+  /** Creates the Popkin when no feature is offered; a failure keeps every choice (L2-009 AC4, AC5). */
+  protected popItUp(): void {
+    this.creator.popItUp([]);
   }
 }

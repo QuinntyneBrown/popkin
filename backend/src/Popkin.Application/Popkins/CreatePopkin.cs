@@ -9,16 +9,25 @@ public sealed record PopkinCreatedDto(Guid Id, string Name, string Emoji, Popkin
 
 /// <summary>
 /// Starts a Popkin (L2-010). The client resolves `EndsAt`, because only the device knows its
-/// midnight and Sunday; the server checks it (L2-009 AC3).
+/// midnight and Sunday; the server checks it (L2-009 AC3). `Plan` and `Schedules` are the
+/// features chosen: `false` switches one off, and one left out is on (L2-152 AC7).
 /// </summary>
-public sealed record CreatePopkinCommand(string? Name, string? Emoji, string? Colour, string? Length, DateTimeOffset? EndsAt) : IRequest<PopkinCreatedDto>;
+public sealed record CreatePopkinCommand(
+    string? Name,
+    string? Emoji,
+    string? Colour,
+    string? Length,
+    DateTimeOffset? EndsAt,
+    bool? Plan = null,
+    bool? Schedules = null) : IRequest<PopkinCreatedDto>;
 
 public sealed class CreatePopkinCommandHandler(
     IAppDbContext db,
     ICurrentPerson current,
     TimeProvider clock,
     IInviteCodeGenerator codes,
-    InviteLinkBuilder links) : IRequestHandler<CreatePopkinCommand, PopkinCreatedDto>
+    InviteLinkBuilder links,
+    IPlatformSnapshot snapshot) : IRequestHandler<CreatePopkinCommand, PopkinCreatedDto>
 {
     private const int CodeAttempts = 5;
 
@@ -49,7 +58,17 @@ public sealed class CreatePopkinCommandHandler(
             var (popkin, everyone) = PopkinSpace.Start(host, name, emoji, colour, length, endsAt, code, now);
             db.Popkins.Add(popkin);
             db.ChatThreads.Add(everyone);
+            // The choice is kept even for a feature not offered yet, so it applies once it is (ADR 0026).
+            foreach (var (feature, on) in new[] { (Feature.Plan, request.Plan), (Feature.Schedules, request.Schedules) })
+            {
+                if (on == false)
+                {
+                    db.PopkinFeaturesOff.Add(PopkinFeatureOff.SwitchOff(popkin.Id, feature, now));
+                }
+            }
+
             await db.SaveChangesAsync(cancellationToken);
+            snapshot.Invalidate();
             return new PopkinCreatedDto(popkin.Id, popkin.Name, popkin.Emoji, popkin.Colour, popkin.EndsAt, popkin.InviteCode, links.Build(popkin.InviteCode));
         }
     }

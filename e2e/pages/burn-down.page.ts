@@ -45,6 +45,8 @@ export class BurnDownPage {
   readonly error: Locator;
   readonly tryAgain: Locator;
   readonly off: Locator;
+  /** What the off screen says, and who can switch it on again (L2-077 AC2). */
+  readonly offText: Locator;
   readonly backToPopkin: Locator;
   readonly nav: Locator;
   readonly currentTab: Locator;
@@ -82,6 +84,7 @@ export class BurnDownPage {
     this.off = page.locator('.empty').filter({
       has: page.getByRole('heading', { name: 'Plan is switched off' }),
     });
+    this.offText = this.off.locator('p');
     this.backToPopkin = this.off.getByRole('link', { name: /^Back to / });
     this.nav = page.getByRole('navigation', { name: 'Popkin' });
     this.currentTab = this.nav.locator('ul a[aria-current="page"]');

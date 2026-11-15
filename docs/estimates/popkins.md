@@ -3,6 +3,7 @@
 | Design | Effort | Complete |
 |---|---|---|
 | choose-address | 4 days | 0% |
+| choose-features | 4 days | 100% |
 | leave-popkin | 2 days | 100% |
 | my-popkins | 3 days | 90% |
 | open-by-address | 4 days | 0% |

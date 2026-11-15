@@ -10,6 +10,7 @@ export class NameYourPopkinPage {
   readonly emoji: Locator;
   readonly colours: Locator;
   readonly looksGood: Locator;
+  readonly steps: Locator;
   readonly back: Locator;
   readonly screen: Locator;
   /** Regions for the sweeps and the parity specs. */
@@ -35,6 +36,7 @@ export class NameYourPopkinPage {
     this.emoji = page.getByRole('group', { name: 'Emoji' }).getByRole('button');
     this.colours = page.getByRole('group', { name: 'Colour' }).getByRole('button');
     this.looksGood = page.getByRole('button', { name: 'Looks good' });
+    this.steps = page.locator('.step-dots');
     this.back = page.getByRole('link', { name: 'Back' });
     this.screen = page.locator('.screen');
     this.previewRow = page.locator('.preview-row');

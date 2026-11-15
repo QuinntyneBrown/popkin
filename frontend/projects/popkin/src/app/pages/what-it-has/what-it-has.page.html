@@ -1,0 +1,48 @@
+<div
+  pk-screen
+  layout="split"
+  heading="What should it have?"
+  [lead]="lead"
+  [accent]="accent()"
+  [footer]="true"
+>
+  <aside
+    pk-split-aside
+    slot="aside"
+    label="What happens"
+    surface="tint"
+    heading="Its tabs"
+    [icon]="draft().emoji"
+    [text]="tabs()"
+  ></aside>
+  <header pk-top-bar slot="header" back="/new/length" [step]="4" [steps]="4"></header>
+  @if (status() === 'failed') {
+    <div pk-alert heading="We couldn’t pop it up.">
+      Something went wrong on our side. Your choices are still here.
+    </div>
+  }
+  <div class="stack stack--sm">
+    @for (row of rows(); track row.feature) {
+      <div
+        pk-setting-row
+        [icon]="row.icon"
+        [heading]="row.title"
+        [text]="row.text"
+        [disabled]="status() === 'popping'"
+        [checked]="row.on"
+        (checkedChange)="toggle(row.feature, $event)"
+      ></div>
+    }
+  </div>
+  <button
+    pk-button
+    slot="footer"
+    variant="popkin"
+    type="button"
+    [block]="true"
+    [busy]="status() === 'popping'"
+    (click)="popItUp()"
+  >
+    {{ status() === 'popping' ? 'Popping it up…' : 'Pop it up' }}
+  </button>
+</div>

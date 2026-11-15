@@ -36,7 +36,8 @@ export interface Stretch {
 export const thisWeekNow = new Date(2026, 8, 12, 12, 0);
 export const thisWeekUrl = `${scheduleUrl}/week`;
 export const thisWeekDayUrl = (day: string) => `${thisWeekUrl}?day=${day}`;
-type Failure = 'server' | 'not-found' | 'off';
+/** `off`: the admin app switched the feature off; `host-off`: the Host did (L2-077 AC2). */
+type Failure = 'server' | 'not-found' | 'off' | 'host-off';
 
 export class Schedule {
   members = [...theSix];
@@ -185,7 +186,11 @@ export class Schedule {
     if (this.failing === 'server') return route.fulfill({ status: 500 });
     if (this.failing) {
       const refusal =
-        this.failing === 'off' ? problem(404, 'feature_off') : problem(404, 'popkin_not_found');
+        this.failing === 'not-found'
+          ? problem(404, 'popkin_not_found')
+          : problem(404, 'feature_off', {
+              switchedOffBy: this.failing === 'host-off' ? 'Host' : 'Popkin',
+            });
       return route.fulfill({ status: refusal.status, json: refusal.body });
     }
     // Without a week, the event's week or else the week of the viewer's today (L2-072 AC8).
@@ -221,7 +226,11 @@ export class Schedule {
     if (this.failing === 'server') return route.fulfill({ status: 500 });
     if (this.failing) {
       const refusal =
-        this.failing === 'off' ? problem(404, 'feature_off') : problem(404, 'popkin_not_found');
+        this.failing === 'not-found'
+          ? problem(404, 'popkin_not_found')
+          : problem(404, 'feature_off', {
+              switchedOffBy: this.failing === 'host-off' ? 'Host' : 'Popkin',
+            });
       return route.fulfill({ status: refusal.status, json: refusal.body });
     }
     const from = url.searchParams.get('from') ?? isoDate(thisWeekNow);

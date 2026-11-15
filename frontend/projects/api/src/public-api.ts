@@ -11,6 +11,8 @@ export * from './lib/api/auth/safe-return-url';
 export * from './lib/api/auth/session.store';
 export * from './lib/models/popkin';
 export * from './lib/api/popkins/new-popkin-draft';
+export * from './lib/api/popkins/new-popkin-creator';
+export * from './lib/api/popkins/feature-text';
 export * from './lib/api/popkins/popkin-length';
 export * from './lib/api/popkins/popkins-api';
 export * from './lib/api/popkins/qr-encoder';

@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { switchedOffBy } from '../popkins/feature-text';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, filter, interval, merge } from 'rxjs';
@@ -34,6 +35,8 @@ export class PlanBoardStore {
 
   readonly view = signal<PlanBoardView | null>(null);
   readonly state = signal<PlanBoardState>('loading');
+  /** Who switched the feature off while `state` is `off` (L2-077 AC2). */
+  readonly offBy = signal<'Host' | 'Popkin'>('Popkin');
   /** The four columns with their cards (L2-068 AC3 to AC6). */
   readonly columns = computed(() => columnsOf(this.view()?.stories ?? []));
   /** A Popkin with no stories yet offers the four starters (L2-068 AC9). */
@@ -119,8 +122,13 @@ export class PlanBoardStore {
         this.view.set(view);
         this.state.set('ready');
       },
-      error: (error: unknown) => this.state.set(failureOf(error)),
+      error: (error: unknown) => this.failed(error),
     });
+  }
+
+  private failed(error: unknown): void {
+    this.offBy.set(switchedOffBy(error));
+    this.state.set(failureOf(error));
   }
 }
 

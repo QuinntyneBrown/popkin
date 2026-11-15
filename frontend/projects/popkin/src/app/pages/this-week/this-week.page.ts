@@ -16,6 +16,7 @@ import {
   ThisWeekView,
   UnreadTracker,
   isoDate,
+  featureOffText,
 } from 'api';
 import {
   AppScreen,
@@ -63,6 +64,8 @@ export class ThisWeekPage {
   readonly day = input<string>();
 
   protected readonly store = inject(ThisWeekStore);
+  /** Who can switch Schedules on again, by who switched it off (L2-077 AC2). */
+  protected readonly offText = computed(() => featureOffText('Schedules', this.store.offBy()));
   protected readonly frame = inject(PopkinFrame);
   private readonly unread = inject(UnreadTracker);
   private readonly errors = inject(ErrorScreens);

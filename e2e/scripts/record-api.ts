@@ -89,7 +89,9 @@ await call('GET', '/api/auth/session');
 await new Promise((resolve) => setTimeout(resolve, 31_000));
 await call('POST', `/api/auth/codes/${verification}/resend`);
 
-// Popkins: Mara starts Lakeside Weekend, Teal, for the weekend (Sunday at 6 pm).
+// Popkins: Mara is offered Plan and Schedules (L2-152 AC8), and starts Lakeside Weekend, Teal,
+// for the weekend (Sunday at 6 pm), with both on.
+await call('GET', '/api/popkins/features');
 const sunday = new Date();
 sunday.setDate(sunday.getDate() + ((7 - sunday.getDay()) % 7 || 7));
 sunday.setHours(18, 0, 0, 0);
@@ -99,6 +101,8 @@ const created = await call('POST', '/api/popkins', {
   colour: 'Teal',
   length: 'TheWeekend',
   endsAt: sunday.toISOString(),
+  plan: true,
+  schedules: true,
 });
 await call('GET', `/api/popkins/${created.id}/invite`);
 
@@ -173,6 +177,8 @@ await call('PUT', `/api/popkins/${created.id}/length`, {
   length: 'TheWeekend',
   endsAt: sunday.toISOString(),
 });
+// Features: Mara saves both on, as they were (L2-153).
+await call('PUT', `/api/popkins/${created.id}/features`, { plan: true, schedules: true });
 
 // The Schedule (journey 22, with Features:Schedules on): Mara sets the event, reads the week
 // of time off that holds it and adds hers, reads this week and enters her hours, and reads the

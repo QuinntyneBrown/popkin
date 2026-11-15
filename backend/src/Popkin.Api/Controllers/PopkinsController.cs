@@ -11,15 +11,20 @@ namespace Popkin.Api.Controllers;
 [Route("api/popkins")]
 public sealed class PopkinsController(ISender sender) : ControllerBase
 {
-    public sealed record CreatePopkinRequest(string? Name, string? Emoji, string? Colour, string? Length, DateTimeOffset? EndsAt);
+    public sealed record CreatePopkinRequest(string? Name, string? Emoji, string? Colour, string? Length, DateTimeOffset? EndsAt, bool? Plan, bool? Schedules);
 
-    /// <summary>Starts a Popkin with its creator as Host (L2-010).</summary>
+    /// <summary>Starts a Popkin with its creator as Host and the features they chose (L2-010, L2-152).</summary>
     [HttpPost]
     public async Task<ActionResult<PopkinCreatedDto>> Create(CreatePopkinRequest request, CancellationToken cancellationToken)
     {
-        var created = await sender.Send(new CreatePopkinCommand(request.Name, request.Emoji, request.Colour, request.Length, request.EndsAt), cancellationToken);
+        var created = await sender.Send(new CreatePopkinCommand(request.Name, request.Emoji, request.Colour, request.Length, request.EndsAt, request.Plan, request.Schedules), cancellationToken);
         return Created($"/api/popkins/{created.Id}", created);
     }
+
+    /// <summary>The features a Popkin not yet created is offered, for "What should it have?" (L2-152 AC8).</summary>
+    [HttpGet("features")]
+    public async Task<ActionResult<NewPopkinFeaturesDto>> GetNewPopkinFeatures(CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetNewPopkinFeaturesQuery(), cancellationToken));
 
     /// <summary>My Popkins: the caller's own, active and wrapped up (L2-017, L2-018, L2-051 AC3).</summary>
     [HttpGet]
@@ -35,6 +40,13 @@ public sealed class PopkinsController(ISender sender) : ControllerBase
     [HttpGet("{popkinId:guid}/features")]
     public async Task<ActionResult<PopkinFeaturesDto>> GetFeatures(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetPopkinFeaturesQuery(popkinId), cancellationToken));
+
+    public sealed record ChangePopkinFeaturesRequest(bool? Plan, bool? Schedules);
+
+    /// <summary>The Host switches the offered features on and off (L2-153).</summary>
+    [HttpPut("{popkinId:guid}/features")]
+    public async Task<ActionResult<PopkinFeaturesDto>> ChangeFeatures(Guid popkinId, ChangePopkinFeaturesRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new ChangePopkinFeaturesCommand(popkinId, request.Plan, request.Schedules), cancellationToken));
 
     public sealed record ChangePopkinLookRequest(string? Name, string? Emoji, string? Colour);
 

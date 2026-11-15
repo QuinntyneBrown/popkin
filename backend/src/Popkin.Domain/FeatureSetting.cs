@@ -49,6 +49,26 @@ public sealed class FeatureSetting
 }
 
 /// <summary>
+/// A feature the Host switched off for their Popkin (L2-152, L2-153). A Popkin without one has
+/// the feature whenever the admin app offers it (ADR 0026); switching off deletes no data.
+/// </summary>
+public sealed class PopkinFeatureOff
+{
+    private PopkinFeatureOff()
+    {
+    }
+
+    public Guid PopkinId { get; private set; }
+
+    public Feature Feature { get; private set; }
+
+    public DateTimeOffset SwitchedOffAt { get; private set; }
+
+    public static PopkinFeatureOff SwitchOff(Guid popkinId, Feature feature, DateTimeOffset now) =>
+        new() { PopkinId = popkinId, Feature = feature, SwitchedOffAt = now };
+}
+
+/// <summary>
 /// A live Popkin named on a feature's switch, which has the feature while the mode is Chosen
 /// (L2-076 AC5). Kept whatever the mode, so moving to Everyone and back keeps the list.
 /// </summary>

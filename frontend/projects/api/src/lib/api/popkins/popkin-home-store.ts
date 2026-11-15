@@ -8,6 +8,7 @@ import {
   MemberView,
   PhotosSummaryView,
   PopkinHomeView,
+  PopkinFeaturesView,
 } from '../../models/home';
 import { CHAT_API } from '../chat/chat-api';
 import { UnreadTracker } from '../chat/unread-tracker';
@@ -195,6 +196,18 @@ export class PopkinHomeStore {
   /** The event the Host has just saved or removed (L2-085 AC4, AC5): Popkin settings shows it. */
   applyEvent(event: EventView | null): void {
     this.popkin.update((popkin) => (popkin ? { ...popkin, event } : popkin));
+  }
+
+  /**
+   * The Host's change of the features (L2-153 AC3): the tabs follow at once, and the home reads
+   * the section of a feature switched on and leaves out one switched off (L2-077 AC6).
+   */
+  applyFeatures(features: PopkinFeaturesView): void {
+    const held = this.popkin();
+    if (!held) return;
+    this.popkin.set({ ...held, plan: features.plan, schedules: features.schedules });
+    if (held.schedules !== features.schedules) this.readSchedule(features.schedules);
+    if (held.plan !== features.plan) this.readPlan(features.plan, false);
   }
 
   /** Reads the Plan section again, after it failed (L2-056). */

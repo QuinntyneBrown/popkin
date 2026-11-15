@@ -16,6 +16,7 @@ import {
   StoryView,
   UnreadTracker,
   biggestEmpty,
+  featureOffText,
 } from 'api';
 import {
   AppScreen,
@@ -59,6 +60,8 @@ export class BurnDownPage {
   readonly popkinId = input.required<string>();
 
   protected readonly store = inject(BurnDownStore);
+  /** Who can switch Plan on again, by who switched it off (L2-077 AC2). */
+  protected readonly offText = computed(() => featureOffText('Plan', this.store.offBy()));
   protected readonly frame = inject(PopkinFrame);
   private readonly unread = inject(UnreadTracker);
   private readonly errors = inject(ErrorScreens);

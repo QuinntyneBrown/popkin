@@ -100,6 +100,8 @@ export class Home {
     schedules: false,
     /** Plan is off unless a spec turns it on: the earlier screens' mocks show no Plan tab. */
     plan: false,
+    /** The Host's choice of each feature the admin app offers (L2-153); none unless a spec offers one. */
+    choices: [] as { feature: 'Plan' | 'Schedules'; on: boolean }[],
     /** The event the Host set (L2-085), sent while Schedules is on. */
     event: null as { label: string; firstDay: string; lastDay: string } | null,
   };
@@ -213,6 +215,15 @@ export class Home {
     return release;
   }
 
+  /**
+   * The admin app offers these features and the Host has these on (L2-153): the header and the
+   * switches say so.
+   */
+  offers(choices: { feature: 'Plan' | 'Schedules'; on: boolean }[]): void {
+    const on = (feature: string) => choices.some((c) => c.feature === feature && c.on);
+    this.popkin = { ...this.popkin, choices, plan: on('Plan'), schedules: on('Schedules') };
+  }
+
   /** Nobody but the Host, and nothing written, added or shared: the mocks' empty home. */
   justTheHost(): void {
     this.popkin = { ...this.popkin, memberCount: 1, avatars: [people.mara.avatar], unreadCount: 0 };
@@ -280,7 +291,11 @@ export class Home {
         return this.popkin;
       // What an open screen reads every minute: the switches of the header (L2-077 AC4).
       case 'features':
-        return { plan: this.popkin.plan, schedules: this.popkin.schedules };
+        return {
+          plan: this.popkin.plan,
+          schedules: this.popkin.schedules,
+          choices: this.popkin.choices,
+        };
       case 'preview':
         return { threadId, messages: this.latest.slice(-4), newCount: this.newCount };
       case 'photos':

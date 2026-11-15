@@ -813,6 +813,23 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("PlanChanges", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.PopkinFeatureOff", b =>
+                {
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Feature")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("SwitchedOffAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("PopkinId", "Feature");
+
+                    b.ToTable("PopkinFeaturesOff", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.PopkinSpace", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1343,6 +1360,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Popkin.Domain.PlanChange", b =>
+                {
+                    b.HasOne("Popkin.Domain.PopkinSpace", null)
+                        .WithMany()
+                        .HasForeignKey("PopkinId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PopkinFeatureOff", b =>
                 {
                     b.HasOne("Popkin.Domain.PopkinSpace", null)
                         .WithMany()

@@ -214,6 +214,7 @@ Each design follows the source named below and marks the conflict in its own REA
 | Popkins | [Popkin home](popkins/popkin-home/README.md) | L2-019 |
 | Popkins | [Popkin settings](popkins/popkin-settings/README.md) | L2-020, L2-066 |
 | Popkins | [Leave a Popkin](popkins/leave-popkin/README.md) | L2-047 |
+| Popkins | [Choose a Popkin's features](popkins/choose-features/README.md) | L2-152, L2-153 |
 | Invitations | [Invite people](invitations/invite-people/README.md) | L2-011, L2-065 |
 | Invitations | [Preview an invite](invitations/preview-invite/README.md) | L2-012, L2-016, L2-065 |
 | Invitations | [Join a Popkin](invitations/join-popkin/README.md) | L2-013, L2-014 |
@@ -557,6 +558,7 @@ or design that settled it.
 | 116 | Groups: choosing a group's emoji; the length of a group's name; the title of Add people for a group that has no name yet ([Groups](contacts/groups/README.md)) | Groups, New group | |
 | 117 | Import and delete copy: a failed import, a candidate list that fails or loads, a way back after "Tick nobody", how many people show before "Show {n} more"; the delete sentence when a count is zero; what removes a stored file a delete failed to remove; what erasing an account does to the contacts others imported from it ([Import from your Popkins](contacts/import-from-popkins/README.md), [Delete a contact](contacts/delete-contact/README.md)) | Import, Delete | |
 | 118 | Whether `ContactsOutbox` holds photos, so a milestone or memory photo taken offline waits like the rest ([Memories and files](contacts/memories/README.md)) | Offline Contacts | |
+| 119 | Whether the admin app's Features panel should say how many Popkins have a feature switched off by their Host: "On in all {n} live Popkins" counts what the admin app offers, not what each Host has on (L2-076 AC1, L2-153, [Choose a Popkin's features](popkins/choose-features/README.md), ADR 0026) | Admin Features | |
 
 Settled so far:
 

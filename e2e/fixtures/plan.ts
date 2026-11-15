@@ -34,7 +34,8 @@ export interface PlanStory {
   addedAt: string;
 }
 
-type Failure = 'server' | 'not-found' | 'off';
+/** `off`: the admin app switched the feature off; `host-off`: the Host did (L2-077 AC2). */
+type Failure = 'server' | 'not-found' | 'off' | 'host-off';
 
 const { mara, walt, dev, ellie } = people;
 
@@ -268,7 +269,11 @@ export class Plan {
     }
     if (this.failing) {
       const refusal =
-        this.failing === 'off' ? problem(404, 'feature_off') : problem(404, 'popkin_not_found');
+        this.failing === 'not-found'
+          ? problem(404, 'popkin_not_found')
+          : problem(404, 'feature_off', {
+              switchedOffBy: this.failing === 'host-off' ? 'Host' : 'Popkin',
+            });
       await route.fulfill({ status: refusal.status, json: refusal.body });
       return true;
     }

@@ -22,6 +22,9 @@ import { TimeOffPage } from '../pages/time-off.page';
 const offText =
   'Popkin has turned this feature off for now. Nothing is lost: it comes back as it was when the feature is on again. Your host can ask Popkin to find out more.';
 
+const hostOffText =
+  'Your host switched Schedules off for this Popkin. Nothing is lost: it comes back as it was when they switch it on again in Popkin settings.';
+
 test.describe('Schedules switched off', () => {
   // L2-077 AC2
   test('time off opened by its address says so, shows no time off, and goes back home', async ({
@@ -102,5 +105,18 @@ test.describe('Schedules switched off', () => {
       '',
       '',
     ]);
+  });
+
+  // L2-077 AC2, L2-153: the Host switched it off, so the Host can switch it on again.
+  test('switched off by the Host, time off and this week say the Host can switch it on again', async ({
+    page,
+  }) => {
+    const schedule = await maraWithASchedule(page, theMocksTimeOff);
+    schedule.fail('host-off');
+    await page.goto(timeOffUrl(mocksWeek));
+    await expect(new TimeOffPage(page).offText).toHaveText(hostOffText);
+
+    await page.goto(thisWeekUrl);
+    await expect(new ThisWeekPage(page).offText).toHaveText(hostOffText);
   });
 });

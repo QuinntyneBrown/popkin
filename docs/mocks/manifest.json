@@ -155,7 +155,8 @@
       "title": "How long",
       "route": "/new/length",
       "requirements": [
-        "L2-009"
+        "L2-009",
+        "L2-152"
       ],
       "states": [
         "default",
@@ -167,6 +168,27 @@
       "not_applicable": {
         "loading": "The screen needs no request before it shows, so it has nothing to wait for.",
         "empty": "The screen lists nothing; it has no collection that can be empty."
+      },
+      "notes": "default, custom and forever draw the step while a feature is offered: step 3 of 4 and Next. submitting and error draw it when no feature is offered: step 3 of 3 and Pop it up (L2-152 AC2)."
+    },
+    {
+      "id": "what-it-has",
+      "kind": "page",
+      "title": "What it has",
+      "route": "/new/features",
+      "requirements": [
+        "L2-152"
+      ],
+      "states": [
+        "default",
+        "plan-off",
+        "one",
+        "submitting",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The offered features are read before the step opens, by the route's resolver.",
+        "empty": "The step opens only when at least one feature is offered (L2-152 AC2)."
       }
     },
     {
@@ -900,7 +922,8 @@
         "L2-068",
         "L2-069",
         "L2-070",
-        "L2-077"
+        "L2-077",
+        "L2-153"
       ],
       "states": [
         "default",
@@ -908,7 +931,8 @@
         "empty",
         "error",
         "read-only",
-        "off"
+        "off",
+        "host-off"
       ]
     },
     {
@@ -1021,7 +1045,8 @@
       "requirements": [
         "L2-020",
         "L2-047",
-        "L2-085"
+        "L2-085",
+        "L2-153"
       ],
       "states": [
         "default",
@@ -1035,6 +1060,24 @@
         "invalid": "The dialog has no field to fill in."
       },
       "notes": "host-now and member-now draw the menu as journey 9 built it: Invite people and, for the Host, Wrap up. Journey 16 adds Edit name and look and Change how long it lasts, journey 18 adds Leave this Popkin; default and member draw the whole menu, and member is the member's menu from journey 18 on."
+    },
+    {
+      "id": "popkin-features",
+      "kind": "dialog",
+      "title": "Features",
+      "opens_from": "popkin-settings",
+      "requirements": [
+        "L2-153"
+      ],
+      "states": [
+        "default",
+        "saving",
+        "error"
+      ],
+      "not_applicable": {
+        "busy": "saving is its busy state.",
+        "invalid": "A switch has no wrong value."
+      }
     },
     {
       "id": "edit-popkin",
