@@ -21,10 +21,14 @@ public sealed record RecapSharerDto(string FirstName);
 /// </summary>
 public sealed record TopRatedDto(Guid ExperienceId, string Title, string? PictureUrl, double Average, int RatingCount, RecapSharerDto SharedBy);
 
+/// <summary>The plan's result: the stories in Done out of every story made (L2-075 AC4).</summary>
+public sealed record RecapStoriesDto(int Done, int Made);
+
 /// <summary>
 /// The recap of a wrapped-up Popkin (L2-046): what it was, when it ran, the people who showed
 /// up, the messages sent, the photos shared with the latest three of them, the first few
-/// members as avatars, and the top-rated moment when anything was rated.
+/// members as avatars, the top-rated moment when anything was rated, and the stories done
+/// while Plan is on and there were any (L2-075 AC4).
 /// </summary>
 public sealed record RecapDto(
     Guid Id,
@@ -42,12 +46,13 @@ public sealed record RecapDto(
     int PhotoCount,
     IReadOnlyList<RecapPhotoDto> Photos,
     IReadOnlyList<AvatarDto> Avatars,
-    TopRatedDto? TopRated);
+    TopRatedDto? TopRated,
+    RecapStoriesDto? Stories);
 
 /// <summary>The recap, for any member of a wrapped-up Popkin (L2-046, L2-051 AC1).</summary>
 public sealed record GetRecapQuery(Guid PopkinId) : IRequest<RecapDto>;
 
-public sealed class GetRecapQueryHandler(IAppDbContext db, IMembershipGuard guard, IPhotoStore store)
+public sealed class GetRecapQueryHandler(IAppDbContext db, IMembershipGuard guard, IPhotoStore store, IFeatureSwitches features)
     : IRequestHandler<GetRecapQuery, RecapDto>
 {
     /// <summary>The recap shows three photos (L2-046 AC1).</summary>
@@ -82,7 +87,26 @@ public sealed class GetRecapQueryHandler(IAppDbContext db, IMembershipGuard guar
             await RecapCounts.PhotosAsync(db, popkin, cancellationToken),
             photos.Select(p => new RecapPhotoDto(p.Id, store.GetReadUrl(p.ThumbnailKey))).ToList(),
             members.Take(MaxAvatars).Select(m => AvatarDto.Of(m, store)).ToList(),
-            await TopRatedAsync(popkin, cancellationToken));
+            await TopRatedAsync(popkin, cancellationToken),
+            await StoriesAsync(popkin, cancellationToken));
+    }
+
+    /// <summary>
+    /// Every story that still exists, Backlog included, and those in Done; none while Plan is off
+    /// or when no story was made (L2-075 AC3, AC4; L2-077 AC6).
+    /// </summary>
+    private async Task<RecapStoriesDto?> StoriesAsync(PopkinSpace popkin, CancellationToken cancellationToken)
+    {
+        if (!features.IsOn(Feature.Plan))
+        {
+            return null;
+        }
+
+        var stories = db.Stories.AsNoTracking().Where(s => s.PopkinId == popkin.Id);
+        var made = await stories.CountAsync(cancellationToken);
+        return made == 0
+            ? null
+            : new RecapStoriesDto(await stories.CountAsync(s => s.Column == StoryColumn.Done, cancellationToken), made);
     }
 
     private async Task<TopRatedDto?> TopRatedAsync(PopkinSpace popkin, CancellationToken cancellationToken)

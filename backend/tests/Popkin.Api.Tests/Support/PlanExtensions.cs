@@ -90,6 +90,10 @@ public static class PlanExtensions
     public static Task<HttpResponseMessage> BurnDownAsync(this HttpClient member, Guid popkinId) =>
         member.GetAsync($"/api/popkins/{popkinId}/plan/burn-down");
 
+    /// <summary>`GET …/plan/summary`, the home's Plan section (L2-075 AC1).</summary>
+    public static Task<HttpResponseMessage> PlanSummaryAsync(this HttpClient member, Guid popkinId) =>
+        member.GetAsync($"/api/popkins/{popkinId}/plan/summary");
+
     public static Task<JsonElement> PlanBoardAsync(this HttpClient member, Guid popkinId) =>
         member.GetFromJsonAsync<JsonElement>($"/api/popkins/{popkinId}/plan");
 

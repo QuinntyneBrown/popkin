@@ -21,6 +21,11 @@ public sealed class PlanController(ISender sender) : ControllerBase
     public async Task<ActionResult<BurnDownDto>> GetBurnDown(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetBurnDownQuery(popkinId), cancellationToken));
 
+    /// <summary>The home's Plan section (L2-075 AC1): the points left, how far behind or ahead and the biggest open stories; 204 before the first story (AC3).</summary>
+    [HttpGet("summary")]
+    public async Task<ActionResult<PlanSummaryDto>> GetSummary(Guid popkinId, CancellationToken cancellationToken) =>
+        await sender.Send(new GetPlanSummaryQuery(popkinId), cancellationToken) is { } summary ? Ok(summary) : NoContent();
+
     /// <summary>Adds a story to Backlog or To do (L2-069). Counted with the caller's messages.</summary>
     [HttpPost("stories")]
     [EnableRateLimiting(RateLimitPolicyNames.Messages)]

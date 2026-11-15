@@ -75,7 +75,7 @@ public sealed class RecapTests
         Assert.Equal(
             [
                 "avatars", "colour", "emoji", "id", "isHost", "keepPhotos", "messageCount", "name", "peopleCount", "photoCount", "photos",
-                "photosRemoveAt", "photosRemovedAt", "startedAt", "topRated", "wrappedUpAt",
+                "photosRemoveAt", "photosRemovedAt", "startedAt", "stories", "topRated", "wrappedUpAt",
             ],
             recap.EnumerateObject().Select(p => p.Name).Order());
     }

@@ -124,6 +124,22 @@ public static class PlanStories
     }
 
     /// <summary>The person who added it, its owner or the Host (L2-070 AC4).</summary>
+    /// <summary>How many of the biggest open stories the burn-down and the home list (L2-071 AC6, L2-075 AC1).</summary>
+    public const int BiggestCount = 3;
+
+    /// <summary>
+    /// The three biggest stories still open, in To do or Doing: the most points first; of two
+    /// with the same, the one added first (L2-071 AC6, L2-075 AC1).
+    /// </summary>
+    public static IReadOnlyList<StoryDto> Biggest(IEnumerable<StoryDto> stories) =>
+        stories
+            .Where(s => s.Column is StoryColumn.ToDo or StoryColumn.Doing)
+            .OrderByDescending(s => s.Points)
+            .ThenBy(s => s.AddedAt)
+            .ThenBy(s => s.Id)
+            .Take(BiggestCount)
+            .ToList();
+
     public static bool MayDelete(Story story, Membership member) =>
         member.Role == MembershipRole.Host || story.AddedByMembershipId == member.Id || story.OwnerMembershipId == member.Id;
 }

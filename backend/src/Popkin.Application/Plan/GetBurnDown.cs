@@ -33,9 +33,6 @@ public sealed class GetBurnDownQueryHandler(
     IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPhotoStore photos, TimeProvider clock)
     : IRequestHandler<GetBurnDownQuery, BurnDownDto>
 {
-    /// <summary>How many of the biggest open stories it lists (L2-071 AC6).</summary>
-    public const int BiggestCount = 3;
-
     public async Task<BurnDownDto> Handle(GetBurnDownQuery request, CancellationToken cancellationToken)
     {
         // Before membership, so nothing of the feature answers while it is off (L2-077 AC3).
@@ -52,15 +49,6 @@ public sealed class GetBurnDownQueryHandler(
         var stories = await PlanStories.ReadAsync(db, photos, popkin.Id, membership, cancellationToken);
         var forecast = history.Forecast(today);
 
-        // The most points first; of two with the same, the one added first (L2-071 AC6).
-        var biggest = stories
-            .Where(s => s.Column is StoryColumn.ToDo or StoryColumn.Doing)
-            .OrderByDescending(s => s.Points)
-            .ThenBy(s => s.AddedAt)
-            .ThenBy(s => s.Id)
-            .Take(BiggestCount)
-            .ToList();
-
         return new BurnDownDto(
             SprintDto.Of(sprint, today),
             history.StartPoints,
@@ -68,6 +56,6 @@ public sealed class GetBurnDownQueryHandler(
             history.Behind(today),
             new ForecastDto(forecast.Kind, forecast.Date, forecast.Days),
             history.Days(today).Select(d => new BurnDayDto(d.Day, d.PointsLeft)).ToList(),
-            biggest);
+            PlanStories.Biggest(stories));
     }
 }
