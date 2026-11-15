@@ -37,13 +37,8 @@ param smsSender string = ''
 @description('Phone sign-in (L2-084, ADR 0023): true once smsSender sends texts; until then sign-up and sign-in offer an email alone.')
 param phoneSignIn bool = false
 
-@description('Whether Schedules, the Schedule tab, is on for every Popkin (L2-077, ADR 0023).')
-param schedules bool = false
-
 @description('The staff email (@popkin.app) of the admin app\'s first Owner (L2-078 AC1, ADR 0024); empty adds nobody, so nobody can sign in to the admin app.')
 param adminFirstOwner string = ''
-@description('Whether Plan, the Plan tab, is on for every Popkin (L2-077, ADR 0023).')
-param plan bool = false
 
 @description('Azure SQL takes no new servers in some regions (East US 2 among them); the nearest that does.')
 param sqlLocation string = 'centralus'
@@ -259,10 +254,8 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'App__Origin', value: appOrigin }
             { name: 'Invites__BaseUrl', value: '${appOrigin}/i' }
             { name: 'Features__PhoneSignIn', value: string(phoneSignIn) }
-            { name: 'Features__Schedules', value: string(schedules) }
             { name: 'Admin__Origin', value: adminOrigin }
             { name: 'Admin__FirstOwner', value: adminFirstOwner }
-            { name: 'Features__Plan', value: string(plan) }
           ])
           resources: { cpu: json('0.5'), memory: '1Gi' }
           probes: [

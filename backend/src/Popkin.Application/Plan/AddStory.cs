@@ -16,7 +16,7 @@ public sealed class AddStoryCommandHandler(
 {
     public async Task<StoryDto> Handle(AddStoryCommand request, CancellationToken cancellationToken)
     {
-        features.Require(Feature.Plan);
+        features.Require(Feature.Plan, request.PopkinId);
         // Nothing new is added to a Popkin that has wrapped up (L2-069 AC8).
         var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
         var title = StoryFields.Title(request.Title);

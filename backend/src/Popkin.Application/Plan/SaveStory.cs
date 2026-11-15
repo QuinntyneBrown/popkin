@@ -17,7 +17,7 @@ public sealed class SaveStoryCommandHandler(
 {
     public async Task<StoryDto> Handle(SaveStoryCommand request, CancellationToken cancellationToken)
     {
-        features.Require(Feature.Plan);
+        features.Require(Feature.Plan, request.PopkinId);
         // A wrapped-up Popkin's plan is read only (L2-070 AC7).
         var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
         var title = StoryFields.Title(request.Title);

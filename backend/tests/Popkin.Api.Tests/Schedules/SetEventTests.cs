@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Popkin.Api.Tests.Support;
+using Popkin.Domain;
 
 namespace Popkin.Api.Tests.Schedules;
 
@@ -45,7 +46,11 @@ public sealed class SetEventTests
     public async Task The_header_carries_the_event_while_Schedules_is_on(string schedules)
     {
         using var api = new ApiFactory();
-        api.Settings["Features:Schedules"] = schedules;
+        if (schedules == "false")
+        {
+            await api.SwitchFeatureAsync(Feature.Schedules, FeatureMode.Off);
+        }
+
         api.Clock.SetUtcNow(Wednesday);
         var lakeside = await api.StartLakesideAsync();
         await api.SetEventAsync(lakeside.Id, "Cabin week", new DateOnly(2027, 2, 15), new DateOnly(2027, 2, 19));
@@ -141,7 +146,7 @@ public sealed class SetEventTests
     public async Task While_Schedules_is_off_the_event_is_not_set()
     {
         using var api = new ApiFactory();
-        api.Settings["Features:Schedules"] = "false";
+        await api.SwitchFeatureAsync(Feature.Schedules, FeatureMode.Off);
         var lakeside = await api.StartLakesideAsync();
 
         var response = await lakeside.Host.SendAsync(EventRequest("PUT", lakeside.Id));

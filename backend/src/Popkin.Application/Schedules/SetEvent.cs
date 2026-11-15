@@ -19,7 +19,7 @@ public sealed class SetEventCommandHandler(
     public async Task<EventDto> Handle(SetEventCommand request, CancellationToken cancellationToken)
     {
         // The switch, then who may ask and whether the Popkin is open, then what was asked.
-        features.Require(Feature.Schedules);
+        features.Require(Feature.Schedules, request.PopkinId);
         var (popkin, _) = await guard.RequireHostAsync(request.PopkinId, cancellationToken);
         var label = request.Label?.Trim() ?? string.Empty;
         if (label.Length is 0 or > PopkinRules.MaxEventLabelLength)
@@ -52,7 +52,7 @@ public sealed class RemoveEventCommandHandler(IAppDbContext db, IFeatureSwitches
 {
     public async Task Handle(RemoveEventCommand request, CancellationToken cancellationToken)
     {
-        features.Require(Feature.Schedules);
+        features.Require(Feature.Schedules, request.PopkinId);
         var (popkin, _) = await guard.RequireHostAsync(request.PopkinId, cancellationToken);
         popkin.RemoveEvent();
         await db.SaveChangesAsync(cancellationToken);

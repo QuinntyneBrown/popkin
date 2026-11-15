@@ -16,7 +16,7 @@ public sealed class MoveStoryCommandHandler(
 {
     public async Task<StoryDto> Handle(MoveStoryCommand request, CancellationToken cancellationToken)
     {
-        features.Require(Feature.Plan);
+        features.Require(Feature.Plan, request.PopkinId);
         // A wrapped-up Popkin's plan is read only (L2-070 AC7).
         var (popkin, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
         var column = StoryFields.Column(request.Column);

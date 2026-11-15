@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Time.Testing;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Realtime;
@@ -64,12 +65,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Invites:BaseUrl", "https://popk.in/");
         // Phone sign-in is on for every test but those of its switch (ADR 0023).
         builder.UseSetting("Features:PhoneSignIn", "true");
-        // Schedules is on for every test but those of its switch (ADR 0023).
-        builder.UseSetting("Features:Schedules", "true");
         // The first Owner of the admin app (L2-078 AC1, L2-119 AC9).
         builder.UseSetting("Admin:FirstOwner", "owner@popkin.app");
-        // Plan is on for every test but those of its switch (ADR 0023).
-        builder.UseSetting("Features:Plan", "true");
         foreach (var (key, value) in Settings)
         {
             builder.UseSetting(key, value);
@@ -98,6 +95,23 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Email));
         });
+    }
+
+    /// <summary>
+    /// Plan and Schedules are on for everyone in every test but those of their switches, as
+    /// `popkin seed` sets them locally (ADR 0024).
+    /// </summary>
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var host = base.CreateHost(builder);
+        using var scope = host.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        foreach (var feature in new[] { Domain.Feature.Plan, Domain.Feature.Schedules })
+        {
+            db.FeatureSettings.Add(Domain.FeatureSetting.Start(feature, Domain.FeatureMode.Everyone, null, "Popkin", Clock.GetUtcNow()));
+        }
+        db.SaveChanges();
+        return host;
     }
 
     /// <summary>A client on HTTPS that sends what a same-origin browser request sends.</summary>

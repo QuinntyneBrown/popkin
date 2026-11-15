@@ -128,14 +128,18 @@ values in the apex's TXT record set and the two DKIM CNAMEs. Two steps are done 
 | `Communication:EmailSender` | API | Email codes and crew invites are not sent, as above. `DoNotReply@popkin.community` once the domain is checked |
 | `Communication:SmsSender` | API | Phone codes and crew invites are not sent, as above. The toll-free number, as `+1…` |
 | `Features:PhoneSignIn` | API | Sign-up and sign-in offer an email alone and a phone code is refused with 400 `channel_not_offered` (L2-084, [ADR 0023](adr/0023-features-switched-on-by-a-setting.md)). `true` once `Communication:SmsSender` sends texts: set `phoneSignIn` to `true` in `infra/main.bicep` and commit |
-| `Features:Schedules` | API | Schedules: the Schedule tab, time off, this week and the event (L2-072 to L2-075, L2-085). Off unless `true`: no Schedule tab, and every Schedules request is refused with 404 `feature_off`, keeping its data (L2-077, [ADR 0023](adr/0023-features-switched-on-by-a-setting.md)). Read at each request. Set `schedules` to `true` in `infra/main.bicep` and commit to switch it on |
 | `Admin:FirstOwner` | API | The admin app has no admin, so nobody can sign in to it. The staff email of the first Owner (L2-078 AC1); the API adds them as an Owner at each start while they are not an admin (L2-119 AC9), and every other admin is added in the admin app. An email that is already an admin's is left as it is ([ADR 0024](adr/0024-admins-moderation-and-switches-in-the-database.md)). Set `adminFirstOwner` in `infra/main.bicep` and commit |
 | `Admin:Origin` | API | The admin invite links to `https://admin.popkin.community`, and a client that sends no fetch metadata cannot change anything from the admin app. The admin app's origin, named in the email that tells a new admin they can sign in (L2-119 AC2) and accepted as same-site for `/api/admin` only; `infra/main.bicep` sets it to `https://admin.<domain>` |
-| `Features:Plan` | API | Plan: the Plan tab, the plan board, its stories and the burn-down (L2-068 to L2-071, L2-075). Off unless `true`: no Plan tab, and every Plan request is refused with 404 `feature_off`, keeping its data (L2-077, [ADR 0023](adr/0023-features-switched-on-by-a-setting.md)). Read at each request. Set `plan` to `true` in `infra/main.bicep` and commit to switch it on |
 | `Communication:ClientId` | API | The API signs in to Azure Communication Services with `DefaultAzureCredential` (`az login` on a developer's machine). The client ID of `id-popkin` |
 | `Proxy:KnownProxies`, `Proxy:KnownNetworks` (not built) | API | Every person shares the proxy's address and one allowance of 10 codes per 10 minutes, and the HTTPS redirect can loop ([Abuse limits](detailed-designs/security/abuse-limits/README.md)) |
 | `DataProtection:KeysPath` (not built) | API | The session cookie's keys die with the container, and every restart signs everyone out ([Sessions](detailed-designs/accounts/sessions/README.md)) |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` (not built) | API, Worker | Nothing is exported; the console log is all there is ([ADR 0012](adr/0012-opentelemetry.md)) |
+
+Plan and Schedules are no longer settings: an Owner switches them in the admin app (Features,
+L2-076, [ADR 0024](adr/0024-admins-moderation-and-switches-in-the-database.md)), and the API
+reads the switches from the database within 30 seconds. A deployed system starts with every
+feature off. `Features:Schedules` and `Features:Plan` are retired; `popkin seed` turns both on
+for everyone locally.
 
 Codes and crew invites are sent by Azure Communication Services
 ([ADR 0021](adr/0021-codes-and-invites-by-azure-communication-services.md)); a channel whose

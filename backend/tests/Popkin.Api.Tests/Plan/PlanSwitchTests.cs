@@ -2,11 +2,12 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Popkin.Api.Tests.Support;
+using Popkin.Domain;
 
 namespace Popkin.Api.Tests.Plan;
 
 /// <summary>
-/// The Plan switch, `Features:Plan` (ADR 0023): the header tells the app whether the Plan tab
+/// The Plan switch (ADR 0024): the header tells the app whether the Plan tab
 /// shows, and while it is off every Plan request is refused with 404 `feature_off`
 /// (L2-068 AC1, L2-077 AC1, AC3).
 /// </summary>
@@ -32,7 +33,7 @@ public sealed class PlanSwitchTests
     public async Task While_Plan_is_off_the_header_says_so_and_the_board_is_refused()
     {
         using var api = new ApiFactory();
-        api.Settings["Features:Plan"] = "false";
+        await api.SwitchFeatureAsync(Feature.Plan, FeatureMode.Off);
         var lakeside = await api.StartLakesideAsync();
 
         var header = await lakeside.Host.GetFromJsonAsync<JsonElement>($"/api/popkins/{lakeside.Id}");
@@ -49,7 +50,7 @@ public sealed class PlanSwitchTests
     public async Task While_Plan_is_off_a_stranger_learns_only_that_it_is_off()
     {
         using var api = new ApiFactory();
-        api.Settings["Features:Plan"] = "false";
+        await api.SwitchFeatureAsync(Feature.Plan, FeatureMode.Off);
         var lakeside = await api.StartLakesideAsync();
         var stranger = api.CreateBrowserClient();
         await stranger.SignUpAsync(api, "Joel Ferreira", "(415) 555-0123");

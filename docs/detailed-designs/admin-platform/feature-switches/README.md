@@ -18,7 +18,7 @@ Today Schedules is switched by the API setting `Features:Schedules`, read at eac
 [Schedules switch](../../schedules/schedules-switch/README.md)). The switch is on or off for every
 Popkin at once. This design moves Plan and Schedules into the database with the three modes,
 behind the same `IFeatureSwitches` interface, now asked per Popkin
-([ADR 0024](../../../adr/0024-admins-moderation-and-switches-in-the-database.md), proposed). Phone sign-in
+([ADR 0024](../../../adr/0024-admins-moderation-and-switches-in-the-database.md), accepted). Phone sign-in
 (`Features:PhoneSignIn`) stays an API setting under ADR 0023: it waits on a verified phone
 number, not on an admin's decision, and is not a per-Popkin feature.
 
@@ -82,17 +82,20 @@ the same rules when it is.
   connection and try again."; L2-087 AC5 asks for "That didn't go through" and "Nothing has
   changed. Your reason is kept; try again." The requirement stands and the mock changes.
 - **"Chosen Popkins" with none chosen.** `feature-chosen` names the Popkins that keep the
-  feature. When the chosen list is empty, the dialog's copy is `<TO SUPPLY>`; the API accepts the
+  feature. When the chosen list is empty, the dialog says "No Popkin is chosen yet, so {feature}
+  is on in no Popkin until you add one. Everyone else stops seeing the {tab} tab within a minute;
+  nothing is deleted." (settled with the design's default, journey 23); the API accepts the
   change and the feature is then on in no Popkin.
 - **Removing a chosen Popkin.** "Remove {Popkin}" has no dialog in the mocks, so it takes no
-  reason and asks nothing. Whether it confirms first is `<TO SUPPLY>`.
+  reason and asks nothing; it does not confirm first (settled, journey 23). A toast says
+  "{Popkin} no longer has {feature}".
 - **A switch never changed.** Before an Owner first sets a switch, it has no "{Setting} since
-  {date} by {admin}" line; that line's copy for a switch with no history is `<TO SUPPLY>`.
+  {date} by {admin}" line; the panel leaves the line out (settled, journey 23).
 - **ADR 0016.** ADR 0016 has `PopkinHub` send `FeatureSwitched` to every connection so open
   screens change. The shared real-time rules send nothing to all connections (L2-051). This
   design follows the rule: open screens read the switch by polling every 60 seconds, and no hub
   event is added. [ADR 0024](../../../adr/0024-admins-moderation-and-switches-in-the-database.md)
-  (proposed) records the same answer and replaces ADR 0016's on/off `FeatureSwitch` and
+  (accepted) records the same answer and replaces ADR 0016's on/off `FeatureSwitch` and
   `FeatureSwitchChange` with `FeatureSetting`, `FeatureChosenPopkin` and the shared audit log.
 
 ### API (admin)
@@ -117,8 +120,8 @@ Every endpoint is on `AdminFeaturesController`, under
   `role_not_allowed`; `404` `feature_popkin_not_chosen`. Data of the Popkin is kept (L2-077 AC8).
 - `GET /api/admin/features/{feature}/popkins/search?q={text}` — any admin. Live Popkins whose
   name contains the text or whose invite code equals it, ignoring case: `FeaturePopkinMatchDto[]`
-  (`popkinId`, `name`, `emoji`, `colour`, `inviteCode`, `alreadyOn`). At most `<TO SUPPLY>`
-  matches. An empty list is "No live Popkin matches" (L2-076 AC6).
+  (`popkinId`, `name`, `emoji`, `colour`, `inviteCode`, `alreadyOn`). At most 20 matches
+  (`SearchFeaturePopkinsQueryHandler.MaxMatches`, settled in journey 23). An empty list is "No live Popkin matches" (L2-076 AC6).
 
 ### API (Popkin web app)
 
@@ -163,12 +166,12 @@ Every endpoint is on `AdminFeaturesController`, under
   look, and the count of live Popkins.
 - **`ChangeFeatureModeCommand`** / **`ChangeFeatureModeCommandHandler`** — calls
   `IAdminGuard.RequireAsync(AdminAction.ChangeFeature)` (`403` `role_not_allowed`), validates the
-  optional reason with `ReasonRules`, upserts `FeatureSetting`, calls `IAuditLog.Record` with
-  `AuditAction.ChangeFeature`, `TargetKind.Feature`, the reason and `Details` `{ old, new, chosen:
+  optional reason with `ReasonRules`, upserts `FeatureSetting`, calls `IAuditLog.RecordAsync` with
+  `AuditAction.TurnedFeatureOff`, `TurnedFeatureOnForEveryone` or `LimitedFeatureToChosen`, `TargetKind.Feature`, the reason and `Details` `{ from, to, chosen:
   [{ id, name }] }`, saves once, then calls `IPlatformSnapshot.Invalidate()` (L2-076 AC11).
 - **`AddFeaturePopkinCommandHandler`**, **`RemoveFeaturePopkinCommandHandler`** — the same guard,
-  reason rules and single save; audit actions `AuditAction.AddFeaturePopkin` and
-  `AuditAction.RemoveFeaturePopkin`, `Details` `{ feature, popkin: { id, name } }`. Adding refuses
+  reason rules and single save; audit actions `AuditAction.AddedFeaturePopkin` and
+  `AuditAction.RemovedFeaturePopkin`, `Details` `{ feature, popkin: { id, name } }`. Adding refuses
   a Popkin that is not `Active`.
 - **`SearchFeaturePopkinsQueryHandler`** — the live-Popkin search of the add dialog.
 - **What happens to `Features:Schedules`** — the setting is retired with this design. A feature
@@ -196,7 +199,7 @@ Every endpoint is on `AdminFeaturesController`, under
   `pk-dialog` with `pk-reason-field` marked optional (L2-087 AC3) and `ActionDialogState` (idle →
   busy → failed, the reason kept). `AddFeaturePopkinDialog` composes `pk-search-field` and a pick
   list of live Popkins; a Popkin with `alreadyOn` is marked and cannot be picked.
-- **`AdminFeaturesStore`** (`frontend/projects/api/src/lib/admin/platform/`) — loads, holds
+- **`AdminFeaturesStore`** (`frontend/projects/api/src/lib/api/admin/platform/`) — loads, holds
   `loading | ready | failed`, applies a saved `AdminFeatureDto` in place, and reports the toast.
   Unit tested (ADR 0011).
 - **`features-text.ts`** (api library) — "On in all {n} live Popkins.", "On in {n} chosen Popkins
