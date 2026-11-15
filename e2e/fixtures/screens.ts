@@ -1257,6 +1257,7 @@ export const screenStates: ScreenState[] = [
   { key: 'planBoardEmpty', ...planStates.planBoardEmpty, regions: planEmptyRegions },
   { key: 'planBoardError', ...planStates.planBoardError, regions: planEmptyRegions },
   { key: 'planBoardOff', ...planStates.planBoardOff, regions: planEmptyRegions },
+  { key: 'planBoardReadOnly', ...planStates.planBoardReadOnly, regions: planBoardRegions },
   { key: 'newStory', ...planStates.newStory, regions: newStoryRegions },
   { key: 'newStoryBusy', ...planStates.newStoryBusy, regions: newStoryRegions },
   { key: 'newStoryInvalid', ...planStates.newStoryInvalid, regions: newStoryRegions },

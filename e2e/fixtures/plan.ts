@@ -374,6 +374,13 @@ export async function thePlanAsSam(page: Page): Promise<void> {
   });
 }
 
+/** The mocks' board in a Popkin that has wrapped up: readable, and nobody can change it (L2-070 AC7). */
+export async function thePlanWrappedUp(page: Page): Promise<void> {
+  await maraWithAPlan(page, (_plan, home) => {
+    home.popkin.status = 'WrappedUp';
+  });
+}
+
 /** A Popkin with no stories yet, and so no sprint (L2-068 AC9). */
 export async function thePlanEmpty(page: Page): Promise<void> {
   await maraWithAPlan(page, (plan) => {

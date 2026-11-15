@@ -12,6 +12,7 @@ import {
   thePlanFailing,
   thePlanLoading,
   thePlanOff,
+  thePlanWrappedUp,
 } from './plan';
 
 /*
@@ -31,6 +32,7 @@ export const planStates = {
   planBoardEmpty: { before: thePlanEmpty },
   planBoardError: { before: thePlanFailing },
   planBoardOff: { before: thePlanOff },
+  planBoardReadOnly: { before: thePlanWrappedUp },
   newStory: { before: theMockPlan, app: async (page) => void (await openNewStory(page)) },
   newStoryBusy: {
     before: theMockPlan,

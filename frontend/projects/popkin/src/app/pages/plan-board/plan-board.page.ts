@@ -14,6 +14,7 @@ import { NewStoryData, NewStoryDialog } from '../../dialogs/new-story/new-story.
 import { StoryClosed, StoryData, StoryDialog } from '../../dialogs/story/story.dialog';
 import {
   AppScreen,
+  Banner,
   Board,
   BoardColumn,
   Button,
@@ -29,12 +30,14 @@ import {
 
 /**
  * The plan board (L2-068): the first view of the Plan tab, four columns of stories and the
- * sprint's state.
+ * sprint's state. A wrapped-up Popkin's board is read only: no card opens and there is no
+ * "New story" (L2-070 AC7).
  */
 @Component({
   selector: 'pk-plan-board-page',
   imports: [
     AppScreen,
+    Banner,
     Board,
     BoardColumn,
     Button,
@@ -62,6 +65,10 @@ export class PlanBoardPage {
   private readonly dialog = inject(Dialog);
 
   /** "Back to {Popkin name}" while Plan is off (L2-077 AC2). */
+  /** Nobody can change the plan of a Popkin that has wrapped up (L2-070 AC7). */
+  protected readonly readOnly = this.frame.wrappedUp;
+  /** Ready, and open to change: "New story" shows (L2-069). */
+  protected readonly canAdd = computed(() => this.store.state() === 'ready' && !this.readOnly());
   protected readonly home = computed(() => `/p/${this.popkinId()}`);
   protected readonly views = computed(() => [
     { label: 'Board', link: `/p/${this.popkinId()}/plan`, current: true },

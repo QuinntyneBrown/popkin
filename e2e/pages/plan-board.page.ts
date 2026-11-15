@@ -44,6 +44,8 @@ export class PlanBoardPage {
   readonly empty: Locator;
   readonly emptyText: Locator;
   readonly starters: Locator;
+  /** "This Popkin has wrapped up." over the board of a wrapped-up Popkin (L2-070 AC7). */
+  readonly wrappedUp: Locator;
   readonly loading: Locator;
   readonly error: Locator;
   readonly tryAgain: Locator;
@@ -56,6 +58,7 @@ export class PlanBoardPage {
   readonly currentTab: Locator;
 
   constructor(readonly page: Page) {
+    this.wrappedUp = page.getByRole('status').filter({ hasText: 'This Popkin has wrapped up.' });
     this.root = page.locator('body[data-page="plan-board"]');
     this.header = page.locator('header.plan-header');
     this.heading = page.getByRole('heading', { level: 1, name: 'Our plan' });
