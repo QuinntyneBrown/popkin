@@ -180,9 +180,9 @@ viewport width: the styles of `pk-board` and `pk-plan-header` place everything.
 - The board's `today` is the server's UTC date; the web app sends none, because a day of Plan is
   a calendar day in UTC (L2-068), unlike the Schedule tab's.
 - The sprint starts with the first story wherever it goes, Backlog included.
-- One sprint per Popkin; editing it and further sprints are deferred (known gap 80).
+- One sprint per Popkin; editing it and further sprints are deferred (known gap 98).
 - `commentCount` is always 0, and no card or dialog shows a count, until comments exist (known gap
-  79).
+  97).
 - `PlanChanged` carries the version only: the board is read again whole, which is a single read
   of at most a few hundred rows, rather than patched from the event.
 
