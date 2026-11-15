@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Chat;
 using Popkin.Application.Invites;
+using Popkin.Application.Schedules;
 using Popkin.Application.Security;
 using Popkin.Domain;
 
@@ -16,7 +17,8 @@ public sealed record PopkinViewerDto(Guid MembershipId, string FirstName);
 /// first few as avatars, who is reading and how many messages are new to them, in Everyone and
 /// in their direct messages of the Popkin (L2-019 AC1, AC7, L2-022 AC3); and, for the read-only states, when it wrapped up, whether its album is
 /// kept, and when its photos go or went (L2-045); the version that orders `PopkinChanged` (L2-020); and
-/// whether Schedules is on, which shows the Schedule tab (L2-072 AC1, L2-077 AC1).
+/// whether Schedules is on, which shows the Schedule tab (L2-072 AC1, L2-077 AC1), and the event while it
+/// is, which "Popkin settings" shows (L2-085 AC1).
 /// </summary>
 public sealed record PopkinHomeDto(
     Guid Id,
@@ -36,7 +38,8 @@ public sealed record PopkinHomeDto(
     DateTimeOffset? PhotosRemoveAt,
     DateTimeOffset? PhotosRemovedAt,
     long Version,
-    bool Schedules);
+    bool Schedules,
+    EventDto? Event);
 
 /// <summary>The header of a Popkin's home, for any of its members (L2-019, L2-051 AC1).</summary>
 public sealed record GetPopkinHomeQuery(Guid PopkinId) : IRequest<PopkinHomeDto>;
@@ -74,6 +77,8 @@ public sealed class GetPopkinHomeQueryHandler(IAppDbContext db, IMembershipGuard
             popkin.PhotosRemoveAt,
             popkin.PhotosRemovedAt,
             popkin.Version,
-            features.IsOn(Feature.Schedules));
+            features.IsOn(Feature.Schedules),
+            // While Schedules is off nothing of it shows; the event is kept (L2-077 AC5).
+            features.IsOn(Feature.Schedules) ? EventDto.Of(popkin) : null);
     }
 }

@@ -19,6 +19,17 @@
       >
         Change how long it lasts
       </button>
+      @if (data.eventHint) {
+        <button
+          pk-menu-item
+          type="button"
+          icon="calendar"
+          [hint]="data.eventHint"
+          (click)="choose('event')"
+        >
+          Set the event
+        </button>
+      }
     }
     <button pk-menu-item type="button" icon="qr" hint="QR code and link" (click)="choose('invite')">
       Invite people

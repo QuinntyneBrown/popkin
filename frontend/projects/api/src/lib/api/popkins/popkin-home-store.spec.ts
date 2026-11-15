@@ -42,6 +42,7 @@ const home: PopkinHomeView = {
   unreadCount: 3,
   version: 1,
   schedules: false,
+  event: null,
 };
 const mara: MemberView = {
   membershipId: 'm-mara',
@@ -476,6 +477,20 @@ describe('PopkinHomeStore', () => {
       store.open('p');
       expect(store.schedule().shown).toBe(false);
       expect(store.state()).toBe('ready');
+    });
+  });
+
+  describe('the event (L2-085)', () => {
+    it('holds the event the Host has just saved, and the one removed', () => {
+      api.home = { ...home, schedules: true };
+      store.open('p');
+      const event = { label: 'Lake weekend', firstDay: '2026-09-25', lastDay: '2026-09-27' };
+
+      store.applyEvent(event);
+      expect(store.popkin()?.event).toEqual(event);
+
+      store.applyEvent(null);
+      expect(store.popkin()?.event).toBeNull();
     });
   });
 });

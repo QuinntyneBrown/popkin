@@ -96,3 +96,4 @@ export * from './lib/models/this-week';
 export * from './lib/api/schedule/this-week-text';
 export * from './lib/api/schedule/this-week-store';
 export * from './lib/api/schedule/my-hours';
+export * from './lib/api/schedule/event-text';

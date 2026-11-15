@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { SetTimeOffBody, TimeOffWeekView } from '../../models/schedule';
+import { Observable, map } from 'rxjs';
+import { EventView, SetTimeOffBody, TimeOffWeekView } from '../../models/schedule';
 import { ScheduleSummaryView, SetHoursBody, ThisWeekView } from '../../models/this-week';
 
 /**
@@ -37,6 +37,16 @@ export interface ScheduleApi {
 
   /** The home's Schedule section (L2-075 AC2): seven days from `from`, the viewer's today. */
   summary(popkinId: string, from: string): Observable<ScheduleSummaryView>;
+
+  /**
+   * The Host sets the event (L2-085 AC4), and it answers the event as saved. Refused with 403 to
+   * a member who is not the Host, 409 `popkin_wrapped_up` once wrapped up, and 400
+   * `invalid_event` for a rule broken.
+   */
+  setEvent(popkinId: string, event: EventView): Observable<EventView>;
+
+  /** The Host removes the event (L2-085 AC5); it answers null, the event there is now. */
+  removeEvent(popkinId: string): Observable<null>;
 }
 
 export const SCHEDULE_API = new InjectionToken<ScheduleApi>('ScheduleApi');
@@ -70,6 +80,14 @@ export class HttpScheduleApi implements ScheduleApi {
     return this.http.get<ScheduleSummaryView>(`${schedule(popkinId)}/summary`, {
       params: { from },
     });
+  }
+
+  setEvent(popkinId: string, event: EventView): Observable<EventView> {
+    return this.http.put<EventView>(`/api/popkins/${popkinId}/event`, event);
+  }
+
+  removeEvent(popkinId: string): Observable<null> {
+    return this.http.delete<void>(`/api/popkins/${popkinId}/event`).pipe(map(() => null));
   }
 }
 

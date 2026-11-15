@@ -23,6 +23,7 @@ import { POPKINS_API } from './popkins-api';
 import { timeLeft } from './time-left';
 import { WrapUpWatch } from '../wrap-up/wrap-up-watch';
 import { PopkinSettingsView } from '../../models/popkin';
+import { EventView } from '../../models/schedule';
 
 /** One block of the home, loaded and failing on its own (L2-019 AC8, AC9). */
 export interface Section<T> {
@@ -163,6 +164,11 @@ export class PopkinHomeStore {
     this.now.set(new Date());
     this.popkin.set(changed);
     this.watch.look(changed.id, changed.endsAt);
+  }
+
+  /** The event the Host has just saved or removed (L2-085 AC4, AC5): Popkin settings shows it. */
+  applyEvent(event: EventView | null): void {
+    this.popkin.update((popkin) => (popkin ? { ...popkin, event } : popkin));
   }
 
   retrySection(section: HomeSection): void {

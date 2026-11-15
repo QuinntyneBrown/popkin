@@ -1,6 +1,7 @@
 import { MessageAuthorView } from './chat';
 import { AvatarView } from './invite';
 import { PopkinColour, PopkinLength } from './popkin';
+import { EventView } from './schedule';
 
 /** The header of a Popkin's home (L2-019 AC1). */
 export interface PopkinHomeView {
@@ -31,6 +32,8 @@ export interface PopkinHomeView {
   version: number;
   /** Whether Schedules is on, which shows the Schedule tab (L2-072 AC1, L2-077 AC1). */
   schedules: boolean;
+  /** The event the Host set (L2-085), or null; always null while Schedules is off. */
+  event: EventView | null;
 }
 
 /** The latest of the Everyone thread, oldest first, without the notes the system writes. */

@@ -10,13 +10,18 @@ export interface PopkinSettingsData {
   host: boolean;
   /** When it wraps up, under "Change how long it lasts": "Wraps up Sun, 6 pm". */
   lengthHint: string;
+  /**
+   * The event under "Set the event", "Lake weekend · Sep 25 – 27" or "Not set"; undefined
+   * hides the row: Schedules is off (L2-020 AC1, L2-085).
+   */
+  eventHint?: string;
 }
 
-export type PopkinSetting = 'edit' | 'length' | 'invite' | 'wrap-up' | 'leave';
+export type PopkinSetting = 'edit' | 'length' | 'event' | 'invite' | 'wrap-up' | 'leave';
 
 /**
  * Popkin settings (L2-020 AC1, AC2): "Edit name and look", "Change how long it lasts",
- * "Invite people" and "Wrap up" for the Host; "Invite people" and "Leave this Popkin" for any
+ * "Set the event" while Schedules is on, "Invite people" and "Wrap up" for the Host; "Invite people" and "Leave this Popkin" for any
  * other member. It closes with the one chosen.
  */
 @Component({
