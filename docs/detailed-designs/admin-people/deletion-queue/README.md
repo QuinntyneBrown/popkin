@@ -32,8 +32,8 @@ The page is `docs/mocks/admin/pages/deletions/`, route `/deletions`, route data
   `status--bad` "2 days" within 7 days, else "in 14 days" as caption) and "Cancel deletion"
   (`btn--quiet btn--sm`) (L2-099 AC1).
 - `viewer.html` — "Cancel deletion" disabled, "Viewer admins can’t do this" (L2-099 AC5); a
-  Support admin sees "Support admins can’t do this", the wording of
-  `docs/mocks/admin/pages/person/support.html`.
+  Support admin sees "Only Owners can do this" ([Admin roles](../../admin-access/admin-roles/README.md));
+  `docs/mocks/admin/pages/person/support.html` draws "Support admins can’t do this".
 - `cancelled.html` — the row gone; the toast "Ruth Lindqvist’s account is kept", "They can sign in
   again." (L2-099 AC4).
 - `empty.html` — "No accounts waiting", "When someone deletes their account, or an admin starts a

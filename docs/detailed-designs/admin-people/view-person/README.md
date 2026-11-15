@@ -42,8 +42,9 @@ The page is `docs/mocks/admin/pages/person/`, route `/people/:personId`, route d
   - **Their data** — "Build a download of everything Mara has posted, for a subject access
     request." and "Export data".
   - **Delete account** — the hold and "Start deletion" (`btn--danger-text`).
-- `support.html` — a Support admin: "Start deletion" disabled with "Support admins can’t do this"
-  as its tooltip and hidden text (L2-098 AC3, L2-086 AC3).
+- `support.html` — a Support admin: "Start deletion" switched off with a reason as its tooltip
+  and description (L2-098 AC3, L2-086 AC3). The mock writes "Support admins can’t do this"; the
+  console says "Only Owners can do this" ([Admin roles](../../admin-access/admin-roles/README.md)).
 - `viewer.html` — a Viewer: every action disabled with "Viewer admins can’t do this" (L2-086 AC2).
 - `suspended.html`, `suspended-toast.html`, `restored.html` — see
   [Suspend a person and lift it](../suspend-person/README.md).

@@ -177,7 +177,17 @@ Each design follows the source named below and marks the conflict in its own REA
   failure copy and the hint of the reason field (L2-087), the settings list (L2-118), a long call
   flagged by colour alone (L2-112 AC2), charts without their figures as text (L2-091 AC4), a job
   log that names an album (L2-113 AC2), the "+n days" toggles where L2-105 asks for a radio group,
-  and hosted Popkins that "pass to the longest-standing member" where L2-098 wraps them up.
+  and hosted Popkins that "pass to the longest-standing member" where L2-098 wraps them up. Also:
+  the Popkins "Show" filter drawn as tabs where it is a radio group (L2-102); the Reports mock
+  without the context messages, the direct-message state, a photo's caption or an experience's
+  picture (L2-109); the reason field's failure copy and hint in the moderation and Popkin dialogs
+  (L2-087); a "Region" row on a Popkin and on a live call, and Health figures (database CPU,
+  replica lag, storage, reconnect rate, region, on-call name), which no requirement asks for and
+  the API does not keep; the more-time toast's "The Host has been told", which no requirement
+  does; an "In-app request" data request, which nothing in the Popkin app makes; and switched-off
+  actions drawn `disabled` with a `title`, where [Admin roles](admin-access/admin-roles/README.md)
+  keeps them focusable with `aria-disabled` so the reason is reachable (L2-086 AC2, WCAG), as
+  journey 24 built them.
 
 ## Subsystems and features
 
@@ -403,7 +413,7 @@ or design that settled it.
 | 82 | Health's thresholds for Degraded and Down, its check timeouts and the figures each card shows ([Health](admin-overview/health/README.md)) | Health | |
 | 83 | The 30-day hold of a deletion: the built purge erases within a day, L2-099 holds 30 days and erases at 03:00 in a time zone not named; what cancelling a deletion restores once memberships are anonymised ([Start a deletion](admin-people/start-deletion/README.md), [The deletion queue](admin-people/deletion-queue/README.md)) | Start a deletion, the deletion queue; changes journey 19 | |
 | 84 | Suspension and sign-in: refusing a code request would disclose that an account exists (L2-006 AC2), so the design refuses at confirmation only ([Suspend a person](admin-people/suspend-person/README.md)) | Suspend a person | |
-| 85 | Mocks the admin designs need and do not have: the Report dialog and "Reported", "Removed by Popkin" in chat, the author's notice, the whole moderation view, the announcement banner in the Popkin app, the suspended-account screen, "This call was ended by Popkin", the removed member's screen, a Popkin that keeps going, and the sign-in's expired, resent and code-limit states; each design names the file it expects | The matching slices (AGENTS.md: a mock before implementation) | |
+| 85 | Mocks the admin designs need and do not have: the Report dialog and "Reported", "Removed by Popkin" in chat, the author's notice, the whole moderation view, the announcement banner in the Popkin app, the suspended-account screen, "This call was ended by Popkin", the removed member's screen, a Popkin that keeps going, and the sign-in's expired, resent and code-limit states; also "Open moderation view" on a Popkin's page, an end more than a year away (`popkin-extend/too-far`), how the Popkins list goes past its first page and past seven members, a Support admin's page, the person page's "export building" line, the data-request dialog's "Received on" and "How it arrived", and the `contact_taken` copy. An address already an admin's (`admin-add/exists`) and the last Owner's row (`admins/last-owner`) were built in journey 24 with the designs' default copy, recorded in [Admins & roles](admin-access/manage-admins/README.md); their mocks are still to be drawn. Each design names the file it expects | The matching slices (AGENTS.md: a mock before implementation) | |
 | 86 | Where a session's device, place and app version come from (a user-agent parser, a geo-IP provider), and how long a session's address is kept ([A person](admin-people/view-person/README.md)) | A person's Sessions panel | |
 | 87 | An admin's name (no screen asks for it; the design uses the email's local part) and how long an admin session lasts ([Admin sign in](admin-access/admin-sign-in/README.md), [Admins & roles](admin-access/manage-admins/README.md)) | Admin sign in || Settled 15 November 2026 (journey 24, the designs' default): an admin is named by their email's local part (`Admin.Name`) until a screen asks for a name, and an admin session lasts 12 hours (`AdminSession.Lifetime`) |
 | 88 | An erased person's name in the audit log for two years, against the erasure of L2-049; the old and new invite codes in the audit log (L2-107 AC4) against L2-120 AC7 ([Audit log](admin-access/audit-log/README.md), [Reset the invite](admin-popkins/reset-invite/README.md)) | Audit log; Reset the invite | |
@@ -411,11 +421,17 @@ or design that settled it.
 | 90 | A report in a wrapped-up Popkin: L2-108 AC7 offers "Report" there, while L2-045 allows no action in a wrapped-up Popkin ([Report content](moderation/report-content/README.md)) | Report content | |
 | 91 | The invite code's shape: the admin mocks and L2-102 search `PINE-4821`, while the codes issued are 10 random characters (L2-011 AC5) ([Find Popkins](admin-popkins/find-popkins/README.md)) | The no-results copy of Find Popkins | |
 | 92 | The album export part in Limits: an export is one zip today, so it has no current value ([Limits](admin-platform/limits/README.md)) | Limits | |
+| 93 | How a removed member's messages are "marked as from a former member" (L2-106 AC1), when a member who leaves keeps their name on their messages (L2-047) ([Remove a member](admin-popkins/remove-member/README.md)) | Remove a member | |
+| 94 | Whether Live calls lists direct calls; the design lists group calls only ([Live calls](admin-operations/live-calls/README.md)) | Live calls | |
+| 95 | The jobs' periods: Prepare album exports runs every 2 seconds in code, against "every 5 minutes" in L2-114, which would also break L2-046 AC4; the Jobs mock's periods differ from the code's; the Worker's 5-second poll of run requests is the design's proposal ([Jobs](admin-operations/jobs/README.md), [Album exports](admin-operations/album-exports/README.md)) | Jobs | |
+| 96 | Values the admin designs leave `<TO SUPPLY>`: the page size and search delay of People and Popkins; a person export's format, how long a ready export and a sent data request are kept, and whether downloading an export asks for its own reason (L2-100 AC5); how often a colliding invite code is drawn again; each limit's maximum; how a release is named; a banner's default and latest end, how many earlier banners are listed, whether suspended people count in its audience and how two publishes at once are kept apart; whether removing a chosen Popkin is confirmed, the Chosen dialog's copy with none chosen and a never-changed switch's copy; the reports rate limit, the queue's paging, what the moderation view shows of reactions and comments, which reason the author's notice names and the view job's tick; the copy of the Report dialog, the moderation view, the admin invite and code emails and the console's label outside production. Each design marks its own | The matching slices | |
 
 Settled so far:
 
 | Decision | Settled by |
 |---|---|
+| The words of a switched-off admin action | [Admin roles](admin-access/admin-roles/README.md), built in journey 24: "Viewer admins can’t do this" for a Viewer and "Only Owners can do this" otherwise. The people designs' "Support admins can’t do this" (from their mocks) gives way to it |
+| How a switched-off admin action is drawn | [Admin roles](admin-access/admin-roles/README.md), built in journey 24: `aria-disabled`, still focusable, ignoring activation, with the reason as its `title` (tooltip and accessible description) |
 | How many API instances run | [ADR 0009](../adr/0009-one-api-instance.md): one |
 | What the event of time off is, and who sets it | [Set the event](schedules/set-the-event/README.md): a label and a first and last day the Host sets from Popkin settings (L2-085), journey 22 |
 | How Schedules is switched before the admin app exists | [Schedules switch](schedules/schedules-switch/README.md): the API setting `Features:Schedules` behind `IFeatureSwitches` ([ADR 0023](../adr/0023-features-switched-on-by-a-setting.md)); journey 23 moves it into the admin app behind the same interface |
