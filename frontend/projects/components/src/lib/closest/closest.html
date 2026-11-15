@@ -1,0 +1,13 @@
+@for (person of people(); track $index) {
+  <a class="closest__person" [routerLink]="person.link">
+    <span
+      pk-avatar
+      size="64"
+      [name]="person.firstName"
+      [initials]="person.initials"
+      [photo]="person.photo"
+      [attr.data-accent]="person.accent"
+    ></span>
+    <span class="closest__name">{{ person.firstName }}</span>
+  </a>
+}

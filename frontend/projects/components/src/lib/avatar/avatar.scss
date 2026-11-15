@@ -47,6 +47,11 @@
   font-size: var(--font-size-lg);
 }
 
+:host(.avatar--64) {
+  width: var(--space-16);
+  height: var(--space-16);
+}
+
 :host(.avatar--xl) {
   width: var(--space-18);
   height: var(--space-18);

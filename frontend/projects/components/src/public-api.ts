@@ -192,3 +192,5 @@ export * from './lib/settings-list/settings-list';
 export * from './lib/release-note/release-note';
 export * from './lib/health-summary/health-summary';
 export * from './lib/service-card/service-card';
+export * from './lib/contact-list/contact-list';
+export * from './lib/closest/closest';
