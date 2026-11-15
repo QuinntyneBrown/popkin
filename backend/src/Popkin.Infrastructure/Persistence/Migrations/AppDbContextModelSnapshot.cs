@@ -739,6 +739,31 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("PhotoReactions", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.PlanChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("At")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Delta")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PopkinId", "At");
+
+                    b.ToTable("PlanChanges", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.PopkinSpace", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1255,6 +1280,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasOne("Popkin.Domain.Photo", null)
                         .WithMany()
                         .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PlanChange", b =>
+                {
+                    b.HasOne("Popkin.Domain.PopkinSpace", null)
+                        .WithMany()
+                        .HasForeignKey("PopkinId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

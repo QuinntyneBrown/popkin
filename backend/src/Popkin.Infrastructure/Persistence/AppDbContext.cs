@@ -61,6 +61,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Sprint> Sprints => Set<Sprint>();
 
+    public DbSet<PlanChange> PlanChanges => Set<PlanChange>();
+
     /// <summary>The audit log cannot be edited, and an entry is deleted only at two years (L2-120 AC6).</summary>
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {

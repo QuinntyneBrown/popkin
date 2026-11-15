@@ -34,7 +34,12 @@ public sealed record StoryDto(
     DateTimeOffset AddedAt);
 
 /// <summary>How the sprint is going (L2-068 AC7): `Behind` is positive behind, negative ahead.</summary>
-public sealed record PlanProgressDto(int PointsLeft, int Behind, IReadOnlyList<int> Sparkline);
+public sealed record PlanProgressDto(int PointsLeft, int Behind, IReadOnlyList<int> Sparkline)
+{
+    /// <summary>The points left now, how far behind the ideal line, and the end of each day so far (L2-068 AC7).</summary>
+    public static PlanProgressDto Of(PlanHistory history, DateOnly today) =>
+        new(history.PointsLeftAtEndOf(today), history.Behind(today), history.Days(today).Select(d => d.PointsLeft).ToList());
+}
 
 /// <summary>A calendar day is a day in UTC (L2-068).</summary>
 public static class PlanDays
@@ -61,6 +66,31 @@ public static class PlanStories
     }
 
     /// <summary>A story of this Popkin, or 404 `story_not_found`: another Popkin's is not told apart from none.</summary>
+    /// <summary>
+    /// Records a change to the points left, if there is one: the story's points left now minus
+    /// <paramref name="before"/>, its points left before the change (L2-070 AC5, AC6).
+    /// </summary>
+    public static void Record(IAppDbContext db, Story story, int before, DateTimeOffset at) => Record(db, story, before, story.PointsLeft, at);
+
+    /// <summary>Records that a story's points left went from <paramref name="before"/> to <paramref name="after"/>.</summary>
+    public static void Record(IAppDbContext db, Story story, int before, int after, DateTimeOffset at)
+    {
+        if (after != before)
+        {
+            db.PlanChanges.Add(PlanChange.Of(story.PopkinId, story.Id, at, after - before));
+        }
+    }
+
+    /// <summary>The sprint's history of points left, from its changes (L2-070 AC5, AC6).</summary>
+    public static async Task<PlanHistory> HistoryAsync(IAppDbContext db, Sprint sprint, CancellationToken cancellationToken)
+    {
+        var changes = await db.PlanChanges
+            .Where(c => c.PopkinId == sprint.PopkinId)
+            .Select(c => new { c.At, c.Delta })
+            .ToListAsync(cancellationToken);
+        return new PlanHistory(sprint.FirstDay, changes.Select(c => (c.At, c.Delta)).ToList());
+    }
+
     public static async Task<Story> RequireAsync(IAppDbContext db, Guid popkinId, Guid storyId, CancellationToken cancellationToken) =>
         await db.Stories.SingleOrDefaultAsync(s => s.Id == storyId && s.PopkinId == popkinId, cancellationToken)
         ?? throw new ProblemException(404, "story_not_found", "That story isn’t on the board any more.");

@@ -41,6 +41,11 @@ public static class PlanExtensions
         }
 
         db.Stories.Add(story);
+        if (story.PointsLeft != 0)
+        {
+            db.PlanChanges.Add(PlanChange.Of(popkinId, story.Id, story.AddedAt, story.PointsLeft));
+        }
+
         await db.SaveChangesAsync();
         return story.Id;
     }

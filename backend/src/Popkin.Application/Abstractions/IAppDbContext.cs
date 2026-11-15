@@ -60,5 +60,7 @@ public interface IAppDbContext
 
     DbSet<Sprint> Sprints { get; }
 
+    DbSet<PlanChange> PlanChanges { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

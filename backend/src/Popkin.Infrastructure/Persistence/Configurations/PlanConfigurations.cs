@@ -20,6 +20,19 @@ public sealed class StoryConfiguration : IEntityTypeConfiguration<Story>
     }
 }
 
+public sealed class PlanChangeConfiguration : IEntityTypeConfiguration<PlanChange>
+{
+    public void Configure(EntityTypeBuilder<PlanChange> builder)
+    {
+        builder.ToTable("PlanChanges");
+        builder.HasKey(c => c.Id);
+        // The burn-down reads a Popkin's changes in the order they were made (L2-071). The story is
+        // not a key: the row outlives a deleted story.
+        builder.HasIndex(c => new { c.PopkinId, c.At });
+        builder.HasOne<PopkinSpace>().WithMany().HasForeignKey(c => c.PopkinId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 public sealed class SprintConfiguration : IEntityTypeConfiguration<Sprint>
 {
     public void Configure(EntityTypeBuilder<Sprint> builder)

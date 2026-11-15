@@ -27,7 +27,7 @@ public sealed class GetPlanBoardQueryHandler(
         return new PlanBoardDto(
             sprint is null ? null : SprintDto.Of(sprint, today),
             stories,
-            null,
+            sprint is null || stories.Count == 0 ? null : PlanProgressDto.Of(await PlanStories.HistoryAsync(db, sprint, cancellationToken), today),
             sprint?.Version ?? 0);
     }
 }

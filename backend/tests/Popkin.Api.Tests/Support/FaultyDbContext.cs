@@ -74,6 +74,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<Sprint> Sprints => inner.Sprints;
 
+    public DbSet<PlanChange> PlanChanges => inner.PlanChanges;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

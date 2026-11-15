@@ -9,7 +9,7 @@ namespace Popkin.Application.Plan;
 /// <summary>Deletes a story, for the person who added it, its owner or the Host (L2-070 AC4).</summary>
 public sealed record DeleteStoryCommand(Guid PopkinId, Guid StoryId) : IRequest;
 
-public sealed class DeleteStoryCommandHandler(IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPopkinNotifier notifier)
+public sealed class DeleteStoryCommandHandler(IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPopkinNotifier notifier, TimeProvider clock)
     : IRequestHandler<DeleteStoryCommand>
 {
     public async Task Handle(DeleteStoryCommand request, CancellationToken cancellationToken)
@@ -25,6 +25,8 @@ public sealed class DeleteStoryCommandHandler(IAppDbContext db, IFeatureSwitches
 
         var sprint = await db.Sprints.SingleAsync(s => s.PopkinId == popkin.Id, cancellationToken);
         db.Stories.Remove(story);
+        // Its points leave the days from now on; the days before still count them.
+        PlanStories.Record(db, story, story.PointsLeft, 0, clock.GetUtcNow());
         sprint.Changed();
         await db.SaveChangesAsync(cancellationToken);
         await notifier.PlanChanged(popkin.Id, sprint.Version);
