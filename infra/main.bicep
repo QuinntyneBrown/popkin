@@ -40,8 +40,8 @@ param phoneSignIn bool = false
 @description('Contacts (L1-029, ADR 0023): true once every Contacts design is built; until then My Popkins offers no Contacts and /api/contacts answers 404 feature_off.')
 param contacts bool = false
 
-@description('The staff email (@popkin.app) of the admin app\'s first Owner (L2-078 AC1, ADR 0024); empty adds nobody, so nobody can sign in to the admin app.')
-param adminFirstOwner string = ''
+@description('The staff email of the admin app\'s first Owner (L2-078 AC1, ADR 0024); empty adds nobody, so nobody can sign in to the admin app.')
+param adminFirstOwner string = 'quinntynebrown@gmail.com'
 
 @description('Azure SQL takes no new servers in some regions (East US 2 among them); the nearest that does.')
 param sqlLocation string = 'centralus'
