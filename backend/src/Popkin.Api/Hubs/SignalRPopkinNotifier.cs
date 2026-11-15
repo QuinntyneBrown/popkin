@@ -59,6 +59,9 @@ public sealed class SignalRPopkinNotifier(
     public Task PopkinChanged(Guid popkinId, PopkinDto popkin) =>
         SendAsync(nameof(IPopkinClient.PopkinChanged), () => Group(popkinId).PopkinChanged(popkinId, popkin));
 
+    public Task ScheduleChanged(Guid popkinId) =>
+        SendAsync(nameof(IPopkinClient.ScheduleChanged), () => Group(popkinId).ScheduleChanged(popkinId));
+
     public Task ParticipantJoined(Guid callId, CallParticipantDto participant) =>
         SendAsync(nameof(IPopkinClient.ParticipantJoined), () => Call(callId).ParticipantJoined(callId, participant));
 

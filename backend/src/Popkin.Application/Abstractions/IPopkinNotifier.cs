@@ -51,6 +51,9 @@ public interface IPopkinNotifier
     /// <summary>The Host changed the Popkin's settings. To every member of the Popkin with a connection open.</summary>
     Task PopkinChanged(Guid popkinId, PopkinDto popkin);
 
+    /// <summary>The Popkin's schedule changed. To every member of the Popkin with a connection open.</summary>
+    Task ScheduleChanged(Guid popkinId);
+
     /// <summary>Someone came onto the call. To the connections on the call.</summary>
     Task ParticipantJoined(Guid callId, CallParticipantDto participant);
 

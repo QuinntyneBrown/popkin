@@ -88,6 +88,12 @@ public interface IPopkinClient
     Task PopkinChanged(Guid popkinId, PopkinDto popkin);
 
     /// <summary>
+    /// A member saved their time off or working hours, or the Host set the event (L2-072 AC11).
+    /// A fact that carries only the Popkin: a screen of Schedule reads its week again.
+    /// </summary>
+    Task ScheduleChanged(Guid popkinId);
+
+    /// <summary>
     /// Someone came onto the call. A fact, sent to the connections on the call; the one who
     /// joined has the participants from the answer to their join.
     /// </summary>

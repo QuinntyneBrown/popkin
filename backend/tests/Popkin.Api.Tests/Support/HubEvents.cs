@@ -36,6 +36,7 @@ public sealed class HubEvents : IAsyncDisposable
         ("Signal", 3),
         ("PopkinWrappedUp", 1),
         ("PopkinChanged", 2),
+        ("ScheduleChanged", 1),
     ];
 
     private readonly object _gate = new();

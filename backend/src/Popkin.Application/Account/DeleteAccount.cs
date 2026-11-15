@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Members;
+using Popkin.Application.Schedules;
 using Popkin.Application.WrapUp;
 using Popkin.Domain;
 
@@ -45,6 +46,7 @@ public sealed class DeleteAccountCommandHandler(
         // The account's own photo stays until the erasure, which deletes it with the rest.
         var avatars = memberships.Select(m => m.PhotoKey).OfType<string>().Where(k => k != person.PhotoKey).Distinct().ToList();
         memberships.ForEach(m => m.Anonymise(now));
+        await MemberSchedules.RemoveAsync(db, memberships.Select(m => m.Id).ToList(), cancellationToken);
 
         var sessions = await db.Sessions.Where(s => s.PersonId == person.Id && s.RevokedAt == null).ToListAsync(cancellationToken);
         sessions.ForEach(s => s.Revoke(now));

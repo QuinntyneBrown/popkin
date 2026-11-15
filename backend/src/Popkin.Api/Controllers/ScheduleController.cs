@@ -1,5 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Popkin.Api.RateLimiting;
 using Popkin.Application.Schedules;
 
 namespace Popkin.Api.Controllers;
@@ -18,4 +20,13 @@ public sealed class ScheduleController(ISender sender) : ControllerBase
         Guid popkinId, [FromQuery] DateOnly? week, [FromQuery] DateOnly? today, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetTimeOffWeekQuery(popkinId, week, today), cancellationToken));
 
+    /// <summary>
+    /// Sets the caller's own time off for a week, Monday to Friday (L2-073), and answers the week.
+    /// Counted with messages.
+    /// </summary>
+    [HttpPut("time-off/{membershipId:guid}")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<TimeOffWeekDto>> SetTimeOff(
+        Guid popkinId, Guid membershipId, SetTimeOffRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SetTimeOffCommand(popkinId, membershipId, request.Week, request.Days), cancellationToken));
 }
