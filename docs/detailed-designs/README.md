@@ -286,7 +286,7 @@ every admin requirement, L2-076 to L2-078 and L2-086 to L2-120.
 ## The admin app
 
 The admin designs share one architecture, recorded in
-[ADR 0024](../adr/0024-admins-moderation-and-switches-in-the-database.md) (Proposed), which
+[ADR 0024](../adr/0024-admins-moderation-and-switches-in-the-database.md) (Accepted), which
 amends [ADR 0016](../adr/0016-admin-app.md):
 
 - **Popkin admin app** — a sixth container, the Angular application `frontend/projects/admin` at
@@ -397,7 +397,7 @@ or design that settled it.
 | 76 | The client's own lines for a photo message with no text read its empty text, not "Photo": the reply bar (`ThreadStore.startReply`), the quote of Message actions, the line a screen reader hears when the message arrives (`announcement`), and the latest line the Chat tab (`ConversationsStore`) and My Popkins (`MyPopkinsStore`) write from `MessageAdded`, until their next read. Message actions also offers Copy for it, which copies nothing and says "Message copied.". The design asks for "Photo" in each and for no Copy; every quote and preview the server answers already reads "Photo" ([Send photos in chat](chat/send-photos-in-chat/README.md), [React to a message](chat/react-to-message/README.md), [Reply to a message](chat/reply-to-message/README.md)) | Journey 13 | Journey 13: `messageLine` reads a photo alone as "Photo" for the reply bar, the announcement, and the latest line the Chat tab and My Popkins write from `MessageAdded`; Message actions quotes it as "Photo" and offers no Copy |
 | 77 | The album's zip packs the display images, at most 2048 px, not the originals that "Save photo" downloads since journey 14 (L2-046 AC4) ([Save a photo](photos/save-photo/README.md), [Recap](wrap-up/recap/README.md)) | None; found in journey 14 | |
 | 78 | Who runs Popkin (its legal name), the address to contact about personal data and the law that governs the Terms. The Terms and the Privacy notice show `<TO SUPPLY: …>` in their place ([Terms and Privacy notice](accounts/legal-pages/README.md)) | The toll-free verification of Popkin's SMS number (ADR 0021) | |
-| 79 | Whether ADR 0024 is accepted: admins in the database, the host-only admin cookie, moderation through reports and a recorded view, switches Off, chosen or everyone | Every admin journey; the moderation view cannot be built under ADR 0016 | |
+| 79 | Whether ADR 0024 is accepted: admins in the database, the host-only admin cookie, moderation through reports and a recorded view, switches Off, chosen or everyone | Every admin journey; the moderation view cannot be built under ADR 0016 | Accepted by the owner, 15 November 2026 |
 | 80 | The Worker's jobs: L2-113 and its mock name four, while the designs add `PreparePersonDataExportsJob` ([Export a person's data](admin-people/export-person-data/README.md)), `PurgeOldAuditEntriesJob` ([Audit log](admin-access/audit-log/README.md)) and `CloseExpiredModerationViewsJob` ([Moderation view](moderation/moderation-view/README.md)); "daily at 03:00" is a schedule the job loop does not support yet ([Jobs](admin-operations/jobs/README.md)) | Jobs, the data export, the audit log's two-year deletion | |
 | 81 | How Metrics reads 14 days of figures: an in-API recorder writing `DailyFigure` rows, or the telemetry backend of known gap 6 ([Metrics](admin-overview/metrics/README.md)); which responses count as failed | Metrics and the dashboard's chart | |
 | 82 | Health's thresholds for Degraded and Down, its check timeouts and the figures each card shows ([Health](admin-overview/health/README.md)) | Health | |

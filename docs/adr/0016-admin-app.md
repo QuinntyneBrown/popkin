@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted, 13 November 2026.
+Accepted, 13 November 2026. Amended by [ADR 0024](0024-admins-moderation-and-switches-in-the-database.md), 15 November 2026.
 
 ## Context
 
