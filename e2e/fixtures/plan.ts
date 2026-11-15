@@ -138,6 +138,8 @@ export class Plan {
   reads = 0;
   /** Reads of the burn-down, answered or not. */
   burnReads = 0;
+  /** Reads of the home's summary, answered or not. */
+  summaryReads = 0;
   /** The bodies of `POST …/plan/stories`, in the order they came. */
   readonly added: Record<string, unknown>[] = [];
   /** Each `PUT …/stories/{id}/column`, by the story's title. */
@@ -229,6 +231,13 @@ export class Plan {
     };
   }
 
+  /** `GET …/plan/summary`, the home's Plan section (L2-075 AC1); null, a 204, with no story. */
+  summary() {
+    if (this.stories.length === 0) return null;
+    const { pointsLeft, behind, biggest } = this.burnDown();
+    return { pointsLeft, behind, biggest };
+  }
+
   storyOf(s: PlanStory) {
     const owner = this.members.find((m) => m.membershipId === s.ownerMembershipId);
     return {
@@ -279,6 +288,12 @@ export class Plan {
       this.burnReads++;
       if (await this.refusal(route)) return;
       return route.fulfill({ json: this.burnDown() });
+    }
+    if (rest === '/summary' && method === 'GET') {
+      this.summaryReads++;
+      if (await this.refusal(route)) return;
+      const summary = this.summary();
+      return summary ? route.fulfill({ json: summary }) : route.fulfill({ status: 204 });
     }
     if (rest === '/stories' && method === 'POST') return this.add(route);
     const moving = rest.match(/^\/stories\/([^/]+)\/column$/);

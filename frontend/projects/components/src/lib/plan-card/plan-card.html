@@ -1,0 +1,9 @@
+<p class="cluster cluster--between">
+  <strong class="row__title">{{ headline() }}</strong>
+  @if (status(); as status) {
+    <span class="text-accent">{{ status }}</span>
+  }
+</p>
+@if (stories().length) {
+  <ol pk-biggest-rows aria-label="Biggest open" [stories]="stories()"></ol>
+}

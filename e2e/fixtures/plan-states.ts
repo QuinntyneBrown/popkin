@@ -40,6 +40,7 @@ export const planStates = {
   burnDownError: { before: thePlanFailing },
   burnDownOff: { before: thePlanOff },
   burnDownDone: { before: thePlanBurnedDown },
+  popkinHomePlan: { before: theMockPlan },
   newStory: { before: theMockPlan, app: async (page) => void (await openNewStory(page)) },
   newStoryBusy: {
     before: theMockPlan,

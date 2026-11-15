@@ -1,0 +1,19 @@
+/* A card set in from the sides of its section. */
+:host {
+  display: block;
+  margin: var(--space-3) var(--space-4) 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.text-accent {
+  color: var(--accent-text);
+  font-weight: var(--font-weight-semibold);
+}

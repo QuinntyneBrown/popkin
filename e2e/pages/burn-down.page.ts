@@ -35,6 +35,7 @@ export class BurnDownPage {
   readonly xLabels: Locator;
   /** "Biggest open" (L2-071 AC6), its stories and its line when nothing is open. */
   readonly biggest: Locator;
+  readonly biggestList: Locator;
   readonly biggestItems: Locator;
   readonly biggestEmpty: Locator;
   /** "Nothing to burn down yet" and its "New story" (L2-071 AC8). */
@@ -68,7 +69,8 @@ export class BurnDownPage {
     this.legendKeys = this.legend.locator('span');
     this.xLabels = this.chart.locator('.burn-chart__x span');
     this.biggest = page.locator('aside.biggest');
-    this.biggestItems = this.biggest.locator('li');
+    this.biggestList = this.biggest.locator('ol');
+    this.biggestItems = this.biggestList.locator('li');
     this.biggestEmpty = this.biggest.locator('p');
     this.empty = page.locator('.empty').filter({
       has: page.getByRole('heading', { name: 'Nothing to burn down yet' }),

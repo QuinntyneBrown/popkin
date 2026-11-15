@@ -163,6 +163,7 @@ export const routes = {
   popkinHomeError: { app: home, mock: 'pages/popkin-home/error.html' },
   popkinHomePartial: { app: home, mock: 'pages/popkin-home/partial.html' },
   popkinHomeSchedule: { app: home, mock: 'pages/popkin-home/schedule.html' },
+  popkinHomePlan: { app: home, mock: 'pages/popkin-home/plan.html' },
   popkinHomeScheduleNone: { app: home, mock: 'pages/popkin-home/schedule-none.html' },
   bannerInfo: { app: home, mock: 'notifications/banner/info.html' },
   videoCall: { app: call, mock: 'pages/video-call/default.html' },

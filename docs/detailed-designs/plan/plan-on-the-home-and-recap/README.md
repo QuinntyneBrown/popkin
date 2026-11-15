@@ -29,8 +29,8 @@ design adds to the [Popkin home](../../popkins/popkin-home/README.md) and the
 - `docs/mocks/pages/wrapped-up/plan.html` — the recap with Plan on: a card "The plan" with
   "12 of 14 stories done", after the stats, counting every story made, Backlog included
   (L2-075 AC4).
-- When the summary fails to load, the section shows the home's per-section failure with "Try
-  again", as the other sections do ([Loading, failure and offline](../../reliability/loading-failure-offline/README.md)).
+- When the summary fails to load, the section shows the home's per-section failure, "The plan
+  didn’t load." and "The rest of the Popkin is fine." with "Try again", as Photos does ([Loading, failure and offline](../../reliability/loading-failure-offline/README.md)).
 
 ### API
 
@@ -47,17 +47,19 @@ design adds to the [Popkin home](../../popkins/popkin-home/README.md) and the
 
 ### Frontend (`frontend/projects/`)
 
-- **`PopkinHomeStore`** — `plan()`: `{ shown, pointsLeft, badge, biggest }`, read with the other
-  summaries when `PopkinFrame.plan` is true; `shown` is false on `204`, on `404` `feature_off` and
-  while Plan is off.
+- **`PopkinHomeStore`** — `plan()`: `{ state, headline, status, biggest }`, read with the header
+  while it says Plan is on, again on `PlanChanged` for its Popkin, and by `retryPlan()`; `state`
+  is `hidden` on `204`, on `404` `feature_off` and while Plan is off, `error` when the read fails,
+  and `ready` otherwise. A quiet read that fails keeps what is shown.
 - **`PopkinHomePage`** — the section (`pk-section`, heading "Plan", `linkSuffix="of the plan"`,
   the link to the board) with `pk-plan-card` inside.
 - **`RecapStore`** — `storiesLine` from `stories`, or nothing.
 - **`plan-text.ts`** — `homeLine` ("24 pts left"), `badge`, `recapLine` ("12 of 14 stories done",
   "1 of 1 story done").
 - **`PLAN_API.summary`**; **`RECAP_API`**'s `RecapDto` gains `stories`.
-- **Components**: `pk-plan-card` (a `.card`: the points left and the status, then the rows of
-  `pk-biggest-open` as an `ol` named "Biggest open", without its heading) and `pk-recap`'s card
+- **Components**: `pk-plan-card` (`.card.biggest`: the points left and the status, then
+  `pk-biggest-rows` as an `ol` named "Biggest open", without a heading). `pk-biggest-rows` holds
+  the rows that `pk-biggest-open` lists on the burn-down too and `pk-recap`'s card
   "The plan" with the stories line.
 
 ### Backend (`backend/src/`)

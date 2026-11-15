@@ -1275,6 +1275,11 @@ export const screenStates: ScreenState[] = [
   { key: 'burnDownError', ...planStates.burnDownError, regions: burnDownEmptyRegions },
   { key: 'burnDownOff', ...planStates.burnDownOff, regions: burnDownEmptyRegions },
   { key: 'burnDownDone', ...planStates.burnDownDone, regions: burnDownRegions },
+  {
+    key: 'popkinHomePlan',
+    ...planStates.popkinHomePlan,
+    regions: (page) => ({ plan: new PopkinHomePage(page).plan }),
+  },
   { key: 'newStory', ...planStates.newStory, regions: newStoryRegions },
   { key: 'newStoryBusy', ...planStates.newStoryBusy, regions: newStoryRegions },
   { key: 'newStoryInvalid', ...planStates.newStoryInvalid, regions: newStoryRegions },

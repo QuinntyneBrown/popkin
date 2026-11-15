@@ -86,6 +86,14 @@ export interface PlanBoardView {
   version: number;
 }
 
+/** `GET …/plan/summary`: the home's Plan section (L2-075 AC1); none before the first story. */
+export interface PlanSummaryView {
+  pointsLeft: number;
+  behind: number;
+  /** The three biggest stories still open. */
+  biggest: StoryView[];
+}
+
 /** `POST …/plan/stories`: a new story goes to Backlog or To do (L2-069). */
 export interface NewStoryRequest {
   title: string;

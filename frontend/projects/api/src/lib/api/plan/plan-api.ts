@@ -5,6 +5,7 @@ import {
   BurnDownView,
   NewStoryRequest,
   PlanBoardView,
+  PlanSummaryView,
   StoryColumn,
   StoryRequest,
   StoryView,
@@ -19,6 +20,8 @@ export interface PlanApi {
   board(popkinId: string): Observable<PlanBoardView>;
   /** The burn-down (L2-071): points left, behind or ahead, the forecast, each day and the biggest open. */
   burnDown(popkinId: string): Observable<BurnDownView>;
+  /** The home's Plan section (L2-075 AC1); null before the first story (its 204). */
+  summary(popkinId: string): Observable<PlanSummaryView | null>;
   /** Adds a story to Backlog or To do (L2-069). */
   addStory(popkinId: string, request: NewStoryRequest): Observable<StoryView>;
   /** Saves a change to every field of a story (L2-070 AC3). */
@@ -41,6 +44,10 @@ export class HttpPlanApi implements PlanApi {
 
   burnDown(popkinId: string): Observable<BurnDownView> {
     return this.http.get<BurnDownView>(`${plan(popkinId)}/burn-down`);
+  }
+
+  summary(popkinId: string): Observable<PlanSummaryView | null> {
+    return this.http.get<PlanSummaryView | null>(`${plan(popkinId)}/summary`);
   }
 
   addStory(popkinId: string, request: NewStoryRequest): Observable<StoryView> {

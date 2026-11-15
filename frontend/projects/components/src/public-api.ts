@@ -176,3 +176,5 @@ export * from './lib/burn-chart/burn-chart';
 export * from './lib/biggest-open/biggest-open';
 export * from './lib/sparkline/sparkline';
 export * from './lib/sprint-chip/sprint-chip';
+export * from './lib/biggest-rows/biggest-rows';
+export * from './lib/plan-card/plan-card';

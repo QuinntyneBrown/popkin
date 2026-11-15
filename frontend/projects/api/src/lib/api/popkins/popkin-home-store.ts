@@ -14,6 +14,8 @@ import { UnreadTracker } from '../chat/unread-tracker';
 import { EXPERIENCES_API } from '../experiences/experiences-api';
 import { PHOTOS_API } from '../photos/photos-api';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
+import { PLAN_API } from '../plan/plan-api';
+import { StoryCardView, badgeLabel, burnHeadline, cardOf } from '../plan/plan-text';
 import { isoDate } from '../schedule/schedule-weeks';
 import { SCHEDULE_API } from '../schedule/schedule-api';
 import { homeLineOf } from '../schedule/this-week-text';
@@ -44,6 +46,20 @@ export interface HomeSchedule {
 const noSchedule: HomeSchedule = { shown: false, line: '' };
 
 /**
+ * The Plan section (L2-075 AC1, AC3): "24 pts left", "7 behind" and the biggest open stories;
+ * `hidden` while Plan is off or before the first story, `error` when it could not be read.
+ */
+export interface HomePlan {
+  state: 'hidden' | 'ready' | 'error';
+  headline: string;
+  /** "7 behind", "3 ahead" or "On track"; none once all is done. */
+  status: string | null;
+  biggest: StoryCardView[];
+}
+
+const noPlan: HomePlan = { state: 'hidden', headline: '', status: null, biggest: [] };
+
+/**
  * The home of one Popkin (docs/detailed-designs/popkins/popkin-home): its header and four
  * sections, each read on its own, kept current by what the hub says and by the clock. One per
  * screen; the page provides it.
@@ -55,6 +71,7 @@ export class PopkinHomeStore {
   private readonly photosApi = inject(PHOTOS_API);
   private readonly experiencesApi = inject(EXPERIENCES_API);
   private readonly scheduleApi = inject(SCHEDULE_API);
+  private readonly planApi = inject(PLAN_API);
   private readonly realtime = inject(POPKIN_REALTIME);
   private readonly unread = inject(UnreadTracker);
   private readonly watch = inject(WrapUpWatch);
@@ -73,6 +90,8 @@ export class PopkinHomeStore {
   readonly photos = signal<Section<PhotosSummaryView>>(loading);
   /** Left out while Schedules is off, nobody has hours, or it cannot be read. */
   readonly schedule = signal<HomeSchedule>(noSchedule);
+  /** Left out while Plan is off or before the first story. */
+  readonly plan = signal<HomePlan>(noPlan);
   readonly experiences = signal<Section<ExperiencesSummaryView>>(loading);
   readonly members = signal<Section<MemberView[]>>(loading);
 
@@ -133,6 +152,13 @@ export class PopkinHomeStore {
         mine,
       )
       .subscribe(() => this.readPhotos(true));
+    // L2-068 AC12: a change to the plan reaches the home too.
+    this.realtime.planChanged$
+      .pipe(
+        filter((changed) => changed.popkinId === this.popkinId),
+        mine,
+      )
+      .subscribe(() => this.readPlan(this.popkin()?.plan ?? false, true));
     this.realtime.reconnected$.pipe(mine).subscribe(() => {
       if (this.state() === 'ready') this.readAll(true);
     });
@@ -171,6 +197,11 @@ export class PopkinHomeStore {
     this.popkin.update((popkin) => (popkin ? { ...popkin, event } : popkin));
   }
 
+  /** Reads the Plan section again, after it failed (L2-056). */
+  retryPlan(): void {
+    this.readPlan(this.popkin()?.plan ?? false, false);
+  }
+
   retrySection(section: HomeSection): void {
     this.readers[section](false);
   }
@@ -202,6 +233,7 @@ export class PopkinHomeStore {
         this.watch.look(popkin.id, popkin.endsAt);
         this.state.set('ready');
         this.readSchedule(popkin.schedules);
+        this.readPlan(popkin.plan, quietly);
       },
       error: (error: unknown) => {
         if (notFound(error)) this.state.set('not-found');
@@ -223,6 +255,35 @@ export class PopkinHomeStore {
         ),
       // The section is left out; the rest of the home is not affected.
       error: () => this.schedule.set(noSchedule),
+    });
+  }
+
+  /**
+   * The Plan summary, read only while Plan is on (L2-077 AC6). Before the first story, or once
+   * Plan is switched off, the section is left out; a failure is the section's own, and a quiet
+   * read that fails keeps what is shown.
+   */
+  private readPlan(on: boolean, quietly: boolean): void {
+    if (!on) {
+      this.plan.set(noPlan);
+      return;
+    }
+    this.planApi.summary(this.popkinId).subscribe({
+      next: (summary) =>
+        this.plan.set(
+          summary
+            ? {
+                state: 'ready',
+                headline: burnHeadline(summary.pointsLeft),
+                status: summary.pointsLeft > 0 ? badgeLabel(summary.behind) : null,
+                biggest: summary.biggest.map(cardOf),
+              }
+            : noPlan,
+        ),
+      error: (error: unknown) => {
+        if (error instanceof HttpErrorResponse && error.status === 404) this.plan.set(noPlan);
+        else if (!quietly) this.plan.set({ ...noPlan, state: 'error' });
+      },
     });
   }
 
