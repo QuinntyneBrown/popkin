@@ -1,9 +1,9 @@
 // Acceptance Test
-// Traces to: L2-129
+// Traces to: L2-129, L2-123
 // Description: Add someone keeps who they are and their details, asks for a name, and opens the new contact.
 import { contactSent } from '../fixtures/contacts';
 import { expect, test } from '../fixtures/pk-test';
-import { recordedBody } from '../fixtures/stubs';
+import { answer, hold, problem, recordedBody } from '../fixtures/stubs';
 import { ContactFormPage } from '../pages/contact-form.page';
 
 const femi = () => recordedBody<{ id: string }>('POST /api/contacts/people');
@@ -89,5 +89,43 @@ test.describe('Add someone', () => {
     await form.cancel.click();
 
     await expect(page).toHaveURL('/contacts/people');
+  });
+
+  // L2-123 AC5
+  test('while saving, Save reads Saving… and is disabled', async ({ page, pk }) => {
+    const release = await hold(page, 'POST /api/contacts/people');
+    await pk.open('addContact');
+    const form = new ContactFormPage(page);
+    await form.name.fill('Femi Bankole');
+
+    await form.save.click();
+
+    await expect(form.saving).toBeDisabled();
+    release();
+    await expect(page).toHaveURL(`/contacts/people/${femi().id}`);
+  });
+
+  // L2-129 AC6
+  test('a failed save says so and keeps everything typed', async ({ page, pk }) => {
+    await answer(page, 'POST /api/contacts/people', problem(500, 'unexpected'));
+    await pk.open('addContact');
+    const form = new ContactFormPage(page);
+    await form.name.fill('Femi Bankole');
+    await form.knownAs.fill('Grace’s fiancé');
+    await form.circleChoice('Friends').click();
+    await form.loves.fill('Arsenal, jazz brunches');
+
+    await form.save.click();
+
+    await expect(form.failed).toHaveText(
+      'We couldn’t save Femi. Everything you typed is still here. Check your connection and try Save again.',
+    );
+    await expect(form.failed).toHaveAttribute('role', 'alert');
+    await expect(form.name).toHaveValue('Femi Bankole');
+    await expect(form.knownAs).toHaveValue('Grace’s fiancé');
+    await expect(form.circleChoice('Friends')).toHaveAttribute('aria-checked', 'true');
+    await expect(form.loves).toHaveValue('Arsenal, jazz brunches');
+    await expect(form.save).toBeEnabled();
+    await expect(page).toHaveURL('/contacts/people/new');
   });
 });

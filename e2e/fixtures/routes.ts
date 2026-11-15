@@ -178,6 +178,8 @@ export const routes = {
   contactsTodayEmpty: { app: '/contacts', mock: 'pages/contacts-today/empty.html' },
   addContact: { app: '/contacts/people/new', mock: 'pages/add-contact/default.html' },
   addContactInvalid: { app: '/contacts/people/new', mock: 'pages/add-contact/invalid.html' },
+  addContactSubmitting: { app: '/contacts/people/new', mock: 'pages/add-contact/submitting.html' },
+  addContactError: { app: '/contacts/people/new', mock: 'pages/add-contact/error.html' },
   scanToJoin: { app: '/popkins', mock: 'dialogs/scan-to-join/default.html' },
   scanToJoinBusy: { app: '/popkins', mock: 'dialogs/scan-to-join/busy.html' },
   scanToJoinInvalid: { app: '/popkins', mock: 'dialogs/scan-to-join/invalid.html' },

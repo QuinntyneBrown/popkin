@@ -25,6 +25,9 @@
     @if (problems().length) {
       <div pk-form-summary [problems]="problems()"></div>
     }
+    @if (store.state() === 'failed') {
+      <div pk-banner variant="danger" [heading]="failedHeading()" [text]="failedText"></div>
+    }
     <section pk-form-section heading="Who">
       <div
         pk-photo-picker

@@ -128,6 +128,7 @@ export * from './lib/api/admin/metrics/trend-chart';
 export * from './lib/models/contacts';
 export * from './lib/api/contacts/contacts-api';
 export * from './lib/api/contacts/contact-form-store';
+export * from './lib/api/contacts/contact-form-text';
 export * from './lib/api/contacts/contacts-text';
 export * from './lib/api/contacts/contacts-frame';
 export * from './lib/api/contacts/connection-map';

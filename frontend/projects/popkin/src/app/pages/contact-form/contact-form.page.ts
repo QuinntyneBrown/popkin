@@ -8,10 +8,19 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CONTACT_CIRCLES, ContactCircle, ContactFormStore, PHOTO_ACCEPT } from 'api';
 import {
+  CONTACT_CIRCLES,
+  ContactCircle,
+  ContactFormStore,
+  PHOTO_ACCEPT,
+  SAVE_FAILED_TEXT,
+  saveFailedHeading,
+} from 'api';
+import {
+  Banner,
   Button,
   ChipOption,
   ChoiceChips,
@@ -32,6 +41,7 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
 @Component({
   selector: 'pk-contact-form-page',
   imports: [
+    Banner,
     Button,
     ChoiceChips,
     FormPair,
@@ -76,6 +86,10 @@ export class ContactFormPage {
       : [],
   );
   private readonly summary = viewChild(FormSummary);
+  private readonly typedName = toSignal(this.form.controls.name.valueChanges, { initialValue: '' });
+  /** "We couldn’t save Femi." (L2-129 AC6). */
+  protected readonly failedHeading = computed(() => saveFailedHeading(this.typedName()));
+  protected readonly failedText = SAVE_FAILED_TEXT;
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.releasePreview());
