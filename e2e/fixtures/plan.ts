@@ -85,11 +85,11 @@ export function theMocksStories(): PlanStory[] {
   ];
 }
 
-/** The points left at the end of each day of the mocks' sprint so far: 24 left, 7 behind. */
-export const theMocksSparkline = [33, 33, 34, 33, 32, 32, 31, 31, 31, 29, 28, 27, 25, 24];
-
-/** The points left at the end of each day of the burn-down's mock: 32 at the start, 24 now. */
+/** The points left at the end of each day of the mocks' sprint so far: 32 at the start, 24 now. */
 export const theMocksBurnDays = [32, 32, 32, 29, 29, 28, 28, 28, 31, 29, 29, 27, 26, 24];
+
+/** The sprint chip's sparkline draws the same days (L2-068 AC7). */
+export const theMocksSparkline = theMocksBurnDays;
 
 /** When the plan finishes, as `GET …/plan/burn-down` answers it (L2-071 AC3). */
 export interface Forecast {

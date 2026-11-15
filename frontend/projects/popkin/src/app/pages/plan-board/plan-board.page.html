@@ -7,6 +7,16 @@
     [subStrong]="readOnly() ? 'Wrapped up' : store.sprint()?.daysLeft"
   >
     <nav pk-view-nav slot="views" [views]="views()"></nav>
+    @if (store.chip(); as chip) {
+      <a
+        pk-sprint-chip
+        [routerLink]="burnDown()"
+        [headline]="chip.headline"
+        [status]="chip.status"
+        [line]="chip.sparkline.line"
+        [idealFrom]="chip.sparkline.ideal.y1"
+      ></a>
+    }
     @if (canAdd()) {
       <button
         pk-button

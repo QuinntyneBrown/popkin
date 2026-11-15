@@ -1,0 +1,20 @@
+:host {
+  flex: none;
+  width: var(--space-11);
+  height: var(--space-5);
+  overflow: visible;
+}
+
+.sparkline__ideal {
+  stroke: var(--color-fg-subtle);
+  stroke-width: 1.25;
+  stroke-dasharray: 2 2;
+}
+
+.sparkline__line {
+  fill: none;
+  stroke: var(--accent-text);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}

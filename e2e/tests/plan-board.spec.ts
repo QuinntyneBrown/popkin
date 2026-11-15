@@ -1,10 +1,11 @@
 // Acceptance Test
-// Traces to: L2-068 AC2 to AC6, AC8 to AC11
+// Traces to: L2-068 AC2 to AC11
 // Description: the plan board shows the sprint, the four columns with their counts and points,
 // and each story's card; a Popkin with no stories offers the four starters; the board loads with
 // a skeleton and recovers from a failure.
 import { maraWithAPlan, planUrl } from '../fixtures/plan';
 import { expect, test } from '../fixtures/pk-test';
+import { BurnDownPage } from '../pages/burn-down.page';
 import { PlanBoardPage } from '../pages/plan-board.page';
 
 test.describe('the plan board', () => {
@@ -18,6 +19,20 @@ test.describe('the plan board', () => {
     await expect(board.sub).toHaveText('Planning sprint · Aug 30 – Sep 26 · 14 days left');
     await expect(board.views).toHaveText(['Board', 'Burn-down']);
     await expect(board.currentView).toHaveText('Board');
+  });
+
+  // L2-068 AC7
+  test('shows the sprint chip, the points left and how far behind, and opens the burn-down', async ({
+    page,
+  }) => {
+    await maraWithAPlan(page);
+    await page.goto(planUrl);
+    const board = new PlanBoardPage(page);
+
+    await expect(board.sprintChip).toHaveAccessibleName('24 pts left · 7 behind');
+    await board.sprintChip.click();
+
+    await expect(new BurnDownPage(page).root).toBeAttached();
   });
 
   // L2-068 AC3, AC5
@@ -71,7 +86,7 @@ test.describe('the plan board', () => {
     await expect(board.column('Doing').count).toHaveText('stories: 0');
   });
 
-  // L2-068 AC9
+  // L2-068 AC7, AC9
   test('with no stories, explains what a story is and offers the four starters', async ({
     page,
   }) => {
@@ -94,6 +109,8 @@ test.describe('the plan board', () => {
       'Set a budget',
     ]);
     await expect(board.columnHeadings).toHaveCount(0);
+    // L2-068 AC7: a sprint with no stories has no chip.
+    await expect(board.sprintChip).toHaveCount(0);
   });
 
   // L2-068 AC10

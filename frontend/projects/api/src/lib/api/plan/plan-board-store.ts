@@ -5,7 +5,15 @@ import { Subscription, filter, interval, merge } from 'rxjs';
 import { PlanBoardView, StoryView } from '../../models/plan';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PLAN_API } from './plan-api';
-import { columnsOf, daysLeftLabel, sprintLine } from './plan-text';
+import {
+  burnHeadline,
+  chipStatus,
+  columnsOf,
+  daysBetween,
+  daysLeftLabel,
+  sprintLine,
+} from './plan-text';
+import { sparklineOf } from './sparkline';
 
 export type PlanBoardState = 'loading' | 'ready' | 'error' | 'off' | 'not-found';
 
@@ -34,6 +42,18 @@ export class PlanBoardStore {
   readonly sprint = computed(() => {
     const sprint = this.view()?.sprint;
     return sprint ? { line: sprintLine(sprint), daysLeft: daysLeftLabel(sprint.daysLeft) } : null;
+  });
+  /** The sprint chip: its sparkline, "24 pts left" and "7 behind"; none before a story (L2-068 AC7). */
+  readonly chip = computed(() => {
+    const view = this.view();
+    const sprint = view?.sprint;
+    const progress = view?.progress;
+    if (!sprint || !progress) return null;
+    return {
+      headline: burnHeadline(progress.pointsLeft),
+      status: progress.pointsLeft > 0 ? chipStatus(progress.behind) : null,
+      sparkline: sparklineOf(progress.sparkline, daysBetween(sprint.firstDay, sprint.lastDay) + 1),
+    };
   });
 
   constructor() {

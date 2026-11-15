@@ -49,6 +49,46 @@ describe('PlanBoardStore', () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it('has a sprint chip while the sprint has stories, and none before (L2-068 AC7)', () => {
+    store.open('p1');
+    expect(store.chip()).toBeNull();
+
+    answer = {
+      ...empty,
+      sprint: {
+        name: 'Planning sprint',
+        firstDay: '2026-08-30',
+        lastDay: '2026-09-26',
+        daysLeft: 14,
+      },
+      progress: { pointsLeft: 24, behind: 7, sparkline: [32, 24] },
+    };
+    store.retry();
+
+    expect(store.chip()).toEqual({
+      headline: '24 pts left',
+      status: '7 behind',
+      sparkline: { line: 'M0.0,1.9 L1.6,6.9', ideal: { y1: 1.9, y2: 22 } },
+    });
+  });
+
+  it('says "All done" on the chip, with no status, once nothing is left', () => {
+    answer = {
+      ...empty,
+      sprint: {
+        name: 'Planning sprint',
+        firstDay: '2026-08-30',
+        lastDay: '2026-09-26',
+        daysLeft: 9,
+      },
+      progress: { pointsLeft: 0, behind: -9, sparkline: [32, 0] },
+    };
+    store.open('p1');
+
+    expect(store.chip()?.headline).toBe('All done');
+    expect(store.chip()?.status).toBeNull();
+  });
+
   it('is loading until the board answers', () => {
     answer = new Subject<PlanBoardView>();
     store.open('p1');

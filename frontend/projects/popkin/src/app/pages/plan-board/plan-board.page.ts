@@ -24,6 +24,7 @@ import {
   Icon,
   PlanHeader,
   PopkinNav,
+  SprintChip,
   StoryCard,
   ViewNav,
 } from 'components';
@@ -48,6 +49,7 @@ import {
     PlanHeader,
     PopkinNav,
     RouterLink,
+    SprintChip,
     StoryCard,
     ViewNav,
   ],
@@ -70,6 +72,8 @@ export class PlanBoardPage {
   /** Ready, and open to change: "New story" shows (L2-069). */
   protected readonly canAdd = computed(() => this.store.state() === 'ready' && !this.readOnly());
   protected readonly home = computed(() => `/p/${this.popkinId()}`);
+  /** The sprint chip opens the burn-down (L2-068 AC7). */
+  protected readonly burnDown = computed(() => `/p/${this.popkinId()}/plan/burn-down`);
   protected readonly views = computed(() => [
     { label: 'Board', link: `/p/${this.popkinId()}/plan`, current: true },
     { label: 'Burn-down', link: `/p/${this.popkinId()}/plan/burn-down`, current: false },

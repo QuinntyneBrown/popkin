@@ -134,6 +134,11 @@ export function burnHeadline(pointsLeft: number): string {
 }
 
 /** "7 behind", "3 ahead" or "On track" (L2-071 AC2). */
+/** The sprint chip's status: "7 behind", "3 ahead" or "on track" (L2-068 AC7). */
+export function chipStatus(behind: number): string {
+  return behind === 0 ? 'on track' : badgeLabel(behind);
+}
+
 export function badgeLabel(behind: number): string {
   if (behind > 0) return `${behind} behind`;
   if (behind < 0) return `${-behind} ahead`;

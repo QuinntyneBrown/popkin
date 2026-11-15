@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BurnDownView, StoryView } from '../../models/plan';
 import {
+  chipStatus,
   badgeLabel,
   biggestEmpty,
   burnHeadline,
@@ -31,6 +32,16 @@ function story(title: string, column: StoryView['column'], points: number): Stor
     addedAt: '2026-08-30T09:00:00Z',
   };
 }
+
+describe('chipStatus (L2-068 AC7)', () => {
+  it.each([
+    [7, '7 behind'],
+    [-3, '3 ahead'],
+    [0, 'on track'],
+  ])('says %i as "%s"', (behind, status) => {
+    expect(chipStatus(behind)).toBe(status);
+  });
+});
 
 describe('sprintLine', () => {
   it('names the sprint and its dates (L2-068 AC2)', () => {

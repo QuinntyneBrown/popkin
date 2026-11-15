@@ -107,7 +107,8 @@ viewport width: the styles of `pk-board` and `pk-plan-header` place everything.
   and move labels of the dialogs, the title's error, the starters, the burn-down's headline,
   forecast and text alternative, and the home's and the recap's lines.
 - **`sparkline.ts`** (`api`, pure, unit-tested) — the sparkline's path and ideal line in a
-  44 × 22 box: the days so far over the sprint's 28, the ideal from the start points to zero.
+  44 × 22 box: the days so far over the sprint's 28, the ideal from the start points to zero,
+  up to the largest points left rounded up to a multiple of 5, as the burn-down's chart.
 - **`PLAN_API`** / **`PlanApi`** / **`HttpPlanApi`** (`api/src/lib/api/plan/plan-api.ts`) —
   `board`, `addStory`, `saveStory`, `moveStory`, `deleteStory`, `burnDown` and `summary`.
 - **`hub-events.ts`** gains `planChanged: 'PlanChanged'`.

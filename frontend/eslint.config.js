@@ -44,6 +44,7 @@ module.exports = defineConfig([
             'pk-conversation-row',
             'pk-schedule-card',
             'pk-story-card',
+            'pk-sprint-chip',
             'label',
           ],
         },

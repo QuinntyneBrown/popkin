@@ -30,6 +30,9 @@ export class PlanBoardPage {
   /** The line under the name: the sprint, its dates and the days left. */
   readonly sub: Locator;
   readonly views: Locator;
+  /** The sprint chip: its sparkline, "24 pts left · 7 behind", a link to the burn-down (L2-068 AC7). */
+  readonly sprintChip: Locator;
+  readonly sparkline: Locator;
   readonly currentView: Locator;
   readonly burnDownView: Locator;
   readonly board: Locator;
@@ -63,6 +66,8 @@ export class PlanBoardPage {
     this.header = page.locator('header.plan-header');
     this.heading = page.getByRole('heading', { level: 1, name: 'Our plan' });
     this.sub = this.header.locator('.plan-header__sub');
+    this.sprintChip = this.header.locator('a.sprint-chip');
+    this.sparkline = this.sprintChip.locator('svg.sparkline');
     this.views = page.getByRole('navigation', { name: 'Views' }).getByRole('link');
     this.currentView = page
       .getByRole('navigation', { name: 'Views' })
