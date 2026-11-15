@@ -33,6 +33,8 @@ export class SegmentedControl {
   readonly kind = input<'tabs' | 'radio'>('tabs');
   readonly options = input.required<SegmentedOption[]>();
   readonly value = model.required<string>();
+  /** Every option is disabled, as in a dialog that cannot be saved. */
+  readonly disabled = input(false);
 
   private readonly buttons = viewChildren<ElementRef<HTMLButtonElement>>('option');
 

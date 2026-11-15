@@ -1,20 +1,21 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { TimeOffStatus, TimeOffWeekView } from '../../models/schedule';
+import { TimeOffChoice, TimeOffStatus, TimeOffWeekView } from '../../models/schedule';
 import { accentOf } from '../../models/popkin';
 import {
   addDays,
   daysOf,
   firstWeekOf,
   holdsEvent,
+  isWithinAYear,
   mondayOf,
   monthOf,
   weekLabel,
   weeksOfMonth,
 } from './schedule-weeks';
 import { SCHEDULE_API } from './schedule-api';
-import { dayHeading, isMany, offCount } from './time-off-text';
+import { dayHeading, isMany, offCount, weekdaysLabel } from './time-off-text';
 
 /** A day's heading in the table: "Mon", "15", "5 of 6 off". */
 export interface TimeOffDay {
@@ -68,6 +69,18 @@ export interface TimeOffNav {
   goTo: { label: string; week: string } | null;
 }
 
+/** My own week, Monday to Friday, as "Add my time off" opens on it (L2-073). */
+export interface MyTimeOff {
+  membershipId: string;
+  week: string;
+  /** "Feb 15 – 19", or "Feb 21 – 25, 2028" in another year. */
+  label: string;
+  /** Each weekday, "Mon 15", and my entry. */
+  days: { name: string; choice: TimeOffChoice }[];
+  /** The week's Monday is more than a year ahead (L2-073 AC5). */
+  tooFar: boolean;
+}
+
 export type TimeOffState = 'loading' | 'ready' | 'error' | 'off' | 'not-found';
 
 /** Time off of one Popkin, one week at a time (docs/detailed-designs/schedules/time-off). One per screen. */
@@ -95,6 +108,13 @@ export class TimeOffStore {
       ) ?? false,
   );
 
+  /** My week to add time off to; null when the week cannot be changed. */
+  readonly mine = computed(() => {
+    const view = this.view();
+    const me = view?.canEdit ? view.members.find((member) => member.isMe) : undefined;
+    return view && me ? myTimeOff(view.week, me.membershipId, me.days, this.today) : null;
+  });
+
   readonly nav = computed(() => {
     const view = this.view();
     return view ? navOf(view) : null;
@@ -108,6 +128,12 @@ export class TimeOffStore {
     this.monday = day ? mondayOf(day) : undefined;
     this.today = today;
     this.read();
+  }
+
+  /** Draws the week a save answered with (L2-073 AC2). */
+  saved(view: TimeOffWeekView): void {
+    this.view.set(view);
+    this.state.set('ready');
   }
 
   retry(): void {
@@ -185,5 +211,26 @@ function tableOf(view: TimeOffWeekView): TimeOffTable {
       isMe: member.isMe,
       days: member.days,
     })),
+  };
+}
+
+function myTimeOff(
+  week: string,
+  membershipId: string,
+  days: TimeOffStatus[],
+  today: string,
+): MyTimeOff {
+  return {
+    membershipId,
+    week,
+    label: weekdaysLabel(week, today),
+    days: daysOf(week)
+      .slice(0, 5)
+      .map((day, i) => {
+        const { weekday, date } = dayHeading(day);
+        const status = days[i];
+        return { name: `${weekday} ${date}`, choice: status === 'Weekend' ? 'Working' : status };
+      }),
+    tooFar: !isWithinAYear(week, today),
   };
 }

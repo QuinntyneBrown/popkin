@@ -1,0 +1,35 @@
+<div pk-dialog heading="Add my time off" [description]="description" [accent]="data.accent">
+  @if (data.mine.tooFar) {
+    <div pk-alert variant="warning" heading="That’s more than a year ahead.">
+      Time off can be entered up to a year ahead. Pick a nearer week.
+    </div>
+  }
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t save that.">Your choices are still here. Try again.</div>
+  }
+  @for (day of data.mine.days; track day.name; let i = $index) {
+    <div pk-leave-row [day]="day.name">
+      <div
+        pk-segmented-control
+        kind="radio"
+        [label]="day.name"
+        [options]="options"
+        [value]="choices()[i]"
+        [disabled]="data.mine.tooFar"
+        (valueChange)="choose(i, $event)"
+      ></div>
+    </div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="popkin"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy() || data.mine.tooFar"
+    (click)="save()"
+  >
+    {{ busy() ? 'Saving…' : 'Save' }}
+  </button>
+</div>

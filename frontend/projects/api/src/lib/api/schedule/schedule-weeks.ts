@@ -93,3 +93,11 @@ export function holdsEvent(
 ): boolean {
   return !!event && event.firstDay <= addDays(monday, 6) && event.lastDay >= monday;
 }
+
+/** How far ahead time off may be entered (L2-073 AC5). */
+const daysAhead = 365;
+
+/** Whether a week's Monday is at most a year after the viewer's today, as the API counts it. */
+export function isWithinAYear(monday: string, today: string): boolean {
+  return monday <= addDays(today, daysAhead);
+}

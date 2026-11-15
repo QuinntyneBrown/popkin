@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayHeading, isMany, offCount } from './time-off-text';
+import { dayHeading, isMany, offCount, weekdaysLabel } from './time-off-text';
 
 describe('offCount', () => {
   it.each([
@@ -30,4 +30,14 @@ describe('dayHeading', () => {
     ['2027-02-20', 'Sat', '20'],
     ['2027-03-07', 'Sun', '7'],
   ])('%s is %s %s', (day, weekday, date) => expect(dayHeading(day)).toEqual({ weekday, date }));
+});
+
+describe('weekdaysLabel', () => {
+  // L2-073 AC1: Monday to Friday, with the year when it is not the viewer's.
+  it.each([
+    ['2027-02-15', 'Feb 15 – 19'],
+    ['2027-03-29', 'Mar 29 – Apr 2'],
+    ['2028-02-21', 'Feb 21 – 25, 2028'],
+    ['2026-12-28', 'Dec 28 – Jan 1, 2026'],
+  ])('%s is "%s"', (monday, label) => expect(weekdaysLabel(monday, '2027-02-17')).toBe(label));
 });

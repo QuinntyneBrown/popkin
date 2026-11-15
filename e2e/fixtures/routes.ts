@@ -152,6 +152,13 @@ export const routes = {
     app: `${home}/schedule?week=2027-02-22`,
     mock: 'pages/time-off/other-week.html',
   },
+  addTimeOff: { app: timeOff, mock: 'dialogs/add-time-off/default.html' },
+  addTimeOffBusy: { app: timeOff, mock: 'dialogs/add-time-off/busy.html' },
+  addTimeOffFailed: { app: timeOff, mock: 'dialogs/add-time-off/failed.html' },
+  addTimeOffInvalid: {
+    app: `${home}/schedule?week=2028-02-21`,
+    mock: 'dialogs/add-time-off/invalid.html',
+  },
   experiencesDid: { app: experiences, mock: 'pages/experiences/did.html' },
   experiencesWant: { app: experiences, mock: 'pages/experiences/want.html' },
   experiencesNoResults: { app: experiences, mock: 'pages/experiences/no-results.html' },

@@ -171,4 +171,58 @@ describe('TimeOffStore', () => {
     store.open('p1', '2027-02-22', today);
     expect(store.nav()!.goTo).toBeNull();
   });
+
+  it('gives my own week, Monday to Friday, to add my time off (L2-073 AC1)', () => {
+    answer = weekOf('2027-02-15', [
+      'Off',
+      'Tentative',
+      'Working',
+      'Off',
+      'Working',
+      'Weekend',
+      'Weekend',
+    ]);
+    store.open('p1', '2027-02-15', today);
+
+    const mine = store.mine()!;
+    expect(mine.membershipId).toBe('m-mara');
+    expect(mine.week).toBe('2027-02-15');
+    expect(mine.label).toBe('Feb 15 – 19');
+    expect(mine.tooFar).toBe(false);
+    expect(mine.days).toEqual([
+      { name: 'Mon 15', choice: 'Off' },
+      { name: 'Tue 16', choice: 'Tentative' },
+      { name: 'Wed 17', choice: 'Working' },
+      { name: 'Thu 18', choice: 'Off' },
+      { name: 'Fri 19', choice: 'Working' },
+    ]);
+  });
+
+  it('says when my week is more than a year ahead (L2-073 AC5)', () => {
+    answer = weekOf('2028-02-21');
+    store.open('p1', '2028-02-21', today);
+
+    expect(store.mine()!.label).toBe('Feb 21 – 25, 2028');
+    expect(store.mine()!.tooFar).toBe(true);
+  });
+
+  it('offers nothing to add when the week cannot be changed', () => {
+    answer = { ...weekOf('2027-02-15'), canEdit: false };
+    store.open('p1', '2027-02-15', today);
+
+    expect(store.mine()).toBeNull();
+  });
+
+  it('draws the week a save answers with, without reading it again (L2-073 AC2)', () => {
+    store.open('p1', '2027-02-15', today);
+    asked = [];
+
+    store.saved(
+      weekOf('2027-02-15', ['Off', 'Off', 'Working', 'Working', 'Working', 'Weekend', 'Weekend']),
+    );
+
+    expect(asked).toEqual([]);
+    expect(store.table()!.rows[0].days.slice(0, 2)).toEqual(['Off', 'Off']);
+    expect(store.nobodyYet()).toBe(false);
+  });
 });

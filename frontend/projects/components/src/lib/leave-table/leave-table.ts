@@ -19,7 +19,7 @@ export interface LeaveDay {
 /** What a member's day is: the words in the cell say it, the fill only repeats it. */
 export type LeaveStatus = 'Off' | 'Tentative' | 'Working' | 'Weekend';
 
-export interface LeaveRow {
+export interface LeaveTableRow {
   name: string;
   avatar: PersonAvatar;
   /** Monday to Sunday. */
@@ -45,7 +45,7 @@ export class LeaveTable {
   /** "Feb 15 – 21": the corner of the table and its caption. */
   readonly label = input.required<string>();
   readonly days = input.required<LeaveDay[]>();
-  readonly rows = input.required<LeaveRow[]>();
+  readonly rows = input.required<LeaveTableRow[]>();
 
   protected readonly columns = [0, 1, 2, 3, 4, 5, 6, 7];
 }

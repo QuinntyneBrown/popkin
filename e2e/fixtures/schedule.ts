@@ -38,8 +38,12 @@ export class Schedule {
   canEdit = true;
   /** The weeks asked for, in order. */
   readonly asked: string[] = [];
+  /** The time off saved, in order: whose, and the body sent. */
+  readonly saves: { membershipId: string; week: string; days: string[] }[] = [];
   private failing?: Failure;
   private held?: Promise<void>;
+  private failingSaves = false;
+  private heldSave?: Promise<void>;
 
   constructor(private readonly page: Page) {}
 
@@ -60,6 +64,7 @@ export class Schedule {
 
   recover(): void {
     this.failing = undefined;
+    this.failingSaves = false;
   }
 
   /** The reads do not answer until the returned function is called. */
@@ -68,6 +73,21 @@ export class Schedule {
     this.held = new Promise((resolve) => (release = resolve));
     return () => {
       this.held = undefined;
+      release();
+    };
+  }
+
+  /** Saving time off fails until `recover` is called. */
+  failSaves(): void {
+    this.failingSaves = true;
+  }
+
+  /** A save does not answer until the returned function is called. */
+  holdSaves(): () => void {
+    let release: () => void = () => undefined;
+    this.heldSave = new Promise((resolve) => (release = resolve));
+    return () => {
+      this.heldSave = undefined;
       release();
     };
   }
@@ -93,6 +113,8 @@ export class Schedule {
   private async route(route: Route): Promise<void> {
     const url = new URL(route.request().url());
     const rest = url.pathname.split('/schedule/')[1];
+    const saving = rest.match(/^time-off\/([^/]+)$/);
+    if (saving && route.request().method() === 'PUT') return this.save(route, saving[1]);
     if (rest !== 'time-off' || route.request().method() !== 'GET') return route.fallback();
     await this.held;
     if (this.failing === 'server') return route.fulfill({ status: 500 });
@@ -109,6 +131,25 @@ export class Schedule {
       isoDate(scheduleNow);
     const monday = mondayOf(day);
     this.asked.push(monday);
+    await route.fulfill({ json: this.week(monday) });
+  }
+
+  /** `PUT …/time-off/{membershipId}`: Monday to Friday, Working taking a day back (L2-073). */
+  private async save(route: Route, membershipId: string): Promise<void> {
+    const body = route.request().postDataJSON() as { week: string; days: string[] };
+    this.saves.push({ membershipId, ...body });
+    await this.heldSave;
+    if (this.failingSaves) return route.fulfill({ status: 500 });
+    const monday = mondayOf(body.week);
+    const mine = this.timeOff.get(membershipId) ?? new Map<string, DayKind>();
+    daysOf(monday)
+      .slice(0, 5)
+      .forEach((day, i) => {
+        const kind = body.days[i];
+        if (kind === 'Off' || kind === 'Tentative') mine.set(day, kind);
+        else mine.delete(day);
+      });
+    this.timeOff.set(membershipId, mine);
     await route.fulfill({ json: this.week(monday) });
   }
 }

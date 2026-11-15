@@ -1,6 +1,11 @@
 <div pk-app-screen [accent]="frame.accent()" layout="tab" body="flush">
   <header pk-plan-header slot="header" heading="Schedule">
     <nav pk-view-nav slot="views" [views]="views()"></nav>
+    @if (store.mine()) {
+      <button pk-button type="button" variant="secondary" size="md" (click)="addMyTimeOff($event)">
+        <svg pk-icon name="plus" size="md"></svg>Add my time off
+      </button>
+    }
   </header>
 
   @switch (store.state()) {

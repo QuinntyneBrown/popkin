@@ -1,4 +1,4 @@
-import { dateOf } from './schedule-weeks';
+import { dateOf, weekLabel } from './schedule-weeks';
 
 /*
  * What time off says (docs/detailed-designs/schedules/time-off): the count of each day and
@@ -21,4 +21,11 @@ export function isMany(off: number, members: number): boolean {
 export function dayHeading(day: string): { weekday: string; date: string } {
   const date = dateOf(day);
   return { weekday: weekdays[date.getDay()], date: String(date.getDate()) };
+}
+
+/** Monday to Friday, "Feb 15 – 19", with ", 2028" when the week is not in the viewer's year. */
+export function weekdaysLabel(monday: string, today: string): string {
+  const label = weekLabel(monday, 5);
+  const year = monday.slice(0, 4);
+  return year === today.slice(0, 4) ? label : `${label}, ${year}`;
 }

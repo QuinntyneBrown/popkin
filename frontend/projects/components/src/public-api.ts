@@ -141,6 +141,7 @@ export * from './lib/member-picker/member-picker';
 export * from './lib/status-note/status-note';
 export * from './lib/field-label/field-label';
 export * from './lib/plan-header/plan-header';
+export * from './lib/leave-row/leave-row';
 export * from './lib/view-nav/view-nav';
 export * from './lib/schedule/schedule';
 export * from './lib/leave-table/leave-table';

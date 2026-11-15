@@ -1,3 +1,4 @@
+import { Dialog } from '@angular/cdk/dialog';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -7,7 +8,14 @@ import {
   input,
   untracked,
 } from '@angular/core';
-import { ErrorScreens, PopkinFrame, TimeOffStore, UnreadTracker, isoDate } from 'api';
+import {
+  ErrorScreens,
+  PopkinFrame,
+  TimeOffStore,
+  TimeOffWeekView,
+  UnreadTracker,
+  isoDate,
+} from 'api';
 import {
   Alert,
   AppScreen,
@@ -24,6 +32,7 @@ import {
   ViewNav,
   WeekChips,
 } from 'components';
+import { AddTimeOffData, AddTimeOffDialog } from '../../dialogs/add-time-off/add-time-off.dialog';
 
 /**
  * Time off (L2-072): the first view of the Schedule tab, a week of the group's days off at a
@@ -60,6 +69,7 @@ export class TimeOffPage {
   protected readonly frame = inject(PopkinFrame);
   private readonly unread = inject(UnreadTracker);
   private readonly errors = inject(ErrorScreens);
+  private readonly dialog = inject(Dialog);
 
   protected readonly link = computed(() => `/p/${this.popkinId()}/schedule`);
   protected readonly views = computed(() => [
@@ -88,6 +98,24 @@ export class TimeOffPage {
     // L2-051 AC1: someone who is not a member cannot tell the Popkin exists.
     effect(() => {
       if (this.store.state() === 'not-found') untracked(() => this.errors.showNotFound());
+    });
+  }
+
+  /** "Add my time off" (L2-073): my row shows what was saved at once. */
+  protected addMyTimeOff(event: Event): void {
+    const mine = this.store.mine();
+    if (!mine) return;
+    const opened = this.dialog.open<TimeOffWeekView, AddTimeOffData>(AddTimeOffDialog, {
+      data: { popkinId: this.popkinId(), accent: this.frame.accent(), mine },
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      restoreFocus: event.currentTarget as HTMLElement,
+      // pk-dialog draws its own backdrop, as the mocks do.
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((saved) => {
+      if (saved) this.store.saved(saved);
     });
   }
 }

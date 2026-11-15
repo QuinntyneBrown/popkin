@@ -3,6 +3,7 @@ import {
   daysOf,
   firstWeekOf,
   holdsEvent,
+  isWithinAYear,
   isoDate,
   monthOf,
   mondayOf,
@@ -101,4 +102,17 @@ describe('holdsEvent', () => {
     expect(holdsEvent(monday, event)).toBe(holds),
   );
   it('is false with no event', () => expect(holdsEvent('2027-02-15', null)).toBe(false));
+});
+
+describe('isWithinAYear', () => {
+  // L2-073 AC5: a week's Monday at most 365 days after the viewer's today.
+  it.each([
+    ['2027-02-15', true], // this week
+    ['2026-01-05', true], // a week gone by
+    ['2028-02-14', true], // 362 days ahead
+    ['2028-02-17', true], // exactly 365 days
+    ['2028-02-21', false], // 369 days ahead
+  ])('%s from 2027-02-17 is %s', (monday, within) =>
+    expect(isWithinAYear(monday, '2027-02-17')).toBe(within),
+  );
 });
