@@ -33,4 +33,21 @@ public static class AdminExtensions
         await client.SignInAsAdminAsync(api);
         return client;
     }
+
+    /// <summary>The first Owner adds `email` with `role`; returns the new admin's id.</summary>
+    public static async Task<Guid> AddAdminAsync(this HttpClient owner, string email, string role)
+    {
+        var response = await owner.PostAsJsonAsync("/api/admin/admins", new { email, role });
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+    }
+
+    /// <summary>A new browser signed in as an admin of `role`, added by `owner`.</summary>
+    public static async Task<(HttpClient Client, Guid Id)> SignedInAdminAsync(this ApiFactory api, HttpClient owner, string email, string role)
+    {
+        var id = await owner.AddAdminAsync(email, role);
+        var client = api.CreateBrowserClient();
+        await client.SignInAsAdminAsync(api, email);
+        return (client, id);
+    }
 }

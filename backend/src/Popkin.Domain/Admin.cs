@@ -36,6 +36,9 @@ public sealed class Admin
 
     public bool IsRemoved => RemovedAt is not null;
 
+    /// <summary>Added but not signed in yet (L2-119 AC4).</summary>
+    public bool IsInvited => ActivatedAt is null;
+
     public static Admin Invite(string email, AdminRole role, Guid? invitedBy, DateTimeOffset now) => new()
     {
         Id = Guid.NewGuid(),
@@ -64,6 +67,17 @@ public sealed class Admin
 
         LastActiveAt = now;
         return true;
+    }
+
+    /// <summary>A removed admin added again keeps one record and one history (L2-119 AC2).</summary>
+    public void Reinvite(AdminRole role, Guid? invitedBy, DateTimeOffset now)
+    {
+        Role = role;
+        InvitedAt = now;
+        InvitedByAdminId = invitedBy;
+        ActivatedAt = null;
+        LastActiveAt = null;
+        RemovedAt = null;
     }
 
     public void ChangeRole(AdminRole role) => Role = role;

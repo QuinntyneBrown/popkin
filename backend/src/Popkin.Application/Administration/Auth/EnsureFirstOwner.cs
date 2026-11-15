@@ -22,13 +22,22 @@ public sealed class EnsureFirstOwnerCommandHandler(IAppDbContext db, TimeProvide
         }
 
         var email = ContactRules.Normalise(ContactChannel.Email, request.Email);
-        if (await db.Admins.AnyAsync(a => a.Email == email && a.RemovedAt == null, cancellationToken))
+        var owner = await db.Admins.FirstOrDefaultAsync(a => a.Email == email, cancellationToken);
+        if (owner is { IsRemoved: false })
         {
             return false;
         }
 
-        var owner = Admin.Invite(email, AdminRole.Owner, null, clock.GetUtcNow());
-        db.Admins.Add(owner);
+        if (owner is null)
+        {
+            owner = Admin.Invite(email, AdminRole.Owner, null, clock.GetUtcNow());
+            db.Admins.Add(owner);
+        }
+        else
+        {
+            owner.Reinvite(AdminRole.Owner, null, clock.GetUtcNow());
+        }
+
         audit.RecordByPopkin(new AuditRecord(
             AuditAction.AddedAdmin,
             AuditTargetKind.Admin,

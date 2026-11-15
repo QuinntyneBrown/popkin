@@ -37,6 +37,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public CapturingCrewInviteSender CrewInvites { get; } = new();
 
+    public CapturingAdminInviteSender AdminInvites { get; } = new();
+
     public FixedCodeGenerator CodeGenerator { get; } = new();
 
     public DatabaseFaults Faults { get; } = new();
@@ -88,6 +90,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<ICodeSender>();
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Email));
+            services.RemoveAll<IAdminInviteSender>();
+            services.AddSingleton<IAdminInviteSender>(AdminInvites);
             services.RemoveAll<ICrewInviteSender>();
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Email));

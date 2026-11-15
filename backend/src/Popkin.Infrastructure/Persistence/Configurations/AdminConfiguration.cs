@@ -15,5 +15,6 @@ public sealed class AdminConfiguration : IEntityTypeConfiguration<Admin>
         builder.Property(a => a.Name).HasMaxLength(100).IsRequired();
         builder.Property(a => a.Role).HasConversion<string>().HasMaxLength(16);
         builder.Ignore(a => a.IsRemoved);
+        builder.Ignore(a => a.IsInvited);
     }
 }

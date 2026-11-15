@@ -52,3 +52,20 @@ public sealed class UnconfiguredCodeSender(ContactChannel channel) : ICodeSender
     public Task SendAsync(string destination, string code, CancellationToken cancellationToken) =>
         throw new CodeNotSentException();
 }
+
+/// <summary>Writes that an admin invite would be sent, without the address, in Development.</summary>
+public sealed class DevelopmentAdminInviteSender(ILogger<DevelopmentAdminInviteSender> logger) : IAdminInviteSender
+{
+    public Task SendAsync(string email, AdminInviteMessage invite, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Development admin invite: not sent, no provider is configured");
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Refuses every admin invite where no email provider is configured.</summary>
+public sealed class UnconfiguredAdminInviteSender : IAdminInviteSender
+{
+    public Task SendAsync(string email, AdminInviteMessage invite, CancellationToken cancellationToken) =>
+        throw new AdminInviteNotSentException();
+}
