@@ -33,34 +33,23 @@ This feature is designed, not built.
 
 ### Screens and states
 
-No mock draws the moderation view (known gap). `docs/mocks/admin/manifest.json` has no screen for
-it, and `docs/mocks/admin/pages/popkin/default.html` offers no "Open moderation view". The design
-expects, written with `writing-html-mocks` before implementation:
+The mocks in `docs/mocks/admin/` settle the copy the design left open:
 
-- `docs/mocks/admin/pages/popkin/default.html` and `viewer.html` — "Open moderation view" among
-  the page's actions, enabled, and disabled for a Viewer with "Viewer admins can't do this"
-  (L2-111 AC5).
-- `docs/mocks/admin/dialogs/moderation-view-open/default.html`, `busy.html`, `invalid.html`,
-  `failed.html` — the dialog of L2-111 AC1: what the admin will see (the Everyone thread, album
-  and experiences), read-only, for 30 minutes, that the audit log records it and that the members
-  are not told, the field "Reason, for the audit log" with focus, the open action and "Cancel".
-  Title and button copy `<TO SUPPLY>`.
-- `docs/mocks/admin/pages/moderation-view/default.html` (Everyone), `album.html`,
-  `experiences.html` — the banner naming the admin, the reason and when the view closes (L2-111
-  AC2), the three parts, each item with "Remove {kind}" and nothing else to act on.
-- `docs/mocks/admin/pages/moderation-view/closed.html` — the view past 30 minutes: the content
-  gone from the screen, a sentence that the view closed, and a way to open it again with a
-  reason (L2-111 AC4).
-- `docs/mocks/admin/pages/moderation-view/viewer.html` is not needed: a Viewer cannot open a
-  view.
-- `loading.html` and `error.html` in the admin app's usual form.
-- The manifest gains the page `moderation-view`, route
-  `admin.popkin.community/popkins/:popkinId/moderation/:viewId`, requirements `L2-111`, `L2-110`,
-  and the dialog `moderation-view-open`, opening from `popkin`.
-
-The removal inside the view reuses the "Remove this {kind}?" dialog
-([Remove reported content or dismiss the report](../decide-report/README.md)); its sentence that
-"the report closes" does not apply to an item with no report, and its copy here is `<TO SUPPLY>`.
+- `pages/popkin/` — every state with its content gains a "Shared content" panel: what members
+  share stays private, a moderation view opens it read-only for 30 minutes on the record, and
+  "Open moderation view"; disabled for a Viewer with "Viewer admins can't do this" (L2-111 AC5).
+- `dialogs/moderation-view-open/` — `default`, `busy`, `invalid`, `failed`. "Open a moderation view
+  of Lakeside Weekend?", the sentence of AC1 (adding that direct messages stay private), "Reason,
+  for the audit log" with focus, "Open view" (primary) and "Cancel".
+- `pages/moderation-view/` — `default` (Everyone), `album`, `experiences`, `removed`, `closed`,
+  `loading`, `error`. A warning `pk-alert` "Moderation view, on the record." names the admin, the
+  time it opened, the reason and when it closes (AC2); a "Closes 11:12" status; the three parts as
+  tabs; each item with "Remove {kind}" and nothing else (AC3). `closed` replaces the content with
+  "This moderation view has closed" and "Open again" (AC4). No `viewer` state: a Viewer cannot open
+  a view.
+- `dialogs/moderation-remove/` — `default`, `busy`, `invalid`, `failed`: the removal of
+  [Remove reported content](../decide-report/README.md) over the view, its last sentence "Any open
+  report on it closes." since the item may have none.
 
 ### API
 

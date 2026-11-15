@@ -22,19 +22,16 @@ visitor without a session never asks and never sees one.
 
 ### Screens and states
 
-No mock draws the banner in the Popkin web app. The admin app's preview
-(`docs/mocks/admin/pages/announcements/default.html` and `warning.html`, the
-`pk-announcement-preview` component) shows its look: a Notice in the `banner--warning` tone and a
-Warning in the louder `banner--loud` tone (`--color-warning-loud`), each with an icon, the message
-and a close button. The design expects these mocks, `<TO SUPPLY>`:
+The mocks are `docs/mocks/notifications/announcement/` (screen `announcement`), in the look of the
+admin app's preview (`pk-announcement-preview`):
 
-- `docs/mocks/notifications/announcement/notice.html` — a Notice above the Popkin home, at 360 px
-  and 1280 px, light and dark.
-- `docs/mocks/notifications/announcement/warning.html` — a Warning, with its own icon.
-- `docs/mocks/notifications/announcement/long.html` — 140 characters wrapping at 360 px with no
-  sideways scroll (L2-116 AC7).
-- The banner above a full-height screen (the call screen, the photo view), whose placement is
-  `<TO SUPPLY>`.
+- `notice.html` — a Notice in the `banner--warning` tone, with an info icon, above the Popkin home.
+- `warning.html` — a Warning in the louder `banner--loud` tone, with a warning-triangle icon; each
+  starts with a visually hidden "Notice from Popkin:" or "Warning from Popkin:" so the kind is not
+  carried by colour alone (L2-116 AC2).
+- `long.html` — a 140-character message wrapping at 360 px with no sideways scroll (AC7).
+- `call.html` — on a full-height screen the banner sits above the top bar and the stage shrinks to
+  fit; "Dismiss" gives the space back.
 
 The states the design covers:
 
