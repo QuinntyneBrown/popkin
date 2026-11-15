@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Metrics
+
+Person(admin, "Admin", "Any admin role")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "MetricsPage")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Popkin meter instruments; DailyFigureRecorder; GET /api/admin/metrics")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "DailyFigure")
+}
+System_Ext(otel, "Telemetry backend", "<TO SUPPLY>")
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Reads metrics", "JSON/HTTPS")
+Rel(api, db, "Writes and reads daily totals", "EF Core")
+Rel(api, otel, "Exports the same instruments", "OTLP, when configured")
+@enduml

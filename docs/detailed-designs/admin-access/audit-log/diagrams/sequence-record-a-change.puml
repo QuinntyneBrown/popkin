@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — A change and its entry are written together
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "Action dialog" as dlg
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Admin controller" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Write handler" as handler
+  participant "IAdminGuard" as guard
+  participant "AuditLog" as log
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "AppDbContext" as ctx
+  database "Popkin database" as db
+end box
+actor -> dlg : Confirm "Suspend" with a reason
+dlg -> ctrl : POST /api/admin/people/(id)/suspension
+ctrl -> handler : Command
+handler -> guard : RequireAsync(SuspendPerson); the Admin is kept for the request
+handler -> handler : ReasonRules, load Person, apply the change
+handler -> log : Record(SuspendedPerson, Person, id, name and id, reason, sessions ended 3)
+log -> guard : CurrentAdminAsync(): the admin loaded above
+log -> ctx : AuditEntries.Add(AuditEntry.Write(now, admin.Id, admin.Name, record)); no save
+handler -> ctx : SaveChangesAsync once
+ctx -> ctx : Refuse a modified AuditEntry, or a deleted one younger than 2 years
+ctx -> db : One transaction: the change and the entry (L2-120 AC5)
+alt commit succeeds
+  db --> handler : Saved
+  handler --> ctrl : 200
+else commit fails
+  db --> handler : Error; neither row exists, so no entry says it succeeded
+  handler --> ctrl : 500 server_error
+end
+@enduml

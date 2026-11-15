@@ -15,6 +15,10 @@ L1-019 puts the switch in a separate admin app, which journey 23 builds. Until t
 an API setting, `Features:Schedules`, as [ADR 0023](../../../adr/0023-features-switched-on-by-a-setting.md)
 decides for features that are switched on by their owner. Journey 22 builds it.
 
+[Feature switches](../../admin-platform/feature-switches/README.md) replaces the setting with a
+switch the admin app keeps, Off, on for chosen Popkins or on for everyone, behind the same
+`IFeatureSwitches` ([ADR 0024](../../adr/0024-admins-moderation-and-switches-in-the-database.md)).
+
 ## Description
 
 ### Screens and states

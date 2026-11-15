@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Feature switches
+
+Person(owner, "Owner", "Admin who may change a feature")
+Person(viewer, "Support or Viewer admin", "Sees who has each feature")
+Person(member, "Member", "Belongs to a Popkin")
+System(popkin, "Popkin", "Pop-up communities: chat, calls, photos, experiences, Plan and Schedules")
+
+Rel(owner, popkin, "Sets Plan and Schedules Off, Chosen Popkins or Everyone in", "Popkin admin app")
+Rel(viewer, popkin, "Reads the switches in", "Popkin admin app")
+Rel(member, popkin, "Sees the Plan and Schedule tabs, or not, in", "Popkin web app")
+@enduml

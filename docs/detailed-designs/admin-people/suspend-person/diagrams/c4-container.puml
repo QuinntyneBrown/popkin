@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Suspend a person and lift it
+
+Person(adminp, "Admin", "Owner, Support or Viewer")
+Person(member, "Person", "The suspended person")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "PersonPage, SuspendPersonDialog, LiftSuspensionDialog")
+  Container(web, "Popkin web app", "Angular SPA", "Sign-in screens; the suspended screen")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "SuspendPersonCommandHandler, LiftSuspensionCommandHandler, ConfirmCodeCommandHandler")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Person suspension, sessions, audit entries")
+}
+Rel(adminp, admin, "Suspends or lifts", "HTTPS")
+Rel(admin, api, "POST /api/admin/people/{personId}/suspend, /lift-suspension", "JSON/HTTPS, admin cookie")
+Rel(member, web, "Signs in", "HTTPS")
+Rel(web, api, "POST /api/auth/codes/{verificationId}/confirm", "JSON/HTTPS")
+Rel(api, db, "Suspends, revokes sessions, records the audit entry in one save", "EF Core")
+@enduml

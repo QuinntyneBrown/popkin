@@ -1,0 +1,40 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Reset the invite
+
+Container_Boundary(adminApp, "Popkin admin app") {
+  Component(dialog, "PopkinResetInviteDialog", "CDK dialog", "Reset the invite?, reason, Reset code and QR")
+  Component(store, "AdminPopkinStore", "Signal store", "resetInvite(reason), toast")
+  Component(client, "HttpAdminPopkinsApi", "ADMIN_POPKINS_API", "Typed HTTP client")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminPopkinsController", "ASP.NET Core controller", "POST {popkinId}/invite/reset")
+  Component(handler, "AdminResetInviteCommandHandler", "MediatR handler", "Reason, role, new code, audit, one save")
+  Component(guard, "IAdminGuard", "Application service", "RequireAsync(ResetInvite)")
+  Component(codes, "RandomInviteCodeGenerator", "IInviteCodeGenerator", "Ten unguessable characters")
+  Component(audit, "IAuditLog", "Application abstraction", "Adds the AuditEntry")
+  Component(preview, "GetInvitePreviewQueryHandler", "MediatR handler", "Popkin by InviteCode, or 404 invite_not_found")
+  Component(join, "JoinPopkinCommandHandler", "MediatR handler", "Popkin by InviteCode, or 404 invite_not_found")
+  Component(getInvite, "GetInviteQueryHandler", "MediatR handler", "The Popkin's current code and link, for a member")
+  ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace.InviteCode unique index, AuditEntry")
+}
+Container_Boundary(web, "Popkin web app") {
+  Component(invite, "InviteDialog", "CDK dialog", "Reads the invite each time it opens")
+  Component(joinPage, "Join invite screen", "Angular page", "Not-found invite for a 404")
+}
+Rel(dialog, store, "Confirms through")
+Rel(store, client, "resetInvite(popkinId, reason)")
+Rel(client, ctrl, "POST", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends AdminResetInviteCommand")
+Rel(handler, guard, "RequireAsync")
+Rel(handler, codes, "NewCode()")
+Rel(handler, audit, "Record(ResetInvite, oldCode, newCode)")
+Rel(handler, db, "SaveChangesAsync once", "EF Core")
+Rel(joinPage, preview, "GET /api/invites/{code}", "JSON/HTTPS")
+Rel(joinPage, join, "POST /api/invites/{code}/join", "JSON/HTTPS")
+Rel(invite, getInvite, "GET /api/popkins/{popkinId}/invite", "JSON/HTTPS")
+Rel(getInvite, db, "Reads")
+Rel(preview, db, "Reads")
+Rel(join, db, "Reads")
+@enduml

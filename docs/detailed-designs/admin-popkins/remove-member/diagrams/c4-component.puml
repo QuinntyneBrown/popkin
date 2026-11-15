@@ -1,0 +1,38 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Remove a member
+
+Container_Boundary(adminApp, "Popkin admin app") {
+  Component(dialog, "PopkinRemoveMemberDialog", "CDK dialog", "Remove {name}?, reason, Remove from Popkin")
+  Component(store, "AdminPopkinStore", "Signal store", "removeMember(membershipId, reason)")
+  Component(client, "HttpAdminPopkinsApi", "ADMIN_POPKINS_API", "Typed HTTP client")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminPopkinsController", "ASP.NET Core controller", "POST {popkinId}/members/{membershipId}/remove")
+  Component(handler, "AdminRemoveMemberCommandHandler", "MediatR handler", "Reason, role, membership, audit, one save")
+  Component(guard, "IAdminGuard", "Application service", "RequireAsync(RemoveMember)")
+  Component(schedules, "MemberSchedules", "Application helper", "Removes the member's schedule entries")
+  Component(departures, "MemberDepartures", "Application service", "Off calls, out of presence and the group, MemberLeft")
+  Component(audit, "IAuditLog", "Application abstraction", "Adds the AuditEntry")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "MemberLeft to the group; MembershipEnded to a user")
+  ComponentDb(db, "Popkin database", "SQL Server", "Membership, AuditEntry")
+}
+Container_Boundary(web, "Popkin web app") {
+  Component(realtime, "PopkinRealtime", "api library", "membershipEnded$")
+  Component(watch, "MembershipWatch", "api library", "Closes the Popkin's screens, opens My Popkins")
+}
+Rel(dialog, store, "Confirms through")
+Rel(store, client, "removeMember(popkinId, membershipId, reason)")
+Rel(client, ctrl, "POST", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends AdminRemoveMemberCommand")
+Rel(handler, guard, "RequireAsync")
+Rel(handler, schedules, "RemoveAsync")
+Rel(handler, audit, "Record(RemoveMember)")
+Rel(handler, db, "SaveChangesAsync once", "EF Core")
+Rel(handler, departures, "AnnounceAsync")
+Rel(departures, notifier, "MemberLeft")
+Rel(handler, notifier, "MembershipEnded(personId, popkinId)")
+Rel(notifier, realtime, "MembershipEnded", "SignalR, Clients.User")
+Rel(watch, realtime, "Subscribes to")
+@enduml

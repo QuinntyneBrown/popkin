@@ -1,0 +1,9 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Audit log
+
+Person(admin, "Admin", "Any role; reads and exports the log")
+System(popkin, "Popkin", "The console, the Popkin API and the Worker")
+Rel(admin, popkin, "Reads every action with who did it and why; exports a CSV")
+@enduml

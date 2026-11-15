@@ -1,0 +1,65 @@
+@startuml
+title UML sequence behaviour — Start a deletion
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PersonPage" as page
+  participant "StartDeletionDialog" as dlg
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "StartDeletionCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "AccountDeletion" as deletion
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Start deletion" (disabled for Support and Viewer with the reason, L2-098 AC3)
+page -> dlg : Open; erase date = today + 30 days
+dlg --> actor : "Start deleting Mara Okafor’s account?", "erases on 13 Aug", reason focused (L2-098 AC1)
+actor -> dlg : Reason, "Start deletion"
+dlg -> client : startDeletion(personId, reason)
+client -> ctrl : POST /api/admin/people/{personId}/deletion { reason }
+ctrl -> handler : Send StartDeletionCommand
+handler -> guard : RequireAsync(StartDeletion)
+alt Support or Viewer
+  guard --> ctrl : 403 role_not_allowed (L2-086 AC1)
+else Owner
+  handler -> db : Person
+  alt Being deleted already, or erased
+    handler --> ctrl : 409 person_being_deleted, or 404 person_not_found
+  else Active or suspended
+    handler -> deletion : PrepareAsync(person, adminId, now)
+    deletion -> db : Wrap up hosted active Popkins (album kept); anonymise memberships; revoke sessions
+    deletion -> deletion : Person.MarkDeleted(now, adminId): ErasesOn = date + 30 days
+    deletion --> handler : PreparedDeletion
+    handler -> audit : Record(DeletionStarted, Person, reason, { erasesOn, popkinsWrappedUp }) (L2-098 AC4)
+    handler -> db : One SaveChangesAsync
+    db --> handler : Saved
+    handler -> deletion : AnnounceAsync(prepared): PopkinWrappedUp, CallEnded, MemberLeft, SessionsEnded
+    handler --> ctrl : AdminPersonDto (Being deleted)
+    ctrl --> client : 200
+    client --> dlg : Person
+    dlg --> page : Close
+    page --> actor : "Erases 13 Aug"; toast "Deletion started" (L2-098 AC2, L2-094 AC4)
+  end
+end
+@enduml

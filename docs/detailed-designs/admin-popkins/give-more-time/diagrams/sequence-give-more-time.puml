@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Give a Popkin more time
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinExtendDialog" as dialog
+  participant "AdminPopkinStore" as store
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+  participant "SignalRPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AdminExtendPopkinCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "PopkinInput" as input
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomeStore" as home
+end box
+actor -> dialog : Choose "Give more time"
+dialog --> actor : "Give it more time", "+7 days" chosen, focus in the reason (L2-105 AC1)
+actor -> dialog : Arrow to "+14 days", type a reason, choose "Add 14 days"
+dialog -> store : giveMoreTime(14, reason)
+store -> client : giveMoreTime(popkinId, 14, reason)
+client -> ctrl : POST /api/admin/popkins/{popkinId}/more-time
+ctrl -> handler : Send AdminExtendPopkinCommand
+handler -> handler : ReasonRules.Required; days in 3, 7, 14, 30
+handler -> guard : RequireAsync(ExtendPopkin)
+guard --> handler : allowed
+handler -> db : Load tracked PopkinSpace: Active, EndsAt set
+handler -> input : End(UntilDate, EndsAt + 14 days, now)
+input --> handler : within a year (L2-009 AC3)
+handler -> handler : PopkinSpace.ChangeLength(UntilDate, newEnd); Version + 1
+handler -> audit : Record(ExtendPopkin, reason, days, oldEndsAt, newEndsAt) (L2-105 AC4)
+handler -> db : SaveChangesAsync under the concurrency token
+db --> handler : committed
+handler -> notifier : PopkinChanged(popkinId, PopkinDto)
+notifier -> home : PopkinChanged to popkin:{popkinId}
+home -> home : Apply when version is higher; new time left, no reload (L2-020 AC4)
+handler --> ctrl : AdminPopkinDto with the new end
+ctrl --> client : 200
+client --> store : Popkin
+store --> dialog : close
+store --> actor : "{n} of {m} days left"; toast "{name} now ends in {n} days" (L2-105 AC2)
+@enduml

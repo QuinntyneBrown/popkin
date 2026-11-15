@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — A refused wrap-up
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinWrapUpDialog" as dialog
+  participant "AdminPopkinStore" as store
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AdminWrapUpPopkinCommandHandler" as handler
+  participant "IAdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt reason empty or only spaces
+  actor -> dialog : Choose "Wrap up"
+  dialog --> actor : Nothing sent; field invalid with its error (L2-087 AC2)
+else Viewer sends the request by hand
+  client -> ctrl : POST .../wrap-up
+  ctrl -> handler : Send AdminWrapUpPopkinCommand
+  handler -> guard : RequireAsync(WrapUpPopkin)
+  guard --> handler : 403 role_not_allowed
+  handler --> ctrl : nothing changed, no audit entry (L2-086 AC1)
+  ctrl --> client : 403 role_not_allowed
+else wrapped up meanwhile
+  actor -> dialog : Confirm with a reason
+  dialog -> store : wrapUp(reason)
+  store -> client : wrapUp(popkinId, reason)
+  client -> ctrl : POST .../wrap-up
+  ctrl -> handler : Send AdminWrapUpPopkinCommand
+  handler -> db : Load PopkinSpace
+  alt already WrappedUp
+    handler --> ctrl : 409 popkin_wrapped_up
+  else wrapped up between the read and the save
+    handler -> db : SaveChangesAsync
+    db --> handler : DbUpdateConcurrencyException (Version changed)
+    handler -> db : Is it WrappedUp now?
+    db --> handler : yes
+    handler --> ctrl : 409 popkin_wrapped_up; nothing saved, audit entry included
+  end
+  ctrl --> client : 409 popkin_wrapped_up
+  client --> store : 409
+  store --> dialog : close
+  store -> client : get(popkinId)
+  client --> store : Popkin, WrappedUp
+  store --> actor : Page shows it wrapped up (L2-104 AC3)
+else network or server failure
+  client --> store : error
+  store --> dialog : failed: "That didn't go through", reason as typed (L2-087 AC5)
+end
+@enduml

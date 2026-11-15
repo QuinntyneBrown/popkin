@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Ask for a code
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "SignInPage" as page
+  participant "AdminSignInStore" as store
+  participant "HttpAdminAuthApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAuthController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "RequestAdminCodeCommandHandler" as handler
+  participant "CodeIssuer" as issuer
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "Email ICodeSender" as email
+end box
+actor -> page : Type staff email, choose "Email me a code"
+page -> store : requestCode(email)
+alt not a whole email address (L2-088 AC2)
+  store --> page : Nothing sent
+  page --> actor : Summary "Check your email address", field "Enter a whole email address, like name@popkin.app."
+else whole address
+  store --> page : "Sending code…", action busy (L2-088 AC3)
+  store -> client : requestCode(email)
+  client -> ctrl : POST /api/admin/auth/codes (codes-per-address limit)
+  ctrl -> handler : Send RequestAdminCodeCommand
+  handler -> db : Load AdminSignInLock for the email
+  alt locked (L2-088 AC6)
+    handler --> ctrl : 429 admin_locked, lockedUntil
+    ctrl --> client : 429
+    client --> store : Locked
+    store --> page : "Too many wrong codes", "Try again at (time)…"
+  else not locked
+    handler -> issuer : IssueAsync(Email, email, AdminSignIn); Admins never read
+    issuer -> db : Supersede earlier codes, add VerificationCode (L2-005 AC2, AC4)
+    issuer -> email : SendAsync(email, code)
+    issuer --> handler : CodeSentDto
+    handler --> ctrl : AdminCodeSentDto
+    ctrl --> client : 200, the same whether or not the email is an admin's
+    client --> store : verificationId, sentTo, expiresAt, resendAvailableAt
+    store --> page : Step code
+    page --> actor : "Enter your code", "Sent to (email). It works for 10 minutes."
+  end
+end
+@enduml

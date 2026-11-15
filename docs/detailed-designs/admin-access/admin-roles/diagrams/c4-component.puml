@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Admin roles
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(sess, "AdminSessionStore", "Signal store (api)", "me, role, allows(action), blockedReason(action)")
+  Component(perm, "admin-permissions.ts", "Pure helper (api)", "actionBlockedReason, VIEWER_NOTICE")
+  Component(btn, "pk-button disabledReason", "components", "aria-disabled, tooltip and description")
+  Component(table, "pk-permission-table", "components", "What each role can do, in words")
+  Component(page, "Any page with actions", "Page", "Binds each action to blockedReason")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(mectl, "AdminMeController", "Controller", "GET /api/admin/me, GET /api/admin/roles")
+  Component(handler, "Any admin write handler", "MediatR handler", "Calls RequireAsync first")
+  Component(guard, "IAdminGuard / AdminGuard", "Application", "CurrentAdminAsync, RequireAsync; 403 role_not_allowed")
+  Component(cur, "ICurrentAdmin", "Application abstraction", "AdminId from the admin cookie")
+  Component(table2, "AdminPermissions", "Domain", "The L2-086 table, its one home")
+  ComponentDb(db, "AppDbContext", "EF Core", "Admins")
+}
+Rel(page, sess, "Reads")
+Rel(sess, perm, "Uses")
+Rel(page, btn, "Passes the reason")
+Rel(page, table, "Renders roles view")
+Rel(sess, mectl, "GET /api/admin/me", "HTTPS")
+Rel(handler, guard, "RequireAsync(action)")
+Rel(mectl, guard, "CurrentAdminAsync")
+Rel(guard, cur, "Reads")
+Rel(guard, table2, "Allows(role, action)")
+Rel(guard, db, "Loads Admin")
+@enduml

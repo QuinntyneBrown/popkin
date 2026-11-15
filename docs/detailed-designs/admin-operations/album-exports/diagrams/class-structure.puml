@@ -1,0 +1,88 @@
+@startuml
+title Class structure — Album exports
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+enum AlbumExportStatus {
+  Preparing
+  Ready
+  Failed
+}
+enum AlbumExportFailure {
+  PhotoMissing
+  StorageTimedOut
+  TooLarge
+  Unexpected
+}
+class AlbumExport {
+  +Guid Id
+  +Guid PopkinId
+  +Guid RequestedByMembershipId
+  +AlbumExportStatus Status
+  +int PhotosTotal
+  +int PhotosDone
+  +long? SizeBytes
+  +int Attempts
+  +AlbumExportFailure? FailedWith
+  +DateTimeOffset RequestedAt
+  +DateTimeOffset? StartedAt
+  +DateTimeOffset? QueuedAt
+  +{static} Request(popkinId, membershipId, photosTotal, sizeBytes, now): AlbumExport
+  +Begin(photosTotal, now): void
+  +Fail(failure): void
+  +Retry(now): void
+  +Ready(storageKey, now): void
+}
+enum PendingExportState {
+  Queued
+  Building
+  Failed
+}
+class PendingAlbumExportDto {
+  +Guid ExportId
+  +Guid PopkinId
+  +string PopkinEmoji
+  +string PopkinName
+  +int Photos
+  +DateTimeOffset AskedAt
+  +string AskedByName
+  +long? SizeBytes
+  +PendingExportState State
+  +int Tries
+  +AlbumExportFailure? Failure
+}
+class PendingAlbumExportsDto {
+  +IReadOnlyList<PendingAlbumExportDto> Exports
+  +int Failed
+  +DateTimeOffset? NextRunAt
+}
+class RetryAlbumExportsCommand {
+  +Guid? ExportId
+}
+class RetryAlbumExportsCommandHandler {
+  +Handle(command): Task<AlbumExportsRetriedDto>
+}
+class AlbumExportsRetriedDto {
+  +int Queued
+  +DateTimeOffset? NextRunAt
+}
+class PrepareAlbumExportsCommandHandler {
+  +Handle(command): Task<int>
+}
+AlbumExport --> AlbumExportStatus
+AlbumExport --> AlbumExportFailure
+PendingAlbumExportDto --> PendingExportState
+PendingAlbumExportsDto "1" *-- "*" PendingAlbumExportDto
+RetryAlbumExportsCommandHandler ..> RetryAlbumExportsCommand : handles
+RetryAlbumExportsCommandHandler --> AlbumExport : Retry()
+RetryAlbumExportsCommandHandler ..> AlbumExportsRetriedDto : returns
+PrepareAlbumExportsCommandHandler --> AlbumExport : Begin / Fail / Ready
+@enduml

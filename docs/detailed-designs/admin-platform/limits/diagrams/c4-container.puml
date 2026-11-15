@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Limits
+
+Person(owner, "Owner", "Admin")
+Person(person, "Person", "Signed in or not")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "Limits page and Save new limits dialog")
+  Container(web, "Popkin web app", "Angular SPA", "Checks a file against GET /api/limits/uploads")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/limits, ILimits, rate limiters, upload checks")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "LimitSetting, AuditEntry, VerificationCode")
+}
+Rel(owner, admin, "Edits and saves", "HTTPS")
+Rel(admin, api, "GET, PUT /api/admin/limits", "JSON/HTTPS, admin cookie")
+Rel(person, web, "Uploads, sends, signs in", "HTTPS")
+Rel(web, api, "Requests bounded by the limits", "JSON/HTTPS")
+Rel(api, db, "Writes limits with audit entries; reloads the snapshot", "EF Core")
+@enduml

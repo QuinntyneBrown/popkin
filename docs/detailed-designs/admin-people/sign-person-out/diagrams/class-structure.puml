@@ -1,0 +1,50 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Sign a person out everywhere
+
+class Session {
+  +Guid Id
+  +Guid PersonId
+  +DateTimeOffset? RevokedAt
+  +IsLive(now): bool
+  +Revoke(now): void
+}
+class SignPersonOutCommand {
+  +Guid PersonId
+  +string Reason
+}
+class SignPersonOutCommandHandler {
+  +Handle(command): Task<AdminPersonDto>
+}
+class SessionRevocation <<Application>> {
+  +RevokeAllAsync(personId, now): Task<int>
+}
+interface IAuditLog {
+  +Record(record): void
+}
+interface IPopkinNotifier {
+  +SessionsEndedAsync(personId): Task
+}
+interface IPopkinClient {
+  +SessionsEnded(): Task
+}
+enum AuditAction {
+  PersonSignedOut
+}
+SignPersonOutCommandHandler ..> SignPersonOutCommand : handles
+SignPersonOutCommandHandler ..> SessionRevocation : uses
+SessionRevocation --> Session : Revoke each live
+SignPersonOutCommandHandler ..> IAuditLog : PersonSignedOut, sessions ended
+SignPersonOutCommandHandler ..> IPopkinNotifier
+IPopkinNotifier ..> IPopkinClient : sends to the person's users
+IAuditLog ..> AuditAction
+@enduml

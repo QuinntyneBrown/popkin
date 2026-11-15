@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Cancel a deletion
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "DeletionsPage" as page
+  participant "CancelDeletionDialog" as dlg
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminDeletionsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "CancelDeletionCommandHandler" as handler
+  participant "Person" as person
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Cancel deletion" on Ruth Lindqvist
+page -> dlg : Open with name and erase date
+dlg --> actor : "Keep Ruth Lindqvist’s account?", reason focused (L2-099 AC3)
+actor -> dlg : Reason, "Cancel deletion"
+dlg -> client : cancelDeletion(personId, reason)
+client -> ctrl : POST /api/admin/deletions/{personId}/cancel { reason }
+ctrl -> handler : Send CancelDeletionCommand
+handler -> handler : IAdminGuard.RequireAsync(CancelDeletion); ReasonRules
+handler -> db : Person
+alt Erased, or never deleted
+  handler --> ctrl : 409 deletion_not_held (L2-099 AC6)
+else Another account now has the email or phone
+  handler --> ctrl : 409 contact_taken
+else Held
+  handler -> person : CancelDeletion()
+  handler -> audit : Record(DeletionCancelled, Person, reason)
+  handler -> db : One SaveChangesAsync
+  handler --> ctrl : 204
+  ctrl --> client : 204
+  client --> dlg : Done
+  dlg --> page : Close; the row leaves the queue
+  page --> actor : Toast "Ruth Lindqvist’s account is kept", "They can sign in again." (L2-099 AC4)
+end
+note over db : Popkins wrapped up by the deletion stay wrapped up (L2-099 AC3)
+@enduml

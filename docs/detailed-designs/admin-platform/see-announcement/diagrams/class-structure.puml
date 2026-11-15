@@ -1,0 +1,65 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — See an announcement
+
+package "api library (frontend)" {
+  interface AnnouncementApi {
+    +live(): Observable<AnnouncementView | null>
+  }
+  class HttpAnnouncementApi {
+    +live(): Observable<AnnouncementView | null>
+  }
+  class AnnouncementView {
+    +string id
+    +string message
+    +'notice' | 'warning' style
+    +string endsAt
+  }
+  class AnnouncementStore {
+    +Signal<AnnouncementView | null> banner
+    -number pollMs = 60000
+    +dismiss(): void
+  }
+  class AnnouncementDismissals {
+    +string key = "popkin.announcement.dismissed"
+    +dismissedId(): string | null
+    +dismiss(id: string): void
+  }
+  class SessionStore
+}
+package "components library" {
+  class Announcement as "pk-announcement" {
+    +input message: string
+    +input style: 'notice' | 'warning'
+    +output dismissed
+  }
+}
+package "Popkin.Application" {
+  class GetLiveAnnouncementQueryHandler {
+    +Handle(query): Task<AnnouncementDto?>
+  }
+  class AnnouncementDto {
+    +Guid Id
+    +string Message
+    +AnnouncementStyle Style
+    +DateTimeOffset EndsAt
+  }
+}
+AnnouncementApi <|.. HttpAnnouncementApi
+AnnouncementStore ..> AnnouncementApi : polls
+AnnouncementStore ..> SessionStore : only with a session
+AnnouncementStore ..> AnnouncementDismissals
+AnnouncementStore --> AnnouncementView : banner
+HttpAnnouncementApi ..> AnnouncementDto : maps 200, 204 to null
+GetLiveAnnouncementQueryHandler ..> AnnouncementDto : returns
+Announcement ..> AnnouncementView : shows
+@enduml

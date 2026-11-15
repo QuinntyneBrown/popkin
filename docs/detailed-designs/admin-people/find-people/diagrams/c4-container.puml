@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — People
+
+Person(adminp, "Admin", "Owner, Support or Viewer")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "PeoplePage, PeopleStore, HttpAdminPeopleApi")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "AdminPeopleController, FindPeopleQueryHandler")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "People, sessions and memberships")
+}
+Rel(adminp, admin, "Searches and filters", "HTTPS")
+Rel(admin, api, "GET /api/admin/people", "JSON/HTTPS, admin cookie")
+Rel(api, db, "Reads a page by last seen, newest first", "EF Core")
+@enduml

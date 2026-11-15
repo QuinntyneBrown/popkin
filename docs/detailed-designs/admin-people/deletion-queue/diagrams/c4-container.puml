@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — The deletion queue
+
+Person(adminp, "Admin", "Owner, Support or Viewer")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "DeletionsPage, DeletionQueueStore, CancelDeletionDialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "AdminDeletionsController, GetDeletionQueueQueryHandler, CancelDeletionCommandHandler")
+  Container(worker, "Popkin Worker", ".NET worker service", "PurgeDeletedAccountsJob, daily at 03:00")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "People in their hold, audit entries")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "Profile photos, deleted at erasure")
+}
+Rel(adminp, admin, "Reads; cancels", "HTTPS")
+Rel(admin, api, "GET /api/admin/deletions, POST /api/admin/deletions/{personId}/cancel", "JSON/HTTPS, admin cookie")
+Rel(api, db, "Reads; cancels with the audit entry", "EF Core")
+Rel(worker, db, "Erases the accounts whose date has come", "EF Core")
+Rel(worker, store, "Deletes the profile photo", "HTTPS")
+@enduml

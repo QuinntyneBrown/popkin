@@ -1,0 +1,52 @@
+@startuml
+title UML sequence behaviour — The Worker records its runs
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Worker" #FFF4E5
+  participant "PeriodicJob" as job
+  participant "JobLogCapture" as capture
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IJobRunLog" as runs
+  participant "Job command handler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+job -> runs : At start: close runs of this job left Running as Failed ("Worker stopped")
+runs -> db : Update JobRun
+loop until stopping is asked
+  alt timer tick
+    job -> runs : BeginAsync(job, Schedule, null)
+  else request picked up (polled every 5 s)
+    job -> runs : TakeRequestAsync(job)
+    runs -> db : Oldest JobRunRequest with TakenAt null; Take(now)
+    job -> runs : BeginAsync(job, RunNow, requestId)
+  end
+  runs -> db : Insert JobRun (Running)
+  job -> capture : Collect this run's log lines
+  job -> handler : Send NewCommand()
+  alt the handler returns
+    job -> runs : FinishAsync(runId, Succeeded, last 20 lines)
+  else the handler throws
+    job -> runs : FinishAsync(runId, Failed, last 20 lines)
+  end
+  runs -> db : Update JobRun; delete runs older than 8 days
+  opt run asked for by an admin (L2-113 AC5)
+    runs -> db : AuditEntry JobRunFinished: the requester, the job, the outcome and how long it took
+  end
+end
+note over capture : Log lines carry ids and counts only, never a name, address, code or text (L2-113 AC2, L2-054 AC3).
+@enduml

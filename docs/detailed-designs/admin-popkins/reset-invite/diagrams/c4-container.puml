@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Reset the invite
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+Person(member, "Member", "Person who belongs to a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(adminApp, "Popkin admin app", "Angular", "frontend/projects/admin at admin.popkin.community")
+  Container(webApp, "Popkin web app", "Angular", "frontend/projects/popkin")
+  Container(api, "Popkin API", "ASP.NET Core", "/api/admin/** controllers, /api controllers and PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server", "Popkins, memberships and audit entries")
+}
+Rel(admin, adminApp, "Uses", "HTTPS")
+Rel(member, webApp, "Uses", "HTTPS")
+Rel(adminApp, api, "POST /api/admin/popkins/{popkinId}/invite/reset", "JSON/HTTPS, admin session cookie")
+Rel(api, db, "Saves the new code and the audit entry", "EF Core")
+Rel(webApp, api, "GET /api/invites/{code}, GET /api/popkins/{popkinId}/invite", "JSON/HTTPS")
+@enduml

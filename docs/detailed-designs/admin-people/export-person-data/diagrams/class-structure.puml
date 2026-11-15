@@ -1,0 +1,79 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Export a person's data
+
+enum DataRequestStatus {
+  New
+  Compiling
+  ReadyToSend
+  Sent
+  Failed
+}
+enum DataRequestChannel {
+  Email
+  InApp
+  Admin
+}
+class DataRequest {
+  +Guid Id
+  +Guid PersonId
+  +string PersonName
+  +DataRequestChannel Channel
+  +DateOnly ReceivedOn
+  +DateOnly DueOn
+  +DataRequestStatus Status
+  +Guid LoggedByAdminId
+  +string Reason
+  +string? StorageKey
+  +DateTimeOffset? ReadyAt
+  +DateTimeOffset? SentAt
+  +DateTimeOffset? LinkExpiresAt
+  +{static} Log(person, channel, receivedOn, adminId, reason): DataRequest
+  +StartExport(): void
+  +Ready(storageKey, now): void
+  +MarkSent(now): void
+  +Fail(): void
+  +IsDueSoon(today): bool
+  +LinkExpired(now): bool
+}
+class StartDataExportCommand {
+  +Guid PersonId
+  +string Reason
+}
+class StartDataExportCommandHandler
+class PreparePersonDataExportsCommand
+class PreparePersonDataExportsCommandHandler {
+  +Handle(command): Task<int>
+}
+class PersonDataExportWriter {
+  +WriteAsync(personId, zip: Stream, ct): Task
+}
+class DownloadDataExportQuery {
+  +Guid DataRequestId
+}
+class DownloadDataExportQueryHandler {
+  +Handle(query): Task<string>
+}
+class PreparePersonDataExportsJob {
+  +Period: TO SUPPLY
+}
+DataRequest --> DataRequestStatus
+DataRequest --> DataRequestChannel
+StartDataExportCommandHandler ..> StartDataExportCommand : handles
+StartDataExportCommandHandler ..> DataRequest : Log, StartExport
+PreparePersonDataExportsJob ..> PreparePersonDataExportsCommand : sends
+PreparePersonDataExportsCommandHandler ..> PreparePersonDataExportsCommand : handles
+PreparePersonDataExportsCommandHandler --> DataRequest : Ready or Fail
+PreparePersonDataExportsCommandHandler ..> PersonDataExportWriter
+DownloadDataExportQueryHandler ..> DownloadDataExportQuery : handles
+DownloadDataExportQueryHandler --> DataRequest : reads StorageKey
+@enduml

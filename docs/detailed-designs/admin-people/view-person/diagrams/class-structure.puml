@@ -1,0 +1,101 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — A person
+
+class Person {
+  +Guid Id
+  +string Name
+  +string? Email
+  +string? Phone
+  +DateTimeOffset CreatedAt
+  +DateTimeOffset? LastSeenAt
+  +StatusAt(): PersonStatus
+  +Seen(now): void
+}
+class Session {
+  +Guid Id
+  +Guid PersonId
+  +DateTimeOffset CreatedAt
+  +DateTimeOffset ExpiresAt
+  +DateTimeOffset? RevokedAt
+  +string? Device
+  +string? Client
+  +string? Address
+  +string? Place
+  +DateTimeOffset? LastSeenAt
+  +IsLive(now): bool
+  +Seen(now): void
+}
+class SessionOrigin {
+  +string? Device
+  +string? Client
+  +string? Address
+  +string? Place
+}
+class GetAdminPersonQuery {
+  +Guid PersonId
+}
+class GetAdminPersonQueryHandler {
+  +Handle(query): Task<AdminPersonDto>
+}
+class AdminPersonDto {
+  +Guid PersonId
+  +string Name
+  +string? PhotoUrl
+  +string? Email
+  +string? Phone
+  +PersonStatus Status
+  +DateTimeOffset JoinedAt
+  +DateTimeOffset? LastSeenAt
+  +string SignIn
+  +AdminPersonPopkinsDto Popkins
+  +List<AdminSessionRowDto> Sessions
+  +AdminSuspensionDto? Suspension
+  +AdminDeletionDto? Deletion
+  +AdminDataExportDto? Export
+}
+class AdminPersonPopkinsDto {
+  +int Total
+  +int Live
+  +List<AdminPersonPopkinDto> Items
+}
+class AdminPersonPopkinDto {
+  +Guid PopkinId
+  +string Emoji
+  +string Name
+  +MembershipRole Role
+  +int Members
+  +DateTimeOffset? EndsAt
+}
+class AdminSessionRowDto {
+  +Guid SessionId
+  +string? Device
+  +string? Client
+  +string? Place
+  +string? Address
+  +DateTimeOffset Since
+  +bool ActiveNow
+}
+class RecordSessionActivityCommand {
+  +Guid SessionId
+}
+GetAdminPersonQueryHandler ..> GetAdminPersonQuery : handles
+GetAdminPersonQueryHandler --> Person : reads
+GetAdminPersonQueryHandler --> Session : reads live
+GetAdminPersonQueryHandler ..> AdminPersonDto : returns
+AdminPersonDto *-- AdminPersonPopkinsDto
+AdminPersonPopkinsDto "1" *-- "*" AdminPersonPopkinDto
+AdminPersonDto "1" *-- "*" AdminSessionRowDto
+Person "1" --> "*" Session
+Session ..> SessionOrigin : started with
+RecordSessionActivityCommand ..> Session : Seen(now)
+@enduml

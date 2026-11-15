@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Reports
+
+Person(admin, "Admin", "Any role")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA, admin.popkin.community", "Reports page")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/admin/reports, GET /api/admin/reports/(kind)/(id)")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Report, Message, Photo, Experience, AuditEntry")
+  Container(store, "Photo store", "Azure Blob Storage", "Photo and picture files")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Reads the queue and a report", "JSON/HTTPS, admin session")
+Rel(api, db, "Reads reports and context; writes the read's AuditEntry", "EF Core")
+Rel(api, store, "Signs a read address")
+Rel(adminapp, store, "Shows the reported photo", "HTTPS, expiring address")
+@enduml

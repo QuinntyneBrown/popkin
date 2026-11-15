@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Find Popkins
+
+Container_Boundary(adminApp, "Popkin admin app") {
+  Component(page, "PopkinsPage", "Angular page", "Header, search, Show filter and table")
+  Component(store, "AdminPopkinsStore", "Signal store", "Search, filter, rows and state")
+  Component(text, "admin-popkin-text.ts", "Pure helpers", "Status and length text")
+  Component(client, "HttpAdminPopkinsApi", "ADMIN_POPKINS_API", "Typed HTTP client")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminPopkinsController", "ASP.NET Core controller", "Admin cookie scheme; one MediatR request per action")
+  Component(handler, "FindPopkinsQueryHandler", "MediatR handler", "Search, filter, order, page")
+  Component(guard, "IAdminGuard", "Application service", "The current admin, or 401")
+  Component(status, "AdminPopkinStatuses", "Domain rule", "Live, Ending within 48 h, WrappedUp")
+  ComponentDb(db, "Popkin database", "SQL Server", "PopkinSpace, Membership")
+}
+Rel(page, store, "Reads state from")
+Rel(page, text, "Formats rows with")
+Rel(store, client, "find(query)")
+Rel(client, ctrl, "GET /api/admin/popkins", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends FindPopkinsQuery")
+Rel(handler, guard, "CurrentAdminAsync()")
+Rel(handler, status, "Of(popkin, now)")
+Rel(handler, db, "Reads", "EF Core, AsNoTracking")
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Remove a member
+
+Person(admin, "Admin", "Owner, Support or Viewer; runs Popkin from the admin app")
+Person(member, "Member", "Person who belongs to a Popkin")
+System(popkin, "Popkin", "Pop-up communities and the admin app that runs them")
+
+Rel(admin, popkin, "Removes a person from one Popkin with a reason in", "HTTPS")
+Rel(member, popkin, "Sees one fewer member, or the removed person's screens close, in", "HTTPS")
+@enduml

@@ -1,0 +1,105 @@
+@startuml
+title Class structure — Jobs
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+enum JobName {
+  WrapUpDuePopkins
+  RemovePhotosOfWrappedUpPopkins
+  PrepareAlbumExports
+  PurgeDeletedAccounts
+}
+enum JobRunOutcome {
+  Running
+  Succeeded
+  Failed
+}
+enum JobRunTrigger {
+  Schedule
+  RunNow
+}
+class JobRun {
+  +Guid Id
+  +JobName Job
+  +JobRunTrigger Trigger
+  +Guid? RequestId
+  +DateTimeOffset StartedAt
+  +DateTimeOffset? FinishedAt
+  +JobRunOutcome Outcome
+  +string Log
+  +{static} Begin(job, trigger, requestId, now): JobRun
+  +Finish(outcome, log, now): void
+}
+class JobRunRequest {
+  +Guid Id
+  +JobName Job
+  +Guid RequestedByAdminId
+  +DateTimeOffset RequestedAt
+  +DateTimeOffset? TakenAt
+  +Take(now): void
+}
+class JobCatalogue {
+  +{static} JobInfo Of(JobName)
+}
+class JobInfo {
+  +JobName Job
+  +string Name
+  +string Does
+  +TimeSpan Period
+  +string ClassName
+}
+interface IJobRunLog {
+  +BeginAsync(job, trigger, requestId): Task<Guid>
+  +FinishAsync(runId, outcome, lines): Task
+  +TakeRequestAsync(job): Task<JobRunRequest?>
+}
+abstract class "PeriodicJob<TResponse>" as PeriodicJob {
+  #NewCommand(): IRequest<TResponse>
+  #ExecuteAsync(ct): Task
+}
+class RunJobNowCommand {
+  +JobName Job
+}
+class RunJobNowCommandHandler {
+  +Handle(command): Task<JobRunRequestDto>
+}
+class GetJobsQueryHandler {
+  +Handle(query): Task<JobsDto>
+}
+class JobDto {
+  +JobName Job
+  +string Name
+  +string Does
+  +JobStatus Status
+  +DateTimeOffset? LastRunAt
+  +TimeSpan? LastRunTook
+  +string Schedule
+  +DateTimeOffset? NextRunAt
+  +int RunsToday
+  +int Failures7Days
+  +string ClassName
+  +IReadOnlyList<string> Log
+}
+JobRun --> JobName
+JobRun --> JobRunOutcome
+JobRun --> JobRunTrigger
+JobRunRequest --> JobName
+JobRun ..> JobRunRequest : RequestId
+JobCatalogue ..> JobInfo : returns
+PeriodicJob ..> IJobRunLog : records runs
+IJobRunLog ..> JobRun : writes
+IJobRunLog ..> JobRunRequest : takes
+RunJobNowCommandHandler ..> RunJobNowCommand : handles
+RunJobNowCommandHandler ..> JobRunRequest : adds
+GetJobsQueryHandler --> JobRun : reads
+GetJobsQueryHandler ..> JobCatalogue : names
+GetJobsQueryHandler ..> JobDto : returns
+@enduml

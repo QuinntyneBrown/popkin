@@ -1,0 +1,68 @@
+@startuml
+title UML sequence behaviour — An Owner publishes a banner
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AnnouncementsPage" as page
+  participant "AdminAnnouncementsStore" as store
+  participant "PublishAnnouncementDialog" as dialog
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAnnouncementsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "PublishAnnouncementCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "Announcement" as entity
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Types the message, picks Notice or Warning, sets "Take it down"
+page -> store : Update the draft
+store --> page : Count "{n}/140", preview (L2-115 AC1, AC3)
+alt Over 140 characters
+  store --> page : "The banner can't be published yet", "Keep it to 140 characters; it's {n}." (L2-115 AC2)
+else Valid
+  actor -> page : "Publish to everyone"
+  page -> dialog : "Show this banner to everyone?", "all {n} people", end time (L2-115 AC4)
+  actor -> dialog : "Publish"
+  dialog -> client : POST /api/admin/announcements { message, style, endsAt }
+  client -> controller : admin cookie
+  controller -> handler : Send PublishAnnouncementCommand
+  handler -> guard : RequireAsync(PublishAnnouncement)
+  alt Support or Viewer
+    guard --> controller : 403 role_not_allowed (L2-115 AC8)
+  else Owner
+    handler -> db : Any announcement live now?
+    alt One is live
+      handler --> controller : 409 announcement_live
+      controller --> client : ProblemDetails
+      dialog --> actor : "The change didn't save"; dialog stays open
+    else None live
+      handler -> entity : Publish(message, style, endsAt, admin, now)
+      handler -> audit : Record(PublishAnnouncement, Announcement id, style, endsAt) (L2-115 AC9)
+      handler -> db : SaveChangesAsync, one transaction
+      handler --> controller : AdminAnnouncementDto
+      controller --> client : 201
+      client --> store : Live
+      store --> page : "Showing now", "Live to {n} people", toast "The banner is live" (L2-115 AC5)
+    end
+  end
+end
+@enduml

@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — Suspend a person
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin or Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PersonPage" as page
+  participant "SuspendPersonDialog" as dlg
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SuspendPersonCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "Person" as person
+  participant "IAuditLog" as audit
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Suspend Mara"
+page -> dlg : Open with name and live session count
+dlg --> actor : "Suspend Mara Okafor?", "signed out of 3 devices now", reason focused (L2-095 AC1, L2-087 AC1)
+actor -> dlg : Reason, "Suspend"
+alt Reason empty or spaces
+  dlg --> actor : "Give a reason; it goes in the audit log." Nothing sent (L2-087 AC2)
+else Reason given
+  dlg -> dlg : Busy, reason read-only (L2-087 AC4)
+  dlg -> client : suspend(personId, reason)
+  client -> ctrl : POST /api/admin/people/{personId}/suspend { reason }
+  ctrl -> handler : Send SuspendPersonCommand
+  handler -> guard : RequireAsync(SuspendPerson)
+  alt Viewer
+    guard --> ctrl : 403 role_not_allowed (L2-086 AC1)
+  else Owner or Support
+    handler -> db : Person, live sessions
+    handler -> person : Suspend(adminId, reason, now)
+    handler -> db : Revoke every live Session (L2-095 AC2)
+    handler -> audit : Record(PersonSuspended, Person, reason, sessions ended)
+    handler -> db : One SaveChangesAsync (L2-095 AC6, L2-120 AC5)
+    db --> handler : Saved
+    handler -> notifier : SessionsEndedAsync(personId)
+    handler --> ctrl : AdminPersonDto
+    ctrl --> client : 200
+    client --> dlg : Person
+    dlg --> page : Close with the person
+    page --> actor : "Suspended", Access names admin and reason; toast "Mara Okafor is suspended" (L2-095 AC2, L2-094 AC3)
+  end
+end
+opt The request fails
+  client --> dlg : Error
+  dlg --> actor : "That didn’t go through", reason kept (L2-087 AC5)
+end
+@enduml

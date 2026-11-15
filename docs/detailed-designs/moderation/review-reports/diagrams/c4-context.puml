@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Reports
+
+Person(member, "Member", "Reports an item in the Popkin app")
+Person(admin, "Admin", "Owner, Support or Viewer; reads the queue")
+System(popkin, "Popkin", "Popkin app, admin app and the Popkin API")
+Rel(member, popkin, "Reports an item")
+Rel(admin, popkin, "Reads the queue and each report; the read is audited")
+@enduml

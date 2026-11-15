@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — A person
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "PersonPage", "Angular page", "pk-page-head, pk-panel, pk-key-values, pk-record")
+  Component(pstore, "PersonStore", "Signal store, api library", "The person and the actions offered")
+  Component(session, "AdminSessionStore", "Signal store", "allowed actions of the role")
+  Component(client, "HttpAdminPeopleApi", "ADMIN_PEOPLE_API", "person(personId)")
+}
+Container_Boundary(apic, "Popkin API") {
+  Component(ctrl, "AdminPeopleController", "ASP.NET Core controller, Admin scheme", "GET /api/admin/people/{personId}")
+  Component(handler, "GetAdminPersonQueryHandler", "MediatR handler", "Account, Popkins, sessions, access")
+  Component(events, "SessionCookieEvents", "Cookie events", "Sends RecordSessionActivityCommand")
+  Component(activity, "RecordSessionActivityCommandHandler", "MediatR handler", "Last seen, at most every 5 minutes")
+  ComponentDb(db, "Popkin database", "SQL Server", "People, Sessions, Memberships, Popkins, Admins")
+}
+Rel(page, pstore, "Reads")
+Rel(page, session, "Reads allowed actions")
+Rel(pstore, client, "Calls")
+Rel(client, ctrl, "GET", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetAdminPersonQuery")
+Rel(handler, db, "Reads", "EF Core")
+Rel(events, activity, "Sends on a live session")
+Rel(activity, db, "Writes LastSeenAt", "EF Core")
+@enduml

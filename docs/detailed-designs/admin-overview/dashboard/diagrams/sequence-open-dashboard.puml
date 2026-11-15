@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — Open the dashboard
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "DashboardPage" as page
+  participant "DashboardStore" as store
+  participant "HttpAdminOverviewApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminDashboardController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminDashboardQueryHandler" as handler
+  participant "IAdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /
+page -> store : load()
+store --> page : Skeletons in the page's shape (L2-089 AC7)
+store -> client : dashboard()
+client -> ctrl : GET /api/admin/dashboard
+ctrl -> ctrl : Admin scheme: no admin session 401, Popkin session only 403
+ctrl -> handler : Send GetAdminDashboardQuery
+handler -> guard : CurrentAdminAsync()
+guard --> handler : Admin (any role may view)
+handler -> db : Count Person, joined today; PopkinSpace live, started today (London day)
+handler -> db : DailyFigure: PeopleActive and PopkinsStarted, last 14 days; today partial (L2-090 AC2)
+handler -> db : Waiting: open Report, latest HealthSample per service, last JobRun per job, DataRequest due in 7 days, Person erased within 3 days (L2-090 AC3)
+handler -> db : Right now: calls under way, Popkins ending in 48 h, deletion queue, exports preparing (L2-090 AC5)
+handler -> db : Last 4 AuditEntry (L2-090 AC6)
+db --> handler : Rows
+handler --> ctrl : AdminDashboardDto
+ctrl --> client : 200 AdminDashboardDto
+client --> store : Dashboard view
+alt nothing waiting (L2-090 AC4)
+  store --> page : "Nothing waiting" with the all-clear sentence
+else things waiting
+  store --> page : "{n} things waiting"; reports and services marked "(urgent)" in words
+end
+page --> actor : Date and time, "figures refresh every minute", three figures, chart, Needs attention, Right now, Recent admin actions (L2-090 AC1)
+alt request fails
+  client --> store : Error
+  store --> page : "Couldn't load the dashboard", "Try again", "Open Health" (L2-089 AC7)
+end
+@enduml

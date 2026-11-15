@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — A change whose reason is optional
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "ChangeAdminRoleDialog" as dlg
+  participant "ActionDialogState (Optional)" as state
+  participant "HttpAdminAccessApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAdminsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangeAdminRoleCommandHandler" as handler
+  participant "ReasonRules" as rules
+  participant "IAuditLog" as audit
+end box
+actor -> dlg : Choose a new role in the list
+dlg --> actor : "Reason, for the audit log" marked optional (L2-087 AC3)
+actor -> dlg : Choose "Change role" with the reason empty
+dlg -> state : confirm(send)
+state -> client : changeRole(id, role, reason: null)
+client -> ctrl : PUT /api/admin/admins/(id)/role (role, reason null)
+ctrl -> handler : Command
+handler -> rules : Optional(null)
+rules --> handler : null
+handler -> audit : Record(ChangedAdminRole, Admin, id, name, null, old and new role)
+handler --> ctrl : 200
+ctrl --> client : 200
+state --> dlg : close(result)
+@enduml

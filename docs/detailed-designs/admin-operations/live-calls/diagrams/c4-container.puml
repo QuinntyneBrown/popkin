@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Live calls
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+Person(member, "Member", "On the call")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "LiveCallsPage, EndCallDialog; polls every 10 s")
+  Container(web, "Popkin web app", "Angular SPA", "CallSession, call screen")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/admin/calls, POST /api/admin/calls/(id)/end, PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Call, CallParticipant, AuditEntry")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(member, web, "Uses", "HTTPS")
+Rel(adminapp, api, "Lists and ends calls", "JSON/HTTPS")
+Rel(api, db, "Reads, ends the call, writes the audit entry", "EF Core")
+Rel(api, web, "CallEnded with reason EndedByPopkin", "SignalR")
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Admins and roles
+
+Person(owner, "Owner", "Decides who can use the console")
+Person(newadmin, "New admin", "Popkin staff at @popkin.app")
+Person(ops, "Operations", "Sets Admin:FirstOwner in the deployment")
+System(popkin, "Popkin", "The console and the Popkin API")
+System_Ext(acs, "Azure Communication Services", "Email")
+Rel(owner, popkin, "Adds and removes admins, changes their roles")
+Rel(ops, popkin, "Names the first Owner by configuration")
+Rel(popkin, acs, "Sends the invite", "HTTPS")
+Rel(acs, newadmin, "Delivers the invite", "Email")
+Rel(newadmin, popkin, "Signs in with a code")
+@enduml

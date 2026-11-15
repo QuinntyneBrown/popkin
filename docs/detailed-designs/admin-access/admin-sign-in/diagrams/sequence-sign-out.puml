@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — Sign out of the console
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AdminShell (pk-admin-shell)" as shell
+  participant "AdminSessionStore" as sess
+  participant "HttpAdminAuthApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAuthController" as ctrl
+  participant "AdminSessionCookie" as cookie
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AdminSignOutCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> shell : Choose "Sign out"
+shell -> sess : signOut()
+sess -> client : signOut()
+client -> ctrl : POST /api/admin/auth/sign-out
+ctrl -> handler : Send AdminSignOutCommand(sessionId)
+handler -> db : AdminSession.Revoke(now)
+ctrl -> cookie : SignOutAsync: clears __Host-popkin-admin only
+ctrl --> client : 204
+client --> sess : Cleared
+sess --> actor : "Sign in to the console" opens (L2-088 AC8)
+note over cookie : The Popkin app's cookie is a different cookie on a different host;\nit is kept (L2-078 AC5)
+@enduml

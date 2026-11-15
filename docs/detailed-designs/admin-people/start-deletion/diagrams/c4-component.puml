@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Start a deletion
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "PersonPage", "Angular page", "Delete account panel")
+  Component(dlg, "StartDeletionDialog", "CDK dialog", "Erase date, pk-reason-field")
+  Component(client, "HttpAdminPeopleApi", "ADMIN_PEOPLE_API", "startDeletion")
+}
+Container_Boundary(apic, "Popkin API") {
+  Component(ctrl, "AdminPeopleController", "Admin scheme", "POST deletion")
+  Component(handler, "StartDeletionCommandHandler", "MediatR handler", "Owner only, reason, audit")
+  Component(self, "DeleteAccountCommandHandler", "MediatR handler", "The person's own deletion, L2-049")
+  Component(deletion, "AccountDeletion", "Application service", "PrepareAsync and AnnounceAsync: the steps of L2-049")
+  Component(wrap, "PopkinWrapUpService", "Application service", "Wrap-up, album kept")
+  Component(depart, "MemberDepartures", "Application service", "MemberLeft in the other Popkins")
+  Component(audit, "IAuditLog", "Application", "DeletionStarted")
+  ComponentDb(db, "Popkin database", "SQL Server", "People, Memberships, Sessions, Popkins, AuditEntries")
+}
+Rel(page, dlg, "Opens")
+Rel(dlg, client, "Calls")
+Rel(client, ctrl, "POST", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends StartDeletionCommand")
+Rel(handler, deletion, "PrepareAsync(person, adminId)")
+Rel(self, deletion, "PrepareAsync(person, null)")
+Rel(deletion, wrap, "PrepareAsync, AnnounceAsync")
+Rel(deletion, depart, "AnnounceAsync")
+Rel(handler, audit, "Records")
+Rel(handler, db, "One SaveChangesAsync", "EF Core")
+@enduml

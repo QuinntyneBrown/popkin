@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — A page follows the role
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Viewer or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "adminSessionGuard" as guard
+  participant "AdminSessionStore" as sess
+  participant "App (pk-admin-shell)" as shell
+  participant "Page" as page
+  participant "pk-button" as btn
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminMeController" as me
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminMeQueryHandler" as q
+  participant "AdminPermissions" as perm
+end box
+actor -> guard : Open a page
+guard -> sess : load()
+sess -> me : GET /api/admin/me
+me -> q : GetAdminMeQuery
+q -> perm : AllowedFor(role)
+q --> me : AdminMeDto (role, allowed)
+me --> sess : 200
+alt role is Viewer (L2-086 AC2)
+  shell --> actor : Notice "You're signed in as a Viewer. You can look at everything; actions are switched off."
+  page -> sess : blockedReason(action) for each action
+  sess --> page : "Viewer admins can't do this"
+  page -> btn : disabledReason = "Viewer admins can't do this"
+  btn --> actor : aria-disabled, tooltip and description; Export CSV stays enabled
+else role is Support (L2-086 AC3)
+  page -> sess : blockedReason(ChangeLimits)
+  sess --> page : "Only Owners can do this"
+  page -> btn : disabledReason = "Only Owners can do this"
+  btn --> actor : Owner-only actions disabled with the reason; every other action enabled
+else Owner
+  btn --> actor : Every action enabled
+end
+@enduml

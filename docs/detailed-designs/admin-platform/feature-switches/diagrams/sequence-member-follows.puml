@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — A member's open screen follows the switch
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinFrame" as frame
+  participant "pk-popkin-nav" as nav
+  participant "TimeOffStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlatformSnapshotMiddleware" as mw
+  participant "PopkinsController, ScheduleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPopkinFeaturesQueryHandler" as features
+  participant "GetTimeOffWeekQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "PlatformSnapshot" as snap
+  database "Popkin database" as db
+end box
+note over snap : An Owner changed Schedules to Chosen; this Popkin is not chosen
+frame -> frame : 60 s since the last read (L2-076 AC10)
+frame -> mw : GET /api/popkins/{popkinId}/features
+mw -> snap : RefreshIfStaleAsync
+opt Older than 30 s, or invalidated
+  snap -> db : Load FeatureSetting and FeatureChosenPopkin
+  db --> snap : Modes and chosen ids
+end
+mw -> controller : Continue
+controller -> features : Send GetPopkinFeaturesQuery
+features -> features : IMembershipGuard.RequireMemberAsync
+features -> snap : IsOn(Plan, popkinId), IsOn(Schedules, popkinId) (L2-077 AC7)
+snap --> features : schedules false
+features --> controller : PopkinFeaturesDto
+controller --> frame : 200 { plan, schedules: false }
+frame -> nav : schedule = false
+nav --> actor : No "Schedule" tab (L2-077 AC1)
+store -> controller : Its own 60 s read of time off
+controller -> handler : Send GetTimeOffWeekQuery
+handler -> snap : Require(Schedules, popkinId)
+snap --> controller : 404 feature_off (L2-077 AC3)
+controller --> store : ProblemDetails code feature_off
+store --> actor : "Schedules is switched off", "Back to {Popkin name}" (L2-077 AC2, AC4)
+note over db : Time off, hours and the event stay (L2-077 AC5, AC8)
+@enduml

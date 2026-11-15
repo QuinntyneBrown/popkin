@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — Export the log as CSV
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin (any role)" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AuditPage" as page
+  participant "AuditLogStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAuditController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ExportAuditLogCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "AuditLog" as log
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Export CSV"
+page -> store : exportUrl() with the current search and admin
+store --> page : /api/admin/audit/export?search=...&adminId=...
+page -> ctrl : GET (a download link; the admin cookie goes with it)
+ctrl -> handler : ExportAuditLogCommand(search, adminId)
+handler -> guard : RequireAsync(ExportAuditLog): every role (L2-086)
+handler -> log : Record(ExportedAuditLog, the filter and the row count)
+handler -> db : SaveChangesAsync: the export's own entry (L2-120 AC5)
+handler -> db : Read matching entries newest first, as a stream
+handler --> ctrl : Rows
+ctrl --> actor : 200 text/csv, popkin-audit-(date).csv: the entries that match the search and filter (L2-120 AC4)
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Admin sign in
+
+Person(admin, "Admin", "Staff email at @popkin.app")
+System_Boundary(popkin, "Popkin") {
+  Container(proxy, "Web proxy", "Caddy (infra/web)", "admin.popkin.community: the admin build, /api/admin/* forwarded, no /hubs")
+  Container(adminapp, "Popkin admin app", "Angular SPA, frontend/projects/admin", "Sign in, code, not an admin")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/auth/*, the Admin cookie scheme")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "VerificationCode, AdminSignInLock, Admin, AdminSession")
+}
+System_Ext(acs, "Azure Communication Services", "Email")
+Rel(admin, proxy, "Opens the console", "HTTPS")
+Rel(proxy, adminapp, "Serves")
+Rel(adminapp, api, "Requests and confirms codes", "JSON/HTTPS via the proxy")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, acs, "Sends the code", "ICodeSender")
+@enduml

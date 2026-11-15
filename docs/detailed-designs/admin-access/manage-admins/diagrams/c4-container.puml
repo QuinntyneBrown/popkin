@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Admins and roles
+
+Person(owner, "Owner", "Signed in to the console")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "Admins & roles page; add, change role, remove dialogs")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/admins; AdminBootstrapper at start-up")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Admin, AdminSession, AuditEntry")
+}
+System_Ext(acs, "Azure Communication Services", "Email")
+Rel(owner, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Lists, adds, changes, removes", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, acs, "Sends the invite", "IAdminInviteSender")
+@enduml

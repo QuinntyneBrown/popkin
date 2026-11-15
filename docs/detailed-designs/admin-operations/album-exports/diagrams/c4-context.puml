@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Album exports
+
+Person(admin, "Admin", "Owner or Support retries; Viewer reads")
+Person(member, "Member", "Chose Save the album on a wrapped-up Popkin")
+System(popkin, "Popkin", "Pop-up communities, the admin app and the Worker")
+System_Ext(blob, "Photo store", "Azure Blob Storage; photos and album zips")
+Rel(member, popkin, "Asks for the album's zip", "HTTPS")
+Rel(admin, popkin, "Sees exports not yet delivered and retries a failed one", "HTTPS")
+Rel(popkin, blob, "Reads photos, writes zips", "HTTPS")
+@enduml

@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Open a page of the console
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "Router + adminSessionGuard" as guard
+  participant "AdminSessionStore" as sess
+  participant "App (pk-admin-shell)" as shell
+  participant "AdminWaitingStore" as waiting
+  participant "Page" as page
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminMeController" as me
+  participant "AdminShellController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminWaitingQueryHandler" as q
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> guard : Open /reports (a link, the address bar or the nav)
+guard -> sess : load()
+sess -> me : GET /api/admin/me
+me --> sess : AdminMeDto (role and allowed actions)
+alt 401
+  guard --> actor : /sign-in?returnUrl=/reports
+else signed in
+  guard -> shell : Route data shell admin, page reports
+  shell --> actor : Sidebar (>= 1024 px) or top bar with Menu; "Production"; current section aria-current="page" (L2-089 AC1, AC2)
+  opt role is Viewer
+    shell --> actor : Notice "You're signed in as a Viewer…" (L2-086 AC2)
+  end
+  shell -> waiting : start() when not running
+  waiting -> ctrl : GET /api/admin/waiting
+  ctrl -> q : GetAdminWaitingQuery
+  q -> db : Count reports waiting, jobs failed on their last run, exports failed
+  q --> ctrl : AdminWaitingDto
+  ctrl --> waiting : 200
+  waiting --> shell : Badges beside Reports, Jobs, Album exports ("5 waiting")
+  shell -> page : Render inside admin-shell__main
+  page --> actor : Skeleton, then content, empty sentence or "Try again" (L2-089 AC7)
+  loop every 60 s while signed in
+    waiting -> ctrl : GET /api/admin/waiting
+  end
+end
+@enduml

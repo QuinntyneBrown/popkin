@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — The admin shell
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(root, "App (root)", "Container", "Chooses the admin or bare shell from route data")
+  Component(shell, "pk-admin-shell", "components", "Sidebar from 1024 px, top bar below, notice slot")
+  Component(nav, "pk-admin-nav", "components", "Six groups, aria-current, waiting badges, the admin's name and role")
+  Component(menu, "MenuDialog", "CDK dialog", "The same nav as a drawer under 1024 px")
+  Component(waiting, "AdminWaitingStore", "Signal store (api)", "Polls the counts every 60 s")
+  Component(sess, "AdminSessionStore", "Signal store (api)", "The signed-in admin")
+  Component(err, "ErrorScreens + NotFoundPage + ServerErrorPage", "api + pages", "There's no page here; Something went wrong")
+  Component(client, "AdminOverviewApi", "ADMIN_OVERVIEW_API", "waiting()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminShellController", "Controller", "GET /api/admin/waiting")
+  Component(q, "GetAdminWaitingQueryHandler", "MediatR handler", "Reports waiting, failed jobs, failed exports")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(root, shell, "Composes when shell is admin")
+Rel(shell, nav, "Projects")
+Rel(root, menu, "Opens from Menu")
+Rel(menu, nav, "Composes")
+Rel(root, waiting, "Reads")
+Rel(root, sess, "Reads")
+Rel(waiting, client, "Calls")
+Rel(client, ctrl, "HTTPS")
+Rel(ctrl, q, "GetAdminWaitingQuery")
+Rel(q, db, "Counts")
+@enduml

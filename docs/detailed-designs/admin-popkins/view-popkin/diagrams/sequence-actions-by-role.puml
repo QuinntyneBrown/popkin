@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — The actions follow the role
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Viewer admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinPage" as page
+  participant "AdminSessionStore" as session
+  participant "popkinActions" as actions
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Admin action handler" as handler
+  participant "IAdminGuard" as guard
+  participant "AdminPermissions" as perms
+end box
+actor -> page : Open a live Popkin's page
+page -> session : me (read on every navigation)
+session -> client : GET /api/admin/me
+client --> session : AdminMeDto, role Viewer, allowed [ExportAuditLog]
+page -> actions : popkinActions(popkin, me)
+actions --> page : each action disabled, "Viewer admins can't do this" (L2-086 AC2)
+page --> actor : Buttons disabled, reason as description and tooltip
+note over actor, client : A request sent by hand still reaches the API
+actor -> client : POST /api/admin/popkins/{popkinId}/wrap-up
+client -> ctrl : POST with reason
+ctrl -> handler : Send the command
+handler -> guard : RequireAsync(WrapUpPopkin)
+guard -> perms : Allows(Viewer, WrapUpPopkin)
+perms --> guard : false
+guard --> handler : 403 role_not_allowed
+handler --> ctrl : nothing changed, no audit entry (L2-086 AC1)
+ctrl --> client : 403 role_not_allowed
+opt role changed by an Owner
+  actor -> page : Open the next page
+  page -> session : me
+  session --> page : new role and allowed actions (L2-086 AC5)
+end
+@enduml

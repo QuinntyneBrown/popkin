@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — An Owner saves new limits
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "LimitsPage" as page
+  participant "AdminLimitsStore" as store
+  participant "SaveLimitsDialog" as dialog
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminLimitsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangeLimitsCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "PlatformSnapshot" as snap
+  database "Popkin database" as db
+end box
+actor -> page : Changes Messages 60 → 20
+page -> store : Edit the draft
+alt Not a whole number of 1 or more
+  store --> page : "Enter a whole number of 1 or more.", "Fix the highlighted limit to save" (L2-117 AC4)
+else Valid
+  store --> page : "1 unsaved change", "Discard", "Save limits" (L2-117 AC3)
+  actor -> page : "Save limits"
+  page -> dialog : "Save new limits?", "Messages per member per minute: 60 → 20" (L2-117 AC5)
+  actor -> dialog : Reason, "Save"
+  alt Reason empty
+    dialog --> actor : "Give a reason; it goes in the audit log." Nothing sent (L2-087 AC2)
+  else Reason given
+    dialog -> client : PUT /api/admin/limits { changes, reason }
+    client -> controller : admin cookie
+    controller -> handler : Send ChangeLimitsCommand
+    handler -> guard : RequireAsync(ChangeLimits)
+    alt Support or Viewer
+      guard --> controller : 403 role_not_allowed (L2-117 AC7)
+    else Owner
+      handler -> handler : ReasonRules, ChangeLimitsCommandValidator
+      handler -> db : Upsert LimitSetting per change
+      handler -> audit : Record(ChangeLimits, Limit, old, new, reason) per change (L2-117 AC8)
+      handler -> db : SaveChangesAsync, one transaction (L2-120 AC5)
+      handler -> snap : Invalidate()
+      handler --> controller : AdminLimitsDto
+      controller --> client : 200
+      client --> store : Saved values
+      store --> page : Bar gone, toast "Limits saved" (L2-117 AC5)
+    end
+  end
+end
+@enduml

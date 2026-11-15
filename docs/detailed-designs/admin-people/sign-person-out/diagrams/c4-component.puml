@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Sign a person out everywhere
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "PersonPage", "Angular page", "Sessions panel")
+  Component(dlg, "SignPersonOutDialog", "CDK dialog", "pk-reason-field, ActionDialogState")
+  Component(client, "HttpAdminPeopleApi", "ADMIN_PEOPLE_API", "signOut(personId, reason)")
+}
+Container_Boundary(apic, "Popkin API") {
+  Component(ctrl, "AdminPeopleController", "Admin scheme", "POST sign-out")
+  Component(handler, "SignPersonOutCommandHandler", "MediatR handler", "Revoke every live session, audit with the count")
+  Component(audit, "IAuditLog", "Application", "Record")
+  Component(notifier, "IPopkinNotifier", "Application", "SessionsEndedAsync")
+  Component(events, "SessionCookieEvents", "Cookie events", "Rejects a revoked session: 401")
+  ComponentDb(db, "Popkin database", "SQL Server", "Sessions, AuditEntries")
+}
+Rel(page, dlg, "Opens")
+Rel(dlg, client, "Calls")
+Rel(client, ctrl, "POST", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends SignPersonOutCommand")
+Rel(handler, audit, "Records")
+Rel(handler, notifier, "After the save")
+Rel(handler, db, "One SaveChangesAsync", "EF Core")
+Rel(events, db, "Reads Session.RevokedAt", "EF Core")
+@enduml

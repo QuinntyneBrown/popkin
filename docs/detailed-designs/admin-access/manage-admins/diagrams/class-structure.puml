@@ -1,0 +1,99 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Admins and roles
+
+enum AdminRole {
+  Owner
+  Support
+  Viewer
+}
+class Admin {
+  +const string StaffDomain = "popkin.app"
+  +Guid Id
+  +string Email
+  +string Name
+  +AdminRole Role
+  +DateTimeOffset InvitedAt
+  +Guid? InvitedByAdminId
+  +DateTimeOffset? ActivatedAt
+  +DateTimeOffset? LastActiveAt
+  +DateTimeOffset? RemovedAt
+  +bool IsInvited
+  +Invite(email, name, role, by, now): Admin
+  +Reinvite(role, by, now): void
+  +ChangeRole(role): void
+  +Remove(now): void
+}
+class AdminSession {
+  +Revoke(now): void
+}
+class AdminOptions {
+  +string? FirstOwner
+}
+class AdminBootstrapper <<IHostedService>> {
+  +StartAsync(ct): sends EnsureFirstOwnerCommand
+}
+class EnsureFirstOwnerCommand {
+  +string Email
+}
+class AddAdminCommand {
+  +string? Email
+  +AdminRole Role
+}
+class ChangeAdminRoleCommand {
+  +Guid AdminId
+  +AdminRole Role
+  +string? Reason
+}
+class RemoveAdminCommand {
+  +Guid AdminId
+  +string? Reason
+}
+class AdminRosterGate {
+  -SemaphoreSlim gate
+  +EnterAsync(ct): IDisposable
+}
+interface IAdminInviteSender {
+  +SendAsync(email, AdminInviteMessage, ct)
+}
+class AdminInviteMessage {
+  +string InvitedByName
+  +AdminRole Role
+  +string ConsoleUrl
+}
+class AdminListDto {
+  +int Count
+  +AdminRowDto[] Admins
+}
+class AdminRowDto {
+  +Guid Id
+  +string Name
+  +string Email
+  +AdminRole Role
+  +bool Invited
+  +DateTimeOffset? LastActiveAt
+  +bool IsYou
+  +bool IsLastOwner
+}
+Admin --> AdminRole
+Admin "1" --> "*" AdminSession
+AdminBootstrapper ..> AdminOptions : reads
+AdminBootstrapper ..> EnsureFirstOwnerCommand : sends
+AddAdminCommand ..> IAdminInviteSender : handler sends
+IAdminInviteSender ..> AdminInviteMessage
+ChangeAdminRoleCommand ..> AdminRosterGate : handler enters
+RemoveAdminCommand ..> AdminRosterGate : handler enters
+RemoveAdminCommand ..> AdminSession : handler revokes all
+AdminListDto "1" *-- "*" AdminRowDto
+@enduml

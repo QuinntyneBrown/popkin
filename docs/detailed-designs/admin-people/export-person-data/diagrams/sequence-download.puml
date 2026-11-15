@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — Download an export
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin or Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "DataRequestsPage" as page
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminDataRequestsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DownloadDataExportQueryHandler" as handler
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "IPhotoStore" as store
+end box
+actor -> page : Download Dev Patel’s export
+page -> client : downloadUrl(dataRequestId)
+client -> ctrl : GET /api/admin/data-requests/{id}/download
+ctrl -> handler : Send DownloadDataExportQuery
+handler -> handler : IAdminGuard.RequireAsync(ExportPersonData) (L2-100 AC4)
+handler -> db : DataRequest
+alt Not ready, or the link expired
+  handler --> ctrl : 409 export_not_ready, or 410 export_expired
+else Ready or sent, not expired
+  handler -> audit : Record(DataExportDownloaded, DataRequest, the request's reason)
+  handler -> db : SaveChangesAsync (L2-100 AC5, L2-120 AC5)
+  handler -> store : GetDownloadUrl(key, "popkin-data-{personId}.zip")
+  handler --> ctrl : Address
+  ctrl --> client : 302 to the signed address
+  client --> actor : The zip downloads
+end
+@enduml

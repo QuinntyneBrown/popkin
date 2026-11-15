@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — Read the deletion queue
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "DeletionsPage" as page
+  participant "DeletionQueueStore" as qstore
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminDeletionsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetDeletionQueueQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open "Deletion queue"
+page -> qstore : load()
+qstore -> client : deletions()
+client -> ctrl : GET /api/admin/deletions
+ctrl -> handler : Send GetDeletionQueueQuery
+handler -> handler : IAdminGuard.CurrentAdminAsync() (any role)
+handler -> db : People with DeletedAt set and ErasedAt null, by ErasesOn, then DeletedAt
+db --> handler : Rows, with the starting admin's name
+handler --> ctrl : DeletionQueueDto (days left counted from today)
+ctrl --> client : 200
+client --> qstore : Rows
+alt No account in its hold
+  qstore --> page : state empty
+  page --> actor : "No accounts waiting" (L2-099 AC2)
+else Rows
+  qstore --> page : rows
+  page --> actor : Name, email, requested, "Themselves" or "Admin · Marco Bianchi", erases, days left (L2-099 AC1)
+end
+note over page : Support and Viewer see "Cancel deletion" disabled with the reason (L2-099 AC5)
+@enduml

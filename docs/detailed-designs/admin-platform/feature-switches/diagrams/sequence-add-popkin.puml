@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — An Owner adds a Popkin to Schedules
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AddFeaturePopkinDialog" as dialog
+  participant "AdminFeaturesStore" as store
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminFeaturesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SearchFeaturePopkinsQueryHandler" as search
+  participant "AddFeaturePopkinCommandHandler" as handler
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "PlatformSnapshot" as snap
+  database "Popkin database" as db
+end box
+actor -> dialog : "Add a Popkin", types "lake"
+dialog -> client : searchPopkins(Schedules, "lake")
+client -> controller : GET /api/admin/features/Schedules/popkins/search?q=lake
+controller -> search : Send SearchFeaturePopkinsQuery
+search -> db : Active Popkins by name or invite code
+db --> search : Matches with alreadyOn
+search --> controller : FeaturePopkinMatchDto[]
+controller --> client : 200
+alt No match
+  dialog --> actor : "No live Popkin matches “lake”. Wrapped-up Popkins can't be added." (L2-076 AC6)
+else Matches
+  dialog --> actor : Tile, name, code; "Lakeside Weekend already has Schedules."
+  actor -> dialog : Picks Bakery Launch Crew, "Add to Schedules"
+  dialog -> dialog : busy, "Adding…"
+  dialog -> store : addPopkin(Schedules, popkinId, reason)
+  store -> client : POST /api/admin/features/Schedules/popkins
+  client -> controller : { popkinId }
+  controller -> handler : Send AddFeaturePopkinCommand
+  handler -> handler : IAdminGuard.RequireAsync(ChangeFeature)
+  handler -> db : Load the Popkin
+  alt Wrapped up
+    handler --> controller : 409 popkin_wrapped_up
+    controller --> client : ProblemDetails
+    dialog --> actor : Alert; dialog stays open (L2-076 AC8)
+  else Live
+    handler -> db : Add FeatureChosenPopkin
+    handler -> audit : Record(AddFeaturePopkin, Feature, popkin id and name)
+    handler -> db : SaveChangesAsync
+    handler -> snap : Invalidate()
+    handler --> controller : AdminFeatureDto
+    controller --> client : 200
+    store --> actor : Panel lists the Popkin (L2-076 AC5)
+  end
+end
+@enduml

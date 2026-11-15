@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Search and filter Popkins
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinsPage" as page
+  participant "AdminPopkinsStore" as store
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "FindPopkinsQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Type a name or an invite code
+page -> store : setSearch(text)
+store -> store : Wait for typing to pause; cancel any older read
+store -> client : find(search, show)
+client -> ctrl : GET /api/admin/popkins?search=...&show=...
+ctrl -> handler : Send FindPopkinsQuery
+handler -> db : Name contains text (ignoring case) or InviteCode equals it (L2-102 AC2)
+db --> handler : Matching Popkins
+handler --> ctrl : AdminPopkinListDto
+ctrl --> client : 200
+client --> store : rows
+alt rows found
+  store --> page : state ready
+  page --> actor : Only the matching Popkins
+else none
+  store --> page : state noResults, search kept
+  page --> actor : "No Popkin matches ..." and "Clear the search" (L2-102 AC2)
+end
+actor -> page : Choose "Ending in 48 h" in Show
+page -> store : setShow(Ending)
+store -> client : find(search, show ending)
+client -> ctrl : GET /api/admin/popkins?show=ending
+ctrl -> handler : Send FindPopkinsQuery
+handler -> db : Active and EndsAt within 48 h of now (L2-102 AC3)
+db --> handler : Ending Popkins
+handler --> ctrl : AdminPopkinListDto
+ctrl --> client : 200
+client --> store : rows
+store --> page : state ready
+page --> actor : Each status "2 days left" or "1 day left" in words
+@enduml

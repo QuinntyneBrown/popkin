@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Report content
+
+Person(member, "Member", "Reports a message, photo or experience someone else posted")
+Person(admin, "Admin", "Reviews the report in the admin app")
+System(popkin, "Popkin", "Private spaces for pop-up communities, and the admin app that runs them")
+Rel(member, popkin, "Reports an item with a reason")
+Rel(admin, popkin, "Reviews reports")
+@enduml

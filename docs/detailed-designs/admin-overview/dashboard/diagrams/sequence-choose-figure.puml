@@ -1,0 +1,39 @@
+@startuml
+title UML sequence behaviour — Choose a figure and refresh
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "DashboardPage" as page
+  participant "DashboardStore" as store
+  participant "HttpAdminOverviewApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminDashboardController" as ctrl
+end box
+actor -> page : Choose "Popkins live" figure tab
+page -> store : choose(PopkinsStarted)
+store --> page : Chart "Popkins started each day", last 14 days, today marked partial (L2-090 AC2)
+page --> actor : aria-selected moves to the tab; the chart's figures as a text table
+loop every 60 s while the page is open (L2-090 AC7)
+  store -> client : dashboard()
+  client -> ctrl : GET /api/admin/dashboard
+  ctrl --> client : 200 AdminDashboardDto
+  client --> store : Replace figures; keep the chosen figure
+  store --> page : Figures refresh without a reload
+end
+actor -> page : Choose a "Right now" tile
+page --> actor : Navigate to /calls, /popkins, /deletions or /exports (L2-090 AC5)
+@enduml

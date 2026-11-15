@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Live calls
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "LiveCallsPage", "Angular page", "pk-data-table, pk-avatar-stack, pk-status-pill, pk-empty-state")
+  Component(dlg, "EndCallDialog", "CDK dialog", "pk-reason-field, ActionDialogState")
+  Component(store, "LiveCallsStore", "Signal store", "10 s refresh, over-3-hours flag")
+  Component(client, "HttpAdminOperationsApi", "ADMIN_OPERATIONS_API", "calls(), endCall(id, reason)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminCallsController", "ASP.NET Core controller", "Admin scheme")
+  Component(list, "GetLiveCallsQueryHandler", "MediatR handler", "Calls under way with their Popkin and participants")
+  Component(end, "EndCallByPopkinCommandHandler", "MediatR handler", "Guard, reason, end, audit, notify")
+  Component(guard, "IAdminGuard", "Application service", "RequireAsync(EndCall)")
+  Component(audit, "IAuditLog", "Application service", "Record(AuditRecord)")
+  Component(notifier, "SignalRPopkinNotifier", "IPopkinNotifier", "CallEnded to the call's audience")
+  ComponentDb(db, "Popkin database", "SQL Server", "Call, CallParticipant, AuditEntry")
+}
+Rel(page, store, "Reads")
+Rel(page, dlg, "Opens")
+Rel(store, client, "Calls every 10 s")
+Rel(dlg, client, "endCall")
+Rel(client, ctrl, "GET / POST", "JSON/HTTPS")
+Rel(ctrl, list, "Sends GetLiveCallsQuery")
+Rel(ctrl, end, "Sends EndCallByPopkinCommand")
+Rel(end, guard, "Requires EndCall")
+Rel(end, audit, "Records EndCall")
+Rel(end, notifier, "CallEnded(EndedByPopkin)")
+Rel(list, db, "Reads", "EF Core")
+Rel(end, db, "One SaveChangesAsync", "EF Core")
+@enduml

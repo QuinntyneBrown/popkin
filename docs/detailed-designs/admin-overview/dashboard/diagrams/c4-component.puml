@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Dashboard
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "DashboardPage", "Angular page", "pk-figure-tabs, pk-trend-chart, pk-attention-list, pk-tiles, pk-action-log")
+  Component(store, "DashboardStore", "Signal store (api library)", "Chosen figure, 60 s refresh, load state")
+  Component(client, "HttpAdminOverviewApi", "ADMIN_OVERVIEW_API", "dashboard()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminDashboardController", "ASP.NET Core controller", "GET /api/admin/dashboard, admin scheme")
+  Component(handler, "GetAdminDashboardQueryHandler", "MediatR handler", "Composes the figures, the waiting list, Right now and recent actions")
+  Component(guard, "IAdminGuard", "Application service", "CurrentAdminAsync")
+  Component(series, "DailySeries", "Application helper", "14 London days of DailyFigure, today partial")
+  Component(attention, "NeedsAttention", "Application helper", "Reports, services, jobs, data requests, erasures")
+  ComponentDb(db, "Popkin database", "SQL Server", "Read only")
+}
+Rel(page, store, "Reads signals, chooses a figure")
+Rel(store, client, "Calls every 60 s")
+Rel(client, ctrl, "GET", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetAdminDashboardQuery")
+Rel(handler, guard, "Requires an admin")
+Rel(handler, series, "Reads the chart")
+Rel(handler, attention, "Builds the waiting list")
+Rel(handler, db, "Counts", "EF Core")
+@enduml

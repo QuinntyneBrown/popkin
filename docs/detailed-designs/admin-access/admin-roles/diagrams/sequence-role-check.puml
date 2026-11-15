@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — The API checks the role
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "Action dialog" as dlg
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Admin controller" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Write handler" as handler
+  participant "AdminGuard" as guard
+  participant "AdminPermissions" as perm
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dlg : Confirm an action (or call the API directly)
+dlg -> ctrl : POST /api/admin/... with reason
+ctrl -> handler : Send the command; the controller checks no role
+handler -> guard : RequireAsync(AdminAction.StartDeletion)
+guard -> db : Load Admin by ICurrentAdmin.AdminId (RemovedAt null)
+db --> guard : Admin with its current Role
+guard -> perm : Allows(Support, StartDeletion)
+perm --> guard : false
+alt not allowed (L2-086 AC1)
+  guard --> handler : throw RoleNotAllowedException
+  handler --> ctrl : 403 role_not_allowed, role; nothing read or changed
+  ctrl --> dlg : 403
+  dlg --> actor : Stays open with "That didn't go through"; the page reads /me again
+else allowed
+  guard --> handler : Admin
+  handler -> handler : Reason, target, rules, change, audit entry (one save)
+  handler --> ctrl : Result
+  ctrl --> dlg : 200
+end
+@enduml

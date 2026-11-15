@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Audit log
+
+Person(admin, "Admin", "Any role")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "Audit log page, recent actions on the dashboard")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Writes entries with each change; GET /api/admin/audit, /export")
+  Container(worker, "Popkin Worker", ".NET worker service", "PurgeOldAuditEntriesJob: deletes entries 2 years old")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "AuditEntry")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Searches, pages, downloads the CSV", "JSON/HTTPS, text/csv")
+Rel(api, db, "Inserts with each change; reads", "EF Core")
+Rel(worker, db, "Deletes entries older than 2 years", "EF Core")
+@enduml

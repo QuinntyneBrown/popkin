@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — List the exports not yet delivered
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AlbumExportsPage" as page
+  participant "AlbumExportsStore" as store
+  participant "HttpAdminOperationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminExportsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPendingAlbumExportsQueryHandler" as handler
+  participant "IAdminGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /exports
+page -> store : load()
+store -> client : exports()
+client -> ctrl : GET /api/admin/exports
+ctrl -> handler : Send GetPendingAlbumExportsQuery
+handler -> guard : CurrentAdminAsync() (any role may view)
+handler -> db : AlbumExport with Status Preparing or Failed; its Popkin; the requester's member name
+handler -> db : Next scheduled run of PrepareAlbumExports (JobRun)
+db --> handler : Rows
+handler -> handler : Preparing and StartedAt null is Queued; Preparing and started is Building
+handler --> ctrl : PendingAlbumExportsDto
+ctrl --> client : 200
+alt exports waiting (L2-114 AC1)
+  store --> page : "{n} not yet delivered · prepared by Prepare album exports every 5 minutes", a row per export
+  page --> actor : Album, photos and when asked, who asked, size, "Queued", "Building" or "Failed · {n} tries" with the reason
+else none (L2-114 AC3)
+  store --> page : "Every requested album has been delivered", "No pending exports"
+end
+opt Viewer admin
+  page --> actor : "Retry" and "Retry {n} failed" disabled, "Viewer admins can't do this"
+end
+@enduml

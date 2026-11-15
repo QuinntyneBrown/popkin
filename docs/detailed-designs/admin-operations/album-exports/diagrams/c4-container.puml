@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Album exports
+
+Person(admin, "Admin", "Any admin role")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "AlbumExportsPage")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/admin/exports, POST retry, POST retry-failed")
+  Container(worker, "Popkin Worker", ".NET worker service", "PrepareAlbumExportsJob")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "AlbumExport, JobRun, AuditEntry")
+  Container(store, "Photo store", "Azure Blob Storage", "Photos and zips")
+}
+Rel(admin, adminapp, "Uses", "HTTPS")
+Rel(adminapp, api, "Lists and retries", "JSON/HTTPS")
+Rel(api, db, "Reads; queues again; audits", "EF Core")
+Rel(worker, db, "Prepares the queued exports", "EF Core")
+Rel(worker, store, "Reads photos, writes the zip", "HTTPS")
+@enduml

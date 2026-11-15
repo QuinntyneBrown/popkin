@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — See an announcement
+
+Person(person, "Signed-in person", "Member of Popkins")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "AnnouncementStore, pk-announcement, dismissal in localStorage")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/announcement")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Announcement")
+  Container(admin, "Popkin admin app", "Angular SPA", "Publishes and takes down")
+}
+Rel(person, web, "Opens any screen", "HTTPS")
+Rel(web, api, "GET /api/announcement every 60 s", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads the live announcement", "EF Core")
+Rel(admin, api, "Writes the announcement", "JSON/HTTPS")
+@enduml

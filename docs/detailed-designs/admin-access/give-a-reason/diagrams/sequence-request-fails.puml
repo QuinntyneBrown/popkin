@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — The request fails and the reason is kept
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "Action dialog" as dlg
+  participant "ActionDialogState" as state
+  participant "Area API" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Admin controller" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Write handler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dlg : Confirm with a reason
+dlg -> state : confirm(send)
+state -> client : send(reason)
+client -> ctrl : POST with (reason)
+ctrl -> handler : Command
+handler -> db : SaveChangesAsync
+db --> handler : Fails; neither the change nor its audit entry is written (L2-120 AC5)
+handler --> ctrl : 500 server_error
+ctrl --> client : 500
+client --> state : ApiProblem
+alt 400 reason_required or reason_too_long
+  state --> dlg : idle; the field shows the error
+else any other failure (L2-087 AC5)
+  state --> dlg : failed; reason as typed, editable again
+  dlg --> actor : pk-alert "That didn't go through", "Nothing has changed. Your reason is kept; try again."
+end
+actor -> dlg : Confirm again
+dlg -> state : confirm(send) with the kept reason
+@enduml

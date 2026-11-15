@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Limits
+
+Person(owner, "Owner", "Admin who may change limits")
+Person(viewer, "Support or Viewer admin", "Reads the limits")
+Person(person, "Person", "Uploads photos, sends messages, asks for codes")
+System(popkin, "Popkin", "Pop-up communities, with upload sizes and rate limits")
+
+Rel(owner, popkin, "Changes upload sizes and rate limits, with a reason, in", "Popkin admin app")
+Rel(viewer, popkin, "Reads Limits in", "Popkin admin app")
+Rel(person, popkin, "Is bounded by the limits of", "Popkin web app")
+@enduml

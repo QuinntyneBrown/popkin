@@ -1,0 +1,68 @@
+@startuml
+title UML sequence behaviour — Open a moderation view
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinPage" as page
+  participant "OpenModerationViewDialog" as dlg
+  participant "HttpAdminModerationApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminModerationController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "OpenModerationViewCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "ModerationView" as view
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open a Popkin's page
+alt Viewer (L2-111 AC5)
+  page --> actor : "Open moderation view" disabled, "Viewer admins can't do this"
+else Owner or Support
+  actor -> page : Choose "Open moderation view"
+  page -> dlg : Open
+  dlg --> actor : Everyone, album, experiences, read-only, 30 minutes, audited, members not told (L2-111 AC1)
+  actor -> dlg : Type a reason, confirm
+  alt reason empty (L2-087 AC2)
+    dlg --> actor : Nothing sent, "Give a reason; it goes in the audit log."
+  else reason given
+    dlg -> client : open(popkinId, reason)
+    client -> ctrl : POST /api/admin/popkins/(id)/moderation-views
+    ctrl -> handler : Send OpenModerationViewCommand
+    handler -> guard : RequireAsync(OpenModerationView)
+    alt role not allowed (L2-086 AC1)
+      guard --> handler : 403 role_not_allowed
+    else allowed
+      handler -> handler : ReasonRules
+      handler -> db : Find the Popkin (404 popkin_not_found)
+      handler -> view : Open(admin, popkin, reason, now), ClosesAt = now + 30 min
+      handler -> audit : Record(ModerationViewOpened, Popkin, reason) (L2-111 AC6)
+      handler -> db : One SaveChangesAsync
+      handler --> ctrl : ModerationViewDto
+    end
+    ctrl --> client : 201 or ProblemDetails
+    alt 201
+      dlg --> actor : Closes; navigate to /popkins/(id)/moderation/(viewId)
+    else failure (L2-087 AC5)
+      dlg --> actor : Stays open, "That didn't go through", reason kept
+    end
+  end
+end
+@enduml

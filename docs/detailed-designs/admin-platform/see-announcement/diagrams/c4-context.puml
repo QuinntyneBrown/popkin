@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — See an announcement
+
+Person(person, "Signed-in person", "Uses the Popkin web app")
+Person_Ext(visitor, "Visitor", "No session")
+Person(owner, "Owner", "Publishes the banner")
+System(popkin, "Popkin", "Pop-up communities; one live banner at a time")
+
+Rel(owner, popkin, "Publishes a banner in", "Popkin admin app")
+Rel(person, popkin, "Sees and dismisses the banner in", "Popkin web app")
+Rel(visitor, popkin, "Sees no banner on the landing page, sign in or an invite of")
+@enduml

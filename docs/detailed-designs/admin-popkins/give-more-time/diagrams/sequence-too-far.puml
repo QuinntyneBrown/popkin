@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Refuse an end more than a year away
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "PopkinExtendDialog" as dialog
+  participant "AdminPopkinStore" as store
+  participant "HttpAdminPopkinsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminPopkinsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AdminExtendPopkinCommandHandler" as handler
+  participant "PopkinInput" as input
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : Choose "+30 days" for a Popkin ending in 11 months, with a reason
+dialog -> store : giveMoreTime(30, reason)
+store -> client : giveMoreTime(popkinId, 30, reason)
+client -> ctrl : POST /api/admin/popkins/{popkinId}/more-time
+ctrl -> handler : Send AdminExtendPopkinCommand
+handler -> db : Load tracked PopkinSpace
+alt keeps going (EndsAt null)
+  handler --> ctrl : 409 popkin_has_no_end
+else end set
+  handler -> input : End(UntilDate, EndsAt + 30 days, now)
+  input --> handler : ProblemException 400 ends_at_out_of_range, limits stated
+  handler --> ctrl : 400 ends_at_out_of_range; nothing saved, no audit entry
+end
+ctrl --> client : ProblemDetails
+client --> store : refusal
+store --> dialog : stays open; the limit beside the choices; reason kept (L2-105 AC3)
+dialog --> actor : Choose fewer days, or Cancel
+@enduml

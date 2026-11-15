@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — Change an admin role
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "AdminsPage" as page
+  participant "ChangeAdminRoleDialog" as dlg
+  participant "HttpAdminAccessApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminAdminsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangeAdminRoleCommandHandler" as handler
+  participant "AdminRosterGate" as gate
+  participant "IAuditLog" as log
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Viewer" in "Role for Aiko Tanaka"
+note over page : Own row and the last Owner's row are disabled with the reason (L2-119 AC7, AC8)
+page -> dlg : open(admin, Viewer)
+dlg --> actor : "Make Aiko Tanaka a Viewer?", what changes, applies next page, optional reason (L2-119 AC5)
+alt Cancel
+  dlg --> page : The select returns to Support
+else "Change role"
+  dlg -> client : changeRole(id, Viewer, reason)
+  client -> ctrl : PUT /api/admin/admins/(id)/role
+  ctrl -> handler : ChangeAdminRoleCommand
+  handler -> handler : RequireAsync(ManageAdmins), ReasonRules.Optional
+  handler -> gate : EnterAsync()
+  handler -> db : Load target and the Owners not removed
+  alt target is the caller
+    handler --> ctrl : 400 cannot_change_own_role
+  else target is the last Owner and the new role is not Owner
+    handler --> ctrl : 409 last_owner (L2-119 AC8)
+  else allowed
+    handler -> handler : Admin.ChangeRole(Viewer)
+    handler -> log : Record(ChangedAdminRole, Admin, id, name, reason, from Support to Viewer)
+    handler -> db : SaveChangesAsync (L2-119 AC11)
+    handler --> ctrl : 200 AdminRowDto
+  end
+  ctrl --> dlg : Answer
+  dlg --> actor : Closes with a toast, or stays open with the failure
+end
+note over handler : The admin's next request reads Viewer (L2-086 AC5)
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+title UML sequence behaviour — An address with no page and an unexpected failure
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "Router" as router
+  participant "Page and its store" as page
+  participant "ErrorScreens" as screens
+  participant "NotFoundPage / ServerErrorPage" as errp
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Admin controller" as ctrl
+  participant "UnexpectedExceptionHandler" as ueh
+end box
+alt address matches no route
+  actor -> router : Open /peopel
+  router -> errp : ** route, page not-found
+  errp --> actor : "There's no page here", "Go to the dashboard", "Error 404" (L2-089 AC5)
+else a record that is gone
+  page -> ctrl : GET /api/admin/people/(id)
+  ctrl --> page : 404
+  page -> screens : showNotFound()
+  screens -> errp : /not-found, address kept
+  errp --> actor : "…or the person or Popkin it pointed to has been erased."
+else unexpected failure
+  page -> ctrl : GET a page's first read
+  ctrl -> ueh : Exception
+  ueh --> page : 500 server_error, reference (no personal data)
+  page -> screens : showServerError(reference, retryUrl)
+  screens -> errp : /error with skipLocationChange
+  errp --> actor : "Something went wrong on our side", "Nothing was changed.", "Try again", "Open Health", "Error 500 · ref (reference)" (L2-089 AC6)
+end
+@enduml

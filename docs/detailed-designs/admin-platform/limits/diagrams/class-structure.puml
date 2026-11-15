@@ -1,0 +1,88 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Limits
+
+package "Popkin.Domain" {
+  enum LimitKey {
+    PhotoMegabytes
+    ProfilePictureMegabytes
+    AlbumExportPartGigabytes
+    MessagesPerMinute
+    CodesPerDestinationPerHour
+    CodesPerAddressPerTenMinutes
+    InviteCodesPerAddressPerTenMinutes
+  }
+  class LimitDefaults {
+    +Of(limit: LimitKey): int
+  }
+  class LimitSetting {
+    +LimitKey Limit
+    +int Value
+    +DateTimeOffset ChangedAt
+    +Guid ChangedByAdminId
+    +string ChangedByName
+    +Change(value: int, admin: Admin, now): void
+  }
+}
+package "Popkin.Application" {
+  interface ILimits {
+    +Get(limit: LimitKey): int
+    +long PhotoBytes
+    +long ProfilePictureBytes
+  }
+  class ChangeLimitsCommand {
+    +LimitChange[] Changes
+    +string Reason
+  }
+  class LimitChange {
+    +LimitKey Limit
+    +int Value
+  }
+  class ChangeLimitsCommandHandler {
+    +Handle(command): Task<AdminLimitsDto>
+  }
+  class ChangeLimitsCommandValidator
+  class CodeIssuer {
+    +IssueAsync(channel, destination, purpose, ct): Task<CodeSentDto>
+  }
+}
+package "Popkin.Infrastructure" {
+  class PlatformSnapshot {
+    +Get(limit): int
+    +RefreshIfStaleAsync(ct): Task
+    +Invalidate(): void
+  }
+}
+package "Popkin.Api" {
+  class UploadLimitAttribute {
+    +LimitKey Limit
+  }
+  class UploadLimitFilter {
+    +OnResourceExecuting(context): void
+  }
+  class RateLimitPolicyNames {
+    +AddPopkinRateLimits(services): IServiceCollection
+  }
+}
+ILimits <|.. PlatformSnapshot
+PlatformSnapshot ..> LimitSetting : reloads
+PlatformSnapshot ..> LimitDefaults : falls back to
+LimitSetting --> LimitKey
+ChangeLimitsCommand *-- LimitChange
+ChangeLimitsCommandHandler ..> ChangeLimitsCommand : handles
+ChangeLimitsCommandValidator ..> ChangeLimitsCommand : validates
+ChangeLimitsCommandHandler --> LimitSetting : upserts
+CodeIssuer ..> ILimits
+UploadLimitFilter ..> UploadLimitAttribute : reads
+UploadLimitFilter ..> ILimits
+RateLimitPolicyNames ..> ILimits
+@enduml

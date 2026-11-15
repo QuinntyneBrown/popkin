@@ -1,0 +1,91 @@
+@startuml
+title Class structure — Dashboard
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+class GetAdminDashboardQuery
+class GetAdminDashboardQueryHandler {
+  +Handle(query): Task<AdminDashboardDto>
+}
+class AdminDashboardDto {
+  +DateTimeOffset AsOf
+  +DashboardFiguresDto Figures
+  +IReadOnlyList<DailySeriesDto> Series
+  +IReadOnlyList<AttentionItemDto> NeedsAttention
+  +RightNowDto RightNow
+  +IReadOnlyList<AuditEntrySummaryDto> RecentActions
+}
+class DashboardFiguresDto {
+  +int People
+  +int JoinedToday
+  +int PopkinsLive
+  +int StartedToday
+  +int ActiveToday
+  +int MessagesToday
+}
+class DailySeriesDto {
+  +DailyFigureKind Figure
+  +IReadOnlyList<DailyPointDto> Days
+}
+class DailyPointDto {
+  +DateOnly Day
+  +double Value
+  +bool Partial
+}
+enum AttentionKind {
+  Reports
+  Service
+  Job
+  DataRequest
+  Erasure
+}
+class AttentionItemDto {
+  +AttentionKind Kind
+  +bool Urgent
+  +string TargetId
+  +int Count
+  +DateTimeOffset? At
+  +string? Detail
+}
+class RightNowDto {
+  +int CallsUnderWay
+  +int PopkinsEndingIn48Hours
+  +int AccountsAwaitingErasure
+  +int ExportsInProgress
+}
+class AuditEntrySummaryDto {
+  +string AdminName
+  +AuditAction Action
+  +AuditTargetKind TargetKind
+  +string TargetName
+  +DateTimeOffset At
+}
+class LondonDays {
+  +{static} DateOnly Today(TimeProvider)
+  +{static} DateTimeOffset StartOf(DateOnly)
+}
+class DashboardStore {
+  +figure: Signal<DailyFigureKind>
+  +state: Signal<LoadState>
+  +choose(figure): void
+}
+GetAdminDashboardQueryHandler ..> GetAdminDashboardQuery : handles
+GetAdminDashboardQueryHandler ..> AdminDashboardDto : returns
+GetAdminDashboardQueryHandler ..> LondonDays : uses
+AdminDashboardDto *-- DashboardFiguresDto
+AdminDashboardDto "1" *-- "2" DailySeriesDto
+DailySeriesDto "1" *-- "14" DailyPointDto
+AdminDashboardDto "1" *-- "*" AttentionItemDto
+AttentionItemDto --> AttentionKind
+AdminDashboardDto *-- RightNowDto
+AdminDashboardDto "1" *-- "4" AuditEntrySummaryDto
+DashboardStore ..> AdminDashboardDto : holds
+@enduml

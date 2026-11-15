@@ -172,6 +172,12 @@ Each design follows the source named below and marks the conflict in its own REA
   mock: the button reads "Change" and its accessible name is "Change" too. Journey 16 gave it
   both: it still reads "Change", and its accessible name is "Change how long it lasts", which
   contains the visible label (WCAG 2.5.3; known gap 47).
+- The admin mocks differ from their requirements in places, and each admin design follows the
+  requirement: the limits page's rows and values (L2-117), the roles table's rows (L2-086), the
+  failure copy and the hint of the reason field (L2-087), the settings list (L2-118), a long call
+  flagged by colour alone (L2-112 AC2), charts without their figures as text (L2-091 AC4), a job
+  log that names an album (L2-113 AC2), the "+n days" toggles where L2-105 asks for a radio group,
+  and hosted Popkins that "pass to the longest-standing member" where L2-098 wraps them up.
 
 ## Subsystems and features
 
@@ -238,8 +244,71 @@ Each design follows the source named below and marks the conflict in its own REA
 | Schedules | [This week](schedules/this-week/README.md) | L2-074, L2-075 (AC2, AC3) |
 | Schedules | [Set the event](schedules/set-the-event/README.md) | L2-085, L2-020 |
 | Schedules | [Schedules switch](schedules/schedules-switch/README.md) | L2-077 |
+| Admin access | [Admin sign in](admin-access/admin-sign-in/README.md) | L2-088, L2-078 |
+| Admin access | [The admin shell](admin-access/admin-shell/README.md) | L2-089, L2-078 |
+| Admin access | [Admin roles](admin-access/admin-roles/README.md) | L2-086 |
+| Admin access | [A reason for every change](admin-access/give-a-reason/README.md) | L2-087 |
+| Admin access | [Audit log](admin-access/audit-log/README.md) | L2-120 |
+| Admin access | [Admins & roles](admin-access/manage-admins/README.md) | L2-119 |
+| Admin overview | [Dashboard](admin-overview/dashboard/README.md) | L2-090 |
+| Admin overview | [Metrics](admin-overview/metrics/README.md) | L2-091 |
+| Admin overview | [Health](admin-overview/health/README.md) | L2-092 |
+| Admin people | [People](admin-people/find-people/README.md) | L2-093 |
+| Admin people | [A person](admin-people/view-person/README.md) | L2-094, L2-078 |
+| Admin people | [Suspend a person and lift it](admin-people/suspend-person/README.md) | L2-095, L2-096 |
+| Admin people | [Sign a person out everywhere](admin-people/sign-person-out/README.md) | L2-097 |
+| Admin people | [Start a deletion](admin-people/start-deletion/README.md) | L2-098 |
+| Admin people | [The deletion queue](admin-people/deletion-queue/README.md) | L2-099 |
+| Admin people | [Export a person's data](admin-people/export-person-data/README.md) | L2-100 |
+| Admin people | [Data requests](admin-people/data-requests/README.md) | L2-101 |
+| Admin Popkins | [Find Popkins](admin-popkins/find-popkins/README.md) | L2-102 |
+| Admin Popkins | [A Popkin](admin-popkins/view-popkin/README.md) | L2-103, L2-078 |
+| Admin Popkins | [Wrap up a Popkin now](admin-popkins/wrap-up-now/README.md) | L2-104 |
+| Admin Popkins | [Give a Popkin more time](admin-popkins/give-more-time/README.md) | L2-105 |
+| Admin Popkins | [Remove a member](admin-popkins/remove-member/README.md) | L2-106 |
+| Admin Popkins | [Reset the invite](admin-popkins/reset-invite/README.md) | L2-107 |
+| Moderation | [Report content](moderation/report-content/README.md) | L2-108 |
+| Moderation | [Reports](moderation/review-reports/README.md) | L2-109 |
+| Moderation | [Remove reported content or dismiss the report](moderation/decide-report/README.md) | L2-110 |
+| Moderation | [Moderation view](moderation/moderation-view/README.md) | L2-111 |
+| Admin operations | [Live calls](admin-operations/live-calls/README.md) | L2-112 |
+| Admin operations | [Jobs](admin-operations/jobs/README.md) | L2-113 |
+| Admin operations | [Album exports](admin-operations/album-exports/README.md) | L2-114 |
+| Admin platform | [Feature switches](admin-platform/feature-switches/README.md) | L2-076, L2-077 |
+| Admin platform | [Announcements](admin-platform/announcements/README.md) | L2-115 |
+| Admin platform | [See an announcement](admin-platform/see-announcement/README.md) | L2-116 |
+| Admin platform | [Limits](admin-platform/limits/README.md) | L2-117 |
+| Admin platform | [Settings](admin-platform/settings/README.md) | L2-118 |
 
-Every L2 requirement from L2-001 to L2-067 is realised by at least one feature above.
+Every L2 requirement from L2-001 to L2-067 is realised by at least one feature above, and so is
+every admin requirement, L2-076 to L2-078 and L2-086 to L2-120.
+
+## The admin app
+
+The admin designs share one architecture, recorded in
+[ADR 0024](../adr/0024-admins-moderation-and-switches-in-the-database.md) (Proposed), which
+amends [ADR 0016](../adr/0016-admin-app.md):
+
+- **Popkin admin app** — a sixth container, the Angular application `frontend/projects/admin` at
+  `https://admin.popkin.community`, on the `api` and `components` libraries. It calls the Popkin
+  API under `/api/admin/**` and polls instead of holding a hub connection.
+- **Admins** are `Admin` rows with an `AdminRole` (Owner, Support, Viewer); `Admin:FirstOwner`
+  names the first Owner. An admin is not a `Person`.
+- **The admin session** is `AdminSession` behind the cookie `__Host-popkin-admin` and the
+  authentication scheme `Admin`, checked on every request.
+- **The role is checked in the handler**: `IAdminGuard.RequireAsync(AdminAction)` against
+  `AdminPermissions` (L2-086), `403` `role_not_allowed`. `GET /api/admin/me` tells the app what
+  to disable.
+- **Every change writes an `AuditEntry` in the same transaction** through `IAuditLog`; a write
+  carries a `reason` validated by `ReasonRules` where L2-087 asks for one.
+- **Moderation** sees content only through a report and its context, or a 30-minute
+  `ModerationView` opened for a reason ([Moderation view](moderation/moderation-view/README.md)).
+- **Feature switches and limits** are rows read through one cached `PlatformSnapshot`
+  (`IFeatureSwitches`, `ILimits`), honoured within a minute
+  ([Feature switches](admin-platform/feature-switches/README.md), [Limits](admin-platform/limits/README.md)).
+  `Features:Schedules` is retired; `Features:PhoneSignIn` stays a setting (ADR 0023).
+- **What every person sees** (a switch, an announcement) is polled every 60 seconds; no event goes
+  to all connections.
 
 ## Known gaps
 
@@ -328,6 +397,20 @@ or design that settled it.
 | 76 | The client's own lines for a photo message with no text read its empty text, not "Photo": the reply bar (`ThreadStore.startReply`), the quote of Message actions, the line a screen reader hears when the message arrives (`announcement`), and the latest line the Chat tab (`ConversationsStore`) and My Popkins (`MyPopkinsStore`) write from `MessageAdded`, until their next read. Message actions also offers Copy for it, which copies nothing and says "Message copied.". The design asks for "Photo" in each and for no Copy; every quote and preview the server answers already reads "Photo" ([Send photos in chat](chat/send-photos-in-chat/README.md), [React to a message](chat/react-to-message/README.md), [Reply to a message](chat/reply-to-message/README.md)) | Journey 13 | Journey 13: `messageLine` reads a photo alone as "Photo" for the reply bar, the announcement, and the latest line the Chat tab and My Popkins write from `MessageAdded`; Message actions quotes it as "Photo" and offers no Copy |
 | 77 | The album's zip packs the display images, at most 2048 px, not the originals that "Save photo" downloads since journey 14 (L2-046 AC4) ([Save a photo](photos/save-photo/README.md), [Recap](wrap-up/recap/README.md)) | None; found in journey 14 | |
 | 78 | Who runs Popkin (its legal name), the address to contact about personal data and the law that governs the Terms. The Terms and the Privacy notice show `<TO SUPPLY: …>` in their place ([Terms and Privacy notice](accounts/legal-pages/README.md)) | The toll-free verification of Popkin's SMS number (ADR 0021) | |
+| 79 | Whether ADR 0024 is accepted: admins in the database, the host-only admin cookie, moderation through reports and a recorded view, switches Off, chosen or everyone | Every admin journey; the moderation view cannot be built under ADR 0016 | |
+| 80 | The Worker's jobs: L2-113 and its mock name four, while the designs add `PreparePersonDataExportsJob` ([Export a person's data](admin-people/export-person-data/README.md)), `PurgeOldAuditEntriesJob` ([Audit log](admin-access/audit-log/README.md)) and `CloseExpiredModerationViewsJob` ([Moderation view](moderation/moderation-view/README.md)); "daily at 03:00" is a schedule the job loop does not support yet ([Jobs](admin-operations/jobs/README.md)) | Jobs, the data export, the audit log's two-year deletion | |
+| 81 | How Metrics reads 14 days of figures: an in-API recorder writing `DailyFigure` rows, or the telemetry backend of known gap 6 ([Metrics](admin-overview/metrics/README.md)); which responses count as failed | Metrics and the dashboard's chart | |
+| 82 | Health's thresholds for Degraded and Down, its check timeouts and the figures each card shows ([Health](admin-overview/health/README.md)) | Health | |
+| 83 | The 30-day hold of a deletion: the built purge erases within a day, L2-099 holds 30 days and erases at 03:00 in a time zone not named; what cancelling a deletion restores once memberships are anonymised ([Start a deletion](admin-people/start-deletion/README.md), [The deletion queue](admin-people/deletion-queue/README.md)) | Start a deletion, the deletion queue; changes journey 19 | |
+| 84 | Suspension and sign-in: refusing a code request would disclose that an account exists (L2-006 AC2), so the design refuses at confirmation only ([Suspend a person](admin-people/suspend-person/README.md)) | Suspend a person | |
+| 85 | Mocks the admin designs need and do not have: the Report dialog and "Reported", "Removed by Popkin" in chat, the author's notice, the whole moderation view, the announcement banner in the Popkin app, the suspended-account screen, "This call was ended by Popkin", the removed member's screen, a Popkin that keeps going, and the sign-in's expired, resent and code-limit states; each design names the file it expects | The matching slices (AGENTS.md: a mock before implementation) | |
+| 86 | Where a session's device, place and app version come from (a user-agent parser, a geo-IP provider), and how long a session's address is kept ([A person](admin-people/view-person/README.md)) | A person's Sessions panel | |
+| 87 | An admin's name (no screen asks for it; the design uses the email's local part) and how long an admin session lasts ([Admin sign in](admin-access/admin-sign-in/README.md), [Admins & roles](admin-access/manage-admins/README.md)) | Admin sign in | |
+| 88 | An erased person's name in the audit log for two years, against the erasure of L2-049; the old and new invite codes in the audit log (L2-107 AC4) against L2-120 AC7 ([Audit log](admin-access/audit-log/README.md), [Reset the invite](admin-popkins/reset-invite/README.md)) | Audit log; Reset the invite | |
+| 89 | Writes with no reason that the brief of these designs expected to carry one: adding an admin, announcements, Run now, Retry, Mark sent and the dismissal of a report (made optional). L2-087 AC1 is followed; whether it should list them is open | None; the designs follow L2-087 | |
+| 90 | A report in a wrapped-up Popkin: L2-108 AC7 offers "Report" there, while L2-045 allows no action in a wrapped-up Popkin ([Report content](moderation/report-content/README.md)) | Report content | |
+| 91 | The invite code's shape: the admin mocks and L2-102 search `PINE-4821`, while the codes issued are 10 random characters (L2-011 AC5) ([Find Popkins](admin-popkins/find-popkins/README.md)) | The no-results copy of Find Popkins | |
+| 92 | The album export part in Limits: an export is one zip today, so it has no current value ([Limits](admin-platform/limits/README.md)) | Limits | |
 
 Settled so far:
 

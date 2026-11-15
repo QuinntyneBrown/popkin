@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Album exports
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "AlbumExportsPage", "Angular page", "pk-data-table, pk-popkin-tile, pk-status-pill, pk-toast")
+  Component(store, "AlbumExportsStore", "Signal store", "List, retry one, retry every failed")
+  Component(client, "HttpAdminOperationsApi", "ADMIN_OPERATIONS_API", "exports(), retryExport(id), retryFailedExports()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminExportsController", "ASP.NET Core controller", "Admin scheme")
+  Component(list, "GetPendingAlbumExportsQueryHandler", "MediatR handler", "Exports Preparing or Failed")
+  Component(retry, "RetryAlbumExportsCommandHandler", "MediatR handler", "RetryExport permission, Retry(), audit")
+  Component(entity, "AlbumExport", "Domain entity", "Queued, Building, Failed with tries and reason")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(handler, "PrepareAlbumExportsCommandHandler", "MediatR handler", "Begins, builds, fails or readies each export")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "AlbumExport")
+Rel(page, store, "Reads")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "GET / POST", "JSON/HTTPS")
+Rel(ctrl, list, "Sends GetPendingAlbumExportsQuery")
+Rel(ctrl, retry, "Sends RetryAlbumExportsCommand")
+Rel(retry, entity, "Retry()")
+Rel(handler, entity, "Begin, Fail(code), Ready")
+Rel(list, db, "Reads", "EF Core")
+Rel(retry, db, "Saves with the audit entries", "EF Core")
+Rel(handler, db, "Saves", "EF Core")
+@enduml

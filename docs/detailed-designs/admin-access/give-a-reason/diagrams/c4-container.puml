@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — A reason for every change
+
+Person(admin, "Admin", "Owner or Support")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA", "Action dialogs with pk-reason-field")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "Every write validates its reason with ReasonRules")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "The change and its AuditEntry with the reason")
+}
+Rel(admin, adminapp, "Types the reason, confirms", "HTTPS")
+Rel(adminapp, api, "Sends the change with reason", "JSON/HTTPS")
+Rel(api, db, "Writes the change and its entry together", "EF Core")
+@enduml

@@ -1,0 +1,77 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Wrap up a Popkin now
+
+class AdminWrapUpPopkinCommand {
+  +Guid PopkinId
+  +string? Reason
+}
+
+class AdminWrapUpPopkinCommandHandler {
+  +Handle(command: AdminWrapUpPopkinCommand): Task<AdminPopkinDto>
+}
+
+class ReasonRules <<static>> {
+  +MaxLength: int = 500
+  +Required(reason: string?): string
+}
+
+interface IAdminGuard {
+  +RequireAsync(action: AdminAction): Task<Admin>
+}
+
+class PopkinWrapUpService {
+  +PrepareAsync(popkin, keepPhotos, ct): Task<PreparedWrapUp>
+  +AnnounceAsync(popkin, endedCalls): Task
+}
+
+class PreparedWrapUp {
+  +IReadOnlyList<Call> Calls
+  +IReadOnlyList<CallParticipant> Participants
+}
+
+interface IAuditLog {
+  +Record(record: AuditRecord): void
+}
+
+class AuditRecord {
+  +AuditAction Action
+  +AuditTargetKind TargetKind
+  +Guid TargetId
+  +string TargetName
+  +string? Reason
+  +object Details
+}
+
+class PopkinSpace {
+  +PopkinStatus Status
+  +DateTimeOffset? WrappedUpAt
+  +bool KeepPhotos
+  +long Version
+  +WrapUp(at, keepPhotos): void
+}
+
+interface IPopkinNotifier {
+  +PopkinWrappedUp(popkinId): Task
+  +CallEnded(audience, callId, threadId): Task
+}
+
+AdminWrapUpPopkinCommandHandler ..> AdminWrapUpPopkinCommand : handles
+AdminWrapUpPopkinCommandHandler ..> ReasonRules : uses
+AdminWrapUpPopkinCommandHandler ..> IAdminGuard : uses
+AdminWrapUpPopkinCommandHandler ..> PopkinWrapUpService : uses
+AdminWrapUpPopkinCommandHandler ..> IAuditLog : uses
+PopkinWrapUpService --> PopkinSpace : wraps up
+PopkinWrapUpService ..> PreparedWrapUp : returns
+PopkinWrapUpService ..> IPopkinNotifier : announces
+IAuditLog ..> AuditRecord : records
+@enduml

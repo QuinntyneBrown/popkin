@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Report content
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(spa, "Popkin web app", "Angular SPA", "Message, photo and experience actions; Report dialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "POST /api/popkins/(id)/reports")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Report")
+  Container(admin, "Popkin admin app", "Angular SPA", "Reports queue")
+}
+Rel(member, spa, "Uses", "HTTPS")
+Rel(spa, api, "Sends the report", "JSON/HTTPS")
+Rel(api, db, "Adds a Report", "EF Core")
+Rel(admin, api, "Reads the queue", "JSON/HTTPS")
+@enduml

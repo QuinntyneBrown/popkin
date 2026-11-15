@@ -1,0 +1,39 @@
+@startuml
+title UML sequence behaviour — Erase an account on its date
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Worker" #FFF4E5
+  participant "PurgeDeletedAccountsJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "PurgeDeletedAccountsCommandHandler" as handler
+  participant "Person" as person
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "IPhotoStore" as store
+end box
+job -> job : Daily tick at 03:00
+job -> handler : Send PurgeDeletedAccountsCommand
+handler -> db : People deleted, not erased, ErasesOn on or before today
+db --> handler : Due accounts, oldest first, 100 at a time
+loop Each due account
+  handler -> store : Delete the profile photo
+  handler -> db : Delete sessions and codes; person.Erase(now)
+  handler -> db : SaveChangesAsync
+end
+handler --> job : Count erased
+note over db : An erased account leaves the queue and cannot be kept (L2-099 AC6)
+@enduml

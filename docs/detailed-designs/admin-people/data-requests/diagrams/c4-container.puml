@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Data requests
+
+Person(adminp, "Admin", "Owner, Support or Viewer")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "DataRequestsPage, DataRequestsStore, LogDataRequestDialog")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "AdminDataRequestsController, handlers of data requests")
+  Container(worker, "Popkin Worker", ".NET worker service", "PreparePersonDataExportsJob")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Data requests, audit entries")
+}
+Rel(adminp, admin, "Logs and follows requests", "HTTPS")
+Rel(admin, api, "GET, POST /api/admin/data-requests", "JSON/HTTPS, admin cookie")
+Rel(api, db, "Reads and writes with the audit entry", "EF Core")
+Rel(worker, db, "Moves Compiling to Ready to send", "EF Core")
+@enduml

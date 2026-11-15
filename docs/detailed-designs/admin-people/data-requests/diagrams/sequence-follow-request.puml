@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Follow a request to Sent
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Support admin or Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "DataRequestsPage" as page
+  participant "DataRequestsStore" as rstore
+  participant "HttpAdminPeopleApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminDataRequestsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetDataRequestsQueryHandler" as list
+  participant "MarkDataRequestSentCommandHandler" as sent
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open Data requests
+page -> rstore : load()
+rstore -> client : dataRequests()
+client -> ctrl : GET /api/admin/data-requests
+ctrl -> list : Send GetDataRequestsQuery
+list -> db : Requests, open first by due date, then sent
+list --> ctrl : DataRequestsDto (DueSoon when due within 7 days and not sent)
+ctrl --> client : 200
+client --> rstore : Rows
+alt None ever logged
+  rstore --> page : state empty
+  page --> actor : "No data requests" (L2-101 AC7)
+else Rows
+  page --> actor : "3 open", rows; "(due soon)" in words (L2-101 AC1, AC2)
+end
+opt A row is Compiling
+  rstore -> client : dataRequests() again after 30 s, while one compiles
+end
+actor -> page : "Mark sent" on a Ready to send row
+page -> rstore : markSent(id)
+rstore -> client : markSent(id)
+client -> ctrl : POST /api/admin/data-requests/{id}/sent
+ctrl -> sent : Send MarkDataRequestSentCommand
+sent -> sent : IAdminGuard.RequireAsync(ExportPersonData)
+sent -> db : DataRequest.MarkSent(now): LinkExpiresAt = now + 7 days; audit DataRequestSent; one save
+sent --> ctrl : Row (Sent)
+ctrl --> client : 200
+client --> rstore : Row
+rstore --> page : "Sent"; later "Link expired 9 Jul" (L2-101 AC6, L2-100 AC4)
+@enduml

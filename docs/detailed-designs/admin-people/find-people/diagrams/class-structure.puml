@@ -1,0 +1,77 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — People
+
+enum PersonStatus {
+  Active
+  Suspended
+  BeingDeleted
+}
+class Person {
+  +Guid Id
+  +string Name
+  +string? Email
+  +string? Phone
+  +string? PhotoKey
+  +DateTimeOffset? LastSeenAt
+  +DateTimeOffset? SuspendedAt
+  +DateTimeOffset? DeletedAt
+  +DateTimeOffset? ErasedAt
+  +StatusAt(): PersonStatus
+}
+class FindPeopleQuery {
+  +string? Search
+  +PersonStatus? Status
+  +string? After
+}
+class FindPeopleQueryHandler {
+  +Handle(query): Task<AdminPeoplePageDto>
+}
+class AdminPeoplePageDto {
+  +int Total
+  +AdminPeopleCountsDto Counts
+  +List<AdminPersonRowDto> Items
+  +string? Next
+}
+class AdminPeopleCountsDto {
+  +int Active
+  +int Suspended
+  +int BeingDeleted
+}
+class AdminPersonRowDto {
+  +Guid PersonId
+  +string Name
+  +string? PhotoUrl
+  +string? Email
+  +string? Phone
+  +PersonStatus Status
+  +int Popkins
+  +DateTimeOffset? LastSeenAt
+}
+class PeopleStore <<api library>> {
+  +search: Signal<string>
+  +status: Signal<PersonStatus | all>
+  +rows: Signal<AdminPersonRowView[]>
+  +state: loading | ready | no-results | failed
+  +setSearch(text): void
+  +setStatus(status): void
+  +loadMore(): void
+  +retry(): void
+}
+FindPeopleQueryHandler ..> FindPeopleQuery : handles
+FindPeopleQueryHandler --> Person : reads
+FindPeopleQueryHandler ..> AdminPeoplePageDto : returns
+AdminPeoplePageDto *-- AdminPeopleCountsDto
+AdminPeoplePageDto "1" *-- "*" AdminPersonRowDto
+Person --> PersonStatus : derives
+PeopleStore ..> AdminPeoplePageDto : reads through ADMIN_PEOPLE_API
+@enduml

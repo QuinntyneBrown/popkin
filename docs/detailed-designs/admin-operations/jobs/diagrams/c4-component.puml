@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Jobs
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "JobsPage", "Angular page", "pk-data-table, pk-job-row, pk-status-pill, pk-key-values")
+  Component(store, "JobsStore", "Signal store", "Opened rows, polls while a run is asked or running")
+  Component(client, "HttpAdminOperationsApi", "ADMIN_OPERATIONS_API", "jobs(), runJob(job)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminJobsController", "ASP.NET Core controller", "Admin scheme")
+  Component(list, "GetJobsQueryHandler", "MediatR handler", "Status, last run, next run, runs today, failures 7 days, log")
+  Component(run, "RunJobNowCommandHandler", "MediatR handler", "RunJob permission, one run at a time, audit")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "PeriodicJob", "BackgroundService", "Tick or run request, then one MediatR command")
+  Component(runs, "IJobRunLog", "Application abstraction", "Begin, finish, take a request")
+  Component(capture, "JobLogCapture", "ILoggerProvider", "Last 20 lines of the run's log")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "JobRun, JobRunRequest, AuditEntry")
+Rel(page, store, "Reads")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "GET / POST", "JSON/HTTPS")
+Rel(ctrl, list, "Sends GetJobsQuery")
+Rel(ctrl, run, "Sends RunJobNowCommand")
+Rel(list, db, "Reads", "EF Core")
+Rel(run, db, "Adds JobRunRequest and AuditEntry", "EF Core")
+Rel(job, runs, "Records each run")
+Rel(job, capture, "Collects lines")
+Rel(runs, db, "Writes JobRun; takes JobRunRequest", "EF Core")
+@enduml

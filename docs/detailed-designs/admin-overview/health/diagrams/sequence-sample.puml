@@ -1,0 +1,40 @@
+@startuml
+title UML sequence behaviour — Sample the four services
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin API" #D1FADF
+  participant "HealthSampler" as sampler
+  participant "HealthChecks" as checks
+  participant "PopkinHub connections" as hub
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "IPhotoStore" as store
+end box
+loop every 30 s (PeriodicTimer on TimeProvider)
+  sampler -> checks : RunAllAsync(now)
+  checks -> checks : ApiCheck: p95 and requests a second over the last minute (http.server.request.duration)
+  checks -> hub : HubCheck: open connections; popkin.hub.send.failures in the last minute
+  checks -> db : DatabaseCheck: round trip of a trivial query, timed
+  checks -> store : PhotoStoreCheck: ProbeAsync(), timed
+  checks -> checks : Each result to Operational, Degraded or Down by its thresholds <TO SUPPLY>
+  alt a check throws or exceeds its timeout
+    checks -> checks : That service is Down for this sample
+  end
+  checks -> db : Save four HealthSample rows
+  sampler -> db : Delete samples older than 30 days
+end
+note over sampler : A 30 s slot with no API sample counts as Down for every service: a stopped API takes no samples.
+@enduml

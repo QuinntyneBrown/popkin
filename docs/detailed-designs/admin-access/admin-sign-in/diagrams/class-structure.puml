@@ -1,0 +1,100 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — Admin sign in
+
+enum CodePurpose {
+  SignUp
+  SignIn
+  AdminSignIn
+}
+class VerificationCode <<existing>> {
+  +Guid Id
+  +string Destination
+  +CodePurpose Purpose
+  +DateTimeOffset ExpiresAt
+  +RecordFailedAttempt()
+  +Consume(now)
+}
+class AdminSignInLock {
+  +const int MaxWrongCodes = 3
+  +TimeSpan LockFor = 15 min
+  +string Email
+  +int WrongCodes
+  +DateTimeOffset? LockedUntil
+  +int TriesLeft
+  +IsLocked(now): bool
+  +RecordWrong(now): void
+  +Reset(): void
+}
+class Admin {
+  +Guid Id
+  +string Email
+  +string Name
+  +AdminRole Role
+  +DateTimeOffset? ActivatedAt
+  +DateTimeOffset? LastActiveAt
+  +DateTimeOffset? RemovedAt
+  +SignedIn(now): void
+}
+class AdminSession {
+  +TimeSpan Lifetime = <TO SUPPLY>
+  +Guid Id
+  +Guid AdminId
+  +DateTimeOffset CreatedAt
+  +DateTimeOffset ExpiresAt
+  +DateTimeOffset? RevokedAt
+  +Start(adminId, now): AdminSession
+  +IsLive(now): bool
+  +Revoke(now): void
+}
+class RequestAdminCodeCommand {
+  +string? Email
+}
+class ConfirmAdminCodeCommand {
+  +Guid VerificationId
+  +string? Code
+}
+class ConfirmAdminCodeCommandHandler {
+  +Handle(command): Task<ConfirmAdminCodeResult>
+}
+class ConfirmAdminCodeResult {
+  +AdminMeDto Me
+  +StartedAdminSession Started
+}
+class AdminSessionCookie {
+  +const string Scheme = "Admin"
+  +const string Name = "__Host-popkin-admin"
+  +AddAdminSessions(services)
+  +SignInAsync(http, started)
+  +SignOutAsync(http)
+}
+class AdminSessionCookieEvents {
+  +ValidatePrincipal(context)
+  +RedirectToLogin(context): 401 or 403
+}
+class ValidateAdminSessionCommand {
+  +Guid SessionId
+  +Guid AdminId
+}
+VerificationCode --> CodePurpose
+ConfirmAdminCodeCommandHandler ..> ConfirmAdminCodeCommand : handles
+ConfirmAdminCodeCommandHandler --> VerificationCode : checks / consumes
+ConfirmAdminCodeCommandHandler --> AdminSignInLock : counts wrong codes
+ConfirmAdminCodeCommandHandler --> Admin : finds by email
+ConfirmAdminCodeCommandHandler --> AdminSession : starts
+ConfirmAdminCodeCommandHandler ..> ConfirmAdminCodeResult : returns
+Admin "1" --> "*" AdminSession
+AdminSessionCookieEvents ..> ValidateAdminSessionCommand : sends
+AdminSessionCookie ..> AdminSessionCookieEvents : uses
+@enduml

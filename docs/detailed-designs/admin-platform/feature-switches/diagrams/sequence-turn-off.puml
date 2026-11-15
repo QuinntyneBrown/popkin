@@ -1,0 +1,72 @@
+@startuml
+title UML sequence behaviour — An Owner turns Schedules off
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "FeaturesPage" as page
+  participant "TurnOffFeatureDialog" as dialog
+  participant "AdminFeaturesStore" as store
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminFeaturesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangeFeatureModeCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "IAuditLog" as audit
+  participant "FeatureSetting" as setting
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "PlatformSnapshot" as snap
+  database "Popkin database" as db
+end box
+actor -> page : Chooses "Off" on Schedules
+page -> dialog : Open "Turn Schedules off for everyone?" (L2-076 AC2)
+actor -> dialog : Optional reason, "Turn it off"
+dialog -> dialog : ActionDialogState busy, "Turning off…" (L2-076 AC7)
+dialog -> store : changeMode(Schedules, Off, reason)
+store -> client : PUT /api/admin/features/Schedules
+client -> controller : { mode: Off, reason }, admin cookie
+controller -> handler : Send ChangeFeatureModeCommand
+handler -> guard : RequireAsync(ChangeFeature)
+alt Support or Viewer (L2-086 AC1)
+  guard --> controller : 403 role_not_allowed
+  controller --> client : 403 ProblemDetails
+else Owner
+  guard --> handler : Admin
+  handler -> handler : ReasonRules, optional (L2-087 AC3)
+  handler -> db : Load FeatureSetting
+  handler -> setting : ChangeMode(Off, admin, now)
+  handler -> audit : Record(ChangeFeature, Feature, old Chosen, new Off, chosen, reason) (L2-076 AC11)
+  handler -> db : SaveChangesAsync, one transaction (L2-120 AC5)
+  alt Save fails
+    db --> handler : Exception
+    handler --> controller : 500, nothing written
+    controller --> client : ProblemDetails
+    client --> dialog : failed
+    dialog --> actor : Alert, reason kept, panel unchanged (L2-076 AC8)
+  else Saved
+    handler -> snap : Invalidate()
+    handler --> controller : AdminFeatureDto
+    controller --> client : 200
+    client --> store : Apply the saved feature
+    store --> dialog : Close
+    page --> actor : "Hidden in every Popkin.", toast "Schedules is off" (L2-076 AC7)
+  end
+end
+note over snap, db : The next request reloads the snapshot; Schedules answers 404 feature_off in every Popkin (L2-077 AC3)
+@enduml

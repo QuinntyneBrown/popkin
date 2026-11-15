@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Give a Popkin more time
+
+Person(admin, "Admin", "Owner, Support or Viewer; runs Popkin from the admin app")
+Person(member, "Member", "Person who belongs to a Popkin")
+System(popkin, "Popkin", "Pop-up communities and the admin app that runs them")
+
+Rel(admin, popkin, "Moves a Popkin's end date later with a reason in", "HTTPS")
+Rel(member, popkin, "Sees the new time left in", "HTTPS")
+@enduml

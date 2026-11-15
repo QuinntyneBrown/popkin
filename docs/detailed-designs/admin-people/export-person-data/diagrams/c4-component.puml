@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Export a person's data
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "PersonPage", "Angular page", "Their data panel")
+  Component(dlg, "ExportPersonDataDialog", "CDK dialog", "pk-reason-field")
+  Component(client, "HttpAdminPeopleApi", "ADMIN_PEOPLE_API", "startExport, downloadUrl")
+}
+Container_Boundary(apic, "Popkin API") {
+  Component(ctrl, "AdminPeopleController / AdminDataRequestsController", "Admin scheme", "POST data-export, GET download")
+  Component(start, "StartDataExportCommandHandler", "MediatR handler", "Logs a DataRequest, Compiling; audit")
+  Component(download, "DownloadDataExportQueryHandler", "MediatR handler", "Owner or Support; audit; signed address")
+}
+Container_Boundary(workerc, "Popkin Worker") {
+  Component(job, "PreparePersonDataExportsJob", "PeriodicJob", "Sends PreparePersonDataExportsCommand")
+  Component(prep, "PreparePersonDataExportsCommandHandler", "MediatR handler", "Builds the zip; removes expired files")
+  Component(writer, "PersonDataExportWriter", "Application service", "Writes account.json, posts and photos")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "DataRequests, Messages, Photos, Experiences, …")
+ComponentDb(store, "Photo store", "Azure Blob Storage", "Photos, export zips")
+Rel(page, dlg, "Opens")
+Rel(dlg, client, "Calls")
+Rel(client, ctrl, "HTTPS", "JSON")
+Rel(ctrl, start, "Sends StartDataExportCommand")
+Rel(ctrl, download, "Sends DownloadDataExportQuery")
+Rel(start, db, "One SaveChangesAsync", "EF Core")
+Rel(download, store, "GetDownloadUrl")
+Rel(job, prep, "Sends")
+Rel(prep, writer, "Uses")
+Rel(writer, db, "Reads the person's own rows", "EF Core")
+Rel(writer, store, "Reads photos, saves the zip")
+@enduml

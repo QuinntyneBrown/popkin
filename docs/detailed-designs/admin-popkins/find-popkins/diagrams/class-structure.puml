@@ -1,0 +1,99 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Find Popkins
+
+enum AdminPopkinStatus {
+  Live
+  Ending
+  WrappedUp
+}
+
+enum PopkinShow {
+  All
+  Live
+  Ending
+  WrappedUp
+}
+
+class FindPopkinsQuery {
+  +string? Search
+  +PopkinShow Show
+  +int Page
+}
+
+class FindPopkinsQueryHandler {
+  +Handle(query: FindPopkinsQuery): Task<AdminPopkinListDto>
+}
+
+class AdminPopkinListDto {
+  +int LiveCount
+  +int WrappedUpCount
+  +IReadOnlyList<AdminPopkinRowDto> Items
+  +bool HasMore
+}
+
+class AdminPopkinRowDto {
+  +Guid Id
+  +string Name
+  +string Emoji
+  +PopkinColour Colour
+  +PopkinLength Length
+  +DateTimeOffset StartedAt
+  +DateTimeOffset? EndsAt
+  +DateTimeOffset? WrappedUpAt
+  +string InviteCode
+  +string HostName
+  +int MemberCount
+  +AdminPopkinStatus Status
+  +int? DaysLeft
+}
+
+class AdminPopkinStatuses <<static>> {
+  +EndingWithin: TimeSpan = 48 h
+  +Of(popkin: PopkinSpace, now: DateTimeOffset): (AdminPopkinStatus, int?)
+}
+
+class PopkinSpace {
+  +Guid Id
+  +string Name
+  +string InviteCode
+  +PopkinStatus Status
+  +DateTimeOffset CreatedAt
+  +DateTimeOffset? EndsAt
+  +DateTimeOffset LastActivityAt
+}
+
+interface IAdminGuard {
+  +CurrentAdminAsync(): Task<Admin>
+  +RequireAsync(action: AdminAction): Task<Admin>
+}
+
+class AdminPopkinsStore <<Angular>> {
+  +search: Signal<string>
+  +show: Signal<PopkinShow>
+  +rows: Signal<AdminPopkinRowDto[]>
+  +state: Signal<'loading'|'ready'|'noResults'|'failed'>
+  +setSearch(text: string): void
+  +setShow(show: PopkinShow): void
+  +retry(): void
+}
+
+FindPopkinsQueryHandler ..> FindPopkinsQuery : handles
+FindPopkinsQueryHandler ..> IAdminGuard : uses
+FindPopkinsQueryHandler ..> AdminPopkinStatuses : uses
+FindPopkinsQueryHandler --> PopkinSpace : reads
+FindPopkinsQueryHandler ..> AdminPopkinListDto : returns
+AdminPopkinListDto "1" *-- "*" AdminPopkinRowDto
+AdminPopkinRowDto --> AdminPopkinStatus
+FindPopkinsQuery --> PopkinShow
+AdminPopkinsStore ..> AdminPopkinListDto : holds
+@enduml

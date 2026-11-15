@@ -1,0 +1,38 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Admins and roles
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "AdminsPage", "Page", "Admins and What each role can do")
+  Component(store, "AdminsStore", "Signal store (api)", "List, count, rows' locks")
+  Component(add, "AddAdminDialog", "CDK dialog", "Staff email, role")
+  Component(chg, "ChangeAdminRoleDialog", "CDK dialog", "Make (name) a (role)?")
+  Component(rem, "RemoveAdminDialog", "CDK dialog", "Remove (name)?")
+  Component(client, "AdminAccessApi", "ADMIN_ACCESS_API", "admins, addAdmin, changeRole, removeAdmin")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminAdminsController", "Controller", "/api/admin/admins")
+  Component(boot, "AdminBootstrapper", "Hosted start-up step", "Sends EnsureFirstOwnerCommand")
+  Component(handlers, "AddAdmin / ChangeAdminRole / RemoveAdmin handlers", "MediatR handlers", "ManageAdmins; self and last-Owner rules")
+  Component(gate, "AdminRosterGate", "Singleton", "One roster change at a time (ADR 0009)")
+  Component(sender, "IAdminInviteSender", "Application abstraction", "The invite email")
+  Component(log, "IAuditLog", "Application", "AddedAdmin, ChangedAdminRole, RemovedAdmin")
+  ComponentDb(db, "AppDbContext", "EF Core", "Admins, AdminSessions, AuditEntries")
+}
+Rel(page, store, "Reads")
+Rel(page, add, "Opens")
+Rel(page, chg, "Opens on a role chosen")
+Rel(page, rem, "Opens")
+Rel(store, client, "Calls")
+Rel(add, client, "addAdmin")
+Rel(chg, client, "changeRole")
+Rel(rem, client, "removeAdmin")
+Rel(client, ctrl, "HTTPS")
+Rel(ctrl, handlers, "Commands")
+Rel(boot, handlers, "EnsureFirstOwnerCommand")
+Rel(handlers, gate, "Enters")
+Rel(handlers, sender, "Sends invite")
+Rel(handlers, log, "Records")
+Rel(handlers, db, "Saves")
+@enduml

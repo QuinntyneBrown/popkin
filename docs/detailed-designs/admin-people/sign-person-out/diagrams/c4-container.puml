@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Sign a person out everywhere
+
+Person(adminp, "Admin", "Owner, Support or Viewer")
+Person(member, "Person", "The person signed out")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "PersonPage, SignPersonOutDialog")
+  Container(web, "Popkin web app", "Angular SPA", "Next request 401; SessionsEnded closes open screens")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "SignPersonOutCommandHandler, PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Sessions, audit entries")
+}
+Rel(adminp, admin, "Signs a person out", "HTTPS")
+Rel(admin, api, "POST /api/admin/people/{personId}/sign-out", "JSON/HTTPS, admin cookie")
+Rel(api, web, "SessionsEnded to the person only", "SignalR")
+Rel(member, web, "Uses Popkin", "HTTPS")
+Rel(api, db, "Revokes sessions and records the entry in one save", "EF Core")
+@enduml

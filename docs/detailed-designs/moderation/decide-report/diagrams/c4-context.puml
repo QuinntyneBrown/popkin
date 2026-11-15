@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Remove reported content or dismiss the report
+
+Person(admin, "Owner or Support admin", "Decides a report")
+Person(member, "Member", "Sees the removal without a reload")
+Person(author, "Author", "Is told why their item was removed")
+System(popkin, "Popkin", "Popkin app, admin app and the Popkin API")
+Rel(admin, popkin, "Removes the item or dismisses the report, with a reason")
+Rel(popkin, member, "Shows Removed by Popkin, Photo removed, or the experience gone")
+Rel(popkin, author, "Shows a removal notice")
+@enduml

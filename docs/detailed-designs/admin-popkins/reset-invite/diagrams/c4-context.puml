@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Reset the invite
+
+Person(admin, "Admin", "Owner, Support or Viewer; runs Popkin from the admin app")
+Person(member, "Member", "Person who belongs to a Popkin")
+System(popkin, "Popkin", "Pop-up communities and the admin app that runs them")
+
+Rel(admin, popkin, "Resets a Popkin's invite code and QR with a reason in", "HTTPS")
+Rel(member, popkin, "Joins with the new invite, or is refused with the old one, in", "HTTPS")
+@enduml

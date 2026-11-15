@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Audit log
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "AuditPage", "Page", "pk-page-head, pk-data-table grouped by day")
+  Component(store, "AuditLogStore", "Signal store (api)", "Search, admin filter, pages, states")
+  Component(text, "audit-text.ts", "Pure helper (api)", "groupByDay, showingText")
+  Component(client, "AdminAccessApi", "ADMIN_ACCESS_API", "audit(), auditExportUrl()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminAuditController", "Controller", "GET /api/admin/audit, GET /api/admin/audit/export")
+  Component(read, "GetAuditEntriesQueryHandler", "MediatR handler", "Filter, keyset page, total")
+  Component(exp, "ExportAuditLogCommandHandler", "MediatR handler", "Records the export, then streams CSV")
+  Component(log, "IAuditLog / AuditLog", "Application", "Record(AuditRecord) adds an entry to the unit of work")
+  Component(any, "Every admin write handler", "MediatR handler", "Change + Record + one SaveChangesAsync")
+  Component(ctx, "AppDbContext", "Infrastructure", "Refuses any update, and any delete younger than 2 years")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "PurgeOldAuditEntriesJob", "PeriodicJob", "Daily tick sends PurgeOldAuditEntriesCommand")
+}
+Rel(page, store, "Reads")
+Rel(store, text, "Uses")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "HTTPS")
+Rel(ctrl, read, "GetAuditEntriesQuery")
+Rel(ctrl, exp, "ExportAuditLogCommand")
+Rel(exp, log, "Record(ExportedAuditLog)")
+Rel(any, log, "Record(...)")
+Rel(log, ctx, "Adds AuditEntry")
+Rel(read, ctx, "Reads")
+Rel(job, ctx, "PurgeOldAuditEntriesCommand removes old entries")
+@enduml

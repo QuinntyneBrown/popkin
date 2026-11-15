@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Data requests
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "DataRequestsPage", "Angular page", "pk-page-head, pk-data-table, pk-status-pill")
+  Component(rstore, "DataRequestsStore", "Signal store, api library", "Rows, due soon, actions by status; polls while compiling")
+  Component(dlg, "LogDataRequestDialog", "CDK dialog", "Email or phone, pk-reason-field")
+  Component(client, "HttpAdminPeopleApi", "ADMIN_PEOPLE_API", "dataRequests, logRequest, startRequestExport, markSent")
+}
+Container_Boundary(apic, "Popkin API") {
+  Component(ctrl, "AdminDataRequestsController", "Admin scheme", "/api/admin/data-requests")
+  Component(list, "GetDataRequestsQueryHandler", "MediatR handler", "Open count, rows")
+  Component(log, "LogDataRequestCommandHandler", "MediatR handler", "Finds the account; logs and starts the export")
+  Component(export, "StartRequestExportCommandHandler", "MediatR handler", "New to Compiling")
+  Component(sent, "MarkDataRequestSentCommandHandler", "MediatR handler", "Ready to send to Sent; link 7 days")
+  ComponentDb(db, "Popkin database", "SQL Server", "DataRequests, People, AuditEntries")
+}
+Rel(page, rstore, "Reads")
+Rel(page, dlg, "Opens")
+Rel(rstore, client, "Calls")
+Rel(dlg, client, "Calls")
+Rel(client, ctrl, "HTTPS", "JSON")
+Rel(ctrl, list, "Sends")
+Rel(ctrl, log, "Sends")
+Rel(ctrl, export, "Sends")
+Rel(ctrl, sent, "Sends")
+Rel(list, db, "Reads", "EF Core")
+Rel(log, db, "One SaveChangesAsync", "EF Core")
+Rel(export, db, "One SaveChangesAsync", "EF Core")
+Rel(sent, db, "One SaveChangesAsync", "EF Core")
+@enduml

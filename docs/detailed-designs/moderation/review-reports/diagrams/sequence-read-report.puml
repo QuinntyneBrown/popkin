@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Read a report
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "ReportsPage" as page
+  participant "ReportsStore" as store
+  participant "HttpAdminReportsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminReportsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetReportQueryHandler" as handler
+  participant "ReportContext" as ctx
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "IPhotoStore" as photos
+end box
+actor -> page : Open a queue item
+page -> store : select(kind, contentId)
+store -> client : getReport(kind, contentId)
+client -> ctrl : GET /api/admin/reports/(kind)/(contentId)
+ctrl -> handler : Send GetReportQuery
+handler -> db : Open reports of the item
+alt none open
+  handler --> ctrl : 404 report_not_found
+else open reports
+  handler -> db : Item, author Membership and Person
+  alt message
+    handler -> ctx : ReadAsync(report)
+    ctx -> db : Five Member messages before and after, Report.ThreadId only (L2-109 AC3)
+    note right of ctx : A direct message: its own thread alone, inDirectMessage true (L2-109 AC5)
+    ctx --> handler : before, after
+  else photo or experience (L2-109 AC4)
+    handler -> photos : GetReadUrl(key) for the photo or picture
+  end
+  handler -> db : Reporters, author's earlier removals, status
+  handler -> audit : Record(ReportRead, TargetKind Report, admin, item) (L2-109 AC8)
+  handler -> db : Save the AuditEntry
+  handler --> ctrl : ReportDetailDto
+end
+ctrl --> client : 200 or 404
+client --> store : detail
+store --> page : open item
+page --> actor : Reason, Popkin, author, item with context marked, "{name} and {n} others", history
+page --> actor : "Remove {kind}", "Keep it, dismiss report", "Open {author}'s account" (L2-109 AC6)
+opt Viewer (L2-086 AC2)
+  page --> actor : Both decisions disabled, "Viewer admins can't do this"
+end
+@enduml

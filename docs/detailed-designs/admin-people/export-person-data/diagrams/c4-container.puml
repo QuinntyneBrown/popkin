@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Export a person's data
+
+Person(adminp, "Admin", "Owner, Support or Viewer")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "PersonPage, ExportPersonDataDialog, DataRequestsPage")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "StartDataExportCommandHandler, DownloadDataExportQueryHandler")
+  Container(worker, "Popkin Worker", ".NET worker service", "PreparePersonDataExportsJob")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Data requests, the person's posts, audit entries")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "Photo files; the export zip")
+}
+Rel(adminp, admin, "Starts and downloads", "HTTPS")
+Rel(admin, api, "POST /api/admin/people/{personId}/data-export, GET …/download", "JSON/HTTPS, admin cookie")
+Rel(api, db, "Logs the request with the audit entry", "EF Core")
+Rel(worker, db, "Reads what the person posted", "EF Core")
+Rel(worker, store, "Reads photos; writes the zip", "HTTPS")
+Rel(api, store, "Signs a download address", "HTTPS")
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System context — The deletion queue
+
+Person(adminp, "Admin", "Owner, Support or Viewer, signed in to the admin app")
+Person(member, "Person", "The person whose deletion is held")
+System(popkin, "Popkin", "Platform for pop-up communities, with its admin app")
+
+Rel(adminp, popkin, "Reads the accounts in their hold; an Owner keeps one", "HTTPS")
+Rel(member, popkin, "Signs in again once the deletion is cancelled", "HTTPS")
+@enduml

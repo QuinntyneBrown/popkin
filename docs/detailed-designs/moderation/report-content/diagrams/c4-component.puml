@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Report content
+
+Container_Boundary(spa, "Popkin web app") {
+  Component(msg, "ReactionsDialog", "CDK dialog", "Message actions: Report / Reported")
+  Component(pho, "PhotoActionsDialog", "CDK dialog", "Photo actions: Report / Reported")
+  Component(exp, "ExperienceActionsDialog", "CDK dialog", "Experience actions: Report / Reported")
+  Component(dlg, "ReportDialog", "CDK dialog", "Five reasons, Report and Cancel")
+  Component(draft, "ReportDraft", "Signal state, api library", "idle, busy, failed; keeps the reason")
+  Component(client, "ReportsApi / HttpReportsApi", "Contract + HTTP client", "fileReport()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ReportsController", "Controller", "POST reports, rate limit reports")
+  Component(handler, "FileReportCommandHandler", "MediatR handler", "One report per member per item")
+  Component(reach, "ReportableContent", "Application service", "Finds the item in the member's reach")
+  Component(guard, "IMembershipGuard", "Abstraction", "404 for non-members")
+  Component(entity, "Report", "Domain entity", "Kind, item, author, reporter, reason")
+  ComponentDb(db, "AppDbContext", "EF Core", "Popkin database")
+}
+Rel(msg, dlg, "Opens on Report")
+Rel(pho, dlg, "Opens on Report")
+Rel(exp, dlg, "Opens on Report")
+Rel(dlg, draft, "Runs")
+Rel(draft, client, "fileReport()")
+Rel(client, ctrl, "HTTPS")
+Rel(ctrl, handler, "FileReportCommand")
+Rel(handler, guard, "RequireMemberAsync")
+Rel(handler, reach, "Resolves the item")
+Rel(handler, entity, "Report.File()")
+Rel(handler, db, "Saves")
+@enduml

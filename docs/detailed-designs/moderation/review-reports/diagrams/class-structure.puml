@@ -1,0 +1,100 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Reports
+
+class Report {
+  +ReportedContentKind ContentKind
+  +Guid ContentId
+  +Guid? ThreadId
+  +Guid AuthorPersonId
+  +Guid ReporterMembershipId
+  +ReportReason Reason
+  +DateTimeOffset ReportedAt
+  +DateTimeOffset? ClosedAt
+  +ReportOutcome? Outcome
+}
+class GetReportQueueQuery {
+  +string? Kind
+}
+class GetReportQuery {
+  +string Kind
+  +Guid ContentId
+}
+class ReportQueueDto {
+  +int Waiting
+  +ReportKindCountsDto Counts
+  +IReadOnlyList<ReportQueueItemDto> Items
+}
+class ReportQueueItemDto {
+  +string Kind
+  +Guid ContentId
+  +PopkinRefDto Popkin
+  +string Reason
+  +DateTimeOffset FirstReportedAt
+  +int ReportCount
+}
+class ReportDetailDto {
+  +string Kind
+  +Guid ContentId
+  +PopkinRefDto Popkin
+  +string Reason
+  +ReportAuthorDto Author
+  +ReportedContentDto Content
+  +ReportContextDto Context
+  +ReportersDto Reporters
+  +AuthorHistoryDto AuthorHistory
+}
+class ReportContextDto {
+  +IReadOnlyList<ReportContextMessageDto> Before
+  +IReadOnlyList<ReportContextMessageDto> After
+  +bool InDirectMessage
+}
+class ReportContext {
+  +{static} int Size = 5
+  +ReadAsync(db, report): Task<ReportContextDto>
+}
+class ReportersDto {
+  +string FirstName
+  +int Others
+}
+class AuthorHistoryDto {
+  +string Status
+  +int EarlierRemovals
+}
+interface IAuditLog {
+  +Record(AuditRecord): void
+}
+class GetReportQueryHandler {
+  +Handle(query): Task<ReportDetailDto>
+}
+class ReportsStore <<api library>> {
+  +queue: Signal<ReportQueueView>
+  +kind: Signal<string?>
+  +open: Signal<ReportDetailView?>
+  +load(kind): void
+  +select(item): void
+  +removeAndOpenNext(item): void
+}
+
+GetReportQueueQuery ..> ReportQueueDto : answered by
+ReportQueueDto "1" *-- "*" ReportQueueItemDto
+ReportQueueItemDto ..> Report : groups open
+GetReportQueryHandler ..> GetReportQuery : handles
+GetReportQueryHandler ..> ReportContext : uses
+GetReportQueryHandler ..> IAuditLog : records ReportRead
+GetReportQueryHandler ..> ReportDetailDto : returns
+ReportDetailDto *-- ReportContextDto
+ReportDetailDto *-- ReportersDto
+ReportDetailDto *-- AuthorHistoryDto
+ReportsStore ..> ReportQueueDto : reads
+ReportsStore ..> ReportDetailDto : reads
+@enduml

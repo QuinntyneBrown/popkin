@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — A session records its device and last seen
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Popkin web app" as web
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AuthController" as auth
+  participant "SessionCookieEvents" as events
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ConfirmCodeCommandHandler" as confirm
+  participant "RecordSessionActivityCommandHandler" as activity
+  participant "Session" as session
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> web : Confirm a six-digit code
+web -> auth : POST /api/auth/codes/{verificationId}/confirm
+auth -> auth : SessionOrigin from User-Agent and the forwarded client address
+auth -> confirm : Send ConfirmCodeCommand(…, origin)
+confirm -> session : Session.Start(personId, now, origin)
+confirm -> db : Save
+db --> confirm : Saved
+confirm --> auth : StartedSession
+auth --> web : 200, session cookie
+web -> events : Any later request
+events -> events : ValidateSessionQuery: live
+events -> activity : Send RecordSessionActivityCommand(sessionId)
+activity -> db : Session.LastSeenAt older than 5 minutes?
+alt Older
+  activity -> session : Seen(now); Person.Seen(now)
+  activity -> db : Save
+else Recent
+  activity --> events : Nothing written
+end
+note over auth, activity : Device, client, address and place go in no log, metric or span (L2-094 AC6)
+@enduml

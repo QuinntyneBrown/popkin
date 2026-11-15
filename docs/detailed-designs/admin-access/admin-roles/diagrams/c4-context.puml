@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Admin roles
+
+Person(owner, "Owner", "Does everything, including admins, features, limits and announcements")
+Person(support, "Support admin", "Helps people and Popkins and moderates content")
+Person(viewer, "Viewer", "Reads everything and changes nothing")
+System(popkin, "Popkin", "The console and the Popkin API, which decides what each role may do")
+Rel(owner, popkin, "Takes every action")
+Rel(support, popkin, "Takes support and moderation actions")
+Rel(viewer, popkin, "Reads; exports the audit log")
+@enduml

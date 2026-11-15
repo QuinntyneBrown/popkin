@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Announcements
+
+package "Popkin.Domain" {
+  enum AnnouncementStyle {
+    Notice
+    Warning
+  }
+  class Announcement {
+    +int MaxMessageLength = 140
+    +Guid Id
+    +string Message
+    +AnnouncementStyle Style
+    +DateTimeOffset PublishedAt
+    +Guid PublishedByAdminId
+    +string PublishedByName
+    +DateTimeOffset EndsAt
+    +DateTimeOffset? TakenDownAt
+    +Guid? TakenDownByAdminId
+    +Publish(message, style, endsAt, admin, now): Announcement
+    +TakeDown(admin, now): void
+    +IsLiveAt(now): bool
+  }
+}
+package "Popkin.Application" {
+  class PublishAnnouncementCommand {
+    +string Message
+    +AnnouncementStyle Style
+    +DateTimeOffset EndsAt
+  }
+  class PublishAnnouncementCommandHandler {
+    +Handle(command): Task<AdminAnnouncementDto>
+  }
+  class TakeDownAnnouncementCommandHandler {
+    +Handle(command): Task<AdminAnnouncementDto>
+  }
+  class GetAdminAnnouncementsQueryHandler {
+    +Handle(query): Task<AdminAnnouncementsDto>
+  }
+  class AdminAnnouncementsDto {
+    +AdminAnnouncementDto? Live
+    +int Audience
+    +AdminAnnouncementDto[] Earlier
+  }
+  interface IAdminGuard {
+    +RequireAsync(action: AdminAction): Task<Admin>
+  }
+  interface IAuditLog {
+    +Record(record: AuditRecord): void
+  }
+}
+Announcement --> AnnouncementStyle
+PublishAnnouncementCommandHandler ..> PublishAnnouncementCommand : handles
+PublishAnnouncementCommandHandler --> Announcement : creates
+TakeDownAnnouncementCommandHandler --> Announcement : takes down
+PublishAnnouncementCommandHandler ..> IAdminGuard
+PublishAnnouncementCommandHandler ..> IAuditLog
+TakeDownAnnouncementCommandHandler ..> IAdminGuard
+TakeDownAnnouncementCommandHandler ..> IAuditLog
+GetAdminAnnouncementsQueryHandler ..> AdminAnnouncementsDto : returns
+GetAdminAnnouncementsQueryHandler ..> Announcement : reads
+@enduml

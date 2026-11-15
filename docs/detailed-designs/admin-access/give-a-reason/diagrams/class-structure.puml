@@ -1,0 +1,57 @@
+@startuml
+' --- shared skin header ---
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+' --------------------------
+title Class structure — A reason for every change
+
+class ReasonRules <<static>> {
+  +const int MaxLength = 500
+  +Required(reason: string?): string
+  +Optional(reason: string?): string?
+}
+enum ReasonPolicy {
+  Required
+  Optional
+  None
+}
+class ProblemException <<existing>> {
+  +int Status
+  +string Code
+  +string? Field
+}
+class ActionDialogState {
+  +policy: ReasonPolicy
+  +status: Signal<'idle' | 'busy' | 'failed'>
+  +reason: Signal<string>
+  +reasonError: Signal<string?>
+  +failure: Signal<ApiProblem?>
+  +confirm(send: (reason) => Observable<T>): Observable<T>
+  +retryable: boolean
+}
+class ReasonField <<pk-reason-field>> {
+  +optional: boolean
+  +placeholder: string
+  +readonly: boolean
+  +error: string?
+  +maxlength = 500
+  +focus(): void
+}
+class ApiProblem <<existing>> {
+  +number status
+  +string? code
+  +string? field
+}
+ReasonRules ..> ProblemException : throws 400
+ActionDialogState --> ReasonPolicy
+ActionDialogState ..> ApiProblem : keeps on failure
+ReasonField ..> ActionDialogState : bound to reason, error, busy
+@enduml

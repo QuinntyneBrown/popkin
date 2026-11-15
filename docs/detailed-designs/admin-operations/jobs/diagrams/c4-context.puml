@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Jobs
+
+Person(admin, "Admin", "Owner or Support runs a job; Viewer reads")
+System(popkin, "Popkin", "Pop-up communities, the admin app and the Worker")
+System_Ext(blob, "Photo store", "Azure Blob Storage")
+Rel(admin, popkin, "Sees how the Worker's jobs ran and runs one now", "HTTPS")
+Rel(popkin, blob, "Jobs read and remove photo files", "HTTPS")
+@enduml

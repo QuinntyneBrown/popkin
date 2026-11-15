@@ -1,0 +1,39 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Feature switches
+
+Container_Boundary(admin, "Popkin admin app") {
+  Component(page, "FeaturesPage", "Angular page", "pk-feature-panel per feature")
+  Component(dialogs, "TurnOffFeatureDialog, FeatureEveryoneDialog, FeatureChosenDialog, AddFeaturePopkinDialog", "CDK dialogs", "Optional reason, ActionDialogState")
+  Component(store, "AdminFeaturesStore", "api library", "loading, ready, failed; applies a saved feature")
+  Component(client, "ADMIN_PLATFORM_API", "api library contract", "HttpAdminPlatformApi")
+}
+Container_Boundary(web, "Popkin web app") {
+  Component(frame, "PopkinFrame", "api library", "plan, schedules; polls every 60 s")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminFeaturesController", "ASP.NET Core controller", "Admin scheme only")
+  Component(handlers, "ChangeFeatureModeCommandHandler, AddFeaturePopkinCommandHandler, RemoveFeaturePopkinCommandHandler", "MediatR handlers", "Role, reason, audit, one save")
+  Component(guard, "IAdminGuard", "Application", "RequireAsync(ChangeFeature)")
+  Component(audit, "IAuditLog", "Application", "Record(AuditRecord)")
+  Component(mw, "PlatformSnapshotMiddleware", "ASP.NET Core middleware", "RefreshIfStaleAsync each request")
+  Component(snap, "PlatformSnapshot", "Infrastructure singleton", "IFeatureSwitches and ILimits")
+  Component(readers, "Schedule handlers, GetPopkinHomeQueryHandler, GetPopkinFeaturesQueryHandler", "MediatR handlers", "IsOn / Require(feature, popkinId)")
+  ComponentDb(db, "Popkin database", "SQL Server", "FeatureSetting, FeatureChosenPopkin, AuditEntry")
+}
+Rel(page, dialogs, "Opens")
+Rel(page, store, "Reads")
+Rel(dialogs, store, "Saves through")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, handlers, "Sends commands")
+Rel(handlers, guard, "Checks the role")
+Rel(handlers, audit, "Records the change")
+Rel(handlers, db, "Saves once", "EF Core")
+Rel(handlers, snap, "Invalidate()")
+Rel(mw, snap, "RefreshIfStaleAsync")
+Rel(snap, db, "Reloads every 30 s at most", "EF Core")
+Rel(readers, snap, "IsOn, Require")
+Rel(frame, readers, "GET /api/popkins/{popkinId}/features")
+@enduml

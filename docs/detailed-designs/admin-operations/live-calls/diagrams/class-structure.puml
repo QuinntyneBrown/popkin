@@ -1,0 +1,90 @@
+@startuml
+title Class structure — Live calls
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+
+enum CallEndReason {
+  LastLeft
+  PopkinWrappedUp
+  EndedByPopkin
+}
+class Call {
+  +Guid Id
+  +Guid PopkinId
+  +Guid? ThreadId
+  +DateTimeOffset StartedAt
+  +DateTimeOffset? EndedAt
+  +CallEndReason? EndReason
+  +long Version
+  +End(on, now, reason: CallEndReason): void
+}
+class CallParticipant {
+  +Guid CallId
+  +Guid MembershipId
+  +DateTimeOffset JoinedAt
+  +DateTimeOffset? LeftAt
+}
+class GetLiveCallsQueryHandler {
+  +Handle(query): Task<LiveCallsDto>
+}
+class LiveCallsDto {
+  +int Calls
+  +int People
+  +IReadOnlyList<LiveCallDto> Items
+}
+class LiveCallDto {
+  +Guid CallId
+  +Guid PopkinId
+  +string PopkinEmoji
+  +string PopkinName
+  +string StartedByName
+  +IReadOnlyList<AvatarDto> Avatars
+  +int People
+  +DateTimeOffset StartedAt
+  +bool OverThreeHours
+}
+class EndCallByPopkinCommand {
+  +Guid CallId
+  +string Reason
+}
+class EndCallByPopkinCommandHandler {
+  +Handle(command): Task<CallEndedByPopkinDto>
+}
+class CallEndedByPopkinDto {
+  +string PopkinName
+  +int Disconnected
+}
+class CallRules {
+  +{static} TimeSpan LongCallAfter = 3 h
+}
+interface IPopkinClient {
+  +CallEnded(popkinId, callId, threadId, reason: CallEndReason): Task
+}
+class LiveCallsStore {
+  +calls: Signal<LiveCallView[]>
+  +refresh(): void
+}
+class EndCallDialog {
+  +state: ActionDialogState
+  +confirm(reason): void
+}
+Call "1" *-- "*" CallParticipant
+Call --> CallEndReason
+EndCallByPopkinCommandHandler ..> EndCallByPopkinCommand : handles
+EndCallByPopkinCommandHandler --> Call : End(EndedByPopkin)
+EndCallByPopkinCommandHandler ..> IPopkinClient : CallEnded
+EndCallByPopkinCommandHandler ..> CallEndedByPopkinDto : returns
+GetLiveCallsQueryHandler ..> LiveCallsDto : returns
+GetLiveCallsQueryHandler ..> CallRules : flags
+LiveCallsDto "1" *-- "*" LiveCallDto
+LiveCallsStore ..> LiveCallsDto : holds
+EndCallDialog ..> LiveCallsStore : refreshes
+@enduml

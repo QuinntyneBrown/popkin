@@ -1,0 +1,69 @@
+@startuml
+title UML sequence behaviour — The banner shows, is dismissed and comes down
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Signed-in person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-root" as root
+  participant "pk-announcement" as banner
+  participant "AnnouncementStore" as store
+  participant "AnnouncementDismissals" as dismissals
+  participant "HttpAnnouncementApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AnnouncementController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetLiveAnnouncementQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+store -> store : SessionStore has a session (L2-116 AC6)
+store -> client : live()
+client -> controller : GET /api/announcement
+controller -> handler : Send GetLiveAnnouncementQuery
+handler -> db : TakenDownAt null and EndsAt > now
+db --> handler : Announcement
+handler --> controller : AnnouncementDto
+controller --> client : 200 { id, message, style, endsAt }
+alt Request fails or 204
+  client --> store : null
+  store --> root : banner null; nothing shows (L2-116 AC5)
+else Live
+  client --> store : AnnouncementView
+  store -> dismissals : dismissedId()
+  alt Same id dismissed on this device
+    store --> root : banner null (L2-116 AC3)
+  else Not dismissed
+    store --> root : banner
+    root -> banner : message, style
+    banner --> actor : Banner at the top, status region announced once, icon and "Warning:" or "Notice:" (L2-116 AC1, AC2)
+    opt "Dismiss"
+      actor -> banner : Dismiss
+      banner -> root : dismissed
+      root -> store : dismiss()
+      store -> dismissals : dismiss(id), in try/catch
+      store --> root : banner null
+    end
+  end
+end
+store -> store : 60 s later
+store -> client : live()
+client -> controller : GET /api/announcement
+controller --> client : 204, taken down or past its end
+client --> store : null
+store --> root : banner null; gone without a reload (L2-116 AC4)
+@enduml
