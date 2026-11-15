@@ -36,6 +36,8 @@ export class TimeOffPage {
   readonly rows: Locator;
   readonly names: Locator;
   readonly legend: Locator;
+  /** The event's label over each of its days. */
+  readonly eventLabels: Locator;
   readonly nobodyYet: Locator;
   readonly loading: Locator;
   readonly error: Locator;
@@ -75,6 +77,7 @@ export class TimeOffPage {
     this.boldCounts = this.table.locator('thead .leave__off--many');
     this.rows = this.table.locator('tbody tr');
     this.names = this.table.locator('tbody th[scope="row"] .truncate');
+    this.eventLabels = this.table.locator('.leave__event');
     this.legend = page.locator('.chart-legend');
     this.nobodyYet = page.getByText('Nobody has added time off yet.');
     this.loading = page.getByRole('status').filter({ hasText: 'Loading time off…' });

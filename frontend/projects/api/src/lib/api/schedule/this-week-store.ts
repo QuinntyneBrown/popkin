@@ -1,6 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription, filter, merge } from 'rxjs';
+import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { accentOf } from '../../models/popkin';
 import { EveningView, ThisWeekView } from '../../models/this-week';
 import { HoursDay } from './my-hours';
@@ -73,6 +75,12 @@ const longDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frida
 @Injectable()
 export class ThisWeekStore {
   private readonly api = inject(SCHEDULE_API);
+  private readonly realtime = inject(POPKIN_REALTIME);
+  private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.follow();
+  }
 
   private popkinId = '';
   private today = '';
@@ -154,12 +162,31 @@ export class ThisWeekStore {
     if (popkinId !== this.popkinId) this.view.set(null);
     this.popkinId = popkinId;
     this.today = today;
+    this.realtime.start();
     this.read();
   }
 
   retry(): void {
     this.view.set(null);
     this.read();
+  }
+
+  /**
+   * The open view reads itself again, quietly, when its Popkin's schedule changes, when a member
+   * leaves it, and when the connection comes back (L2-072 AC11, the shared real-time rules).
+   */
+  private follow(): void {
+    const mine = takeUntilDestroyed(this.destroyRef);
+    merge(
+      this.realtime.scheduleChanged$.pipe(filter((popkinId) => popkinId === this.popkinId)),
+      this.realtime.memberLeft$.pipe(filter((left) => left.popkinId === this.popkinId)),
+      this.realtime.reconnected$,
+    )
+      .pipe(
+        filter(() => !!this.popkinId),
+        mine,
+      )
+      .subscribe(() => this.read());
   }
 
   private read(): void {

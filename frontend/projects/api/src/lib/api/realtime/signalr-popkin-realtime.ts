@@ -36,6 +36,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   private readonly photoGone = new Subject<{ popkinId: string; photoId: string }>();
   private readonly wrapped = new Subject<string>();
   private readonly changed = new Subject<PopkinSettingsView>();
+  private readonly schedule = new Subject<string>();
   private readonly back = new Subject<void>();
   private readonly callChange = new Subject<Of<'callChanged$'>>();
   private readonly callEnd = new Subject<Of<'callEnded$'>>();
@@ -58,6 +59,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
   readonly photoDeleted$ = this.photoGone.asObservable();
   readonly popkinWrappedUp$ = this.wrapped.asObservable();
   readonly popkinChanged$ = this.changed.asObservable();
+  readonly scheduleChanged$ = this.schedule.asObservable();
   readonly reconnected$ = this.back.asObservable();
   readonly callChanged$ = this.callChange.asObservable();
   readonly callEnded$ = this.callEnd.asObservable();
@@ -150,6 +152,7 @@ export class SignalRPopkinRealtime implements PopkinRealtime {
         this.signals.next({ callId, fromMembershipId, signal }),
     );
     connection.on(HUB_EVENTS.popkinWrappedUp, (popkinId: string) => this.wrapped.next(popkinId));
+    connection.on(HUB_EVENTS.scheduleChanged, (popkinId: string) => this.schedule.next(popkinId));
     connection.on(HUB_EVENTS.popkinChanged, (_popkinId: string, popkin: PopkinSettingsView) =>
       this.changed.next(popkin),
     );

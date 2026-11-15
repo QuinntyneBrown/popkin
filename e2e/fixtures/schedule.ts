@@ -84,6 +84,9 @@ export class Schedule {
     this.failingSaves = false;
   }
 
+  /** Reads of time off or this week asked for, answered or not. */
+  reads = 0;
+
   /** The reads do not answer until the returned function is called. */
   hold(): () => void {
     let release: () => void = () => undefined;
@@ -177,6 +180,7 @@ export class Schedule {
     const saving = rest.match(/^time-off\/([^/]+)$/);
     if (saving && route.request().method() === 'PUT') return this.save(route, saving[1]);
     if (rest !== 'time-off' || route.request().method() !== 'GET') return route.fallback();
+    this.reads++;
     await this.held;
     if (this.failing === 'server') return route.fulfill({ status: 500 });
     if (this.failing) {
@@ -212,6 +216,7 @@ export class Schedule {
 
   /** `GET …/schedule/week?from=`: seven days from the viewer's today (L2-074). */
   private async readWeek(route: Route, url: URL): Promise<void> {
+    this.reads++;
     await this.held;
     if (this.failing === 'server') return route.fulfill({ status: 500 });
     if (this.failing) {
@@ -461,4 +466,13 @@ export async function theThisWeekLoading(page: Page): Promise<void> {
 export async function theThisWeekFailing(page: Page): Promise<void> {
   const schedule = await maraThisWeek(page, theMocksHours);
   schedule.fail();
+}
+
+/**
+ * The weeks a view asked for, each once: an open view reads itself again once the hub has
+ * connected (the shared real-time rules), so a spec of which week opens compares these, not the
+ * count of reads.
+ */
+export function weeksAsked(asked: readonly string[]): string[] {
+  return [...new Set(asked)];
 }

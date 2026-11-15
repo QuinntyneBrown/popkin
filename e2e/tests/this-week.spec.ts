@@ -11,6 +11,7 @@ import {
   timeOffUrl,
   mocksWeek,
   maraWithASchedule,
+  weeksAsked,
 } from '../fixtures/schedule';
 import { expect, test } from '../fixtures/pk-test';
 import { ThisWeekPage } from '../pages/this-week.page';
@@ -43,7 +44,7 @@ test.describe('This week', () => {
     ]);
     await expect(thisWeek.pressedDay).toHaveText(/Sat\s*12/);
     await expect(thisWeek.note).toHaveText('Free means not working between 8 and 11 pm.');
-    expect(scheduleOf(page).weeksFrom).toEqual(['2026-09-12']);
+    expect(weeksAsked(scheduleOf(page).weeksFrom)).toEqual(['2026-09-12']);
   });
 
   // L2-074 AC3, AC5, AC6
@@ -73,7 +74,7 @@ test.describe('This week', () => {
     await expect(thisWeek.shiftsText).toHaveText(
       'Mara: working 9 am to 5:30 pm; Walt: working 11 am to 7 pm; Dev: working 7 am to 3:30 pm; Ellie: working 7 am to 7:30 pm; Sam: working 10 am to 5 pm; Priya: working 8:30 am to 5 pm.',
     );
-    expect(scheduleOf(page).weeksFrom).toEqual(['2026-09-12']);
+    expect(weeksAsked(scheduleOf(page).weeksFrom)).toEqual(['2026-09-12']);
   });
 
   // L2-074 AC4, AC5
@@ -151,13 +152,16 @@ test.describe('This week', () => {
   });
 
   // L2-056 AC1, AC2
-  test('says it is loading, then fails with a way to try again', async ({ page }) => {
+  test('says it is loading, then fails with a way to try again', async ({ page, hub }) => {
     const schedule = await maraThisWeek(page, theMocksHours);
     const release = schedule.hold();
     await page.goto(thisWeekUrl);
     const thisWeek = new ThisWeekPage(page);
 
     await expect(thisWeek.loading).toBeAttached();
+    // Both the first read and the one once the hub connects fail; then nothing replaces the error.
+    await hub.connected();
+    await expect.poll(() => schedule.reads).toBe(2);
     schedule.fail();
     release();
     await expect(thisWeek.error).toBeVisible();

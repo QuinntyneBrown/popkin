@@ -11,6 +11,7 @@ import {
   scheduleOf,
   scheduleUrl,
   timeOffUrl,
+  weeksAsked,
 } from '../fixtures/schedule';
 import { expect, test } from '../fixtures/pk-test';
 import { PopkinHomePage } from '../pages/popkin-home.page';
@@ -42,7 +43,7 @@ test.describe('Time off', () => {
       /Sun\s*21/,
     ]);
     await expect(timeOff.names).toHaveText(['Mara', 'Walt', 'Dev', 'Ellie', 'Sam', 'Priya']);
-    expect(scheduleOf(page).asked).toEqual([mocksWeek]);
+    expect(weeksAsked(scheduleOf(page).asked)).toEqual([mocksWeek]);
   });
 
   // L2-072 AC2, AC4, AC10
@@ -110,6 +111,7 @@ test.describe('Time off', () => {
 
   test('says it is loading, then that it could not load, and loads again on Try again', async ({
     page,
+    hub,
   }) => {
     const schedule = await maraWithASchedule(page);
     const release = schedule.hold();
@@ -118,6 +120,9 @@ test.describe('Time off', () => {
     const timeOff = new TimeOffPage(page);
 
     await expect(timeOff.loading).toBeAttached();
+    // Both the first read and the one once the hub connects fail; then nothing replaces the error.
+    await hub.connected();
+    await expect.poll(() => schedule.reads).toBe(2);
     release();
     await expect(timeOff.error).toBeVisible();
     schedule.recover();
@@ -170,7 +175,7 @@ test.describe('Time off', () => {
       timeOff.weekChips.nth(2).getByRole('img', { name: 'Event this week' }),
     ).toBeVisible();
     await expect(timeOff.goToEvent).toHaveCount(0);
-    expect(schedule.asked).toEqual([mocksWeek]);
+    expect(weeksAsked(schedule.asked)).toEqual([mocksWeek]);
   });
 
   // L2-072 AC3, AC7

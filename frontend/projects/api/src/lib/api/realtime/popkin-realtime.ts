@@ -35,6 +35,11 @@ export interface PopkinRealtime {
    * full, with the version that orders them.
    */
   readonly popkinChanged$: Observable<PopkinSettingsView>;
+  /**
+   * Someone changed a Popkin's time off, working hours or event (L2-072 AC11, L2-085 AC4): the
+   * id of the Popkin, whose open Schedule reads itself again.
+   */
+  readonly scheduleChanged$: Observable<string>;
   /** Photos were added to a Popkin's album (L2-031 AC7). */
   readonly photosAdded$: Observable<{ popkinId: string; photoIds: string[] }>;
   /**

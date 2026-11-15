@@ -5,6 +5,17 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { EveningView, StretchView, ThisWeekView } from '../../models/this-week';
 import { SCHEDULE_API } from './schedule-api';
 import { ThisWeekStore } from './this-week-store';
+import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
+/** The hub's events the Schedule's stores follow (L2-072 AC11). */
+const realtime = {
+  scheduleChanged$: new Subject<string>(),
+  memberLeft$: new Subject<{ popkinId: string; membershipId: string }>(),
+  reconnected$: new Subject<void>(),
+  started: 0,
+  start() {
+    this.started++;
+  },
+};
 
 const today = '2026-09-12';
 const avatar = { initials: 'MO', accent: 'Coral', photoUrl: null } as const;
@@ -72,7 +83,11 @@ describe('ThisWeekStore', () => {
       return answer instanceof Subject ? answer : of(answer);
     };
     TestBed.configureTestingModule({
-      providers: [ThisWeekStore, { provide: SCHEDULE_API, useValue: { thisWeek } }],
+      providers: [
+        ThisWeekStore,
+        { provide: SCHEDULE_API, useValue: { thisWeek } },
+        { provide: POPKIN_REALTIME, useValue: realtime },
+      ],
     });
     store = TestBed.inject(ThisWeekStore);
   });
@@ -266,5 +281,41 @@ describe('ThisWeekStore', () => {
     week.days[0] = evening(today, { freeCount: 1, everyoneFreeFrom: null, working: ['Mara'] });
     store.saved(week);
     expect(store.days()[0].free).toBe('1/3 free');
+  });
+
+  // L2-072 AC11: what another member changes reaches the open view without a reload.
+  describe('live', () => {
+    it('opens the connection', () => {
+      const before = realtime.started;
+      store.open('p1', undefined, today);
+      expect(realtime.started).toBe(before + 1);
+    });
+
+    it('reads again when the schedule of its Popkin changes, and not for another', () => {
+      store.open('p1', undefined, today);
+      realtime.scheduleChanged$.next('p2');
+      expect(asked).toHaveLength(1);
+      realtime.scheduleChanged$.next('p1');
+      expect(asked).toEqual([today, today]);
+      expect(store.state()).toBe('ready');
+    });
+
+    it('reads again when a member leaves its Popkin', () => {
+      store.open('p1', undefined, today);
+      realtime.memberLeft$.next({ popkinId: 'p1', membershipId: 'm-walt' });
+      expect(asked).toEqual([today, today]);
+    });
+
+    it('reads again when the connection comes back', () => {
+      store.open('p1', undefined, today);
+      realtime.reconnected$.next();
+      expect(asked).toEqual([today, today]);
+    });
+
+    it('reads nothing before it is opened', () => {
+      realtime.scheduleChanged$.next('p1');
+      realtime.reconnected$.next();
+      expect(asked).toEqual([]);
+    });
   });
 });
