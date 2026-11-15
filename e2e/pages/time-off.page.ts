@@ -42,6 +42,10 @@ export class TimeOffPage {
   readonly loading: Locator;
   readonly error: Locator;
   readonly tryAgain: Locator;
+  /** "Schedules is switched off" (L2-077 AC2), and its way back to the Popkin's home. */
+  readonly off: Locator;
+  readonly offText: Locator;
+  readonly backToPopkin: Locator;
   readonly nav: Locator;
   readonly currentTab: Locator;
   /** Regions for the sweeps and the parity specs. */
@@ -85,6 +89,11 @@ export class TimeOffPage {
     this.tryAgain = this.error.getByRole('button', { name: 'Try again' });
     this.nav = page.getByRole('navigation', { name: 'Popkin' });
     this.currentTab = this.nav.locator('[aria-current="page"]');
+    this.off = page.locator('.empty').filter({
+      has: page.getByRole('heading', { name: 'Schedules is switched off' }),
+    });
+    this.offText = this.off.locator('p');
+    this.backToPopkin = this.off.getByRole('link', { name: /^Back to / });
     this.body = page.locator('.schedule');
   }
 

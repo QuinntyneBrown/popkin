@@ -70,6 +70,8 @@ export class ThisWeekPage {
 
   protected readonly link = computed(() => `/p/${this.popkinId()}/schedule/week`);
   protected readonly everyone = computed(() => `/p/${this.popkinId()}/chat/everyone`);
+  /** "Back to {Popkin name}" while Schedules is off (L2-077 AC2). */
+  protected readonly home = computed(() => `/p/${this.popkinId()}`);
   protected readonly views = computed(() => [
     { label: 'Time off', link: `/p/${this.popkinId()}/schedule`, current: false },
     { label: 'This week', link: `/p/${this.popkinId()}/schedule/week`, current: true },

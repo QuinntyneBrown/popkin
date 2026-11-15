@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EveningView, StretchView, ThisWeekView } from '../../models/this-week';
 import { SCHEDULE_API } from './schedule-api';
 import { ThisWeekStore } from './this-week-store';
@@ -315,6 +315,38 @@ describe('ThisWeekStore', () => {
     it('reads nothing before it is opened', () => {
       realtime.scheduleChanged$.next('p1');
       realtime.reconnected$.next();
+      expect(asked).toEqual([]);
+    });
+  });
+
+  // L2-077 AC4, AC5: an open view follows the switch within a minute.
+  describe('the switch', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it('reads again each minute while open', () => {
+      store.open('p1', undefined, today);
+      vi.advanceTimersByTime(59_999);
+      expect(asked).toHaveLength(1);
+      vi.advanceTimersByTime(1);
+      expect(asked).toEqual([today, today]);
+    });
+
+    it('turns off within a minute, and back with what it held once on again', () => {
+      const saved = answer;
+      store.open('p1', undefined, today);
+      answer = 'off';
+      vi.advanceTimersByTime(60_000);
+      expect(store.state()).toBe('off');
+
+      answer = saved;
+      vi.advanceTimersByTime(60_000);
+      expect(store.state()).toBe('ready');
+      expect(store.days()).toHaveLength(7);
+    });
+
+    it('reads nothing before it is opened', () => {
+      vi.advanceTimersByTime(120_000);
       expect(asked).toEqual([]);
     });
   });

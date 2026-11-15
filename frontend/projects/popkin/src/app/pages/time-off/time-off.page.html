@@ -1,7 +1,7 @@
 <div pk-app-screen [accent]="frame.accent()" layout="tab" body="flush">
   <header pk-plan-header slot="header" heading="Schedule">
     <nav pk-view-nav slot="views" [views]="views()"></nav>
-    @if (store.mine()) {
+    @if (store.mine() && store.state() !== 'off') {
       <button pk-button type="button" variant="secondary" size="md" (click)="addMyTimeOff($event)">
         <svg pk-icon name="plus" size="md"></svg>Add my time off
       </button>
@@ -11,6 +11,20 @@
   @switch (store.state()) {
     @case ('loading') {
       <div pk-schedule [loading]="true"></div>
+    }
+    @case ('off') {
+      <div pk-schedule>
+        <div
+          pk-empty-state
+          icon="power"
+          heading="Schedules is switched off"
+          text="Popkin has turned this feature off for now. Nothing is lost: it comes back as it was when the feature is on again. Your host can ask Popkin to find out more."
+        >
+          <a pk-button variant="primary" size="md" [routerLink]="home()">
+            <svg pk-icon name="back" size="md"></svg>Back to {{ frame.name() }}
+          </a>
+        </div>
+      </div>
     }
     @case ('error') {
       <div pk-schedule>

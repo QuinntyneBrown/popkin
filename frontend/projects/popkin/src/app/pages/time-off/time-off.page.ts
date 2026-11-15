@@ -8,6 +8,7 @@ import {
   input,
   untracked,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   ErrorScreens,
   PopkinFrame,
@@ -52,6 +53,7 @@ import { AddTimeOffData, AddTimeOffDialog } from '../../dialogs/add-time-off/add
     MonthNav,
     PlanHeader,
     PopkinNav,
+    RouterLink,
     Schedule,
     ViewNav,
     WeekChips,
@@ -72,6 +74,8 @@ export class TimeOffPage {
   private readonly dialog = inject(Dialog);
 
   protected readonly link = computed(() => `/p/${this.popkinId()}/schedule`);
+  /** "Back to {Popkin name}" while Schedules is off (L2-077 AC2). */
+  protected readonly home = computed(() => `/p/${this.popkinId()}`);
   protected readonly views = computed(() => [
     { label: 'Time off', link: `/p/${this.popkinId()}/schedule`, current: true },
     { label: 'This week', link: `/p/${this.popkinId()}/schedule/week`, current: false },

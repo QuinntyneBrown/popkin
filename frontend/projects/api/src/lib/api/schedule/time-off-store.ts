@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subscription, filter, merge } from 'rxjs';
+import { Subscription, filter, interval, merge } from 'rxjs';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { TimeOffChoice, TimeOffStatus, TimeOffWeekView } from '../../models/schedule';
 import { accentOf } from '../../models/popkin';
@@ -101,6 +101,7 @@ export class TimeOffStore {
   private monday?: string;
   private today = '';
   private reading?: Subscription;
+  private minute?: Subscription;
   private readonly view = signal<TimeOffWeekView | null>(null);
 
   readonly state = signal<TimeOffState>('loading');
@@ -136,6 +137,10 @@ export class TimeOffStore {
     this.monday = day ? mondayOf(day) : undefined;
     this.today = today;
     this.realtime.start();
+    // L2-077 AC4: an open view reads itself each minute, so it follows the switch within one.
+    this.minute ??= interval(60_000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.read());
     this.read();
   }
 
