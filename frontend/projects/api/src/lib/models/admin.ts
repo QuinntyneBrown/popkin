@@ -14,14 +14,15 @@ export type AdminAction =
   | 'ExtendPopkin'
   | 'RemoveMember'
   | 'ResetInvite'
-  | 'DecideReport'
+  | 'ReviewReports'
+  | 'RemoveContent'
   | 'OpenModerationView'
   | 'EndCall'
   | 'RunJob'
   | 'RetryExport'
-  | 'ManageFeatures'
+  | 'ChangeFeature'
   | 'ChangeLimits'
-  | 'ManageAnnouncements'
+  | 'PublishAnnouncement'
   | 'ManageAdmins'
   | 'ExportAuditLog'
   | (string & {});
@@ -101,4 +102,43 @@ export interface AdminPermissionRowView {
 export interface AdminRolesView {
   counts: { owner: number; support: number; viewer: number };
   rows: AdminPermissionRowView[];
+}
+
+/** A feature an Owner switches (L2-076). */
+export type Feature = 'Plan' | 'Schedules';
+
+/** Who has a feature: nobody, the chosen Popkins only, or every Popkin. */
+export type FeatureMode = 'Off' | 'Chosen' | 'Everyone';
+
+export interface ChosenPopkin {
+  popkinId: string;
+  name: string;
+  emoji: string;
+  colour: string;
+}
+
+/** One panel of the Features page (L2-076 AC1, AC5). */
+export interface AdminFeature {
+  feature: Feature;
+  mode: FeatureMode;
+  /** How many live Popkins there are, for "On in all {n} live Popkins." */
+  livePopkins: number;
+  chosen: ChosenPopkin[];
+  /** Null for a switch nobody has set. */
+  changedAt: string | null;
+  changedByName: string | null;
+}
+
+export interface AdminFeatures {
+  features: AdminFeature[];
+}
+
+/** A live Popkin the add dialog found (L2-076 AC6). */
+export interface FeaturePopkinMatch {
+  popkinId: string;
+  name: string;
+  emoji: string;
+  colour: string;
+  inviteCode: string;
+  alreadyOn: boolean;
 }

@@ -1,7 +1,7 @@
 # Estimates
 
-- Overall effort: 252 days
-- Complete: 86%
+- Overall effort: 268 days
+- Complete: 83%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
@@ -20,6 +20,7 @@
 | [schedules](schedules.md) | 20 days | 100% |
 | [admin-access](admin-access.md) | 16 days | 97% |
 | [plan](plan.md) | 17 days | 100% |
+| [admin-platform](admin-platform.md) | 16 days | 30% |
 
 ## Roadmap
 

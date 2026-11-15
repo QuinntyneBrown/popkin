@@ -119,3 +119,6 @@ export * from './lib/api/plan/burn-down-store';
 export * from './lib/api/plan/burn-chart';
 export * from './lib/api/plan/sparkline';
 export * from './lib/api/plan/plan-text';
+export * from './lib/api/admin/platform/admin-platform-api';
+export * from './lib/api/admin/platform/admin-features.store';
+export * from './lib/api/admin/platform/features-text';

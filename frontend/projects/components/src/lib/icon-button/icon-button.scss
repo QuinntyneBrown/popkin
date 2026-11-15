@@ -73,3 +73,14 @@
 :host(.icon-btn--popkin) {
   color: var(--accent-text);
 }
+
+:host([aria-disabled='true']) {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+:host(.icon-btn--chip) {
+  width: var(--space-8);
+  height: var(--space-8);
+  color: var(--color-fg-muted);
+}

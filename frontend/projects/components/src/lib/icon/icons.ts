@@ -308,6 +308,7 @@ export const ICONS = {
     { path: 'M15 8h-5' },
     { path: 'M15 12h-5' },
   ],
+  toggle: [{ rect: [20, 12, 2, 6, 6] }, { circle: [16, 12, 2] }],
   lock: [{ rect: [18, 11, 3, 11, 2] }, { path: 'M7 11V7a5 5 0 0 1 10 0v4' }],
   'arrow-right': [{ path: 'M5 12h14' }, { path: 'm12 5 7 7-7 7' }],
   menu: [{ line: [4, 20, 12, 12] }, { line: [4, 20, 6, 6] }, { line: [4, 20, 18, 18] }],

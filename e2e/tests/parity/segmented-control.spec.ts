@@ -1,4 +1,5 @@
-import { theMockAdmins } from '../../fixtures/admin';
+import { signedInAs, theMockAdmins, theMockFeatures } from '../../fixtures/admin';
+import { FeaturesPage } from '../../pages/admin/features.page';
 import { AdminsPage } from '../../pages/admin/admins.page';
 import { accountStates } from '../../fixtures/account-states';
 import { parity } from '../../fixtures/parity';
@@ -26,5 +27,21 @@ parity('segmented-control', [
     name: 'count',
     region: (page) => new AdminsPage(page).tabs,
     before: theMockAdmins,
+  },
+  // The stretched radio form, and the same switched off with a reason (L2-076 AC12).
+  {
+    key: 'adminFeatures',
+    name: 'stretch',
+    region: (page) => new FeaturesPage(page).schedules.modes,
+    before: async (page) => void (await theMockFeatures(page)),
+  },
+  {
+    key: 'adminFeaturesSupport',
+    name: 'disabled-reason',
+    region: (page) => new FeaturesPage(page).schedules.modes,
+    before: async (page) => {
+      await theMockFeatures(page);
+      await signedInAs(page, 'Support');
+    },
   },
 ]);

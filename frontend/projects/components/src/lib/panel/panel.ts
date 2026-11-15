@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /**
@@ -7,6 +8,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
  */
 @Component({
   selector: 'section[pk-panel]',
+  imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './panel.html',
   styleUrl: './panel.scss',
@@ -18,4 +20,6 @@ export class Panel {
   readonly variant = input<'default' | 'danger'>('default');
   /** Whether it has a foot (`[slot=foot]`): a count and a button, as "Older actions". */
   readonly foot = input(false);
+  /** Whether its content sits in the padded body (`panel__body`), as a feature's panel does. */
+  readonly body = input(false);
 }

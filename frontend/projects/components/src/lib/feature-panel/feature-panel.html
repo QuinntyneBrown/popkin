@@ -1,0 +1,63 @@
+@if (loading()) {
+  <div class="feature-panel__row" aria-hidden="true">
+    <div class="feature-panel__text feature-panel__lines">
+      <span pk-skeleton shape="title" [width]="30"></span>
+      <span pk-skeleton shape="text" [width]="70"></span>
+      <span pk-skeleton shape="text" [width]="40"></span>
+    </div>
+    <span pk-skeleton shape="pill" class="feature-panel__mode-skeleton"></span>
+  </div>
+} @else {
+  <div class="feature-panel__row">
+    <div class="feature-panel__text">
+      <h2 class="feature-panel__name">{{ name() }}</h2>
+      <p class="feature-panel__about">{{ about() }}</p>
+      <p class="feature-panel__reach">
+        {{ reach() }}
+        @if (since()) {
+          <span class="feature-panel__since">{{ since() }}</span>
+        }
+      </p>
+    </div>
+    <div
+      pk-segmented-control
+      kind="radio"
+      [label]="'Who has ' + name()"
+      [options]="modes"
+      [stretch]="true"
+      [disabledReason]="disabledReason()"
+      [(value)]="shown"
+      (valueChange)="choose($event)"
+    ></div>
+  </div>
+  @if (mode() === 'Chosen') {
+    <ul class="feature-panel__chosen" [attr.aria-label]="'Popkins with ' + name()">
+      @for (popkin of chosen(); track popkin.id) {
+        <li class="feature-panel__item" [attr.data-accent]="popkin.accent">
+          <span pk-popkin-tile size="xs" [emoji]="popkin.emoji"></span>{{ popkin.name }}
+          <button
+            pk-icon-button
+            type="button"
+            icon="close"
+            size="sm"
+            variant="chip"
+            [label]="'Remove ' + popkin.name"
+            [disabledReason]="disabledReason()"
+            (click)="removeChosen.emit(popkin)"
+          ></button>
+        </li>
+      }
+      <li>
+        <button
+          class="feature-panel__add"
+          type="button"
+          [attr.aria-disabled]="disabledReason() ? 'true' : null"
+          [attr.title]="disabledReason()"
+          (click)="add()"
+        >
+          <svg pk-icon name="plus" size="sm"></svg>Add a Popkin
+        </button>
+      </li>
+    </ul>
+  }
+}

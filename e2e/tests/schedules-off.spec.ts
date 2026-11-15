@@ -1,10 +1,10 @@
 // Acceptance Test
-// Traces to: L2-077 AC2, AC4, AC5
+// Traces to: L2-077 AC1, AC2, AC4, AC5
 // Description: while Schedules is off, time off and this week opened by their address say
 // "Schedules is switched off" and offer "Back to {Popkin name}", showing nothing of the feature;
 // an open screen turns to that within a minute, and back to what it held once the feature is on
 // again.
-import { homeUrl } from '../fixtures/home';
+import { homeOf, homeUrl } from '../fixtures/home';
 import { expect, test } from '../fixtures/pk-test';
 import {
   maraThisWeek,
@@ -55,6 +55,23 @@ test.describe('Schedules switched off', () => {
     await expect(thisWeek.backToPopkin).toHaveText('Back to Cabin Week ’27');
     await expect(thisWeek.days).toHaveCount(0);
     await expect(thisWeek.myHours).toHaveCount(0);
+  });
+
+  // L2-077 AC1, AC4: the tabs follow the switch, read every minute, with no reload.
+  test('an open screen loses the Schedule tab within a minute of Schedules going off', async ({
+    page,
+  }) => {
+    const schedule = await maraWithASchedule(page, theMocksTimeOff);
+    await page.goto(timeOffUrl(mocksWeek));
+    const timeOff = new TimeOffPage(page);
+    await expect(timeOff.scheduleTab).toBeVisible();
+
+    homeOf(page).popkin.schedules = false;
+    schedule.fail('off');
+    await page.clock.runFor(60_000);
+
+    await expect(timeOff.off).toBeVisible();
+    await expect(timeOff.scheduleTab).toHaveCount(0);
   });
 
   // L2-077 AC4, AC5

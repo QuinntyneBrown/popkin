@@ -33,6 +33,10 @@
   color: var(--color-fg-subtle);
 }
 
+.panel__body {
+  padding: var(--space-3) var(--space-5) var(--space-5);
+}
+
 .panel__foot {
   display: flex;
   flex-wrap: wrap;

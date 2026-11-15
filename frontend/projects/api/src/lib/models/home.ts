@@ -36,6 +36,14 @@ export interface PopkinHomeView {
   plan: boolean;
   /** The event the Host set (L2-085), or null; always null while Schedules is off. */
   event: EventView | null;
+  /** Whether Plan is on for this Popkin, which shows the Plan tab (L2-077 AC1). */
+  plan: boolean;
+}
+
+/** `GET /api/popkins/{id}/features`: the switched features this Popkin has (L2-077). */
+export interface PopkinFeaturesView {
+  plan: boolean;
+  schedules: boolean;
 }
 
 /** The latest of the Everyone thread, oldest first, without the notes the system writes. */

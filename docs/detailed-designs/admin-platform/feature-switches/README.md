@@ -194,11 +194,19 @@ Every endpoint is on `AdminFeaturesController`, under
   `chosen`, `disabledReason`; outputs `modeChosen`, `removeChosen`, `addChosen`. Its options are
   `pk-segmented-control` as a radio group named "Who has {feature}"; the reach line says the mode
   in words, so the mode is never told by the selected option's colour alone.
-- **Dialogs** (`frontend/projects/admin/src/app/dialogs/`) — `TurnOffFeatureDialog`,
-  `FeatureEveryoneDialog`, `FeatureChosenDialog` and `AddFeaturePopkinDialog`, each a CDK dialog in
-  `pk-dialog` with `pk-reason-field` marked optional (L2-087 AC3) and `ActionDialogState` (idle →
-  busy → failed, the reason kept). `AddFeaturePopkinDialog` composes `pk-search-field` and a pick
-  list of live Popkins; a Popkin with `alreadyOn` is marked and cannot be picked.
+- **Dialogs** (`frontend/projects/admin/src/app/dialogs/`) — built in journey 23 as two:
+  `FeatureModeDialog` (`feature-mode/`) draws the three mode mocks (`turn-off-feature`,
+  `feature-everyone`, `feature-chosen`) from `modeDialogText(feature, mode, chosen)`: "Turn it
+  off"/"Turning off…" and "Keep it on" for Off, "Apply"/"Applying…" and "Cancel" otherwise. Its
+  optional reason is the `pk-textarea` the admins dialogs use, until `pk-reason-field` is built,
+  with `ActionDialogState` (idle → busy → failed). A failure says "That didn't go through" and
+  "Nothing has changed. Your reason is kept; try again." (L2-087 AC5). Cancelling puts the
+  panel's mode back. `FeatureAddPopkinDialog` (`feature-add-popkin/`) composes `pk-search-field`
+  (300 ms) and `pk-pick-list` "Live Popkins"; it lists nothing until text is typed, a Popkin with
+  `alreadyOn` is a note under the list, not an option, and its failure says "Nothing has changed;
+  try again." since it asks for no reason. Removing a chosen Popkin opens no dialog.
+- **`pk-pick-list`** (components) — a listbox of Popkins (tile, name, detail) with notes under it;
+  arrow keys move, Enter or a tap picks.
 - **`AdminFeaturesStore`** (`frontend/projects/api/src/lib/api/admin/platform/`) — loads, holds
   `loading | ready | failed`, applies a saved `AdminFeatureDto` in place, and reports the toast.
   Unit tested (ADR 0011).
@@ -210,7 +218,11 @@ Every endpoint is on `AdminFeaturesController`, under
   `addPopkin(feature, popkinId, reason)`, `removePopkin(feature, popkinId)`,
   `searchPopkins(feature, text)`. `HttpAdminPlatformApi` implements it.
 - The options are disabled from `AdminSessionStore.allowed` with "Viewer admins can't do this" or
-  "Only Owners can do this" (L2-076 AC12); the API refuses them anyway (L2-086 AC1).
+  "Only Owners can do this" (L2-076 AC12); the API refuses them anyway (L2-086 AC1). They stay
+  focusable with `aria-disabled` and the reason as their title, as `pk-segmented-control`'s
+  `disabledReason` and `pk-icon-button`'s draw them; the mocks `viewer` and `support` show both.
+- A chosen radio of `pk-segmented-control` is filled with the inverse colour, as the design
+  system draws a checked radio; a radio no longer carries `aria-selected`.
 
 ### Frontend (Popkin web app)
 
@@ -229,8 +241,12 @@ Every endpoint is on `AdminFeaturesController`, under
   Popkin cannot be added.
 - A direct test of `PlatformSnapshot`, one case per row: no row is off; each mode; chosen and not
   chosen; stale after 30 seconds of `FakeTimeProvider`, fresh before.
-- Playwright (admin project): the page's states and each dialog's default, busy and failed path,
-  through `AdminFeaturesPage` and its dialog page objects; the web app's off screen spec stays.
+- Playwright (admin project): `tests/admin/features.spec.ts` through `FeaturesPage`,
+  `AddFeaturePopkinDialog` and the shared `AdminActionDialog`: the switches as the mocks draw
+  them, Off with a reason, keeping it on, limiting with none chosen, a failure that keeps the
+  reason, adding and removing a chosen Popkin, a Support admin and a failed read. The web app's
+  `schedules-off.spec.ts` adds that an open screen loses the Schedule tab within a minute.
+- Parity: `feature-panel`, `pick-list` and the stretched and switched-off `segmented-control`.
 
 ## Requirements
 

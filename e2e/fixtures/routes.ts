@@ -79,6 +79,69 @@ export const routes = {
   adminRemove: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-remove/default.html' },
   adminRemoveBusy: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-remove/busy.html' },
   adminRemoveFailed: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-remove/failed.html' },
+  adminFeatures: { app: `${ADMIN}/features`, mock: 'admin/pages/features/default.html' },
+  adminFeaturesOff: { app: `${ADMIN}/features`, mock: 'admin/pages/features/off.html' },
+  adminFeaturesEveryone: { app: `${ADMIN}/features`, mock: 'admin/pages/features/everyone.html' },
+  adminFeaturesLoading: { app: `${ADMIN}/features`, mock: 'admin/pages/features/loading.html' },
+  adminFeaturesError: { app: `${ADMIN}/features`, mock: 'admin/pages/features/error.html' },
+  adminFeaturesViewer: { app: `${ADMIN}/features`, mock: 'admin/pages/features/viewer.html' },
+  adminFeaturesSupport: { app: `${ADMIN}/features`, mock: 'admin/pages/features/support.html' },
+  adminTurnOffFeature: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/turn-off-feature/default.html',
+  },
+  adminTurnOffFeatureBusy: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/turn-off-feature/busy.html',
+  },
+  adminTurnOffFeatureFailed: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/turn-off-feature/failed.html',
+  },
+  adminFeatureEveryone: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-everyone/default.html',
+  },
+  adminFeatureEveryoneBusy: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-everyone/busy.html',
+  },
+  adminFeatureEveryoneFailed: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-everyone/failed.html',
+  },
+  adminFeatureChosen: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-chosen/default.html',
+  },
+  adminFeatureChosenBusy: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-chosen/busy.html',
+  },
+  adminFeatureChosenFailed: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-chosen/failed.html',
+  },
+  adminFeatureAddPopkin: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-add-popkin/default.html',
+  },
+  adminFeatureAddPopkinResults: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-add-popkin/results.html',
+  },
+  adminFeatureAddPopkinNoResults: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-add-popkin/no-results.html',
+  },
+  adminFeatureAddPopkinBusy: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-add-popkin/busy.html',
+  },
+  adminFeatureAddPopkinFailed: {
+    app: `${ADMIN}/features`,
+    mock: 'admin/dialogs/feature-add-popkin/failed.html',
+  },
   adminAuditFiltered: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/filtered.html' },
   adminAuditNoResults: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/no-results.html' },
   adminAuditLoading: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/loading.html' },

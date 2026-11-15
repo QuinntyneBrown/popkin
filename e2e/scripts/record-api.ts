@@ -9,7 +9,7 @@
  * and leaves it, she adds the album's first photo, she shares an experience, rates it and
  * comments on it, she wraps the Popkin up and reads its recap, and Dev leaves it. Then she gives her full name, reads her
  * account and saves a photo; Joel signs out; and Mara deletes her account. Last, Lena Fischer
- * signs in to the admin app and adds three admins. Each answer is keyed
+ * signs in to the admin app, adds three admins and turns Schedules off. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -155,6 +155,8 @@ await call('GET', `/api/popkins/${created.id}/threads`);
 // The Popkin home: Mara reads the header and its four sections. Photos and experiences are
 // empty until their journeys.
 await call('GET', `/api/popkins/${created.id}`);
+// The switches an open screen reads every minute (L2-077 AC4): Schedules on, as the seed sets it.
+await call('GET', `/api/popkins/${created.id}/features`);
 await call('GET', `/api/popkins/${created.id}/threads/everyone/preview`);
 await call('GET', `/api/popkins/${created.id}/photos/summary`);
 await call('GET', `/api/popkins/${created.id}/experiences/summary`);
@@ -350,10 +352,22 @@ const aiko = await call('POST', '/api/admin/admins', {
 await call('GET', '/api/admin/roles');
 const admins = await call('GET', '/api/admin/admins');
 await call('GET', '/api/admin/audit');
+// Features (L2-076): Plan off and Schedules on for everyone, as the seed leaves them; no live
+// Popkin matches "lake" now Lakeside Weekend has wrapped up.
+await call('GET', '/api/admin/features');
+await call('GET', '/api/admin/features/Schedules/popkins/search?q=lake');
 // Then she makes Aiko a Viewer and removes Marco; the list and the log above stay as they were.
-await call('PUT', `/api/admin/admins/${aiko.id}/role`, { role: 'Viewer', reason: 'Moved to finance' });
+await call('PUT', `/api/admin/admins/${aiko.id}/role`, {
+  role: 'Viewer',
+  reason: 'Moved to finance',
+});
 const marco = admins.admins.find((admin: { name: string }) => admin.name === 'Marco Bianchi');
 await call('POST', `/api/admin/admins/${marco.id}/remove`, { reason: null });
+// Last, she turns Schedules off; the page above stays as it was.
+await call('PUT', '/api/admin/features/Schedules', {
+  mode: 'Off',
+  reason: 'Sync bug on Android 3.4.0',
+});
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

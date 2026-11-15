@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { MyPopkinsView } from '../../models/my-popkins';
 import { Observable } from 'rxjs';
-import { MemberView, PopkinHomeView } from '../../models/home';
+import { MemberView, PopkinHomeView, PopkinFeaturesView } from '../../models/home';
 import {
   ChangeLengthRequest,
   ChangeLookRequest,
@@ -21,6 +21,8 @@ export interface PopkinsApi {
   getInvite(popkinId: string): Observable<InviteView>;
   /** The header of the Popkin's home. 404 `popkin_not_found` for someone who is not a member. */
   getHome(popkinId: string): Observable<PopkinHomeView>;
+  /** Which switched features the Popkin has, read by its open screens (L2-077 AC4). */
+  getFeatures(popkinId: string): Observable<PopkinFeaturesView>;
   /** The members, the Host first. */
   getMembers(popkinId: string): Observable<MemberView[]>;
   /** The Host changes the name, emoji and colour (L2-020 AC3). 403 `host_only`; 409 `popkin_wrapped_up`. */
@@ -57,6 +59,12 @@ export class HttpPopkinsApi implements PopkinsApi {
 
   getHome(popkinId: string): Observable<PopkinHomeView> {
     return this.http.get<PopkinHomeView>(`/api/popkins/${encodeURIComponent(popkinId)}`);
+  }
+
+  getFeatures(popkinId: string): Observable<PopkinFeaturesView> {
+    return this.http.get<PopkinFeaturesView>(
+      `/api/popkins/${encodeURIComponent(popkinId)}/features`,
+    );
   }
 
   getMembers(popkinId: string): Observable<MemberView[]> {

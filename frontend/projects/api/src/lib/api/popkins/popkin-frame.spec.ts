@@ -24,7 +24,9 @@ const lakeside = {
   photosRemovedAt: null,
   length: 'TheWeekend',
   version: 1,
-} as PopkinHomeView;
+  plan: false,
+  schedules: true,
+} as unknown as PopkinHomeView;
 
 const changed = (version: number, id = 'p'): PopkinSettingsView => ({
   id,
@@ -41,11 +43,21 @@ describe('PopkinFrame', () => {
   let asked: number;
   let frame: PopkinFrame;
   let hub: Subject<PopkinSettingsView>;
+  let features: { plan: boolean; schedules: boolean } | 'down';
+  let featureReads: number;
 
   beforeEach(() => {
     vi.useFakeTimers({ now: new Date(2026, 8, 12, 12, 0) });
     answer = lakeside;
     asked = 0;
+    features = { plan: false, schedules: true };
+    featureReads = 0;
+    const getFeatures = () => {
+      featureReads++;
+      return features === 'down'
+        ? throwError(() => new HttpErrorResponse({ status: 500 }))
+        : of(features);
+    };
     hub = new Subject<PopkinSettingsView>();
     const getHome = () => {
       asked++;
@@ -56,7 +68,7 @@ describe('PopkinFrame', () => {
     TestBed.configureTestingModule({
       providers: [
         PopkinFrame,
-        { provide: POPKINS_API, useValue: { getHome } },
+        { provide: POPKINS_API, useValue: { getHome, getFeatures } },
         {
           provide: POPKIN_REALTIME,
           useValue: {
@@ -106,6 +118,37 @@ describe('PopkinFrame', () => {
     expect(frame.emoji()).toBe('🎉');
     expect(frame.accent()).toBe('plum');
     expect(frame.timeLeft()).toBeNull();
+  });
+
+  // L2-076 AC10, L2-077 AC4: an open screen follows a switch within a minute.
+  it('reads the Popkin’s features every minute, and follows a switch', () => {
+    frame.open('p');
+    expect(frame.schedules()).toBe(true);
+    expect(frame.plan()).toBe(false);
+    expect(featureReads).toBe(0);
+
+    features = { plan: true, schedules: false };
+    vi.advanceTimersByTime(59_000);
+    expect(frame.schedules()).toBe(true);
+    vi.advanceTimersByTime(1_000);
+
+    expect(featureReads).toBe(1);
+    expect(frame.schedules()).toBe(false);
+    expect(frame.plan()).toBe(true);
+  });
+
+  it('keeps the last answer when a read of the features fails', () => {
+    frame.open('p');
+    features = 'down';
+    vi.advanceTimersByTime(60_000);
+    expect(frame.schedules()).toBe(true);
+  });
+
+  it('reads the features of the Popkin open now only', () => {
+    frame.open('p');
+    frame.open('q');
+    vi.advanceTimersByTime(60_000);
+    expect(featureReads).toBe(1);
   });
 
   it('reads a Popkin once', () => {
