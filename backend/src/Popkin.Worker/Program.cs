@@ -18,5 +18,6 @@ builder.Services.AddHostedService<WrapUpDuePopkinsJob>();
 builder.Services.AddHostedService<RemovePhotosOfWrappedUpPopkinsJob>();
 builder.Services.AddHostedService<PrepareAlbumExportsJob>();
 builder.Services.AddHostedService<PurgeDeletedAccountsJob>();
+builder.Services.AddHostedService<PurgeOldAuditEntriesJob>();
 
 await builder.Build().RunAsync();

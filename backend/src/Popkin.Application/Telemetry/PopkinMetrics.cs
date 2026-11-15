@@ -14,6 +14,7 @@ public sealed class PopkinMetrics
     private readonly Counter<long> _hubSendFailures;
     private readonly Histogram<double> _wrapUpLateness;
     private readonly Gauge<double> _wrapUpLastTick;
+    private readonly Counter<long> _auditEntriesPurged;
 
     public PopkinMetrics(IMeterFactory meters)
     {
@@ -26,6 +27,8 @@ public sealed class PopkinMetrics
             "popkin.wrap_up.lateness", unit: "s", description: "How long after its end date a Popkin was wrapped up.");
         _wrapUpLastTick = meter.CreateGauge<double>(
             "popkin.wrap_up.last_tick", unit: "s", description: "When the Worker last finished a wrap-up tick, in seconds since the Unix epoch.");
+        _auditEntriesPurged = meter.CreateCounter<long>(
+            "popkin.audit.entries_purged", description: "Audit entries deleted at two years old (L2-120 AC6).");
     }
 
     /// <summary>L2-044 AC1: a Popkin wraps up within one minute of its end date.</summary>
@@ -40,4 +43,6 @@ public sealed class PopkinMetrics
 
     public void HubSendFailed(string eventName) =>
         _hubSendFailures.Add(1, new KeyValuePair<string, object?>("event", eventName));
+
+    public void AuditEntriesPurged(int count) => _auditEntriesPurged.Add(count);
 }

@@ -12,7 +12,7 @@ namespace Popkin.Application.Administration.Auth;
 /// </summary>
 public sealed record EnsureFirstOwnerCommand(string? Email) : IRequest<bool>;
 
-public sealed class EnsureFirstOwnerCommandHandler(IAppDbContext db, TimeProvider clock) : IRequestHandler<EnsureFirstOwnerCommand, bool>
+public sealed class EnsureFirstOwnerCommandHandler(IAppDbContext db, TimeProvider clock, IAuditLog audit) : IRequestHandler<EnsureFirstOwnerCommand, bool>
 {
     public async Task<bool> Handle(EnsureFirstOwnerCommand request, CancellationToken cancellationToken)
     {
@@ -27,7 +27,14 @@ public sealed class EnsureFirstOwnerCommandHandler(IAppDbContext db, TimeProvide
             return false;
         }
 
-        db.Admins.Add(Admin.Invite(email, AdminRole.Owner, null, clock.GetUtcNow()));
+        var owner = Admin.Invite(email, AdminRole.Owner, null, clock.GetUtcNow());
+        db.Admins.Add(owner);
+        audit.RecordByPopkin(new AuditRecord(
+            AuditAction.AddedAdmin,
+            AuditTargetKind.Admin,
+            owner.Id.ToString(),
+            owner.Name,
+            Details: new Dictionary<string, object?> { ["role"] = nameof(AdminRole.Owner), ["firstOwner"] = true }));
         await db.SaveChangesAsync(cancellationToken);
         return true;
     }

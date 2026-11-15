@@ -55,6 +55,24 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<AdminSignInLock> AdminSignInLocks => Set<AdminSignInLock>();
 
+    public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
+
+    /// <summary>The audit log cannot be edited, and an entry is deleted only at two years (L2-120 AC6).</summary>
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+        foreach (var entry in ChangeTracker.Entries<AuditEntry>())
+        {
+            if (entry.State == EntityState.Modified
+                || (entry.State == EntityState.Deleted && !entry.Entity.MayBeDeleted(now)))
+            {
+                throw new InvalidOperationException("An audit entry cannot be changed or deleted.");
+            }
+        }
+
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

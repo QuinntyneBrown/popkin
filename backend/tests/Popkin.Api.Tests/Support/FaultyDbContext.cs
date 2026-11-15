@@ -68,6 +68,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<AdminSignInLock> AdminSignInLocks => inner.AdminSignInLocks;
 
+    public DbSet<AuditEntry> AuditEntries => inner.AuditEntries;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

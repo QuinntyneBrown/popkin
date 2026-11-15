@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<CodeIssuer>();
         services.AddScoped<IMembershipGuard, MembershipGuard>();
         services.AddScoped<Abstractions.IAdminGuard, Administration.AdminGuard>();
+        services.AddScoped<Administration.IAuditLog, Administration.AuditLog>();
         services.AddScoped<CallLeaver>();
         services.AddScoped<Members.MemberDepartures>();
         services.AddScoped<PopkinWrapUpService>();

@@ -54,5 +54,7 @@ public interface IAppDbContext
 
     DbSet<AdminSignInLock> AdminSignInLocks { get; }
 
+    DbSet<AuditEntry> AuditEntries { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
