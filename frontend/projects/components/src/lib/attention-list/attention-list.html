@@ -1,0 +1,23 @@
+@for (item of items(); track $index) {
+  <li>
+    <a class="attention__item" [routerLink]="item.link">
+      <span
+        class="attention__dot"
+        [class.attention__dot--urgent]="item.urgent"
+        aria-hidden="true"
+      ></span>
+      <span class="attention__text">
+        <span class="attention__title"
+          >{{ item.title }}
+          @if (item.urgent) {
+            <span class="visually-hidden"> (urgent)</span>
+          }
+        </span>
+        @if (item.detail) {
+          <span class="attention__detail">{{ item.detail }}</span>
+        }
+      </span>
+      <svg pk-icon name="chevron-right" size="sm"></svg>
+    </a>
+  </li>
+}
