@@ -116,9 +116,7 @@ test.describe('choosing what a new Popkin has', () => {
   });
 
   // L2-152 AC2
-  test('opened by its address with nothing offered, it goes back to How long', async ({
-    page,
-  }) => {
+  test('opened by its address with nothing offered, it goes back to How long', async ({ page }) => {
     await offerNewPopkin(page, []);
     await howLongForLakeside(page);
     await page.goto('/new/features');

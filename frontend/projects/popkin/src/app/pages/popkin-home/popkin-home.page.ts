@@ -26,6 +26,10 @@ import {
   membersLabel,
   messageTime,
   photosMeta,
+  FeatureChoiceView,
+  POPKINS_API,
+  PopkinFeaturesView,
+  featuresHint,
 } from 'api';
 import {
   Alert,
@@ -54,6 +58,10 @@ import {
   PopkinSettingsDialog,
 } from '../../dialogs/popkin-settings/popkin-settings.dialog';
 import { InviteData, InviteDialog } from '../../dialogs/invite/invite.dialog';
+import {
+  PopkinFeaturesData,
+  PopkinFeaturesDialog,
+} from '../../dialogs/popkin-features/popkin-features.dialog';
 import { LeavePopkinData, LeavePopkinDialog } from '../../dialogs/leave-popkin/leave-popkin.dialog';
 import { EditPopkinData, EditPopkinDialog } from '../../dialogs/edit-popkin/edit-popkin.dialog';
 import {
@@ -119,6 +127,7 @@ export class PopkinHomePage {
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   private readonly toaster = inject(Toaster);
+  private readonly popkins = inject(POPKINS_API);
 
   protected readonly popkin = this.store.popkin;
   protected readonly accent = computed(() => {
@@ -231,6 +240,21 @@ export class PopkinHomePage {
     const popkin = this.popkin();
     if (!popkin) return;
     const opener = this.document.activeElement as HTMLElement | null;
+    if (popkin.viewerRole !== 'Host') {
+      this.openSettings(opener, []);
+      return;
+    }
+    // The Host's choices of the offered features, for "Features" (L2-153 AC1); without them the
+    // menu opens without it.
+    this.popkins.getFeatures(this.popkinId()).subscribe({
+      next: (features) => this.openSettings(opener, features.choices),
+      error: () => this.openSettings(opener, []),
+    });
+  }
+
+  private openSettings(opener: HTMLElement | null, choices: FeatureChoiceView[]): void {
+    const popkin = this.popkin();
+    if (!popkin) return;
     const opened = this.dialog.open<PopkinSetting, PopkinSettingsData>(PopkinSettingsDialog, {
       data: {
         accent: this.accent(),
@@ -238,6 +262,7 @@ export class PopkinHomePage {
         host: popkin.viewerRole === 'Host',
         lengthHint: lengthHint(popkin.endsAt, new Date()),
         eventHint: popkin.schedules ? eventHint(popkin.event) : undefined,
+        featuresHint: featuresHint(choices),
       },
       ariaLabelledBy: 'dlg-title',
       hasBackdrop: false,
@@ -247,6 +272,7 @@ export class PopkinHomePage {
       if (setting === 'edit') this.editLook(opener);
       if (setting === 'length') this.changeLength(opener);
       if (setting === 'event') this.setEvent(opener);
+      if (setting === 'features') this.features(opener, choices);
       if (setting === 'invite') this.invite();
       if (setting === 'wrap-up') void this.router.navigate(['/p', this.popkinId(), 'wrap-up']);
       if (setting === 'leave') this.leave(popkin.name);
@@ -315,6 +341,23 @@ export class PopkinHomePage {
       if (!result) return;
       this.store.applyEvent(result.event);
       if (result.event) this.toaster.show('success', 'Event saved');
+    });
+  }
+
+  /** "Features" (L2-153): once saved, the tabs and the home follow at once and a toast says so. */
+  private features(opener: HTMLElement | null, choices: FeatureChoiceView[]): void {
+    const opened = this.dialog.open<PopkinFeaturesView, PopkinFeaturesData>(PopkinFeaturesDialog, {
+      data: { popkinId: this.popkinId(), accent: this.accent(), choices },
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      restoreFocus: opener ?? true,
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((saved) => {
+      if (!saved) return;
+      this.store.applyFeatures(saved);
+      this.toaster.show('success', 'Features saved');
     });
   }
 

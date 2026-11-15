@@ -251,6 +251,43 @@ describe('PopkinHomeStore', () => {
   });
 
   // L2-019 AC8
+  // L2-153 AC3, L2-077 AC6
+  describe('the Host’s change of the features', () => {
+    it('shows the tabs at once and reads the section of a feature switched on', () => {
+      api.planSummary = null;
+      store.open('p');
+      const before = api.asked.plan;
+
+      store.applyFeatures({ plan: true, schedules: false, choices: [] });
+
+      expect(store.popkin()?.plan).toBe(true);
+      expect(store.popkin()?.schedules).toBe(false);
+      expect(api.asked.plan).toBe(before + 1);
+    });
+
+    it('leaves out the section of a feature switched off, without reading it', () => {
+      api.home = { ...(api.home as PopkinHomeView), plan: true };
+      api.planSummary = null;
+      store.open('p');
+      const before = api.asked.plan;
+
+      store.applyFeatures({ plan: false, schedules: false, choices: [] });
+
+      expect(store.popkin()?.plan).toBe(false);
+      expect(store.plan().state).not.toBe('error');
+      expect(api.asked.plan).toBe(before);
+    });
+
+    it('reads nothing again for a feature that did not change', () => {
+      store.open('p');
+      const before = { ...api.asked };
+
+      store.applyFeatures({ plan: false, schedules: false, choices: [] });
+
+      expect(api.asked).toEqual(before);
+    });
+  });
+
   describe('a Popkin with nothing in it yet', () => {
     it('has an empty chat when nobody has written', () => {
       api.preview = { threadId: 't', messages: [], newCount: 0 };

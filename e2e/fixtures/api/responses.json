@@ -2,10 +2,7 @@
   "GET /api/auth/channels": {
     "status": 200,
     "body": {
-      "channels": [
-        "Phone",
-        "Email"
-      ]
+      "channels": ["Phone", "Email"]
     }
   },
   "POST /api/auth/codes": {
@@ -49,10 +46,7 @@
   "GET /api/popkins/features": {
     "status": 200,
     "body": {
-      "offered": [
-        "Plan",
-        "Schedules"
-      ]
+      "offered": ["Plan", "Schedules"]
     }
   },
   "POST /api/popkins": {
@@ -159,10 +153,7 @@
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
-      "namedMembers": [
-        "Mara",
-        "Walt"
-      ],
+      "namedMembers": ["Mara", "Walt"],
       "othersCount": 1
     }
   },
@@ -798,15 +789,7 @@
             "photoUrl": null
           },
           "isMe": true,
-          "days": [
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Weekend",
-            "Weekend"
-          ]
+          "days": ["Working", "Working", "Working", "Working", "Working", "Weekend", "Weekend"]
         },
         {
           "membershipId": "7a85cda3-20f2-4593-8610-b800cd37165c",
@@ -817,15 +800,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Weekend",
-            "Weekend"
-          ]
+          "days": ["Working", "Working", "Working", "Working", "Working", "Weekend", "Weekend"]
         },
         {
           "membershipId": "0fc761d0-e7cb-4c84-8c20-b107437efab0",
@@ -836,15 +811,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Weekend",
-            "Weekend"
-          ]
+          "days": ["Working", "Working", "Working", "Working", "Working", "Weekend", "Weekend"]
         },
         {
           "membershipId": "415c6580-7593-4b87-b213-97a65531c121",
@@ -855,15 +822,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Weekend",
-            "Weekend"
-          ]
+          "days": ["Working", "Working", "Working", "Working", "Working", "Weekend", "Weekend"]
         }
       ],
       "canEdit": true
@@ -888,15 +847,7 @@
             "photoUrl": null
           },
           "isMe": true,
-          "days": [
-            "Working",
-            "Working",
-            "Working",
-            "Tentative",
-            "Off",
-            "Weekend",
-            "Weekend"
-          ]
+          "days": ["Working", "Working", "Working", "Tentative", "Off", "Weekend", "Weekend"]
         },
         {
           "membershipId": "7a85cda3-20f2-4593-8610-b800cd37165c",
@@ -907,15 +858,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Weekend",
-            "Weekend"
-          ]
+          "days": ["Working", "Working", "Working", "Working", "Working", "Weekend", "Weekend"]
         },
         {
           "membershipId": "0fc761d0-e7cb-4c84-8c20-b107437efab0",
@@ -926,15 +869,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Weekend",
-            "Weekend"
-          ]
+          "days": ["Working", "Working", "Working", "Working", "Working", "Weekend", "Weekend"]
         },
         {
           "membershipId": "415c6580-7593-4b87-b213-97a65531c121",
@@ -945,15 +880,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Working",
-            "Weekend",
-            "Weekend"
-          ]
+          "days": ["Working", "Working", "Working", "Working", "Working", "Weekend", "Weekend"]
         }
       ],
       "canEdit": true
@@ -1026,15 +953,7 @@
             "photoUrl": null
           },
           "isMe": true,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
+          "days": [[], [], [], [], [], [], []]
         },
         {
           "membershipId": "7a85cda3-20f2-4593-8610-b800cd37165c",
@@ -1045,15 +964,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
+          "days": [[], [], [], [], [], [], []]
         },
         {
           "membershipId": "0fc761d0-e7cb-4c84-8c20-b107437efab0",
@@ -1064,15 +975,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
+          "days": [[], [], [], [], [], [], []]
         },
         {
           "membershipId": "415c6580-7593-4b87-b213-97a65531c121",
@@ -1083,15 +986,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
+          "days": [[], [], [], [], [], [], []]
         }
       ]
     }
@@ -1121,9 +1016,7 @@
           "date": "2026-09-14",
           "freeCount": 4,
           "everyoneFreeFrom": "17:30",
-          "lastOffShift": [
-            "Mara"
-          ],
+          "lastOffShift": ["Mara"],
           "working": []
         },
         {
@@ -1189,15 +1082,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
+          "days": [[], [], [], [], [], [], []]
         },
         {
           "membershipId": "0fc761d0-e7cb-4c84-8c20-b107437efab0",
@@ -1208,15 +1093,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
+          "days": [[], [], [], [], [], [], []]
         },
         {
           "membershipId": "415c6580-7593-4b87-b213-97a65531c121",
@@ -1227,15 +1104,7 @@
             "photoUrl": null
           },
           "isMe": false,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
+          "days": [[], [], [], [], [], [], []]
         }
       ]
     }
@@ -1309,9 +1178,7 @@
       "progress": {
         "pointsLeft": 13,
         "behind": 0,
-        "sparkline": [
-          13
-        ]
+        "sparkline": [13]
       },
       "version": 5
     }

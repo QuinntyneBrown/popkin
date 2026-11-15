@@ -22,6 +22,8 @@ export class PopkinSettingsDialog {
   /** The Host's only. */
   /** "Set the event", with the event as its hint, for the Host while Schedules is on (L2-085). */
   readonly setEvent: Locator;
+  /** "Features", with what is on as its hint, for the Host while one is offered (L2-153 AC1). */
+  readonly features: Locator;
   readonly wrapUp: Locator;
   /** A member's only: the danger row. */
   readonly leave: Locator;
@@ -39,6 +41,7 @@ export class PopkinSettingsDialog {
     this.changeLength = this.items.filter({ hasText: 'Change how long it lasts' });
     this.invitePeople = this.items.filter({ hasText: 'Invite people' });
     this.setEvent = this.items.filter({ hasText: 'Set the event' });
+    this.features = this.items.filter({ hasText: 'Features' });
     this.wrapUp = this.items.filter({ hasText: 'Wrap up' });
     this.leave = this.items.filter({ hasText: 'Leave this Popkin' });
   }
