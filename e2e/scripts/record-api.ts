@@ -253,8 +253,24 @@ await call('POST', `${calls}/${joined.call.id}/leave`);
 // My Popkins: Mara's one active Popkin, as its card (journey 6).
 await call('GET', '/api/popkins');
 
-// Contacts, open while `Features:Contacts` is on (journey 25): Mara keeps nobody yet.
+// Contacts, open while `Features:Contacts` is on (journey 25): Mara keeps nobody yet. Then she
+// adds Femi, as Add someone draws him (L2-129).
 await call('GET', '/api/contacts/summary');
+const femi = new FormData();
+femi.append(
+  'contact',
+  JSON.stringify({
+    clientId: '00000000-0000-4000-c000-000000000001',
+    name: 'Femi Bankole',
+    knownAs: 'Grace’s fiancé',
+    circle: 'Friends',
+    phone: '',
+    email: 'femi.b@mail.com',
+    city: 'London',
+    loves: ['Arsenal', 'jazz brunches'],
+  }),
+);
+await call('POST', '/api/contacts/people', femi);
 
 // Photos: Mara has added none, adds one with a caption, then reads the album and the photo.
 const album = `/api/popkins/${created.id}/photos`;
