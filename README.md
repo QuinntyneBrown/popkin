@@ -202,7 +202,6 @@ popkin/
 │   ├── adr/                architecture decisions
 │   ├── estimates/          effort and percent complete per design
 │   ├── personas/           invented people who come across Popkin
-│   ├── prompts/            one implementation prompt per journey
 │   └── videos/             narrated videos, one folder each
 ├── .github/                CI workflow, issue and pull request templates
 ├── AGENTS.md               rules for people and coding agents working in this repository
