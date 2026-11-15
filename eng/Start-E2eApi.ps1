@@ -38,6 +38,7 @@ $env:App__Origin = 'http://localhost:4200'
 $env:Invites__BaseUrl = 'https://popk.in/'
 # Phone sign-in is on, so the recording covers it; specs stub it off (L2-084, ADR 0023).
 $env:Features__PhoneSignIn = 'true'
+$env:Features__Schedules = 'true'
 # Photo files of this run, beside its database, cleared with it.
 $photos = Join-Path $databaseDirectory 'photos'
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $photos

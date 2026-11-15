@@ -14,6 +14,20 @@ interface RecordedResponse {
 
 const recorded: Record<string, RecordedResponse> = responses;
 
+/** A Popkin's header: `GET /api/popkins/{id}`. */
+const header = /^GET \/api\/popkins\/[0-9a-f-]{36}$/;
+
+/**
+ * The recording is made with Schedules on (eng/Start-E2eApi.ps1). The screens of the earlier
+ * journeys stand for a Popkin where it is off, as their mocks do (docs/mocks/README.md, 8), so the
+ * recorded header is read with it off; a spec of Schedules answers the header itself.
+ */
+function schedulesOff(key: string, body: unknown): unknown {
+  return header.test(key) && body && typeof body === 'object'
+    ? { ...body, schedules: false }
+    : body;
+}
+
 /** Opens screens by route key against the app, or against the mocks when PK_BASELINE=1. */
 export class Pk {
   constructor(private readonly page: Page) {}
@@ -56,7 +70,7 @@ export const test = base.extend<{ pk: Pk; unanswered: string[]; hub: Hub }>({
         await route.abort();
         return;
       }
-      await route.fulfill({ status: answer.status, json: answer.body });
+      await route.fulfill({ status: answer.status, json: schedulesOff(key, answer.body) });
     });
     await use(page);
   },

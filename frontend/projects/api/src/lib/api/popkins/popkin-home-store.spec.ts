@@ -39,6 +39,7 @@ const home: PopkinHomeView = {
   viewer: { membershipId: 'm-mara', firstName: 'Mara' },
   unreadCount: 3,
   version: 1,
+  schedules: false,
 };
 const mara: MemberView = {
   membershipId: 'm-mara',

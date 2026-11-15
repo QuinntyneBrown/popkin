@@ -144,7 +144,7 @@ export class GroupChatPage {
   protected readonly sentOnReturn = signal<number | null>(null);
 
   /** What the Popkin itself says once it has wrapped up: when it did (L2-045 AC1). */
-  private readonly frame = inject(PopkinFrame);
+  protected readonly frame = inject(PopkinFrame);
   protected readonly thread = this.store.thread;
   protected readonly readOnly = computed(() => !!this.thread()?.readOnly);
   private readonly watch = inject(WrapUpWatch);
@@ -217,8 +217,10 @@ export class GroupChatPage {
     effect(() => {
       if (this.state() === 'not-found') untracked(() => this.errors.showNotFound());
     });
+    // The frame says when it wrapped up, and whether the Schedule tab shows (L2-077 AC1).
     effect(() => {
-      if (this.readOnly()) untracked(() => this.frame.open(this.popkinId()));
+      const popkinId = this.popkinId();
+      untracked(() => this.frame.open(popkinId));
     });
 
     // Once the thread is known: the draft left here earlier, the latest in view, and focus.

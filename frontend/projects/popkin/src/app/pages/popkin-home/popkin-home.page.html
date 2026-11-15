@@ -252,6 +252,7 @@
       [members]="membersLabel()"
       [timeLeft]="store.timeLeft()"
       [unread]="unreadCount()"
+      [schedule]="popkin()?.schedules ?? false"
     ></nav>
   </div>
 }

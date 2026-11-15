@@ -29,6 +29,8 @@ export interface PopkinHomeView {
   unreadCount: number;
   /** Rises with every change of its settings; orders `PopkinChanged` (L2-020). */
   version: number;
+  /** Whether Schedules is on, which shows the Schedule tab (L2-072 AC1, L2-077 AC1). */
+  schedules: boolean;
 }
 
 /** The latest of the Everyone thread, oldest first, without the notes the system writes. */

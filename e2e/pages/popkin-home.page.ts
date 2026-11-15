@@ -45,6 +45,7 @@ export class PopkinHomePage {
   readonly tabs: Locator;
   readonly currentTab: Locator;
   readonly chatTab: Locator;
+  readonly scheduleTab: Locator;
   readonly unreadCount: Locator;
   readonly sidebarTimeLeft: Locator;
   /** The Popkin's name and emoji in the sidebar, from 1024 px. */
@@ -112,6 +113,7 @@ export class PopkinHomePage {
     this.tabs = this.nav.locator('ul a > span:not(.badge)');
     this.currentTab = this.nav.locator('ul a[aria-current="page"]');
     this.chatTab = this.nav.getByRole('link', { name: /^Chat/ });
+    this.scheduleTab = this.nav.getByRole('link', { name: 'Schedule', exact: true });
     this.unreadCount = this.nav.locator('.badge [aria-hidden="true"]');
     this.sidebarTimeLeft = this.nav.locator('.time-left');
     this.sidebarName = this.nav.locator('.popkin-nav__id-text strong');
