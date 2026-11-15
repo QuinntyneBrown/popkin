@@ -88,6 +88,21 @@ export function theMocksStories(): PlanStory[] {
 /** The points left at the end of each day of the mocks' sprint so far: 24 left, 7 behind. */
 export const theMocksSparkline = [33, 33, 34, 33, 32, 32, 31, 31, 31, 29, 28, 27, 25, 24];
 
+/** The points left at the end of each day of the burn-down's mock: 32 at the start, 24 now. */
+export const theMocksBurnDays = [32, 32, 32, 29, 29, 28, 28, 28, 31, 29, 29, 27, 26, 24];
+
+/** When the plan finishes, as `GET …/plan/burn-down` answers it (L2-071 AC3). */
+export interface Forecast {
+  kind: 'Late' | 'Early' | 'LastDay' | 'NoProgress' | 'Done';
+  date: string | null;
+  days: number;
+}
+
+/** A day `n` days after the mocks' first, Aug 30 2026, as `yyyy-MM-dd`. */
+function sprintDay(n: number): string {
+  return new Date(Date.UTC(2026, 7, 30 + n)).toISOString().slice(0, 10);
+}
+
 export class Plan {
   members = [...theSix];
   viewer = mara.membershipId;
@@ -104,9 +119,25 @@ export class Plan {
     behind: 7,
     sparkline: theMocksSparkline,
   };
+  /** The burn-down's numbers (L2-071); its biggest open stories come from `stories`. */
+  burn: {
+    startPoints: number;
+    pointsLeft: number;
+    behind: number;
+    forecast: Forecast | null;
+    days: number[];
+  } = {
+    startPoints: 32,
+    pointsLeft: 24,
+    behind: 7,
+    forecast: { kind: 'Late', date: '2026-09-30', days: 4 },
+    days: [...theMocksBurnDays],
+  };
   version = 1;
   /** Reads of the board, answered or not. */
   reads = 0;
+  /** Reads of the burn-down, answered or not. */
+  burnReads = 0;
   /** The bodies of `POST …/plan/stories`, in the order they came. */
   readonly added: Record<string, unknown>[] = [];
   /** Each `PUT …/stories/{id}/column`, by the story's title. */
@@ -173,6 +204,31 @@ export class Plan {
     };
   }
 
+  /** `GET …/plan/burn-down` as the API answers it (L2-071). */
+  burnDown() {
+    if (!this.sprint) {
+      return {
+        sprint: null,
+        startPoints: 0,
+        pointsLeft: 0,
+        behind: 0,
+        forecast: null,
+        days: [],
+        biggest: [],
+      };
+    }
+    const open = this.stories.filter((s) => s.column === 'ToDo' || s.column === 'Doing');
+    const biggest = [...open]
+      .sort((a, b) => b.points - a.points || a.addedAt.localeCompare(b.addedAt))
+      .slice(0, 3);
+    return {
+      sprint: this.sprint,
+      ...this.burn,
+      days: this.burn.days.map((pointsLeft, i) => ({ day: sprintDay(i), pointsLeft })),
+      biggest: biggest.map((s) => this.storyOf(s)),
+    };
+  }
+
   storyOf(s: PlanStory) {
     const owner = this.members.find((m) => m.membershipId === s.ownerMembershipId);
     return {
@@ -218,6 +274,11 @@ export class Plan {
       this.reads++;
       if (await this.refusal(route)) return;
       return route.fulfill({ json: this.board() });
+    }
+    if (rest === '/burn-down' && method === 'GET') {
+      this.burnReads++;
+      if (await this.refusal(route)) return;
+      return route.fulfill({ json: this.burnDown() });
     }
     if (rest === '/stories' && method === 'POST') return this.add(route);
     const moving = rest.match(/^\/stories\/([^/]+)\/column$/);
@@ -379,6 +440,24 @@ export async function thePlanWrappedUp(page: Page): Promise<void> {
   await maraWithAPlan(page, (_plan, home) => {
     home.popkin.status = 'WrappedUp';
   });
+}
+
+/**
+ * The burn-down's done mock: every story done, the last on Sep 17, nine days early; today is
+ * Sep 17 (L2-071 AC3).
+ */
+export async function thePlanBurnedDown(page: Page): Promise<void> {
+  await maraWithAPlan(page, (plan) => {
+    plan.stories = plan.stories.map((s) => (s.column === 'Backlog' ? s : { ...s, column: 'Done' }));
+    plan.burn = {
+      startPoints: 32,
+      pointsLeft: 0,
+      behind: -9,
+      forecast: { kind: 'Done', date: '2026-09-17', days: 9 },
+      days: [...theMocksBurnDays, 20, 14, 9, 4, 0],
+    };
+  });
+  await page.clock.setSystemTime(new Date(2026, 8, 17, 12, 0));
 }
 
 /** A Popkin with no stories yet, and so no sprint (L2-068 AC9). */

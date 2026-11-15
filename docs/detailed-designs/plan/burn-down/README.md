@@ -32,7 +32,7 @@ builds it.
   points left by day as a line in the Popkin's colour; the ideal line dashed from 32 to 0 on
   Sep 26; the forecast dotted from today to Sep 30; a dot and "24 left" on today; "+3" over the
   day the line rose; the shaded "After the sprint"; the x axis "Aug 30", "Sep 6", "Today",
-  "Sep 19", "Sep 26"; the legend "Points left", "Ideal line", "At this week’s pace" (AC4);
+  "Sep 20", "Sep 26"; the legend "Points left", "Ideal line", "At this week’s pace" (AC4);
   "Biggest open": "8 Book the cabin at Pine Hollow" with Mara, "5 Rent a 7-seat van" with Walt,
   "3 Grocery list for three dinners" with Ellie (AC6). From 1024 px "Biggest open" sits beside the
   chart; narrower, under it (AC7).
@@ -69,9 +69,11 @@ plan is 7 behind.
 - The x axis runs from the first day to the later of three days after the last day and one day
   after the forecast's `date`, so "After the sprint" and the forecast always fit (Sep 29 in the
   done mock, Oct 1 in the default). Its labels are the first day, each seventh day after it,
-  "Today", and the last day; a label that would overlap "Today" is left out.
+  "Today", and the last day; a label within three days of "Today" is left out (Sep 13 in the
+  default mock, which once said "Sep 19" and now says "Sep 20", by this rule).
 - The y axis runs from 0 to the largest of the start points and every day's points left, rounded
-  up to a multiple of 10, with a tick every 10.
+  up to a multiple of 5 and never below 5, with a tick every 10 (32 gives 35, as both mocks draw
+  it: 30 sits a seventh of the way down).
 - The line joins the points left at the end of each day so far, today's being the points left
   now. Each day the line rose is marked "+{n}" over it.
 - The ideal line runs from the start points on the first day to 0 on the last day. The forecast
@@ -147,7 +149,11 @@ reads the viewport width ([Responsive layout](../../accessibility/responsive-lay
 
 - A sprint whose stories are all in Backlog has nothing in the sprint: its start points are 0, and
   the burn-down reads as empty ("Nothing to burn down yet"), not "All done". Decided while
-  building journey 21: "All done" means work was finished, and none was.
+  building journey 21: "All done" means work was finished, and none was. In the app: empty while
+  there is no sprint, or while no point is left and every day's points left were 0.
+- The text alternative says the headline's status and the forecast before the days ("24 points
+  left, 7 behind. Finishes Sep 30, 4 days late. Points left at the end of each day: Aug 30: 32,
+  …"), so it says all the chart does.
 
 ## Requirements
 

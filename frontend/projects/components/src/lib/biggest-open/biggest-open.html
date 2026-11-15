@@ -1,0 +1,26 @@
+<h2>Biggest open</h2>
+@if (stories().length) {
+  <ol class="biggest__list">
+    @for (story of stories(); track story.id) {
+      <li>
+        <span class="biggest__pts" [attr.aria-label]="pointsLabel(story.points)">{{
+          story.points
+        }}</span>
+        <span class="biggest__title truncate">{{ story.title }}</span>
+        @if (story.owner; as owner) {
+          <span class="biggest__owner" role="img" [attr.aria-label]="owner.name">
+            <span
+              pk-avatar
+              size="2xs"
+              [initials]="owner.initials"
+              [photo]="owner.photo"
+              [attr.data-accent]="owner.accent"
+            ></span>
+          </span>
+        }
+      </li>
+    }
+  </ol>
+} @else {
+  <p class="biggest__empty">{{ empty() }}</p>
+}

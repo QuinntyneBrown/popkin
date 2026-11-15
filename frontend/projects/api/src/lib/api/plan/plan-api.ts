@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  BurnDownView,
   NewStoryRequest,
   PlanBoardView,
   StoryColumn,
@@ -16,6 +17,8 @@ import {
 export interface PlanApi {
   /** The plan board (L2-068): the sprint, every story and how the sprint is going. */
   board(popkinId: string): Observable<PlanBoardView>;
+  /** The burn-down (L2-071): points left, behind or ahead, the forecast, each day and the biggest open. */
+  burnDown(popkinId: string): Observable<BurnDownView>;
   /** Adds a story to Backlog or To do (L2-069). */
   addStory(popkinId: string, request: NewStoryRequest): Observable<StoryView>;
   /** Saves a change to every field of a story (L2-070 AC3). */
@@ -34,6 +37,10 @@ export class HttpPlanApi implements PlanApi {
 
   board(popkinId: string): Observable<PlanBoardView> {
     return this.http.get<PlanBoardView>(plan(popkinId));
+  }
+
+  burnDown(popkinId: string): Observable<BurnDownView> {
+    return this.http.get<BurnDownView>(`${plan(popkinId)}/burn-down`);
   }
 
   addStory(popkinId: string, request: NewStoryRequest): Observable<StoryView> {

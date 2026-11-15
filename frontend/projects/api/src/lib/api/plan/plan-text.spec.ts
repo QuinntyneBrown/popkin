@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { StoryView } from '../../models/plan';
+import { BurnDownView, StoryView } from '../../models/plan';
 import {
+  badgeLabel,
+  biggestEmpty,
+  burnHeadline,
   cardOf,
+  chartText,
   columnsOf,
   daysLeftLabel,
   dueLabel,
+  forecastText,
   moveOf,
   sprintLine,
   storyLine,
@@ -162,4 +167,85 @@ describe('moveOf', () => {
   ] as const)('offers a %s story its next column, short of Done (L2-070 AC1)', (column, move) =>
     expect(moveOf(column)).toEqual(move),
   );
+});
+
+describe('the burn-down (L2-071)', () => {
+  it('heads with the points left, or "All done" with none', () => {
+    expect(burnHeadline(24)).toBe('24 pts left');
+    expect(burnHeadline(1)).toBe('1 pt left');
+    expect(burnHeadline(0)).toBe('All done');
+  });
+
+  it('badges how far behind or ahead, or on track (AC2)', () => {
+    expect(badgeLabel(7)).toBe('7 behind');
+    expect(badgeLabel(-3)).toBe('3 ahead');
+    expect(badgeLabel(0)).toBe('On track');
+  });
+
+  it('says when the plan finishes (AC3)', () => {
+    expect(forecastText({ kind: 'Late', date: '2026-09-30', days: 4 })).toBe(
+      'Finishes Sep 30 · 4 days late',
+    );
+    expect(forecastText({ kind: 'Late', date: '2026-09-27', days: 1 })).toBe(
+      'Finishes Sep 27 · 1 day late',
+    );
+    expect(forecastText({ kind: 'Early', date: '2026-09-17', days: 9 })).toBe(
+      'Finishes Sep 17 · 9 days early',
+    );
+    expect(forecastText({ kind: 'LastDay', date: '2026-09-26', days: 0 })).toBe(
+      'Finishes Sep 26, on the last day',
+    );
+    expect(forecastText({ kind: 'NoProgress', date: null, days: 0 })).toBe(
+      'No progress in the last few days',
+    );
+    expect(forecastText({ kind: 'Done', date: '2026-09-17', days: 9 })).toBe(
+      'Finished Sep 17 · 9 days early',
+    );
+    expect(forecastText({ kind: 'Done', date: '2026-09-28', days: -2 })).toBe(
+      'Finished Sep 28 · 2 days late',
+    );
+    expect(forecastText({ kind: 'Done', date: '2026-09-26', days: 0 })).toBe('Finished Sep 26');
+  });
+
+  it('gives the chart as text: the status, the forecast and each day by its date (AC5)', () => {
+    const view: BurnDownView = {
+      sprint: {
+        name: 'Planning sprint',
+        firstDay: '2026-08-30',
+        lastDay: '2026-09-26',
+        daysLeft: 25,
+      },
+      startPoints: 32,
+      pointsLeft: 24,
+      behind: 7,
+      forecast: { kind: 'Late', date: '2026-09-30', days: 4 },
+      days: [
+        { day: '2026-08-30', pointsLeft: 32 },
+        { day: '2026-08-31', pointsLeft: 29 },
+        { day: '2026-09-01', pointsLeft: 24 },
+      ],
+      biggest: [],
+    };
+    const days = 'Points left at the end of each day: Aug 30: 32, Aug 31: 29, Sep 1: 24.';
+
+    expect(chartText(view)).toBe(`24 points left, 7 behind. Finishes Sep 30, 4 days late. ${days}`);
+    expect(
+      chartText({
+        ...view,
+        pointsLeft: 0,
+        behind: -9,
+        forecast: { kind: 'Done', date: '2026-09-17', days: 9 },
+      }),
+    ).toBe(`No points left, 9 ahead. Finished Sep 17, 9 days early. ${days}`);
+    expect(
+      chartText({ ...view, behind: 0, forecast: { kind: 'NoProgress', date: null, days: 0 } }),
+    ).toBe(`24 points left, on track. No progress in the last few days. ${days}`);
+  });
+
+  it('says nothing is left open, to all of the members in words (AC6)', () => {
+    expect(biggestEmpty(6)).toBe('Nothing left open. Nice work, all six of you.');
+    expect(biggestEmpty(2)).toBe('Nothing left open. Nice work, both of you.');
+    expect(biggestEmpty(1)).toBe('Nothing left open. Nice work.');
+    expect(biggestEmpty(14)).toBe('Nothing left open. Nice work, all 14 of you.');
+  });
 });

@@ -3,6 +3,7 @@ import { EditPopkinDialog } from '../pages/edit-popkin.dialog';
 import { settingsStates } from './settings-states';
 import { scheduleStates } from './schedule-states';
 import { planStates } from './plan-states';
+import { BurnDownPage } from '../pages/burn-down.page';
 import { PlanBoardPage } from '../pages/plan-board.page';
 import { NewStoryDialog } from '../pages/new-story.dialog';
 import { StoryDialog } from '../pages/story.dialog';
@@ -230,6 +231,16 @@ const planBoardRegions = (page: Page) => {
 /** The empty, error and off states: the mocks draw an empty state under the Plan's header. */
 const planEmptyRegions = (page: Page) => ({
   header: new PlanBoardPage(page).header,
+  state: page.locator('main .empty'),
+});
+/** The burn-down: its header, and the chart with "Biggest open" (L2-071). */
+const burnDownRegions = (page: Page) => {
+  const burnDown = new BurnDownPage(page);
+  return { header: burnDown.header, burn: burnDown.burn };
+};
+/** The burn-down's empty, error and off states: an empty state under its header. */
+const burnDownEmptyRegions = (page: Page) => ({
+  header: new BurnDownPage(page).header,
   state: page.locator('main .empty'),
 });
 const thisWeekRegions = (page: Page) => {
@@ -1258,6 +1269,12 @@ export const screenStates: ScreenState[] = [
   { key: 'planBoardError', ...planStates.planBoardError, regions: planEmptyRegions },
   { key: 'planBoardOff', ...planStates.planBoardOff, regions: planEmptyRegions },
   { key: 'planBoardReadOnly', ...planStates.planBoardReadOnly, regions: planBoardRegions },
+  { key: 'burnDown', ...planStates.burnDown, regions: burnDownRegions },
+  { key: 'burnDownLoading', ...planStates.burnDownLoading, regions: burnDownRegions },
+  { key: 'burnDownEmpty', ...planStates.burnDownEmpty, regions: burnDownEmptyRegions },
+  { key: 'burnDownError', ...planStates.burnDownError, regions: burnDownEmptyRegions },
+  { key: 'burnDownOff', ...planStates.burnDownOff, regions: burnDownEmptyRegions },
+  { key: 'burnDownDone', ...planStates.burnDownDone, regions: burnDownRegions },
   { key: 'newStory', ...planStates.newStory, regions: newStoryRegions },
   { key: 'newStoryBusy', ...planStates.newStoryBusy, regions: newStoryRegions },
   { key: 'newStoryInvalid', ...planStates.newStoryInvalid, regions: newStoryRegions },

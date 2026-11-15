@@ -1,0 +1,71 @@
+@let c = chart();
+<p class="visually-hidden">{{ text() }}</p>
+<div class="burn-chart__plot">
+  <div class="burn-chart__y" aria-hidden="true">
+    @for (tick of c.yTicks; track tick.label) {
+      <span [style.top.%]="tick.top">{{ tick.label }}</span>
+    }
+  </div>
+  <div class="burn-chart__area" aria-hidden="true">
+    <svg class="burn-chart__svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      @for (tick of c.yTicks; track tick.label) {
+        <line
+          class="burn-chart__grid"
+          x1="0"
+          x2="100"
+          [attr.y1]="tick.top"
+          [attr.y2]="tick.top"
+          vector-effect="non-scaling-stroke"
+        />
+      }
+      <rect
+        class="burn-chart__after"
+        [attr.x]="c.after.x"
+        y="0"
+        [attr.width]="c.after.width"
+        height="100"
+      />
+      <line
+        class="burn-chart__ideal"
+        [attr.x1]="c.ideal.x1"
+        [attr.y1]="c.ideal.y1"
+        [attr.x2]="c.ideal.x2"
+        [attr.y2]="c.ideal.y2"
+        vector-effect="non-scaling-stroke"
+      />
+      @if (c.forecast; as forecast) {
+        <line
+          class="burn-chart__forecast"
+          [attr.x1]="forecast.x1"
+          [attr.y1]="forecast.y1"
+          [attr.x2]="forecast.x2"
+          [attr.y2]="forecast.y2"
+          vector-effect="non-scaling-stroke"
+        />
+      }
+      <path class="burn-chart__line" [attr.d]="c.line" vector-effect="non-scaling-stroke" />
+    </svg>
+    <span class="burn-chart__dot" [style.left.%]="c.today.left" [style.top.%]="c.today.top"></span>
+    <span
+      class="burn-chart__label"
+      [style.left.%]="c.today.left"
+      [style.top]="'calc(' + c.today.top + '% - var(--space-10))'"
+      >{{ c.today.label }}</span
+    >
+    @for (rise of c.rises; track rise.left) {
+      <span
+        class="burn-chart__note"
+        [style.left.%]="rise.left"
+        [style.top]="'calc(' + rise.top + '% - var(--space-7))'"
+        >{{ rise.label }}</span
+      >
+    }
+    <span class="burn-chart__after-label">After the sprint</span>
+  </div>
+</div>
+<div class="burn-chart__x" aria-hidden="true">
+  @for (tick of c.xTicks; track tick.label) {
+    <span [class.is-today]="tick.today" [style.left.%]="tick.left">{{ tick.label }}</span>
+  }
+</div>
+<figcaption pk-chart-legend class="burn-chart__legend" [keys]="legend(c)"></figcaption>

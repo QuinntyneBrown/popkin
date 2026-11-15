@@ -171,3 +171,6 @@ export * from './lib/permission-table/permission-table';
 export * from './lib/admin-entry/admin-entry';
 export * from './lib/toolbar/toolbar';
 export * from './lib/select-field/select-field';
+export * from './lib/burn/burn';
+export * from './lib/burn-chart/burn-chart';
+export * from './lib/biggest-open/biggest-open';

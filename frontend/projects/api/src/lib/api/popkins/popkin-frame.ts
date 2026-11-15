@@ -34,6 +34,7 @@ export class PopkinFrame {
     const popkin = this.popkin();
     return popkin ? membersLabel(popkin.memberCount) : '';
   });
+  readonly memberCount = computed(() => this.popkin()?.memberCount ?? 0);
   readonly timeLeft = computed(() => {
     const popkin = this.popkin();
     return popkin?.endsAt && popkin.status === 'Active'

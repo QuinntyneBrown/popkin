@@ -1,0 +1,28 @@
+@if (loading()) {
+  <p class="visually-hidden" role="status">Loading the burn-down…</p>
+  <section class="burn__main stack" aria-hidden="true">
+    <span pk-skeleton shape="title"></span>
+    <span pk-skeleton shape="text" [width]="50"></span>
+    <span pk-skeleton shape="media"></span>
+  </section>
+  <aside class="burn__aside stack stack--sm" aria-hidden="true">
+    <span pk-skeleton shape="text" [width]="40"></span>
+    <span pk-skeleton shape="bubble"></span>
+    <span pk-skeleton shape="bubble"></span>
+    <span pk-skeleton shape="bubble"></span>
+  </aside>
+} @else {
+  <section class="burn__main">
+    <p class="burn__headline">
+      <strong>{{ headline() }}</strong>
+      @if (badge(); as badge) {
+        <span class="burn__badge">{{ badge }}</span>
+      }
+    </p>
+    @if (forecast(); as forecast) {
+      <p class="burn__forecast">{{ forecast }}</p>
+    }
+    <ng-content select="[slot=chart]" />
+  </section>
+  <ng-content select="[slot=aside]" />
+}

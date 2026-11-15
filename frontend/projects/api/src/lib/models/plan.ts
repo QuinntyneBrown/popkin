@@ -48,6 +48,36 @@ export interface PlanProgressView {
   sparkline: number[];
 }
 
+/** How the forecast reads (L2-071 AC3). */
+export type ForecastKind = 'Late' | 'Early' | 'LastDay' | 'NoProgress' | 'Done';
+
+/** When the plan finishes: `days` late or early, 0 on the last day; below 0 when done late. */
+export interface ForecastView {
+  kind: ForecastKind;
+  /** `yyyy-MM-dd`; null for no progress. */
+  date: string | null;
+  days: number;
+}
+
+/** The points left at the end of one day of the sprint. */
+export interface BurnDayView {
+  day: string;
+  pointsLeft: number;
+}
+
+/** `GET /api/popkins/{id}/plan/burn-down` (L2-071). */
+export interface BurnDownView {
+  sprint: SprintView | null;
+  startPoints: number;
+  pointsLeft: number;
+  /** Positive behind, negative ahead. */
+  behind: number;
+  forecast: ForecastView | null;
+  days: BurnDayView[];
+  /** The three biggest stories in To do and Doing. */
+  biggest: StoryView[];
+}
+
 /** `GET /api/popkins/{id}/plan` (L2-068). */
 export interface PlanBoardView {
   sprint: SprintView | null;

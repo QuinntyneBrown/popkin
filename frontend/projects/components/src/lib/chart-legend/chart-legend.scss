@@ -45,3 +45,19 @@ strong {
 .is-working {
   background: var(--color-bg-subtle);
 }
+
+.is-line {
+  height: 0;
+  border-top: var(--border-width-ring) solid var(--accent-text);
+  border-radius: var(--radius-full);
+}
+
+.is-ideal {
+  height: 0;
+  border-top: var(--border-width-thick) dashed var(--color-fg-subtle);
+}
+
+.is-forecast {
+  height: 0;
+  border-top: var(--border-width-thick) dotted var(--accent-text);
+}

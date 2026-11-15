@@ -1,0 +1,143 @@
+:host {
+  display: block;
+  margin-top: var(--space-6);
+}
+
+.burn-chart__plot {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.burn-chart__y {
+  position: relative;
+  flex: none;
+  width: var(--space-6);
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+  text-align: right;
+
+  span {
+    position: absolute;
+    right: 0;
+    translate: 0 -50%;
+  }
+}
+
+.burn-chart__area {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 15rem;
+}
+
+.burn-chart__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.burn-chart__grid {
+  stroke: var(--color-border-default);
+  stroke-width: 1;
+}
+
+.burn-chart__after {
+  fill: var(--color-bg-subtle);
+}
+
+.burn-chart__ideal {
+  stroke: var(--color-fg-subtle);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
+}
+
+.burn-chart__forecast {
+  stroke: var(--accent-text);
+  stroke-width: 2;
+  stroke-dasharray: 2 5;
+  stroke-linecap: round;
+}
+
+.burn-chart__line {
+  fill: none;
+  stroke: var(--accent-text);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.burn-chart__dot {
+  position: absolute;
+  width: var(--space-3);
+  height: var(--space-3);
+  translate: -50% -50%;
+  border-radius: var(--radius-full);
+  background: var(--accent-text);
+  box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-canvas);
+}
+
+.burn-chart__label {
+  position: absolute;
+  translate: -50% 0;
+  padding: var(--space-1) var(--space-2-5);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+  font: var(--font-weight-bold) var(--font-size-xs) / 1 var(--font-family-sans);
+  white-space: nowrap;
+}
+
+.burn-chart__note {
+  position: absolute;
+  translate: -50% 0;
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.burn-chart__after-label {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  display: none;
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-family-sans);
+  color: var(--color-fg-subtle);
+  white-space: nowrap;
+}
+
+.burn-chart__x {
+  position: relative;
+  height: var(--space-5);
+  margin: var(--space-2) 0 0 var(--space-8);
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+
+  span {
+    position: absolute;
+    translate: -50% 0;
+    white-space: nowrap;
+  }
+
+  .is-today {
+    color: var(--color-fg-default);
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+@media (min-width: 40rem) {
+  .burn-chart__after-label {
+    display: block;
+  }
+}
+
+@media (min-width: 48rem) {
+  .burn-chart__area {
+    height: 18.75rem;
+  }
+}
+
+// The legend sits closer under the chart than under the Schedule's table.
+.burn-chart__legend {
+  margin-top: var(--space-3);
+}

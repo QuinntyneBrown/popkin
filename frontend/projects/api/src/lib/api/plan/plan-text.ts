@@ -1,7 +1,8 @@
 import { MemberView } from '../../models/home';
-import { SprintView, StoryColumn, StoryView } from '../../models/plan';
+import { BurnDownView, ForecastView, SprintView, StoryColumn, StoryView } from '../../models/plan';
 import { accentOf } from '../../models/popkin';
 import { weekLabel } from '../schedule/schedule-weeks';
+import { countWord } from '../schedule/this-week-text';
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -126,6 +127,60 @@ export function whoChipsOf(members: readonly MemberView[]): WhoChipView[] {
   }));
 }
 
-function daysBetween(from: string, to: string): number {
+/** "24 pts left", "1 pt left", or "All done" once none are (L2-071 AC2, AC3). */
+export function burnHeadline(pointsLeft: number): string {
+  if (pointsLeft <= 0) return 'All done';
+  return pointsLeft === 1 ? '1 pt left' : `${pointsLeft} pts left`;
+}
+
+/** "7 behind", "3 ahead" or "On track" (L2-071 AC2). */
+export function badgeLabel(behind: number): string {
+  if (behind > 0) return `${behind} behind`;
+  if (behind < 0) return `${-behind} ahead`;
+  return 'On track';
+}
+
+/** "Finishes Sep 30 · 4 days late", "No progress in the last few days", "Finished Sep 17 · 9 days early"… (L2-071 AC3). */
+export function forecastText(forecast: ForecastView, joiner = ' · '): string {
+  if (forecast.kind === 'NoProgress' || !forecast.date) return 'No progress in the last few days';
+  const date = sprintDayLabel(forecast.date);
+  if (forecast.kind === 'LastDay') return `Finishes ${date}, on the last day`;
+  const verb = forecast.kind === 'Done' ? 'Finished' : 'Finishes';
+  const late = forecast.kind === 'Late' || forecast.days < 0;
+  const days = Math.abs(forecast.days);
+  if (days === 0) return `${verb} ${date}`;
+  return `${verb} ${date}${joiner}${days === 1 ? '1 day' : `${days} days`} ${late ? 'late' : 'early'}`;
+}
+
+/**
+ * The chart as text (L2-071 AC5): "24 points left, 7 behind. Finishes Sep 30, 4 days late. Points
+ * left at the end of each day: Aug 30: 32, …".
+ */
+export function chartText(view: BurnDownView): string {
+  const left =
+    view.pointsLeft <= 0
+      ? 'No points left'
+      : `${view.pointsLeft === 1 ? '1 point' : `${view.pointsLeft} points`} left`;
+  const status = view.behind === 0 ? 'on track' : badgeLabel(view.behind);
+  const forecast = view.forecast ? ` ${forecastText(view.forecast, ', ')}.` : '';
+  const days = view.days.map((d) => `${sprintDayLabel(d.day)}: ${d.pointsLeft}`).join(', ');
+  return `${left}, ${status}.${forecast} Points left at the end of each day: ${days}.`;
+}
+
+/** "Nothing left open. Nice work, all six of you." (L2-071 AC6). */
+export function biggestEmpty(members: number): string {
+  if (members <= 1) return 'Nothing left open. Nice work.';
+  if (members === 2) return 'Nothing left open. Nice work, both of you.';
+  return `Nothing left open. Nice work, all ${countWord(members)} of you.`;
+}
+
+/** "Aug 30". */
+export function sprintDayLabel(day: string): string {
+  const [, month, date] = day.split('-').map(Number);
+  return `${months[month - 1]} ${date}`;
+}
+
+/** Whole days from one `yyyy-MM-dd` to another. */
+export function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / 86_400_000);
 }
