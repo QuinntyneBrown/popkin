@@ -264,7 +264,7 @@ parity('dialog', [
   },
   // Journey 12: the message actions of theirs, of the member's own, with More reactions open.
   {
-    key: 'reactions',
+    key: 'reactionsCurrent',
     ...reactStates.reactions,
     name: 'reactions',
     region: (page) => new ReactionsDialog(page).panel,
@@ -276,7 +276,7 @@ parity('dialog', [
     region: (page) => new ReactionsDialog(page).panel,
   },
   {
-    key: 'reactionsMore',
+    key: 'reactionsCurrentMore',
     ...reactStates.reactionsMore,
     name: 'reactions-more',
     region: (page) => new ReactionsDialog(page).panel,

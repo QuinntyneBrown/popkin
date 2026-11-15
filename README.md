@@ -177,8 +177,18 @@ Azure Container Apps, and the marketing site, separately, on an Azure Static Web
   `components` library, compared with the mocks at 360 px and 1280 px in both themes.
 
 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs the backend tests, the token check, the frontend lint,
-format check, unit tests and build, the behaviour specs and the component parity specs on every push to
-`main` and every pull request.
+format check, unit tests and build and the behaviour specs on every push to `main` and every pull
+request. The component parity specs are not part of CI; run `npm run parity` in `e2e/` by hand
+([ADR 0027](docs/adr/0027-parity-specs-run-by-hand.md)).
+
+CI bounds backend and frontend jobs to 15 minutes, image builds to 30 minutes and Playwright
+to 20 minutes. Playwright type checking runs before the browser tests, behaviour retries capture
+a trace, and the report is retained for seven days, including on successful runs.
+
+The reactions and Host experience-action parity cases use explicitly named `current` mocks
+for journey 12, before reporting (L2-108) is built. The original mocks retain the future Report
+action for the reporting implementation and owner-run sweeps. When L2-108 ships, point these
+parity cases back to those mocks and remove the current-state copies.
 
 ## Repository structure
 

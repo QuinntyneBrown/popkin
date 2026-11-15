@@ -3,7 +3,8 @@
 ## Status
 
 Accepted, 12 November 2026. Amends ADR 0006 (only behaviour tests run) for the component parity specs, and applies
-ADR 0003 (baselines rendered from the mocks) to them.
+ADR 0003 (baselines rendered from the mocks) to them. Amended by ADR 0027: CI no longer runs
+`npm run parity`.
 
 ## Context
 

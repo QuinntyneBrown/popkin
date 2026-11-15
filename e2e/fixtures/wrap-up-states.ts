@@ -64,7 +64,16 @@ interface WrapUpState {
 }
 
 export const wrapUpStates = {
-  popkinSettings: { before: (page) => theMockHome(page), app: openSettings },
+  popkinSettings: {
+    before: (page) =>
+      theMockHome(page, (home) =>
+        home.offers([
+          { feature: 'Plan', on: false },
+          { feature: 'Schedules', on: false },
+        ]),
+      ),
+    app: openSettings,
+  },
   popkinSettingsMember: { before: (page) => theMockHome(page, asMember), app: openSettings },
   wrapUp: { before: (page) => theMockWrapUp(page) },
   wrapUpAlbumOff: {

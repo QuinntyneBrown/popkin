@@ -132,7 +132,8 @@ static: one root composing `pk-*` components, copy in `content.ts`, links to the
   screen state its `routes.ts` entry and page-object regions. **Never run them**: no agent runs
   `npm run sweeps`, `npm run baseline`, or anything setting `PK_SWEEPS=1` or `PK_BASELINE=1`.
 - **Component parity (ADR 0008).** Every `components` component has a spec in
-  `e2e/tests/parity/` built with `e2e/fixtures/parity.ts`. Agents run `npm run parity`.
+  `e2e/tests/parity/` built with `e2e/fixtures/parity.ts`. Agents run `npm run parity`; CI does
+  not (ADR 0027).
 - Update visual baselines only for intentional design changes, after changing the mock first.
 - Chromium only; never configure or run another browser.
 

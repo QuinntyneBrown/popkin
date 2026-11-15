@@ -16,7 +16,7 @@ parity('menu-list', [
   },
   // The Host's, on an experience somebody else shared: Delete alone.
   {
-    key: 'experienceActionsHost',
+    key: 'experienceActionsCurrentHost',
     ...experienceStates.experienceActionsHost,
     name: 'host',
     region: (page) => new ExperienceActionsDialog(page).menu,
