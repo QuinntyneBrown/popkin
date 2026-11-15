@@ -301,12 +301,19 @@ const adminCode = await call('POST', '/api/admin/auth/codes', { email: 'lena.fis
 await call('POST', `/api/admin/auth/codes/${adminCode.verificationId}/confirm`, { code: '482913' });
 await call('GET', '/api/admin/me');
 await call('GET', '/api/admin/waiting');
-await call('GET', '/api/admin/roles');
 await call('POST', '/api/admin/admins', { email: 'kwame.mensah@popkin.app', role: 'Support' });
 await call('POST', '/api/admin/admins', { email: 'marco.bianchi@popkin.app', role: 'Viewer' });
-await call('POST', '/api/admin/admins', { email: 'aiko.tanaka@popkin.app', role: 'Support' });
-await call('GET', '/api/admin/admins');
+const aiko = await call('POST', '/api/admin/admins', {
+  email: 'aiko.tanaka@popkin.app',
+  role: 'Support',
+});
+await call('GET', '/api/admin/roles');
+const admins = await call('GET', '/api/admin/admins');
 await call('GET', '/api/admin/audit');
+// Then she makes Aiko a Viewer and removes Marco; the list and the log above stay as they were.
+await call('PUT', `/api/admin/admins/${aiko.id}/role`, { role: 'Viewer', reason: 'Moved to finance' });
+const marco = admins.admins.find((admin: { name: string }) => admin.name === 'Marco Bianchi');
+await call('POST', `/api/admin/admins/${marco.id}/remove`, { reason: null });
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');
 writeFileSync(file, `${JSON.stringify(recorded, null, 2)}\n`);

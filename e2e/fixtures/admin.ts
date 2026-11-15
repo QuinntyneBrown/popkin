@@ -73,3 +73,58 @@ export function auditPage(
 ) {
   return { status: 200, body: { entries, total, next } };
 }
+
+/** The recorded signed-in admin, an Owner. */
+export const recordedMe = recordedBody<{ adminId: string; role: string; allowed: string[] }>(
+  'GET /api/admin/me',
+);
+
+/** The console as an admin of `role` sees it: the recorded admin with that role's actions. */
+export async function signedInAs(page: Page, role: 'Support' | 'Viewer'): Promise<void> {
+  const allowed =
+    role === 'Viewer' ? ['ExportAuditLog'] : recordedMe.allowed.filter((a) => a !== 'ManageAdmins');
+  await page.route('**/api/admin/me', (route) =>
+    route.fulfill({ status: 200, json: { ...recordedMe, role, allowed } }),
+  );
+}
+
+/** The five admins the Admins & roles mocks draw, with Lena signed in, at noon on 14 July. */
+export async function theMockAdmins(page: Page): Promise<void> {
+  const now = new Date('2026-07-14T12:00:00+01:00');
+  await page.clock.setFixedTime(now);
+  const ago = (minutes: number) => new Date(now.getTime() - minutes * 60_000).toISOString();
+  const admin = (
+    name: string,
+    role: string,
+    lastActiveAt: string | null,
+    extra: { isYou?: boolean; invited?: boolean } = {},
+  ) => ({
+    id: `mock-${name.split(' ')[0].toLowerCase()}`,
+    name,
+    email: `${name.split(' ')[0].toLowerCase()}@popkin.app`,
+    role,
+    invited: extra.invited ?? false,
+    lastActiveAt,
+    isYou: extra.isYou ?? false,
+    isLastOwner: false,
+  });
+  const admins = [
+    admin('Lena Fischer', 'Owner', ago(0), { isYou: true }),
+    admin('Kwame Mensah', 'Owner', ago(120)),
+    admin('Aiko Tanaka', 'Support', ago(14)),
+    admin('Marco Bianchi', 'Support', ago(24 * 60)),
+    admin('Hannah Cole', 'Viewer', '2026-07-09T10:00:00+01:00'),
+  ];
+  const roles = recordedBody<{ rows: unknown[] }>('GET /api/admin/roles');
+  await page.route('**/api/admin/**', (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (route.request().method() !== 'GET') return route.fallback();
+    if (path === '/api/admin/admins') {
+      return route.fulfill({ json: { count: admins.length, admins } });
+    }
+    if (path === '/api/admin/roles') {
+      return route.fulfill({ json: { ...roles, counts: { owner: 2, support: 2, viewer: 1 } } });
+    }
+    return route.fallback();
+  });
+}

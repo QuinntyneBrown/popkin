@@ -107,3 +107,8 @@ export * from './lib/api/admin/shell/admin-sections';
 export * from './lib/api/admin/auth/admin-sign-in-text';
 export * from './lib/api/admin/auth/admin-sign-in.store';
 export * from './lib/api/toasts/toaster';
+export * from './lib/api/admin/access/admin-permissions';
+export * from './lib/api/admin/access/admin-role-text';
+export * from './lib/api/admin/access/role-table-text';
+export * from './lib/api/admin/access/admins.store';
+export * from './lib/api/admin/dialogs/action-dialog-state';

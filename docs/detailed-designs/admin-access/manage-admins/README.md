@@ -65,14 +65,20 @@ add the rest (L2-119 AC9).
   out of the console now and can’t sign back in. Their past actions stay in the audit log. They
   were a Viewer.", the optional reason, the danger button "Remove admin" and "Cancel"
   (L2-119 AC6). `busy.html`: "Removing…".
-- States with no mock, which the design expects: the refusal of an address that is already an
-  admin's (`docs/mocks/admin/dialogs/admin-add/exists.html`; its copy is `<TO SUPPLY>`), and the
-  last Owner's row with its role select and "Remove" disabled and the reason
-  (`docs/mocks/admin/pages/admins/last-owner.html`; the reason's copy is `<TO SUPPLY>`, the
-  manifest's note says "the last Owner can’t be removed or demoted").
-- The change dialog's sentence for each pair of roles: the mock gives Support to Viewer. The
-  other five pairs (Owner to Support, Owner to Viewer, Support to Owner, Viewer to Support, Viewer
-  to Owner) are `<TO SUPPLY>`, as is the toast after a role change.
+- States with no mock, which the design expects, take these defaults (settled 15 November 2026
+  under the owner's decision to use the designs' defaults): an address that is already an
+  admin's is refused on the field with "{name} is already an admin." ("That address is already
+  an admin’s." when the name is not listed); the last Owner's role shows as text titled "The
+  console needs at least one Owner."; a `409` `last_owner` in a dialog shows the alert "The
+  console needs at least one Owner." with "Nothing changed. Make someone else an Owner first."
+  (change) or "Nothing changed. They stay an admin." (remove).
+- The change dialog's sentence for each pair of roles: the mock gives Support to Viewer;
+  `changeRoleSentence` in `admin-role-text.ts` writes the other pairs in the same form (to Owner:
+  "{first} can do everything, including adding and removing admins, features and limits.";
+  Owner to Support: "{first} can still help people and Popkins but can no longer change admins,
+  features or limits."; Viewer to Support: "{first} can help people and Popkins, moderate
+  content and end calls."), each ending "It applies the next time they open a page." The toast
+  after a role change reads "{name} is now a {role}".
 
 ### API
 
@@ -173,7 +179,7 @@ add the rest (L2-119 AC9).
   `email_not_staff` and `admin_exists` to the field. It has no reason field.
 - **`ChangeAdminRoleDialog`** (`dialogs/admin-change-role/`) and **`RemoveAdminDialog`**
   (`dialogs/admin-remove/`) — built on `ActionDialogState` with the policy `Optional` and
-  `pk-reason-field` ([A reason for every change](../give-a-reason/README.md)). Each maps `409`
+  the reason field ([A reason for every change](../give-a-reason/README.md)). Each maps `409`
   `last_owner` to its own alert and reloads the list.
 - **Toasts** — through the app's `Toaster`: the invite's and the removal's copy from the mocks;
   the role change's `<TO SUPPLY>`.

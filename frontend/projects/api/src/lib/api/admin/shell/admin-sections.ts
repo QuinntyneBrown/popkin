@@ -20,6 +20,9 @@ export interface AdminNavGroup {
 export const ADMIN_SECTIONS: readonly AdminNavGroup[] = [
   {
     label: 'Access',
-    items: [{ label: 'Audit log', route: '/audit', page: 'audit', icon: 'scroll' }],
+    items: [
+      { label: 'Admins & roles', route: '/admins', page: 'admins', icon: 'shield' },
+      { label: 'Audit log', route: '/audit', page: 'audit', icon: 'scroll' },
+    ],
   },
 ];

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, input } from '@angular/core';
 
 /**
  * Button (docs/design-system/components/button.html). On `<button>` it takes an action, on `<a>`
@@ -25,6 +25,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[attr.aria-busy]': "busy() ? 'true' : null",
     '[attr.aria-pressed]': 'pressed() === null ? null : pressed()',
     '[attr.disabled]': 'busy() || disabled() ? "" : null',
+    '[attr.aria-disabled]': 'disabledReason() ? "true" : null',
+    '[attr.title]': 'disabledReason() ?? null',
   },
 })
 export class Button {
@@ -38,4 +40,23 @@ export class Button {
   readonly disabled = input(false);
   /** A toggle's state; null for a button that is not one. */
   readonly pressed = input<boolean | null>(null);
+  /**
+   * Why the action is switched off for this person, such as "Viewer admins can’t do this"
+   * (L2-086 AC2, AC3): the button is `aria-disabled`, ignores activation and stays focusable, so
+   * a keyboard or screen-reader user reaches the reason, its tooltip and its description.
+   */
+  readonly disabledReason = input<string | null>(null);
+
+  constructor() {
+    // A capture listener on the button runs before its consumer's (click), so it can stop it.
+    inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.addEventListener(
+      'click',
+      (event: MouseEvent) => {
+        if (!this.disabledReason()) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      },
+      { capture: true },
+    );
+  }
 }

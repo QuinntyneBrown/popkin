@@ -1,0 +1,41 @@
+<table class="perm-table">
+  <caption class="visually-hidden">
+    {{
+      label()
+    }}
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col" class="perm-table__action">Action</th>
+      @for (role of roles(); track role.key) {
+        <th scope="col">
+          <span class="perm-table__role">{{ role.name }}</span>
+          <span class="perm-table__count">{{ countText(role.count) }}</span>
+        </th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (group of groups(); track group.label) {
+      <tr class="perm-table__group">
+        <th scope="rowgroup" colspan="4">{{ group.label }}</th>
+      </tr>
+      @for (row of group.rows; track row.label) {
+        <tr>
+          <th scope="row" class="perm-table__label">{{ row.label }}</th>
+          @for (allowed of [row.owner, row.support, row.viewer]; track $index) {
+            <td>
+              @if (allowed) {
+                <svg pk-icon name="check" size="sm" class="perm-table__yes"></svg>
+                <span class="visually-hidden">Allowed</span>
+              } @else {
+                <span class="perm-table__no" aria-hidden="true">—</span>
+                <span class="visually-hidden">Not allowed</span>
+              }
+            </td>
+          }
+        </tr>
+      }
+    }
+  </tbody>
+</table>

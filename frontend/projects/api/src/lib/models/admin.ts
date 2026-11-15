@@ -89,3 +89,16 @@ export interface AdminList {
   count: number;
   admins: AdminRow[];
 }
+
+/** A row of what each role can do, as `GET /api/admin/roles` keys it (L2-086 AC4). */
+export interface AdminPermissionRowView {
+  row: string;
+  owner: boolean;
+  support: boolean;
+  viewer: boolean;
+}
+
+export interface AdminRolesView {
+  counts: { owner: number; support: number; viewer: number };
+  rows: AdminPermissionRowView[];
+}

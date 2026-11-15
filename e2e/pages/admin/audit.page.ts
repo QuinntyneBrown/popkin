@@ -22,6 +22,7 @@ export class AuditPage {
   readonly openHealth: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly toolbar: Locator;
+  readonly adminField: Locator;
   readonly foot: Locator;
   readonly pageHead: Locator;
   readonly panel: Locator;
@@ -44,6 +45,7 @@ export class AuditPage {
     this.tryAgain = page.getByRole('button', { name: 'Try again' });
     this.openHealth = page.getByRole('link', { name: 'Open Health' });
     this.toolbar = page.locator('.toolbar');
+    this.adminField = this.admin;
     this.foot = page.locator('.panel__foot');
     this.pageHead = page.locator('.page-head');
     this.panel = page.locator('.panel');

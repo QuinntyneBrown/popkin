@@ -1,3 +1,6 @@
+import { theMockAdmins } from '../../fixtures/admin';
+import { AdminActionDialog } from '../../pages/admin/admin-dialogs';
+import { AdminsPage } from '../../pages/admin/admins.page';
 import { experienceStates } from '../../fixtures/experience-states';
 import type { Page } from '@playwright/test';
 import { parity } from '../../fixtures/parity';
@@ -28,5 +31,16 @@ parity('textarea', [
     name: 'busy',
     region: field,
     prepare: focused,
+  },
+  // Optional: an action's reason for the audit log (L2-087).
+  {
+    key: 'adminChangeRole',
+    name: 'optional',
+    region: (page) =>
+      new AdminActionDialog(page, 'Make Aiko Tanaka a Viewer?', /Change role/).reasonField,
+    before: theMockAdmins,
+    app: async (page) => {
+      await new AdminsPage(page).role('Aiko Tanaka').selectOption('Viewer');
+    },
   },
 ]);

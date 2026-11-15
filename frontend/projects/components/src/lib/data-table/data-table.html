@@ -15,7 +15,13 @@
     <thead>
       <tr>
         @for (column of columns(); track $index) {
-          <th scope="col">{{ column }}</th>
+          <th scope="col">
+            @if (columnAt($index).hidden) {
+              <span class="visually-hidden">{{ columnAt($index).label }}</span>
+            } @else {
+              {{ columnAt($index).label }}
+            }
+          </th>
         }
       </tr>
     </thead>
@@ -30,8 +36,9 @@
           <tr>
             @for (cell of row.cells; track $index) {
               <td
-                [attr.data-label]="$first ? null : columns()[$index]"
+                [attr.data-label]="$first ? null : columnAt($index).label"
                 [class.data-table__time]="cell.kind === 'time'"
+                [class.data-table__end]="columnAt($index).end"
               >
                 @switch (cell.kind) {
                   @case ('strong') {
@@ -45,8 +52,55 @@
                       }
                     </span>
                   }
+                  @case ('person') {
+                    <span class="who">
+                      <span
+                        pk-avatar
+                        size="36"
+                        [attr.data-accent]="cell.accent"
+                        [name]="cell.text"
+                      ></span>
+                      <span class="who__text">
+                        <span class="who__name"
+                          >{{ cell.text }}
+                          @if (cell.badge) {
+                            <span pk-badge variant="quiet" [text]="cell.badge"></span>
+                          }
+                        </span>
+                        <span class="who__sub">{{ cell.sub }}</span>
+                      </span>
+                    </span>
+                  }
+                  @case ('role') {
+                    <select
+                      class="select role-select"
+                      [attr.aria-label]="cell.label"
+                      (change)="choose(row.id, $event, cell.value ?? '')"
+                    >
+                      @for (option of cell.options; track option.value) {
+                        <option [value]="option.value" [selected]="option.value === cell.value">
+                          {{ option.label }}
+                        </option>
+                      }
+                    </select>
+                  }
+                  @case ('action') {
+                    <button
+                      pk-button
+                      type="button"
+                      variant="quiet"
+                      size="sm"
+                      [attr.aria-label]="cell.label"
+                      [disabledReason]="cell.disabledReason ?? null"
+                      (click)="acted.emit({ rowId: row.id, action: cell.action ?? '' })"
+                    >
+                      {{ cell.text }}
+                    </button>
+                  }
                   @default {
-                    {{ cell.text }}
+                    @if (cell.text) {
+                      <span [attr.title]="cell.title ?? null">{{ cell.text }}</span>
+                    }
                   }
                 }
               </td>

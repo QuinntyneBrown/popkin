@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { catchError, firstValueFrom, map, of } from 'rxjs';
 import { AdminAction, AdminMe } from '../../../models/admin';
+import { actionBlockedReason } from '../access/admin-permissions';
 import { ADMIN_AUTH_API } from './admin-auth-api';
 
 /**
@@ -31,6 +32,12 @@ export class AdminSessionStore {
   /** Whether the signed-in admin's role allows `action` (L2-086). */
   allows(action: AdminAction): boolean {
     return this.state()?.allowed.includes(action) ?? false;
+  }
+
+  /** Why the signed-in admin cannot take `action`, or `null` when they can (L2-086 AC2). */
+  blockedReason(action: AdminAction): string | null {
+    const me = this.state();
+    return actionBlockedReason(me?.role, me?.allowed ?? [], action);
   }
 
   set(me: AdminMe): void {

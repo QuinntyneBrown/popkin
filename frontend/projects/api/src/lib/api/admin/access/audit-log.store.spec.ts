@@ -38,6 +38,7 @@ describe('AuditLogStore', () => {
       audit: vi.fn(() => of(page([4, 3], 4, '3'))),
       exportAudit: vi.fn(),
       admins: vi.fn(() => of({ count: 1, admins: [{ id: 'a1', name: 'Lena Fischer' }] })),
+      roles: vi.fn(),
       addAdmin: vi.fn(),
       changeRole: vi.fn(),
       removeAdmin: vi.fn(),

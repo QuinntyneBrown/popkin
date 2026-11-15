@@ -36,6 +36,12 @@ export const routes: Routes = [
     canActivateChild: [adminSessionGuard],
     children: [
       {
+        path: 'admins',
+        loadComponent: () => import('./pages/admins/admins.page').then((m) => m.AdminsPage),
+        data: data({ shell: 'admin', page: 'admins' }),
+        title: 'Admins & roles · Popkin Admin',
+      },
+      {
         path: 'audit',
         loadComponent: () => import('./pages/audit/audit.page').then((m) => m.AuditPage),
         data: data({ shell: 'admin', page: 'audit' }),

@@ -15,6 +15,7 @@ export class AdminShell {
   readonly notice: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly accessGroup: Locator;
+  readonly envTag: Locator;
 
   constructor(page: Page) {
     this.shell = page.locator('.admin-shell');
@@ -27,5 +28,6 @@ export class AdminShell {
     this.openMenu = this.bar.getByRole('button', { name: 'Open menu' });
     this.notice = page.locator('.admin-shell__notice');
     this.accessGroup = this.side.locator('.admin-nav__group').last();
+    this.envTag = this.bar.locator('.env-tag');
   }
 }

@@ -8,9 +8,11 @@
     [attr.aria-selected]="option.value === value()"
     [tabIndex]="option.value === value() ? 0 : -1"
     [disabled]="disabled()"
+    [attr.aria-label]="option.count === undefined ? null : option.label + ' ' + option.count"
     (click)="choose(option.value)"
     (keydown)="move($event, i)"
   >
-    {{ option.label }}
+    {{ option.label
+    }}<span class="segmented__count" [hidden]="option.count === undefined">{{ option.count }}</span>
   </button>
 }
