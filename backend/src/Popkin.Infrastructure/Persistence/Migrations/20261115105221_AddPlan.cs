@@ -12,6 +12,27 @@ namespace Popkin.Infrastructure.Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "PlanChanges",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PopkinId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    At = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    Delta = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlanChanges", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlanChanges_Popkins_PopkinId",
+                        column: x => x.PopkinId,
+                        principalTable: "Popkins",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Sprints",
                 columns: table => new
                 {
@@ -59,6 +80,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlanChanges_PopkinId_At",
+                table: "PlanChanges",
+                columns: new[] { "PopkinId", "At" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Stories_PopkinId_PlacedAt",
                 table: "Stories",
                 columns: new[] { "PopkinId", "PlacedAt" });
@@ -67,6 +93,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "PlanChanges");
+
             migrationBuilder.DropTable(
                 name: "Sprints");
 
