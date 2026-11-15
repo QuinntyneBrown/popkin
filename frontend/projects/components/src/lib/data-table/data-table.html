@@ -1,0 +1,113 @@
+@if (loading()) {
+  <div aria-hidden="true">
+    @for (row of skeletonRows; track row) {
+      <div class="data-table__skeleton">
+        @for (column of columns(); track $index) {
+          <span class="data-table__bar" [class.data-table__bar--lead]="$first"
+            ><span pk-skeleton shape="text" [width]="80"></span
+          ></span>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  <table class="data-table" [attr.aria-label]="label()">
+    <thead>
+      <tr>
+        @for (column of columns(); track $index) {
+          <th scope="col">
+            @if (columnAt($index).hidden) {
+              <span class="visually-hidden">{{ columnAt($index).label }}</span>
+            } @else {
+              {{ columnAt($index).label }}
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (group of groups(); track $index) {
+        @if (group.label) {
+          <tr class="data-table__group">
+            <th scope="rowgroup" [attr.colspan]="columns().length">{{ group.label }}</th>
+          </tr>
+        }
+        @for (row of group.rows; track row.id) {
+          <tr>
+            @for (cell of row.cells; track $index) {
+              <td
+                [attr.data-label]="$first ? null : columnAt($index).label"
+                [class.data-table__time]="cell.kind === 'time'"
+                [class.data-table__end]="columnAt($index).end"
+              >
+                @switch (cell.kind) {
+                  @case ('strong') {
+                    <strong>{{ cell.text }}</strong>
+                  }
+                  @case ('name') {
+                    <span>
+                      <span class="data-table__name">{{ cell.text }}</span>
+                      @if (cell.sub) {
+                        <span class="data-table__sub">{{ cell.sub }}</span>
+                      }
+                    </span>
+                  }
+                  @case ('person') {
+                    <span class="who">
+                      <span
+                        pk-avatar
+                        size="36"
+                        [attr.data-accent]="cell.accent"
+                        [name]="cell.text"
+                      ></span>
+                      <span class="who__text">
+                        <span class="who__name"
+                          >{{ cell.text }}
+                          @if (cell.badge) {
+                            <span pk-badge variant="quiet" [text]="cell.badge"></span>
+                          }
+                        </span>
+                        <span class="who__sub">{{ cell.sub }}</span>
+                      </span>
+                    </span>
+                  }
+                  @case ('role') {
+                    <select
+                      class="select role-select"
+                      [attr.aria-label]="cell.label"
+                      (change)="choose(row.id, $event, cell.value ?? '')"
+                    >
+                      @for (option of cell.options; track option.value) {
+                        <option [value]="option.value" [selected]="option.value === cell.value">
+                          {{ option.label }}
+                        </option>
+                      }
+                    </select>
+                  }
+                  @case ('action') {
+                    <button
+                      pk-button
+                      type="button"
+                      variant="quiet"
+                      size="sm"
+                      [attr.aria-label]="cell.label"
+                      [disabledReason]="cell.disabledReason ?? null"
+                      (click)="acted.emit({ rowId: row.id, action: cell.action ?? '' })"
+                    >
+                      {{ cell.text }}
+                    </button>
+                  }
+                  @default {
+                    @if (cell.text) {
+                      <span [attr.title]="cell.title ?? null">{{ cell.text }}</span>
+                    }
+                  }
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+}

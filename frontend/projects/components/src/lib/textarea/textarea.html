@@ -1,4 +1,9 @@
-<label class="field__label" [for]="fieldId()">{{ label() }}</label>
+<label class="field__label" [for]="fieldId()"
+  >{{ label() }}
+  @if (optional()) {
+    <span class="field__optional">{{ optional() }}</span>
+  }
+</label>
 <textarea
   #field
   class="textarea"

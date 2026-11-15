@@ -13,7 +13,7 @@ import {
   hostedLine,
 } from 'api';
 import { Alert, Button, DialogFrame, TextField } from 'components';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 /** The word typed to confirm (L2-049 AC2). */
 const CONFIRMATION = 'delete';

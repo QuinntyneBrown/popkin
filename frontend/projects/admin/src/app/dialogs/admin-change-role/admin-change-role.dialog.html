@@ -1,0 +1,44 @@
+<div pk-dialog [heading]="heading" [description]="description">
+  @if (lastOwner()) {
+    <div pk-alert heading="The console needs at least one Owner.">
+      Nothing changed. Make someone else an Owner first.
+    </div>
+  } @else if (state.status() === 'failed') {
+    <div pk-alert heading="We couldn’t save that.">
+      Nothing changed. Check your connection and try again.
+    </div>
+  }
+  <div
+    pk-textarea
+    fieldId="reason"
+    label="Reason, for the audit log"
+    optional="optional"
+    placeholder="e.g. Moved to another team"
+    [rows]="2"
+    [maxlength]="maxLength"
+    [error]="state.reasonError() ?? undefined"
+    [readonly]="busy()"
+    (changed)="reason.set($event)"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [busy]="busy()"
+    (click)="confirm()"
+  >
+    {{ busy() ? 'Changing…' : 'Change role' }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    [block]="true"
+    [disabled]="busy()"
+    (click)="cancel()"
+  >
+    Cancel
+  </button>
+</div>

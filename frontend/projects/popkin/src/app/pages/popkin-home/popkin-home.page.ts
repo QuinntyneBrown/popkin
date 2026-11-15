@@ -64,7 +64,7 @@ import {
   SetEventDialog,
   SetEventResult,
 } from '../../dialogs/set-event/set-event.dialog';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 /** How many of what a section holds the home lists; the layout shows fewer on a narrow screen. */
 const MEMBERS_LISTED = 6;

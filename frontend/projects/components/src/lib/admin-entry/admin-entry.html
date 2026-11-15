@@ -1,0 +1,21 @@
+<div class="admin-entry__col">
+  <div class="admin-entry__brand"><span pk-admin-brand size="lg"></span></div>
+  <div class="admin-entry__card">
+    @if (heading()) {
+      <h1 class="admin-entry__title">{{ heading() }}</h1>
+      <p class="admin-entry__lead">
+        {{ lead() }}<strong class="admin-entry__emphasis">{{ leadEmphasis() }}</strong
+        >{{ leadEnd() }}
+      </p>
+      <div class="admin-entry__form">
+        <ng-content />
+        @if (links()) {
+          <div class="admin-entry__links"><ng-content select="[slot=links]" /></div>
+        }
+      </div>
+    } @else {
+      <ng-content select="[slot=card]" />
+    }
+  </div>
+  <p class="admin-entry__foot">Production console. Every action is recorded in the audit log.</p>
+</div>

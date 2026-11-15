@@ -11,7 +11,7 @@ import {
   ReactionsData,
   ReactionsDialog,
 } from '../../dialogs/reactions/reactions.dialog';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 /** pk-dialog draws its own backdrop, as the mocks do. */
 const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true } as const;

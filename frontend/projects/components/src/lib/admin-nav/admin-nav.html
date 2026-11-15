@@ -1,0 +1,52 @@
+<div class="admin-nav__head">
+  <a pk-admin-brand routerLink="/" aria-label="Popkin Admin, dashboard" (click)="chosen.emit()"></a>
+  <div>
+    <span pk-env-tag class="admin-nav__tag">{{ label() }}</span>
+  </div>
+</div>
+<nav class="admin-nav" aria-label="Admin">
+  @for (section of sections(); track section.label) {
+    <div class="admin-nav__group">
+      <h2 class="admin-nav__label" [id]="id(section.label)">{{ section.label }}</h2>
+      <ul class="admin-nav__list" [attr.aria-labelledby]="id(section.label)">
+        @for (item of section.items; track item.page) {
+          <li>
+            <a
+              class="admin-nav__item"
+              [routerLink]="item.route"
+              [attr.aria-current]="item.page === current() ? 'page' : null"
+              (click)="chosen.emit()"
+            >
+              <svg pk-icon class="admin-nav__icon" [name]="item.icon"></svg>
+              <span class="truncate">{{ item.label }}</span>
+              @if (item.waiting) {
+                <span
+                  pk-badge
+                  class="admin-nav__badge"
+                  [count]="item.waiting"
+                  [label]="item.waiting + ' waiting'"
+                ></span>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</nav>
+@if (me(); as me) {
+  <div class="admin-nav__me">
+    <span pk-avatar size="36" data-accent="plum" [name]="me.name"></span>
+    <span class="admin-nav__me-text">
+      <span class="admin-nav__me-name">{{ me.name }}</span>
+      <span class="admin-nav__me-role">{{ me.role }}</span>
+    </span>
+    <button
+      pk-icon-button
+      type="button"
+      icon="sign-out"
+      label="Sign out"
+      (click)="signOut.emit()"
+    ></button>
+  </div>
+}

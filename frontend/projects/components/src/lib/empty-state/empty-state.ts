@@ -18,6 +18,8 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
   host: {
     class: 'empty',
     '[class.empty--compact]': 'compact()',
+    '[class.empty--flush]': 'flush()',
+    '[class.empty--panel]': 'panel()',
     '[attr.role]': "alert() ? 'alert' : null",
   },
 })
@@ -32,6 +34,10 @@ export class EmptyState {
   readonly level = input<1 | 2 | 3>(2);
   /** The empty state of one section, inside a card: less room, a smaller heading and tile. */
   readonly compact = input(false);
+  /** No padding of its own, inside a card that has its own: the admin app's entry card. */
+  readonly flush = input(false);
+  /** Compact, with room above and below, filling a console panel: "No matching actions". */
+  readonly panel = input(false);
   readonly text = input<string>();
   /** Announces the state when it replaces content that failed to load (L2-056 AC2). */
   readonly alert = input(false);

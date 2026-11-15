@@ -126,9 +126,10 @@ values, each with the `AdminAction` values it covers:
   is `Viewer` ([The admin shell](../admin-shell/README.md)).
 - **Disabled actions** — every action is a `pk-button` (or `pk-role-select`, `pk-segmented-control`)
   bound to `blockedReason(action)`. `pk-button` gains the input `disabledReason`: when set, the
-  button is `aria-disabled="true"`, ignores activation, shows the reason as its tooltip
-  (`pk-tooltip`) and names it as its description (`aria-describedby` to a visually hidden text).
+  button is `aria-disabled="true"`, ignores activation (a capture listener stops the click) and
+  carries the reason as its `title`, which is both its tooltip and its accessible description.
   It stays focusable, so a keyboard or screen-reader user reaches the reason (L2-086 AC2, AC3).
+  A role the row cannot change shows as text with the same `title`.
 - **`pk-permission-table`** (`components`, block `perm-table`, new) — inputs `rows` (label,
   group, and the three booleans) and `counts`. Each cell shows its mark and the word "Allowed" or
   "Not allowed", so the mark never carries the meaning alone (L2-086 AC4). The labels and groups

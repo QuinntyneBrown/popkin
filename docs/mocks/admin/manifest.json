@@ -354,7 +354,8 @@
         "L2-104",
         "L2-105",
         "L2-106",
-        "L2-107"
+        "L2-107",
+        "L2-111"
       ],
       "states": [
         "default",
@@ -370,6 +371,30 @@
       ],
       "not_applicable": {
         "empty": "A Popkin always has its Host, its length and its invite; there is no empty Popkin."
+      }
+    },
+    {
+      "id": "moderation-view",
+      "kind": "page",
+      "title": "Moderation view",
+      "route": "admin.popkin.community/popkins/:popkinId/moderation/:viewId",
+      "requirements": [
+        "L2-086",
+        "L2-110",
+        "L2-111"
+      ],
+      "states": [
+        "default",
+        "album",
+        "experiences",
+        "removed",
+        "closed",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "A Popkin always has its Everyone thread; a part with nothing in it says so in its panel.",
+        "viewer": "A Viewer can’t open a moderation view (L2-111 AC5); the Popkin page shows the button disabled."
       }
     },
     {
@@ -439,6 +464,41 @@
         "failed"
       ],
       "close": "../../pages/popkin/default.html"
+    },
+    {
+      "id": "moderation-view-open",
+      "kind": "dialog",
+      "title": "Open a moderation view",
+      "opens_from": "popkin",
+      "requirements": [
+        "L2-087",
+        "L2-111"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/popkin/default.html"
+    },
+    {
+      "id": "moderation-remove",
+      "kind": "dialog",
+      "title": "Remove content in a moderation view",
+      "opens_from": "moderation-view",
+      "requirements": [
+        "L2-087",
+        "L2-110",
+        "L2-111"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/moderation-view/default.html"
     },
     {
       "id": "reports",

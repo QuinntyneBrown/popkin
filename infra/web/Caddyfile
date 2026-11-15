@@ -6,6 +6,25 @@
 	persist_config off
 }
 
+# An app's files, with the header set of Personal data protection.
+(files) {
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy same-origin
+		Permissions-Policy "camera=(self), microphone=(self), geolocation=()"
+	}
+
+	# Hashed bundles never change; index.html and everything else is checked each time.
+	@hashed path_regexp -[A-Z0-9]{8}\.(js|css)$
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	header Cache-Control "no-cache"
+
+	try_files {path} /index.html
+	file_server
+}
+
 :8080 {
 	encode zstd gzip
 
@@ -22,23 +41,19 @@
 		}
 	}
 
-	# The web app's files, with the header set of Personal data protection.
+	# The admin app on admin.popkin.community (ADR 0024). Front Door asks for the container app
+	# by its own name and passes the address the browser used as X-Forwarded-Host. Both apps'
+	# files are public, so the header only chooses which to serve; the API trusts it for nothing.
+	@admin expression `{header.X-Forwarded-Host}.startsWith("admin.") || {host}.startsWith("admin.")`
+	handle @admin {
+		root * /srv/admin
+		header X-Robots-Tag "noindex, nofollow"
+		import files
+	}
+
+	# The web app's files.
 	handle {
-		root * /srv
-		header {
-			Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; require-trusted-types-for 'script'"
-			X-Content-Type-Options nosniff
-			X-Frame-Options DENY
-			Referrer-Policy same-origin
-			Permissions-Policy "camera=(self), microphone=(self), geolocation=()"
-		}
-
-		# Hashed bundles never change; index.html and everything else is checked each time.
-		@hashed path_regexp -[A-Z0-9]{8}\.(js|css)$
-		header @hashed Cache-Control "public, max-age=31536000, immutable"
-		header Cache-Control "no-cache"
-
-		try_files {path} /index.html
-		file_server
+		root * /srv/app
+		import files
 	}
 }

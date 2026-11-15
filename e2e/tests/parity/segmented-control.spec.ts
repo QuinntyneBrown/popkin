@@ -1,3 +1,5 @@
+import { theMockAdmins } from '../../fixtures/admin';
+import { AdminsPage } from '../../pages/admin/admins.page';
 import { accountStates } from '../../fixtures/account-states';
 import { parity } from '../../fixtures/parity';
 import { AccountPage } from '../../pages/account.page';
@@ -17,5 +19,12 @@ parity('segmented-control', [
     ...accountStates.account,
     name: 'theme',
     region: (page) => new AccountPage(page).segmented,
+  },
+  // Tabs with a count: Admins & roles.
+  {
+    key: 'adminAdmins',
+    name: 'count',
+    region: (page) => new AdminsPage(page).tabs,
+    before: theMockAdmins,
   },
 ]);

@@ -48,5 +48,13 @@ public interface IAppDbContext
 
     DbSet<WorkingStretch> WorkingStretches { get; }
 
+    DbSet<Admin> Admins { get; }
+
+    DbSet<AdminSession> AdminSessions { get; }
+
+    DbSet<AdminSignInLock> AdminSignInLocks { get; }
+
+    DbSet<AuditEntry> AuditEntries { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -293,6 +293,17 @@ export const ICONS = {
     { path: 'M21 12H9' },
     { path: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' },
   ],
+  // The admin app's sections and its bar (docs/mocks/admin).
+  shield: [{ path: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' }],
+  scroll: [
+    { path: 'M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4' },
+    { path: 'M19 17V5a2 2 0 0 0-2-2H4' },
+    { path: 'M15 8h-5' },
+    { path: 'M15 12h-5' },
+  ],
+  lock: [{ rect: [18, 11, 3, 11, 2] }, { path: 'M7 11V7a5 5 0 0 1 10 0v4' }],
+  'arrow-right': [{ path: 'M5 12h14' }, { path: 'm12 5 7 7-7 7' }],
+  menu: [{ line: [4, 20, 12, 12] }, { line: [4, 20, 6, 6] }, { line: [4, 20, 18, 18] }],
 } satisfies Record<string, IconShape[]>;
 
 export type IconName = keyof typeof ICONS;

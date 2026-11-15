@@ -15,11 +15,13 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
     class: 'badge',
     '[class.badge--popkin]': "variant() === 'popkin'",
     '[class.badge--quiet]': "variant() === 'quiet'",
-    '[class.badge--words]': '!!unit()',
+    '[class.badge--words]': '!!unit() || !!text()',
   },
 })
 export class Badge {
-  readonly count = input.required<number>();
+  readonly count = input(0);
+  /** A word in place of a count, such as "You". */
+  readonly text = input<string>();
   /** `accent` is the app's "new"; `popkin` takes the Popkin's colour; `quiet` is sand. */
   readonly variant = input<'accent' | 'popkin' | 'quiet'>('accent');
   /** A word after the count that says what is counted, such as `new`: "3 new". */
@@ -29,6 +31,8 @@ export class Badge {
 
   /** A count above 99 reads "99+". */
   protected readonly shown = computed(() => {
+    const text = this.text();
+    if (text) return text;
     const count = this.count() > 99 ? '99+' : String(this.count());
     return this.unit() ? `${count} ${this.unit()}` : count;
   });

@@ -32,29 +32,25 @@ This feature is designed, not built. Nothing of it exists in the codebase yet.
 
 ### Screens and states
 
-No mock draws any part of this feature (known gap). The design expects these mocks, written with
-`writing-html-mocks` before implementation:
+The mocks (`docs/mocks/manifest.json`, screen `report` and the states below) settle the copy the
+design left open:
 
-- `docs/mocks/dialogs/report/default.html` — the Report dialog: title `<TO SUPPLY>`, the question
-  "what is wrong" as a radio group of the five report reasons, none chosen, the sentence that
-  Popkin's staff will look at it with the messages around it and that the person is not told who
-  reported it, "Report" (danger) and "Cancel".
-- `docs/mocks/dialogs/report/invalid.html` — "Report" chosen with no reason picked; the group says
-  so (copy `<TO SUPPLY>`).
-- `docs/mocks/dialogs/report/busy.html` — "Report" busy and disabled, the reasons read-only.
-- `docs/mocks/dialogs/report/failed.html` — the dialog open with the reason still chosen and a
-  `pk-alert` that the report could not be sent (copy `<TO SUPPLY>`, L2-108 AC8).
-- `docs/mocks/dialogs/reactions/report.html` — "Message actions" on someone else's message, with
-  "Report" after "Copy".
-- `docs/mocks/dialogs/reactions/reported.html` — the same with "Reported", disabled.
-- `docs/mocks/dialogs/photo-actions/report.html` and `reported.html` — "Photo actions" for a photo
-  someone else added: "Report" or "Reported", and, for the Host on an album photo, "Delete photo"
-  too.
-- `docs/mocks/dialogs/experience-actions/report.html` and `reported.html` — the same for an
-  experience.
-- `docs/mocks/pages/photo-view/read-only-report.html` — the photo view of a wrapped-up Popkin with
-  "Photo actions" offering "Report" only.
-- The success toast: "{Kind} reported." is the expected shape; its exact copy is `<TO SUPPLY>`.
+- `docs/mocks/dialogs/report/` — `default`, `invalid`, `busy`, `failed`. Title "Report this
+  message" (photo, experience); the sentence "Popkin's staff will look at it with the messages
+  around it. Walt isn't told who reported it."; the item quoted; "What's wrong?" over the five
+  report reasons as a radio group of `pk-option-card`s, none chosen; "Report" (danger) and
+  "Cancel". Invalid: "Choose what's wrong to send the report." Busy: "Reporting…", the reasons
+  `aria-disabled`. Failed: the reason still chosen and "We couldn't send your report. Your choice
+  is kept. Check your connection and try again." (L2-108 AC8).
+- `docs/mocks/dialogs/reactions/default.html` and `more.html` — "Report" after "Copy" on someone
+  else's message; `mine.html` has none (AC5). `reported.html` — "Reported", disabled, with "Popkin's
+  staff will take a look" (AC4).
+- `docs/mocks/dialogs/photo-actions/report.html` and `reported.html`; `dialogs/experience-actions/
+  report.html` and `reported.html`; `experience-actions/host.html` gains "Report" before "Delete".
+- `docs/mocks/pages/photo-view/read-only-report.html` — Dev's photo in a wrapped-up Popkin, with
+  "Photo actions" offering "Report" (AC7).
+- `docs/mocks/pages/group-chat/reported.html` — the toast "Message reported" / "Thanks. Popkin's
+  staff will take a look; it stays in the thread until they do." (AC3).
 
 ### API
 

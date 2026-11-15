@@ -343,7 +343,8 @@
         "L2-027",
         "L2-028",
         "L2-045",
-        "L2-036"
+        "L2-036",
+        "L2-108"
       ],
       "states": [
         "default",
@@ -358,7 +359,8 @@
         "deleted-quote",
         "photo-preview",
         "photo-refused",
-        "photo-removed"
+        "photo-removed",
+        "reported"
       ]
     },
     {
@@ -440,7 +442,8 @@
         "L2-045",
         "L2-056",
         "L2-058",
-        "L2-059"
+        "L2-059",
+        "L2-108"
       ],
       "states": [
         "default",
@@ -453,7 +456,8 @@
         "reaction-failed",
         "save-failed",
         "wrapped",
-        "removed"
+        "removed",
+        "read-only-report"
       ],
       "not_applicable": {
         "empty": "The screen shows one photo; there is no collection to be empty."
@@ -896,17 +900,35 @@
       "requirements": [
         "L2-024",
         "L2-025",
-        "L2-023"
+        "L2-023",
+        "L2-108"
       ],
       "states": [
         "default",
         "mine",
-        "more"
+        "more",
+        "reported"
       ],
       "not_applicable": {
         "busy": "A reaction shows at once and is undone with a message if it fails to save.",
         "invalid": "The dialog has no field to fill in."
       }
+    },
+    {
+      "id": "report",
+      "kind": "dialog",
+      "title": "Report",
+      "opens_from": "reactions",
+      "requirements": [
+        "L2-108"
+      ],
+      "states": [
+        "default",
+        "invalid",
+        "busy",
+        "failed"
+      ],
+      "close": "../../pages/group-chat/default.html"
     },
     {
       "id": "delete-message",
@@ -971,13 +993,16 @@
       "title": "Photo actions",
       "opens_from": "photo-view",
       "requirements": [
-        "L2-036"
+        "L2-036",
+        "L2-108"
       ],
       "states": [
-        "default"
+        "default",
+        "report",
+        "reported"
       ],
       "not_applicable": {
-        "busy": "The one row opens Delete this photo?; nothing is sent from this menu.",
+        "busy": "Each row opens another dialog; nothing is sent from this menu.",
         "invalid": "The dialog has no field to fill in."
       }
     },
@@ -1053,11 +1078,14 @@
       "title": "Experience actions",
       "opens_from": "experience-detail",
       "requirements": [
-        "L2-040"
+        "L2-040",
+        "L2-108"
       ],
       "states": [
         "default",
-        "host"
+        "host",
+        "report",
+        "reported"
       ],
       "not_applicable": {
         "busy": "Each row opens another dialog; nothing is sent from this one.",
@@ -1230,6 +1258,26 @@
         "danger",
         "persistent"
       ]
+    },
+    {
+      "id": "announcement",
+      "kind": "notification",
+      "title": "Announcement",
+      "opens_from": "popkin-home",
+      "requirements": [
+        "L2-116"
+      ],
+      "states": [
+        "notice",
+        "warning",
+        "long",
+        "call"
+      ],
+      "not_applicable": {
+        "info": "An announcement is a Notice or a Warning; the notice state is the quieter of the two.",
+        "success": "An announcement reports nothing the person did.",
+        "danger": "The loudest an announcement gets is a Warning."
+      }
     }
   ]
 }

@@ -18,7 +18,7 @@ import {
   tryAgainIn,
 } from 'api';
 import { Button, Link, Screen, SplitAside, TextField, TopBar } from 'components';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 const CODE_LENGTH = 6;
 

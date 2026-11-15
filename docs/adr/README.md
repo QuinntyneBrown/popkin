@@ -26,7 +26,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0013](0013-deployment-shape.md) | Deployment: two container images behind one reverse proxy, one origin | Accepted |
 | [0014](0014-calls-are-a-mesh.md) | Calls: a mesh of peer connections, signalled through the hub, with a TURN relay by configuration | Accepted |
 | [0015](0015-the-worker-sends-no-hub-events.md) | The Worker sends no hub events: a timed wrap-up reaches open screens by the clock | Accepted |
-| [0016](0016-admin-app.md) | The admin app: a fourth frontend project at `admin.popkin.community`, admin sessions, feature switches read through one cached service | Accepted |
+| [0016](0016-admin-app.md) | The admin app: a fourth frontend project at `admin.popkin.community`, admin sessions, feature switches read through one cached service | Accepted, amended by 0024 |
 | [0017](0017-marketing-site.md) | The marketing site: a static Angular project at `about.popkin.community` with the pitch film, linking to the app through one `APP_URL` | Accepted |
 | [0018](0018-deploy-to-azure-on-every-commit.md) | Every commit to main is deployed to Azure: Container Apps behind Caddy, Azure SQL, the marketing site on a Static Web App | Accepted |
 | [0019](0019-popkin-may-charge.md) | Popkin may charge one day: no claim that it is free; no advertising stays | Accepted |
@@ -34,7 +34,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0021](0021-codes-and-invites-by-azure-communication-services.md) | Codes and crew invites are sent by Azure Communication Services: SMS from a toll-free number, email from `popkin.community`, signed in with the managed identity | Accepted |
 | [0022](0022-photos-in-azure-blob-storage.md) | Photo files are kept in a private Azure Blob Storage container, signed in with the managed identity; the API still signs and serves every address | Accepted |
 | [0023](0023-features-switched-on-by-a-setting.md) | A feature that is not ready is switched on by an API setting under `Features:`, which the API enforces and the app asks for before a screen opens | Accepted |
-| [0024](0024-admins-moderation-and-switches-in-the-database.md) | Admins, moderation and feature switches are kept in the database: admin roles and sessions, an audit log in the same transaction, moderation only through reports and a recorded view, switches Off, chosen or everyone | Proposed |
+| [0024](0024-admins-moderation-and-switches-in-the-database.md) | Admins, moderation and feature switches are kept in the database: admin roles and sessions, an audit log in the same transaction, moderation only through reports and a recorded view, switches Off, chosen or everyone | Accepted |
 
 ## Format
 

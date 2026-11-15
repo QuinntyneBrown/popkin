@@ -1,0 +1,15 @@
+@if (heading()) {
+  <div class="panel__head">
+    <div>
+      <h2 class="panel__title">{{ heading() }}</h2>
+      @if (sub()) {
+        <p class="panel__sub">{{ sub() }}</p>
+      }
+    </div>
+    <ng-content select="[slot=head]" />
+  </div>
+}
+<ng-content />
+@if (foot()) {
+  <div class="panel__foot"><ng-content select="[slot=foot]" /></div>
+}

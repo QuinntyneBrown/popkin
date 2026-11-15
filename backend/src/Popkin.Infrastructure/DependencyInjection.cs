@@ -125,6 +125,7 @@ public static class DependencyInjection
                     var client = new EmailClient(endpoint, communicationCredential);
                     services.AddSingleton<ICodeSender>(new EmailCodeSender(client, sender));
                     services.AddSingleton<ICrewInviteSender>(new EmailCrewInviteSender(client, sender));
+                    services.AddSingleton<IAdminInviteSender>(new EmailAdminInviteSender(client, sender));
                 }
                 else
                 {
@@ -138,11 +139,19 @@ public static class DependencyInjection
                 services.AddSingleton<ICodeSender>(sp => new DevelopmentCodeSender(channel, sp.GetRequiredService<ILogger<DevelopmentCodeSender>>()));
                 services.AddSingleton<ICrewInviteSender>(
                     sp => new DevelopmentCrewInviteSender(channel, sp.GetRequiredService<ILogger<DevelopmentCrewInviteSender>>()));
+                if (channel == ContactChannel.Email)
+                {
+                    services.AddSingleton<IAdminInviteSender>(sp => new DevelopmentAdminInviteSender(sp.GetRequiredService<ILogger<DevelopmentAdminInviteSender>>()));
+                }
             }
             else
             {
                 services.AddSingleton<ICodeSender>(new UnconfiguredCodeSender(channel));
                 services.AddSingleton<ICrewInviteSender>(new UnconfiguredCrewInviteSender(channel));
+                if (channel == ContactChannel.Email)
+                {
+                    services.AddSingleton<IAdminInviteSender>(new UnconfiguredAdminInviteSender());
+                }
             }
         }
 

@@ -1,5 +1,7 @@
 import { Injectable, signal } from '@angular/core';
-import { ToastVariant } from 'components';
+
+/** The kinds of toast, as `pk-toast` draws them. */
+export type ToastVariant = 'success' | 'info' | 'warning' | 'danger';
 
 export interface ToastMessage {
   id: number;

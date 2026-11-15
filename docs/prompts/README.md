@@ -33,3 +33,4 @@ Pixabay under it, designed transitions, and no captions burned in.
 | 18 | [Leave a Popkin](18-leave-a-popkin.md) | L2-047, L2-020 (AC2) | 1 |
 | 19 | [Delete account](19-delete-account.md) | L2-049, L2-054 | 2 |
 | 20 | [Say keen](20-say-keen.md) | L2-042 | 1 |
+| 24 | [Open the admin app](24-open-the-admin-app.md) | L2-078, L2-086 to L2-089, L2-119, L2-120 | 16 |

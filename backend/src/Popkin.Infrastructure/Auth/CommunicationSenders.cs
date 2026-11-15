@@ -106,3 +106,17 @@ public sealed class SmsCrewInviteSender(SmsClient client, string sender) : ICrew
         }
     }
 }
+
+/// <summary>Emails an admin invite through Azure Communication Services (L2-119 AC2, ADR 0021).</summary>
+public sealed class EmailAdminInviteSender(EmailClient client, string sender) : IAdminInviteSender
+{
+    public async Task SendAsync(string email, AdminInviteMessage invite, CancellationToken cancellationToken)
+    {
+        var subject = "You can sign in to Popkin Admin";
+        var text = $"{invite.InvitedByName} added you to Popkin Admin as {invite.Role}. Sign in with this email and a code: {invite.ConsoleUrl}";
+        if (!await CommunicationText.TrySendEmailAsync(client, sender, email, subject, text, cancellationToken))
+        {
+            throw new AdminInviteNotSentException();
+        }
+    }
+}

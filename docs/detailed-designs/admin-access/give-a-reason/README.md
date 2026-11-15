@@ -87,13 +87,13 @@ change is "Not asked" has no `Reason` in its body.
 
 ### Frontend
 
-- **`pk-reason-field`** (`components/src/lib/reason-field/`, `ReasonField`, new) — composes
-  `pk-textarea` with the label "Reason, for the audit log", the `optional` marker when `optional`
-  is true, the hint "Other admins see it in the audit log." when it is false, a `placeholder`
-  input, `maxlength` 500 (no more characters are accepted, L2-087 AC6), `readonly` and `error`
-  inputs, and `focus()`. It is a form control (`ControlValueAccessor`), so a dialog binds it with
-  `[formControl]`. The field carries `cdkFocusInitial`, so the CDK puts focus in it when the
-  dialog opens (L2-087 AC1).
+- **The reason field** — `pk-textarea` (`fieldId` `reason`) with the label "Reason, for the
+  audit log", its `optional` marker ("optional") when the policy is `Optional`, the hint "Other
+  admins see it in the audit log." when it is `Required`, a `placeholder`, `maxlength`
+  `REASON_MAX_LENGTH` (500; no more characters are accepted, L2-087 AC6), `readonly` while busy
+  and `error` from `reasonError`. The dialog is opened with `autoFocus: '#reason'`, so focus
+  starts in the field (L2-087 AC1). A wrapper component would add nothing `pk-textarea` lacks,
+  so the earlier `pk-reason-field` is not built; the name below means this configuration.
 - **`ActionDialogState`** (`api/admin/dialogs/action-dialog-state.ts`, new) — created by each
   action dialog with its `ReasonPolicy`. Signals: `status` (`idle` | `busy` | `failed`),
   `reason`, `reasonError`, `failure` (`ApiProblem | null`). `confirm(send)`:

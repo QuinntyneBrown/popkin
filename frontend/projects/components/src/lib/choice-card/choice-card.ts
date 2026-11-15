@@ -9,7 +9,8 @@ import {
 
 export interface ChoiceOption<T extends string = string> {
   value: T;
-  icon: string;
+  /** An emoji before the text; without one the radio comes first, as the admin roles have. */
+  icon?: string;
   title: string;
   sub: string;
 }
@@ -24,11 +25,18 @@ export interface ChoiceOption<T extends string = string> {
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './choice-card.html',
   styleUrl: './choice-card.scss',
-  host: { role: 'radiogroup', '[attr.aria-label]': 'label()' },
+  host: {
+    role: 'radiogroup',
+    '[attr.aria-label]': 'showLabel() ? null : label()',
+    '[attr.aria-labelledby]': 'showLabel() ? labelId() : null',
+  },
 })
 export class ChoiceCard {
   readonly label = input.required<string>();
   readonly options = input.required<readonly ChoiceOption[]>();
+  /** Whether the label shows above the cards, as a field's does: "Role". */
+  readonly showLabel = input(false);
+  readonly labelId = input('choice-label');
   readonly value = model.required<string>();
 
   private readonly cards = viewChildren<ElementRef<HTMLButtonElement>>('card');

@@ -5,7 +5,8 @@ namespace Popkin.Api.Auth;
 /// <summary>
 /// Same-site proof for every change (L2-050 AC2): a POST, PUT, PATCH or DELETE under /api, and
 /// every request under /hubs, is accepted when `Sec-Fetch-Site` is `same-origin`, or, where a
-/// client sends no fetch metadata, when `Origin` is the app's origin (`App:Origin`) or absent.
+/// client sends no fetch metadata, when `Origin` is the app's origin (`App:Origin`) or absent; a
+/// change under /api/admin may also come from the admin app's origin (`Admin:Origin`, ADR 0024).
 /// Otherwise 403 `cross_site_request`. With the Strict cookie it closes cross-site request
 /// forgery. The hub is checked whatever the method, because a WebSocket opens with a GET and a
 /// browser sends its `Origin` with it: the hub accepts a connection from the app's own origin only.
@@ -13,6 +14,7 @@ namespace Popkin.Api.Auth;
 public sealed class SameSiteRequestMiddleware(RequestDelegate next, IConfiguration configuration)
 {
     private readonly string? _origin = configuration["App:Origin"]?.TrimEnd('/');
+    private readonly string? _adminOrigin = configuration["Admin:Origin"]?.TrimEnd('/');
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -42,7 +44,10 @@ public sealed class SameSiteRequestMiddleware(RequestDelegate next, IConfigurati
             return site is "same-origin";
         }
 
-        var origin = request.Headers.Origin.ToString();
-        return string.IsNullOrEmpty(origin) || string.Equals(origin.TrimEnd('/'), _origin, StringComparison.OrdinalIgnoreCase);
+        var origin = request.Headers.Origin.ToString().TrimEnd('/');
+        return string.IsNullOrEmpty(origin)
+            || string.Equals(origin, _origin, StringComparison.OrdinalIgnoreCase)
+            || (request.Path.StartsWithSegments("/api/admin")
+                && string.Equals(origin, _adminOrigin, StringComparison.OrdinalIgnoreCase));
     }
 }

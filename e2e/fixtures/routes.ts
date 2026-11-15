@@ -36,7 +36,52 @@ export const MARKETING = 'http://localhost:4201';
 /** The app's address the marketing site is built with in development (`APP_URL`). */
 export const MARKETING_APP_URL = 'http://localhost:4200';
 
+/** Where the suite serves the admin app, a further application (ADR 0016, ADR 0024). */
+export const ADMIN = 'http://localhost:4202';
+
 export const routes = {
+  adminSignIn: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/default.html' },
+  adminSignInInvalidEmail: {
+    app: `${ADMIN}/sign-in`,
+    mock: 'admin/pages/sign-in/invalid-email.html',
+  },
+  adminSignInSending: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/sending.html' },
+  adminSignInCode: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/code.html' },
+  adminSignInInvalid: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/invalid.html' },
+  adminSignInChecking: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/checking.html' },
+  adminSignInLocked: { app: `${ADMIN}/sign-in`, mock: 'admin/pages/sign-in/locked.html' },
+  adminNotAnAdmin: { app: `${ADMIN}/not-an-admin`, mock: 'admin/pages/not-an-admin/default.html' },
+  adminAudit: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/default.html' },
+  adminAdmins: { app: `${ADMIN}/admins`, mock: 'admin/pages/admins/default.html' },
+  adminMenu: { app: `${ADMIN}/audit`, mock: 'admin/dialogs/menu/default.html' },
+  adminNotFound: { app: `${ADMIN}/no-such-page`, mock: 'admin/pages/not-found/default.html' },
+  adminServerError: { app: `${ADMIN}/error`, mock: 'admin/pages/server-error/default.html' },
+  adminAdminsInvited: { app: `${ADMIN}/admins`, mock: 'admin/pages/admins/invited.html' },
+  adminAdminsRemoved: { app: `${ADMIN}/admins`, mock: 'admin/pages/admins/removed.html' },
+  adminAdminsViewer: { app: `${ADMIN}/admins`, mock: 'admin/pages/admins/viewer.html' },
+  adminAdminsLoading: { app: `${ADMIN}/admins`, mock: 'admin/pages/admins/loading.html' },
+  adminAdminsError: { app: `${ADMIN}/admins`, mock: 'admin/pages/admins/error.html' },
+  adminRoles: { app: `${ADMIN}/admins?view=roles`, mock: 'admin/pages/admins/roles.html' },
+  adminAdd: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-add/default.html' },
+  adminAddInvalid: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-add/invalid.html' },
+  adminAddBusy: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-add/busy.html' },
+  adminAddFailed: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-add/failed.html' },
+  adminChangeRole: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-change-role/default.html' },
+  adminChangeRoleBusy: {
+    app: `${ADMIN}/admins`,
+    mock: 'admin/dialogs/admin-change-role/busy.html',
+  },
+  adminChangeRoleFailed: {
+    app: `${ADMIN}/admins`,
+    mock: 'admin/dialogs/admin-change-role/failed.html',
+  },
+  adminRemove: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-remove/default.html' },
+  adminRemoveBusy: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-remove/busy.html' },
+  adminRemoveFailed: { app: `${ADMIN}/admins`, mock: 'admin/dialogs/admin-remove/failed.html' },
+  adminAuditFiltered: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/filtered.html' },
+  adminAuditNoResults: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/no-results.html' },
+  adminAuditLoading: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/loading.html' },
+  adminAuditError: { app: `${ADMIN}/audit`, mock: 'admin/pages/audit/error.html' },
   account: { app: '/account', mock: 'pages/account/default.html' },
   accountLoading: { app: '/account', mock: 'pages/account/loading.html' },
   accountError: { app: '/account', mock: 'pages/account/error.html' },

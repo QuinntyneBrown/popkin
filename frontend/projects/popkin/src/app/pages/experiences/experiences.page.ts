@@ -38,7 +38,7 @@ import {
   ShareExperienceData,
   ShareExperienceDialog,
 } from '../../dialogs/share-experience/share-experience.dialog';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 /**
  * Experiences (L2-037): what the group did and what it wants to do, as cards, the newest

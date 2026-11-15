@@ -17,6 +17,12 @@ public sealed class RequestCodeCommandHandler(CodeIssuer issuer, SignInChannels 
             throw ProblemException.Invalid("channel_not_offered", "Codes can't be sent there yet.", "channel");
         }
 
+        if (request.Purpose is not (CodePurpose.SignUp or CodePurpose.SignIn))
+        {
+            // An admin code is asked for only at the admin app (L2-088).
+            throw ProblemException.Invalid("purpose_invalid", "Codes can't be sent for that.", "purpose");
+        }
+
         var destination = ContactRules.Normalise(request.Channel, request.Destination);
         return issuer.IssueAsync(request.Channel, destination, request.Purpose, cancellationToken);
     }

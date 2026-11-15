@@ -1,0 +1,53 @@
+namespace Popkin.Domain;
+
+/// <summary>Each change or read the audit log records (L2-120 AC5). A design that needs another adds it here.</summary>
+public enum AuditAction
+{
+    SuspendedPerson,
+    LiftedSuspension,
+    SignedPersonOut,
+    StartedDeletion,
+    CancelledDeletion,
+    ExportedPersonData,
+    DownloadedPersonData,
+    LoggedDataRequest,
+    WrappedUpPopkin,
+    ExtendedPopkin,
+    RemovedMember,
+    ResetInvite,
+    OpenedReport,
+    RemovedContent,
+    DismissedReport,
+    OpenedModerationView,
+    ClosedModerationView,
+    EndedCall,
+    RanJob,
+    RetriedExport,
+    TurnedFeatureOff,
+    TurnedFeatureOnForEveryone,
+    LimitedFeatureToChosen,
+    ChangedLimits,
+    PublishedAnnouncement,
+    EndedAnnouncement,
+    AddedAdmin,
+    ChangedAdminRole,
+    RemovedAdmin,
+    ExportedAuditLog,
+}
+
+/// <summary>What an audit entry is about.</summary>
+public enum AuditTargetKind
+{
+    Person,
+    Popkin,
+    Report,
+    Call,
+    Job,
+    AlbumExport,
+    DataRequest,
+    Feature,
+    Limit,
+    Announcement,
+    Admin,
+    ModerationView,
+}

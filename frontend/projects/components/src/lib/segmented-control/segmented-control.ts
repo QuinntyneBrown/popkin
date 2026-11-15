@@ -10,6 +10,8 @@ import {
 export interface SegmentedOption<T extends string = string> {
   value: T;
   label: string;
+  /** A count after the label, in a quieter colour: "Admins 4". */
+  count?: number;
 }
 
 /**

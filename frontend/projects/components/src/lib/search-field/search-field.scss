@@ -39,3 +39,13 @@
   border-color: var(--color-border-focus);
   box-shadow: var(--shadow-focus);
 }
+
+:host(.search--toolbar) {
+  flex: 1 1 18rem;
+}
+
+:host(.search--toolbar) .input {
+  height: var(--control-height-lg);
+  border-color: var(--color-border-default);
+  font-size: var(--font-size-md-plus);
+}

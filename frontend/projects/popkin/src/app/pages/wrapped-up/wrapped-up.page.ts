@@ -23,7 +23,7 @@ import {
   StackAvatar,
   TopBar,
 } from 'components';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 /**
  * The recap (L2-046): the front page of a Popkin that has wrapped up. It says what happened,

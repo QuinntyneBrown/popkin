@@ -1,0 +1,69 @@
+<div pk-page-head heading="Admins & roles" [sub]="sub()">
+  <button
+    pk-button
+    slot="actions"
+    type="button"
+    variant="primary"
+    size="sm"
+    [disabledReason]="blocked()"
+    (click)="add()"
+  >
+    <svg pk-icon name="plus" size="sm"></svg>Add admin
+  </button>
+</div>
+<div pk-toolbar>
+  <div
+    pk-segmented-control
+    label="Admins & roles"
+    [options]="tabs()"
+    [value]="view()"
+    (valueChange)="showView($event)"
+  ></div>
+</div>
+@if (view() === 'roles') {
+  <section pk-panel [foot]="true">
+    @if (store.roles(); as roles) {
+      <div pk-permission-table [rows]="permissionRows()" [counts]="roles.counts"></div>
+    }
+    <ul slot="foot" class="stack stack--sm">
+      @for (sentence of roleSentences; track sentence.role) {
+        <li>
+          <strong>{{ sentence.role }}</strong>&ngsp;<span class="text-muted">{{
+            sentence.text
+          }}</span>
+        </li>
+      }
+    </ul>
+  </section>
+} @else {
+  @if (store.status() === 'loading') {
+    <p class="visually-hidden" role="status">Loading the admins…</p>
+  }
+  <section pk-panel>
+    @if (store.status() === 'failed') {
+      <div
+        pk-empty-state
+        icon="server-error"
+        heading="Couldn’t load the admins"
+        text="The admin API didn’t answer. Nothing has changed; try again, or check Health if it keeps happening."
+        [compact]="true"
+        [panel]="true"
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.load()">
+          <svg pk-icon name="retry" size="sm"></svg>Try again
+        </button>
+        <a pk-button variant="secondary" size="md" routerLink="/health">Open Health</a>
+      </div>
+    } @else {
+      <div
+        pk-data-table
+        label="Admins"
+        [columns]="columns"
+        [groups]="groups()"
+        [loading]="store.status() === 'loading'"
+        (chose)="chose($event)"
+        (acted)="acted($event)"
+      ></div>
+    }
+  </section>
+}

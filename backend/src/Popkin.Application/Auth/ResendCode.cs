@@ -13,7 +13,7 @@ public sealed class ResendCodeCommandHandler(IAppDbContext db, TimeProvider cloc
 {
     public async Task<CodeSentDto> Handle(ResendCodeCommand request, CancellationToken cancellationToken)
     {
-        var code = await db.VerificationCodes.AsNoTracking().FirstOrDefaultAsync(c => c.Id == request.VerificationId, cancellationToken)
+        var code = await db.VerificationCodes.AsNoTracking().FirstOrDefaultAsync(c => c.Id == request.VerificationId && c.Purpose != Domain.CodePurpose.AdminSignIn, cancellationToken)
             ?? throw new ProblemException(400, "verification_unknown", "Start again to get a code.");
         var wait = code.ResendAvailableAt - clock.GetUtcNow();
         if (wait > TimeSpan.Zero)

@@ -212,6 +212,7 @@
   --color-warning-border: var(--palette-sun);
   --color-warning-icon: var(--palette-sun-deep);
   --color-warning-solid: var(--palette-sun-deep);
+  --color-warning-loud: var(--palette-sun);         /* a loud announcement's fill: sun in both themes, under constant-dark text */
 
   --color-danger-bg: var(--palette-coral-soft);
   --color-danger-fg: var(--palette-coral-deep);

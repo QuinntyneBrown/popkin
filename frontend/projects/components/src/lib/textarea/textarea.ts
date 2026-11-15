@@ -37,6 +37,8 @@ export class Textarea implements ControlValueAccessor {
   readonly placeholder = input<string>();
   readonly maxlength = input<number>();
   readonly hint = input<string>();
+  /** After the label, muted, on a field that may stay empty: "optional". */
+  readonly optional = input<string>();
   readonly error = input<string>();
   /** The text stays as it is, while the form is being saved. */
   readonly readonly = input(false);

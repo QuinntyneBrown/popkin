@@ -336,6 +336,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .menu-list__item { display: flex; align-items: center; gap: var(--space-4); width: 100%; min-height: var(--space-16); padding: var(--space-2) 0; border: 0; background: none; color: var(--color-fg-default); font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal) var(--font-family-sans); text-align: left; text-decoration: none; }
 .menu-list__item:hover { color: var(--color-fg-default); }
 .menu-list__item--danger, .menu-list__item--danger:hover { color: var(--color-danger-fg); }
+.menu-list__item:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
 .menu-list__item small { display: block; font: var(--text-body-sm); color: var(--color-fg-muted); }
 .hscroll { display: flex; gap: var(--space-2); overflow-x: auto; padding: 0 var(--space-4); scrollbar-width: none; }
 .hscroll > * { flex: none; }
@@ -1380,7 +1381,7 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
 
 .page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4) var(--space-6); margin-bottom: var(--space-6); }
 .page-head__back { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--space-8); margin: 0 0 var(--space-3) calc(var(--space-1) * -1); padding: 0 var(--space-3) 0 var(--space-1); border-radius: var(--radius-full); color: var(--color-fg-muted); text-decoration: none; font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); }
-.page-head > .page-head__back { margin-right: 100%; } /* alone on its line above the title */
+.page-head > .page-head__back { margin-right: 100%; white-space: nowrap; } /* alone on its line above the title, never broken: a Popkin's name is a back label too */
 .page-head__back:hover { background: var(--color-bg-surface); color: var(--color-fg-default); }
 .page-head__id { display: flex; align-items: center; gap: var(--space-4); min-width: 0; }
 .page-head h1 { font: var(--text-h1-compact); }

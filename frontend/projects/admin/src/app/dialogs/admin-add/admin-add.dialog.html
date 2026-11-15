@@ -1,0 +1,49 @@
+<div
+  pk-dialog
+  heading="Add an admin"
+  description="They’ll get an email to sign in with a code. Only @popkin.app addresses can be admins."
+>
+  @if (failed()) {
+    <div pk-alert heading="We couldn’t send the invite.">Nothing changed. Try again.</div>
+  }
+  <div
+    pk-text-field
+    fieldId="staff"
+    label="Staff email"
+    type="email"
+    autocomplete="off"
+    placeholder="name@popkin.app"
+    [error]="emailError()"
+    [readonly]="busy()"
+    (changed)="email.set($event)"
+  ></div>
+  <div
+    pk-choice-card
+    label="Role"
+    [showLabel]="true"
+    labelId="role-label"
+    [options]="roles"
+    [(value)]="role"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [busy]="busy()"
+    (click)="send()"
+  >
+    {{ busy() ? 'Sending…' : 'Send invite' }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    [block]="true"
+    [disabled]="busy()"
+    (click)="cancel()"
+  >
+    Cancel
+  </button>
+</div>

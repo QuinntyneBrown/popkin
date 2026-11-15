@@ -26,6 +26,19 @@
   font: var(--text-h3);
 }
 
+:host(.empty--panel) {
+  padding-block: var(--space-12);
+}
+
+:host(.empty--flush) {
+  padding: 0;
+}
+
+:host(.empty--flush) h1 {
+  margin-top: var(--space-4);
+  font: var(--text-h1-compact);
+}
+
 .empty__text {
   max-width: var(--layout-measure-sm);
   color: var(--color-fg-muted);
@@ -57,5 +70,6 @@
 .empty__code {
   margin-top: var(--space-3);
   font: var(--text-caption);
-  color: var(--color-fg-subtle);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-fg-muted);
 }

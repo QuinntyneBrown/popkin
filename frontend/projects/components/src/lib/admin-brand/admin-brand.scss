@@ -1,0 +1,31 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-fg-default);
+  text-decoration: none;
+}
+
+.admin-brand__mark {
+  width: var(--space-6);
+  height: var(--space-6);
+  color: var(--color-accent);
+}
+
+:host(.admin-brand--lg) .admin-brand__mark {
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+.admin-brand__app {
+  display: inline-flex;
+  align-items: center;
+  height: var(--space-7);
+  padding: 0 var(--space-2-5);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+  font: var(--font-weight-bold) var(--font-size-xs) / 1 var(--font-family-sans);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}

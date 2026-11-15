@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed, 15 November 2026. Amends [ADR 0016](0016-admin-app.md); supersedes its `Admin:Accounts`
+Accepted, 15 November 2026. Amends [ADR 0016](0016-admin-app.md); supersedes its `Admin:Accounts`
 setting, its on/off `FeatureSwitch` and its `FeatureSwitched` event, and answers its last
 consequence. Narrows [ADR 0023](0023-features-switched-on-by-a-setting.md) for Plan and Schedules.
 

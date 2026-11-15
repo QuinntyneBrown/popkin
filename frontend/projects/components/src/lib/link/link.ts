@@ -14,10 +14,13 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   host: {
     '[class.text-btn]': "variant() !== 'inline'",
     '[class.text-btn--accent]': "variant() === 'accent'",
+    '[class.text-btn--compact]': 'compact()',
   },
 })
 export class Link {
   readonly variant = input<'inline' | 'text' | 'accent'>('inline');
   /** The words of the action, in the accent colour after the content: "Start a Popkin". */
   readonly action = input<string>();
+  /** A smaller text button with no padding, for a line of links in a card: "Use another email". */
+  readonly compact = input(false);
 }

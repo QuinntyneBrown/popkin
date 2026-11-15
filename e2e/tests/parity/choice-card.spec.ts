@@ -1,3 +1,6 @@
+import { theMockAdmins } from '../../fixtures/admin';
+import { AddAdminDialog } from '../../pages/admin/admin-dialogs';
+import { AdminsPage } from '../../pages/admin/admins.page';
 import { howLongForLakeside } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { settingsStates } from '../../fixtures/settings-states';
@@ -23,5 +26,13 @@ parity('choice-card', [
     ...settingsStates.changeLength,
     name: 'dialog',
     region: (page) => new ChangeLengthDialog(page).group,
+  },
+  // Without an icon, the radio first: an admin's role (L2-119 AC2).
+  {
+    key: 'adminAdd',
+    name: 'role',
+    region: (page) => new AddAdminDialog(page).roles,
+    before: theMockAdmins,
+    app: (page) => new AdminsPage(page).addAdmin.click(),
   },
 ]);

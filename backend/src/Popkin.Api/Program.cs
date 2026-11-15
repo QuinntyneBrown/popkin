@@ -79,6 +79,9 @@ builder.Services.AddSwaggerGen();
 
 // The session cookie and the server-side session behind it; 401 and 403, never a redirect.
 builder.Services.AddPopkinSessions();
+// The admin app's session, its own cookie and scheme (L2-078 AC5, ADR 0024).
+builder.Services.AddAdminSessions();
+builder.Services.AddHostedService<AdminBootstrapper>();
 
 // Every endpoint requires a signed-in caller unless it opts out with [AllowAnonymous].
 builder.Services.AddAuthorizationBuilder()

@@ -37,6 +37,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public CapturingCrewInviteSender CrewInvites { get; } = new();
 
+    public CapturingAdminInviteSender AdminInvites { get; } = new();
+
     public FixedCodeGenerator CodeGenerator { get; } = new();
 
     public DatabaseFaults Faults { get; } = new();
@@ -64,6 +66,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Features:PhoneSignIn", "true");
         // Schedules is on for every test but those of its switch (ADR 0023).
         builder.UseSetting("Features:Schedules", "true");
+        // The first Owner of the admin app (L2-078 AC1, L2-119 AC9).
+        builder.UseSetting("Admin:FirstOwner", "owner@popkin.app");
         foreach (var (key, value) in Settings)
         {
             builder.UseSetting(key, value);
@@ -86,6 +90,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<ICodeSender>();
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICodeSender>(Codes.For(Domain.ContactChannel.Email));
+            services.RemoveAll<IAdminInviteSender>();
+            services.AddSingleton<IAdminInviteSender>(AdminInvites);
             services.RemoveAll<ICrewInviteSender>();
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Email));
