@@ -98,6 +98,11 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
   design keeps it, so a failure is announced without interrupting.
 - **Other devices.** Whether Contacts syncs between a person's devices beyond the offline queue
   is open (known gap 110). A second device sees a change on its next read.
+- **Built in steps.** The switch, the way in from My Popkins, the Contacts navigation, Today's
+  greeting and empty state, the guard that keeps a closed Contacts on My Popkins (with My
+  Popkins as the safe answer, ADR 0023) and toasts that wait are built first. `ContactsOutbox`
+  comes with the first write (Add someone), the loading and failure states with the first page
+  that reads its own data (People), and the Follow-ups badge with Follow-ups.
 - **Time zone.** The device day is the day the person sees. The Worker's reminders need the
   owner's time zone, which is open (known gap 104).
 
