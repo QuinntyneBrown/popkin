@@ -1,0 +1,9 @@
+<div>
+  <h2 class="form-section__title" [id]="headingId">{{ heading() }}</h2>
+  @if (hint()) {
+    <p class="form-section__hint">{{ hint() }}</p>
+  }
+</div>
+<div class="form-section__body">
+  <ng-content />
+</div>

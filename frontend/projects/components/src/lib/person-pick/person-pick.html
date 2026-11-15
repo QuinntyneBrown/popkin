@@ -1,0 +1,21 @@
+<span
+  pk-avatar
+  [name]="name()"
+  [initials]="initials()"
+  [photo]="photo()"
+  [attr.data-accent]="accent()"
+></span>
+<div class="person-pick__text">
+  <div class="row__title">{{ name() }}</div>
+  @if (text()) {
+    <div class="row__text">{{ text() }}</div>
+  }
+</div>
+<button
+  pk-icon-button
+  type="button"
+  icon="close"
+  size="md"
+  [label]="'Remove the connection to ' + firstName()"
+  (click)="removed.emit()"
+></button>

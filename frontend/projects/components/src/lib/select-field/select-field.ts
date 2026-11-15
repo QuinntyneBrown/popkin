@@ -22,6 +22,8 @@ export class SelectField {
   readonly label = input.required<string>();
   readonly options = input.required<readonly SelectOption[]>();
   readonly variant = input<'default' | 'toolbar'>('default');
+  /** The label is for assistive technology only, where the row around it says what it is. */
+  readonly hideLabel = input(false);
   readonly value = model('');
 
   protected chose(event: Event): void {

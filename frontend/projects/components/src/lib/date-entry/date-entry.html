@@ -1,0 +1,20 @@
+<div>
+  <div class="date-entry__kind">{{ kind() }}</div>
+  <div class="date-entry__date">{{ date() }}</div>
+</div>
+<div
+  pk-select-field
+  [hideLabel]="true"
+  [fieldId]="fieldId()"
+  [label]="remindLabel()"
+  [options]="options()"
+  [(value)]="remind"
+></div>
+<button
+  pk-icon-button
+  type="button"
+  icon="close"
+  size="md"
+  [label]="removeLabel()"
+  (click)="removed.emit()"
+></button>

@@ -1,5 +1,5 @@
 <label
-  [class]="variant() === 'toolbar' ? 'visually-hidden' : 'select-field__label'"
+  [class]="variant() === 'toolbar' || hideLabel() ? 'visually-hidden' : 'select-field__label'"
   [for]="fieldId()"
   >{{ label() }}</label
 >

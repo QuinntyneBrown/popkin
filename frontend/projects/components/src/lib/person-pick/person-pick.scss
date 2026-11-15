@@ -1,0 +1,25 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--border-width-thick) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+}
+
+.person-pick__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.row__text {
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
