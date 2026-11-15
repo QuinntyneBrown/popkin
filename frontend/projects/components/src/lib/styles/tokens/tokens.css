@@ -228,6 +228,7 @@
   --color-danger-solid: var(--palette-coral-deep);
   --color-danger-solid-hover: var(--palette-coral-deeper);
   --color-fg-on-danger: var(--palette-white);
+  --color-fg-on-success: var(--palette-white);   /* a mark on the success fill: a ticked follow-up */
 
   /* Status icons inside a toast (the toast is the inverse surface). */
   --color-inverse-success-icon: var(--palette-teal-light);
@@ -436,6 +437,7 @@
   --color-danger-solid: var(--palette-coral);
   --color-danger-solid-hover: var(--palette-coral-hover);
   --color-fg-on-danger: var(--palette-black);
+  --color-fg-on-success: var(--palette-black);
   --color-border-focus: var(--palette-coral-light);
   --color-info-solid: var(--palette-cream-soft);
   --color-success-solid: var(--palette-teal-light);
@@ -510,6 +512,7 @@
     --color-danger-solid: var(--palette-coral);
     --color-danger-solid-hover: var(--palette-coral-hover);
     --color-fg-on-danger: var(--palette-black);
+    --color-fg-on-success: var(--palette-black);
     --color-border-focus: var(--palette-coral-light);
     --color-info-solid: var(--palette-cream-soft);
     --color-success-solid: var(--palette-teal-light);

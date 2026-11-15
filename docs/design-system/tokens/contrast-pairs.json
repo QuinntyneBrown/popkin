@@ -492,6 +492,42 @@
       "bg": "--color-warning-loud",
       "min": 4.5,
       "note": "admin: a loud announcement's text on its sun banner"
+    },
+    {
+      "fg": "--color-fg-on-success",
+      "bg": "--color-success-solid",
+      "min": 3,
+      "note": "contacts: the tick on a done follow-up"
+    },
+    {
+      "fg": "--color-success-solid",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "contacts: a kept period of a habit against the card"
+    },
+    {
+      "fg": "--color-border-strong",
+      "bg": "--color-bg-surface",
+      "min": 3,
+      "note": "contacts: a missed period's outline, a follow-up's empty tick"
+    },
+    {
+      "fg": "--color-border-strong",
+      "bg": "--color-bg-subtle",
+      "min": 3,
+      "note": "contacts: a follow-up's empty tick on a sand card"
+    },
+    {
+      "fg": "--color-constant-dark",
+      "bg": "--color-warning-loud",
+      "min": 4.5,
+      "note": "contacts: a date two weeks off or less, and the chosen kind of milestone"
+    },
+    {
+      "fg": "--color-fg-accent",
+      "bg": "--color-bg-subtle",
+      "min": 4.5,
+      "note": "contacts: \"2 days late\" on a sand to-do card"
     }
   ]
 }
