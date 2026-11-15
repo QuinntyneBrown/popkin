@@ -1,0 +1,36 @@
+<div pk-app-screen [accent]="frame.accent()" layout="tab">
+  <header pk-plan-header slot="header" heading="Our plan">
+    <nav pk-view-nav slot="views" [views]="views()"></nav>
+  </header>
+
+  @switch (store.state()) {
+    @case ('off') {
+      <div class="stack">
+        <div
+          pk-empty-state
+          icon="power"
+          heading="Plan is switched off"
+          text="Popkin has turned this feature off for now. Nothing is lost: it comes back as it was when the feature is on again. Your host can ask Popkin to find out more."
+        >
+          <a pk-button variant="primary" size="md" [routerLink]="home()">
+            <svg pk-icon name="back" size="md"></svg>Back to {{ frame.name() }}
+          </a>
+        </div>
+      </div>
+    }
+  }
+
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    current="plan"
+    [popkinId]="popkinId()"
+    [name]="frame.name()"
+    [emoji]="frame.emoji()"
+    [members]="frame.members()"
+    [timeLeft]="frame.timeLeft()"
+    [unread]="unreadCount()"
+    [schedule]="frame.schedules()"
+    [plan]="frame.plan()"
+  ></nav>
+</div>

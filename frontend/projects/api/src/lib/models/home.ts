@@ -32,6 +32,8 @@ export interface PopkinHomeView {
   version: number;
   /** Whether Schedules is on, which shows the Schedule tab (L2-072 AC1, L2-077 AC1). */
   schedules: boolean;
+  /** Whether Plan is on, which shows the Plan tab (L2-068 AC1, L2-077 AC1). */
+  plan: boolean;
   /** The event the Host set (L2-085), or null; always null while Schedules is off. */
   event: EventView | null;
 }

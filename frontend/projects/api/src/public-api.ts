@@ -112,3 +112,6 @@ export * from './lib/api/admin/access/admin-role-text';
 export * from './lib/api/admin/access/role-table-text';
 export * from './lib/api/admin/access/admins.store';
 export * from './lib/api/admin/dialogs/action-dialog-state';
+export * from './lib/models/plan';
+export * from './lib/api/plan/plan-api';
+export * from './lib/api/plan/plan-board-store';
