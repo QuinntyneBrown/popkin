@@ -40,6 +40,9 @@ param phoneSignIn bool = false
 @description('Whether Schedules, the Schedule tab, is on for every Popkin (L2-077, ADR 0023).')
 param schedules bool = false
 
+@description('The staff email (@popkin.app) of the admin app\'s first Owner (L2-078 AC1, ADR 0024); empty adds nobody, so nobody can sign in to the admin app.')
+param adminFirstOwner string = ''
+
 @description('Azure SQL takes no new servers in some regions (East US 2 among them); the nearest that does.')
 param sqlLocation string = 'centralus'
 
@@ -165,6 +168,9 @@ resource environment 'Microsoft.App/managedEnvironments@2024-03-01' = {
 // The app's own origin, on Front Door (ADR 0020). A Popkin's address, https://{address}.<domain>,
 // reaches the same app.
 var appOrigin = 'https://app.${domain}'
+// The admin app's origin (ADR 0024): popkin-web serves it on admin.<domain>, which the wildcard
+// route of Front Door already sends there.
+var adminOrigin = 'https://admin.${domain}'
 module communication 'communication.bicep' = {
   name: 'communication'
   params: {
@@ -252,6 +258,8 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'Invites__BaseUrl', value: '${appOrigin}/i' }
             { name: 'Features__PhoneSignIn', value: string(phoneSignIn) }
             { name: 'Features__Schedules', value: string(schedules) }
+            { name: 'Admin__Origin', value: adminOrigin }
+            { name: 'Admin__FirstOwner', value: adminFirstOwner }
           ])
           resources: { cpu: json('0.5'), memory: '1Gi' }
           probes: [

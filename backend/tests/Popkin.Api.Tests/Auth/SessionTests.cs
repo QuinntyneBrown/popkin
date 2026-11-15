@@ -92,6 +92,23 @@ public sealed class SessionTests
         Assert.Empty(api.Codes.Sent);
     }
 
+    // Given a client that sends no fetch metadata, when the admin app's origin sends a change to
+    // the admin API, then it is accepted; to the rest of the API it is another site (ADR 0024).
+    [Fact]
+    public async Task Without_fetch_metadata_the_admin_origin_may_change_only_the_admin_api()
+    {
+        using var api = new ApiFactory();
+        api.Settings["Admin:Origin"] = "https://admin.localhost";
+        var client = api.CreateClient(new() { BaseAddress = new Uri("https://localhost") });
+        client.DefaultRequestHeaders.Add("Origin", "https://admin.localhost");
+
+        var admin = await client.PostAsJsonAsync("/api/admin/auth/codes", new { email = "owner@popkin.app" });
+        var app = await client.PostAsJsonAsync("/api/auth/codes", new { purpose = "SignUp", channel = "Phone", destination = "(415) 555-0148" });
+
+        Assert.Equal(HttpStatusCode.OK, admin.StatusCode);
+        await app.AssertProblem(HttpStatusCode.Forbidden, "cross_site_request");
+    }
+
     [Fact]
     public async Task Without_fetch_metadata_a_change_needs_the_app_origin()
     {

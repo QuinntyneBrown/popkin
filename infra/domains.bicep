@@ -4,7 +4,8 @@
 // - Azure Front Door Standard ends TLS with certificates it issues and renews itself, a wildcard
 //   among them, and routes by host:
 //     app.popkin.community and *.popkin.community -> popkin-web (the app, which reads its host
-//       to tell the app from a Popkin's address, as Open a Popkin by its address describes);
+//       to tell the app from a Popkin's address, as Open a Popkin by its address describes;
+//       admin.popkin.community, under the wildcard, is the admin app, ADR 0024);
 //     popkin.community and www.popkin.community  -> the marketing site's Static Web App.
 // A name with a record of its own (app, www, the _dnsauth checks) wins over the wildcard.
 @description('The registered domain.')
