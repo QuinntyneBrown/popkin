@@ -1,0 +1,27 @@
+import type { Locator, Page } from '@playwright/test';
+
+/** The Contacts navigation on every Contacts page (L2-121 AC3–AC6). */
+export class ContactsNav {
+  readonly root: Locator;
+  readonly back: Locator;
+  readonly name: Locator;
+  /** "13 people · only you", or "Only you can see them" with nobody. */
+  readonly countLine: Locator;
+  readonly tabs: Locator;
+  readonly current: Locator;
+  readonly followUpsBadge: Locator;
+
+  constructor(page: Page) {
+    this.root = page.getByRole('navigation', { name: 'Contacts' });
+    this.back = this.root.getByRole('link', { name: 'Your Popkins' });
+    this.name = this.root.locator('.popkin-nav__id strong');
+    this.countLine = this.root.locator('.popkin-nav__id-text');
+    this.tabs = this.root.locator('li a');
+    this.current = this.root.locator('a[aria-current="page"]');
+    this.followUpsBadge = this.tab('Follow-ups').locator('.badge');
+  }
+
+  tab(name: string): Locator {
+    return this.tabs.filter({ hasText: name });
+  }
+}

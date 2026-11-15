@@ -174,6 +174,8 @@ export const routes = {
   myPopkinsEmpty: { app: '/popkins', mock: 'pages/my-popkins/empty.html' },
   myPopkinsError: { app: '/popkins', mock: 'pages/my-popkins/error.html' },
   myPopkinsOffline: { app: '/popkins', mock: 'pages/my-popkins/offline.html' },
+  // Contacts (journey 25): Mara keeps nobody yet in the recording.
+  contactsTodayEmpty: { app: '/contacts', mock: 'pages/contacts-today/empty.html' },
   scanToJoin: { app: '/popkins', mock: 'dialogs/scan-to-join/default.html' },
   scanToJoinBusy: { app: '/popkins', mock: 'dialogs/scan-to-join/busy.html' },
   scanToJoinInvalid: { app: '/popkins', mock: 'dialogs/scan-to-join/invalid.html' },

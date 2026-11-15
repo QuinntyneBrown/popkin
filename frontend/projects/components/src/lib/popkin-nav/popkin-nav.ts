@@ -9,12 +9,18 @@ import { TimeLeft } from '../time-left/time-left';
 /** The places of a Popkin. */
 export type PopkinNavTab = 'home' | 'chat' | 'plan' | 'schedule' | 'photos' | 'experiences';
 
-interface Tab {
-  key: PopkinNavTab;
+/** The places of Contacts (L2-121 AC3). */
+export type ContactsNavTab =
+  'today' | 'people' | 'dates' | 'follow-ups' | 'habits' | 'groups' | 'connections';
+
+interface Tab<K extends string = PopkinNavTab> {
+  key: K;
   label: string;
   icon: IconName;
-  /** The route after `/p/{id}`. */
+  /** The route after `/p/{id}`, or after `/contacts`. */
   path: string;
+  /** Shown from 768 px only: a phone has five Contacts tabs (L2-121 AC4). */
+  wideOnly?: boolean;
 }
 
 const TABS: readonly Tab[] = [
@@ -24,6 +30,22 @@ const TABS: readonly Tab[] = [
   { key: 'schedule', label: 'Schedule', icon: 'calendar', path: '/schedule' },
   { key: 'photos', label: 'Photos', icon: 'photos', path: '/photos' },
   { key: 'experiences', label: 'Experiences', icon: 'experiences', path: '/experiences' },
+];
+
+const CONTACTS_TABS: readonly Tab<ContactsNavTab>[] = [
+  { key: 'today', label: 'Today', icon: 'sun', path: '' },
+  { key: 'people', label: 'People', icon: 'users', path: '/people' },
+  { key: 'dates', label: 'Dates', icon: 'cake', path: '/dates' },
+  { key: 'follow-ups', label: 'Follow-ups', icon: 'list-checks', path: '/follow-ups' },
+  { key: 'habits', label: 'Habits', icon: 'repeat', path: '/habits', wideOnly: true },
+  { key: 'groups', label: 'Groups', icon: 'users-round', path: '/groups' },
+  {
+    key: 'connections',
+    label: 'Connections',
+    icon: 'network',
+    path: '/connections',
+    wideOnly: true,
+  },
 ];
 
 /**
@@ -43,18 +65,23 @@ const TABS: readonly Tab[] = [
   host: {
     class: 'popkin-nav',
     '[class.popkin-nav--wide]': 'wide()',
-    'aria-label': 'Popkin',
+    '[attr.aria-label]': "place() === 'contacts' ? 'Contacts' : 'Popkin'",
   },
 })
 export class PopkinNav {
-  readonly popkinId = input.required<string>();
-  readonly name = input.required<string>();
-  readonly emoji = input.required<string>();
+  /**
+   * `contacts` is the navigation of Contacts (L2-121 AC3): the 📇 tile, "Contacts", its seven
+   * tabs under `/contacts` with `contactsCurrent` marked, and Follow-ups badged with `due`.
+   */
+  readonly place = input<'popkin' | 'contacts'>('popkin');
+  readonly popkinId = input('');
+  readonly name = input('');
+  readonly emoji = input('');
   /** The line under the name in the sidebar: "14 members". */
   readonly members = input('');
   /** The time the Popkin has left, in words; none when null. */
   readonly timeLeft = input<string | null>(null);
-  readonly current = input.required<PopkinNavTab>();
+  readonly current = input<PopkinNavTab>('home');
   /** The unread messages, counted on Chat when above zero. */
   readonly unread = input(0);
   readonly wide = input(false);
@@ -62,15 +89,47 @@ export class PopkinNav {
   readonly schedule = input(false);
   /** Whether Plan is on: the Plan tab shows between Chat and Schedule (or Photos). */
   readonly plan = input(false);
+  readonly contactsCurrent = input<ContactsNavTab>('today');
+  /** Follow-ups late or due today, counted on Follow-ups when above zero (L2-121 AC5). */
+  readonly due = input(0);
+  /** The badge's name: "2 follow-ups late or due today". */
+  readonly dueLabel = input('');
+
+  protected readonly contacts = computed(() => this.place() === 'contacts');
+  protected readonly shownName = computed(() => (this.contacts() ? 'Contacts' : this.name()));
+  protected readonly shownEmoji = computed(() => (this.contacts() ? '📇' : this.emoji()));
 
   protected readonly tabs = computed(() =>
-    TABS.filter(
+    this.contacts() ? this.contactsTabs() : this.popkinTabs(),
+  );
+
+  private contactsTabs() {
+    return CONTACTS_TABS.map((tab) => ({
+      key: tab.key as string,
+      label: tab.label,
+      icon: tab.icon,
+      wideOnly: tab.wideOnly ?? false,
+      current: tab.key === this.contactsCurrent(),
+      link: `/contacts${tab.path}`,
+      badge: tab.key === 'follow-ups' ? this.due() : 0,
+      badgeLabel: this.dueLabel(),
+    }));
+  }
+
+  private popkinTabs() {
+    return TABS.filter(
       (tab) => (tab.key !== 'schedule' || this.schedule()) && (tab.key !== 'plan' || this.plan()),
     ).map((tab) => ({
-      ...tab,
+      key: tab.key as string,
+      label: tab.label,
+      icon: tab.icon,
+      wideOnly: false,
+      current: tab.key === this.current(),
       link: `/p/${this.popkinId()}${tab.path}`,
-    })),
-  );
+      badge: tab.key === 'chat' ? this.unread() : 0,
+      badgeLabel: this.unreadLabel(),
+    }));
+  }
 
   protected readonly unreadLabel = computed(() =>
     this.unread() === 1 ? '1 unread message' : `${this.unread()} unread messages`,

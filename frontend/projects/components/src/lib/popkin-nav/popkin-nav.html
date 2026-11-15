@@ -4,9 +4,9 @@
 </a>
 <div class="popkin-nav__id">
   <div class="popkin-nav__id-row">
-    <span pk-popkin-tile size="md" [emoji]="emoji()"></span>
+    <span pk-popkin-tile size="md" [emoji]="shownEmoji()"></span>
     <div class="popkin-nav__id-text">
-      <strong class="truncate">{{ name() }}</strong>{{ members() }}
+      <strong class="truncate">{{ shownName() }}</strong>{{ members() }}
     </div>
   </div>
   @if (timeLeft()) {
@@ -15,20 +15,20 @@
 </div>
 <ul class="popkin-nav__tabs">
   @for (tab of tabs(); track tab.key) {
-    <li>
+    <li [class.only-m-up]="tab.wideOnly">
       <a
         class="popkin-nav__tab"
         [routerLink]="tab.link"
-        [attr.aria-current]="tab.key === current() ? 'page' : null"
+        [attr.aria-current]="tab.current ? 'page' : null"
       >
         <svg pk-icon class="popkin-nav__icon" [name]="tab.icon"></svg>
         <span>{{ tab.label }}</span>
-        @if (tab.key === 'chat' && unread() > 0) {
+        @if (tab.badge > 0) {
           <span
             pk-badge
             class="popkin-nav__badge"
-            [count]="unread()"
-            [label]="unreadLabel()"
+            [count]="tab.badge"
+            [label]="tab.badgeLabel"
           ></span>
         }
       </a>

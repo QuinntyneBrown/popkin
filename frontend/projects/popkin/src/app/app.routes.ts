@@ -259,6 +259,15 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'contacts',
+    pathMatch: 'full',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/contacts-today/contacts-today.page').then((m) => m.ContactsTodayPage),
+    data: data({ shell: 'app', page: 'contacts-today' }),
+    title: 'Today · Contacts · Popkin',
+  },
+  {
     path: 'popkins',
     canActivate: [signedInGuard],
     loadComponent: () => import('./pages/my-popkins/my-popkins.page').then((m) => m.MyPopkinsPage),

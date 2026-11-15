@@ -13,3 +13,11 @@ export function contactsOff(page: Page): Promise<void> {
 export function contactsUnknown(page: Page): Promise<void> {
   return failNetwork(page, 'GET /api/contacts/summary');
 }
+
+/** The Contacts cast of the mocks: Mara keeps 13 people (docs/mocks/README.md). */
+export function contactsOfMara(page: Page): Promise<void> {
+  return answer(page, 'GET /api/contacts/summary', { status: 200, body: { people: 13 } });
+}
+
+/** 8:40 am on Tuesday 15 September 2026, the morning of the Contacts mocks. */
+export const contactsMorning = new Date(2026, 8, 15, 8, 40);
