@@ -50,15 +50,19 @@ A bottom sheet below 640 px and a centred dialog above, as every dialog
 
 ### Frontend (`frontend/projects/`)
 
-- **`PopkinSettingsDialog`** — adds the "Set the event" row for the Host when the frame says
-  Schedules is on, with the event's label and days or "Not set".
+- **`PopkinSettingsDialog`** — adds the "Set the event" row for the Host when the header says
+  Schedules is on (`eventHint`, undefined otherwise), with the event's label and days or "Not
+  set".
+- **`PopkinHomeStore.applyEvent`** — keeps the event saved or removed, so the menu shows it at
+  once; the home shows the toast "Event saved" after a save.
 - **`SetEventDialog`** (`dialogs/set-event`) — the label field (`maxlength="40"`) and two `date`
   fields set to the event; "Save" disabled with the message of the first rule broken (an empty
   label: "Give the event a label.", the last day before the first, the first day more than a
   year ahead: "The event can be set up to a year ahead."); "Saving…"; the failure alert keeps
   what was entered.
-- **`event-text.ts`** (`api`) — "Sep 25 – 27", "Feb 27 – Mar 2", across years "Dec 30 2026 –
-  Jan 2 2027".
+- **`event-text.ts`** (`api`) — `eventDays`: "Sep 25 – 27", "Feb 27 – Mar 2", across years
+  "Dec 30 2026 – Jan 2 2027", one day "Sep 25"; `eventHint`: the menu's hint; `eventError`: the
+  first rule broken and its field, as the API checks them; `EVENT_LABEL_MAX` (40).
 - **`ScheduleApi.setEvent`, `.removeEvent`**.
 
 ### Backend (`backend/src/`)
@@ -73,6 +77,8 @@ A bottom sheet below 640 px and a centred dialog above, as every dialog
 
 - The event is kept with the Popkin when Schedules is off and on again (L2-077 AC5).
 - An event has no limit on its length beyond a year ahead for its first day.
+- A date left empty keeps "Save" off and says "Pick the first day." or "Pick the last day.";
+  a new event says nothing until something is typed.
 
 ## Requirements
 
