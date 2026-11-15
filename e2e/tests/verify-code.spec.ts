@@ -168,7 +168,7 @@ test.describe('sending a new code', () => {
     // seconds. Hold the clock, put it back to the moment the code was sent and let the screen's
     // one-second tick read it.
     await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1));
-    await page.clock.setSystemTime(sentAt - 1);
+    await page.clock.setSystemTime(sentAt.getTime() - 1);
     await page.clock.runFor(1_000);
 
     await expect(verify.resend).toHaveText('Send a new code in 0:30');
