@@ -15,7 +15,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DeleteAccountDialog } from '../../dialogs/delete-account/delete-account.dialog';
 import { SignOutDialog } from '../../dialogs/sign-out/sign-out.dialog';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 import {
   ACCOUNT_API,
   AccountStore,

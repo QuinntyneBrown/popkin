@@ -54,7 +54,7 @@ import {
   Thread,
   TopBar,
 } from 'components';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 import { ConversationList } from '../conversations/conversation-list';
 import { MessageActions } from '../conversations/message-actions';
 

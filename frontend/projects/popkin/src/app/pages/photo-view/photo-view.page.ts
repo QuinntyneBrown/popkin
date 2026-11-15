@@ -40,7 +40,7 @@ import {
   PhotoReactionsData,
   PhotoReactionsDialog,
 } from '../../dialogs/photo-reactions/photo-reactions.dialog';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 /**
  * One photo, full screen on a dark stage (L2-033): who added it and when, the whole photo and

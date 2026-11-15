@@ -6,7 +6,7 @@ import { WrapUpWatch } from 'api';
 import { SkipLink, Toast, ToastRegion } from 'components';
 import { filter, map } from 'rxjs';
 import { PkRouteData } from './app.routes';
-import { Toaster } from './toasts/toaster';
+import { Toaster } from 'api';
 
 /** AppShell: the skip link and the routed page (which owns `main`), with the route's `page` stamped on `<body data-page>`. */
 @Component({

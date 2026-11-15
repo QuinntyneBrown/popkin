@@ -47,7 +47,7 @@ import {
   ShareExperienceData,
   ShareExperienceDialog,
 } from '../../dialogs/share-experience/share-experience.dialog';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 /**
  * One experience (L2-038): what it was, the group's score, the member's own rating

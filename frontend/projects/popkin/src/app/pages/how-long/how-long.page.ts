@@ -23,7 +23,7 @@ import {
   TopBar,
 } from 'components';
 import { EndDateData, EndDateDialog } from '../../dialogs/end-date/end-date.dialog';
-import { Toaster } from '../../toasts/toaster';
+import { Toaster } from 'api';
 
 /** The second step of starting a Popkin: when it wraps up (L2-009). */
 @Component({
