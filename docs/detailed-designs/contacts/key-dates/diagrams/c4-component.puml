@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Key dates
+
+Container(web, "Popkin web app", "Angular", "ContactsDatesPage, AddDateDialog, DatesStore")
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "KeyDatesController", "ASP.NET Core controller", "Dates list, key-date add, reminder, remove")
+  Component(prefCtrl, "ReminderPreferencesController", "ASP.NET Core controller", "Reads and saves the defaults and switches")
+  Component(query, "GetContactDatesQueryHandler", "MediatR handler", "Occurrences, days left, years, filter")
+  Component(add, "AddKeyDateCommandHandler", "MediatR handler", "Validates and adds a key date once")
+  Component(change, "ChangeKeyDateReminderCommandHandler", "MediatR handler", "Changes one date's lead time")
+  Component(prefs, "SaveReminderPreferencesCommandHandler", "MediatR handler", "Upserts the owner's defaults")
+  Component(guard, "IContactGuard", "Application service", "404 contact_not_found for another person's contact")
+  ComponentDb(db, "Popkin database", "SQL Server", "KeyDate, ReminderPreferences")
+}
+Rel(web, ctrl, "Calls", "JSON/HTTPS")
+Rel(web, prefCtrl, "Calls", "JSON/HTTPS")
+Rel(ctrl, query, "Sends GetContactDatesQuery(on, kind)")
+Rel(ctrl, add, "Sends AddKeyDateCommand")
+Rel(ctrl, change, "Sends ChangeKeyDateReminderCommand")
+Rel(prefCtrl, prefs, "Sends SaveReminderPreferencesCommand")
+Rel(add, guard, "RequireOwnedAsync")
+Rel(query, db, "Reads", "EF Core")
+Rel(add, db, "Writes", "EF Core")
+Rel(change, db, "Writes", "EF Core")
+Rel(prefs, db, "Writes", "EF Core")
+@enduml

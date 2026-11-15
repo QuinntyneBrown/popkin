@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — People opens
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsPeoplePage" as page
+  participant "ContactsFrame" as frame
+  participant "PeopleStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPeopleQueryHandler" as handler
+  participant "KeyDate" as occ
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Chooses People
+page -> frame : refresh()
+page --> actor : "People", "13 people · only you can see them", search, skeletons, "Loading your people…" (L2-127 AC4)
+page -> store : load()
+store -> client : people("2026-09-15")
+client -> controller : GET /api/contacts/people?on=2026-09-15
+controller -> handler : Send GetPeopleQuery
+handler -> db : Owner's contacts, key dates, latest conversation each (OwnedBy)
+db --> handler : Rows
+handler -> occ : NextOccurrence(on), each key date
+occ --> handler : Soonest per contact
+handler --> controller : PeopleDto ordered by name
+alt Request fails
+  controller --> client : Error or no answer
+  store --> page : failed
+  page --> actor : "We couldn't load your people", "Try again" (L2-123 AC2)
+else No contacts
+  controller --> client : 200 { contacts: [] }
+  page --> actor : "No one here yet", "Add someone", "Import from your Popkins" (L2-126 AC4)
+else Contacts
+  controller --> client : 200 PeopleDto
+  client --> store : ready
+  store -> store : counts, closest, shown
+  page --> actor : Circles "All 13", "Family 4"…; Closest Ada, Chidi, Grace (L2-126 AC2, L2-127 AC1)
+  page --> actor : Everyone A to Z with circle, next date, last talked (L2-126 AC3)
+end
+@enduml

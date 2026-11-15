@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Only you see your Contacts
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "Profile page", "Angular page", "page contact-profile; state not-found")
+  Component(store, "ContactProfileStore", "api library", "not-found on 404 contact_not_found or a malformed id")
+  Component(text, "contacts-text.ts", "api library", "notFound, firstName(name)")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrls, "Contacts controllers", "ASP.NET Core controllers", "api/contacts/**, default authenticated policy")
+  Component(handlers, "Contacts handlers", "MediatR handlers", "Popkin.Application/Contacts/*")
+  Component(guard, "IContactGuard", "Application", "RequireOwnedAsync, RequireOwnedGroupAsync, RequireAllOwnedAsync")
+  Component(owned, "OwnedQueries.OwnedBy", "Application", "WHERE OwnerId = caller")
+  Component(current, "ICurrentPerson", "Application", "PersonId from the session")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contacts tables, each with OwnerId")
+}
+Rel(page, store, "Reads state")
+Rel(page, text, "Words")
+Rel(store, client, "profile(id)")
+Rel(client, ctrls, "JSON/HTTPS")
+Rel(ctrls, handlers, "Sends one request")
+Rel(handlers, guard, "One contact or group by id")
+Rel(handlers, owned, "Every list")
+Rel(guard, current, "PersonId")
+Rel(owned, current, "PersonId")
+Rel(guard, db, "Load by Id and OwnerId", "EF Core")
+Rel(owned, db, "Filtered reads", "EF Core")
+@enduml

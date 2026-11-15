@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Add a photo memory
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddMemoryDialog" as dialog
+  participant "memory-rules" as rules
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactMemoriesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddPhotoMemoryCommandHandler" as handler
+  participant "IContactGuard" as guard
+  participant "IPhotoProcessor" as proc
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> dialog : "Add", "Photo", "Choose a photo"
+dialog -> rules : Check size and type
+alt Over 25 MB (L2-136 AC3)
+  rules --> dialog : Too large
+  dialog --> actor : "Photo: that one is 32 MB; choose one up to 25 MB." and "Choose another photo"
+else Allowed
+  actor -> dialog : Caption; "Save"
+  dialog -> client : addPhotoMemory(contactId, file, caption) with reportProgress
+  client -> ctrl : POST /api/contacts/people/{id}/memories/photos
+  client --> dialog : Progress events
+  dialog --> actor : "Uploading · 2.4 of 3.1 MB", progress bar, "Uploading…" (L2-136 AC4)
+  ctrl -> handler : Send AddPhotoMemoryCommand
+  handler -> guard : RequireOwnedAsync(contactId)
+  guard --> handler : Contact, or 404 contact_not_found
+  handler -> handler : Caption, file, 25 MB, type; else 400
+  handler -> proc : MakeAlbumPhoto(upload)
+  proc --> handler : Display, thumbnail, capture time
+  handler -> photos : SaveAsync(display), SaveAsync(thumbnail) under random keys
+  handler -> db : Add Memory; save once
+  db --> handler : Committed; on failure both files are deleted
+  handler --> ctrl : PhotoMemoryDto
+  ctrl --> client : 201
+  client --> dialog : Saved memory
+  dialog --> actor : Closes; the photo heads the grid
+end
+@enduml

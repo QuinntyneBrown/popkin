@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Import from your Popkins
+
+Container_Boundary(web, "Popkin web app") {
+  Component(entry, "Contacts Today and People", "Angular pages", "Empty states offer Import")
+  Component(dialog, "ImportContactsDialog", "CDK dialog", "pk-dialog, pk-tick-list per Popkin")
+  Component(store, "ImportContactsStore", "api library", "Ticks per person, count, import")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsImportController", "ASP.NET Core controller", "/api/contacts/import")
+  Component(query, "GetImportCandidatesQueryHandler", "MediatR handler", "Shared Popkins and their people, once each")
+  Component(cmd, "ImportContactsCommandHandler", "MediatR handler", "Checks ids, adds contacts, one save")
+  Component(current, "ICurrentPerson", "Application abstraction", "PersonId")
+  Component(photos, "IPhotoStore", "Application abstraction", "GetReadUrl")
+  ComponentDb(db, "Popkin database", "SQL Server", "Membership, PopkinSpace, Contact, ImportBatch")
+}
+Rel(entry, dialog, "Opens")
+Rel(dialog, store, "Reads and toggles")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, query, "Sends GetImportCandidatesQuery")
+Rel(ctrl, cmd, "Sends ImportContactsCommand")
+Rel(query, current, "Who asks")
+Rel(cmd, current, "Who asks")
+Rel(query, photos, "Signs avatars")
+Rel(query, db, "Reads", "EF Core")
+Rel(cmd, db, "Reads candidates; saves once", "EF Core")
+@enduml

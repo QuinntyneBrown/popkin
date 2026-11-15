@@ -1,0 +1,63 @@
+@startuml
+title UML sequence behaviour — The owner adds someone
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactFormPage" as page
+  participant "ContactFormStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddContactCommandHandler" as handler
+  participant "SaveContactValidator" as validator
+  participant "IContactGuard" as guard
+  participant "Contact" as contact
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhotoProcessor" as processor
+  participant "IPhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> page : Name, circle, photo, dates, a connection, a group; "Save"
+page -> store : save()
+store --> actor : "Saving…", button disabled (L2-123 AC5)
+store -> outbox : enqueue(clientId, request, photo)
+outbox -> client : addContact(request, photo)
+client -> controller : POST /api/contacts/people (multipart)
+controller -> handler : Send AddContactCommand
+handler -> db : Contact with this owner and client id?
+alt Already saved (a resend)
+  handler --> controller : The saved contact
+else New
+  handler -> validator : Validate (L2-129)
+  handler -> guard : Each other contact and each group is the owner's (L2-122 AC1)
+  handler -> processor : MakeAvatar(photo)
+  handler -> photos : SaveAsync("contacts/{random}")
+  handler -> contact : Create(owner, clientId, name, details, now)
+  handler -> db : Add Contact, KeyDate, Connection, ContactGroupMember rows
+  handler -> db : SaveChangesAsync, one unit of work
+  handler --> controller : ContactProfileDto
+end
+controller --> client : 201 Location
+client --> store : Saved
+store --> page : Open /contacts/people/{id} (L2-129 AC5)
+page --> actor : Profile, toast "Femi Bankole added"
+note over db : Nothing is sent to the contact or to any Popkin (L2-122 AC3)
+@enduml

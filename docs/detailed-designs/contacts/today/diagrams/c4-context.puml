@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Today
+
+Person(owner, "Owner", "Signed-in person who keeps the Contacts")
+Person(contact, "Contact", "Kept by the owner; is told nothing")
+System(popkin, "Popkin", "Pop-up communities, and each person's own Contacts")
+
+Rel(owner, popkin, "Sees the next date, what to do and who to catch up with in", "Popkin web app")
+Rel(owner, contact, "Messages or calls from the phone", "sms:, tel:")
+@enduml

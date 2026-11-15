@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — The owner takes a contact out of Closest
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactProfilePage" as page
+  participant "ContactActionsDialog" as menu
+  participant "ContactProfileStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "TakeOutOfClosestCommandHandler" as handler
+  participant "IContactGuard" as guard
+  participant "Contact" as contact
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "More for Chidi"
+page -> menu : Open, titled "Chidi Okafor" (L2-131 AC1)
+actor -> menu : "Take Chidi out of Closest"
+menu -> store : takeOutOfClosest(contactId)
+store -> client : DELETE /api/contacts/people/{contactId}/closest
+client -> controller : Session cookie
+controller -> handler : Send TakeOutOfClosestCommand
+handler -> guard : RequireOwnedAsync(contactId)
+guard --> handler : Contact
+handler -> contact : LeaveClosest(); circle unchanged (L2-131 AC2)
+handler -> db : SaveChangesAsync
+handler --> controller : Done
+controller --> client : 204
+store -> client : profile(contactId)
+store --> actor : Chidi stays in People and Family
+@enduml

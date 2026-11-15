@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Habits opens
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsHabitsPage" as page
+  participant "HabitsStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "HabitsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetHabitsQueryHandler" as handler
+  participant "Habit" as second
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Opens /contacts/habits
+page -> store : load()
+store -> client : habits()
+client -> controller : GET /api/contacts/habits
+controller -> handler : Send GetHabitsQuery
+handler -> db : Habits and HabitKept where OwnerId = PersonId (L2-122 AC1)
+db --> handler : Rows
+handler -> second : LastTime, DueOn() = last time + rhythm (L2-143 AC3)
+handler --> controller : HabitDto[]
+alt Read fails
+  controller --> client : Error
+  page --> actor : "We couldn’t load your habits", "Try again"
+else No habits
+  controller --> client : 200 []
+  page --> actor : "No habits yet", "New habit" (L2-143 AC4)
+else Habits
+  controller --> client : 200
+  client --> store : HabitDto[]
+  store -> store : habitDue(dueOn, device today); habitKeeping(keptOn, rhythm, today)
+  opt A habit is overdue
+    page --> actor : Spotlight "Two days overdue", "Lunch with Chidi", "Call Chidi", "We met up" (L2-143 AC2)
+  end
+  page --> actor : Rows: rhythm, "Kept 11 of the last 12", "11 weeks running", "Next Sun, Sep 20" (L2-143 AC1)
+end
+@enduml

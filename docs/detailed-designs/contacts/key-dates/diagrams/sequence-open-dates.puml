@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Open Dates
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsDatesPage" as page
+  participant "DatesStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "KeyDatesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetContactDatesQueryHandler" as handler
+  participant "KeyDate" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /contacts/dates
+page --> actor : "Loading your dates…" (L2-123 AC1)
+page -> store : load(device day, all)
+store -> client : dates(on, all)
+client -> ctrl : GET /api/contacts/dates?on={device day}&kind=all
+ctrl -> handler : Send GetContactDatesQuery
+handler -> db : Owner's key dates, contacts, ReminderPreferences
+db --> handler : Rows
+handler -> entity : NextOccurrence(on), YearsOn per date (L2-137 AC3)
+entity --> handler : Occurrence, days left, years
+handler --> ctrl : ContactDatesDto soonest first
+ctrl --> client : 200
+alt Read fails
+  store --> page : failed
+  page --> actor : "We couldn't load your dates", "Your reminders still go out." and "Try again" (L2-123 AC2)
+else No key dates
+  store --> page : empty
+  page --> actor : "No dates yet", "Add a date", no reminder settings (L2-137 AC4)
+else Dates
+  store --> page : ready, grouped by month
+  page --> actor : Rows with "in {n} days" and the Reminders card (L2-137 AC1, L2-139 AC1)
+  actor -> page : Choose "Birthdays"
+  page -> store : filter(birthdays)
+  store --> page : Birthdays only (L2-137 AC2)
+end
+@enduml

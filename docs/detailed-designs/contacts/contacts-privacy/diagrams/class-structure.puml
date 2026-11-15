@@ -1,0 +1,73 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Only you see your Contacts
+
+package "Popkin.Domain" {
+  interface IOwnedByPerson {
+    +Guid OwnerId
+  }
+  class Contact {
+    +Guid Id
+    +Guid OwnerId
+    +string Name
+    +Guid? PersonId
+  }
+  class ContactGroup {
+    +Guid Id
+    +Guid OwnerId
+  }
+  class "KeyDate, FollowUp, Habit, TimelineEntry,\nMemory, Connection, ..." as Others {
+    +Guid OwnerId
+  }
+}
+package "Popkin.Application" {
+  interface IContactGuard {
+    +RequireOwnedAsync(contactId: Guid, ct): Task<Contact>
+    +RequireOwnedGroupAsync(groupId: Guid, ct): Task<ContactGroup>
+    +RequireAllOwnedAsync(contactIds: IReadOnlyCollection<Guid>, ct): Task<IReadOnlyList<Contact>>
+  }
+  class ContactGuard {
+    +{static} NotFound(): ProblemException
+    +{static} GroupNotFound(): ProblemException
+  }
+  class OwnedQueries {
+    +{static} OwnedBy<T>(rows: IQueryable<T>, ownerId: Guid): IQueryable<T>
+  }
+  interface ICurrentPerson {
+    +Guid PersonId
+  }
+  interface IAppDbContext
+  class ProblemException {
+    +int Status
+    +string Code
+  }
+}
+package "Popkin web app (api library)" {
+  class ContactProfileStore {
+    +state: loading | ready | failed | not-found
+    +retry(): void
+  }
+  class ContactsText {
+    +notFound
+    +firstName(name: string): string
+  }
+}
+IOwnedByPerson <|.. Contact
+IOwnedByPerson <|.. ContactGroup
+IOwnedByPerson <|.. Others
+IContactGuard <|.. ContactGuard
+ContactGuard ..> IAppDbContext
+ContactGuard ..> ICurrentPerson
+ContactGuard ..> ProblemException : 404 contact_not_found, group_not_found
+OwnedQueries ..> IOwnedByPerson
+ContactProfileStore ..> ProblemException : reads code contact_not_found
+@enduml

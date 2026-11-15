@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Follow-ups opens
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsFollowUpsPage" as page
+  participant "FollowUpsStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "FollowUpsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetFollowUpsQueryHandler" as handler
+  participant "FollowUp" as second
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Opens /contacts/follow-ups
+page -> store : load()
+store --> page : loading, "Loading your follow-ups…"
+store -> client : followUps()
+client -> controller : GET /api/contacts/follow-ups
+controller -> handler : Send GetFollowUpsQuery
+handler -> db : FollowUps where OwnerId = PersonId (L2-122 AC1)
+db --> handler : Rows with contact first names and promise channels
+handler --> controller : FollowUpDto[]
+alt Read fails
+  controller --> client : Error
+  client --> store : failed
+  page --> actor : "We couldn’t load your follow-ups", "Try again"
+else Read succeeds
+  controller --> client : 200
+  client --> store : FollowUpDto[]
+  store -> store : followUpBuckets(list, device today, filter)
+  alt No open follow-up
+    page --> actor : "Nothing open", "You’re all caught up", "Go to People" (L2-141 AC4)
+  else Open follow-ups
+    page --> actor : "8 open · 6 of them promises you made", Overdue, Today, This week, Later (L2-141 AC1)
+  end
+end
+actor -> page : Chooses "Promises"
+page -> store : filter = promises
+page --> actor : Only promises; the heading counts follow (L2-141 AC2)
+actor -> page : "Show 1 done"
+page --> actor : "Done" with "Done Sep 10"; "Hide done" (L2-141 AC3)
+@enduml

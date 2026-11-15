@@ -1,0 +1,91 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — A contact's profile
+
+package "Popkin.Domain" {
+  class Contact {
+    +Guid Id
+    +Guid OwnerId
+    +string Name
+    +string? KnownAs
+    +ContactCircle? Circle
+    +string? Phone
+    +string? Email
+    +string? City
+    +string? HowWeMet
+    +string[] Loves
+    +string? PhotoKey
+    +bool IsClosest
+    +Guid? PersonId
+    +LeaveClosest(): void
+  }
+  enum ContactCircle {
+    Family
+    Friends
+    Work
+    Neighbours
+    Clubs
+  }
+  class KeyDate
+  class Habit
+  class Connection
+  class ContactGroupMember
+}
+package "Popkin.Application" {
+  interface IContactGuard {
+    +RequireOwnedAsync(contactId: Guid, ct): Task<Contact>
+  }
+  class GetContactProfileQuery {
+    +Guid ContactId
+  }
+  class GetContactProfileQueryHandler {
+    +Handle(query): Task<ContactProfileDto>
+  }
+  class TakeOutOfClosestCommand {
+    +Guid ContactId
+  }
+  class TakeOutOfClosestCommandHandler {
+    +Handle(command): Task
+  }
+  class ContactProfileDto {
+    +Guid Id
+    +string Name
+    +string FirstName
+    +string? PhotoUrl
+    +bool IsClosest
+    +PopkinLinkDto? AlsoIn
+    +ContactKeyDateDto[] KeyDates
+    +ContactHabitDto? Habit
+    +ContactConnectionDto[] Connections
+    +ContactGroupChipDto[] Groups
+    +ContactCountsDto Counts
+  }
+  class ContactCountsDto {
+    +int TimelineEntries
+    +int FollowUps
+    +int OpenFollowUps
+    +int Memories
+  }
+}
+Contact --> ContactCircle
+Contact "1" *-- "*" KeyDate
+Contact "1" *-- "0..1" Habit
+Contact "1" o-- "*" Connection
+Contact "1" o-- "*" ContactGroupMember
+GetContactProfileQueryHandler ..> GetContactProfileQuery : handles
+GetContactProfileQueryHandler ..> IContactGuard
+GetContactProfileQueryHandler ..> ContactProfileDto : returns
+ContactProfileDto *-- ContactCountsDto
+TakeOutOfClosestCommandHandler ..> TakeOutOfClosestCommand : handles
+TakeOutOfClosestCommandHandler ..> IContactGuard
+TakeOutOfClosestCommandHandler --> Contact : LeaveClosest()
+@enduml

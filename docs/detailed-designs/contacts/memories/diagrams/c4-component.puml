@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Memories and files
+
+Container(web, "Popkin web app", "Angular", "AddMemoryDialog, ContactMemoriesStore, memory-rules")
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactMemoriesController", "ASP.NET Core controller", "GET memories, POST memories/photos")
+  Component(add, "AddPhotoMemoryCommandHandler", "MediatR handler", "Checks, processes and keeps one photo")
+  Component(read, "GetMemoriesQueryHandler", "MediatR handler", "Photos, files and notes with addresses")
+  Component(rules, "MemoryPhotoRules", "Application rules", "25 MB, accepted types")
+  Component(guard, "IContactGuard", "Application service", "404 contact_not_found")
+  Component(proc, "IPhotoProcessor", "Port", "Upright, no location data, display and thumbnail")
+  Component(photos, "IPhotoStore", "Port", "Blob storage, addresses that expire")
+  ComponentDb(db, "Popkin database", "SQL Server", "Memory")
+}
+Rel(web, ctrl, "Calls", "HTTPS")
+Rel(ctrl, add, "Sends AddPhotoMemoryCommand")
+Rel(ctrl, read, "Sends GetMemoriesQuery")
+Rel(add, guard, "RequireOwnedAsync")
+Rel(add, rules, "Validates")
+Rel(add, proc, "MakeAlbumPhoto")
+Rel(add, photos, "SaveAsync")
+Rel(add, db, "Writes", "EF Core")
+Rel(read, db, "Reads", "EF Core")
+Rel(read, photos, "GetReadUrl, GetDownloadUrl")
+@enduml

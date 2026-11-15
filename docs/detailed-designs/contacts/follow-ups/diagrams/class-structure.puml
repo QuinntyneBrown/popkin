@@ -1,0 +1,102 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Follow-ups
+
+package "Popkin.Domain" {
+  class FollowUp {
+    +Guid Id
+    +Guid OwnerId
+    +Guid? ContactId
+    +string Text
+    +DateOnly? DueOn
+    +bool IsPromise
+    +Guid? TimelineEntryId
+    +Guid ClientId
+    +DateTimeOffset CreatedAt
+    +DateTimeOffset? DoneAt
+    +Add(owner, text, contact, dueOn, clientId, now): FollowUp
+    +MarkDone(now: DateTimeOffset): void
+    +MarkNotDone(): void
+  }
+  class FollowUpRules {
+    +Text(value: string?): string
+  }
+  class Contact
+  class TimelineEntry {
+    +TalkChannel Channel
+    +DateTimeOffset LoggedAt
+  }
+  enum TalkChannel {
+    InPerson
+    Phone
+    Video
+    Messages
+  }
+}
+package "Popkin.Application.Contacts.FollowUps" {
+  class GetFollowUpsQueryHandler
+  class AddFollowUpCommand {
+    +Guid ClientId
+    +string? Text
+    +Guid? ContactId
+    +DateOnly? DueOn
+  }
+  class AddFollowUpCommandHandler
+  class SetFollowUpDoneCommand {
+    +Guid FollowUpId
+    +bool Done
+  }
+  class SetFollowUpDoneCommandHandler
+  class FollowUpDto {
+    +Guid Id
+    +string Text
+    +Guid? ContactId
+    +string? ContactFirstName
+    +DateOnly? DueOn
+    +bool IsPromise
+    +TalkChannel? PromisedVia
+    +DateOnly? PromisedOn
+    +DateTimeOffset? DoneAt
+  }
+  interface IContactGuard {
+    +RequireOwnedAsync(contactId, ct): Task<Contact>
+  }
+}
+package "api library (web app)" {
+  class FollowUpsStore {
+    +state: loading | ready | failed
+    +filter: everything | promises
+    +showDone: boolean
+    +buckets: FollowUpBucket[]
+    +lateOrDueToday: number
+    +add(text): void
+    +setDone(id, done): void
+  }
+  class FollowUpBuckets <<pure>> {
+    +followUpBuckets(list, today, filter): FollowUpBucket[]
+    +lateOrDueToday(list, today): number
+  }
+}
+
+FollowUp "*" --> "0..1" Contact : for
+FollowUp "*" --> "0..1" TimelineEntry : promised in
+TimelineEntry --> TalkChannel
+FollowUp ..> FollowUpRules : validates with
+AddFollowUpCommandHandler ..> AddFollowUpCommand : handles
+AddFollowUpCommandHandler ..> IContactGuard : uses
+AddFollowUpCommandHandler --> FollowUp : creates
+SetFollowUpDoneCommandHandler ..> SetFollowUpDoneCommand : handles
+SetFollowUpDoneCommandHandler --> FollowUp : changes
+GetFollowUpsQueryHandler ..> FollowUpDto : returns
+FollowUpsStore ..> FollowUpBuckets : sorts with
+FollowUpsStore o-- FollowUpDto : holds
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Today
+
+Person(owner, "Owner", "Signed-in person")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "ContactsTodayPage, TodayStore, ContactsOutbox")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/contacts/today, owner only")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Contact, KeyDate, FollowUp, Habit, HabitKept, TimelineEntry")
+}
+Rel(owner, web, "Opens Contacts", "HTTPS")
+Rel(web, api, "GET /api/contacts/today?on={device day}; the follow-up write", "JSON/HTTPS, session")
+Rel(api, db, "Reads the owner's rows", "EF Core")
+@enduml

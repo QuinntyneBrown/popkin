@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Memories and files
+
+Person(owner, "Person", "Keeps their own Contacts; the only one who sees them")
+System(popkin, "Popkin", "Platform for pop-up communities, with Contacts")
+
+Rel(owner, popkin, "Uses Contacts in", "HTTPS")
+@enduml

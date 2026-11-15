@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Reminders
+
+Person(owner, "Person", "Owner of the reminders")
+System_Ext(acs, "Azure Communication Services", "Email")
+System_Ext(push, "Phone notification service", "<TO SUPPLY>")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Shows in-app reminders; holds the switches")
+  Container(api, "Popkin API", "ASP.NET Core", "Reads and dismisses reminders")
+  Container(worker, "Popkin Worker", ".NET worker", "SendContactRemindersJob; no hub connection")
+  ContainerDb(db, "Popkin database", "SQL Server", "KeyDate, ReminderPreferences, ContactReminder, ContactWeeklyEmail")
+}
+Rel(owner, web, "Uses", "HTTPS")
+Rel(web, api, "Reads and dismisses reminders", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(worker, db, "Finds due reminders, records sends", "EF Core")
+Rel(worker, acs, "Sends the week ahead", "HTTPS")
+Rel(worker, push, "Sends phone notifications", "<TO SUPPLY>")
+@enduml

@@ -1,0 +1,108 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Habits
+
+package "Popkin.Domain" {
+  enum HabitRhythm {
+    Weekly
+    EveryTwoWeeks
+    Monthly
+  }
+  class Habit {
+    +Guid Id
+    +Guid OwnerId
+    +Guid ContactId
+    +string What
+    +HabitRhythm Rhythm
+    +DateOnly StartedOn
+    +Guid ClientId
+    +DateTimeOffset CreatedAt
+    +DateOnly LastTime
+    +Start(owner, contact, what, rhythm, startedOn, clientId, now): Habit
+    +DueOn(): DateOnly
+    +IsOverdue(today: DateOnly): bool
+    +Keep(keptOn: DateOnly, clientId: Guid): HabitKept
+    +Unkeep(keptId: Guid): void
+  }
+  class HabitKept {
+    +Guid Id
+    +Guid HabitId
+    +DateOnly KeptOn
+    +Guid ClientId
+    +DateTimeOffset CreatedAt
+  }
+  class HabitSchedule <<static>> {
+    +Next(from: DateOnly, rhythm: HabitRhythm): DateOnly
+  }
+  class HabitRules <<static>> {
+    +What(value: string?): string
+  }
+  class Contact
+}
+package "Popkin.Application.Contacts.Habits" {
+  class StartHabitCommand {
+    +Guid ClientId
+    +Guid ContactId
+    +string? What
+    +string? Rhythm
+  }
+  class KeepHabitCommand {
+    +Guid HabitId
+    +Guid ClientId
+    +DateOnly KeptOn
+  }
+  class UnkeepHabitCommand {
+    +Guid HabitId
+    +Guid KeptId
+  }
+  class HabitDto {
+    +Guid Id
+    +string What
+    +HabitRhythm Rhythm
+    +DateOnly LastTime
+    +DateOnly DueOn
+    +DateOnly[] KeptOn
+  }
+  class StartHabitCommandHandler
+  class KeepHabitCommandHandler
+  class UnkeepHabitCommandHandler
+  class GetHabitsQueryHandler
+}
+package "api library (web app)" {
+  class HabitsStore {
+    +state: loading | ready | failed
+    +leading: HabitView?
+    +rows: HabitView[]
+    +keep(id): void
+    +undo(): void
+  }
+  class HabitRulesTs <<pure>> {
+    +habitDue(dueOn, today): due | overdue | ahead
+    +habitKeeping(keptOn, rhythm, today): KeepStrip
+  }
+}
+
+Habit "*" --> "1" Contact : with
+Habit "1" *-- "*" HabitKept : kept
+Habit --> HabitRhythm
+Habit ..> HabitSchedule : due day from
+Habit ..> HabitRules : validates with
+StartHabitCommandHandler ..> StartHabitCommand : handles
+StartHabitCommandHandler --> Habit : starts
+KeepHabitCommandHandler ..> KeepHabitCommand : handles
+KeepHabitCommandHandler --> Habit : Keep
+UnkeepHabitCommandHandler ..> UnkeepHabitCommand : handles
+UnkeepHabitCommandHandler --> Habit : Unkeep
+GetHabitsQueryHandler ..> HabitDto : returns
+HabitsStore o-- HabitDto : holds
+HabitsStore ..> HabitRulesTs : uses
+@enduml

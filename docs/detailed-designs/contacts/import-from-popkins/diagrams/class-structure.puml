@@ -1,0 +1,94 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Import from your Popkins
+
+package "Popkin.Domain" {
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+  }
+  class Membership {
+    +Guid PopkinId
+    +Guid PersonId
+    +string DisplayName
+    +string? PhotoKey
+    +DateTimeOffset? LeftAt
+  }
+  class Person {
+    +Guid Id
+    +DateTimeOffset? DeletedAt
+  }
+  class Contact {
+    +Guid Id
+    +Guid OwnerId
+    +string Name
+    +Guid? PersonId
+    +{static} Import(ownerId, personId, name, now): Contact
+  }
+  class ImportBatch {
+    +Guid OwnerId
+    +Guid ClientId
+    +int Imported
+    +DateTimeOffset At
+  }
+}
+package "Popkin.Application" {
+  class GetImportCandidatesQueryHandler {
+    +Handle(query): Task<ImportCandidatesDto>
+  }
+  class ImportContactsCommand {
+    +Guid ClientId
+    +Guid[] PersonIds
+  }
+  class ImportContactsCommandHandler {
+    +Handle(command): Task<ImportResultDto>
+  }
+  class ImportCandidatesDto {
+    +int Total
+    +ImportPopkinDto[] Popkins
+  }
+  class ImportPopkinDto {
+    +Guid PopkinId
+    +string Name
+    +string Emoji
+    +int PeopleCount
+    +ImportPersonDto[] People
+  }
+  class ImportPersonDto {
+    +Guid PersonId
+    +string Name
+    +string Initials
+    +string? PhotoUrl
+  }
+  class ImportResultDto {
+    +int Imported
+  }
+  interface ICurrentPerson {
+    +Guid PersonId
+  }
+}
+PopkinSpace "1" *-- "*" Membership
+Membership "*" --> "1" Person
+Contact "0..1" ..> "1" Person : PersonId
+ImportCandidatesDto *-- ImportPopkinDto
+ImportPopkinDto *-- ImportPersonDto
+GetImportCandidatesQueryHandler ..> Membership : reads, LeftAt null
+GetImportCandidatesQueryHandler ..> ImportCandidatesDto : returns
+GetImportCandidatesQueryHandler ..> ICurrentPerson
+ImportContactsCommandHandler ..> ImportContactsCommand : handles
+ImportContactsCommandHandler ..> ICurrentPerson
+ImportContactsCommandHandler --> Contact : Import, once per person
+ImportContactsCommandHandler --> ImportBatch : records client id
+ImportContactsCommandHandler ..> ImportResultDto : returns
+@enduml

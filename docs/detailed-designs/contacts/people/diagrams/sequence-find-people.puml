@@ -1,0 +1,43 @@
+@startuml
+title UML sequence behaviour — Choosing a circle and searching on People
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsPeoplePage" as page
+  participant "pk-filter-chips" as chips
+  participant "pk-search-field" as search
+  participant "PeopleStore" as store
+  participant "people-text.ts" as text
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsController" as controller
+end box
+note over controller : No request: the list is already on the device
+actor -> chips : Chooses "Family"
+chips -> store : circle = Family
+store --> page : closest hidden; shown = Ada, Chidi, Ifeoma, Tomás; listName "Family"
+page --> actor : "Family" pressed; four rows (L2-127 AC2)
+actor -> chips : Chooses "All"
+chips -> store : circle = all
+actor -> search : Types "Femi"
+search -> store : search = "Femi"
+store -> text : matchesName(each contact, "Femi")
+text --> store : none
+store --> page : noResults
+page --> actor : Closest and list hidden; "No one called “Femi”", "Add “Femi”" (L2-127 AC3)
+actor -> page : "Add “Femi”"
+page --> actor : Add someone, /contacts/people/new?name=Femi
+@enduml

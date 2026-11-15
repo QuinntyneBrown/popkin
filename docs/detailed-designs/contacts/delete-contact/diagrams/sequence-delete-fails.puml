@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — The delete fails
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "DeleteContactDialog" as dialog
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DeleteContactCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhotoStore" as photos
+  database "Popkin database" as db
+end box
+actor -> dialog : "Delete Chidi"
+dialog -> client : deleteContact(contactId)
+alt No connection
+  client --> dialog : Network error
+else Save fails
+  client -> controller : DELETE /api/contacts/people/{contactId}
+  controller -> handler : Send DeleteContactCommand
+  handler -> db : SaveChangesAsync
+  db --> handler : Exception; the transaction rolls back
+  handler --> controller : 500
+  controller --> client : ProblemDetails
+  client --> dialog : failed
+  note over photos : No file is deleted, since the save did not commit
+end
+dialog --> actor : "We couldn't delete Chidi." "Nothing was removed. Check your connection and try again." (L2-132 AC3)
+actor -> dialog : "Keep Chidi" or "Delete Chidi" again
+@enduml

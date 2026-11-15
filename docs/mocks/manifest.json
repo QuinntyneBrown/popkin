@@ -278,7 +278,8 @@
       "requirements": [
         "L2-017",
         "L2-018",
-        "L2-056"
+        "L2-056",
+        "L2-121"
       ],
       "states": [
         "default",
@@ -294,7 +295,12 @@
       "kind": "page",
       "title": "Contacts · Today",
       "route": "/contacts",
-      "requirements": [],
+      "requirements": [
+        "L2-121",
+        "L2-123",
+        "L2-125",
+        "L2-142"
+      ],
       "states": [
         "default",
         "loading",
@@ -308,7 +314,12 @@
       "kind": "page",
       "title": "Contacts · People",
       "route": "/contacts/people",
-      "requirements": [],
+      "requirements": [
+        "L2-121",
+        "L2-123",
+        "L2-126",
+        "L2-127"
+      ],
       "states": [
         "default",
         "loading",
@@ -323,7 +334,14 @@
       "kind": "page",
       "title": "Contact profile",
       "route": "/contacts/people/:id",
-      "requirements": [],
+      "requirements": [
+        "L2-121",
+        "L2-122",
+        "L2-123",
+        "L2-128",
+        "L2-135",
+        "L2-136"
+      ],
       "states": [
         "default",
         "loading",
@@ -341,7 +359,11 @@
       "kind": "page",
       "title": "Add someone",
       "route": "/contacts/people/new",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-129",
+        "L2-130"
+      ],
       "states": [
         "default",
         "invalid",
@@ -359,7 +381,11 @@
       "kind": "page",
       "title": "Log a conversation",
       "route": "/contacts/people/:id/log",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-133",
+        "L2-134"
+      ],
       "states": [
         "default",
         "milestone",
@@ -377,7 +403,13 @@
       "kind": "page",
       "title": "Contacts · Dates",
       "route": "/contacts/dates",
-      "requirements": [],
+      "requirements": [
+        "L2-121",
+        "L2-123",
+        "L2-137",
+        "L2-139",
+        "L2-140"
+      ],
       "states": [
         "default",
         "loading",
@@ -391,7 +423,12 @@
       "kind": "page",
       "title": "Contacts · Follow-ups",
       "route": "/contacts/follow-ups",
-      "requirements": [],
+      "requirements": [
+        "L2-121",
+        "L2-123",
+        "L2-141",
+        "L2-142"
+      ],
       "states": [
         "default",
         "loading",
@@ -406,7 +443,12 @@
       "kind": "page",
       "title": "Contacts · Habits",
       "route": "/contacts/habits",
-      "requirements": [],
+      "requirements": [
+        "L2-121",
+        "L2-123",
+        "L2-143",
+        "L2-144"
+      ],
       "states": [
         "default",
         "loading",
@@ -420,7 +462,12 @@
       "kind": "page",
       "title": "Contacts · Groups",
       "route": "/contacts/groups",
-      "requirements": [],
+      "requirements": [
+        "L2-121",
+        "L2-123",
+        "L2-146",
+        "L2-148"
+      ],
       "states": [
         "default",
         "loading",
@@ -435,7 +482,11 @@
       "kind": "page",
       "title": "Contacts · Connections",
       "route": "/contacts/connections",
-      "requirements": [],
+      "requirements": [
+        "L2-121",
+        "L2-123",
+        "L2-149"
+      ],
       "states": [
         "default",
         "loading",
@@ -1463,7 +1514,10 @@
       "kind": "dialog",
       "title": "New habit",
       "opens_from": "contacts-habits",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-145"
+      ],
       "states": [
         "default",
         "invalid",
@@ -1475,7 +1529,10 @@
       "kind": "dialog",
       "title": "Add a date",
       "opens_from": "contacts-dates",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-138"
+      ],
       "states": [
         "default",
         "invalid",
@@ -1487,7 +1544,10 @@
       "kind": "dialog",
       "title": "New group",
       "opens_from": "contacts-groups",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-147"
+      ],
       "states": [
         "default",
         "invalid",
@@ -1499,7 +1559,10 @@
       "kind": "dialog",
       "title": "Connect two people",
       "opens_from": "contacts-connections",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-150"
+      ],
       "states": [
         "default",
         "invalid",
@@ -1512,7 +1575,10 @@
       "kind": "dialog",
       "title": "Import from your Popkins",
       "opens_from": "contacts-today",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-151"
+      ],
       "states": [
         "default",
         "busy"
@@ -1526,7 +1592,9 @@
       "kind": "dialog",
       "title": "Contact actions",
       "opens_from": "contact-profile",
-      "requirements": [],
+      "requirements": [
+        "L2-131"
+      ],
       "states": [
         "default"
       ],
@@ -1540,7 +1608,10 @@
       "kind": "dialog",
       "title": "Delete a contact",
       "opens_from": "contact-profile",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-132"
+      ],
       "states": [
         "default",
         "busy",
@@ -1555,7 +1626,10 @@
       "kind": "dialog",
       "title": "Add to memories",
       "opens_from": "contact-profile",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-136"
+      ],
       "states": [
         "default",
         "invalid",
@@ -1567,7 +1641,10 @@
       "kind": "dialog",
       "title": "Add people to a group",
       "opens_from": "contacts-groups",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-147"
+      ],
       "states": [
         "default",
         "busy"
@@ -1581,7 +1658,11 @@
       "kind": "notification",
       "title": "Contacts toasts",
       "opens_from": "contacts-today",
-      "requirements": [],
+      "requirements": [
+        "L2-123",
+        "L2-124",
+        "L2-140"
+      ],
       "states": [
         "info",
         "success",

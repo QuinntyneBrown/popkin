@@ -1,0 +1,88 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Open Contacts
+
+package "Popkin web app (api library)" {
+  class ContactsFrame {
+    +people: Signal<number | null>
+    +due: Signal<number>
+    +countLine: Signal<string>
+    +dueLabel: Signal<string>
+    +refresh(): void
+  }
+  class ContactsOutbox {
+    -entries: Signal<ContactsOutboxEntry[]>
+    +enqueue(kind: string, body: unknown): void
+    -sendNext(): void
+  }
+  class ContactsOutboxEntry {
+    +clientId: string
+    +kind: string
+    +body: unknown
+    +state: Waiting | Sending | Failed
+  }
+  class Toaster {
+    +show(variant, heading, text?, action?): void
+    +hold(id: number): void
+    +release(id: number): void
+    +dismiss(id: number): void
+  }
+  interface ContactsApi {
+    +summary(): Observable<ContactsSummaryDto>
+    +followUps(): Observable<FollowUpDto[]>
+  }
+  class FollowUpRules <<Follow-ups design>> {
+    +lateOrDueToday(followUps, today: string): number
+  }
+  interface NetworkStatus {
+    +online: Signal<boolean>
+    +backOnline$: Observable<void>
+  }
+}
+package "Popkin.Domain" {
+  interface IClientWrite {
+    +Guid OwnerId
+    +Guid ClientId
+  }
+  class Contact
+  class FollowUp
+}
+package "Popkin.Application" {
+  class GetContactsSummaryQuery
+  class GetContactsSummaryQueryHandler {
+    +Handle(query: GetContactsSummaryQuery): Task<ContactsSummaryDto>
+  }
+  class ContactsSummaryDto {
+    +int People
+  }
+  class ClientWrites {
+    +FindAsync<T>(rows: IQueryable<T>, ownerId: Guid, clientId: Guid): Task<T?>
+  }
+  interface ICurrentPerson {
+    +Guid PersonId
+  }
+}
+ContactsOutbox *-- ContactsOutboxEntry
+ContactsOutbox ..> ContactsApi : sends
+ContactsOutbox ..> NetworkStatus : backOnline$
+ContactsOutbox ..> Toaster : offline, failure
+ContactsOutbox ..> ContactsFrame : refresh()
+ContactsFrame ..> ContactsApi : summary(), followUps()
+ContactsFrame ..> FollowUpRules : badge
+IClientWrite <|.. Contact
+IClientWrite <|.. FollowUp
+GetContactsSummaryQueryHandler ..> GetContactsSummaryQuery : handles
+GetContactsSummaryQueryHandler ..> ICurrentPerson
+GetContactsSummaryQueryHandler ..> Contact : counts
+GetContactsSummaryQueryHandler ..> ContactsSummaryDto : returns
+ClientWrites ..> IClientWrite
+@enduml

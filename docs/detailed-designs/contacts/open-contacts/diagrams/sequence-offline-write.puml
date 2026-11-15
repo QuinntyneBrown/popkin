@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — A Contacts write made offline
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Signed-in person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Contacts page" as page
+  participant "ContactsOutbox" as outbox
+  participant "NETWORK_STATUS" as net
+  participant "Toaster" as toaster
+  participant "HttpContactsApi" as client
+  participant "ContactsFrame" as frame
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Contacts controller" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Create handler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Adds a follow-up while offline
+page -> outbox : enqueue(kind, body) with a new clientId
+outbox -> net : online()
+net --> outbox : false
+outbox -> outbox : Keep the entry Waiting in local storage
+outbox -> toaster : warning "You're offline" (L2-123 AC4)
+toaster --> actor : "What you add is kept on this phone and saved when you're back."
+net -> outbox : backOnline$
+loop Each waiting entry, in order
+  outbox -> client : Send the body with its clientId
+  client -> controller : JSON/HTTPS
+  controller -> handler : Send the command
+  handler -> db : ClientWrites.FindAsync(OwnerId, clientId)
+  alt Already saved
+    db --> handler : The saved row; nothing is added
+  else New
+    handler -> db : SaveChangesAsync
+  end
+  handler --> controller : The row
+  controller --> client : 200
+  outbox -> outbox : Remove the entry
+  outbox -> frame : refresh()
+end
+opt Refused (4xx)
+  outbox -> toaster : danger toast of its kind, stays until dismissed (L2-124 AC3)
+end
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Memories and files
+
+Person(owner, "Person", "Keeps photos, files and notes about a contact")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Memories & files tab, Add to memories dialog")
+  Container(api, "Popkin API", "ASP.NET Core", "/api/contacts/** endpoints")
+  ContainerDb(db, "Popkin database", "SQL Server", "Memory")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "Memory files under random keys")
+}
+Rel(owner, web, "Uses", "HTTPS")
+Rel(web, api, "Uploads and reads", "multipart and JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, store, "Saves files, signs addresses", "HTTPS")
+Rel(web, store, "Reads files through addresses that expire", "HTTPS")
+@enduml

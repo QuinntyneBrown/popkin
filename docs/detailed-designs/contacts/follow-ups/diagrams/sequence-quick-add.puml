@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — Adding a follow-up in a line
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsFollowUpsPage" as page
+  participant "FollowUpsStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "FollowUpsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddFollowUpCommandHandler" as handler
+  participant "IContactGuard" as second
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Types "Call Sam about the reference", Enter
+page -> store : add(text)
+store --> page : Listed open at once (L2-142 AC1)
+store -> outbox : POST with a new clientId
+outbox -> client : addFollowUp({ clientId, text })
+client -> controller : POST /api/contacts/follow-ups
+controller -> handler : Send AddFollowUpCommand
+opt contactId given
+  handler -> second : RequireOwnedAsync(contactId)
+  second --> handler : Contact, or 404 contact_not_found
+end
+handler -> db : A follow-up with this ClientId?
+alt Already saved (a resend)
+  db --> handler : The existing row
+else New
+  handler -> handler : FollowUpRules.Text: 400 text_required when empty
+  handler -> db : Add FollowUp, SaveChangesAsync
+end
+handler --> controller : FollowUpDto
+controller --> client : 201
+client --> store : Replace the pending row
+note over page, store : The person and the day of a quick add are gap 106
+@enduml

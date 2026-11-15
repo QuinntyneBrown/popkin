@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Delete a contact
+
+Person(owner, "Owner", "Signed-in person who keeps their own Contacts")
+Person_Ext(contact, "Contact", "Someone the owner deletes; never told")
+System(popkin, "Popkin", "Pop-up communities, with each person's own Contacts")
+
+Rel(owner, popkin, "Deletes a contact in", "Popkin web app")
+Rel(popkin, contact, "Sends nothing to; changes none of their Popkins")
+@enduml

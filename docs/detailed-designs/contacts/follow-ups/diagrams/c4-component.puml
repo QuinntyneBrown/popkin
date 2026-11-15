@@ -1,0 +1,30 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Follow-ups
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactsFollowUpsPage", "Angular page", "pk-task, pk-segmented-control, pk-empty-state")
+  Component(store, "FollowUpsStore", "api library", "buckets, counts, lateOrDueToday, toasts")
+  Component(rules, "followUpBuckets", "api library, pure", "Overdue, Today, This week, Later")
+  Component(outbox, "ContactsOutbox", "api library", "Sends writes in order, with a client id")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "FollowUpsController", "ASP.NET Core controller", "One MediatR request per endpoint")
+  Component(handlers, "GetFollowUpsQueryHandler, AddFollowUpCommandHandler, SetFollowUpDoneCommandHandler", "MediatR handlers", "Owner's rows only")
+  Component(guard, "IContactGuard", "Application", "RequireOwnedAsync: 404 contact_not_found")
+  Component(entity, "FollowUp", "Domain entity", "Add, MarkDone, MarkNotDone")
+  ComponentDb(db, "Popkin database", "SQL Server", "FollowUp")
+}
+Rel(page, store, "Reads and calls")
+Rel(store, rules, "Sorts with")
+Rel(store, outbox, "Queues writes")
+Rel(outbox, client, "Sends")
+Rel(store, client, "Loads")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, handlers, "Sends query or command")
+Rel(handlers, guard, "Checks the contact")
+Rel(handlers, entity, "Creates and changes")
+Rel(handlers, db, "Reads and saves", "EF Core")
+@enduml

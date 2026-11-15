@@ -1,0 +1,84 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Connections
+
+package "Popkin.Domain" {
+  enum ConnectionKind {
+    Family
+    Partner
+    Friend
+    Work
+  }
+  class Connection {
+    +Guid Id
+    +Guid OwnerId
+    +Guid ContactId
+    +Guid OtherContactId
+    +ConnectionKind Kind
+    +string? Words
+    +Guid ClientId
+    +DateTimeOffset CreatedAt
+    +Connect(owner, contact, other, kind, words, clientId, now): Connection
+  }
+  class ConnectionRules <<static>> {
+    +Words(value: string?): string?
+  }
+  class Contact {
+    +string Name
+    +string HowKnown
+    +ContactCircle Circle
+  }
+}
+package "Popkin.Application.Contacts.Connections" {
+  class ConnectCommand {
+    +Guid ClientId
+    +Guid ContactId
+    +Guid? OtherContactId
+    +string? Kind
+    +string? Words
+  }
+  class ConnectCommandHandler
+  class GetConnectionMapQueryHandler
+  class ConnectionMapDto {
+    +MapPersonDto[] People
+    +ConnectionDto[] Connections
+  }
+  interface IContactGuard {
+    +RequireOwnedAsync(contactId, ct): Task<Contact>
+  }
+}
+package "api library (web app)" {
+  class ConnectionsStore {
+    +state: loading | ready | failed
+    +filter: everyone | family | friends | work
+    +focus: string?
+    +lines: MapLine[]
+    +choose(contactId): void
+    +clear(): void
+    +connect(request): void
+  }
+  class ConnectionFilter <<pure>> {
+    +linesFor(connections, filter, focus): MapLine[]
+  }
+}
+
+Connection "*" --> "1" Contact : contact
+Connection "*" --> "1" Contact : other contact
+Connection --> ConnectionKind
+Connection ..> ConnectionRules : validates with
+ConnectCommandHandler ..> ConnectCommand : handles
+ConnectCommandHandler ..> IContactGuard : uses
+ConnectCommandHandler --> Connection : creates
+GetConnectionMapQueryHandler ..> ConnectionMapDto : returns
+ConnectionsStore o-- ConnectionMapDto : holds
+ConnectionsStore ..> ConnectionFilter : uses
+@enduml

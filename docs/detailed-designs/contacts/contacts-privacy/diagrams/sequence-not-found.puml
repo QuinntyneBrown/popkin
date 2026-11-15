@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — A link to a contact that is not the person's own
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Lena (not the owner)" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Profile page" as page
+  participant "ContactProfileStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Contacts controller" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Profile query handler" as handler
+  participant "IContactGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Opens /contacts/people/{id} from Mara's link
+alt id is not a Guid
+  page -> store : load(id)
+  store --> page : not-found, no request
+else A Guid
+  page -> store : load(id)
+  store -> client : profile(id)
+  client -> controller : GET /api/contacts/people/{id}
+  controller -> handler : Send the profile query
+  handler -> guard : RequireOwnedAsync(id)
+  guard -> db : Contact where Id = id and OwnerId = Lena
+  db --> guard : none (the contact is Mara's)
+  guard --> controller : 404 contact_not_found, as for a deleted contact (L2-122 AC1)
+  controller --> client : ProblemDetails, no name
+  client --> store : code contact_not_found
+  store --> page : not-found
+end
+page --> actor : "This person isn't in your contacts", "Go to People"; no other action (L2-122 AC2)
+actor -> page : "Go to People"
+page --> actor : Lena's own People
+@enduml

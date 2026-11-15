@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Today
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactsTodayPage", "Angular page", "pk-spotlight, pk-task, pk-contacts-page, pk-popkin-nav")
+  Component(store, "TodayStore", "api library", "loading, ready, empty, failed; toggle(followUpId)")
+  Component(text, "today-text.ts", "api library", "Greeting, days left, days late, rhythms")
+  Component(outbox, "ContactsOutbox", "api library", "Sends the follow-up write in order")
+  Component(toaster, "Toaster", "api library", "Marked done, Undo; the failure")
+  Component(client, "CONTACTS_API", "api library contract", "today(on)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsController", "ASP.NET Core controller", "GET api/contacts/today")
+  Component(handler, "GetTodayQueryHandler", "MediatR handler", "Reads the owner's rows; composes TodayDto")
+  Component(rules, "KeyDate.NextOccurrence, TodayRules", "Domain and Application", "Next occurrence, order, cuts")
+  Component(owned, "OwnedQueries.OwnedBy", "Application", "WHERE OwnerId = caller")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contacts tables")
+}
+Rel(page, store, "Reads state")
+Rel(page, text, "Words")
+Rel(store, client, "today(device day); importCandidates() when empty")
+Rel(store, outbox, "Follow-up done or open")
+Rel(store, toaster, "Marked done, Undo")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetTodayQuery")
+Rel(handler, owned, "Every read")
+Rel(handler, rules, "Orders and cuts")
+Rel(owned, db, "Filtered reads", "EF Core")
+@enduml

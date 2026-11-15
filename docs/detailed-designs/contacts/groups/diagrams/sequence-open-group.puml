@@ -1,0 +1,60 @@
+@startuml
+title UML sequence behaviour — Opening a group
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactsGroupsPage" as page
+  participant "GroupsStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "GroupsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetGroupsQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Opens /contacts/groups
+page -> store : load()
+store -> client : groups()
+client -> controller : GET /api/contacts/groups
+controller -> handler : Send GetGroupsQuery
+handler -> db : ContactGroups where OwnerId = PersonId (L2-122 AC1)
+handler -> db : Members' last conversations, coming key dates
+handler -> db : Membership of the person in each linked Popkin, LeftAt null
+handler --> controller : GroupDto[]
+alt Read fails
+  controller --> client : Error
+  page --> actor : "We couldn’t load your groups", "Try again"
+else No groups
+  page --> actor : "No groups yet", "New group" (L2-146 AC3)
+else Groups
+  controller --> client : 200
+  client --> store : GroupDto[]
+  store -> store : byKind: Households, Small groups, Teams, Clubs; empty kinds left out
+  page --> actor : Groups with emoji, name, first names (L2-146 AC1)
+  actor -> page : Chooses Thursday Night Group
+  page -> page : ?group={id}, aria-current
+  page --> actor : Kind, name, "Add people", "4 people", note, "Coming up" (L2-146 AC2)
+  alt Linked to a Popkin the person is in
+    page --> actor : "Open “Thursday Night Group”" opens that Popkin (L2-148 AC1)
+  else Linked to no Popkin
+    page --> actor : "Start a Popkin with them" (L2-148 AC2)
+  end
+end
+@enduml

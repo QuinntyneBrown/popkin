@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Add or edit someone
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ContactFormPage", "Angular page", "pk-form-sections, pk-photo-picker, pk-choice-chips, pk-form-summary, pk-banner")
+  Component(drafts, "Add a date, Connect", "CDK dialogs in draft mode", "Return drafts; save nothing")
+  Component(store, "ContactFormStore", "api library", "idle, invalid, saving, failed")
+  Component(outbox, "ContactsOutbox", "api library", "Sends in order with a client id")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsPeopleController", "ASP.NET Core controller", "/api/contacts/people")
+  Component(validator, "SaveContactValidator", "Application static class", "ContactRules; 400 codes")
+  Component(handlers, "AddContactCommandHandler, EditContactCommandHandler", "MediatR handlers", "Ownership, avatar, one save")
+  Component(guard, "IContactGuard", "Application", "Contact and group ownership")
+  Component(processor, "IPhotoProcessor", "Application abstraction", "MakeAvatar")
+  Component(photos, "IPhotoStore", "Application abstraction", "SaveAsync, DeleteAsync")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contacts tables")
+}
+Rel(page, drafts, "Opens")
+Rel(page, store, "Reads and changes")
+Rel(store, outbox, "Queues the save")
+Rel(outbox, client, "Calls")
+Rel(client, ctrl, "multipart/form-data")
+Rel(ctrl, handlers, "Sends AddContactCommand or EditContactCommand")
+Rel(handlers, validator, "Validates")
+Rel(handlers, guard, "Checks ownership")
+Rel(handlers, processor, "Makes the avatar")
+Rel(handlers, photos, "Writes the avatar")
+Rel(handlers, db, "Saves once", "EF Core")
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Connections
+
+Person(person, "Person", "Owns their Contacts")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Connections page, Connect dialog, ConnectionsStore")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/contacts/connections")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Connection, Contact")
+}
+Rel(person, web, "Opens /contacts/connections", "HTTPS")
+Rel(web, api, "GET, POST /api/contacts/connections", "JSON/HTTPS")
+Rel(api, db, "Reads and writes the owner's connections", "EF Core")
+@enduml

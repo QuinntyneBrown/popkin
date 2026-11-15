@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Add a date
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddDateDialog" as dialog
+  participant "DatesStore" as store
+  participant "ContactsOutbox" as outbox
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "KeyDatesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddKeyDateCommandHandler" as handler
+  participant "IContactGuard" as guard
+  participant "KeyDate" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : "Add a date", choose "Birthday"
+dialog -> store : Default for Birthday
+store --> dialog : "Remind me" starts at the default (L2-138 AC3)
+actor -> dialog : "Save the date"
+alt No day
+  dialog --> actor : "One thing to fix", "The day: pick it, so we know when to remind you." (L2-138 AC2)
+else Day picked
+  dialog --> actor : "Saving…" disabled (L2-123 AC5)
+  dialog -> outbox : addKeyDate(contactId, body with clientId)
+  outbox -> client : POST /api/contacts/people/{id}/key-dates
+  client -> ctrl : HTTPS request
+  ctrl -> handler : Send AddKeyDateCommand
+  handler -> guard : RequireOwnedAsync(contactId)
+  guard --> handler : Contact, or 404 contact_not_found
+  handler -> db : Key date with this clientId?
+  db --> handler : None
+  handler -> entity : New KeyDate(kind, title, day, everyYear, lead)
+  handler -> db : Save once
+  db --> handler : Committed
+  handler --> ctrl : KeyDateRowDto
+  ctrl --> client : 201
+  client --> dialog : Saved row
+  dialog --> actor : Closes; the date shows on Dates and the profile (L2-138 AC4)
+end
+@enduml
