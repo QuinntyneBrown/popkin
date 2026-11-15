@@ -27,6 +27,8 @@ public sealed class BurnDownTests
         await AddAsync(host, lakeside.Id, "Book the cabin at Pine Hollow", 8);
         var van = await AddAsync(host, lakeside.Id, "Rent a 7-seat van", 5);
         await AddAsync(host, lakeside.Id, "Grocery list for three dinners", 3);
+        // A minute later, so of the two 3s the grocery list was added first.
+        api.Clock.Advance(TimeSpan.FromMinutes(1));
         await AddAsync(host, lakeside.Id, "Everyone confirms the week off", 3);
         var deposits = await AddAsync(host, lakeside.Id, "Collect $150 deposits", 8);
         await AddAsync(host, lakeside.Id, "Kayak rental for two days", 8, "Backlog");

@@ -57,6 +57,7 @@ public sealed class GetBurnDownQueryHandler(
             .Where(s => s.Column is StoryColumn.ToDo or StoryColumn.Doing)
             .OrderByDescending(s => s.Points)
             .ThenBy(s => s.AddedAt)
+            .ThenBy(s => s.Id)
             .Take(BiggestCount)
             .ToList();
 
