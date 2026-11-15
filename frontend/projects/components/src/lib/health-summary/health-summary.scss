@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  margin-bottom: var(--space-6);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-success-bg);
+  color: var(--color-fg-default);
+}
+
+:host(.health-summary--degraded) {
+  background: var(--color-warning-bg);
+}
+
+:host(.health-summary--down) {
+  background: var(--color-danger-solid);
+  color: var(--color-fg-on-danger);
+}
+
+.health-summary__title {
+  margin: 0;
+  font: var(--text-h2);
+}
+
+.health-summary__text {
+  margin: var(--space-1) 0 0;
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+:host(.health-summary--down) .health-summary__text {
+  color: inherit;
+}
+
+@media (min-width: 48rem) {
+  :host {
+    padding: var(--space-6);
+  }
+
+  .health-summary__title {
+    font-size: var(--font-size-4xl);
+  }
+}

@@ -1,0 +1,53 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.config__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  padding: var(--space-2-5) var(--space-5);
+}
+
+.config__row + .config__row {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.config__name {
+  display: block;
+  font: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.config__key {
+  display: block;
+  font: var(--text-code);
+  font-size: var(--font-size-xs);
+  color: var(--color-fg-subtle);
+  overflow-wrap: anywhere;
+}
+
+.config__value {
+  margin: 0;
+  font: var(--text-code);
+  overflow-wrap: anywhere;
+}
+
+.config__value--unset {
+  color: var(--color-fg-subtle);
+}
+
+@media (min-width: 40rem) {
+  .config__row {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .config__value {
+    text-align: right;
+  }
+}

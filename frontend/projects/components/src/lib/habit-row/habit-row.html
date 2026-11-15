@@ -1,0 +1,23 @@
+<a class="habit-row__who" [routerLink]="link()">
+  <span
+    pk-avatar
+    size="lg"
+    [name]="name()"
+    [initials]="initials()"
+    [photo]="photo()"
+    [attr.data-accent]="accent()"
+  ></span>
+  <span class="habit-row__id">
+    <span class="habit-row__title">{{ heading() }}</span>
+    <span class="row__text">{{ often() }}</span>
+  </span>
+</a>
+<div pk-keep-strip [periods]="periods()"></div>
+<div class="habit-row__end">
+  @if (streak()) {
+    <div class="habit-row__streak">{{ streak() }}</div>
+  }
+  @if (next()) {
+    <div class="habit-row__next">{{ next() }}</div>
+  }
+</div>

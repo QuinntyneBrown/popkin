@@ -1,0 +1,118 @@
+:host {
+  display: block;
+}
+
+.contact-list__head {
+  display: none;
+}
+
+.divided {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.divided > li + li {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.contact-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--space-18);
+  padding-block: var(--space-2);
+  color: inherit;
+  text-decoration: none;
+}
+
+.contact-row:hover {
+  background: color-mix(in srgb, var(--color-bg-subtle) 60%, transparent);
+  color: inherit;
+}
+
+.contact-row__who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.contact-row__id {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title,
+.row__text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.row__text {
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.contact-row__cell {
+  display: none;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.contact-row__cell strong {
+  font-weight: var(--font-weight-regular);
+  color: var(--color-fg-default);
+}
+
+.contact-row__last {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.contact-row__last--quiet {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-accent);
+}
+
+@media (min-width: 48rem) {
+  .contact-list__head,
+  .contact-row {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr);
+    padding-inline: var(--space-2);
+  }
+
+  .contact-list__head {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--border-width-hairline) solid var(--color-border-default);
+    font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+    color: var(--color-fg-subtle);
+  }
+
+  .contact-list__head > :last-child {
+    text-align: right;
+  }
+
+  .contact-row__cell {
+    display: block;
+  }
+}

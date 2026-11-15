@@ -1,0 +1,14 @@
+@for (item of items(); track $index) {
+  <li>
+    <a class="record" [routerLink]="item.link">
+      <span pk-popkin-tile size="sm" [emoji]="item.emoji" [attr.data-accent]="item.accent"></span>
+      <span class="record__text">
+        <span class="record__title">{{ item.title }}</span>
+        @if (item.sub) {
+          <span class="record__sub">{{ item.sub }}</span>
+        }
+      </span>
+      <svg pk-icon name="chevron-right" size="sm"></svg>
+    </a>
+  </li>
+}

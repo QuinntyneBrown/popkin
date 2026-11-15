@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: var(--layout-container-narrow);
+  margin-inline: auto;
+  padding: 0 var(--space-5) var(--space-16);
+}
+
+@media (min-width: 48rem) {
+  :host {
+    padding-inline: var(--space-8);
+  }
+}

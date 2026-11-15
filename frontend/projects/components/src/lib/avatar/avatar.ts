@@ -25,6 +25,7 @@ export interface PersonAvatar {
     '[class.avatar--sm]': "size() === 'sm'",
     '[class.avatar--36]': "size() === '36'",
     '[class.avatar--lg]': "size() === 'lg'",
+    '[class.avatar--64]': "size() === '64'",
     '[class.avatar--xl]': "size() === 'xl'",
     '[class.avatar--2xl]': "size() === '2xl'",
     '[class.avatar--ring]': 'ring()',
@@ -38,8 +39,11 @@ export class Avatar {
   /** The initials as the API gives them, where the name itself is not known (an invite). */
   readonly initials = input<string>();
   readonly photo = input<string | null>();
-  /** `36` is the 36 px avatar of a short row, as the design system names it. */
-  readonly size = input<'2xs' | 'xs' | 'sm' | '36' | 'base' | 'lg' | 'xl' | '2xl'>('base');
+  /**
+   * `36` is the 36 px avatar of a short row, as the design system names it; `64` the face of
+   * Closest in Contacts, at the base avatar's type.
+   */
+  readonly size = input<'2xs' | 'xs' | 'sm' | '36' | 'base' | 'lg' | '64' | 'xl' | '2xl'>('base');
   /** A ring in the canvas colour, for avatars that overlap or sit on a picture. */
   readonly ring = input(false);
   /** No colour yet: the person has not joined, as in the photo picker. */

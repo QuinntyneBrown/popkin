@@ -18,4 +18,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class Chip {
   readonly outline = input(false);
+  /** How many a filter chip would show, after its label: "Family 4". */
+  readonly count = input<number | string>();
 }

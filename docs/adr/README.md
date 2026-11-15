@@ -18,7 +18,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0005](0005-tests-without-a-backend-or-database.md) | Tests run without a real backend or database: Playwright API mocking for e2e, EF Core InMemory for the backend | Accepted |
 | [0006](0006-behaviour-tests-only-by-default.md) | Only behaviour tests run; the visual, responsive and accessibility sweeps run by hand | Accepted |
 | [0007](0007-presentation-in-the-components-library.md) | Prefer best practice; presentation only in `components`, one encapsulated `.scss` per component, BEM names | Accepted |
-| [0008](0008-component-parity-specs.md) | Component parity specs: `npm run parity`, against the mocks | Accepted |
+| [0008](0008-component-parity-specs.md) | Component parity specs: `npm run parity`, against the mocks | Accepted, amended by 0025 |
 | [0009](0009-one-api-instance.md) | Popkin runs one API instance; what depends on that and what would end it | Accepted |
 | [0010](0010-the-hub-in-tests.md) | The hub in tests: stubbed in Playwright, in memory in the backend; a backend test never sleeps | Accepted |
 | [0011](0011-unit-tests-for-frontend-logic.md) | Unit tests for the `api` library's stores and helpers, run in CI | Accepted |
@@ -35,6 +35,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0022](0022-photos-in-azure-blob-storage.md) | Photo files are kept in a private Azure Blob Storage container, signed in with the managed identity; the API still signs and serves every address | Accepted |
 | [0023](0023-features-switched-on-by-a-setting.md) | A feature that is not ready is switched on by an API setting under `Features:`, which the API enforces and the app asks for before a screen opens | Accepted |
 | [0024](0024-admins-moderation-and-switches-in-the-database.md) | Admins, moderation and feature switches are kept in the database: admin roles and sessions, an audit log in the same transaction, moderation only through reports and a recorded view, switches Off, chosen or everyone | Accepted |
+| [0025](0025-library-components-ahead-of-their-screens.md) | Library components may be built ahead of their screens: their parity spec and acceptance test come with the first screen that uses them | Accepted |
 
 ## Format
 

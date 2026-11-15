@@ -3,11 +3,12 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  min-height: var(--target-comfortable);
+  min-height: var(--pk-link-height, var(--target-comfortable));
   padding: 0 var(--space-4);
   border: 0;
   background: none;
-  color: var(--color-fg-muted);
+  /* Knobs for a text button on a dark surface, such as the save bar. */
+  color: var(--pk-link-color, var(--color-fg-muted));
   font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
   text-decoration: none;
 }
