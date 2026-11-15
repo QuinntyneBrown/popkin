@@ -24,7 +24,7 @@ Plan and Schedules are shown in another of Mara's Popkins: Cabin Week ’27 🛶
   14 stories, 35 points in all, 24 left, 7 behind, finishes Sep 30 at this week's pace.
   Time off is entered by the week from Feb 1 to Mar 8 2027; Dev is tentative for the event week.
   This week runs Sat 12 – Fri 18 Sep; Wednesday is the evening all six are free, from 7:30 pm.
-Admin app: Noor Haddad (Plum, initials) runs Popkin; both switches on since Sep 1 2026.
+Admin app: its mocks are a separate set in admin/, with their own cast in admin/README.md.
 -->
 
 ## How to open them
@@ -127,9 +127,8 @@ depends on one says so.
    hours come "from everyone's work calendars"; the mocks have each member enter their own
    (`my-hours`), as L2-074 states, and a calendar connection is open. The story dialog
    (`story`) and the empty, loading and error states are new.
-7. The admin app (`admin-features`, `admin-sign-in`, `admin-denied`, `turn-off-feature`) has
-   no design at all (L1-019, ADR 0016); it is built from the Popkin app's components with an
-   "Admin" mark in the top bar.
+7. The admin app is a separate application (`frontend/projects/admin`); its screens, from the
+   Popkin Admin designs in Magic Patterns, are a mock set of their own in [admin/](admin/index.html).
 8. The earlier mocks of a Popkin's screens show four tabs. They now stand for a Popkin where
    Plan and Schedules are off (L2-077 AC1); the new screens show all six tabs.
 9. The event of time off: settled by journey 22. The Host sets its label and its first and last
@@ -195,9 +194,6 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Burn-down (`burn-down`) | [✅](pages/burn-down/default.html) | [✅](pages/burn-down/loading.html) | [✅](pages/burn-down/empty.html) | [✅](pages/burn-down/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/burn-down/done.html) |  |  |  | `L2-071` |
 | Time off (`time-off`) | [✅](pages/time-off/default.html) | [✅](pages/time-off/loading.html) | [✅](pages/time-off/empty.html) | [✅](pages/time-off/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/time-off/off.html) |  | [✅](pages/time-off/confirmed.html) | [✅](pages/time-off/other-week.html) |  | `L2-072`, `L2-073`, `L2-077` |
 | This week (`this-week`) | [✅](pages/this-week/default.html) | [✅](pages/this-week/loading.html) | [✅](pages/this-week/empty.html) | [✅](pages/this-week/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/this-week/working.html) | `L2-074` |
-| Features (admin) (`admin-features`) | [✅](pages/admin-features/default.html) | [✅](pages/admin-features/loading.html) | ➖ | [✅](pages/admin-features/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/admin-features/off.html) |  |  |  |  | `L2-076`, `L2-077`, `L2-078` |
-| Admin sign in (`admin-sign-in`) | [✅](pages/admin-sign-in/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-078` |
-| Not an admin (`admin-denied`) | [✅](pages/admin-denied/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-078` |
 
 ### Dialogs
 
@@ -229,7 +225,6 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Set the event (`set-event`) | [✅](dialogs/set-event/default.html) | [✅](dialogs/set-event/busy.html) | [✅](dialogs/set-event/invalid.html) |  |  |  |  |  |  | [✅](dialogs/set-event/failed.html) |  |  |  |  |  |  |  |  |  |  |  |  | `L2-085` |
 | Add my time off (`add-time-off`) | [✅](dialogs/add-time-off/default.html) | [✅](dialogs/add-time-off/busy.html) | [✅](dialogs/add-time-off/invalid.html) |  |  |  |  |  |  | [✅](dialogs/add-time-off/failed.html) |  |  |  |  |  |  |  |  |  |  |  |  | `L2-073` |
 | My hours (`my-hours`) | [✅](dialogs/my-hours/default.html) | [✅](dialogs/my-hours/busy.html) | [✅](dialogs/my-hours/invalid.html) |  |  |  |  |  |  | [✅](dialogs/my-hours/failed.html) |  |  |  |  |  |  |  |  |  |  |  |  | `L2-074` |
-| Turn off a feature (`turn-off-feature`) | [✅](dialogs/turn-off-feature/default.html) | [✅](dialogs/turn-off-feature/busy.html) | ➖ |  |  |  |  |  |  | [✅](dialogs/turn-off-feature/failed.html) |  |  |  |  |  |  |  |  |  |  |  |  | `L2-076` |
 
 ### Notifications
 

@@ -1,0 +1,783 @@
+{
+  "project": "Popkin Admin",
+  "screens": [
+    {
+      "id": "sign-in",
+      "kind": "page",
+      "title": "Admin sign in",
+      "route": "admin.popkin.community/sign-in",
+      "requirements": [
+        "L2-078"
+      ],
+      "states": [
+        "default",
+        "invalid-email",
+        "sending",
+        "code",
+        "invalid",
+        "checking",
+        "locked"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows.",
+        "empty": "The screen lists nothing.",
+        "error": "A failed send or check is the invalid and locked states; a server failure is server-error."
+      }
+    },
+    {
+      "id": "not-an-admin",
+      "kind": "page",
+      "title": "Not an admin",
+      "route": "admin.popkin.community/not-an-admin",
+      "requirements": [
+        "L2-078"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows.",
+        "empty": "The screen lists nothing.",
+        "error": "This screen is itself the refusal."
+      }
+    },
+    {
+      "id": "not-found",
+      "kind": "page",
+      "title": "Not found",
+      "route": "admin.popkin.community/*",
+      "requirements": [],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "Nothing to wait for.",
+        "empty": "The screen lists nothing.",
+        "error": "This screen is itself the error."
+      }
+    },
+    {
+      "id": "server-error",
+      "kind": "page",
+      "title": "Server error",
+      "route": "admin.popkin.community/*",
+      "requirements": [],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "Nothing to wait for.",
+        "empty": "The screen lists nothing.",
+        "error": "This screen is itself the error."
+      }
+    },
+    {
+      "id": "dashboard",
+      "kind": "page",
+      "title": "Dashboard",
+      "route": "admin.popkin.community/",
+      "requirements": [],
+      "states": [
+        "default",
+        "metric-popkins",
+        "all-clear",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "A running platform always has people, Popkins and activity to count; a quiet day is all-clear."
+      }
+    },
+    {
+      "id": "menu",
+      "kind": "dialog",
+      "title": "Menu",
+      "opens_from": "dashboard",
+      "requirements": [],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "busy": "Choosing a section only navigates; nothing is sent.",
+        "invalid": "The menu has no field."
+      }
+    },
+    {
+      "id": "people",
+      "kind": "page",
+      "title": "People",
+      "route": "admin.popkin.community/people",
+      "requirements": [],
+      "states": [
+        "default",
+        "suspended",
+        "no-results",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "Popkin always has accounts; a list with none is only a search with no match (no-results).",
+        "forbidden": "Every admin role may find and view people."
+      }
+    },
+    {
+      "id": "person",
+      "kind": "page",
+      "title": "Person",
+      "route": "admin.popkin.community/people/:personId",
+      "requirements": [],
+      "states": [
+        "default",
+        "suspended",
+        "deleting",
+        "support",
+        "viewer",
+        "suspended-toast",
+        "restored",
+        "signed-out",
+        "deletion-started",
+        "export-started",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "A person always has an account to show; their empty lists say so in place (Sessions: “Not signed in anywhere”)."
+      }
+    },
+    {
+      "id": "person-suspend",
+      "kind": "dialog",
+      "title": "Suspend a person",
+      "opens_from": "person",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/person/default.html"
+    },
+    {
+      "id": "person-restore",
+      "kind": "dialog",
+      "title": "Lift a suspension",
+      "opens_from": "person",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/person/suspended.html"
+    },
+    {
+      "id": "person-sign-out",
+      "kind": "dialog",
+      "title": "Sign a person out",
+      "opens_from": "person",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/person/default.html"
+    },
+    {
+      "id": "person-delete",
+      "kind": "dialog",
+      "title": "Start a deletion",
+      "opens_from": "person",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/person/default.html"
+    },
+    {
+      "id": "person-export",
+      "kind": "dialog",
+      "title": "Export a person’s data",
+      "opens_from": "person",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/person/default.html"
+    },
+    {
+      "id": "deletions",
+      "kind": "page",
+      "title": "Deletion queue",
+      "route": "admin.popkin.community/deletions",
+      "requirements": [],
+      "states": [
+        "default",
+        "viewer",
+        "cancelled",
+        "empty",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "no-results": "The queue has no search or filter; four to a few dozen rows fit on one page."
+      }
+    },
+    {
+      "id": "deletion-cancel",
+      "kind": "dialog",
+      "title": "Cancel a deletion",
+      "opens_from": "deletions",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
+    },
+    {
+      "id": "data-requests",
+      "kind": "page",
+      "title": "Data requests",
+      "route": "admin.popkin.community/data-requests",
+      "requirements": [],
+      "states": [
+        "default",
+        "viewer",
+        "logged",
+        "empty",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "no-results": "The list has no search or filter; open requests are few."
+      }
+    },
+    {
+      "id": "data-request-new",
+      "kind": "dialog",
+      "title": "Log a data request",
+      "opens_from": "data-requests",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ]
+    },
+    {
+      "id": "popkins",
+      "kind": "page",
+      "title": "Popkins",
+      "route": "admin.popkin.community/popkins",
+      "requirements": [],
+      "states": [
+        "default",
+        "ending",
+        "no-results",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "A running platform always has Popkins; a search or filter with no match is no-results.",
+        "viewer": "The list has no actions; every role sees it the same way."
+      }
+    },
+    {
+      "id": "popkin",
+      "kind": "page",
+      "title": "Popkin",
+      "route": "admin.popkin.community/popkins/:popkinId",
+      "requirements": [],
+      "states": [
+        "default",
+        "ending",
+        "wrapped",
+        "viewer",
+        "extended",
+        "wrapped-now",
+        "member-removed",
+        "invite-reset",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "A Popkin always has its Host, its length and its invite; there is no empty Popkin."
+      }
+    },
+    {
+      "id": "popkin-wrap-up",
+      "kind": "dialog",
+      "title": "Wrap up a Popkin now",
+      "opens_from": "popkin",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/popkin/default.html"
+    },
+    {
+      "id": "popkin-extend",
+      "kind": "dialog",
+      "title": "Give a Popkin more time",
+      "opens_from": "popkin",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/popkin/default.html"
+    },
+    {
+      "id": "popkin-remove-member",
+      "kind": "dialog",
+      "title": "Remove a member",
+      "opens_from": "popkin",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/popkin/default.html"
+    },
+    {
+      "id": "popkin-reset-invite",
+      "kind": "dialog",
+      "title": "Reset the invite",
+      "opens_from": "popkin",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/popkin/default.html"
+    },
+    {
+      "id": "reports",
+      "kind": "page",
+      "title": "Reports",
+      "route": "admin.popkin.community/reports",
+      "requirements": [],
+      "states": [
+        "default",
+        "photo",
+        "photos",
+        "viewer",
+        "removed",
+        "dismissed",
+        "empty",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "no-results": "The kind filter shows a count beside each kind; a kind with none still lists, and the queue's own empty state covers a clear queue."
+      }
+    },
+    {
+      "id": "report-remove",
+      "kind": "dialog",
+      "title": "Remove reported content",
+      "opens_from": "reports",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/reports/default.html"
+    },
+    {
+      "id": "calls",
+      "kind": "page",
+      "title": "Live calls",
+      "route": "admin.popkin.community/calls",
+      "requirements": [],
+      "states": [
+        "default",
+        "viewer",
+        "ended",
+        "empty",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "no-results": "The list has no search or filter; it shows every call under way."
+      }
+    },
+    {
+      "id": "call-end",
+      "kind": "dialog",
+      "title": "End a call",
+      "opens_from": "calls",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/calls/default.html"
+    },
+    {
+      "id": "metrics",
+      "kind": "page",
+      "title": "Metrics",
+      "route": "admin.popkin.community/metrics",
+      "requirements": [],
+      "states": [
+        "default",
+        "7-days",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "A running platform always has a day of activity to chart; there is no empty series."
+      }
+    },
+    {
+      "id": "health",
+      "kind": "page",
+      "title": "Health",
+      "route": "admin.popkin.community/health",
+      "requirements": [],
+      "states": [
+        "default",
+        "all-good",
+        "down",
+        "checking",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "The four services are always checked; there is no empty list."
+      }
+    },
+    {
+      "id": "jobs",
+      "kind": "page",
+      "title": "Jobs",
+      "route": "admin.popkin.community/jobs",
+      "requirements": [],
+      "states": [
+        "default",
+        "collapsed",
+        "running",
+        "viewer",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "The Worker always hosts its four jobs; the list is never empty."
+      }
+    },
+    {
+      "id": "exports",
+      "kind": "page",
+      "title": "Album exports",
+      "route": "admin.popkin.community/exports",
+      "requirements": [],
+      "states": [
+        "default",
+        "retried",
+        "viewer",
+        "empty",
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "id": "features",
+      "kind": "page",
+      "title": "Features",
+      "route": "admin.popkin.community/features",
+      "requirements": [
+        "L2-076",
+        "L2-077",
+        "L2-078"
+      ],
+      "states": [
+        "default",
+        "off",
+        "everyone",
+        "loading",
+        "error",
+        "viewer"
+      ],
+      "not_applicable": {
+        "empty": "Plan and Schedules always exist; there is no empty list."
+      }
+    },
+    {
+      "id": "turn-off-feature",
+      "kind": "dialog",
+      "title": "Turn off a feature",
+      "opens_from": "features",
+      "requirements": [
+        "L2-076"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional; nothing can be invalid."
+      }
+    },
+    {
+      "id": "feature-everyone",
+      "kind": "dialog",
+      "title": "Turn a feature on for everyone",
+      "opens_from": "features",
+      "requirements": [
+        "L2-076"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional; nothing can be invalid."
+      }
+    },
+    {
+      "id": "feature-chosen",
+      "kind": "dialog",
+      "title": "Limit a feature to chosen Popkins",
+      "opens_from": "features",
+      "requirements": [
+        "L2-076"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional; nothing can be invalid."
+      }
+    },
+    {
+      "id": "feature-add-popkin",
+      "kind": "dialog",
+      "title": "Add a Popkin to a feature",
+      "opens_from": "features",
+      "requirements": [
+        "L2-076"
+      ],
+      "states": [
+        "default",
+        "results",
+        "no-results",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has a search, not a field to fill in; nothing can be invalid."
+      }
+    },
+    {
+      "id": "announcements",
+      "kind": "page",
+      "title": "Announcements",
+      "route": "admin.popkin.community/announcements",
+      "requirements": [],
+      "states": [
+        "default",
+        "warning",
+        "invalid",
+        "published",
+        "live",
+        "taken-down",
+        "viewer",
+        "empty",
+        "loading",
+        "error"
+      ]
+    },
+    {
+      "id": "announcement-publish",
+      "kind": "dialog",
+      "title": "Publish a banner",
+      "opens_from": "announcements",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no field; the message is checked on the page before it opens."
+      },
+      "close": "../../pages/announcements/default.html"
+    },
+    {
+      "id": "announcement-end",
+      "kind": "dialog",
+      "title": "Take the banner down",
+      "opens_from": "announcements",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no field to fill in."
+      },
+      "close": "../../pages/announcements/default.html"
+    },
+    {
+      "id": "limits",
+      "kind": "page",
+      "title": "Limits",
+      "route": "admin.popkin.community/limits",
+      "requirements": [],
+      "states": [
+        "default",
+        "edited",
+        "invalid",
+        "saved",
+        "viewer",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "Every limit always has a value; there is no empty list."
+      }
+    },
+    {
+      "id": "limit-save",
+      "kind": "dialog",
+      "title": "Save new limits",
+      "opens_from": "limits",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/limits/edited.html"
+    },
+    {
+      "id": "settings",
+      "kind": "page",
+      "title": "Settings",
+      "route": "admin.popkin.community/settings",
+      "requirements": [],
+      "states": [
+        "default",
+        "filtered",
+        "no-results",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "A deployed system always runs with settings; there is no empty list."
+      }
+    },
+    {
+      "id": "admins",
+      "kind": "page",
+      "title": "Admins & roles",
+      "route": "admin.popkin.community/admins",
+      "requirements": [],
+      "states": [
+        "default",
+        "roles",
+        "invited",
+        "removed",
+        "loading",
+        "error",
+        "viewer"
+      ],
+      "not_applicable": {
+        "empty": "The signed-in admin is always in the list; it can’t be empty.",
+        "no-results": "The list has no search or filter; five to a few dozen admins fit on one page."
+      }
+    },
+    {
+      "id": "admin-add",
+      "kind": "dialog",
+      "title": "Add an admin",
+      "opens_from": "admins",
+      "requirements": [],
+      "states": [
+        "default",
+        "invalid",
+        "busy",
+        "failed"
+      ]
+    },
+    {
+      "id": "admin-change-role",
+      "kind": "dialog",
+      "title": "Change an admin’s role",
+      "opens_from": "admins",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional."
+      }
+    },
+    {
+      "id": "admin-remove",
+      "kind": "dialog",
+      "title": "Remove an admin",
+      "opens_from": "admins",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional."
+      }
+    },
+    {
+      "id": "audit",
+      "kind": "page",
+      "title": "Audit log",
+      "route": "admin.popkin.community/audit",
+      "requirements": [],
+      "states": [
+        "default",
+        "filtered",
+        "no-results",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "Adding the first admin is itself recorded, so the log is never empty."
+      }
+    }
+  ]
+}
