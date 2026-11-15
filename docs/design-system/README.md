@@ -128,6 +128,26 @@ tabs.
 Not built, because no screen needs them yet: dropdown menu (Popkin settings is a sheet with menu rows), select, checkbox, radio buttons (choice cards and the segmented control cover the choices),
 breadcrumb and pagination (the admin app's side navigation and table are the admin shell and the data table). Add one from the extracting-design-systems catalog when a mock first needs it.
 
+### Contacts
+
+Contacts is a member's own address book beside Your Popkins, in the Popkin app, extracted on 15 November 2026 from its mocks
+([contacts-today](../mocks/pages/contacts-today/default.html) and the screens linked from it). Its pattern is
+[Contacts](patterns/contacts.html). Contacts has no L1 or L2 requirement yet (open question 10 in the mocks' README).
+
+| Component | Group | What it is | Mocks |
+|---|---|---|---|
+| [Contacts page and grid](components/contacts-layout.html) | Structure | The body of every Contacts section, its two columns from L, and the head of each list. | pages/contacts-today/default, pages/contacts-dates/default, pages/contact-profile/default |
+| [Spotlight and date tile](components/spotlight.html) | Content | The one thing that matters most on a screen, tinted in its colour; a date drawn as a tile, in sun when it is near. | pages/contacts-today/default, pages/contacts-habits/default |
+| [Contact row](components/contact-row.html) | Lists | A person in People: who, how you know them, how long since you talked; Closest and the circle chips above it. | pages/contacts-people/default |
+| [Task](components/task.html) | Lists | A follow-up or a promise with its tick; the add field; a promise before it is saved. | pages/contacts-follow-ups/default, pages/contacts-today/done, pages/log-entry/default |
+| [Contact timeline](components/contact-timeline.html) | Content | A person's history: conversations, milestones and memories on a line. | pages/contact-profile/default |
+| [Keep strip and habit row](components/keep-strip.html) | Content | A habit's last twelve periods, kept, missed and due; the habit in a list. | pages/contacts-habits/default |
+| [Info card and add card](components/info-card.html) | Content | A sand card of facts; the dashed card that starts what is missing. | pages/contact-profile/default, pages/contact-profile/empty |
+| [Contact header and facts](components/contact-id.html) | Content | A profile's head with Message · Call · Log; facts, likes and memories. | pages/contact-profile/default, pages/contact-profile/memories |
+| [Group browser](components/group-browser.html) | Navigation | Groups by kind beside the open one, with the way into its Popkin. | pages/contacts-groups/default, pages/contacts-groups/start |
+| [Connection map](components/connection-map.html) | Content | Who knows whom: faces on a board joined by lines, with the links in words beside it. | pages/contacts-connections/default |
+| [Form sections](components/form-sections.html) | Inputs | Add someone's sections, with a date entry, a person pick and the kind grid. | pages/add-contact/default, pages/log-entry/milestone |
+
 ### In the components library
 
 The `pk-*` components in `frontend/projects/components` carry these blocks, one stylesheet each
@@ -160,6 +180,7 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 | [Notifications](patterns/notifications.html) | Toasts for outcomes, banners for conditions, counts where people look. Nothing nags. |
 | [Content and tone](patterns/content-and-tone.html) | Short, human, a little cheeky. The words carry as much of Popkin's warmth as the colour does. |
 | [Admin console](patterns/admin-console.html) | The admin app: a sidebar, sand pages of panels and tables, every action with a reason and a record in the audit log. |
+| [Contacts](patterns/contacts.html) | A member's own address book: its seven sections, what each component is for, its states and its words. |
 | [Popkin colour](patterns/popkin-colour.html) | Each Popkin picks one of seven colours. Its screens, main buttons, bubbles, badges and tabs take that colour, for everyone in it. |
 
 ## Tokens
@@ -191,6 +212,10 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 | `docs/mocks/admin/pages/announcements/warning` | The loud banner's fill `--color-warning-border` is dark in dark theme: black text 3.1:1 | New `--color-warning-loud` (sun in both themes), 12.3:1 |
 | `docs/mocks/admin`, reports | The open report told by its fill alone | A bar on its left as well |
 | `docs/mocks/admin`, every page with a back link | The back link sat on the title's line; the person loading skeleton overflowed at 360 px and vanished on the sand page | Back link alone on its line inside a page head; skeletons on the page read `--color-bg-subtle-hover` |
+| Contacts mocks (`components.css`) | The person's history reused `.timeline`, the How long timeline's block; its line and flex rules leaked into name-your-popkin | Renamed `.contact-timeline` in the stylesheet and the 7 profile mocks that draw it |
+| `contacts-habits`, `contact-profile` | Kept and missed periods of a habit were two fills a colour apart (2.98:1): colour alone | Missed is an empty outline in `--color-border-strong`; kept stays filled green |
+| `contacts-follow-ups/done`, `contacts-today/done` | The done tick was constant white, 2.12:1 on the dark theme's green | New token `--color-fg-on-success`: white in light, black in dark |
+| `log-entry/milestone` | The kind grid of milestones is toggle buttons where one choice is made | Kept as drawn; the Form sections page recommends `role="radiogroup"` with arrow keys for the kind grid when it is built |
 
 ## Popkin colour contrast
 
@@ -219,6 +244,17 @@ same sRGB mixing the browser uses. Minimums: 4.5:1 for text, 3:1 for lines. All 
 | Amber (sun) | dark | 12.28 | 7.62 | 12.79 | 11.13 | 8.75 | 11.45 | 9.96 |
 
 ## Verification
+
+Run on 15 November 2026, after extracting Contacts:
+
+- `check_contrast.py` on `tokens/tokens.css`: 160 passed, 0 failed, 0 unresolved (light and dark), with six new pairs for Contacts.
+  Text on a Popkin tint was computed apart: muted text 5.46:1 or more on every tint; late coral text 5.05:1 (light) and 5.27:1
+  (dark) on coral, and 4.48:1 on sun in dark, so late text sits on coral only.
+- `check_design_system.py docs/design-system`: 115 pages (91 components, 11 patterns), 0 errors, 0 warnings.
+- `check_mocks.py docs/mocks`: 87 screens, 375 mocks, 0 errors (18 warnings, unchanged).
+- The eleven Contacts pages and the pattern loaded at 360 px with no horizontal scroll; Task, Connection map, Keep strip,
+  Spotlight, Group browser, Contact row and Form sections reviewed by eye in light at 1280 px and in dark at 360 px; the habit,
+  follow-up and connections mocks re-screenshotted after the stylesheet changes.
 
 Run on 15 November 2026, after extracting the admin app:
 
@@ -251,6 +287,10 @@ Run on 12 November 2026:
 
 ## Changelog
 
+- **15 November 2026**: Contacts. 11 component pages (a "Contacts" group in the nav and the index) and the Contacts pattern, from the
+  Contacts mocks; new token `--color-fg-on-success`; the Contacts classes in `components.css` gain `data-state` hover and focus hooks;
+  the Color foundation lists the new token. Fixed: `.timeline` renamed `.contact-timeline`, a habit's missed periods drawn as an outline,
+  the done tick's colour per theme.
 - **15 November 2026**: the admin app. 19 component pages for `frontend/projects/admin` (an "Admin app" group in the nav and the
   index) and the Admin console pattern; the admin's classes in `components.css` gain `data-state` hover hooks; new token
   `--color-warning-loud`; the waiting dot and degraded uptime use `--color-warning-solid`; a contrast pair for captions on the sand

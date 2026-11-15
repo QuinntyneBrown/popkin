@@ -1808,7 +1808,7 @@ a.segmented__option { display: inline-flex; align-items: center; gap: var(--spac
 /* Closest: the starred people as a strip of faces. */
 .closest { display: flex; gap: var(--space-4); overflow-x: auto; margin: var(--space-3) calc(-1 * var(--space-5)) 0; padding: var(--space-1) var(--space-5); scrollbar-width: none; }
 .closest__person { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); flex: none; width: var(--space-20); color: inherit; text-decoration: none; font: var(--font-weight-semibold) var(--font-size-sm-plus) / var(--line-height-snug) var(--font-family-sans); text-align: center; }
-.closest__person:hover { color: inherit; }
+.closest__person:hover, .closest__person[data-state="hover"] { color: inherit; }
 .closest__person .avatar { width: var(--space-16); height: var(--space-16); }
 @media (min-width: 48rem) { .closest { margin-inline: 0; padding-inline: 0; } }
 
@@ -1822,8 +1822,8 @@ a.segmented__option { display: inline-flex; align-items: center; gap: var(--spac
 .task__check { display: grid; place-items: center; flex: none; width: var(--target-comfortable); height: var(--target-comfortable); margin: calc(-1 * var(--space-2)); padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: inherit; cursor: pointer; }
 .task__box { display: grid; place-items: center; width: var(--space-7); height: var(--space-7); border: var(--border-width-thick) solid var(--color-border-strong); border-radius: var(--radius-full); background: var(--color-bg-surface); }
 .task__box .icon { display: none; width: var(--space-4); height: var(--space-4); stroke-width: 3; }
-.task__check:hover .task__box { border-color: var(--color-fg-muted); }
-.task__check[aria-pressed="true"] .task__box { border-color: var(--color-success-solid); background: var(--color-success-solid); color: var(--color-constant-light); }
+.task__check:hover .task__box, .task__check[data-state="hover"] .task__box { border-color: var(--color-fg-muted); }
+.task__check[aria-pressed="true"] .task__box { border-color: var(--color-success-solid); background: var(--color-success-solid); color: var(--color-fg-on-success); }
 .task__check[aria-pressed="true"] .task__box .icon { display: block; }
 .task__icon { display: grid; place-items: center; flex: none; width: var(--space-7); height: var(--space-7); border-radius: var(--radius-full); background: var(--accent-tint); color: var(--accent-text); }
 .task__icon .icon { width: var(--space-4); height: var(--space-4); }
@@ -1836,7 +1836,7 @@ a.segmented__option { display: inline-flex; align-items: center; gap: var(--spac
 .task__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); font: var(--text-body-sm); color: var(--color-fg-muted); }
 .task__meta .icon { width: var(--space-4); height: var(--space-4); }
 .task__who { display: inline-flex; align-items: center; gap: var(--space-1-5); min-height: var(--space-8); font-weight: var(--font-weight-semibold); color: var(--color-fg-default); text-decoration: none; }
-.task__who:hover { color: var(--color-fg-default); text-decoration: underline; }
+.task__who:hover, .task__who[data-state="hover"] { color: var(--color-fg-default); text-decoration: underline; }
 .task__due { flex: none; font: var(--text-body-sm); color: var(--color-fg-muted); white-space: nowrap; }
 .task__due--late { font-weight: var(--font-weight-semibold); color: var(--color-fg-accent); }
 
@@ -1844,37 +1844,37 @@ a.segmented__option { display: inline-flex; align-items: center; gap: var(--spac
 .add-field { position: relative; }
 .add-field > .icon { position: absolute; left: var(--space-4); top: 50%; translate: 0 -50%; color: var(--color-fg-subtle); pointer-events: none; }
 .add-field .input { padding-left: var(--space-12); border-color: transparent; background: var(--color-bg-subtle); }
-.add-field .input:focus { border-color: var(--color-border-focus); background: var(--color-bg-surface); }
+.add-field .input:focus, .add-field .input[data-state="focus"] { border-color: var(--color-border-focus); background: var(--color-bg-surface); }
 
 /* What kind of entry: a dot in its colour. Conversation coral, milestone sun, memory green; the entry's words say which. */
 .kind-dot { display: inline-block; flex: none; width: var(--space-2-5); height: var(--space-2-5); border-radius: var(--radius-full); background: var(--accent); }
 
 /* A person's history, newest first, on a line. Milestones sit in a tinted card with their tag. */
-.timeline { position: relative; display: flex; flex-direction: column; gap: var(--space-5); margin-top: var(--space-5); }
-.timeline::before { content: ""; position: absolute; top: var(--space-2); bottom: var(--space-2); left: calc(var(--space-2-5) / 2); width: var(--border-width-hairline); background: var(--color-border-default); }
-.timeline__item { position: relative; padding-left: var(--space-7); }
-.timeline__item > .kind-dot { position: absolute; left: 0; top: var(--space-1-5); }
-.timeline__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); font: var(--text-caption); color: var(--color-fg-subtle); }
-.timeline__date { font-weight: var(--font-weight-semibold); color: var(--color-fg-muted); }
-.timeline__tag { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--accent-tint); font-weight: var(--font-weight-semibold); color: var(--color-fg-default); }
-.timeline__card { margin-top: var(--space-1); }
-.timeline__item--milestone .timeline__card { margin-top: var(--space-2); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--accent-tint); }
-.timeline__title { font: var(--text-h4); }
-.timeline__item--milestone .timeline__title { font: var(--text-h3); }
-.timeline__body { max-width: var(--layout-measure); margin-top: var(--space-1); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
-.timeline__photo { display: block; width: 100%; max-width: var(--layout-measure-md); height: var(--space-40); margin-top: var(--space-3); border-radius: var(--radius-lg); object-fit: cover; }
+.contact-timeline { position: relative; display: flex; flex-direction: column; gap: var(--space-5); margin-top: var(--space-5); }
+.contact-timeline::before { content: ""; position: absolute; top: var(--space-2); bottom: var(--space-2); left: calc(var(--space-2-5) / 2); width: var(--border-width-hairline); background: var(--color-border-default); }
+.contact-timeline__item { position: relative; padding-left: var(--space-7); }
+.contact-timeline__item > .kind-dot { position: absolute; left: 0; top: var(--space-1-5); }
+.contact-timeline__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); font: var(--text-caption); color: var(--color-fg-subtle); }
+.contact-timeline__date { font-weight: var(--font-weight-semibold); color: var(--color-fg-muted); }
+.contact-timeline__tag { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--accent-tint); font-weight: var(--font-weight-semibold); color: var(--color-fg-default); }
+.contact-timeline__card { margin-top: var(--space-1); }
+.contact-timeline__item--milestone .contact-timeline__card { margin-top: var(--space-2); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--accent-tint); }
+.contact-timeline__title { font: var(--text-h4); }
+.contact-timeline__item--milestone .contact-timeline__title { font: var(--text-h3); }
+.contact-timeline__body { max-width: var(--layout-measure); margin-top: var(--space-1); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
+.contact-timeline__photo { display: block; width: 100%; max-width: var(--layout-measure-md); height: var(--space-40); margin-top: var(--space-3); border-radius: var(--radius-lg); object-fit: cover; }
 
-/* A habit's last twelve periods, oldest first: kept is filled green, missed is the line colour, the one due now is dashed. Its label says how many were kept. */
+/* A habit's last twelve periods, oldest first: kept is filled green, missed is an empty outline, the one due now is dashed. Fill, not colour, tells them apart; the label says how many were kept. */
 .keep-strip { display: flex; gap: var(--space-1); }
-.keep-strip__cell { flex: 1; height: var(--space-7); border-radius: var(--radius-xs); background: var(--color-border-default); }
-.keep-strip__cell--kept { background: var(--color-success-solid); }
+.keep-strip__cell { flex: 1; height: var(--space-7); border: var(--border-width-thick) solid var(--color-border-strong); border-radius: var(--radius-xs); background: none; }
+.keep-strip__cell--kept { border-color: var(--color-success-solid); background: var(--color-success-solid); }
 .keep-strip__cell--due { border: var(--border-width-thick) dashed var(--color-danger-border); background: none; }
 .keep-strip--sm .keep-strip__cell { height: var(--space-6); }
 
 /* A habit in the list: who and how often, the strip, the streak and the next one. */
 .habit-row { display: grid; gap: var(--space-4); padding-block: var(--space-5); }
 .habit-row__who { display: flex; align-items: center; gap: var(--space-3); min-width: 0; color: inherit; text-decoration: none; }
-.habit-row__who:hover { color: inherit; }
+.habit-row__who:hover, .habit-row__who[data-state="hover"] { color: inherit; }
 .habit-row__title { font: var(--text-h3); }
 .habit-row__end { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); }
 .habit-row__streak { font: var(--font-weight-semibold) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); }
@@ -1897,7 +1897,7 @@ a.segmented__option { display: inline-flex; align-items: center; gap: var(--spac
 
 /* A dashed card that starts something: "Make a habit of seeing Femi". */
 .add-card { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--target-comfortable); padding: var(--space-4); border: var(--border-width-hairline) dashed var(--color-border-strong); border-radius: var(--radius-lg); background: none; color: var(--color-fg-default); font: var(--font-weight-semibold) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); text-align: left; text-decoration: none; cursor: pointer; }
-.add-card:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+.add-card:hover, .add-card[data-state="hover"] { background: var(--color-bg-subtle); color: var(--color-fg-default); }
 .add-card > .icon { color: var(--color-fg-muted); }
 
 /* A profile's head: the face, the name, how you know them, and Message · Call · Log. */
@@ -1940,7 +1940,7 @@ a.segmented__option { display: inline-flex; align-items: center; gap: var(--spac
 .group-browser__kind { margin-top: var(--space-5); font: var(--text-meta); color: var(--color-fg-subtle); }
 .group-browser__kind:first-child { margin-top: 0; }
 .group-browser__item { margin-inline: calc(-1 * var(--space-3)); padding-inline: var(--space-3); border-radius: var(--radius-lg); }
-.group-browser__item:hover { background: color-mix(in srgb, var(--color-bg-subtle) 60%, transparent); }
+.group-browser__item:hover, .group-browser__item[data-state="hover"] { background: color-mix(in srgb, var(--color-bg-subtle) 60%, transparent); }
 .group-browser__id { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
 .group-browser__over { font: var(--text-meta); color: var(--color-fg-muted); }
 .group-browser__name { font: var(--text-h1-compact); }
@@ -2017,7 +2017,7 @@ a.who-chip, a.who-chip:hover { color: var(--color-fg-default); text-decoration: 
 /* What kind of milestone: a grid of choices, the chosen one in sun with an edge. */
 .kind-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
 .kind-grid__option { display: flex; align-items: center; gap: var(--space-2-5); height: var(--space-14); padding: 0 var(--space-4); border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); color: var(--color-fg-default); font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans); cursor: pointer; }
-.kind-grid__option:hover { background: var(--color-bg-subtle); }
+.kind-grid__option:hover, .kind-grid__option[data-state="hover"] { background: var(--color-bg-subtle); }
 .kind-grid__option[aria-pressed="true"] { border-color: var(--color-constant-dark); background: var(--color-warning-loud); color: var(--color-constant-dark); box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-constant-dark); }
 @media (min-width: 40rem) { .kind-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
