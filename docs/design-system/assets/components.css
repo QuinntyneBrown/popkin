@@ -1729,3 +1729,299 @@ a.segmented__option { display: inline-flex; align-items: center; gap: var(--spac
 .attention__item[data-state="hover"], a.tile[data-state="hover"], a.record[data-state="hover"], .figure-tab[data-state="hover"], .data-table tbody tr[data-state="hover"], .page-head__back[data-state="hover"] { background: var(--color-bg-subtle); }
 .data-table__link[data-state="hover"] { text-decoration: underline; text-underline-offset: 0.2em; }
 .report-item[aria-current="true"] { box-shadow: inset var(--border-width-thick) 0 0 var(--color-fg-default); } /* the open report: a bar as well as the fill, so colour is not the only sign */
+
+/* ---- Contacts: the member's own address book beside Your Popkins, added with its mocks on 15 November 2026 ---- */
+/* Its shell is the Popkin shell (.screen--app + .popkin-nav): five tabs on phones, all seven from M. */
+
+/* A Contacts section's body: wider margins as the screen widens, room for the tabs on phones. */
+.contacts-page { padding: var(--space-5) var(--space-5) var(--space-24); }
+.contacts-page > .page-head { margin-bottom: var(--space-5); }
+@media (min-width: 48rem) { .contacts-page { padding: var(--space-8) var(--space-8) var(--space-12); } }
+@media (min-width: 80rem) { .contacts-page { padding-inline: var(--space-12); } }
+
+/* Two columns from L: lead and side (Today), about and history (a profile), main and aside (Dates, Connections). */
+.contacts-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-8); align-items: start; }
+.contacts-grid > * { min-width: 0; }
+@media (min-width: 64rem) {
+  .contacts-grid { gap: var(--space-10); }
+  .contacts-grid--lead { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+  .contacts-grid--about { grid-template-columns: var(--layout-detail-pane) minmax(0, 1fr); gap: var(--space-12); }
+  .contacts-grid--aside { grid-template-columns: minmax(0, 1fr) var(--layout-detail-pane); }
+}
+@media (min-width: 80rem) {
+  .contacts-grid--about { grid-template-columns: var(--layout-list-pane) minmax(0, 1fr); }
+  .contacts-grid--aside { grid-template-columns: minmax(0, 1fr) var(--layout-list-pane); }
+}
+
+/* A list's heading with its link: "Coming up · All dates". */
+.list-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--target-comfortable); }
+.list-head__title { font: var(--text-h3); }
+.list-head__title--late { color: var(--color-fg-accent); }
+.list-head__title--quiet { font: var(--text-meta); color: var(--color-fg-subtle); }
+.list-head__count { margin-left: var(--space-1); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-subtle); }
+
+/* The one that matters most: the next date on Today, the habit slipping on Habits. Tinted in its colour. */
+.spotlight { padding: var(--space-5); border-radius: var(--radius-xl); background: var(--accent-tint); }
+.spotlight__when { display: flex; align-items: center; gap: var(--space-2); font: var(--text-meta); color: var(--color-fg-muted); }
+.spotlight__when--late { color: var(--color-fg-accent); }
+.spotlight__id { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-4); }
+.spotlight__title { font: var(--text-h2); letter-spacing: var(--letter-spacing-tight); }
+.spotlight__sub { margin-top: var(--space-1); color: var(--color-fg-muted); }
+.spotlight__facts { display: grid; gap: var(--space-3); margin-top: var(--space-5); padding-top: var(--space-5); border-top: var(--border-width-hairline) solid var(--color-border-default); }
+.spotlight__fact { display: flex; gap: var(--space-3); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-snug) var(--font-family-sans); }
+.spotlight__fact strong { font-weight: var(--font-weight-semibold); }
+.spotlight__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-5); }
+.spotlight .keep-strip { margin-top: var(--space-6); }
+.spotlight--row .spotlight__id { flex-direction: column; align-items: flex-start; margin-top: 0; }
+.spotlight--row .spotlight__actions { margin-top: 0; }
+@media (min-width: 40rem) { .spotlight__facts { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 48rem) {
+  .spotlight { padding: var(--space-7); }
+  .spotlight__title { font: var(--text-h1-compact); }
+  .spotlight--row .spotlight__id { flex-direction: row; align-items: center; gap: var(--space-5); }
+}
+
+/* A date as a tile: the weekday or month over the day. Soon (two weeks or less) is filled in sun, and the row says "in 4 days". */
+.date-tile { display: grid; place-content: center; flex: none; width: var(--space-14); height: var(--space-14); border-radius: var(--radius-lg); background: var(--color-bg-subtle); color: var(--color-fg-default); text-align: center; }
+.date-tile--soon { background: var(--color-warning-loud); color: var(--color-constant-dark); }
+.date-tile--bare { width: var(--space-12); height: auto; background: none; }
+.date-tile__top { font: var(--font-weight-bold) var(--font-size-2xs) / 1 var(--font-family-sans); text-transform: uppercase; }
+.date-tile--bare .date-tile__top { color: var(--color-fg-subtle); }
+.date-tile__day { margin-top: var(--space-0-5); font: var(--font-weight-black) var(--font-size-2xl) / 1 var(--font-family-display); }
+
+/* A person in a list: name and how you know them; from M the circle, the next date and when you last talked as columns. */
+.contact-list__head { display: none; }
+.contact-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); min-height: var(--space-18); padding-block: var(--space-2); color: inherit; text-decoration: none; }
+.contact-row:hover, .contact-row[data-state="hover"] { background: color-mix(in srgb, var(--color-bg-subtle) 60%, transparent); color: inherit; }
+.contact-row__who { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.contact-row__cell { display: none; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); color: var(--color-fg-muted); }
+.contact-row__cell strong { font-weight: var(--font-weight-regular); color: var(--color-fg-default); }
+.contact-row__last { font: var(--text-body-sm); color: var(--color-fg-muted); text-align: right; white-space: nowrap; }
+.contact-row__last--quiet { font-weight: var(--font-weight-semibold); color: var(--color-fg-accent); }
+@media (min-width: 48rem) {
+  .contact-list__head, .contact-row { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr); padding-inline: var(--space-2); }
+  .contact-list__head { display: grid; gap: var(--space-4); margin-top: var(--space-6); padding-bottom: var(--space-2); border-bottom: var(--border-width-hairline) solid var(--color-border-default); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-subtle); }
+  .contact-list__head > :last-child { text-align: right; }
+  .contact-row__cell { display: block; }
+}
+
+/* Closest: the starred people as a strip of faces. */
+.closest { display: flex; gap: var(--space-4); overflow-x: auto; margin: var(--space-3) calc(-1 * var(--space-5)) 0; padding: var(--space-1) var(--space-5); scrollbar-width: none; }
+.closest__person { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); flex: none; width: var(--space-20); color: inherit; text-decoration: none; font: var(--font-weight-semibold) var(--font-size-sm-plus) / var(--line-height-snug) var(--font-family-sans); text-align: center; }
+.closest__person:hover { color: inherit; }
+.closest__person .avatar { width: var(--space-16); height: var(--space-16); }
+@media (min-width: 48rem) { .closest { margin-inline: 0; padding-inline: 0; } }
+
+/* A count on a filter chip: "Family 4". */
+.chip__count { margin-left: var(--space-1-5); opacity: 0.7; }
+
+/* A follow-up or a promise: tick it, read it, see who and when. Ticked, it is struck through and the tick says "Mark not done". */
+.task { display: flex; align-items: flex-start; gap: var(--space-3); min-height: var(--space-18); padding-block: var(--space-3); }
+.task--card { min-height: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--color-bg-subtle); }
+.task--outline { align-items: center; min-height: 0; padding: var(--space-3) var(--space-4); border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); }
+.task__check { display: grid; place-items: center; flex: none; width: var(--target-comfortable); height: var(--target-comfortable); margin: calc(-1 * var(--space-2)); padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: inherit; cursor: pointer; }
+.task__box { display: grid; place-items: center; width: var(--space-7); height: var(--space-7); border: var(--border-width-thick) solid var(--color-border-strong); border-radius: var(--radius-full); background: var(--color-bg-surface); }
+.task__box .icon { display: none; width: var(--space-4); height: var(--space-4); stroke-width: 3; }
+.task__check:hover .task__box { border-color: var(--color-fg-muted); }
+.task__check[aria-pressed="true"] .task__box { border-color: var(--color-success-solid); background: var(--color-success-solid); color: var(--color-constant-light); }
+.task__check[aria-pressed="true"] .task__box .icon { display: block; }
+.task__icon { display: grid; place-items: center; flex: none; width: var(--space-7); height: var(--space-7); border-radius: var(--radius-full); background: var(--accent-tint); color: var(--accent-text); }
+.task__icon .icon { width: var(--space-4); height: var(--space-4); }
+.task__main { flex: 1; min-width: 0; }
+.task__text { font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug) var(--font-family-sans); }
+.task__text a, .info-card__title a { color: inherit; text-decoration: none; }
+.task__text a:hover, .info-card__title a:hover { color: inherit; text-decoration: underline; }
+.task--card .task__text, .task--outline .task__text { font-size: var(--font-size-md-minus); }
+.task__check[aria-pressed="true"] + .task__main .task__text { color: var(--color-fg-subtle); text-decoration: line-through; }
+.task__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.task__meta .icon { width: var(--space-4); height: var(--space-4); }
+.task__who { display: inline-flex; align-items: center; gap: var(--space-1-5); min-height: var(--space-8); font-weight: var(--font-weight-semibold); color: var(--color-fg-default); text-decoration: none; }
+.task__who:hover { color: var(--color-fg-default); text-decoration: underline; }
+.task__due { flex: none; font: var(--text-body-sm); color: var(--color-fg-muted); white-space: nowrap; }
+.task__due--late { font-weight: var(--font-weight-semibold); color: var(--color-fg-accent); }
+
+/* An adding field: a sand pill with a plus, "Something to do for Chidi…". */
+.add-field { position: relative; }
+.add-field > .icon { position: absolute; left: var(--space-4); top: 50%; translate: 0 -50%; color: var(--color-fg-subtle); pointer-events: none; }
+.add-field .input { padding-left: var(--space-12); border-color: transparent; background: var(--color-bg-subtle); }
+.add-field .input:focus { border-color: var(--color-border-focus); background: var(--color-bg-surface); }
+
+/* What kind of entry: a dot in its colour. Conversation coral, milestone sun, memory green; the entry's words say which. */
+.kind-dot { display: inline-block; flex: none; width: var(--space-2-5); height: var(--space-2-5); border-radius: var(--radius-full); background: var(--accent); }
+
+/* A person's history, newest first, on a line. Milestones sit in a tinted card with their tag. */
+.timeline { position: relative; display: flex; flex-direction: column; gap: var(--space-5); margin-top: var(--space-5); }
+.timeline::before { content: ""; position: absolute; top: var(--space-2); bottom: var(--space-2); left: calc(var(--space-2-5) / 2); width: var(--border-width-hairline); background: var(--color-border-default); }
+.timeline__item { position: relative; padding-left: var(--space-7); }
+.timeline__item > .kind-dot { position: absolute; left: 0; top: var(--space-1-5); }
+.timeline__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-2); font: var(--text-caption); color: var(--color-fg-subtle); }
+.timeline__date { font-weight: var(--font-weight-semibold); color: var(--color-fg-muted); }
+.timeline__tag { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--accent-tint); font-weight: var(--font-weight-semibold); color: var(--color-fg-default); }
+.timeline__card { margin-top: var(--space-1); }
+.timeline__item--milestone .timeline__card { margin-top: var(--space-2); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--accent-tint); }
+.timeline__title { font: var(--text-h4); }
+.timeline__item--milestone .timeline__title { font: var(--text-h3); }
+.timeline__body { max-width: var(--layout-measure); margin-top: var(--space-1); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
+.timeline__photo { display: block; width: 100%; max-width: var(--layout-measure-md); height: var(--space-40); margin-top: var(--space-3); border-radius: var(--radius-lg); object-fit: cover; }
+
+/* A habit's last twelve periods, oldest first: kept is filled green, missed is the line colour, the one due now is dashed. Its label says how many were kept. */
+.keep-strip { display: flex; gap: var(--space-1); }
+.keep-strip__cell { flex: 1; height: var(--space-7); border-radius: var(--radius-xs); background: var(--color-border-default); }
+.keep-strip__cell--kept { background: var(--color-success-solid); }
+.keep-strip__cell--due { border: var(--border-width-thick) dashed var(--color-danger-border); background: none; }
+.keep-strip--sm .keep-strip__cell { height: var(--space-6); }
+
+/* A habit in the list: who and how often, the strip, the streak and the next one. */
+.habit-row { display: grid; gap: var(--space-4); padding-block: var(--space-5); }
+.habit-row__who { display: flex; align-items: center; gap: var(--space-3); min-width: 0; color: inherit; text-decoration: none; }
+.habit-row__who:hover { color: inherit; }
+.habit-row__title { font: var(--text-h3); }
+.habit-row__end { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); }
+.habit-row__streak { font: var(--font-weight-semibold) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); }
+@media (min-width: 48rem) {
+  .habit-row { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; align-items: center; gap: var(--space-8); }
+  .habit-row__end { display: block; text-align: right; }
+}
+
+/* A sand card of facts: a habit on a profile, a group's place and note. */
+.info-card { padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-bg-subtle); }
+.info-card__line { display: flex; align-items: flex-start; gap: var(--space-2); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed) var(--font-family-sans); }
+.info-card__line + .info-card__line { margin-top: var(--space-3); }
+.info-card__line > .icon { width: var(--space-4); height: var(--space-4); margin-top: var(--space-1); color: var(--color-fg-muted); }
+.info-card__over { display: flex; align-items: center; gap: var(--space-2); font: var(--text-meta); color: var(--color-fg-muted); }
+.info-card__over .icon { width: var(--space-4); height: var(--space-4); }
+.info-card__title { margin-top: var(--space-1); font: var(--text-h3); }
+.info-card .keep-strip { margin-top: var(--space-3); }
+.info-card__foot { margin-top: var(--space-2); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.info-card__foot--late { font-weight: var(--font-weight-semibold); color: var(--color-fg-accent); }
+
+/* A dashed card that starts something: "Make a habit of seeing Femi". */
+.add-card { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--target-comfortable); padding: var(--space-4); border: var(--border-width-hairline) dashed var(--color-border-strong); border-radius: var(--radius-lg); background: none; color: var(--color-fg-default); font: var(--font-weight-semibold) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); text-align: left; text-decoration: none; cursor: pointer; }
+.add-card:hover { background: var(--color-bg-subtle); color: var(--color-fg-default); }
+.add-card > .icon { color: var(--color-fg-muted); }
+
+/* A profile's head: the face, the name, how you know them, and Message · Call · Log. */
+.contact-id { display: flex; flex-direction: column; gap: var(--space-5); }
+.contact-id__who { display: flex; align-items: center; gap: var(--space-4); min-width: 0; }
+.contact-id__name { font: var(--text-h1-compact); letter-spacing: var(--letter-spacing-tight); }
+.contact-id__sub { margin-top: var(--space-0-5); color: var(--color-fg-muted); }
+.contact-id__also { margin-top: var(--space-1); font: var(--text-body-sm); color: var(--color-fg-subtle); }
+.contact-id__actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+.contact-id__actions .btn { padding-inline: var(--space-2); }
+@media (min-width: 40rem) { .contact-id__actions .btn { padding-inline: var(--space-5); } }
+@media (min-width: 48rem) {
+  .contact-id { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+  .contact-id__who { gap: var(--space-5); }
+  .contact-id__name { font: var(--text-h1); }
+  .contact-id__actions { display: flex; }
+}
+
+/* About a person: an icon and a fact per line. */
+.contact-facts { display: flex; flex-direction: column; gap: var(--space-2-5); margin-top: var(--space-2); }
+.contact-facts__item { display: flex; align-items: flex-start; gap: var(--space-3); }
+.contact-facts__item dt { flex: none; margin-top: var(--space-0-5); color: var(--color-fg-subtle); }
+.contact-facts__item dt .icon { width: var(--space-4); height: var(--space-4); }
+.contact-facts__item dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+
+/* What they love: soft sun pills. */
+.likes { display: flex; flex-wrap: wrap; gap: var(--space-1-5); margin-top: var(--space-2); }
+.likes__item { padding: var(--space-1-5) var(--space-3); border-radius: var(--radius-full); background: var(--accent-tint); font: var(--font-weight-medium) var(--font-size-sm-plus) / var(--line-height-snug) var(--font-family-sans); }
+
+/* Memories & files: photos in a grid, then files and notes. */
+.memory-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); margin-top: var(--space-4); }
+.memory-grid img { display: block; width: 100%; aspect-ratio: 1; border-radius: var(--radius-lg); object-fit: cover; }
+.memory-grid figcaption { margin-top: var(--space-1-5); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--text-caption); color: var(--color-fg-muted); }
+@media (min-width: 40rem) { .memory-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* Groups: the list beside the open group from L; on phones one or the other. */
+.group-browser { display: grid; grid-template-columns: minmax(0, 1fr); }
+.group-browser__list, .group-browser__detail { min-width: 0; }
+.group-browser--detail .group-browser__list, .group-browser:not(.group-browser--detail) .group-browser__detail { display: none; }
+.group-browser__kind { margin-top: var(--space-5); font: var(--text-meta); color: var(--color-fg-subtle); }
+.group-browser__kind:first-child { margin-top: 0; }
+.group-browser__item { margin-inline: calc(-1 * var(--space-3)); padding-inline: var(--space-3); border-radius: var(--radius-lg); }
+.group-browser__item:hover { background: color-mix(in srgb, var(--color-bg-subtle) 60%, transparent); }
+.group-browser__id { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-3); }
+.group-browser__over { font: var(--text-meta); color: var(--color-fg-muted); }
+.group-browser__name { font: var(--text-h1-compact); }
+.group-browser__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-5); }
+.group-browser__parts { display: grid; gap: var(--space-8); margin-top: var(--space-8); }
+.group-browser__parts > * { min-width: 0; }
+@media (min-width: 64rem) {
+  .group-browser { grid-template-columns: var(--layout-list-pane-xl) minmax(0, 1fr); }
+  .group-browser--detail .group-browser__list, .group-browser:not(.group-browser--detail) .group-browser__detail { display: block; }
+  .group-browser__list { padding-right: var(--space-8); border-right: var(--border-width-hairline) solid var(--color-border-default); }
+  .group-browser__detail { padding-left: var(--space-10); }
+  .group-browser__item[aria-current="true"] { background: var(--color-bg-subtle); box-shadow: inset var(--border-width-thick) 0 0 var(--color-fg-default); }
+  .group-browser__back { display: none; }
+  .group-browser__id { margin-top: 0; }
+}
+@media (min-width: 80rem) { .group-browser__parts { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); } }
+
+/* Connections: who knows whom, as faces joined by lines on a board. The aside lists the same links in words. */
+.connection-map { --pk-map-inset: var(--space-6); position: relative; width: 100%; aspect-ratio: 1000 / 680; overflow: hidden; border-radius: var(--radius-xl); background: var(--color-bg-subtle); }
+.connection-map__lines { position: absolute; inset: var(--pk-map-inset); width: calc(100% - 2 * var(--pk-map-inset)); height: calc(100% - 2 * var(--pk-map-inset)); overflow: visible; }
+.connection-map__line { fill: none; stroke-width: 2.5; stroke-linecap: round; transition: opacity var(--duration-fast) var(--ease-standard); }
+.connection-map__line--family { stroke: var(--color-accent); }
+.connection-map__line--partner { stroke: var(--color-fg-accent); }
+.connection-map__line--friend { stroke: var(--color-success-solid); }
+.connection-map__line--work { stroke: var(--color-fg-subtle); stroke-dasharray: 8 6; }
+.connection-map__line--pending { stroke-dasharray: 2 8; }
+.connection-map__line--on { stroke-width: 4; }
+.connection-map__line--dim { opacity: 0.18; }
+.connection-map__node { position: absolute; left: calc(var(--pk-map-inset) + (100% - 2 * var(--pk-map-inset)) * var(--x)); top: calc(var(--pk-map-inset) + (100% - 2 * var(--pk-map-inset)) * var(--y)); translate: -50% -50%; display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: 0; border: 0; background: none; color: var(--color-fg-default); cursor: pointer; transition: opacity var(--duration-fast) var(--ease-standard); }
+.connection-map__node .avatar { width: var(--space-7); height: var(--space-7); box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-surface); }
+.connection-map__node--you .avatar { width: var(--space-9); height: var(--space-9); box-shadow: 0 0 0 var(--border-width-ring) var(--color-accent); }
+.connection-map__node[aria-pressed="true"] .avatar { box-shadow: 0 0 0 calc(var(--border-width-ring) + var(--border-width-thick)) var(--color-fg-default); }
+.connection-map__node--dim { opacity: 0.35; }
+.connection-map__name { padding: 0 var(--space-1-5); border-radius: var(--radius-full); background: color-mix(in srgb, var(--color-bg-surface) 90%, transparent); font: var(--font-weight-semibold) var(--font-size-2xs) / var(--line-height-normal) var(--font-family-sans); white-space: nowrap; }
+.connection-map__node[aria-pressed="true"] .connection-map__name { background: var(--color-bg-inverse); color: var(--color-fg-inverse); }
+@media (min-width: 48rem) {
+  .connection-map { --pk-map-inset: var(--space-10); }
+  .connection-map__node .avatar { width: var(--space-10); height: var(--space-10); }
+  .connection-map__node--you .avatar { width: var(--space-14); height: var(--space-14); }
+  .connection-map__name { padding: 0 var(--space-2); font-size: var(--font-size-sm-plus); }
+}
+
+/* A line's sample: in the filter chips and beside each link in the aside. */
+.link-key { display: inline-block; flex: none; width: var(--space-4); height: var(--space-1); border-radius: var(--radius-full); background: var(--color-fg-subtle); }
+.link-key--family { background: var(--color-accent); }
+.link-key--partner { background: var(--color-fg-accent); }
+.link-key--friend { background: var(--color-success-solid); }
+.chip .link-key { margin-right: var(--space-2); }
+a.who-chip, a.who-chip:hover { color: var(--color-fg-default); text-decoration: none; }
+
+/* A form in sections: the section's name and hint beside its fields from M (Add someone). */
+.form-sections { width: 100%; max-width: var(--layout-container-narrow); margin-inline: auto; padding: 0 var(--space-5) var(--space-16); }
+.form-section { display: grid; gap: var(--space-4); padding-block: var(--space-7); border-bottom: var(--border-width-hairline) solid var(--color-border-default); }
+.form-section:last-child { border-bottom: 0; }
+.form-section__title { font: var(--text-h3); }
+.form-section__hint { margin-top: var(--space-1); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.form-section__body { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+.form-section__pair { display: grid; gap: var(--space-5); }
+@media (min-width: 40rem) { .form-section__pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+@media (min-width: 48rem) {
+  .form-sections { padding-inline: var(--space-8); }
+  .form-section { grid-template-columns: var(--space-40) minmax(0, 1fr); gap: var(--space-8); padding-block: var(--space-9); }
+}
+
+/* A date with its reminder in a form: what and when, then how far ahead to hear. */
+.date-entry { display: grid; gap: var(--space-2); padding: var(--space-3); border: var(--border-width-thick) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); }
+.date-entry__kind { font: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans); color: var(--color-fg-subtle); }
+.date-entry__date { font-weight: var(--font-weight-semibold); }
+@media (min-width: 40rem) { .date-entry { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto; align-items: center; gap: var(--space-3); } }
+
+/* A chosen person in a form: face, name, how they connect, Remove. */
+.person-pick { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border: var(--border-width-thick) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); }
+
+/* What kind of milestone: a grid of choices, the chosen one in sun with an edge. */
+.kind-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+.kind-grid__option { display: flex; align-items: center; gap: var(--space-2-5); height: var(--space-14); padding: 0 var(--space-4); border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); color: var(--color-fg-default); font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans); cursor: pointer; }
+.kind-grid__option:hover { background: var(--color-bg-subtle); }
+.kind-grid__option[aria-pressed="true"] { border-color: var(--color-constant-dark); background: var(--color-warning-loud); color: var(--color-constant-dark); box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-constant-dark); }
+@media (min-width: 40rem) { .kind-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* The promise a conversation made, before it is saved. */
+.promise { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--accent-tint); }
+.promise__when { display: flex; align-items: center; gap: var(--space-1); margin-top: var(--space-0-5); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.promise__when .icon { width: var(--space-4); height: var(--space-4); }
