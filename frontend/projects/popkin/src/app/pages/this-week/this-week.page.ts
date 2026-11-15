@@ -1,0 +1,85 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  untracked,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { ErrorScreens, PopkinFrame, ThisWeekStore, UnreadTracker, isoDate } from 'api';
+import {
+  AppScreen,
+  Button,
+  DayPicker,
+  EmptyState,
+  FreeHeadline,
+  Icon,
+  PlanHeader,
+  PopkinNav,
+  Schedule,
+  Shifts,
+  ViewNav,
+} from 'components';
+
+/**
+ * This week (L2-074): the second view of the Schedule tab, seven days from the viewer's today,
+ * how many are free each evening, and the chosen evening's headline and timeline. The chosen day
+ * is in the address, so a reload keeps it; without one it is today.
+ */
+@Component({
+  selector: 'pk-this-week-page',
+  imports: [
+    AppScreen,
+    Button,
+    DayPicker,
+    EmptyState,
+    FreeHeadline,
+    Icon,
+    PlanHeader,
+    PopkinNav,
+    RouterLink,
+    Schedule,
+    Shifts,
+    ViewNav,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './this-week.page.html',
+})
+export class ThisWeekPage {
+  /** The route's `:popkinId`. */
+  readonly popkinId = input.required<string>();
+  /** The address's `?day=`: the evening chosen. */
+  readonly day = input<string>();
+
+  protected readonly store = inject(ThisWeekStore);
+  protected readonly frame = inject(PopkinFrame);
+  private readonly unread = inject(UnreadTracker);
+  private readonly errors = inject(ErrorScreens);
+
+  protected readonly link = computed(() => `/p/${this.popkinId()}/schedule/week`);
+  protected readonly everyone = computed(() => `/p/${this.popkinId()}/chat/everyone`);
+  protected readonly views = computed(() => [
+    { label: 'Time off', link: `/p/${this.popkinId()}/schedule`, current: false },
+    { label: 'This week', link: `/p/${this.popkinId()}/schedule/week`, current: true },
+  ]);
+  protected readonly unreadCount = computed(() => this.unread.forPopkin(this.popkinId()));
+
+  constructor() {
+    effect(() => {
+      const popkinId = this.popkinId();
+      untracked(() => this.frame.open(popkinId));
+    });
+    effect(() => {
+      const popkinId = this.popkinId();
+      const day = this.day();
+      // The seven days start on the viewer's own today (L2-074 AC1).
+      untracked(() => this.store.open(popkinId, day, isoDate(new Date())));
+    });
+    // L2-051 AC1: someone who is not a member cannot tell the Popkin exists.
+    effect(() => {
+      if (this.store.state() === 'not-found') untracked(() => this.errors.showNotFound());
+    });
+  }
+}

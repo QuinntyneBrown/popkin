@@ -92,3 +92,6 @@ export * from './lib/api/schedule/schedule-api';
 export * from './lib/api/schedule/schedule-weeks';
 export * from './lib/api/schedule/time-off-text';
 export * from './lib/api/schedule/time-off-store';
+export * from './lib/models/this-week';
+export * from './lib/api/schedule/this-week-text';
+export * from './lib/api/schedule/this-week-store';

@@ -17,4 +17,6 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class PlanHeader {
   readonly heading = input.required<string>();
+  /** A line under the name: "Sep 12 – 18 · everyone’s working hours". */
+  readonly sub = input<string>();
 }

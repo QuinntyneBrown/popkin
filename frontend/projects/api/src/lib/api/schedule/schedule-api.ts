@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SetTimeOffBody, TimeOffWeekView } from '../../models/schedule';
+import { ThisWeekView } from '../../models/this-week';
 
 /**
  * A Popkin's Schedule (docs/detailed-designs/schedules). Every call answers 404
@@ -24,6 +25,9 @@ export interface ScheduleApi {
     membershipId: string,
     body: SetTimeOffBody,
   ): Observable<TimeOffWeekView>;
+
+  /** This week (L2-074): seven days from `from`, the viewer's today. */
+  thisWeek(popkinId: string, from: string): Observable<ThisWeekView>;
 }
 
 export const SCHEDULE_API = new InjectionToken<ScheduleApi>('ScheduleApi');
@@ -43,6 +47,10 @@ export class HttpScheduleApi implements ScheduleApi {
     body: SetTimeOffBody,
   ): Observable<TimeOffWeekView> {
     return this.http.put<TimeOffWeekView>(`${schedule(popkinId)}/time-off/${membershipId}`, body);
+  }
+
+  thisWeek(popkinId: string, from: string): Observable<ThisWeekView> {
+    return this.http.get<ThisWeekView>(`${schedule(popkinId)}/week`, { params: { from } });
   }
 }
 

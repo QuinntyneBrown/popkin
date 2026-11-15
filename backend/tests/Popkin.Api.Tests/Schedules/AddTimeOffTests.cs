@@ -159,10 +159,10 @@ public sealed class AddTimeOffTests
         Assert.Equal("days", problem.GetProperty("field").GetString());
     }
 
-    // Given Joel has time off, when he leaves the Popkin, then his time off is gone with him
-    // (L2-047, the Schedules design: leaving removes a member's time off).
+    // Given Joel has time off and working hours, when he leaves the Popkin, then both are gone
+    // with him (L2-047, the Schedules design: leaving removes a member's schedule).
     [Fact]
-    public async Task Leaving_removes_the_members_time_off()
+    public async Task Leaving_removes_the_members_time_off_and_hours()
     {
         using var api = new ApiFactory();
         api.Clock.SetUtcNow(Wednesday);
@@ -173,15 +173,18 @@ public sealed class AddTimeOffTests
             $"/api/popkins/{lakeside.Id}/schedule/time-off/{joelId}",
             new { week = "2027-02-15", days = new[] { "Off", "Off", "Tentative", "Working", "Off" } })).EnsureSuccessStatusCode();
 
+        await api.SetHoursAsync(lakeside.Id, "Joel F", new DateOnly(2027, 2, 17), ("09:00", "17:00"));
+
         (await joel.DeleteAsync($"/api/popkins/{lakeside.Id}/members/me")).EnsureSuccessStatusCode();
 
         Assert.Equal(0, api.TimeOffCount(joelId));
+        Assert.Equal(0, api.WorkingStretchCount(joelId));
     }
 
-    // Given Joel has time off, when he deletes his account, then his time off is removed with
-    // his memberships (L2-049, the Schedules design).
+    // Given Joel has time off and working hours, when he deletes his account, then both are
+    // removed with his memberships (L2-049, the Schedules design).
     [Fact]
-    public async Task Deleting_the_account_removes_the_members_time_off()
+    public async Task Deleting_the_account_removes_the_members_time_off_and_hours()
     {
         using var api = new ApiFactory();
         api.Clock.SetUtcNow(Wednesday);
@@ -192,9 +195,12 @@ public sealed class AddTimeOffTests
             $"/api/popkins/{lakeside.Id}/schedule/time-off/{joelId}",
             new { week = "2027-02-15", days = new[] { "Off", "Off", "Off", "Off", "Off" } })).EnsureSuccessStatusCode();
 
+        await api.SetHoursAsync(lakeside.Id, "Joel F", new DateOnly(2027, 2, 17), ("09:00", "17:00"));
+
         (await joel.DeleteAsync("/api/account")).EnsureSuccessStatusCode();
 
         Assert.Equal(0, api.TimeOffCount(joelId));
+        Assert.Equal(0, api.WorkingStretchCount(joelId));
     }
 
     private static string[] DaysOf(JsonElement week, string firstName) =>

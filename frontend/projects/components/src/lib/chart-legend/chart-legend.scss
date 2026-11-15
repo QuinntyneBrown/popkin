@@ -20,6 +20,15 @@ i {
   border-radius: var(--radius-xs);
 }
 
+strong {
+  color: var(--accent-text);
+}
+
+.is-card {
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
 .is-tint {
   background: var(--accent-tint);
 }

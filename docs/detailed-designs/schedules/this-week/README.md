@@ -57,7 +57,7 @@ width.
 - `GET /api/popkins/{popkinId}/schedule/week?from=2026-09-12` → `200` `ThisWeekDto`: `from`,
   `memberCount`, `canEdit`, `days` (seven, each `date`, `freeCount`, `everyoneFreeFrom`
   ("19:30") or null, `lastOffShift` (first names), `working` (first names of those working in
-  the evening)), and `members` (each `membershipId`, `firstName`, `avatarUrl`, `accent`, `isMe`
+  the evening)), and `members` (each `membershipId`, `firstName`, `avatar`, `isMe`
   and `days`: seven lists of `{ start, end }` as "HH:mm", the end "24:00" for midnight).
 - `PUT /api/popkins/{popkinId}/schedule/hours/{membershipId}` with `{ from, days: [7] }`, each
   a list of at most two `{ start, end }` → `200` `ThisWeekDto`.

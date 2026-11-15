@@ -1,0 +1,12 @@
+<ul class="day-picker" aria-label="Pick a day">
+  @for (day of days(); track day.day) {
+    <li>
+      <a [routerLink]="link()" [queryParams]="{ day: day.day }" [attr.aria-pressed]="day.pressed">
+        <span class="day-picker__wd">{{ day.weekday }}</span>
+        <span class="day-picker__date">{{ day.date }}</span>
+        <span class="day-picker__free" [class.day-picker__free--all]="day.all">{{ day.free }}</span>
+      </a>
+    </li>
+  }
+</ul>
+<p class="day-picker__note">{{ note() }}</p>

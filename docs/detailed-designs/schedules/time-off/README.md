@@ -26,7 +26,8 @@ Journey 22 builds it.
 
 - `docs/mocks/pages/time-off/default.html` — Cabin Week ’27, six members, the week of
   Feb 15 – 21 2027: the header "Schedule" with the view switch ("Time off" current, "This week")
-  and "Add my time off"; "February" between "Previous month" and "Next month", "2027"; the week
+  and "Add my time off"; "February" between "Previous month" and "Next month", and the year
+  "2027" as a label; the week
   chips "Feb 1 – 7" to "Feb 22 – 28", the event's week with a dot and pressed; "Previous week" and
   "Next week"; the table (`table.leave`) with "Cabin week" over the event's days and
   "5 of 6 off" in bold; the legend "Off", "Tentative", "Working", "Event days".
@@ -55,10 +56,11 @@ centred dialog above. Nothing reads the viewport width.
 - `GET /api/popkins/{popkinId}/schedule/time-off?week=2027-02-15` → `200` `TimeOffWeekDto`:
   `week` (the Monday asked for; any other day is moved back to its Monday), `event`
   (`EventDto` or null: `label`, `firstDay`, `lastDay`), `members` (each a `membershipId`, a
-  `firstName`, an `avatarUrl`, an `accent`, `isMe`, and `days`: seven entries, `Off`,
-  `Tentative`, `Working` or `Weekend`), and `canEdit` (the Popkin is active). Without `week`
-  the API answers the event's week, or the week of the server's date when there is no event;
-  the web app always sends the week it wants, counted on the viewer's clock (L2-072 AC8).
+  `firstName`, an `avatar` (`initials`, `accent`, `photoUrl`, as everywhere else a member is
+  drawn), `isMe`, and `days`: seven entries, `Off`, `Tentative`, `Working` or `Weekend`), and
+  `canEdit` (the Popkin is active). Without `week` the API answers the event's week, or else the
+  week of `today`, the viewer's date the web app sends, or of the server's date without one
+  (L2-072 AC8).
 - `PUT /api/popkins/{popkinId}/schedule/time-off/{membershipId}` with `{ week, days: [5] }`
   (Monday to Friday, each `Off`, `Tentative` or `Working`) → `200` `TimeOffWeekDto` of that
   week. "Working" removes the day's entry.

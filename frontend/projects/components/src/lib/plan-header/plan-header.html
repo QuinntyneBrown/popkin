@@ -2,6 +2,9 @@
 <div class="plan-header__row">
   <div class="plan-header__title">
     <h1>{{ heading() }}</h1>
+    @if (sub(); as sub) {
+      <p class="plan-header__sub">{{ sub }}</p>
+    }
   </div>
   <div class="plan-header__actions"><ng-content /></div>
 </div>

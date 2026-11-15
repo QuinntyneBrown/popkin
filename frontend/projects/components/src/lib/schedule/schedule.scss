@@ -11,6 +11,16 @@
   gap: var(--space-4);
 }
 
+.schedule__skeleton-days {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.schedule__skeleton-day {
+  flex: 1;
+  height: var(--space-20);
+}
+
 .schedule__skeleton-row {
   display: flex;
   flex-wrap: wrap;

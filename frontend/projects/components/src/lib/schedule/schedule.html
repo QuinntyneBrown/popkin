@@ -1,14 +1,27 @@
 @if (loading()) {
   <p class="visually-hidden" role="status">{{ loadingText() }}</p>
-  <div class="schedule__skeleton" aria-hidden="true">
-    <span pk-skeleton shape="pill"></span>
-    <div class="schedule__skeleton-row">
-      <span pk-skeleton shape="pill"></span>
-      <span pk-skeleton shape="pill"></span>
+  @if (view() === 'this-week') {
+    <div class="schedule__skeleton" aria-hidden="true">
+      <div class="schedule__skeleton-days">
+        @for (day of [1, 2, 3, 4]; track day) {
+          <span pk-skeleton shape="card" class="schedule__skeleton-day"></span>
+        }
+      </div>
+      <span pk-skeleton shape="title"></span>
+      <span pk-skeleton shape="text" [width]="70"></span>
+      <span pk-skeleton shape="media"></span>
     </div>
-    <span pk-skeleton shape="card"></span>
-    <span pk-skeleton shape="card"></span>
-  </div>
+  } @else {
+    <div class="schedule__skeleton" aria-hidden="true">
+      <span pk-skeleton shape="pill"></span>
+      <div class="schedule__skeleton-row">
+        <span pk-skeleton shape="pill"></span>
+        <span pk-skeleton shape="pill"></span>
+      </div>
+      <span pk-skeleton shape="card"></span>
+      <span pk-skeleton shape="card"></span>
+    </div>
+  }
 } @else {
   <ng-content />
 }

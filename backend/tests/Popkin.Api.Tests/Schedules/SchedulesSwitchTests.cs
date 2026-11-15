@@ -43,6 +43,30 @@ public sealed class SchedulesSwitchTests
         Assert.False(problem.TryGetProperty("members", out _));
     }
 
+    // Given Schedules is off, when a member makes any Schedules request, then it is refused with
+    // 404 `feature_off`, and what was entered is kept for when it is back on (L2-077 AC3, AC6).
+    [Theory]
+    [InlineData("GET", "schedule/time-off?week=2027-02-15")]
+    [InlineData("PUT", "schedule/time-off/{me}")]
+    [InlineData("GET", "schedule/week?from=2026-09-12")]
+    public async Task While_Schedules_is_off_every_Schedules_request_is_refused(string method, string path)
+    {
+        using var api = new ApiFactory();
+        api.Settings["Features:Schedules"] = "false";
+        var lakeside = await api.StartLakesideAsync();
+        var me = await lakeside.Host.MembershipIdAsync(lakeside.Id);
+        var request = new HttpRequestMessage(new HttpMethod(method), $"/api/popkins/{lakeside.Id}/{path.Replace("{me}", me.ToString())}");
+        if (method != "GET")
+        {
+            // A body every write binds; the switch refuses it before it is read.
+            request.Content = JsonContent.Create(new { week = "2027-02-15", from = "2027-02-15", days = Array.Empty<string>() });
+        }
+
+        var response = await lakeside.Host.SendAsync(request);
+
+        await response.AssertProblem(HttpStatusCode.NotFound, "feature_off");
+    }
+
     // Given Schedules is off, when a person who is not a member asks for a Popkin's time off,
     // then the answer is the same 404 `feature_off`, which says nothing of the Popkin (L2-077 AC3,
     // L2-051).

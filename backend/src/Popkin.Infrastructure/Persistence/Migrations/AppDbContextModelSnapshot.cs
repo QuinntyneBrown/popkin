@@ -796,6 +796,28 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("VerificationCodes", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.WorkingStretch", b =>
+                {
+                    b.Property<Guid>("MembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Index")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EndMinute")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StartMinute")
+                        .HasColumnType("int");
+
+                    b.HasKey("MembershipId", "Day", "Index");
+
+                    b.ToTable("WorkingStretches", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.AlbumExport", b =>
                 {
                     b.HasOne("Popkin.Domain.PopkinSpace", null)
@@ -1048,6 +1070,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Popkin.Domain.TimeOffDay", b =>
+                {
+                    b.HasOne("Popkin.Domain.Membership", null)
+                        .WithMany()
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.WorkingStretch", b =>
                 {
                     b.HasOne("Popkin.Domain.Membership", null)
                         .WithMany()

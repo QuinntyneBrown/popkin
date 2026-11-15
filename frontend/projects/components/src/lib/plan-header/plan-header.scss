@@ -16,6 +16,13 @@
   flex-grow: 1;
 }
 
+.plan-header__sub {
+  margin-top: var(--space-1);
+  font: var(--font-weight-regular) var(--font-size-sm-plus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
 h1 {
   font: var(--text-h1-compact);
   letter-spacing: var(--letter-spacing-tight);

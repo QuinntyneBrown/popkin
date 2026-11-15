@@ -16,3 +16,16 @@ public sealed class TimeOffDayConfiguration : IEntityTypeConfiguration<TimeOffDa
         builder.HasOne<Membership>().WithMany().HasForeignKey(d => d.MembershipId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+public sealed class WorkingStretchConfiguration : IEntityTypeConfiguration<WorkingStretch>
+{
+    public void Configure(EntityTypeBuilder<WorkingStretch> builder)
+    {
+        builder.ToTable("WorkingStretches");
+        // At most two stretches per member and day (L2-074 AC8).
+        builder.HasKey(s => new { s.MembershipId, s.Day, s.Index });
+        builder.Ignore(s => s.Stretch);
+        // The stretches go with their membership.
+        builder.HasOne<Membership>().WithMany().HasForeignKey(s => s.MembershipId).OnDelete(DeleteBehavior.Cascade);
+    }
+}

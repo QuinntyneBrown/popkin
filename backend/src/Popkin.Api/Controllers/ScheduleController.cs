@@ -29,4 +29,13 @@ public sealed class ScheduleController(ISender sender) : ControllerBase
     public async Task<ActionResult<TimeOffWeekDto>> SetTimeOff(
         Guid popkinId, Guid membershipId, SetTimeOffRequest request, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new SetTimeOffCommand(popkinId, membershipId, request.Week, request.Days), cancellationToken));
+
+    /// <summary>
+    /// This week (L2-074): seven days from `from`, the viewer's today, each evening's free count
+    /// and everyone's working stretches.
+    /// </summary>
+    [HttpGet("week")]
+    public async Task<ActionResult<ThisWeekDto>> GetThisWeek(Guid popkinId, [FromQuery] DateOnly? from, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetThisWeekQuery(popkinId, from), cancellationToken));
+
 }

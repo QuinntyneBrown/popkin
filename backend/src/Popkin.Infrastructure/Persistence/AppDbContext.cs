@@ -47,6 +47,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<TimeOffDay> TimeOffDays => Set<TimeOffDay>();
 
+    public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
