@@ -1,0 +1,26 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 3, "lines": ["When is everyone free? Find the evening, then plan it."] },
+    { "id": "timeoff", "bars": 6, "lines": ["The Schedule tab opens on Time off: a row for each member, a column for each day, Off, Tentative or Working.", "The event's days carry its label, and each day counts who is off."] },
+    { "id": "add", "bars": 6, "lines": ["Add my time off sets your own week, a day at a time.", "Save, and your row fills in, for everyone, without a reload."] },
+    { "id": "thisweek", "bars": 5, "lines": ["This week shows the next seven evenings, and how many are free on each.", "On Wednesday, everyone's free from seven thirty."] },
+    { "id": "shifts", "bars": 5, "lines": ["A timeline from noon to midnight shows who works when, and says it in words for a screen reader."] },
+    { "id": "hours", "bars": 4, "lines": ["My hours takes your own working hours, up to two stretches a day, on the quarter hour."] },
+    { "id": "dinner", "bars": 6, "lines": ["Plan dinner in chat opens the Everyone thread with a draft, ready to send, not sent.", "On an evening someone works, it asks those who are free instead."] },
+    { "id": "home", "bars": 4, "lines": ["The Popkin home names the next evening everyone is free."] },
+    { "id": "event", "bars": 4, "lines": ["The Host sets the event from Popkin settings: a label, a first day and a last day."] },
+    { "id": "grow", "bars": 6, "lines": [
+      { "text": "On a phone, the table scrolls inside the screen, the names fixed.", "at": 0 },
+      { "text": "From ten twenty-four pixels, the headline and its chat action sit side by side.", "at": 8 }
+    ] },
+    { "id": "off", "bars": 5, "lines": ["Schedules has a switch. While it is off, the tab is gone and its screens say so. Nothing is lost."] },
+    { "id": "proof", "bars": 6, "lines": ["What no screen shows: each member changes only their own row, and a wrapped-up Popkin's schedule is read only.", "An open screen follows every change, live."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey twenty-two. Popkin is a platform for pop-up communities."] }
+  ]
+}
