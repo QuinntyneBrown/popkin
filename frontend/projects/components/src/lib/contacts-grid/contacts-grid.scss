@@ -1,0 +1,36 @@
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: start;
+}
+
+/* The columns are the consumer's elements; the grid keeps them from overflowing it. */
+@media (min-width: 64rem) {
+  :host {
+    gap: var(--space-10);
+  }
+
+  :host(.contacts-grid--lead) {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+
+  :host(.contacts-grid--about) {
+    grid-template-columns: var(--layout-detail-pane) minmax(0, 1fr);
+    gap: var(--space-12);
+  }
+
+  :host(.contacts-grid--aside) {
+    grid-template-columns: minmax(0, 1fr) var(--layout-detail-pane);
+  }
+}
+
+@media (min-width: 80rem) {
+  :host(.contacts-grid--about) {
+    grid-template-columns: var(--layout-list-pane) minmax(0, 1fr);
+  }
+
+  :host(.contacts-grid--aside) {
+    grid-template-columns: minmax(0, 1fr) var(--layout-list-pane);
+  }
+}

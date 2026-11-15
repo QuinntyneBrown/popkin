@@ -206,3 +206,6 @@ export * from './lib/kind-grid/kind-grid';
 export * from './lib/keep-strip/keep-strip';
 export * from './lib/habit-row/habit-row';
 export * from './lib/group-browser/group-browser';
+export * from './lib/contacts-page/contacts-page';
+export * from './lib/contacts-grid/contacts-grid';
+export * from './lib/list-head/list-head';

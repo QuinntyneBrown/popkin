@@ -1,0 +1,31 @@
+@if (level() === 2) {
+  <h2
+    class="list-head__title"
+    [class.list-head__title--late]="tone() === 'late'"
+    [class.list-head__title--quiet]="tone() === 'quiet'"
+    [id]="headingId()"
+  >
+    <ng-container *ngTemplateOutlet="title" />
+  </h2>
+} @else {
+  <h3
+    class="list-head__title"
+    [class.list-head__title--late]="tone() === 'late'"
+    [class.list-head__title--quiet]="tone() === 'quiet'"
+    [id]="headingId()"
+  >
+    <ng-container *ngTemplateOutlet="title" />
+  </h3>
+}
+@if (link() && linkLabel()) {
+  <a pk-link variant="accent" [routerLink]="link()">{{ linkLabel() }}</a>
+}
+<ng-template #title>
+  @if (icon(); as name) {
+    <svg pk-icon [name]="name" size="sm"></svg>
+  }
+  {{ heading() }}
+  @if (count() !== undefined) {
+    <span class="list-head__count">{{ count() }}</span>
+  }
+</ng-template>
