@@ -19,3 +19,15 @@ public sealed class GetPopkinFeaturesQueryHandler(IMembershipGuard guard, IFeatu
         return new PopkinFeaturesDto(features.IsOn(Feature.Plan, popkin.Id), features.IsOn(Feature.Schedules, popkin.Id));
     }
 }
+
+/// <summary>The features a Popkin not yet created is offered: those on for Everyone, Plan first (L2-152 AC8).</summary>
+public sealed record NewPopkinFeaturesDto(IReadOnlyList<Feature> Offered);
+
+public sealed record GetNewPopkinFeaturesQuery : IRequest<NewPopkinFeaturesDto>;
+
+public sealed class GetNewPopkinFeaturesQueryHandler(IFeatureSwitches features)
+    : IRequestHandler<GetNewPopkinFeaturesQuery, NewPopkinFeaturesDto>
+{
+    public Task<NewPopkinFeaturesDto> Handle(GetNewPopkinFeaturesQuery request, CancellationToken cancellationToken) =>
+        Task.FromResult(new NewPopkinFeaturesDto(new[] { Feature.Plan, Feature.Schedules }.Where(features.IsOfferedToNew).ToList()));
+}

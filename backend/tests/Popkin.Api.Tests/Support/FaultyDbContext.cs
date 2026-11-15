@@ -80,6 +80,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<FeatureChosenPopkin> FeatureChosenPopkins => inner.FeatureChosenPopkins;
 
+    public DbSet<PopkinFeatureOff> PopkinFeaturesOff => inner.PopkinFeaturesOff;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

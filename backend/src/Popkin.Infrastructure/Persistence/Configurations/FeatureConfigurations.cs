@@ -26,3 +26,14 @@ public sealed class FeatureChosenPopkinConfiguration : IEntityTypeConfiguration<
         builder.HasOne<PopkinSpace>().WithMany().HasForeignKey(c => c.PopkinId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+public sealed class PopkinFeatureOffConfiguration : IEntityTypeConfiguration<PopkinFeatureOff>
+{
+    public void Configure(EntityTypeBuilder<PopkinFeatureOff> builder)
+    {
+        builder.ToTable("PopkinFeaturesOff");
+        builder.HasKey(o => new { o.PopkinId, o.Feature });
+        builder.Property(o => o.Feature).HasConversion<string>().HasMaxLength(32);
+        builder.HasOne<PopkinSpace>().WithMany().HasForeignKey(o => o.PopkinId).OnDelete(DeleteBehavior.Cascade);
+    }
+}

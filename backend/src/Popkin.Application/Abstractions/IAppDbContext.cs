@@ -66,5 +66,7 @@ public interface IAppDbContext
 
     DbSet<FeatureChosenPopkin> FeatureChosenPopkins { get; }
 
+    DbSet<PopkinFeatureOff> PopkinFeaturesOff { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
