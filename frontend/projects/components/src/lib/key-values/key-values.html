@@ -1,0 +1,12 @@
+@for (item of items(); track item.label) {
+  <div>
+    <dt>{{ item.label }}</dt>
+    <dd>
+      @if (item.mono) {
+        <span class="mono">{{ item.value }}</span>
+      } @else {
+        {{ item.value }}
+      }
+    </dd>
+  </div>
+}
