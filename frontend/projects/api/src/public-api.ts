@@ -115,3 +115,4 @@ export * from './lib/api/admin/dialogs/action-dialog-state';
 export * from './lib/models/plan';
 export * from './lib/api/plan/plan-api';
 export * from './lib/api/plan/plan-board-store';
+export * from './lib/api/plan/plan-text';

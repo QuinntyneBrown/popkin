@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Invites;
+using Popkin.Application.Problems;
 using Popkin.Domain;
 
 namespace Popkin.Application.Plan;
@@ -58,6 +59,11 @@ public static class PlanStories
             .Select(s => Of(s, owners, viewer, photos))
             .ToList();
     }
+
+    /// <summary>A story of this Popkin, or 404 `story_not_found`: another Popkin's is not told apart from none.</summary>
+    public static async Task<Story> RequireAsync(IAppDbContext db, Guid popkinId, Guid storyId, CancellationToken cancellationToken) =>
+        await db.Stories.SingleOrDefaultAsync(s => s.Id == storyId && s.PopkinId == popkinId, cancellationToken)
+        ?? throw new ProblemException(404, "story_not_found", "That story isn’t on the board any more.");
 
     public static async Task<IReadOnlyDictionary<Guid, Membership>> OwnersAsync(
         IAppDbContext db, IReadOnlyCollection<Story> stories, CancellationToken cancellationToken)

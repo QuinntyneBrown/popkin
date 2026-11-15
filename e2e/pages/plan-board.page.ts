@@ -36,6 +36,10 @@ export class PlanBoardPage {
   readonly columns: Locator;
   readonly columnHeadings: Locator;
   readonly cards: Locator;
+  /** "New story" in the header, from 768 px (L2-068 AC8). */
+  readonly newStory: Locator;
+  /** The floating "New story" above the tabs, below 768 px. */
+  readonly newStoryFab: Locator;
   /** "No stories yet" (L2-068 AC9), its text and its four starters. */
   readonly empty: Locator;
   readonly emptyText: Locator;
@@ -57,7 +61,9 @@ export class PlanBoardPage {
     this.heading = page.getByRole('heading', { level: 1, name: 'Our plan' });
     this.sub = this.header.locator('.plan-header__sub');
     this.views = page.getByRole('navigation', { name: 'Views' }).getByRole('link');
-    this.currentView = page.getByRole('navigation', { name: 'Views' }).locator('[aria-current="page"]');
+    this.currentView = page
+      .getByRole('navigation', { name: 'Views' })
+      .locator('[aria-current="page"]');
     this.burnDownView = page.getByRole('navigation', { name: 'Views' }).getByRole('link', {
       name: 'Burn-down',
     });
@@ -65,6 +71,8 @@ export class PlanBoardPage {
     this.columns = this.board.locator('section.board__col');
     this.columnHeadings = this.columns.getByRole('heading', { level: 2 });
     this.cards = this.board.locator('.story-card');
+    this.newStory = this.header.getByRole('button', { name: 'New story' });
+    this.newStoryFab = page.locator('.screen__fab').getByRole('button', { name: 'New story' });
     this.empty = page.locator('.empty').filter({
       has: page.getByRole('heading', { name: 'No stories yet' }),
     });
@@ -81,6 +89,11 @@ export class PlanBoardPage {
     this.nav = page.getByRole('navigation', { name: 'Popkin' });
     this.tabs = this.nav.locator('ul a > span:not(.badge)');
     this.currentTab = this.nav.locator('ul a[aria-current="page"]');
+  }
+
+  /** A starter of the empty board: "Pick the dates" (L2-068 AC9). */
+  starter(name: string): Locator {
+    return this.starters.filter({ hasText: name });
   }
 
   /** A column, by its name: "To do". */

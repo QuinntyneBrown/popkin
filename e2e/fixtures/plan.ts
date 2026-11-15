@@ -4,6 +4,9 @@ import { sam } from './experiences';
 import { maraAtHome, type Home } from './home';
 import { Schedule, priya, theSix } from './schedule';
 import { problem } from './stubs';
+import { NewStoryDialog } from '../pages/new-story.dialog';
+import { StoryDialog } from '../pages/story.dialog';
+import { PlanBoardPage } from '../pages/plan-board.page';
 
 /**
  * The Plan of Cabin Week ’27 as the mocks draw it, answered in memory (ADR 0005): fourteen
@@ -104,8 +107,14 @@ export class Plan {
   version = 1;
   /** Reads of the board, answered or not. */
   reads = 0;
+  /** The bodies of `POST …/plan/stories`, in the order they came. */
+  readonly added: Record<string, unknown>[] = [];
+  /** Each `PUT …/stories/{id}/column`, by the story's title. */
+  readonly moves: { title: string; column: string }[] = [];
   private failing?: Failure;
+  private writesFail = false;
   private held?: Promise<void>;
+  private writesHeld?: Promise<void>;
 
   constructor(private readonly page: Page) {}
 
@@ -119,6 +128,25 @@ export class Plan {
 
   recover(): void {
     this.failing = undefined;
+  }
+
+  /** Every write answers 500 until `writesRecover`. */
+  failWrites(): void {
+    this.writesFail = true;
+  }
+
+  writesRecover(): void {
+    this.writesFail = false;
+  }
+
+  /** The writes do not answer until the returned function is called. */
+  holdWrites(): () => void {
+    let release: () => void = () => undefined;
+    this.writesHeld = new Promise((resolve) => (release = resolve));
+    return () => {
+      this.writesHeld = undefined;
+      release();
+    };
   }
 
   /** The reads do not answer until the returned function is called. */
@@ -187,9 +215,63 @@ export class Plan {
       if (await this.refusal(route)) return;
       return route.fulfill({ json: this.board() });
     }
+    if (rest === '/stories' && method === 'POST') return this.add(route);
+    const moving = rest.match(/^\/stories\/([^/]+)\/column$/);
+    if (moving && method === 'PUT') return this.move(route, moving[1]);
     return route.fallback();
   }
+
+  /** `PUT …/stories/{id}/column`: the story goes last in its new column (L2-070 AC2). */
+  private async move(route: Route, id: string): Promise<void> {
+    const column = (route.request().postDataJSON() as { column: Column }).column;
+    const found = this.stories.find((s) => s.id === id);
+    if (!found) return route.fulfill({ status: 404, json: problem(404, 'story_not_found').body });
+    this.moves.push({ title: found.title, column });
+    await this.writesHeld;
+    if (this.writesFail) return route.fulfill({ status: 500 });
+    const moved = { ...found, column };
+    this.stories = [...this.stories.filter((s) => s.id !== id), moved];
+    this.version++;
+    return route.fulfill({ json: this.storyOf(moved) });
+  }
+
+  /** `POST …/plan/stories`: the story goes last in its column (L2-069 AC5). */
+  private async add(route: Route): Promise<void> {
+    const body = route.request().postDataJSON() as Record<string, unknown>;
+    this.added.push(body);
+    await this.writesHeld;
+    if (this.writesFail) return route.fulfill({ status: 500 });
+    const added = story(
+      String(body['title']).trim(),
+      body['column'] as Column,
+      Number(body['points']),
+      body['tag'] as Tag,
+      body['ownerMembershipId'] ? { membershipId: String(body['ownerMembershipId']) } : null,
+      { addedByMembershipId: this.viewer },
+    );
+    this.stories.push(added);
+    this.version++;
+    return route.fulfill({ status: 201, json: this.storyOf(added) });
+  }
 }
+
+const fullNames: Record<string, string> = {
+  Mara: 'Mara Okafor',
+  Walt: 'Walt Brennan',
+  Dev: 'Dev Patel',
+  Ellie: 'Ellie Brennan',
+  Sam: 'Sam Ortega',
+  Priya: 'Priya Nair',
+};
+
+/** The six of Cabin Week ’27 as `GET …/members` answers them, Mara the Host and the viewer. */
+const theSixMembers = theSix.map((person, i) => ({
+  membershipId: person.membershipId,
+  displayName: fullNames[person.firstName] ?? person.firstName,
+  avatar: person.avatar,
+  role: i === 0 ? ('Host' as const) : ('Member' as const),
+  isViewer: i === 0,
+}));
 
 const plans = new WeakMap<Page, Plan>();
 
@@ -218,6 +300,7 @@ export async function maraWithAPlan(
     home.popkin.length = 'KeepItGoing';
     home.popkin.endsAt = null;
     home.popkin.memberCount = 6;
+    home.members = theSixMembers;
     change?.(plan, home);
   });
   await plan.install();
@@ -260,4 +343,33 @@ export async function thePlanFailing(page: Page): Promise<void> {
 export async function thePlanOff(page: Page): Promise<void> {
   const plan = await maraWithAPlan(page);
   plan.fail('off');
+}
+
+/**
+ * "New story" as the mocks draw it: "Who brings what: packing list", 2 points, Ellie on it
+ * (L2-069). Opened from the header from 768 px and from the floating action below.
+ */
+export async function openNewStory(page: Page, filled = true): Promise<NewStoryDialog> {
+  const board = new PlanBoardPage(page);
+  await board.cards.first().waitFor();
+  const opener = (await board.newStory.isVisible()) ? board.newStory : board.newStoryFab;
+  await opener.click();
+  const dialog = new NewStoryDialog(page);
+  await dialog.member('Ellie').waitFor();
+  if (filled) {
+    await dialog.title.fill('Who brings what: packing list');
+    await dialog.member('Ellie').click();
+  }
+  return dialog;
+}
+
+/** Opens a story's dialog from its card: "Book the cabin at Pine Hollow" as the mocks do (L2-070). */
+export async function openStory(
+  page: Page,
+  title = 'Book the cabin at Pine Hollow',
+): Promise<StoryDialog> {
+  await new PlanBoardPage(page).card(title).root.click();
+  const dialog = new StoryDialog(page, title);
+  await dialog.member('Mara').waitFor();
+  return dialog;
 }

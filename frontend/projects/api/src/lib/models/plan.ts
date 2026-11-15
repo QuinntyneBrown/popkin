@@ -55,3 +55,12 @@ export interface PlanBoardView {
   progress: PlanProgressView | null;
   version: number;
 }
+
+/** `POST …/plan/stories`: a new story goes to Backlog or To do (L2-069). */
+export interface NewStoryRequest {
+  title: string;
+  column: 'Backlog' | 'ToDo';
+  points: number;
+  ownerMembershipId: string | null;
+  tag: StoryTag;
+}

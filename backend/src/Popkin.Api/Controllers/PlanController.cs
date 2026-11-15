@@ -1,5 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Popkin.Api.RateLimiting;
 using Popkin.Application.Plan;
 
 namespace Popkin.Api.Controllers;
@@ -13,4 +15,25 @@ public sealed class PlanController(ISender sender) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<PlanBoardDto>> GetBoard(Guid popkinId, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetPlanBoardQuery(popkinId), cancellationToken));
+
+    /// <summary>Adds a story to Backlog or To do (L2-069). Counted with the caller's messages.</summary>
+    [HttpPost("stories")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<StoryDto>> AddStory(Guid popkinId, AddStoryRequest request, CancellationToken cancellationToken)
+    {
+        var story = await sender.Send(
+            new AddStoryCommand(popkinId, request.Title, request.Column, request.Points, request.OwnerMembershipId, request.Tag),
+            cancellationToken);
+        return Created($"/api/popkins/{popkinId}/plan/stories/{story.Id}", story);
+    }
+
+    /// <summary>Moves a story to another column, last in it (L2-070 AC2). Counted with the caller's messages.</summary>
+    [HttpPut("stories/{storyId:guid}/column")]
+    [EnableRateLimiting(RateLimitPolicyNames.Messages)]
+    public async Task<ActionResult<StoryDto>> MoveStory(Guid popkinId, Guid storyId, MoveStoryRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new MoveStoryCommand(popkinId, storyId, request.Column), cancellationToken));
 }
+
+public sealed record MoveStoryRequest(string? Column);
+
+public sealed record AddStoryRequest(string? Title, string? Column, int? Points, Guid? OwnerMembershipId, string? Tag);

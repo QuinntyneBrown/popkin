@@ -4,6 +4,8 @@ import { settingsStates } from './settings-states';
 import { scheduleStates } from './schedule-states';
 import { planStates } from './plan-states';
 import { PlanBoardPage } from '../pages/plan-board.page';
+import { NewStoryDialog } from '../pages/new-story.dialog';
+import { StoryDialog } from '../pages/story.dialog';
 import { AddTimeOffDialog } from '../pages/add-time-off.dialog';
 import { MyHoursDialog } from '../pages/my-hours.dialog';
 import { SetEventDialog } from '../pages/set-event.dialog';
@@ -208,6 +210,14 @@ const timeOffEmptyRegions = (page: Page) => ({
   header: new TimeOffPage(page).header,
   state: page.locator('main .empty'),
 });
+const newStoryRegions = (page: Page) => {
+  const dialog = new NewStoryDialog(page);
+  return { header: dialog.heading, body: dialog.body, footer: dialog.footer };
+};
+const storyRegions = (page: Page) => {
+  const dialog = new StoryDialog(page);
+  return { header: dialog.heading, body: dialog.body, footer: dialog.footer };
+};
 const planBoardRegions = (page: Page) => {
   const plan = new PlanBoardPage(page);
   return { header: plan.header, board: plan.board };
@@ -1242,6 +1252,12 @@ export const screenStates: ScreenState[] = [
   { key: 'planBoardEmpty', ...planStates.planBoardEmpty, regions: planEmptyRegions },
   { key: 'planBoardError', ...planStates.planBoardError, regions: planEmptyRegions },
   { key: 'planBoardOff', ...planStates.planBoardOff, regions: planEmptyRegions },
+  { key: 'newStory', ...planStates.newStory, regions: newStoryRegions },
+  { key: 'newStoryBusy', ...planStates.newStoryBusy, regions: newStoryRegions },
+  { key: 'newStoryInvalid', ...planStates.newStoryInvalid, regions: newStoryRegions },
+  { key: 'newStoryFailed', ...planStates.newStoryFailed, regions: newStoryRegions },
+  { key: 'story', ...planStates.story, regions: storyRegions },
+  { key: 'storyDone', ...planStates.storyDone, regions: storyRegions },
   { key: 'addTimeOff', ...scheduleStates.addTimeOff, regions: addTimeOffRegions },
   { key: 'addTimeOffBusy', ...scheduleStates.addTimeOffBusy, regions: addTimeOffRegions },
   { key: 'addTimeOffInvalid', ...scheduleStates.addTimeOffInvalid, regions: addTimeOffRegions },

@@ -1,3 +1,4 @@
+import { Dialog } from '@angular/cdk/dialog';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,7 +9,9 @@ import {
   untracked,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ErrorScreens, PlanBoardStore, PopkinFrame, UnreadTracker } from 'api';
+import { ErrorScreens, PlanBoardStore, PopkinFrame, StoryView, UnreadTracker } from 'api';
+import { NewStoryData, NewStoryDialog } from '../../dialogs/new-story/new-story.dialog';
+import { StoryData, StoryDialog } from '../../dialogs/story/story.dialog';
 import {
   AppScreen,
   Board,
@@ -16,6 +19,7 @@ import {
   Button,
   Chip,
   EmptyState,
+  Fab,
   Icon,
   PlanHeader,
   PopkinNav,
@@ -36,6 +40,7 @@ import {
     Button,
     Chip,
     EmptyState,
+    Fab,
     Icon,
     PlanHeader,
     PopkinNav,
@@ -54,6 +59,7 @@ export class PlanBoardPage {
   protected readonly frame = inject(PopkinFrame);
   private readonly unread = inject(UnreadTracker);
   private readonly errors = inject(ErrorScreens);
+  private readonly dialog = inject(Dialog);
 
   /** "Back to {Popkin name}" while Plan is off (L2-077 AC2). */
   protected readonly home = computed(() => `/p/${this.popkinId()}`);
@@ -75,6 +81,38 @@ export class PlanBoardPage {
       : 'plain',
   );
   protected readonly unreadCount = computed(() => this.unread.forPopkin(this.popkinId()));
+
+  /** "New story", from the header, the floating action or a starter with its title (L2-069). */
+  protected newStory(title?: string): void {
+    const opened = this.dialog.open<StoryView, NewStoryData>(NewStoryDialog, {
+      data: { popkinId: this.popkinId(), accent: this.frame.accent(), title },
+      ariaLabelledBy: 'dlg-title',
+      autoFocus: '#stitle',
+      // pk-dialog draws its own backdrop, as the mocks do.
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((story) => {
+      if (story) this.store.added(story);
+    });
+  }
+
+  /** A story's card opens it, to move it on, mark it done or change it (L2-070 AC1). */
+  protected openStory(id: string): void {
+    const story = this.store.view()?.stories.find((s) => s.id === id);
+    if (!story) return;
+    const opened = this.dialog.open<StoryView, StoryData>(StoryDialog, {
+      data: { popkinId: this.popkinId(), accent: this.frame.accent(), story },
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      autoFocus: '#stitle',
+      hasBackdrop: false,
+      ariaModal: true,
+    });
+    opened.closed.subscribe((changed) => {
+      if (changed) this.store.moved(changed);
+    });
+  }
 
   constructor() {
     effect(() => {

@@ -1,0 +1,25 @@
+<span class="field__label" [id]="labelId()">{{ label() }}</span>
+<div class="chips" role="group" [id]="fieldId()" [attr.aria-labelledby]="labelId()">
+  @for (member of members(); track member.id) {
+    <button
+      class="who-chip"
+      type="button"
+      [attr.aria-pressed]="member.id === value()"
+      [attr.aria-disabled]="disabled() ? 'true' : null"
+      (click)="toggle(member.id)"
+    >
+      <span
+        pk-avatar
+        size="sm"
+        aria-hidden="true"
+        [attr.data-accent]="member.accent"
+        [initials]="member.initials"
+        [photo]="member.photo"
+      ></span
+      >{{ member.name }}
+    </button>
+  }
+</div>
+@if (none() && value() === null) {
+  <p class="field__hint">{{ none() }}</p>
+}

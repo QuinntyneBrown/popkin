@@ -1,3 +1,4 @@
+import { MemberView } from '../../models/home';
 import { SprintView, StoryColumn, StoryView } from '../../models/plan';
 import { accentOf } from '../../models/popkin';
 import { weekLabel } from '../schedule/schedule-weeks';
@@ -86,6 +87,43 @@ export function columnsOf(stories: readonly StoryView[]): BoardColumnView[] {
       stories: mine.map(cardOf),
     };
   });
+}
+
+/** "Doing · 8 points · Mara · Stay": where a story is, how big, who is on it and its tag (L2-070 AC1). */
+export function storyLine(story: StoryView): string {
+  const column = COLUMNS.find((c) => c.key === story.column)?.heading ?? story.column;
+  const points = story.points === 1 ? '1 point' : `${story.points} points`;
+  return [column, points, story.owner?.firstName ?? 'No one yet', story.tag].join(' · ');
+}
+
+/**
+ * "Move to {next column}" for a story in Backlog or To do. A story in Doing is marked done
+ * instead, and one that is done moves no further (L2-070 AC1).
+ */
+export function moveOf(column: StoryColumn): { to: StoryColumn; label: string } | null {
+  if (column === 'Backlog') return { to: 'ToDo', label: 'Move to To do' };
+  if (column === 'ToDo') return { to: 'Doing', label: 'Move to Doing' };
+  return null;
+}
+
+/** A member as "Who’s on it?" offers them (L2-069 AC1). */
+export interface WhoChipView {
+  id: string;
+  name: string;
+  initials: string;
+  photo: string | null;
+  accent: string;
+}
+
+/** Every member by first name with their avatar, in the order the API lists them (L2-069 AC1). */
+export function whoChipsOf(members: readonly MemberView[]): WhoChipView[] {
+  return members.map((member) => ({
+    id: member.membershipId,
+    name: member.displayName.trim().split(/\s+/)[0],
+    initials: member.avatar.initials,
+    photo: member.avatar.photoUrl,
+    accent: accentOf(member.avatar.accent),
+  }));
 }
 
 function daysBetween(from: string, to: string): number {

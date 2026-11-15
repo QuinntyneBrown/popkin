@@ -206,6 +206,12 @@ export const routes = {
   planBoardEmpty: { app: plan, mock: 'pages/plan-board/empty.html' },
   planBoardError: { app: plan, mock: 'pages/plan-board/error.html' },
   planBoardOff: { app: plan, mock: 'pages/plan-board/off.html' },
+  newStory: { app: plan, mock: 'dialogs/new-story/default.html' },
+  newStoryBusy: { app: plan, mock: 'dialogs/new-story/busy.html' },
+  newStoryInvalid: { app: plan, mock: 'dialogs/new-story/invalid.html' },
+  newStoryFailed: { app: plan, mock: 'dialogs/new-story/failed.html' },
+  story: { app: plan, mock: 'dialogs/story/default.html' },
+  storyDone: { app: plan, mock: 'dialogs/story/done.html' },
   thisWeek: { app: `${home}/schedule/week?day=2026-09-16`, mock: 'pages/this-week/default.html' },
   thisWeekWorking: {
     app: `${home}/schedule/week?day=2026-09-15`,

@@ -1,6 +1,16 @@
 import type { Page } from '@playwright/test';
 import type { RouteKey } from './routes';
-import { theMockPlan, thePlanEmpty, thePlanFailing, thePlanLoading, thePlanOff } from './plan';
+import { expect } from '@playwright/test';
+import {
+  openNewStory,
+  openStory,
+  planOf,
+  theMockPlan,
+  thePlanEmpty,
+  thePlanFailing,
+  thePlanLoading,
+  thePlanOff,
+} from './plan';
 
 /*
  * The states of the Plan the mocks draw (journey 21), for the sweeps: `before` is the step
@@ -19,4 +29,35 @@ export const planStates = {
   planBoardEmpty: { before: thePlanEmpty },
   planBoardError: { before: thePlanFailing },
   planBoardOff: { before: thePlanOff },
+  newStory: { before: theMockPlan, app: async (page) => void (await openNewStory(page)) },
+  newStoryBusy: {
+    before: theMockPlan,
+    app: async (page) => {
+      const dialog = await openNewStory(page);
+      planOf(page).holdWrites();
+      await dialog.action.click();
+    },
+  },
+  newStoryInvalid: {
+    before: theMockPlan,
+    app: async (page) => {
+      const dialog = await openNewStory(page, false);
+      await dialog.member('Ellie').click();
+      await dialog.action.click();
+    },
+  },
+  newStoryFailed: {
+    before: theMockPlan,
+    app: async (page) => {
+      const dialog = await openNewStory(page);
+      planOf(page).failWrites();
+      await dialog.action.click();
+      await expect(dialog.failed).toBeVisible();
+    },
+  },
+  story: { before: theMockPlan, app: async (page) => void (await openStory(page)) },
+  storyDone: {
+    before: theMockPlan,
+    app: async (page) => void (await openStory(page, 'Collect $150 deposits')),
+  },
 } satisfies Partial<Record<RouteKey, PlanState>>;

@@ -7,6 +7,18 @@
     [subStrong]="store.sprint()?.daysLeft"
   >
     <nav pk-view-nav slot="views" [views]="views()"></nav>
+    @if (store.state() === 'ready') {
+      <button
+        pk-button
+        type="button"
+        variant="popkin"
+        size="md"
+        class="only-m-up"
+        (click)="newStory()"
+      >
+        <svg pk-icon name="plus" size="md"></svg>New story
+      </button>
+    }
   </header>
 
   @switch (store.state()) {
@@ -52,7 +64,7 @@
           >
             <div class="cluster">
               @for (starter of starters; track starter) {
-                <button pk-chip type="button" [outline]="true">
+                <button pk-chip type="button" [outline]="true" (click)="newStory(starter)">
                   <svg pk-icon name="plus" size="sm"></svg>{{ starter }}
                 </button>
               }
@@ -81,6 +93,7 @@
                     [owner]="story.owner"
                     [due]="story.due"
                     [done]="story.done"
+                    (click)="openStory(story.id)"
                   ></button>
                 </li>
               }
@@ -89,6 +102,12 @@
         </div>
       }
     }
+  }
+
+  @if (store.state() === 'ready') {
+    <button pk-fab slot="fab" type="button" class="only-below-m" (click)="newStory()">
+      New story
+    </button>
   }
 
   <nav

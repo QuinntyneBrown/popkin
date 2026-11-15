@@ -1,0 +1,27 @@
+<span class="field__label" [id]="labelId()">{{ label() }}</span>
+@if (hint()) {
+  <p class="field__hint" [id]="hintId()">{{ hint() }}</p>
+}
+<div
+  class="pts-group"
+  role="radiogroup"
+  [id]="fieldId()"
+  [attr.aria-labelledby]="labelId()"
+  [attr.aria-describedby]="hint() ? hintId() : null"
+  [attr.aria-disabled]="disabled() ? 'true' : null"
+>
+  @for (option of options(); track option; let i = $index) {
+    <button
+      #option
+      class="pts-group__opt"
+      type="button"
+      role="radio"
+      [attr.aria-checked]="option === value()"
+      [tabIndex]="option === value() ? 0 : -1"
+      (click)="choose(option)"
+      (keydown)="move($event, i)"
+    >
+      {{ option }}
+    </button>
+  }
+</div>

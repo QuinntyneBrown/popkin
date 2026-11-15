@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PlanBoardView } from '../../models/plan';
+import { PlanBoardView, StoryView } from '../../models/plan';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PLAN_API } from './plan-api';
 import { PlanBoardStore } from './plan-board-store';
@@ -92,5 +92,54 @@ describe('PlanBoardStore', () => {
 
     expect(reads).toBe(2);
     expect(store.state()).toBe('off');
+  });
+
+  it('shows a story it added last in its column at once (L2-069 AC5)', () => {
+    const story = (id: string, column: StoryView['column']): StoryView => ({
+      id,
+      title: id,
+      column,
+      points: 2,
+      tag: 'Travel',
+      owner: null,
+      dueDate: null,
+      commentCount: 0,
+      addedByMembershipId: 'm1',
+      canDelete: true,
+      addedAt: '2026-09-12T09:00:00Z',
+    });
+    answer = { ...empty, stories: [story('Van', 'ToDo'), story('Kayak', 'Backlog')] };
+    store.open('p1');
+
+    store.added(story('Packing list', 'ToDo'));
+
+    expect(store.columns()[1].stories.map((s) => s.title)).toEqual(['Van', 'Packing list']);
+    expect(store.empty()).toBe(false);
+  });
+
+  it('shows a story it moved last in its new column at once (L2-070 AC2)', () => {
+    const story = (id: string, column: StoryView['column']): StoryView => ({
+      id,
+      title: id,
+      column,
+      points: 2,
+      tag: 'Travel',
+      owner: null,
+      dueDate: null,
+      commentCount: 0,
+      addedByMembershipId: 'm1',
+      canDelete: true,
+      addedAt: '2026-09-12T09:00:00Z',
+    });
+    answer = {
+      ...empty,
+      stories: [story('Van', 'ToDo'), story('Cabin', 'Doing'), story('Kayak', 'Doing')],
+    };
+    store.open('p1');
+
+    store.moved(story('Van', 'Doing'));
+
+    expect(store.columns()[1].stories).toEqual([]);
+    expect(store.columns()[2].stories.map((s) => s.title)).toEqual(['Cabin', 'Kayak', 'Van']);
   });
 });

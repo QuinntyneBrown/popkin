@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { StoryView } from '../../models/plan';
-import { cardOf, columnsOf, daysLeftLabel, dueLabel, sprintLine } from './plan-text';
+import {
+  cardOf,
+  columnsOf,
+  daysLeftLabel,
+  dueLabel,
+  moveOf,
+  sprintLine,
+  storyLine,
+  whoChipsOf,
+} from './plan-text';
 
 function story(title: string, column: StoryView['column'], points: number): StoryView {
   return {
@@ -97,4 +106,60 @@ describe('cardOf', () => {
     expect(card.done).toBe(true);
     expect(card.owner).toBeNull();
   });
+});
+
+describe('whoChipsOf', () => {
+  it('offers every member by first name with their avatar (L2-069 AC1)', () => {
+    const chips = whoChipsOf([
+      {
+        membershipId: 'm-mara',
+        displayName: 'Mara Okafor',
+        avatar: { initials: 'MO', accent: 'Coral', photoUrl: '/p/mara.jpg' },
+        role: 'Host',
+        isViewer: true,
+      },
+      {
+        membershipId: 'm-sam',
+        displayName: '  Sam   Ortega ',
+        avatar: { initials: 'SO', accent: 'Amber', photoUrl: null },
+        role: 'Member',
+        isViewer: false,
+      },
+    ]);
+
+    expect(chips).toEqual([
+      { id: 'm-mara', name: 'Mara', initials: 'MO', photo: '/p/mara.jpg', accent: 'coral' },
+      { id: 'm-sam', name: 'Sam', initials: 'SO', photo: null, accent: 'amber' },
+    ]);
+  });
+});
+
+describe('storyLine', () => {
+  it('says where a story is, how big, who is on it and its tag (L2-070 AC1)', () => {
+    const line = storyLine({
+      ...story('Cabin', 'Doing', 8),
+      tag: 'Stay',
+      owner: {
+        membershipId: 'm-mara',
+        firstName: 'Mara',
+        avatar: { initials: 'MO', accent: 'Coral', photoUrl: null },
+      },
+    });
+    expect(line).toBe('Doing · 8 points · Mara · Stay');
+  });
+
+  it('says "To do", "1 point" and "No one yet"', () => {
+    expect(storyLine(story('Licence', 'ToDo', 1))).toBe('To do · 1 point · No one yet · Travel');
+  });
+});
+
+describe('moveOf', () => {
+  it.each([
+    ['Backlog', { to: 'ToDo', label: 'Move to To do' }],
+    ['ToDo', { to: 'Doing', label: 'Move to Doing' }],
+    ['Doing', null],
+    ['Done', null],
+  ] as const)('offers a %s story its next column, short of Done (L2-070 AC1)', (column, move) =>
+    expect(moveOf(column)).toEqual(move),
+  );
 });

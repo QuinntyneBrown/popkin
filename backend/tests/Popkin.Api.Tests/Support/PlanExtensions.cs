@@ -58,6 +58,10 @@ public static class PlanExtensions
             $"/api/popkins/{popkinId}/plan/stories",
             new { title, column, points, ownerMembershipId, tag });
 
+    /// <summary>`PUT …/plan/stories/{storyId}/column`: moves a story to a column (L2-070 AC2).</summary>
+    public static Task<HttpResponseMessage> MoveStoryAsync(this HttpClient member, Guid popkinId, Guid storyId, string? column) =>
+        member.PutAsJsonAsync($"/api/popkins/{popkinId}/plan/stories/{storyId}/column", new { column });
+
     public static Task<JsonElement> PlanBoardAsync(this HttpClient member, Guid popkinId) =>
         member.GetFromJsonAsync<JsonElement>($"/api/popkins/{popkinId}/plan");
 

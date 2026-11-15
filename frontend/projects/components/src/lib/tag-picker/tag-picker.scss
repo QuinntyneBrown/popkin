@@ -1,0 +1,65 @@
+:host {
+  display: block;
+}
+
+.field__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font: var(--text-label);
+  color: var(--color-fg-default);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag-picker__opt {
+  display: inline-flex;
+  align-items: center;
+  height: var(--space-10);
+  min-width: var(--target-comfortable);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+  white-space: nowrap;
+}
+
+/* The chosen tag is outlined, not dark, so its dot still shows (L2-069 AC1). */
+.tag-picker__opt[aria-checked='true'] {
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-border-focus);
+}
+
+.story-tag__dot {
+  width: var(--space-2-5);
+  height: var(--space-2-5);
+  margin-right: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-fg-subtle);
+
+  &[data-tag='travel'] {
+    background: var(--color-tag-travel);
+  }
+
+  &[data-tag='stay'] {
+    background: var(--color-tag-stay);
+  }
+
+  &[data-tag='food'] {
+    background: var(--color-tag-food);
+  }
+
+  &[data-tag='money'] {
+    background: var(--color-tag-money);
+  }
+
+  &[data-tag='fun'] {
+    background: var(--color-tag-fun);
+  }
+}

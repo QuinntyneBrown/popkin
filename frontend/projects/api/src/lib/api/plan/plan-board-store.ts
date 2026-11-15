@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, interval } from 'rxjs';
-import { PlanBoardView } from '../../models/plan';
+import { PlanBoardView, StoryView } from '../../models/plan';
 import { POPKIN_REALTIME } from '../realtime/popkin-realtime';
 import { PLAN_API } from './plan-api';
 import { columnsOf, daysLeftLabel, sprintLine } from './plan-text';
@@ -43,6 +43,24 @@ export class PlanBoardStore {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.read());
     this.read();
+  }
+
+  /** A story this member just added shows at once, last in its column (L2-069 AC5). */
+  added(story: StoryView): void {
+    this.view.update((view) => (view ? { ...view, stories: [...view.stories, story] } : view));
+  }
+
+  /** A story this member moved or changed shows at once, last in its column if it moved (L2-070 AC2, AC3). */
+  moved(story: StoryView): void {
+    this.view.update((view) => {
+      if (!view) return view;
+      const was = view.stories.find((s) => s.id === story.id);
+      const others = view.stories.filter((s) => s.id !== story.id);
+      if (was && was.column === story.column) {
+        return { ...view, stories: view.stories.map((s) => (s.id === story.id ? story : s)) };
+      }
+      return { ...view, stories: [...others, story] };
+    });
   }
 
   retry(): void {
