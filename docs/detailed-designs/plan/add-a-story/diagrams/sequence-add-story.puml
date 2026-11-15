@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — Adding a story
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PlanBoardPage" as page
+  participant "NewStoryDialog" as dialog
+  participant "HttpPlanApi" as client
+  participant "PlanBoardStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlanController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "AddStoryCommandHandler" as handler
+  participant "StoryInput" as input
+  participant "PlanStories" as plan
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "New story" or a starter
+page -> dialog : Open: "This sprint", 2 points, nobody, Travel; the starter's title (L2-069 AC1, L2-068 AC9)
+actor -> dialog : Fill it in; the submit reads "Add to To do" or "Add to backlog" (L2-069 AC3)
+alt The title is empty or only spaces
+  dialog --> actor : Field invalid, "Say what needs doing."; nothing sent (L2-069 AC4)
+else
+  dialog -> dialog : "Adding…", disabled (L2-069 AC5)
+  dialog -> client : addStory(popkinId, input)
+  client -> controller : POST /api/popkins/{popkinId}/plan/stories
+  controller -> handler : Send AddStoryCommand
+  handler -> switches : Require(Plan)
+  handler -> guard : RequireActiveMemberAsync(popkinId)
+  handler -> input : Title, column (Backlog or ToDo), points, tag, owner
+  alt Wrapped up
+    controller --> client : 409 popkin_wrapped_up (L2-069 AC8)
+  else A rule broken
+    controller --> client : 400 invalid_story, the field named (L2-069 AC8)
+  else Allowed
+    handler -> plan : Add
+    plan -> db : Sprint "Planning sprint" from today (UTC) when it is the first story (L2-068 AC13)
+    plan -> db : Story last in its column; PlanChange +points when To do (L2-070 AC6); Version + 1; one save
+    plan -> notifier : PlanChanged(popkinId, version)
+    controller --> client : 201 StoryDto
+    client --> dialog : The story
+    dialog --> page : Close with the story
+    page -> store : apply(story): last in its column, counts and points updated (L2-069 AC5)
+  end
+end
+alt Failure
+  client --> dialog : Error
+  dialog --> actor : Stays open with everything; "We couldn’t save that. Your story is still here. Try again." (L2-069 AC6)
+end
+@enduml

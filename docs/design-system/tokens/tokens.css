@@ -195,6 +195,13 @@
   --color-confetti-sun: var(--palette-sun);
   --color-confetti-coral: var(--palette-coral);
 
+  /* A story's tag: a dot beside the tag's name, never colour alone. The same in both themes. */
+  --color-tag-travel: var(--palette-accent-sky);
+  --color-tag-stay: var(--palette-accent-plum);
+  --color-tag-food: var(--palette-coral);
+  --color-tag-money: var(--palette-sun);
+  --color-tag-fun: var(--palette-accent-leaf);
+
   --color-info-bg: var(--palette-sand);
   --color-info-fg: var(--palette-ink);
   --color-info-border: var(--palette-line);

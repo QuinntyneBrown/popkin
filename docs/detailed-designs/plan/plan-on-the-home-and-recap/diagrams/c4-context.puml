@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Plan on the home and in the recap
+
+Person(member, "Member", "Opens the home, or the recap once wrapped up")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences, plan and schedules")
+
+Rel(member, popkin, "Sees the plan's state and its result in")
+@enduml

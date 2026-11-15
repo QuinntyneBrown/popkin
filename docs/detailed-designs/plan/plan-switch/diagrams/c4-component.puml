@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Plan switch
+
+Container_Boundary(web, "Popkin web app") {
+  Component(frame, "PopkinFrame", "api library", "plan from the header")
+  Component(nav, "pk-popkin-nav", "components library", "Plan tab when on, Schedule after it")
+  Component(stores, "PlanBoardStore, BurnDownStore", "api library", "state off on 404 feature_off; read every minute")
+  Component(home, "PopkinHomePage", "Angular page", "Reads the summary only when plan is on")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(header, "GetPopkinHomeQueryHandler", "MediatR handler", "PopkinHomeDto.plan")
+  Component(recap, "GetRecapQueryHandler", "MediatR handler", "stories null while off")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "IsOn, Require")
+  Component(settings, "SettingsFeatureSwitches", "Infrastructure", "Reads IConfiguration Features:Plan")
+  Component(handlers, "Plan handlers", "MediatR handlers", "Require Plan first")
+}
+Rel(frame, header, "GET header")
+Rel(nav, frame, "Reads plan")
+Rel(home, frame, "Reads plan")
+Rel(stores, handlers, "Read")
+Rel(header, switches, "IsOn")
+Rel(recap, switches, "IsOn")
+Rel(handlers, switches, "Require")
+Rel(switches, settings, "Implemented by")
+@enduml

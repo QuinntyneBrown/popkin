@@ -84,6 +84,8 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Preview card](components/preview-card.html) | Identity | With a name. No name yet. A 40-character name. | Static (both themes) | pages/name-your-popkin/default, pages/name-your-popkin/blank, pages/name-your-popkin/edge |
 | [Schedule](components/schedule.html) | Schedules | The Schedule tab's parts: the header and its two views, weeks of a month, the time-off table, the day picker, free headline and shifts, My hours rows and the home's Schedule card. | Static (both themes) | pages/time-off/default, pages/this-week/default, pages/popkin-home/schedule |
 | [Timeline](components/timeline.html) | Content | Day, weekend, custom, forever. | Static (both themes) | pages/how-long/default, pages/how-long/custom, pages/how-long/forever |
+| [Schedule](components/schedule.html) | Schedules | Plan header and views, weeks, time-off table, legend, day picker, free headline (everyone free, some working, no hours yet), shifts, hours row, Schedule card. | Loading, empty, error, off, read-only, invalid (both themes) | pages/time-off/default, pages/this-week/default, dialogs/add-time-off/default, dialogs/my-hours/default, pages/popkin-home/schedule |
+| [Plan](components/plan.html) | Plan | Sprint chip, board and column (Backlog, empty), story card (owned, no one yet, done), tag dots, points, member and tag pickers, burn-down chart, Biggest open (beside the chart, in the home’s card). | Hover, focus, chosen, done, loading, empty, error, read-only, off (both themes) | pages/plan-board/default, pages/burn-down/default, dialogs/story/default, pages/popkin-home/plan |
 
 ### Admin app
 
@@ -113,10 +115,10 @@ The admin app (`frontend/projects/admin`) is a separate application on the same 
 | [Popkin length, invite and members](components/popkin-facts.html) | Popkins | The parts of a Popkin's admin page: how long it has left and when it ends, its invite code and link, and its members with the Host marked. | admin/pages/popkin/default, admin/pages/popkin/ending |
 
 Added with the Plan, Schedules and admin mocks on 13 November 2026, in `assets/components.css`
-and not yet given a page of their own (the next run of `extracting-design-systems` writes them):
+and documented since on [Plan](components/plan.html) and [Schedule](components/schedule.html); the admin app's parts have no page yet:
 view switch (`.view-nav`), plan header (`.plan-header`), sprint chip and sparkline
 (`.sprint-chip`, `.sparkline`), board and story card (`.board`, `.story-card`, `.pts-group`,
-`.who-chip`), burn-down chart and legend (`.burn`, `.burn-chart`, `.chart-legend`, `.biggest`),
+`.who-chip`, the tag dots read `--color-tag-*`), burn-down chart and legend (`.burn`, `.burn-chart`, `.chart-legend`, `.biggest`),
 month and week pickers (`.month-nav`, `.weeks`), the time-off table (`.table-wrap`, `.leave`),
 the day picker and shift timeline (`.day-picker`, `.free`, `.shifts`), the hours and leave rows
 of the dialogs (`.hours-row`, `.leave-row`), the panel dialog (`.dialog--panel`) and the admin

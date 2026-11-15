@@ -1,0 +1,46 @@
+@startuml
+title UML sequence behaviour — The home's Plan section
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinHomePage" as page
+  participant "PopkinHomeStore" as store
+  participant "PopkinFrame" as frame
+  participant "HttpPlanApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlanController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPlanSummaryQueryHandler" as handler
+  participant "PlanHistory" as history
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open the Popkin home
+page -> frame : The header
+alt plan is false
+  page --> actor : No Plan section, no Plan request (L2-075 AC3, L2-077 AC6)
+else plan is true
+  store -> client : summary(popkinId)
+  client -> controller : GET /api/popkins/{popkinId}/plan/summary
+  controller -> handler : Send GetPlanSummaryQuery
+  handler -> handler : Require(Plan), RequireMemberAsync
+  handler -> db : Stories, sprint, PlanChange rows
+  alt No story
+    controller --> client : 204
+    store --> page : shown false: no section (L2-075 AC3)
+  else
+    handler -> history : Behind for today
+    controller --> client : 200 PlanSummaryDto
+    store --> page : "24 pts left", "7 behind", three biggest open, "See all" (L2-075 AC1)
+  end
+end
+actor -> page : Choose "See all"
+page --> actor : The plan board
+@enduml

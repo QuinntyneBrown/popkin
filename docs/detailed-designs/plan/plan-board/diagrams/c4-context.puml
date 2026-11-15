@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Plan board
+
+Person(member, "Member", "Adds, sizes, owns and moves stories")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences, plan and schedules")
+
+Rel(member, popkin, "Reads the board and the sprint's state in")
+@enduml

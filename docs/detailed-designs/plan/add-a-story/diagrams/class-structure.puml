@@ -1,0 +1,67 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Add a story
+
+package "Popkin.Application" {
+  class AddStoryRequest {
+    +string Title
+    +string Column
+    +int Points
+    +Guid? OwnerMembershipId
+    +string Tag
+  }
+  class AddStoryCommand {
+    +Guid PopkinId
+    +string Title
+    +string Column
+    +int Points
+    +Guid? OwnerMembershipId
+    +string Tag
+  }
+  class AddStoryCommandHandler {
+    +Handle(command): StoryDto
+  }
+  class StoryInput {
+    +{static} Title(title: string): string
+    +{static} Column(column: string, isNew: bool): StoryColumn
+    +{static} Points(points: int): int
+    +{static} Tag(tag: string): StoryTag
+    +{static} OwnerAsync(db, popkinId, membershipId): Guid?
+  }
+  class PlanStories {
+    +{static} SaveAsync(db, notifier, sprint, change): long
+  }
+  interface IFeatureSwitches
+  interface IMembershipGuard
+  interface IPopkinNotifier {
+    +PlanChanged(popkinId: Guid, version: long): Task
+  }
+}
+package "Popkin.Domain" {
+  class Story
+  class Sprint {
+    +{static} Start(popkinId: Guid, today: DateOnly): Sprint
+    +Changed(): void
+  }
+  class PlanChange
+}
+AddStoryRequest ..> AddStoryCommand : becomes
+AddStoryCommandHandler ..> AddStoryCommand
+AddStoryCommandHandler ..> StoryInput
+AddStoryCommandHandler ..> PlanStories
+AddStoryCommandHandler ..> IFeatureSwitches
+AddStoryCommandHandler ..> IMembershipGuard
+PlanStories ..> IPopkinNotifier
+PlanStories ..> Sprint
+AddStoryCommandHandler ..> Story : creates
+AddStoryCommandHandler ..> PlanChange : creates when To do
+@enduml

@@ -90,6 +90,7 @@ are open.
 | `MemberUpdated` | state | A member's name or photo | `GET /api/popkins/{popkinId}` | `CurrentPopkinStore` |
 | `PopkinWrappedUp` | fact | The Popkin ended; the screen should be the recap | `GET /api/popkins/{popkinId}`; `status` `WrappedUp` opens the recap. Sent when the Host wraps up; the Worker sends none, so a wrap-up by time is learned from this read alone, made by the clock ([ADR 0015](../../../adr/0015-the-worker-sends-no-hub-events.md)) | `WrapUpWatch`, for every screen inside the Popkin ([Time is up](../../wrap-up/time-is-up/README.md)) |
 | `ScheduleChanged` | fact | Time off, working hours or the event changed | `GET …/schedule/time-off?week=` or `GET …/schedule/week?from=`, the view on screen | `TimeOffStore`, `ThisWeekStore` ([Time off](../../schedules/time-off/README.md)) |
+| `PlanChanged` | state, its version alone | A story was added, moved, changed or deleted | `GET /api/popkins/{popkinId}/plan`, `…/plan/burn-down` or `…/plan/summary`, the view on screen, read when the version is above the one held | `PlanBoardStore`, `BurnDownStore`, `PopkinHomeStore` ([Plan board](../../plan/plan-board/README.md)) |
 | `PopkinLengthChanged` | state | The time left is wrong | `GET /api/popkins/{popkinId}`; `endsAt` | `CurrentPopkinStore` |
 
 ### Tests

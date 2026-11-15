@@ -18,7 +18,8 @@ nobody enters another's.
 
 Time off sits beside [This week](../this-week/README.md), the other view of the tab, and both
 exist only while the Schedules switch is on ([Schedules switch](../schedules-switch/README.md)).
-Journey 22 builds it.
+The Schedule tab follows Plan when Plan is on, and Chat when it is off
+([Plan switch](../../plan/plan-switch/README.md), L2-072 AC1). Journey 22 builds it.
 
 ## Description
 

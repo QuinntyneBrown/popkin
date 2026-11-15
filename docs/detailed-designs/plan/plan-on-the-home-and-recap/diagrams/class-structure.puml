@@ -1,0 +1,56 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Plan on the home and in the recap
+
+package "Popkin.Application" {
+  class GetPlanSummaryQuery {
+    +Guid PopkinId
+  }
+  class PlanSummaryDto {
+    +int PointsLeft
+    +int Behind
+    +StoryDto[] Biggest
+  }
+  class RecapDto {
+    +int PeopleCount
+    +int MessageCount
+    +int PhotoCount
+    +RecapStoriesDto? Stories
+  }
+  class RecapStoriesDto {
+    +int Done
+    +int Made
+  }
+  class PopkinHomeDto {
+    +bool Plan
+  }
+  interface IFeatureSwitches {
+    +IsOn(feature: Feature): bool
+    +Require(feature: Feature): void
+  }
+}
+package "Popkin.Domain" {
+  class PlanHistory {
+    +Behind(today: DateOnly): int
+  }
+  class Story {
+    +StoryColumn Column
+    +int Points
+  }
+}
+GetPlanSummaryQuery ..> PlanSummaryDto : null when no story (204)
+GetPlanSummaryQuery ..> IFeatureSwitches : Require
+GetPlanSummaryQuery ..> PlanHistory
+RecapDto *-- RecapStoriesDto
+RecapDto ..> IFeatureSwitches : IsOn
+RecapStoriesDto ..> Story : counts
+@enduml

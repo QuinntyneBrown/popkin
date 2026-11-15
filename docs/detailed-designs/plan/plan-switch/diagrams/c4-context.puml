@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Plan switch
+
+Person(member, "Member", "Sees the Plan tab, or not")
+Person(owner, "Owner", "Runs Popkin and sets its API settings")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences, plan and schedules")
+
+Rel(owner, popkin, "Sets Features:Plan of")
+Rel(member, popkin, "Uses the Plan tab of")
+@enduml

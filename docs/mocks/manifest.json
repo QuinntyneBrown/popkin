@@ -310,6 +310,7 @@
         "ongoing",
         "last-hour",
         "last-hour-member",
+        "plan",
         "schedule",
         "schedule-none"
       ]
@@ -538,7 +539,8 @@
       "route": "/p/:popkin/recap",
       "requirements": [
         "L2-046",
-        "L2-045"
+        "L2-045",
+        "L2-075"
       ],
       "states": [
         "default",
@@ -546,7 +548,8 @@
         "loading",
         "error",
         "exporting",
-        "plain"
+        "plain",
+        "plan"
       ],
       "not_applicable": {
         "empty": "A wrapped-up Popkin always has its people and dates; the top-rated card is left out when nothing was rated."
@@ -707,14 +710,16 @@
       "title": "Burn-down",
       "route": "/p/:popkin/plan/burn-down",
       "requirements": [
-        "L2-071"
+        "L2-071",
+        "L2-077"
       ],
       "states": [
         "default",
         "loading",
         "empty",
         "error",
-        "done"
+        "done",
+        "off"
       ]
     },
     {
@@ -1169,12 +1174,30 @@
       ],
       "states": [
         "default",
+        "no-delete",
         "done",
         "busy",
         "failed"
       ],
       "not_applicable": {
         "invalid": "The title rule and its message are the same as New story (new-story/invalid)."
+      }
+    },
+    {
+      "id": "delete-story",
+      "kind": "dialog",
+      "title": "Delete story",
+      "opens_from": "story",
+      "requirements": [
+        "L2-070"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The dialog has no field to fill in."
       }
     },
     {

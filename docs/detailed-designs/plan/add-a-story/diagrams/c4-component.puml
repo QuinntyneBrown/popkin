@@ -1,0 +1,37 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Add a story
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "PlanBoardPage", "Angular page", "Opens the dialog; applies the story")
+  Component(dialog, "NewStoryDialog", "CDK dialog", "Title, column, points, owner, tag")
+  Component(store, "PlanBoardStore", "api library", "apply(story)")
+  Component(text, "plan-text.ts", "api library, pure", "submitLabel, titleError, ownerHint")
+  Component(client, "HttpPlanApi", "Behind PLAN_API", "addStory")
+  Component(ui, "pk-dialog (panel), pk-text-field, pk-segmented-control, pk-points-picker, pk-who-chips, pk-tag-picker", "components library", "Presentation")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PlanController", "ASP.NET Core controller", "POST stories, rate-limited with messages")
+  Component(cmd, "AddStoryCommandHandler", "MediatR handler", "Adds the story")
+  Component(input, "StoryInput", "Application", "400 invalid_story with the field")
+  Component(plan, "PlanStories", "Application", "Sprint, PlanChange, version, save, PlanChanged")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "404 feature_off")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 popkin_not_found, 409 popkin_wrapped_up")
+  Component(notifier, "IPopkinNotifier", "Application abstraction", "PlanChanged")
+  ComponentDb(db, "Popkin database", "SQL Server", "Story, Sprint, PlanChange")
+}
+Rel(page, dialog, "Opens")
+Rel(dialog, ui, "Composes")
+Rel(dialog, text, "Words from")
+Rel(dialog, client, "addStory")
+Rel(page, store, "apply")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(ctrl, cmd, "Sends AddStoryCommand")
+Rel(cmd, switches, "Requires Plan")
+Rel(cmd, guard, "Requires an active membership")
+Rel(cmd, input, "Checks with")
+Rel(cmd, plan, "Saves through")
+Rel(plan, db, "Saves")
+Rel(plan, notifier, "PlanChanged")
+@enduml

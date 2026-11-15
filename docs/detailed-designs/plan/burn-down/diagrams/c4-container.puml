@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Burn-down
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Burn-down page, chart and its text")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET .../plan/burn-down, hub event PlanChanged")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Sprint, open stories, PlanChange")
+}
+Rel(member, web, "Chooses Burn-down or the sprint chip", "HTTPS")
+Rel(web, api, "Reads the burn-down", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads the sprint's history", "EF Core")
+Rel(api, web, "PlanChanged", "SignalR")
+@enduml

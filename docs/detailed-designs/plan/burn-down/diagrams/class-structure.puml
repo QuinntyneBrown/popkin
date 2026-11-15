@@ -1,0 +1,74 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Burn-down
+
+package "Popkin.Domain" {
+  enum ForecastKind {
+    Late
+    Early
+    LastDay
+    NoProgress
+    Done
+  }
+  class Forecast {
+    +ForecastKind Kind
+    +DateOnly? Date
+    +int Days
+  }
+  class PlanHistory {
+    +PointsLeftAtEndOf(day: DateOnly): int
+    +Days(today: DateOnly): int[]
+    +StartPoints: int
+    +{static} Ideal(start: int, i: int): int
+    +Behind(today: DateOnly): int
+    +Forecast(today: DateOnly): Forecast
+  }
+  class PlanChange {
+    +DateTimeOffset At
+    +int Delta
+  }
+  class Sprint {
+    +DateOnly FirstDay
+    +DateOnly LastDay
+  }
+}
+package "Popkin.Application" {
+  class GetBurnDownQuery {
+    +Guid PopkinId
+  }
+  class BurnDownDto {
+    +SprintDto? Sprint
+    +int StartPoints
+    +int PointsLeft
+    +int Behind
+    +ForecastDto Forecast
+    +BurnDayDto[] Days
+    +StoryDto[] Biggest
+  }
+  class ForecastDto {
+    +ForecastKind Kind
+    +DateOnly? Date
+    +int Days
+  }
+  class BurnDayDto {
+    +DateOnly Day
+    +int PointsLeft
+  }
+}
+PlanHistory ..> PlanChange : sums
+PlanHistory ..> Sprint
+PlanHistory ..> Forecast : answers
+Forecast --> ForecastKind
+GetBurnDownQuery ..> BurnDownDto
+BurnDownDto *-- ForecastDto
+BurnDownDto *-- BurnDayDto
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Plan on the home and in the recap
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Home's Plan section, recap's stories line")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET .../plan/summary, GET .../recap")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Story, Sprint, PlanChange")
+}
+Rel(member, web, "Opens the home or the recap", "HTTPS")
+Rel(web, api, "Reads the summary, the recap", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads", "EF Core")
+Rel(api, web, "PlanChanged", "SignalR")
+@enduml

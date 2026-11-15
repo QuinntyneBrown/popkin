@@ -1,0 +1,50 @@
+@startuml
+title UML sequence behaviour — Opening the burn-down
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "BurnDownPage" as page
+  participant "BurnDownStore" as store
+  participant "HttpPlanApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlanController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "GetBurnDownQueryHandler" as handler
+  participant "PlanHistory" as history
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Burn-down" or the sprint chip (L2-071 AC1, L2-068 AC7)
+page -> store : open(popkinId)
+store -> client : burnDown(popkinId)
+client -> controller : GET /api/popkins/{popkinId}/plan/burn-down
+controller -> handler : Send GetBurnDownQuery
+handler -> switches : Require(Plan)
+handler -> guard : RequireMemberAsync(popkinId)
+handler -> db : Sprint, open stories, the sprint's PlanChange rows
+alt No sprint
+  controller --> client : 200, sprint null
+  store --> page : state empty: "Nothing to burn down yet", "New story" (L2-071 AC8)
+else
+  handler -> history : Days, start points, behind, forecast for today (UTC)
+  controller --> client : 200 BurnDownDto
+  client --> store : The burn-down
+  store --> page : "24 pts left", "7 behind" (L2-071 AC2)
+  store --> page : "Finishes Sep 30 · 4 days late", or early, last day, no progress, all done (L2-071 AC3)
+  store --> page : Line, ideal, forecast, today's dot, "After the sprint", legend (L2-071 AC4)
+  store --> page : The text alternative: points left, status, forecast, each day (L2-071 AC5)
+  store --> page : "Biggest open": three stories with points, title and owner (L2-071 AC6)
+end
+alt Plan is off, or the read fails
+  store --> page : state off "Plan is switched off", or error "We couldn’t load the burn-down", "Try again"
+end
+@enduml

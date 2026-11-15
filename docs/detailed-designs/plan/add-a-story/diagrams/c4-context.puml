@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Add a story
+
+Person(member, "Member", "Any member of an active Popkin")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences, plan and schedules")
+
+Rel(member, popkin, "Adds a story to the plan of")
+@enduml

@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — Deleting a story
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Remover" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "StoryDialog" as dialog
+  participant "DeleteStoryDialog" as confirm
+  participant "HttpPlanApi" as client
+  participant "PlanBoardStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PlanController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DeleteStoryCommandHandler" as handler
+  participant "Story" as story
+  participant "PlanStories" as plan
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+note over dialog : "Delete" shows only when canDelete: who added it, its owner or the Host (L2-070 AC4)
+actor -> dialog : Choose "Delete"
+dialog -> confirm : Open "Delete this story?", "This can’t be undone.", "Delete", "Keep it"
+alt "Keep it"
+  confirm --> dialog : Close; nothing changes
+else "Delete"
+  confirm -> confirm : "Deleting…", disabled
+  confirm -> client : deleteStory(popkinId, storyId)
+  client -> controller : DELETE /api/popkins/{popkinId}/plan/stories/{storyId}
+  controller -> handler : Send DeleteStoryCommand
+  handler -> handler : Require(Plan), RequireActiveMemberAsync, the story (404 story_not_found)
+  handler -> story : CanBeRemovedBy(membership)
+  alt Anyone else
+    controller --> client : 403 not_your_story (L2-070 AC4)
+  else A remover
+    handler -> plan : Delete
+    plan -> db : Remove the story; PlanChange −(its points left) unless 0; Version + 1; one save
+    plan -> notifier : PlanChanged(popkinId, version)
+    controller --> client : 204
+    confirm --> dialog : Close both
+    dialog -> store : remove(storyId)
+  end
+end
+alt Failure
+  client --> confirm : Error
+  confirm --> actor : Stays open; "We couldn’t delete the story. It’s still on the board. Try again."
+end
+@enduml
