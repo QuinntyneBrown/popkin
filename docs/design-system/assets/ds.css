@@ -187,3 +187,17 @@ pre code { background: none; padding: 0; }
 .ds-example__canvas--aside::after { content: "Shown from 768px. Widen the window to see it."; display: block; padding: var(--space-6); font: var(--text-body-sm); color: var(--color-fg-muted); }
 .ds-example__canvas--split { display: block; padding: 0; overflow: hidden; contain: layout; }
 @media (min-width: 48rem) { .ds-example__canvas--aside::after { content: none; } }
+
+/* A component's own page title is the page's single <h1>, so an example that draws a screen's <h1>
+   uses <h2 class="ds-h1"> and these rules repeat the look the product gives it. */
+.ds-h1 { font: var(--text-h1); letter-spacing: var(--letter-spacing-tight); }
+.hero .ds-h1 { font: var(--text-hero); letter-spacing: var(--letter-spacing-tighter); }
+.plan-header .ds-h1, .tab-header .ds-h1 { font: var(--text-h1-compact); letter-spacing: var(--letter-spacing-tight); }
+.welcome__heading.ds-h1 { font: var(--text-display); }
+@media (min-width: 36rem) { .hero .ds-h1 { font-size: var(--font-size-7xl); } }
+@media (min-width: 62rem) { .hero .ds-h1 { font-size: var(--font-size-8xl); } }
+@media (min-width: 48rem) { .plan-header .ds-h1, .tab-header .ds-h1 { font: var(--text-h1); } }
+/* An example wider than its figure (a table, a row of chapters) scrolls inside the figure, never the page. */
+.ds-dodont figure, .ds-themes > [data-theme] { min-width: 0; }
+.ds-example__canvas, .ds-anatomy__figure { position: relative; overflow-x: auto; min-width: 0; } /* relative: keeps visually hidden text inside the scroll */
+.ds-section p code, .ds-section li code { overflow-wrap: anywhere; } /* a long token name wraps instead of widening the page */

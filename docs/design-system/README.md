@@ -82,7 +82,35 @@ The mocks were built from the Popkin Community Platform designs; this system is 
 | [Split aside](components/split-aside.html) | Layout | Photograph with a caption. Tint with a preview card. Tint with an icon, a title, a timeline and text. | Static (both themes) | pages/sign-up/default, pages/name-your-popkin/default, pages/how-long/default |
 | [Panes](components/panes.html) | Layout | List pane beside a thread. Thread pane beside the list. Detail pane: the Popkin, or the other member of a direct message with the photos shared between you. | Static (both themes) | pages/conversations/default, pages/direct-message/default, pages/group-chat/default |
 | [Preview card](components/preview-card.html) | Identity | With a name. No name yet. A 40-character name. | Static (both themes) | pages/name-your-popkin/default, pages/name-your-popkin/blank, pages/name-your-popkin/edge |
+| [Schedule](components/schedule.html) | Schedules | The Schedule tab's parts: the header and its two views, weeks of a month, the time-off table, the day picker, free headline and shifts, My hours rows and the home's Schedule card. | Static (both themes) | pages/time-off/default, pages/this-week/default, pages/popkin-home/schedule |
 | [Timeline](components/timeline.html) | Content | Day, weekend, custom, forever. | Static (both themes) | pages/how-long/default, pages/how-long/custom, pages/how-long/forever |
+
+### Admin app
+
+The admin app (`frontend/projects/admin`) is a separate application on the same tokens and stylesheet, extracted on
+15 November 2026 from [docs/mocks/admin](../mocks/admin/index.html). Its pattern is [Admin console](patterns/admin-console.html).
+
+| Component | Group | What it is | Mocks |
+|---|---|---|---|
+| [Admin shell](components/admin-shell.html) | Structure | The frame every signed-in admin screen sits in: a sidebar of grouped sections from 1024 px, a top bar with a menu drawer below it, the environment always on screen. | admin/pages/dashboard/default, admin/dialogs/menu/default, admin/pages/calls/viewer |
+| [Page header](components/page-head.html) | Structure | The title of an admin page with its subtitle, an optional way back and the page's actions on the right. | admin/pages/dashboard/default, admin/pages/person/default, admin/pages/jobs/default |
+| [Panel](components/panel.html) | Containers | A surface on the sand page, with an optional title, subtitle, action and foot. Admin pages are panels in a grid. | admin/pages/dashboard/default, admin/pages/person/default, admin/pages/reports/default |
+| [Data table](components/data-table.html) | Data | A list of records that reads as a table from 768 px and as stacked records on phones, with a toolbar of search and filters above it. | admin/pages/people/default, admin/pages/exports/default, admin/pages/audit/default |
+| [Status pill](components/status.html) | Data | A small pill with a dot and one or two words: what state a record is in, told by its words and its tone. | admin/pages/people/default, admin/pages/exports/default, admin/pages/jobs/default |
+| [Key values](components/key-values.html) | Data | A record's facts as label and value pairs in a grid: joined, last seen, account id. | admin/pages/person/default, admin/pages/popkin/default |
+| [Figures and tiles](components/figures.html) | Data | Big numbers: figure tabs that choose the chart under them, tiles that link to a list, and a headline figure over a chart. | admin/pages/dashboard/default, admin/pages/metrics/default |
+| [Trend chart and uptime](components/charts.html) | Data | A daily series as a solid line over a light area, and thirty days of uptime as bars. | admin/pages/dashboard/default, admin/pages/metrics/default, admin/pages/health/default |
+| [Activity lists](components/activity-lists.html) | Data | Short lists of things that happened or are waiting: needs attention, recent admin actions, a record's Popkins and sessions, an announcement's history. | admin/pages/dashboard/default, admin/pages/person/default, admin/pages/announcements/default |
+| [Report review](components/report-review.html) | Moderation | The report queue beside the reported content: a list of reports, the content quoted as posted, who reported it and the author's history, with the decision under it. | admin/pages/reports/default, admin/pages/reports/photo, admin/pages/reports/removed |
+| [Service health](components/service-health.html) | Operations | A summary of how the platform is, then a card per service with its figure, its note and thirty days of uptime. | admin/pages/health/default, admin/pages/health/all-good, admin/pages/health/down |
+| [Job row](components/job.html) | Operations | A background job: its name, what it does, its schedule, its last run and status, with its details and log under it when open. | admin/pages/jobs/default, admin/pages/jobs/running |
+| [Feature panel](components/feature-panel.html) | Platform | One feature with how far it reaches: Off, Chosen Popkins or Everyone, who changed it and when, and the chosen Popkins as removable chips. | admin/pages/features/default, admin/dialogs/feature-add-popkin/results |
+| [Limit row and save bar](components/limits.html) | Platform | A platform limit as a number with its unit and what it guards, and the bar that gathers unsaved changes until they are saved with a reason. | admin/pages/limits/default, admin/pages/limits/edited, admin/dialogs/limit-save/default |
+| [Permission table and role select](components/permission-table.html) | Access | What each role may do, as a table of permissions by role with a tick or a dash and the word for each, and the select that sets an admin's role. | admin/pages/admins/roles, admin/pages/admins/default |
+| [Admin sign-in card](components/admin-entry.html) | Structure | The signed-out frame of the admin app: a centred card on the sand page with the brand, a title, a short form or message and a way out. | admin/pages/sign-in/default, admin/pages/sign-in/code, admin/pages/not-an-admin/default |
+| [Settings list](components/settings-list.html) | Platform | The deployed system's settings, read-only: each name, its key and its value, with secrets shown only as Set or Not set, under the release that is running. | admin/pages/settings/default, admin/pages/settings/filtered |
+| [Announcement preview](components/announcement-preview.html) | Platform | A sketch of the Popkin app with the announcement's banner on top, so an admin sees what everyone will see before publishing. | admin/pages/announcements/default, admin/pages/announcements/warning |
+| [Popkin length, invite and members](components/popkin-facts.html) | Popkins | The parts of a Popkin's admin page: how long it has left and when it ends, its invite code and link, and its members with the Host marked. | admin/pages/popkin/default, admin/pages/popkin/ending |
 
 Added with the Plan, Schedules and admin mocks on 13 November 2026, in `assets/components.css`
 and not yet given a page of their own (the next run of `extracting-design-systems` writes them):
@@ -92,11 +120,11 @@ view switch (`.view-nav`), plan header (`.plan-header`), sprint chip and sparkli
 month and week pickers (`.month-nav`, `.weeks`), the time-off table (`.table-wrap`, `.leave`),
 the day picker and shift timeline (`.day-picker`, `.free`, `.shifts`), the hours and leave rows
 of the dialogs (`.hours-row`, `.leave-row`), the panel dialog (`.dialog--panel`) and the admin
-app's feature row and mark (`.feature-row`, `.topbar__app`). The Popkin tabs now take four or six
+app's feature row (`.feature-row`, used by no mock since the admin app moved to `docs/mocks/admin`). The Admin tag `.topbar__app` is part of the [admin shell](components/admin-shell.html). The Popkin tabs now take four or six
 tabs.
 
 Not built, because no screen needs them yet: dropdown menu (Popkin settings is a sheet with menu rows), select, checkbox, radio buttons (choice cards and the segmented control cover the choices),
-side navigation, breadcrumb, pagination and table. Add one from the extracting-design-systems catalog when a mock first needs it.
+breadcrumb and pagination (the admin app's side navigation and table are the admin shell and the data table). Add one from the extracting-design-systems catalog when a mock first needs it.
 
 ### In the components library
 
@@ -129,13 +157,14 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 | [Lists and media](patterns/lists-and-media.html) | Popkin has no tables. Its lists are cards, rows and photo grids, newest first, loading more as you scroll. |
 | [Notifications](patterns/notifications.html) | Toasts for outcomes, banners for conditions, counts where people look. Nothing nags. |
 | [Content and tone](patterns/content-and-tone.html) | Short, human, a little cheeky. The words carry as much of Popkin's warmth as the colour does. |
+| [Admin console](patterns/admin-console.html) | The admin app: a sidebar, sand pages of panels and tables, every action with a reason and a record in the audit log. |
 | [Popkin colour](patterns/popkin-colour.html) | Each Popkin picks one of seven colours. Its screens, main buttons, bubbles, badges and tabs take that colour, for everyone in it. |
 
 ## Tokens
 
 - `tokens/tokens.css`: the source of truth. Primitives (`--palette-*`), roles (`--color-*`, `--text-*`, `--space-*`, `--radius-*`, `--shadow-*`, `--duration-*`, `--layout-*` …) with light and dark values, and the Popkin colour (`--accent*`, set with `data-accent`).
-- `tokens/tokens.json`: the DTCG export, generated from `tokens.css` (347 tokens).
-- `tokens/contrast-pairs.json`: the 75 foreground and background pairs the components rely on, checked in both themes.
+- `tokens/tokens.json`: the DTCG export, generated from `tokens.css` (378 tokens).
+- `tokens/contrast-pairs.json`: the 78 foreground and background pairs the components rely on, checked in both themes.
 - `assets/components.css`: every component class, tokens only. `assets/fonts/`: Nunito, Inter and Rubik (SIL Open Font License).
 - `assets/ds.css`, `assets/ds.js`: the documentation chrome; not product UI.
 
@@ -156,6 +185,10 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 | `pages/brand-components` | A `btn--ghost` class that did not exist | Ghost is the base `.btn`; the brand-sheet-only classes moved to the mocks' `mock.css` |
 | Design (Magic Patterns) | Faint text #8a8090 (3.6:1), hairline field and switch edges (1.3:1), future step dots (1.3:1) | Already corrected in the mocks; recorded as `--color-fg-subtle`, `--color-border-strong`, and `--palette-ink-muted` for disabled text only |
 | Design (Magic Patterns), Straight palette | Coral (2.9:1) as a focused field's edge and an invalid field's edge; the seven Popkin colours (1.7 to 2.9:1) as edges, rings and icons on white | `--color-border-focus` and `--color-danger-border` are deep coral; `--accent-line` darkens the Popkin colour 30% toward black in light |
+| `docs/mocks/admin` (Magic Patterns, Popkin Admin) | The waiting dot and degraded uptime days in the pale sun, under 3:1 on a panel | `--color-warning-solid` |
+| `docs/mocks/admin/pages/announcements/warning` | The loud banner's fill `--color-warning-border` is dark in dark theme: black text 3.1:1 | New `--color-warning-loud` (sun in both themes), 12.3:1 |
+| `docs/mocks/admin`, reports | The open report told by its fill alone | A bar on its left as well |
+| `docs/mocks/admin`, every page with a back link | The back link sat on the title's line; the person loading skeleton overflowed at 360 px and vanished on the sand page | Back link alone on its line inside a page head; skeletons on the page read `--color-bg-subtle-hover` |
 
 ## Popkin colour contrast
 
@@ -185,6 +218,17 @@ same sRGB mixing the browser uses. Minimums: 4.5:1 for text, 3:1 for lines. All 
 
 ## Verification
 
+Run on 15 November 2026, after extracting the admin app:
+
+- `check_contrast.py` on `tokens/tokens.css`: 148 passed, 0 failed, 0 unresolved (light and dark). It caught the loud announcement
+  banner at 3.1:1 in dark, fixed with `--color-warning-loud`.
+- `check_design_system.py docs/design-system`: 102 pages (79 components, 10 patterns), 0 errors, 0 warnings.
+- `check_mocks.py docs/mocks`: 64 screens, 267 mocks, 0 errors (18 warnings, unchanged). `check_mocks.py docs/mocks/admin`:
+  47 screens, 223 mocks, 0 errors, 0 warnings.
+- Every documentation page loaded at 360, 768 and 1280 px in both themes: no horizontal scroll (the hero, film, panes, data
+  table and permission table pages scrolled sideways before and no longer do). The index, the color page, the admin console
+  pattern and the data table, figures and report review pages reviewed by eye; the admin mocks re-screenshotted.
+
 Run on 13 November 2026, after applying the Straight palette:
 
 - `check_contrast.py` on `tokens/tokens.css`: 142 passed, 0 failed, 0 unresolved (light and dark). The primary fill pairs now ask 1:1 (the label
@@ -202,3 +246,12 @@ Run on 12 November 2026:
 - `python .claude/skills/writing-html-mocks/scripts/check_mocks.py docs/mocks` after pointing the mocks at this system: 46 screens, 162 mocks, 0 errors, 0 warnings; no horizontal scroll and no failed requests at 360, 768 and 1280px.
 - Every documentation page loaded at 360 and 1280px: no horizontal scroll, no failed requests.
 - Screenshots of the index, the color page and the button, dialog and message pages at 360 and 1280px in both themes, and of eight mocks at 360px in both themes, reviewed by eye. Fixed from that review: the ghost button example, forced hover on danger and secondary buttons, light samples inside a dark page, and code tables overflowing at 360px.
+
+## Changelog
+
+- **15 November 2026**: the admin app. 19 component pages for `frontend/projects/admin` (an "Admin app" group in the nav and the
+  index) and the Admin console pattern; the admin's classes in `components.css` gain `data-state` hover hooks; new token
+  `--color-warning-loud`; the waiting dot and degraded uptime use `--color-warning-solid`; a contrast pair for captions on the sand
+  page. The Layout and Responsive foundations describe the admin shell. Fixed: the film page's missing do/don't and sources, the
+  extra `<h1>` in the hero, top bar, welcome and schedule examples (now `h2.ds-h1`, styled in `ds.css`), the README's missing link to
+  Schedule, and examples that widened their page.
