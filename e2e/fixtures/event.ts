@@ -3,8 +3,8 @@ import { PopkinHomePage } from '../pages/popkin-home.page';
 import { PopkinSettingsDialog } from '../pages/popkin-settings.dialog';
 import { SetEventDialog } from '../pages/set-event.dialog';
 import { popkinId } from './chat';
-import { homeOf } from './home';
-import { type Schedule, maraWithASchedule, scheduleOf } from './schedule';
+import { homeNow, homeOf, maraAtHome } from './home';
+import { Schedule, maraWithASchedule, scheduleOf } from './schedule';
 import { problem } from './stubs';
 
 export interface EventBody {
@@ -33,7 +33,8 @@ export class EventSettings {
 
   constructor(
     private readonly page: Page,
-    readonly schedule: Schedule,
+    /** The Schedule that marks the event, where the page answers one. */
+    readonly schedule?: Schedule,
   ) {}
 
   async install(): Promise<void> {
@@ -60,7 +61,7 @@ export class EventSettings {
     if (home.popkin.viewerRole !== 'Host') return this.refuse(route, 403, 'host_only');
     if (this.failing) return this.refuse(route, 500, 'server_error');
     home.popkin.event = body;
-    this.schedule.event = body;
+    if (this.schedule) this.schedule.event = body;
     return remove ? route.fulfill({ status: 204 }) : route.fulfill({ json: body });
   }
 
@@ -85,6 +86,24 @@ export async function maraWithAnEvent(
     home.popkin.viewerRole = role;
   });
   const settings = new EventSettings(page, scheduleOf(page));
+  await settings.install();
+  return settings;
+}
+
+/**
+ * Mara at the home of Lakeside Weekend with Schedules on, on the mocks' day, its event Lake
+ * weekend, Sep 25 – 27: the Set the event mocks.
+ */
+export async function theMockEvent(page: Page): Promise<EventSettings> {
+  await page.clock.install({ time: homeNow });
+  await maraAtHome(page, (home) => {
+    home.popkin.schedules = true;
+    home.popkin.event = { label: 'Lake weekend', firstDay: '2026-09-25', lastDay: '2026-09-27' };
+  });
+  // The home asks for its Schedule section; nobody has hours, so it is left out.
+  const schedule = new Schedule(page);
+  await schedule.install();
+  const settings = new EventSettings(page, schedule);
   await settings.install();
   return settings;
 }

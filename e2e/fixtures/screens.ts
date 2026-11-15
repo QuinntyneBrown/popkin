@@ -1,6 +1,12 @@
 import { ChangeLengthDialog } from '../pages/change-length.dialog';
 import { EditPopkinDialog } from '../pages/edit-popkin.dialog';
 import { settingsStates } from './settings-states';
+import { scheduleStates } from './schedule-states';
+import { AddTimeOffDialog } from '../pages/add-time-off.dialog';
+import { MyHoursDialog } from '../pages/my-hours.dialog';
+import { SetEventDialog } from '../pages/set-event.dialog';
+import { ThisWeekPage } from '../pages/this-week.page';
+import { TimeOffPage } from '../pages/time-off.page';
 import { ConversationsPage } from '../pages/conversations.page';
 import { DirectMessagePage } from '../pages/direct-message.page';
 import { NewMessageDialog } from '../pages/new-message.dialog';
@@ -191,6 +197,26 @@ const deleteRegions = (page: Page) => ({ dialog: new DeleteExperienceDialog(page
 const leaveRegions = (page: Page) => ({ dialog: new LeavePopkinDialog(page).panel });
 const editRegions = (page: Page) => ({ dialog: new EditPopkinDialog(page).panel });
 const lengthRegions = (page: Page) => ({ dialog: new ChangeLengthDialog(page).panel });
+const timeOffRegions = (page: Page) => {
+  const timeOff = new TimeOffPage(page);
+  return { header: timeOff.header, body: timeOff.body };
+};
+/** An error or the off screen: the mocks draw its empty state without the Schedule's frame. */
+const timeOffEmptyRegions = (page: Page) => ({
+  header: new TimeOffPage(page).header,
+  state: page.locator('main .empty'),
+});
+const thisWeekRegions = (page: Page) => {
+  const thisWeek = new ThisWeekPage(page);
+  return { header: thisWeek.header, body: thisWeek.body };
+};
+const thisWeekErrorRegions = (page: Page) => ({
+  header: new ThisWeekPage(page).header,
+  state: page.locator('main .empty'),
+});
+const addTimeOffRegions = (page: Page) => ({ dialog: new AddTimeOffDialog(page).panel });
+const myHoursRegions = (page: Page) => ({ dialog: new MyHoursDialog(page).panel });
+const setEventRegions = (page: Page) => ({ dialog: new SetEventDialog(page).panel });
 const wrapUpRegions = (page: Page) => {
   const wrapUp = new WrapUpPage(page);
   return { main: wrapUp.main, picture: wrapUp.picture };
@@ -1192,6 +1218,46 @@ export const screenStates: ScreenState[] = [
     ...wrapUpStates.popkinSettingsMember,
     regions: (page) => ({ dialog: new PopkinSettingsDialog(page).panel }),
   },
+  // Find a free evening (journey 22).
+  { key: 'timeOff', ...scheduleStates.timeOff, regions: timeOffRegions },
+  { key: 'timeOffLoading', ...scheduleStates.timeOffLoading, regions: timeOffRegions },
+  { key: 'timeOffEmpty', ...scheduleStates.timeOffEmpty, regions: timeOffRegions },
+  { key: 'timeOffError', ...scheduleStates.timeOffError, regions: timeOffEmptyRegions },
+  { key: 'timeOffConfirmed', ...scheduleStates.timeOffConfirmed, regions: timeOffRegions },
+  { key: 'timeOffOtherWeek', ...scheduleStates.timeOffOtherWeek, regions: timeOffRegions },
+  { key: 'timeOffOff', ...scheduleStates.timeOffOff, regions: timeOffEmptyRegions },
+  { key: 'addTimeOff', ...scheduleStates.addTimeOff, regions: addTimeOffRegions },
+  { key: 'addTimeOffBusy', ...scheduleStates.addTimeOffBusy, regions: addTimeOffRegions },
+  { key: 'addTimeOffInvalid', ...scheduleStates.addTimeOffInvalid, regions: addTimeOffRegions },
+  { key: 'addTimeOffFailed', ...scheduleStates.addTimeOffFailed, regions: addTimeOffRegions },
+  { key: 'thisWeek', ...scheduleStates.thisWeek, regions: thisWeekRegions },
+  { key: 'thisWeekWorking', ...scheduleStates.thisWeekWorking, regions: thisWeekRegions },
+  { key: 'thisWeekEmpty', ...scheduleStates.thisWeekEmpty, regions: thisWeekRegions },
+  { key: 'thisWeekLoading', ...scheduleStates.thisWeekLoading, regions: thisWeekRegions },
+  { key: 'thisWeekError', ...scheduleStates.thisWeekError, regions: thisWeekErrorRegions },
+  { key: 'myHours', ...scheduleStates.myHours, regions: myHoursRegions },
+  { key: 'myHoursBusy', ...scheduleStates.myHoursBusy, regions: myHoursRegions },
+  { key: 'myHoursInvalid', ...scheduleStates.myHoursInvalid, regions: myHoursRegions },
+  { key: 'myHoursFailed', ...scheduleStates.myHoursFailed, regions: myHoursRegions },
+  {
+    key: 'popkinHomeSchedule',
+    ...scheduleStates.popkinHomeSchedule,
+    regions: (page) => ({ schedule: new PopkinHomePage(page).schedule }),
+  },
+  {
+    key: 'popkinHomeScheduleNone',
+    ...scheduleStates.popkinHomeScheduleNone,
+    regions: (page) => ({ schedule: new PopkinHomePage(page).schedule }),
+  },
+  {
+    key: 'popkinSettingsSchedules',
+    ...scheduleStates.popkinSettingsSchedules,
+    regions: (page) => ({ dialog: new PopkinSettingsDialog(page).panel }),
+  },
+  { key: 'setEvent', ...scheduleStates.setEvent, regions: setEventRegions },
+  { key: 'setEventBusy', ...scheduleStates.setEventBusy, regions: setEventRegions },
+  { key: 'setEventInvalid', ...scheduleStates.setEventInvalid, regions: setEventRegions },
+  { key: 'setEventFailed', ...scheduleStates.setEventFailed, regions: setEventRegions },
   // Change Popkin settings (journey 16).
   { key: 'editPopkin', ...settingsStates.editPopkin, regions: editRegions },
   { key: 'editPopkinBusy', ...settingsStates.editPopkinBusy, regions: editRegions },
