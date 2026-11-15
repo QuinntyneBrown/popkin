@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { FeatureChoiceView } from '../../models/home';
-import { featureOffText, featuresHint } from './feature-text';
+import { HttpErrorResponse } from '@angular/common/http';
+import { featureOffText, featuresHint, switchedOffBy } from './feature-text';
 
 describe('featuresHint', () => {
   it.each<[FeatureChoiceView[], string | undefined]>([
@@ -51,5 +52,19 @@ describe('featureOffText', () => {
     expect(featureOffText('Schedules', 'Popkin')).toBe(
       'Popkin has turned this feature off for now. Nothing is lost: it comes back as it was when the feature is on again. Your host can ask Popkin to find out more.',
     );
+  });
+});
+
+describe('switchedOffBy', () => {
+  const refusal = (body: unknown) => new HttpErrorResponse({ status: 404, error: body });
+
+  it.each<[unknown, 'Host' | 'Popkin']>([
+    [refusal({ code: 'feature_off', switchedOffBy: 'Host' }), 'Host'],
+    [refusal({ code: 'feature_off', switchedOffBy: 'Popkin' }), 'Popkin'],
+    [refusal({ code: 'feature_off' }), 'Popkin'],
+    [refusal(null), 'Popkin'],
+    [new Error('offline'), 'Popkin'],
+  ])('reads %o as switched off by %s', (error, by) => {
+    expect(switchedOffBy(error)).toBe(by);
   });
 });

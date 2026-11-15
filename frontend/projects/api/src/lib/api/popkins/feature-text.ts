@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { FeatureChoiceView, PopkinFeature } from '../../models/home';
 
 /** What each feature a Popkin may have is called and does, beside its switch (L2-152 AC1). */
@@ -38,4 +39,10 @@ export function featureOffText(feature: PopkinFeature, switchedOffBy: 'Host' | '
   return switchedOffBy === 'Host'
     ? `Your host switched ${feature} off for this Popkin. Nothing is lost: it comes back as it was when they switch it on again in Popkin settings.`
     : 'Popkin has turned this feature off for now. Nothing is lost: it comes back as it was when the feature is on again. Your host can ask Popkin to find out more.';
+}
+
+/** Who switched a feature off, from its 404 `feature_off`; the admin app unless it says the Host. */
+export function switchedOffBy(error: unknown): 'Host' | 'Popkin' {
+  const body = error instanceof HttpErrorResponse ? error.error : null;
+  return (body as { switchedOffBy?: string } | null)?.switchedOffBy === 'Host' ? 'Host' : 'Popkin';
 }

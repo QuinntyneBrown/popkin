@@ -9,7 +9,14 @@ import {
   untracked,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ErrorScreens, PlanBoardStore, PopkinFrame, StoryView, UnreadTracker } from 'api';
+import {
+  ErrorScreens,
+  PlanBoardStore,
+  PopkinFrame,
+  StoryView,
+  UnreadTracker,
+  featureOffText,
+} from 'api';
 import { NewStoryData, NewStoryDialog } from '../../dialogs/new-story/new-story.dialog';
 import { StoryClosed, StoryData, StoryDialog } from '../../dialogs/story/story.dialog';
 import {
@@ -61,6 +68,8 @@ export class PlanBoardPage {
   readonly popkinId = input.required<string>();
 
   protected readonly store = inject(PlanBoardStore);
+  /** Who can switch Plan on again, by who switched it off (L2-077 AC2). */
+  protected readonly offText = computed(() => featureOffText('Plan', this.store.offBy()));
   protected readonly frame = inject(PopkinFrame);
   private readonly unread = inject(UnreadTracker);
   private readonly errors = inject(ErrorScreens);

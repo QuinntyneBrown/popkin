@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { switchedOffBy } from '../popkins/feature-text';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription, filter, interval, merge } from 'rxjs';
@@ -90,6 +91,8 @@ export class ThisWeekStore {
   private readonly day = signal<string | undefined>(undefined);
 
   readonly state = signal<ThisWeekState>('loading');
+  /** Who switched the feature off while `state` is `off` (L2-077 AC2). */
+  readonly offBy = signal<'Host' | 'Popkin'>('Popkin');
   readonly canEdit = computed(() => this.view()?.canEdit ?? false);
   readonly subtitle = computed(() => {
     const view = this.view();
@@ -202,8 +205,13 @@ export class ThisWeekStore {
         this.view.set(view);
         this.state.set('ready');
       },
-      error: (error: unknown) => this.state.set(failureOf(error)),
+      error: (error: unknown) => this.failed(error),
     });
+  }
+
+  private failed(error: unknown): void {
+    this.offBy.set(switchedOffBy(error));
+    this.state.set(failureOf(error));
   }
 }
 
