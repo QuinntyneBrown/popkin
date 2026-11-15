@@ -1,0 +1,76 @@
+:host {
+  position: relative;
+  display: block;
+  padding-left: var(--space-7);
+}
+
+.kind-dot {
+  position: absolute;
+  left: 0;
+  top: var(--space-1-5);
+  display: inline-block;
+  flex: none;
+  width: var(--space-2-5);
+  height: var(--space-2-5);
+  border-radius: var(--radius-full);
+  background: var(--accent);
+}
+
+.contact-timeline__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+}
+
+.contact-timeline__date {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-muted);
+}
+
+.contact-timeline__tag {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--accent-tint);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-fg-default);
+}
+
+.contact-timeline__card {
+  margin-top: var(--space-1);
+}
+
+:host(.contact-timeline__item--milestone) .contact-timeline__card {
+  margin-top: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--accent-tint);
+}
+
+.contact-timeline__title {
+  font: var(--text-h4);
+}
+
+:host(.contact-timeline__item--milestone) .contact-timeline__title {
+  font: var(--text-h3);
+}
+
+.contact-timeline__body {
+  max-width: var(--layout-measure);
+  margin-top: var(--space-1);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-relaxed)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.contact-timeline__photo {
+  display: block;
+  width: 100%;
+  max-width: var(--layout-measure-md);
+  height: var(--space-40);
+  margin-top: var(--space-3);
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}

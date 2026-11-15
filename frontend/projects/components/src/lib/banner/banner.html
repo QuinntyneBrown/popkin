@@ -1,6 +1,8 @@
 <svg pk-icon class="banner__icon" size="md" [name]="shownIcon()"></svg>
 <div class="banner__text">
-  <strong>{{ heading() }}</strong>
+  @if (heading()) {
+    <strong>{{ heading() }}</strong>
+  }
   @if (text()) {
     {{ text() }}
   }
@@ -20,6 +22,9 @@
   }
 }
 <ng-content />
+@if (dismissMark()) {
+  <svg pk-icon class="banner__icon" name="close" size="sm"></svg>
+}
 @if (dismissible()) {
   <button
     pk-icon-button

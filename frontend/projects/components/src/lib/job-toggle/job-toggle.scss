@@ -1,0 +1,22 @@
+:host {
+  display: block;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: inherit;
+}
+
+.job__name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: var(--font-weight-semibold);
+}
+
+.job__does {
+  display: block;
+  font: var(--text-caption);
+  color: var(--color-fg-muted);
+}

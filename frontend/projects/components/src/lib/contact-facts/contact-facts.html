@@ -1,0 +1,9 @@
+@for (fact of facts(); track fact.label) {
+  <div class="contact-facts__item">
+    <dt>
+      <svg pk-icon size="sm" [name]="fact.icon"></svg
+      ><span class="visually-hidden">{{ fact.label }}</span>
+    </dt>
+    <dd>{{ fact.value }}</dd>
+  </div>
+}

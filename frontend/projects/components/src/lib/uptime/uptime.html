@@ -1,0 +1,7 @@
+@for (day of days(); track $index) {
+  <span
+    class="uptime__bar"
+    [class.uptime__bar--degraded]="day === 'degraded'"
+    [class.uptime__bar--down]="day === 'down'"
+  ></span>
+}

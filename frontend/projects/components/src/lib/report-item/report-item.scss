@@ -1,0 +1,61 @@
+:host {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  color: inherit;
+  text-decoration: none;
+}
+
+:host(:hover),
+:host([aria-current='true']) {
+  background: var(--color-bg-subtle);
+}
+
+/* The open report: a bar as well as the fill, so colour is not the only sign. */
+:host([aria-current='true']) {
+  box-shadow: inset var(--border-width-thick) 0 0 var(--color-fg-default);
+}
+
+.report-item__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-9);
+  height: var(--space-9);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  box-shadow: inset 0 0 0 var(--border-width-hairline) var(--color-border-default);
+  color: var(--color-fg-muted);
+}
+
+.report-item__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.report-item__reason {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--font-weight-semibold);
+}
+
+.report-item__where {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.report-item__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+}

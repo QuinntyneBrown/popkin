@@ -1,0 +1,20 @@
+:host {
+  display: inline-block;
+  flex: none;
+  width: var(--space-4);
+  height: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-fg-subtle);
+}
+
+:host(.link-key--family) {
+  background: var(--color-accent);
+}
+
+:host(.link-key--partner) {
+  background: var(--color-fg-accent);
+}
+
+:host(.link-key--friend) {
+  background: var(--color-success-solid);
+}

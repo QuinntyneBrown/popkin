@@ -1,0 +1,27 @@
+<div class="contact-id__who">
+  <ng-content select="[slot=avatar]" />
+  <div class="contact-id__text">
+    <h1 class="contact-id__name">{{ name() }}</h1>
+    @if (sub()) {
+      <p class="contact-id__sub">{{ sub() }}</p>
+    }
+    @if (popkin() && popkinLink()) {
+      <p class="contact-id__also">
+        Also in your Popkin <a [routerLink]="popkinLink()">“{{ popkin() }}”</a>
+      </p>
+    }
+  </div>
+</div>
+<div class="contact-id__actions">
+  @if (phone(); as phone) {
+    <a pk-button class="contact-id__action" variant="primary" size="sm" [href]="'sms:' + phone"
+      ><svg pk-icon name="message-circle" size="md"></svg>Message</a
+    >
+    <a pk-button class="contact-id__action" variant="secondary" size="sm" [href]="'tel:' + phone"
+      ><svg pk-icon name="call" size="md"></svg>Call</a
+    >
+  }
+  <a pk-button class="contact-id__action" variant="secondary" size="sm" [routerLink]="logLink()"
+    ><svg pk-icon name="notebook" size="md"></svg>Log</a
+  >
+</div>

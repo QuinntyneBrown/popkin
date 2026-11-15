@@ -1,0 +1,10 @@
+<svg pk-icon name="plus" size="md"></svg>
+<label class="visually-hidden" [for]="fieldId()">{{ label() }}</label>
+<input
+  #field
+  class="input input--pill"
+  autocomplete="off"
+  [id]="fieldId()"
+  [placeholder]="placeholder()"
+  (keydown.enter)="add(field)"
+/>

@@ -1,0 +1,20 @@
+<span class="kind-dot" aria-hidden="true"></span>
+<p class="contact-timeline__meta">
+  <span class="contact-timeline__date">{{ date() }}</span><span class="visually-hidden">{{
+    shown().word
+  }}</span>
+  @if (tag()) {
+    <span class="contact-timeline__tag">{{ tag() }}</span>
+  } @else if (via()) {
+    <span>{{ via() }}</span>
+  }
+</p>
+<div class="contact-timeline__card">
+  <h3 class="contact-timeline__title">{{ title() }}</h3>
+  @if (body()) {
+    <p class="contact-timeline__body">{{ body() }}</p>
+  }
+  @if (photo()) {
+    <img class="contact-timeline__photo" [src]="photo()" [alt]="photoAlt()" />
+  }
+</div>

@@ -30,6 +30,15 @@ With no screen, there is no region to compare with the mock and no behaviour to 
 - The six Contacts components are built ahead of a Contacts requirement. A Contacts requirement
   and detailed design still come before any Contacts screen.
 
+## Amendment, 15 November 2026
+
+The odd-numbered components of the backlog (#1, #3, … #21) were built the same day under this
+decision, five of them for Contacts. Besides lint and the apps' AOT build, the library and its
+templates are type checked on their own (`npx ngc -p projects/components/tsconfig.lib.json
+--noEmit` in `frontend/`), since no app imports these components yet; and the logic two of them
+rely on, the trend chart's geometry (`trendChartOf`) and the connection map's focus and filter
+(`connectionMapOf`), lives in the `api` library with its unit tests (ADR 0011).
+
 ## Consequences
 
 - The components are ready when their screens are built.

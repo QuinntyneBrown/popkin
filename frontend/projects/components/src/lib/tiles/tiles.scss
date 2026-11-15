@@ -1,0 +1,15 @@
+:host {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--border-width-hairline);
+  overflow: hidden;
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--color-border-default);
+}
+
+@media (min-width: 64rem) {
+  :host(.tiles--4) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
