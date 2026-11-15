@@ -12,6 +12,7 @@ import {
   scheduleUrl,
   timeOffUrl,
   weeksAsked,
+  theTimeOffConfirmed,
 } from '../fixtures/schedule';
 import { expect, test } from '../fixtures/pk-test';
 import { PopkinHomePage } from '../pages/popkin-home.page';
@@ -70,6 +71,22 @@ test.describe('Time off', () => {
   });
 
   // L2-072 AC2, AC4
+  // L2-072 AC3, AC4, AC6
+  test('marks the event’s days with its label, and counts in bold when all but one are off', async ({
+    page,
+  }) => {
+    await theTimeOffConfirmed(page);
+    await page.goto(timeOffUrl(mocksWeek));
+    const timeOff = new TimeOffPage(page);
+
+    await expect(timeOff.eventLabels).toHaveText(Array(5).fill('Cabin week'));
+    await expect(timeOff.counts).toHaveText([...Array(5).fill('6 of 6 off'), '–', '–']);
+    await expect(timeOff.boldCounts).toHaveCount(5);
+    await expect(timeOff.cellsOf('Dev')).toHaveText(['Off', 'Off', 'Off', 'Off', 'Off', '', '']);
+    await expect(timeOff.cellsOf('Dev').nth(6)).toHaveAccessibleName('Weekend');
+    await expect(timeOff.legend).toHaveText(/Off\s*Tentative\s*Working\s*Event days/);
+  });
+
   test('shows who is off and tentative, and counts who is off each day', async ({ page }) => {
     await maraWithASchedule(page, (schedule) => {
       schedule.off(people.mara.membershipId, ['2027-02-15', '2027-02-16']);
