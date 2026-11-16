@@ -55,6 +55,29 @@ public sealed class PurgeDeletedAccountsTests
         Assert.Contains(db.Sessions, s => s.PersonId == waltPerson.Id);
     }
 
+    // Given Mara, who kept Chidi with his photo and then deleted her account, and Lena, who
+    // keeps Bea, when the erasure runs, then Chidi and his photo's file are gone and Bea stays
+    // (L2-049 AC4, L2-132; known gap 110).
+    [Fact]
+    public async Task A_deleted_accounts_contacts_are_erased()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+        var lena = await api.SignedUpAsync("Lena Fischer", "(415) 555-0123");
+        (await mara.AddContactAsync(ContactsExtensions.Named("Chidi Okafor"), TestPhotos.WithLocation(MagickFormat.Jpeg)))
+            .EnsureSuccessStatusCode();
+        await lena.AddedContactAsync("Bea Lind");
+        (await mara.DeleteAsync("/api/account")).EnsureSuccessStatusCode();
+        api.Clock.Advance(TimeSpan.FromDays(1));
+
+        await api.SendAsync(new PurgeDeletedAccountsCommand());
+
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        Assert.Equal(["Bea Lind"], db.Contacts.Select(c => c.Name).ToList());
+        Assert.Empty(api.Photos.Files);
+    }
+
     // Given Mara, who deleted her account, and someone who then signed up with her number,
     // when the erasure runs, then the new account and its code are untouched.
     [Fact]

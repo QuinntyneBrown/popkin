@@ -42,6 +42,14 @@ public sealed class ContactsPeopleController(ISender sender) : ControllerBase
     public Task<ContactProfileDto> Get(Guid contactId, CancellationToken cancellationToken) =>
         sender.Send(new GetContactQuery(contactId), cancellationToken);
 
+    /// <summary>Deletes the contact and what was kept about them (L2-132); 404 for one not the caller's.</summary>
+    [HttpDelete("{contactId:guid}")]
+    public async Task<IActionResult> Delete(Guid contactId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new DeleteContactCommand(contactId), cancellationToken);
+        return NoContent();
+    }
+
     /// <summary>Into Closest (L2-131 AC4); one already in it is left as it is.</summary>
     [HttpPut("{contactId:guid}/closest")]
     public async Task<IActionResult> JoinClosest(Guid contactId, CancellationToken cancellationToken)

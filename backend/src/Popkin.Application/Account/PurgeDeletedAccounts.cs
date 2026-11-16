@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Contacts;
 
 namespace Popkin.Application.Account;
 
@@ -72,7 +73,11 @@ public sealed class PurgeDeletedAccountsCommandHandler(
             await db.VerificationCodes
                 .Where(c => destinations.Contains(c.Destination) && c.SentAt <= person.DeletedAt)
                 .ToListAsync(CancellationToken.None));
+        // Their Contacts go with them, and the files they kept (L2-132, known gap 110).
+        var contactFiles = await ContactRemoval.RemoveAsync(
+            db, db.Contacts.Where(c => c.OwnerId == person.Id), CancellationToken.None);
         person.Erase(clock.GetUtcNow());
         await db.SaveChangesAsync(CancellationToken.None);
+        await ContactRemoval.DeleteFilesAsync(photos, contactFiles, logger);
     }
 }
