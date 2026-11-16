@@ -56,25 +56,31 @@ Popkin web app, `docs/mocks/pages/contacts-follow-ups/`, on Tuesday 15 September
 Ticking a follow-up strikes it through at once, before the save answers (L2-142 AC2); "Undo" in
 the toast, or "Mark not done: {text}", opens it again (L2-142 AC3, L2-124 AC4).
 
-### Conflicts and gaps
+### Rulings
 
-- **Quick add's person and day (gap 106).** "Add a follow-up" takes text only (L2-142 AC1). Which
-  contact it is for, its due day and its bucket are `<TO SUPPLY>`. Until gap 106 is settled the
-  API accepts a follow-up with no contact and no day, and the page lists it under "Later" with no
-  name and no day (the design's proposal, `<TO SUPPLY>`).
-- **End of "This week".** The mocks put Saturday 19 September under "This week" and Sunday 20
-  September under "Later", which reads as a week that ends on Saturday. The design follows the
-  mocks; whether the week's end follows the person's locale is `<TO SUPPLY>` (proposed new gap).
-- **Copy not drawn.** "1 day late" for one day, how "{when}" of a promise is written beyond the
-  mocks' "Sep 3" and "Sat", and the order of two follow-ups due the same day are `<TO SUPPLY>`.
-- **Done follow-ups.** How many done follow-ups "Show {n} done" counts (all, or a recent window),
-  and whether "Promises" filters the "Done" list too, are `<TO SUPPLY>`.
-- **Editing and deleting** a follow-up are not drawn (gap 106); nothing here builds them.
-- **Reminders** for a follow-up or a promise's "Remind me {day}" belong to
-  [Reminders](../reminders/README.md) (gap 104).
-- **Time zone.** The person's time zone is open (gap 104). A due day is a calendar day with no
-  time; the web app decides "today" by the device's date, as Start a Popkin resolves its end on
-  the device.
+Gaps 106 (for follow-ups) and 115 are ruled (2026-11-16):
+
+- **Quick add.** "Add a follow-up" on Follow-ups adds a follow-up for nobody and with no day; it
+  is listed under "Later" with no name and no day. On a contact's profile, "Add a follow-up for
+  {first name}" ("Something to do for {first name}…") adds one for that contact, with no day.
+  A follow-up's text is 1 to 200 characters.
+- **The week.** "This week" runs from tomorrow to the coming Saturday, as the mocks draw it, on
+  the device's date; on a Saturday it is empty and Sunday onwards is "Later".
+- **Copy.** One day late reads "1 day late". A promise's "{when}" reads "today" on its day, its
+  weekday ("Sat") when it was 1 to 3 days ago, and otherwise its date ("Sep 3"). Follow-ups due
+  the same day keep the order they were added in; those with no day come last in "Later".
+- **Done.** "Show {n} done" counts every done follow-up of the chosen tab ("Promises" counts done
+  promises only), and "Done" lists them most recently done first.
+- **Loading and failure** leave the subtitle out, since the counts are not known; the mocks draw it
+  so no more.
+- **Editing and deleting** a follow-up are not offered: a follow-up is ticked done instead, and
+  goes with its contact (L2-132). Nothing is drawn for them.
+- **Reminders** for a follow-up belong to [Reminders](../reminders/README.md) (gap 104).
+- **Promises** are made by Log ([Log a conversation or milestone](../log-entry/README.md)); a
+  follow-up keeps its promise's channel and day (`PromisedVia`, `PromisedOn`) so the list reads
+  without the timeline.
+- **The badge.** The Contacts navigation counts the open follow-ups due today or before on the
+  device's date, read with the summary before each Contacts page opens.
 
 ### API
 
@@ -88,8 +94,8 @@ default authenticated policy; each sends one MediatR request. Another person's f
   and `doneAt`.
 - `POST /api/contacts/follow-ups` — body `{ clientId, text, contactId?, dueOn? }`. `201`
   `FollowUpDto`. A second request with the same `clientId` returns the first follow-up and saves
-  nothing (ContactsOutbox resends). Refusals: `400` `text_required`, `text_too_long` (limit
-  `<TO SUPPLY>`, gap 106); `404` `contact_not_found`.
+  nothing (ContactsOutbox resends). Refusals: `400` `text_required`, `text_too_long` (200);
+  `404` `contact_not_found`.
 - `PUT /api/contacts/follow-ups/{id}/done` — body `{ done }`. `200` `FollowUpDto`. `true` sets
   `DoneAt` to now, `false` clears it; asking for the state it already has changes nothing, so a
   resend is safe. Refusal: `404` `follow_up_not_found`.
@@ -97,7 +103,8 @@ default authenticated policy; each sends one MediatR request. Another person's f
 ### Backend
 
 - **`FollowUp`** (Domain) — `Id`, `OwnerId`, `ContactId?`, `Text`, `DueOn?` (`DateOnly`),
-  `IsPromise`, `TimelineEntryId?`, `ClientId`, `CreatedAt`, `DoneAt?`. `Add(owner, text, contact,
+  `IsPromise`, `PromisedVia?` (`TalkChannel`), `PromisedOn?`, `TimelineEntryId?`, `ClientId`,
+  `CreatedAt`, `DoneAt?`. `Add(owner, text, contact,
   dueOn, clientId, now)`, `MarkDone(now)`, `MarkNotDone()`.
 - **`FollowUpRules`** (Domain) — `Text(string?)` trims and refuses empty or too long text.
 - **`GetFollowUpsQueryHandler`** (`Popkin.Application/Contacts/FollowUps/`) — reads the owner's
@@ -143,7 +150,7 @@ default authenticated policy; each sends one MediatR request. Another person's f
 | Today | Today | "Today" |
 | After today, up to the coming Saturday | This week | Weekday ("Thu") |
 | After the coming Saturday | Later | Date ("Sep 20") |
-| None | Later (proposal, gap 106) | Nothing |
+| None | Later, last | Nothing |
 | Done | Done (shown with "Show {n} done") | "Done {day}" |
 
 ### Tests
