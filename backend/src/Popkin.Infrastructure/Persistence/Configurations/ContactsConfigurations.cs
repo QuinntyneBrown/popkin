@@ -117,3 +117,33 @@ public sealed class MemoryConfiguration : IEntityTypeConfiguration<Memory>
         builder.HasOne<Contact>().WithMany().HasForeignKey(m => m.ContactId).OnDelete(DeleteBehavior.NoAction);
     }
 }
+
+public sealed class HabitConfiguration : IEntityTypeConfiguration<Habit>
+{
+    public void Configure(EntityTypeBuilder<Habit> builder)
+    {
+        builder.ToTable("Habits");
+        builder.HasKey(h => h.Id);
+        // A resend saves once (L2-123 AC4).
+        builder.HasIndex(h => new { h.OwnerId, h.ClientId }).IsUnique();
+        builder.HasIndex(h => h.ContactId);
+        builder.Property(h => h.What).HasMaxLength(Habit.MaxWhatLength).IsRequired();
+        builder.Property(h => h.Rhythm).HasConversion<string>().HasMaxLength(16);
+        builder.HasMany(h => h.Kept).WithOne().HasForeignKey(k => k.HabitId).OnDelete(DeleteBehavior.Cascade);
+        // A habit goes with its account (L2-049) and with its contact (L2-132); ContactRemoval
+        // removes it in the same save, so the database never cascades from two paths.
+        builder.HasOne<Person>().WithMany().HasForeignKey(h => h.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Contact>().WithMany().HasForeignKey(h => h.ContactId).OnDelete(DeleteBehavior.NoAction);
+    }
+}
+
+public sealed class HabitKeptConfiguration : IEntityTypeConfiguration<HabitKept>
+{
+    public void Configure(EntityTypeBuilder<HabitKept> builder)
+    {
+        builder.ToTable("HabitKept");
+        builder.HasKey(k => k.Id);
+        // A resend of "We met up" saves once (L2-123 AC4).
+        builder.HasIndex(k => new { k.HabitId, k.ClientId }).IsUnique();
+    }
+}

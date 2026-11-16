@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Contacts.Dates;
+using Popkin.Application.Contacts.Habits;
 using Popkin.Application.Contacts.Security;
 
 namespace Popkin.Application.Contacts.People;
@@ -27,6 +28,9 @@ public sealed class GetContactQueryHandler(
         var kept = new ContactKeptDto(
             await db.TimelineEntries.OwnedBy(current.PersonId).CountAsync(e => e.ContactId == contact.Id, cancellationToken),
             await db.Memories.OwnedBy(current.PersonId).CountAsync(m => m.ContactId == contact.Id, cancellationToken));
-        return ContactProfileDto.Of(contact, photos, KeyDateRules.ForProfile(dates, today), kept);
+        var habit = await db.Habits.OwnedBy(current.PersonId).Include(h => h.Kept).AsNoTracking()
+            .SingleOrDefaultAsync(h => h.ContactId == contact.Id && h.EndedAt == null, cancellationToken);
+        return ContactProfileDto.Of(
+            contact, photos, KeyDateRules.ForProfile(dates, today), kept, habit is null ? null : HabitDto.Of(habit, contact, photos));
     }
 }

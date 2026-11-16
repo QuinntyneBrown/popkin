@@ -58,6 +58,10 @@ public interface IAppDbContext
 
     DbSet<Memory> Memories { get; }
 
+    DbSet<Habit> Habits { get; }
+
+    DbSet<HabitKept> HabitKept { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }

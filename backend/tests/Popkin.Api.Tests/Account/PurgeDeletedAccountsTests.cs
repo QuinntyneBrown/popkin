@@ -58,7 +58,7 @@ public sealed class PurgeDeletedAccountsTests
     }
 
     // Given Mara, who kept Chidi with his photo and then deleted her account, and Lena, who
-    // keeps Bea, when the erasure runs, then Chidi, his photo's file and his memories' files are gone and Bea stays
+    // keeps Bea, when the erasure runs, then Chidi, his photo's file, his memories' files and his habit are gone and Bea stays
     // (L2-049 AC4, L2-132; known gap 110).
     [Fact]
     public async Task A_deleted_accounts_contacts_are_erased()
@@ -84,6 +84,13 @@ public sealed class PurgeDeletedAccountsTests
             { new StringContent(Guid.NewGuid().ToString()), "clientId" },
         };
         (await mara.PostAsync($"/api/contacts/people/{chidiId}/memories/files", speech)).EnsureSuccessStatusCode();
+        var habit = await mara.PostAsJsonAsync("/api/contacts/habits", new { clientId = Guid.NewGuid(), contactId = chidiId, what = "Lunch", rhythm = "Weekly" });
+        var habitId = (await habit.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        (await mara.PostAsJsonAsync($"/api/contacts/habits/{habitId}/kept", new
+        {
+            clientId = Guid.NewGuid(),
+            keptOn = DateOnly.FromDateTime(api.Clock.GetUtcNow().UtcDateTime).ToString("yyyy-MM-dd"),
+        })).EnsureSuccessStatusCode();
         await lena.AddedContactAsync("Bea Lind");
         (await mara.PostAsJsonAsync("/api/contacts/follow-ups", new { clientId = Guid.NewGuid(), text = "Call Sam" }))
             .EnsureSuccessStatusCode();
@@ -98,6 +105,8 @@ public sealed class PurgeDeletedAccountsTests
         Assert.Empty(db.FollowUps);
         Assert.Empty(db.TimelineEntries);
         Assert.Empty(db.Memories);
+        Assert.Empty(db.Habits);
+        Assert.Empty(db.HabitKept);
         Assert.Empty(api.Photos.Files);
     }
 

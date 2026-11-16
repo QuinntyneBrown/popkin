@@ -1,5 +1,6 @@
 using Popkin.Application.Abstractions;
 using Popkin.Application.Contacts.Dates;
+using Popkin.Application.Contacts.Habits;
 using Popkin.Domain;
 
 namespace Popkin.Application.Contacts.People;
@@ -24,10 +25,11 @@ public sealed record ContactProfileDto(
     IReadOnlyList<string> Loves,
     bool IsClosest,
     IReadOnlyList<ContactKeyDateDto> KeyDates,
-    ContactKeptDto? Kept = null)
+    ContactKeptDto? Kept = null,
+    HabitDto? Habit = null)
 {
     public static ContactProfileDto Of(
-        Contact contact, IPhotoStore photos, IReadOnlyList<ContactKeyDateDto>? keyDates = null, ContactKeptDto? kept = null) =>
+        Contact contact, IPhotoStore photos, IReadOnlyList<ContactKeyDateDto>? keyDates = null, ContactKeptDto? kept = null, HabitDto? habit = null) =>
         new(
             contact.Id,
             contact.Name,
@@ -44,7 +46,8 @@ public sealed record ContactProfileDto(
             contact.Loves,
             contact.IsClosest,
             keyDates ?? [],
-            kept);
+            kept,
+            habit);
 }
 
 /// <summary>What is kept about a contact and would go with them (L2-132 AC1): their timeline entries and memories.</summary>
