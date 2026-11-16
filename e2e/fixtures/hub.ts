@@ -21,6 +21,15 @@ interface Frame {
   protocol?: string;
 }
 
+/** A frame the app sent, or undefined when it is not JSON; the caller fails the test naming it. */
+function parsed(text: string): Frame | undefined {
+  try {
+    return JSON.parse(text) as Frame;
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * ADR 0010: the hub every page talks to. No test opens a connection to a real hub: this answers
  * the negotiate request, routes the hub's WebSocket, completes the SignalR JSON handshake,
@@ -74,7 +83,12 @@ export class Hub {
       this.socket = socket;
       socket.onMessage((data) => {
         for (const text of String(data).split(END).filter(Boolean)) {
-          this.receive(socket, JSON.parse(text) as Frame);
+          const frame = parsed(text);
+          if (frame) this.receive(socket, frame);
+          else
+            unanswered.push(
+              `WS frame that is not JSON (${text.length} chars): ${text.slice(0, 120)}`,
+            );
         }
       });
     });

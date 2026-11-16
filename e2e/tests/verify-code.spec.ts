@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import responses from '../fixtures/api/responses.json';
 import { codeSentAt, inviteCode } from '../fixtures/journeys';
 import { expect, test } from '../fixtures/pk-test';
@@ -9,6 +10,23 @@ const sent = responses['POST /api/auth/codes'].body;
 const confirmKey = `POST /api/auth/codes/${sent.verificationId}/confirm`;
 const resendKey = `POST /api/auth/codes/${sent.verificationId}/resend`;
 const sentAt = codeSentAt;
+
+/**
+ * Pauses a running clock just ahead of the page's time. A far-off pause would leave the screen
+ * rendering a stale tick, and the running clock can pass a near one before the pause lands, so a
+ * pause it has passed is tried again.
+ */
+async function holdTheClock(page: Page): Promise<void> {
+  for (;;) {
+    const now = await page.evaluate(() => Date.now());
+    try {
+      await page.clock.pauseAt(now + 100);
+      return;
+    } catch (error) {
+      if (!String(error).includes('to the past')) throw error;
+    }
+  }
+}
 
 test.describe('confirming the code', () => {
   // L2-004 AC1
@@ -167,7 +185,7 @@ test.describe('sending a new code', () => {
     // Reaching the screen runs on real time, which a slow machine would count towards the 30
     // seconds. Hold the clock, put it back to the moment the code was sent and let the screen's
     // one-second tick read it.
-    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1));
+    await holdTheClock(page);
     await page.clock.setSystemTime(sentAt.getTime() - 1);
     await page.clock.runFor(1_000);
 
