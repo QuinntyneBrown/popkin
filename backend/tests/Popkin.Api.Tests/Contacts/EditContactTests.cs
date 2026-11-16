@@ -119,4 +119,23 @@ public sealed class EditContactTests
 
         await response.AssertProblem(HttpStatusCode.NotFound, "feature_off");
     }
+
+    [Fact]
+    public async Task Given_Chidi_has_a_photo_when_Mara_saves_Edit_with_a_new_one_then_it_replaces_the_old()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+        var added = await (await mara.AddContactAsync(ContactsExtensions.Named("Chidi Okafor"), TestPhotos.WithLocation(MagickFormat.Jpeg)))
+            .Content.ReadFromJsonAsync<JsonElement>();
+        var chidi = added.GetProperty("id").GetGuid();
+        var oldKey = Assert.Single(api.Photos.Files.Keys);
+
+        var response = await mara.EditContactAsync(chidi, ContactsExtensions.Named("Chidi Okafor"), TestPhotos.WithLocation(MagickFormat.Png));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var newKey = Assert.Single(api.Photos.Files.Keys);
+        Assert.NotEqual(oldKey, newKey);
+        var edited = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.NotEqual(added.GetProperty("photoUrl").GetString(), edited.GetProperty("photoUrl").GetString());
+    }
 }

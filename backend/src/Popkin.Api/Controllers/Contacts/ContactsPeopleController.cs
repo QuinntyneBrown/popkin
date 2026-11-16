@@ -53,8 +53,14 @@ public sealed class ContactsPeopleController(ISender sender) : ControllerBase
         return NoContent();
     }
 
-    /// <summary>Edit (L2-130): the part `contact` as Add someone sends it, without a photo.</summary>
+    /// <summary>Edit (L2-130): the part `contact` as Add someone sends it, and an optional `photo` that replaces theirs.</summary>
     [HttpPut("{contactId:guid}")]
-    public Task<ContactProfileDto> Edit(Guid contactId, [FromForm] string contact, CancellationToken cancellationToken) =>
-        sender.Send(new EditContactCommand(contactId, JsonSerializer.Deserialize<SaveContactRequest>(contact, Json)!), cancellationToken);
+    [EnableRateLimiting(RateLimitPolicyNames.Photos)]
+    public async Task<ContactProfileDto> Edit(Guid contactId, [FromForm] string contact, IFormFile? photo, CancellationToken cancellationToken)
+    {
+        await using var content = photo?.OpenReadStream();
+        var upload = photo is null ? null : new PhotoUpload(content!, photo.Length);
+        return await sender.Send(
+            new EditContactCommand(contactId, JsonSerializer.Deserialize<SaveContactRequest>(contact, Json)!, upload), cancellationToken);
+    }
 }
