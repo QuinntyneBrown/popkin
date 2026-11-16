@@ -5,9 +5,11 @@ import {
   computed,
   effect,
   inject,
+  input,
   signal,
   viewChild,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,9 +19,12 @@ import {
   ContactFormStore,
   PHOTO_ACCEPT,
   SAVE_FAILED_TEXT,
+  contactValuesOf,
+  editHeading,
   saveFailedHeading,
 } from 'api';
 import {
+  Avatar,
   Banner,
   Button,
   ChipOption,
@@ -37,10 +42,14 @@ import {
 
 const NAME_MESSAGE = 'Add a name so you can find them later.';
 
-/** Add someone (L2-129): who they are and their details, kept for me alone. */
+/**
+ * Add someone (L2-129) and Edit (L2-130): who they are and their details, kept for me alone.
+ * With a `contactId` from the route it edits that contact, and their photo is shown as it is.
+ */
 @Component({
   selector: 'pk-contact-form-page',
   imports: [
+    Avatar,
     Banner,
     Button,
     ChoiceChips,
@@ -48,6 +57,7 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
     FormSection,
     FormSections,
     FormSummary,
+    NgTemplateOutlet,
     PhotoPicker,
     ReactiveFormsModule,
     Screen,
@@ -59,6 +69,8 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
   templateUrl: './contact-form.page.html',
 })
 export class ContactFormPage {
+  /** The contact being edited, from `/contacts/people/:contactId/edit`; none when adding. */
+  readonly contactId = input<string>();
   protected readonly store = inject(ContactFormStore);
   private readonly router = inject(Router);
   protected readonly accept = PHOTO_ACCEPT;
@@ -90,9 +102,30 @@ export class ContactFormPage {
   /** "We couldn’t save Femi." (L2-129 AC6). */
   protected readonly failedHeading = computed(() => saveFailedHeading(this.typedName()));
   protected readonly failedText = SAVE_FAILED_TEXT;
+  protected readonly heading = computed(() => {
+    const editing = this.store.editing();
+    return editing ? editHeading(editing.firstName) : 'Add someone';
+  });
+  /** Cancel opens People after an add, or the profile after an edit (L2-129 AC7, L2-130 AC2). */
+  protected readonly back = computed(() => {
+    const contactId = this.contactId();
+    return contactId ? `/contacts/people/${contactId}` : '/contacts/people';
+  });
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.releasePreview());
+    effect(() => {
+      const contactId = this.contactId();
+      if (contactId) this.store.edit(contactId);
+    });
+    // Edit shows every value they have (L2-130 AC1).
+    effect(() => {
+      const editing = this.store.editing();
+      if (!editing) return;
+      const { circle, ...values } = contactValuesOf(editing);
+      this.form.setValue(values);
+      this.circle.set(circle ?? '');
+    });
     // The new contact's profile opens once they are kept (L2-129 AC5).
     effect(() => {
       const saved = this.store.saved();

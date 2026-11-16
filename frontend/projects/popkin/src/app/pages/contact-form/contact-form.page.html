@@ -2,10 +2,10 @@
   <header
     pk-top-bar
     slot="header"
-    back="/contacts/people"
     backLabel="Cancel"
     backIcon="close"
-    heading="Add someone"
+    [back]="back()"
+    [heading]="heading()"
     [line]="true"
     [sticky]="true"
   >
@@ -29,24 +29,41 @@
       <div pk-banner variant="danger" [heading]="failedHeading()" [text]="failedText"></div>
     }
     <section pk-form-section heading="Who">
-      <div
-        pk-photo-picker
-        label="Add a photo"
-        [photo]="preview()"
-        [accept]="accept"
-        [disabled]="saving()"
-        (picked)="pick($event)"
-      ></div>
-      <div
-        pk-text-field
-        fieldId="name"
-        label="Name"
-        placeholder="Their name"
-        autocomplete="off"
-        [formControl]="form.controls.name"
-        [readonly]="saving()"
-        [error]="store.state() === 'invalid' ? nameMessage : undefined"
-      ></div>
+      @if (store.editing(); as editing) {
+        <div class="cluster">
+          <span
+            pk-avatar
+            size="xl"
+            [name]="editing.name"
+            [initials]="editing.initials"
+            [attr.data-accent]="editing.accent"
+            [photo]="editing.photoUrl"
+          ></span>
+          <ng-container [ngTemplateOutlet]="name" />
+        </div>
+      } @else {
+        <div
+          pk-photo-picker
+          label="Add a photo"
+          [photo]="preview()"
+          [accept]="accept"
+          [disabled]="saving()"
+          (picked)="pick($event)"
+        ></div>
+        <ng-container [ngTemplateOutlet]="name" />
+      }
+      <ng-template #name>
+        <div
+          pk-text-field
+          fieldId="name"
+          label="Name"
+          placeholder="Their name"
+          autocomplete="off"
+          [formControl]="form.controls.name"
+          [readonly]="saving()"
+          [error]="store.state() === 'invalid' ? nameMessage : undefined"
+        ></div>
+      </ng-template>
       <div
         pk-text-field
         fieldId="relation"

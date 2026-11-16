@@ -11,6 +11,8 @@ export class ContactFormPage {
   readonly details: Locator;
   readonly detailsHint: Locator;
   readonly addPhoto: Locator;
+  /** Edit shows the photo they have, with no way to change it (add-contact design, Conflicts). */
+  readonly photo: Locator;
   readonly name: Locator;
   readonly nameError: Locator;
   readonly knownAs: Locator;
@@ -39,6 +41,7 @@ export class ContactFormPage {
     this.details = page.getByRole('region', { name: 'Details' });
     this.detailsHint = this.details.locator('.form-section__hint');
     this.addPhoto = page.getByRole('button', { name: 'Add a photo' });
+    this.photo = this.who.locator('.avatar img');
     this.name = page.getByRole('textbox', { name: 'Name' });
     this.nameError = page.locator('#name-err');
     this.knownAs = page.getByRole('textbox', { name: 'How you know them' });

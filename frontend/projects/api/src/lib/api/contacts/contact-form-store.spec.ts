@@ -4,7 +4,12 @@ import { Subject, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContactProfileView } from '../../models/contacts';
 import { CONTACTS_API } from './contacts-api';
-import { ContactFormStore, ContactFormValues, contactRequestOf } from './contact-form-store';
+import {
+  ContactFormStore,
+  ContactFormValues,
+  contactRequestOf,
+  contactValuesOf,
+} from './contact-form-store';
 
 const typed: ContactFormValues = {
   name: '  Femi Bankole ',
@@ -33,12 +38,45 @@ describe('contactRequestOf', () => {
   });
 });
 
+describe('contactValuesOf', () => {
+  it('fills the form from a kept contact, the things they love as one field (L2-130 AC1)', () => {
+    const chidi = {
+      ...femi,
+      name: 'Chidi Okafor',
+      knownAs: 'Brother',
+      circle: 'Family',
+      phone: null,
+      email: 'chidi@okafor.dev',
+      city: 'Manchester',
+      loves: ['Man City', 'Hot sauce collecting'],
+    } as ContactProfileView;
+
+    expect(contactValuesOf(chidi)).toEqual({
+      name: 'Chidi Okafor',
+      knownAs: 'Brother',
+      circle: 'Family',
+      phone: '',
+      email: 'chidi@okafor.dev',
+      city: 'Manchester',
+      loves: 'Man City, Hot sauce collecting',
+    });
+  });
+});
+
 describe('ContactFormStore', () => {
-  let api: { addContact: ReturnType<typeof vi.fn> };
+  let api: {
+    addContact: ReturnType<typeof vi.fn>;
+    contact: ReturnType<typeof vi.fn>;
+    editContact: ReturnType<typeof vi.fn>;
+  };
   let store: ContactFormStore;
 
   beforeEach(() => {
-    api = { addContact: vi.fn(() => of(femi)) };
+    api = {
+      addContact: vi.fn(() => of(femi)),
+      contact: vi.fn(() => of(femi)),
+      editContact: vi.fn(() => of(femi)),
+    };
     TestBed.configureTestingModule({
       providers: [ContactFormStore, { provide: CONTACTS_API, useValue: api }],
     });
@@ -96,5 +134,30 @@ describe('ContactFormStore', () => {
     const [first, second] = api.addContact.mock.calls.map(([request]) => request.clientId);
     expect(second).toBe(first);
     expect(store.saved()).toEqual(femi);
+  });
+
+  it('editing, holds the contact read and saves the edit to them, not a new contact (L2-130 AC2)', () => {
+    store.edit('c1');
+    expect(api.contact).toHaveBeenCalledWith('c1');
+    expect(store.editing()).toEqual(femi);
+
+    store.save(typed, null);
+
+    expect(api.addContact).not.toHaveBeenCalled();
+    expect(api.editContact).toHaveBeenCalledWith(
+      'c1',
+      expect.objectContaining({ name: 'Femi Bankole' }),
+    );
+    expect(store.saved()).toEqual(femi);
+  });
+
+  it('editing, a failed save is failed and keeps the contact being edited', () => {
+    api.editContact.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0 })));
+    store.edit('c1');
+
+    store.save(typed, null);
+
+    expect(store.state()).toBe('failed');
+    expect(store.editing()).toEqual(femi);
   });
 });

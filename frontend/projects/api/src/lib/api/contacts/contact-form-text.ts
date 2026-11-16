@@ -8,3 +8,8 @@ export function saveFailedHeading(name: string): string {
 /** The rest of the failed-save banner (L2-129 AC6). */
 export const SAVE_FAILED_TEXT =
   'Everything you typed is still here. Check your connection and try Save again.';
+
+/** The heading of Edit: "Edit Chidi" (L2-130 AC1). */
+export function editHeading(firstName: string): string {
+  return `Edit ${firstName}`;
+}

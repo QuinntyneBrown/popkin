@@ -30,8 +30,21 @@ export function contactRequestOf(values: ContactFormValues, clientId: string): S
   };
 }
 
+/** The form filled from a kept contact, the things they love as one field (L2-130 AC1). */
+export function contactValuesOf(contact: ContactProfileView): ContactFormValues {
+  return {
+    name: contact.name,
+    knownAs: contact.knownAs ?? '',
+    circle: contact.circle,
+    phone: contact.phone ?? '',
+    email: contact.email ?? '',
+    city: contact.city ?? '',
+    loves: contact.loves.join(', '),
+  };
+}
+
 /**
- * Add someone (docs/detailed-designs/contacts/add-contact): saving the form. One per screen; the
+ * Add someone and Edit (docs/detailed-designs/contacts/add-contact): saving the form. One per screen; the
  * page provides it. A save the API has not confirmed is sent again under the same client id, so
  * it is kept once (L2-123 AC4).
  */
@@ -43,6 +56,13 @@ export class ContactFormStore {
   readonly state = signal<'idle' | 'invalid' | 'saving' | 'failed'>('idle');
   /** The contact once the API has kept them; the page then opens their profile (L2-129 AC5). */
   readonly saved = signal<ContactProfileView | null>(null);
+  /** The contact being edited, once read; null while adding someone (L2-130). */
+  readonly editing = signal<ContactProfileView | null>(null);
+
+  /** Edit: read the contact, so the form shows every value (L2-130 AC1). */
+  edit(contactId: string): void {
+    this.api.contact(contactId).subscribe((contact) => this.editing.set(contact));
+  }
 
   /** With no name, nothing is sent and the form is invalid (L2-129 AC4). */
   save(values: ContactFormValues, photo: File | null): void {
@@ -53,7 +73,11 @@ export class ContactFormStore {
       return;
     }
     this.state.set('saving');
-    this.api.addContact(request, photo).subscribe({
+    const editing = this.editing();
+    const sent = editing
+      ? this.api.editContact(editing.id, request)
+      : this.api.addContact(request, photo);
+    sent.subscribe({
       next: (contact) => {
         this.clientId = crypto.randomUUID();
         this.saved.set(contact);

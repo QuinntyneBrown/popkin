@@ -270,7 +270,24 @@ femi.append(
     loves: ['Arsenal', 'jazz brunches'],
   }),
 );
-await call('POST', '/api/contacts/people', femi);
+const femiKept = await call('POST', '/api/contacts/people', femi);
+// She opens Edit for Femi, as a direct visit reads him, and saves him in Lagos (L2-130).
+await call('GET', `/api/contacts/people/${femiKept.id}`);
+const femiEdited = new FormData();
+femiEdited.append(
+  'contact',
+  JSON.stringify({
+    clientId: '00000000-0000-4000-c000-000000000002',
+    name: 'Femi Bankole',
+    knownAs: 'Grace’s fiancé',
+    circle: 'Friends',
+    phone: '',
+    email: 'femi.b@mail.com',
+    city: 'Lagos',
+    loves: ['Arsenal', 'jazz brunches'],
+  }),
+);
+await call('PUT', `/api/contacts/people/${femiKept.id}`, femiEdited);
 
 // Photos: Mara has added none, adds one with a caption, then reads the album and the photo.
 const album = `/api/popkins/${created.id}/photos`;

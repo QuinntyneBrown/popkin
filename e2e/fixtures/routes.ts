@@ -31,6 +31,8 @@ const recap = `${home}/recap`;
 const plan = `${home}/plan`;
 // One the signed-in Host did not share: Ellie's idea, a beach day next summer.
 const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
+// The contact the recording adds and edits: Femi.
+const femi = `/contacts/people/${responses['POST /api/contacts/people'].body.id}`;
 
 /** Where the suite serves the marketing site, a second application (ADR 0017). */
 export const MARKETING = 'http://localhost:4201';
@@ -180,6 +182,7 @@ export const routes = {
   addContactInvalid: { app: '/contacts/people/new', mock: 'pages/add-contact/invalid.html' },
   addContactSubmitting: { app: '/contacts/people/new', mock: 'pages/add-contact/submitting.html' },
   addContactError: { app: '/contacts/people/new', mock: 'pages/add-contact/error.html' },
+  editContact: { app: `${femi}/edit`, mock: 'pages/add-contact/edit.html' },
   scanToJoin: { app: '/popkins', mock: 'dialogs/scan-to-join/default.html' },
   scanToJoinBusy: { app: '/popkins', mock: 'dialogs/scan-to-join/busy.html' },
   scanToJoinInvalid: { app: '/popkins', mock: 'dialogs/scan-to-join/invalid.html' },

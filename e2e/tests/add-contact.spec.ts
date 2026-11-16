@@ -129,3 +129,93 @@ test.describe('Add someone', () => {
     await expect(page).toHaveURL('/contacts/people/new');
   });
 });
+
+test.describe('Edit', () => {
+  const kept = () =>
+    recordedBody<{ id: string; photoUrl: string | null }>('POST /api/contacts/people');
+  const read = () => `GET /api/contacts/people/${kept().id}`;
+  const edited = () => `PUT /api/contacts/people/${kept().id}`;
+
+  // L2-130 AC1
+  test('opens with every value filled in under "Edit Femi"', async ({ page, pk }) => {
+    await pk.open('editContact');
+
+    const form = new ContactFormPage(page);
+    await expect(form.heading).toHaveText('Edit Femi');
+    await expect(form.name).toHaveValue('Femi Bankole');
+    await expect(form.knownAs).toHaveValue('Grace’s fiancé');
+    await expect(form.circleChoice('Friends')).toHaveAttribute('aria-checked', 'true');
+    await expect(form.email).toHaveValue('femi.b@mail.com');
+    await expect(form.city).toHaveValue('London');
+    await expect(form.loves).toHaveValue('Arsenal, jazz brunches');
+    await expect(form.save).toBeEnabled();
+  });
+
+  // L2-130 AC1
+  test('shows the photo they have, and offers no new one', async ({ page, pk }) => {
+    const photoUrl =
+      'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    await answer(page, read(), {
+      status: 200,
+      body: { ...recordedBody<object>(read()), photoUrl },
+    });
+    await pk.open('editContact');
+
+    const form = new ContactFormPage(page);
+    await expect(form.photo).toHaveAttribute('src', photoUrl);
+    await expect(form.addPhoto).toHaveCount(0);
+  });
+
+  // L2-130 AC2
+  test('Save keeps the change to them and opens their profile', async ({ page, pk }) => {
+    await pk.open('editContact');
+    const form = new ContactFormPage(page);
+    await expect(form.city).toHaveValue('London');
+    await form.city.fill('Lagos');
+    const request = page.waitForRequest(
+      (r) => r.method() === 'PUT' && r.url().endsWith(`/api/contacts/people/${kept().id}`),
+    );
+
+    await form.save.click();
+
+    expect(contactSent(await request)).toEqual({
+      clientId: expect.stringMatching(/^[0-9a-f-]{36}$/),
+      name: 'Femi Bankole',
+      knownAs: 'Grace’s fiancé',
+      circle: 'Friends',
+      phone: '',
+      email: 'femi.b@mail.com',
+      city: 'Lagos',
+      loves: ['Arsenal', 'jazz brunches'],
+    });
+    await expect(page).toHaveURL(`/contacts/people/${kept().id}`);
+  });
+
+  // L2-130 AC2
+  test('Cancel saves nothing and opens their profile', async ({ page, pk }) => {
+    await pk.open('editContact');
+    const form = new ContactFormPage(page);
+    await expect(form.name).toHaveValue('Femi Bankole');
+
+    await form.cancel.click();
+
+    await expect(page).toHaveURL(`/contacts/people/${kept().id}`);
+  });
+
+  // L2-129 AC6, as Edit uses the same form
+  test('a failed save says so and keeps every change', async ({ page, pk }) => {
+    await answer(page, edited(), problem(500, 'unexpected'));
+    await pk.open('editContact');
+    const form = new ContactFormPage(page);
+    await expect(form.city).toHaveValue('London');
+    await form.city.fill('Lagos');
+
+    await form.save.click();
+
+    await expect(form.failed).toHaveText(
+      'We couldn’t save Femi. Everything you typed is still here. Check your connection and try Save again.',
+    );
+    await expect(form.city).toHaveValue('Lagos');
+    await expect(page).toHaveURL(`/contacts/people/${kept().id}/edit`);
+  });
+});
