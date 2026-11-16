@@ -1,0 +1,93 @@
+<div pk-app-screen accent="coral" layout="tab" body="fill">
+  <div pk-contacts-page>
+    <div pk-page-head slot="head" heading="People" [sub]="sub()">
+      @if (!empty()) {
+        <a
+          pk-button
+          slot="actions"
+          class="only-m-up"
+          variant="secondary"
+          size="sm"
+          routerLink="/contacts/connections"
+          >Connections</a
+        >
+      }
+      <a pk-button slot="actions" variant="primary" size="sm" routerLink="/contacts/people/new"
+        >Add someone</a
+      >
+    </div>
+    @if (empty()) {
+      <div
+        pk-empty-state
+        icon="users"
+        heading="No one here yet"
+        text="Add the people who matter, or bring in the people you already know from your Popkins."
+      >
+        <a pk-button variant="primary" size="md" routerLink="/contacts/people/new">Add someone</a>
+      </div>
+    } @else if (store.state() === 'failed') {
+      <div
+        pk-empty-state
+        icon="alert"
+        [alert]="true"
+        heading="We couldn’t load your people"
+        text="Nobody you added is lost. Check your connection and try again."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+          Try again
+        </button>
+      </div>
+    } @else {
+      <div class="stack">
+        @if (store.state() === 'loading') {
+          <p class="visually-hidden" role="status">Loading your people…</p>
+        }
+        <div pk-search-field label="Search by name" [(value)]="store.search"></div>
+        @if (store.state() === 'loading') {
+          <div pk-contact-list label="Everyone" [people]="[]" [loading]="true"></div>
+        } @else {
+          <div
+            pk-filter-chips
+            label="Circle"
+            [options]="circles()"
+            [value]="store.circle()"
+            (valueChange)="choose($event)"
+          ></div>
+          @if (store.noResults()) {
+            <div
+              pk-empty-state
+              icon="search"
+              [status]="true"
+              [heading]="noResults().heading"
+              [text]="noResults().text"
+            >
+              <a
+                pk-button
+                variant="secondary"
+                size="md"
+                routerLink="/contacts/people/new"
+                [queryParams]="{ name: store.search().trim() }"
+                >{{ noResults().add }}</a
+              >
+            </div>
+          } @else {
+            @if (closest().length) {
+              <section aria-labelledby="closest">
+                <div pk-list-head headingId="closest" heading="Closest" tone="quiet"></div>
+                <div pk-closest [people]="closest()"></div>
+              </section>
+            }
+            <div pk-contact-list [label]="store.listName()" [people]="rows()"></div>
+          }
+        }
+      </div>
+    }
+  </div>
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    place="contacts"
+    contactsCurrent="people"
+    [members]="frame.countLine()"
+  ></nav>
+</div>

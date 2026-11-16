@@ -116,3 +116,30 @@
     display: block;
   }
 }
+
+.contact-list__loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.contact-list__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.contact-list__skeleton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-18);
+}
+
+.contact-list__lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}

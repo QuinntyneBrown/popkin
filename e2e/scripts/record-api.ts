@@ -317,6 +317,8 @@ chidi.append(
 const chidiKept = await call('POST', '/api/contacts/people', chidi, false);
 await call('PUT', `/api/contacts/people/${chidiKept.id}/closest`);
 await call('GET', `/api/contacts/people/${chidiKept.id}`);
+// She opens People on the morning of the mocks: Chidi and Femi, both in Closest (L2-126).
+await call('GET', '/api/contacts/people?on=2026-09-15');
 await call('DELETE', `/api/contacts/people/${chidiKept.id}/closest`);
 
 // Photos: Mara has added none, adds one with a caption, then reads the album and the photo.

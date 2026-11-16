@@ -1,7 +1,7 @@
 // Acceptance Test
 // Traces to: L2-129, L2-123
 // Description: Add someone keeps who they are and their details, asks for a name, and opens the new contact.
-import { contactSent } from '../fixtures/contacts';
+import { contactSent, contactsMorning } from '../fixtures/contacts';
 import { expect, test } from '../fixtures/pk-test';
 import { answer, hold, problem, recordedBody } from '../fixtures/stubs';
 import { aPhoto } from '../fixtures/photos';
@@ -87,6 +87,7 @@ test.describe('Add someone', () => {
 
   // L2-129 AC7
   test('Cancel saves nothing and opens People', async ({ page, pk }) => {
+    await page.clock.install({ time: contactsMorning });
     await pk.open('addContact');
     const form = new ContactFormPage(page);
     await form.name.fill('Femi Bankole');

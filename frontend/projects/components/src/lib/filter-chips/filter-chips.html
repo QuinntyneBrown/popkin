@@ -1,0 +1,11 @@
+@for (option of options(); track option.value) {
+  <button
+    pk-chip
+    type="button"
+    [count]="option.count"
+    [attr.aria-pressed]="option.value === value()"
+    (click)="value.set(option.value)"
+  >
+    {{ option.label }}
+  </button>
+}

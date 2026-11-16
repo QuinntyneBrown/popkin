@@ -41,13 +41,12 @@ export function nextDateLine(next: NextDateView): { date: string; what: string; 
 
 /**
  * When we last talked, as People's last column reads it (gaps 99 and 111, ruled): "today",
- * "yesterday", the weekday within the last 6 days, the date ("Sep 5") up to 30 days, then
+ * then the weekday within the last 6 days, the date ("Sep 5") up to 30 days, then
  * "{n} days ago"; "Not yet" with none.
  */
 export function lastTalked(on: string | null, days: number | null): string {
   if (on === null || days === null) return 'Not yet';
   if (days <= 0) return 'today';
-  if (days === 1) return 'yesterday';
   if (days > DRIFTING_AFTER_DAYS) return `${days} days ago`;
   const [year, month, day] = on.split('-').map(Number);
   if (days <= 6) return WEEKDAYS[new Date(year, month - 1, day).getDay()];

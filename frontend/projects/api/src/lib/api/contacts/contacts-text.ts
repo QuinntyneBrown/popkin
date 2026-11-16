@@ -62,7 +62,7 @@ export function dayParam(day: Date): string {
 }
 
 /** People's line under its heading (L2-126 AC1, AC4). */
-export function peopleLine(people: number): string {
+export function contactsPeopleLine(people: number): string {
   if (people === 0) return 'Only you can see them';
   return `${people === 1 ? '1 person' : `${people} people`} · only you can see them`;
 }

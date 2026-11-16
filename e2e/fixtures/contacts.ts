@@ -74,3 +74,204 @@ export async function chidiProfile(page: Page, change: object = {}): Promise<voi
 export function femiProfile(page: Page, change: object = {}): Promise<void> {
   return profileAsDrawn(page, 'Femi Bankole', { accent: 'Leaf', ...change });
 }
+
+/** Serves a picture from the mocks at `/api/files/contacts/{file}`, as a contact's photo. */
+export function servePhotos(page: Page): Promise<void> {
+  return page.route('**/api/files/contacts/*.jpg', (route) =>
+    route.fulfill({
+      path: join(MOCK_IMAGES, new URL(route.request().url()).pathname.split('/').pop() ?? ''),
+      contentType: 'image/jpeg',
+    }),
+  );
+}
+
+/** People on the morning of the mocks, as the API reads it for `contactsMorning`. */
+export const peopleKey = 'GET /api/contacts/people?on=2026-09-15';
+
+type Row = [
+  name: string,
+  knownAs: string,
+  circle: string,
+  accent: string,
+  photo: string | null,
+  next: [month: number, day: number, title: string, inDays: number],
+  lastTalkedOn: string,
+  lastTalkedDays: number,
+  closest?: boolean,
+];
+
+/** Mara's 13 people as contacts-people/default.html draws them on 15 September 2026. */
+const MARAS_PEOPLE: Row[] = [
+  [
+    'Ada Okafor',
+    'Mum',
+    'Family',
+    'Coral',
+    'contact-ada.jpg',
+    [10, 7, 'Birthday', 22],
+    '2026-09-13',
+    2,
+    true,
+  ],
+  [
+    'Ben Hale',
+    'Uni friend',
+    'Friends',
+    'Amber',
+    null,
+    [10, 5, 'Iris is one month old', 20],
+    '2026-09-05',
+    10,
+  ],
+  [
+    'Chidi Okafor',
+    'Brother',
+    'Family',
+    'Sky',
+    'contact-chidi.jpg',
+    [9, 26, 'Anniversary', 11],
+    '2026-09-06',
+    9,
+    true,
+  ],
+  [
+    'Dev Patel',
+    'Colleague, design team',
+    'Work',
+    'Sky',
+    'call3.jpg',
+    [11, 2, '5 years at the studio', 48],
+    '2026-09-14',
+    1,
+  ],
+  [
+    'Ellie Brennan',
+    'Thursday group',
+    'Clubs',
+    'Berry',
+    'call4.jpg',
+    [4, 29, 'Birthday', 226],
+    '2026-09-10',
+    5,
+  ],
+  [
+    'Grace Adeyemi',
+    'Best friend from uni',
+    'Friends',
+    'Plum',
+    'contact-grace.jpg',
+    [9, 19, 'Birthday', 4],
+    '2026-09-11',
+    4,
+    true,
+  ],
+  ['Ifeoma Okafor', 'Sister', 'Family', 'Berry', null, [12, 9, 'Birthday', 85], '2026-09-04', 11],
+  ['Joel Kim', 'Thursday group', 'Clubs', 'Sky', null, [7, 23, 'Birthday', 311], '2026-08-13', 33],
+  [
+    'Priya Nair',
+    'Tigers U9 parent',
+    'Clubs',
+    'Coral',
+    null,
+    [8, 7, 'Birthday', 326],
+    '2026-09-12',
+    3,
+  ],
+  [
+    'Ruth Lindqvist',
+    'Next door, no. 14',
+    'Neighbours',
+    'Teal',
+    'contact-ruth.jpg',
+    [10, 24, 'Birthday', 39],
+    '2026-09-12',
+    3,
+  ],
+  [
+    'Sam Ortega',
+    'Former manager',
+    'Work',
+    'Amber',
+    null,
+    [3, 11, 'Birthday', 177],
+    '2026-07-18',
+    59,
+  ],
+  [
+    'Tomás Reyes',
+    'Brother-in-law',
+    'Family',
+    'Leaf',
+    null,
+    [9, 26, 'Anniversary', 11],
+    '2026-09-06',
+    9,
+  ],
+  [
+    'Walt Brennan',
+    'Thursday group',
+    'Clubs',
+    'Leaf',
+    'call2.jpg',
+    [11, 16, 'Birthday', 62],
+    '2026-09-10',
+    5,
+  ],
+];
+
+/**
+ * Mara's 13 people, in the shape the recording reads a row in: what key dates and the log will
+ * give each one, which the recording cannot make yet (L2-126).
+ */
+export async function marasPeople(page: Page): Promise<void> {
+  const recorded = recordedBody<{ contacts: object[] }>(peopleKey).contacts[0];
+  await servePhotos(page);
+  await answer(page, peopleKey, {
+    status: 200,
+    body: {
+      contacts: MARAS_PEOPLE.map(
+        (
+          [name, knownAs, circle, accent, photo, next, lastTalkedOn, lastTalkedDays, closest],
+          i,
+        ) => ({
+          ...recorded,
+          id: `00000000-0000-4000-d000-${String(i + 1).padStart(12, '0')}`,
+          name,
+          firstName: name.split(' ')[0],
+          knownAs,
+          circle,
+          isClosest: closest ?? false,
+          photoUrl: photo ? `/api/files/contacts/${photo}` : null,
+          initials: name
+            .split(' ')
+            .map((part) => part[0])
+            .join(''),
+          accent,
+          nextDate: {
+            month: next[0],
+            day: next[1],
+            kind: 'Birthday',
+            title: next[2],
+            inDays: next[3],
+          },
+          lastTalkedOn,
+          lastTalkedDays,
+        }),
+      ),
+    },
+  });
+  await contactsOfMara(page);
+}
+
+/** The photos the recording made: each is the mocks' picture of Chidi. */
+export function serveRecordedPhotos(page: Page): Promise<void> {
+  return page.route('**/api/files/contacts/*.jpg?*', (route) =>
+    route.fulfill({ path: join(MOCK_IMAGES, 'contact-chidi.jpg'), contentType: 'image/jpeg' }),
+  );
+}
+
+/** Nobody in Contacts yet (L2-126 AC4). */
+export async function nobodyInPeople(page: Page): Promise<void> {
+  await answer(page, peopleKey, { status: 200, body: { contacts: [] } });
+  await answer(page, 'GET /api/contacts/summary', { status: 200, body: { people: 0 } });
+}

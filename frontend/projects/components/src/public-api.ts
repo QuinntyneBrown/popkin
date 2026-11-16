@@ -198,6 +198,7 @@ export * from './lib/closest/closest';
 export * from './lib/info-card/info-card';
 export * from './lib/info-line/info-line';
 export * from './lib/add-card/add-card';
+export * from './lib/filter-chips/filter-chips';
 export * from './lib/form-sections/form-sections';
 export * from './lib/form-section/form-section';
 export * from './lib/form-pair/form-pair';

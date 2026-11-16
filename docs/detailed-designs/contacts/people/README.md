@@ -59,7 +59,7 @@ contact are the Add someone, Edit and Delete designs; the profile is the profile
 - **The next key date's form** (gap 101). A date 90 days away or fewer reads date first, in bold
   ("Oct 7 · Birthday"); a later one reads kind first, plain ("Birthday Apr 29").
 - **Closest** (gap 100). Ordered by first name, A to Z; no limit of its own.
-- **Last talked** (gaps 99, 111). "today", "yesterday", the weekday ("Sun") within the last 6
+- **Last talked** (gaps 99, 111). "today", then the weekday ("Mon", "Sun") within the last 6
   days, the date ("Sep 5") up to 30 days, then "{n} days ago", drawn quiet, the drifting threshold Today shares. A
   contact with no conversation logged reads "Not yet".
 - **The circle's name.** The mock gives the list the accessible name "Family" (or "Everyone") and
@@ -70,8 +70,9 @@ contact are the Add someone, Edit and Delete designs; the profile is the profile
 - **How many contacts** (gap 110). No limit; People reads them all at once.
 - **Built in steps.** The next key date joins with [Key dates](../key-dates/README.md) and last
   talked with [Log](../log-entry/README.md); until then `nextDate` and `lastTalkedOn` are null
-  and the cells are empty. "Import from your Popkins" in the empty state joins with
-  [Import](../import-from-popkins/README.md).
+  and the cells are empty. "Import from your Popkins" in the empty state, beside "Add someone",
+  joins with [Import](../import-from-popkins/README.md). The loading skeleton is
+  `pk-contact-list`'s `loading` state; "No one called…" is `pk-empty-state` with `status`.
 
 ### API
 
