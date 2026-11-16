@@ -10,7 +10,9 @@
   }
 </p>
 <div class="contact-timeline__card">
-  <h3 class="contact-timeline__title">{{ title() }}</h3>
+  @if (title()) {
+    <h3 class="contact-timeline__title">{{ title() }}</h3>
+  }
   @if (body()) {
     <p class="contact-timeline__body">{{ body() }}</p>
   }

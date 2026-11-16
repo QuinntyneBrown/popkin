@@ -30,9 +30,10 @@ export class ContactTimelineItem {
   readonly kind = input.required<ContactTimelineKind>();
   /** The day, such as "Sep 6" or "Sep 26, 2021". */
   readonly date = input.required<string>();
-  readonly title = input.required<string>();
+  /** A milestone's or a memory's title; a conversation has none (known gap 106, ruled). */
+  readonly title = input<string>();
   readonly body = input<string>();
-  /** How a conversation happened: "Phone · 40 min", "In person". */
+  /** How a conversation happened: "Phone", "In person". */
   readonly via = input<string>();
   /** A milestone's kind: "New job". */
   readonly tag = input<string>();

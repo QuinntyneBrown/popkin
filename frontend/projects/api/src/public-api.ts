@@ -142,4 +142,6 @@ export * from './lib/api/contacts/contact-dates-text';
 export * from './lib/api/contacts/dates-store';
 export * from './lib/api/contacts/follow-ups-text';
 export * from './lib/api/contacts/follow-ups-store';
+export * from './lib/api/contacts/log-entry-text';
+export * from './lib/api/contacts/log-entry-store';
 export * from './lib/api/contacts/local-contacts-outbox-storage';

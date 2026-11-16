@@ -68,6 +68,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<FollowUp> FollowUps => inner.FollowUps;
 
+    public DbSet<TimelineEntry> TimelineEntries => inner.TimelineEntries;
+
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;
 
     public DbSet<Admin> Admins => inner.Admins;
