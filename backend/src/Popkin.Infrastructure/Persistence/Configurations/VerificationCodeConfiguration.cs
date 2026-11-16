@@ -11,7 +11,7 @@ public sealed class VerificationCodeConfiguration : IEntityTypeConfiguration<Ver
         builder.ToTable("VerificationCodes");
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Channel).HasConversion<string>().HasMaxLength(10);
-        builder.Property(c => c.Purpose).HasConversion<string>().HasMaxLength(10);
+        builder.Property(c => c.Purpose).HasConversion<string>().HasMaxLength(16);
         builder.Property(c => c.Destination).HasMaxLength(254).IsRequired();
         builder.Property(c => c.CodeHash).HasMaxLength(64).IsRequired();
         // Two confirmations of one code cannot both consume it (L2-005 AC5).

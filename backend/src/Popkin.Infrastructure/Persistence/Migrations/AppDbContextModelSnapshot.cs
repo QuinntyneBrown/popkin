@@ -1088,8 +1088,8 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Purpose")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<DateTimeOffset>("SentAt")
                         .HasColumnType("datetimeoffset");
