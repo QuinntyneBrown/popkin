@@ -3,6 +3,9 @@
     [routerLink]="view.link"
     [queryParams]="view.query"
     [attr.aria-current]="view.current ? 'page' : null"
-    >{{ view.label }}</a
-  >
+    >{{ view.label }}
+    @if (view.count) {
+      <span class="view-nav__count">{{ view.count }}</span>
+    }
+  </a>
 }

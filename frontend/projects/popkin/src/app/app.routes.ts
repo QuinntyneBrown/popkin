@@ -289,6 +289,15 @@ export const routes: Routes = [
     data: data({ shell: 'app', page: 'contacts-people' }),
   },
   {
+    path: 'contacts/follow-ups',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-follow-ups/contacts-follow-ups.page').then(
+        (m) => m.ContactsFollowUpsPage,
+      ),
+    data: data({ shell: 'app', page: 'contacts-follow-ups' }),
+  },
+  {
     path: 'contacts/dates',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>

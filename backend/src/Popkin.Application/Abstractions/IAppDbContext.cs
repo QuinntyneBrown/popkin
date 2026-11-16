@@ -52,6 +52,8 @@ public interface IAppDbContext
 
     DbSet<ReminderPreferences> ReminderPreferences { get; }
 
+    DbSet<FollowUp> FollowUps { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }

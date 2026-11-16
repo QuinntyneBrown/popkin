@@ -9,7 +9,7 @@
 | contacts-privacy | 2 days | 60% |
 | delete-contact | 2 days | 90% |
 | log-entry | 4 days | 0% |
-| follow-ups | 5 days | 0% |
+| follow-ups | 5 days | 95% |
 | key-dates | 6 days | 90% |
 | memories | 3 days | 0% |
 | habits | 4 days | 0% |

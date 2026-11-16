@@ -341,6 +341,16 @@ await call('PUT', '/api/contacts/reminder-preferences', {
   mondayEmail: true,
 });
 await call('GET', '/api/contacts/reminder-preferences');
+// She adds a follow-up for Chidi, due the Sunday after the mocks' Tuesday, reads Follow-ups,
+// and ticks it done (L2-141, L2-142).
+const commute = await call('POST', '/api/contacts/follow-ups', {
+  clientId: '00000000-0000-4000-c000-000000000020',
+  text: 'Ask Chidi how the commute is going',
+  contactId: chidiKept.id,
+  dueOn: '2026-09-20',
+});
+await call('GET', '/api/contacts/follow-ups');
+await call('PUT', `/api/contacts/follow-ups/${commute.id}/done`, { done: true });
 await call('DELETE', `/api/contacts/people/${chidiKept.id}/closest`);
 // She deletes Chidi from his profile (L2-132).
 await call('DELETE', `/api/contacts/people/${chidiKept.id}`);

@@ -382,3 +382,158 @@ export async function noDates(page: Page): Promise<void> {
   });
   await contactsOfMara(page);
 }
+
+export const followUpsKey = 'GET /api/contacts/follow-ups';
+
+/** [text, first name, accent, photo, due, promised via, promised on, done on] */
+type FollowUpRow = [
+  string,
+  string | null,
+  string | null,
+  string | null,
+  string | null,
+  string | null,
+  string | null,
+  string | null,
+];
+
+/** Mara's follow-ups as the mocks draw them on Tuesday 15 September 2026. */
+const MARAS_FOLLOW_UPS: FollowUpRow[] = [
+  [
+    'Introduce Dev to Priya about the design role',
+    'Dev',
+    'Sky',
+    'call3.jpg',
+    '2026-09-13',
+    'Messages',
+    '2026-09-03',
+    null,
+  ],
+  [
+    'Return Ruth’s ladder',
+    'Ruth',
+    'Teal',
+    'contact-ruth.jpg',
+    '2026-09-15',
+    'InPerson',
+    '2026-09-12',
+    null,
+  ],
+  [
+    'Send Grace the Lisbon photos',
+    'Grace',
+    'Plum',
+    'contact-grace.jpg',
+    '2026-09-17',
+    'Video',
+    '2026-09-11',
+    null,
+  ],
+  [
+    'Pick up her birthday card and a bottle of orange wine',
+    'Grace',
+    'Plum',
+    'contact-grace.jpg',
+    '2026-09-18',
+    null,
+    null,
+    null,
+  ],
+  [
+    'Drop a lasagne round for Ben & Kate',
+    'Ben',
+    'Amber',
+    null,
+    '2026-09-19',
+    'Messages',
+    '2026-09-05',
+    null,
+  ],
+  [
+    'Ask Chidi how the commute is going',
+    'Chidi',
+    'Sky',
+    'contact-chidi.jpg',
+    '2026-09-20',
+    null,
+    null,
+    null,
+  ],
+  [
+    'Book a table for Ada’s birthday lunch · 7 people',
+    'Ada',
+    'Coral',
+    'contact-ada.jpg',
+    '2026-09-25',
+    'Phone',
+    '2026-09-13',
+    null,
+  ],
+  [
+    'Go with Mum to her knee appointment',
+    'Ada',
+    'Coral',
+    'contact-ada.jpg',
+    '2026-09-29',
+    'InPerson',
+    '2026-07-26',
+    null,
+  ],
+  [
+    'Bring the soup pot back on Thursday',
+    'Ada',
+    'Coral',
+    'contact-ada.jpg',
+    '2026-09-10',
+    'InPerson',
+    '2026-09-06',
+    '2026-09-10T15:00:00Z',
+  ],
+];
+
+/** The id of Mara's follow-up drawn n-th (from 1). */
+export function followUpId(n: number): string {
+  return `00000000-0000-4000-f000-${String(n).padStart(12, '0')}`;
+}
+
+/** Follow-ups answers with the mocks' list, linked to Chidi, the contact recorded. */
+export async function marasFollowUps(page: Page): Promise<void> {
+  await servePhotos(page);
+  const body = MARAS_FOLLOW_UPS.map(([text, first, accent, photo, dueOn, via, on, done], i) => ({
+    id: followUpId(i + 1),
+    text,
+    contactId: first ? recordedContactId('Chidi Okafor') : null,
+    contactFirstName: first,
+    contactInitials: first ? (first === 'Ben' ? 'BH' : first.slice(0, 2).toUpperCase()) : null,
+    contactAccent: accent,
+    contactPhotoUrl: photo ? `/api/files/contacts/${photo}` : null,
+    dueOn,
+    isPromise: via !== null,
+    promisedVia: via,
+    promisedOn: on,
+    createdAt: `2026-09-0${(i % 9) + 1}T08:00:00Z`,
+    doneAt: done,
+  }));
+  await answer(page, followUpsKey, { status: 200, body });
+}
+
+/** Nothing open, nothing done. */
+export function noFollowUps(page: Page): Promise<void> {
+  return answer(page, followUpsKey, { status: 200, body: [] });
+}
+
+/**
+ * Answers every "Mark done" and "Mark not done" of the mocks' follow-ups with that follow-up,
+ * done or open as asked, so a tick and its Undo both save.
+ */
+export async function answerTicks(page: Page): Promise<void> {
+  await page.route('**/api/contacts/follow-ups/*/done', async (route) => {
+    const id = route.request().url().split('/').at(-2) ?? '';
+    const n = Number(id.slice(-12));
+    const [text] = MARAS_FOLLOW_UPS[n - 1];
+    const { done } = route.request().postDataJSON() as { done: boolean };
+    await route.fulfill({
+      json: { id, text, doneAt: done ? '2026-09-15T07:40:00Z' : null },
+    });
+  });
+}

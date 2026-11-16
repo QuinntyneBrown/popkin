@@ -55,3 +55,21 @@ public sealed class ReminderPreferencesConfiguration : IEntityTypeConfiguration<
         builder.HasOne<Person>().WithMany().HasForeignKey(p => p.OwnerId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+public sealed class FollowUpConfiguration : IEntityTypeConfiguration<FollowUp>
+{
+    public void Configure(EntityTypeBuilder<FollowUp> builder)
+    {
+        builder.ToTable("FollowUps");
+        builder.HasKey(f => f.Id);
+        // A resend saves once (L2-123 AC4).
+        builder.HasIndex(f => new { f.OwnerId, f.ClientId }).IsUnique();
+        builder.HasIndex(f => f.ContactId);
+        builder.Property(f => f.Text).HasMaxLength(FollowUp.MaxTextLength).IsRequired();
+        builder.Property(f => f.PromisedVia).HasConversion<string>().HasMaxLength(12);
+        // A follow-up goes with its account (L2-049) and with its contact (L2-132); ContactRemoval
+        // removes it in the same save, so the database never cascades from two paths.
+        builder.HasOne<Person>().WithMany().HasForeignKey(f => f.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Contact>().WithMany().HasForeignKey(f => f.ContactId).OnDelete(DeleteBehavior.NoAction);
+    }
+}

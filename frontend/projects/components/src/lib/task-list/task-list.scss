@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:host(.divided) li + li {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}

@@ -58,11 +58,14 @@ export function parity(component: string, cases: ParityCase[]): void {
               await parityCase.region(page).evaluate((element: HTMLElement) => {
                 const over = element.getBoundingClientRect().top % 1;
                 if (over === 0) return;
-                // A floating region is placed from its bottom edge; a row, after the row above.
-                if (getComputedStyle(element).position === 'absolute') {
+                // A floating region is placed from its bottom edge; any other is moved down by
+                // itself, so a parent that centres it (a list head) cannot halve the move.
+                const position = getComputedStyle(element).position;
+                if (position === 'absolute') {
                   element.style.bottom = `${over - 1}px`;
                 } else {
-                  element.style.marginTop = `${1 - over}px`;
+                  if (position === 'static') element.style.position = 'relative';
+                  element.style.top = `${1 - over}px`;
                 }
               });
             }

@@ -77,6 +77,8 @@ public sealed class PurgeDeletedAccountsCommandHandler(
         var contactFiles = await ContactRemoval.RemoveAsync(
             db, db.Contacts.Where(c => c.OwnerId == person.Id), CancellationToken.None);
         db.ReminderPreferences.RemoveRange(db.ReminderPreferences.Where(p => p.OwnerId == person.Id));
+        // A follow-up for nobody names no contact, so ContactRemoval leaves it.
+        db.FollowUps.RemoveRange(db.FollowUps.Where(f => f.OwnerId == person.Id));
         person.Erase(clock.GetUtcNow());
         await db.SaveChangesAsync(CancellationToken.None);
         await ContactRemoval.DeleteFilesAsync(photos, contactFiles, logger);

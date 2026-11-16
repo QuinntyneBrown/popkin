@@ -564,6 +564,58 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("FeatureSettings", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.FollowUp", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DoneAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly?>("DueOn")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsPromise")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("PromisedOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("PromisedVia")
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("TimelineEntryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("OwnerId", "ClientId")
+                        .IsUnique();
+
+                    b.ToTable("FollowUps", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.KeyDate", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1417,6 +1469,20 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasOne("Popkin.Domain.PopkinSpace", null)
                         .WithMany()
                         .HasForeignKey("PopkinId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.FollowUp", b =>
+                {
+                    b.HasOne("Popkin.Domain.Contact", null)
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -1,0 +1,113 @@
+<div pk-app-screen accent="coral" layout="tab" body="fill">
+  <div pk-contacts-page>
+    <div
+      pk-page-head
+      slot="head"
+      heading="Follow-ups"
+      [sub]="store.state() === 'ready' ? store.subtitle() : undefined"
+    ></div>
+    @if (store.state() === 'failed') {
+      <div
+        pk-empty-state
+        icon="alert"
+        [alert]="true"
+        heading="We couldn’t load your follow-ups"
+        text="Nothing you added is lost. Check your connection and try again."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.open()">
+          Try again
+        </button>
+      </div>
+    } @else {
+      <div pk-contacts-grid layout="narrow">
+        <div class="cluster">
+          <div
+            pk-add-field
+            fieldId="new-task"
+            label="Add a follow-up"
+            placeholder="Call Sam about the reference…"
+            (added)="store.add($event)"
+          ></div>
+          <div
+            pk-segmented-control
+            label="Show"
+            [options]="tabs"
+            [value]="store.filter()"
+            (valueChange)="show($event)"
+          ></div>
+        </div>
+        @if (store.state() === 'loading') {
+          <p class="visually-hidden" role="status">Loading your follow-ups…</p>
+          <div class="stack" aria-hidden="true">
+            <span pk-skeleton shape="title" [width]="30"></span>
+            <ul pk-date-list [dates]="[]" [loading]="true"></ul>
+          </div>
+        } @else if (store.openCount() === 0 && !store.showDone()) {
+          <div
+            pk-empty-state
+            icon="check"
+            heading="You’re all caught up"
+            text="Nothing you said you’d do is waiting. Add one above when it comes up, or log a conversation and note what you promised."
+          >
+            <a pk-button variant="secondary" size="md" routerLink="/contacts/people"
+              >Go to People</a
+            >
+          </div>
+        } @else {
+          @for (bucket of buckets(); track bucket.key) {
+            <section [attr.aria-labelledby]="'b-' + bucket.key">
+              <div
+                pk-list-head
+                [headingId]="'b-' + bucket.key"
+                [heading]="bucket.heading"
+                [count]="bucket.tasks.length"
+                [tone]="bucket.key === 'overdue' ? 'late' : 'default'"
+              ></div>
+              <ul pk-task-list [tasks]="bucket.tasks" (doneChange)="tick($event)"></ul>
+            </section>
+          }
+          @if (store.showDone() && done().length) {
+            <section aria-labelledby="b-done">
+              <div pk-list-head headingId="b-done" heading="Done" tone="quiet"></div>
+              <ul pk-task-list [tasks]="done()" [divided]="false" (doneChange)="tick($event)"></ul>
+            </section>
+          }
+          @if (store.showDone()) {
+            <div>
+              <button
+                pk-button
+                type="button"
+                variant="quiet"
+                size="sm"
+                (click)="store.showDone.set(false)"
+              >
+                Hide done
+              </button>
+            </div>
+          } @else if (done().length) {
+            <div>
+              <button
+                pk-button
+                type="button"
+                variant="quiet"
+                size="sm"
+                (click)="store.showDone.set(true)"
+              >
+                {{ showDoneLabel(done().length) }}
+              </button>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    place="contacts"
+    contactsCurrent="follow-ups"
+    [members]="frame.countLine()"
+    [due]="frame.due()"
+    [dueLabel]="frame.dueLabel()"
+  ></nav>
+</div>

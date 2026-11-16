@@ -1,0 +1,16 @@
+@for (task of tasks(); track task.id) {
+  <li
+    pk-task
+    [text]="task.text"
+    [done]="task.done"
+    [who]="task.who"
+    [whoLink]="task.whoLink"
+    [whoPhoto]="task.whoPhoto ?? null"
+    [whoAccent]="task.whoAccent"
+    [note]="task.note"
+    [noteIcon]="task.noteIcon"
+    [due]="task.due"
+    [late]="task.late ?? false"
+    (doneChange)="doneChange.emit({ id: task.id, done: $event })"
+  ></li>
+}

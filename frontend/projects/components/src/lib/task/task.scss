@@ -135,8 +135,10 @@
 }
 
 /* The note and its icon, as the mocks' cluster with a --space-1 gap. */
+/* As the mocks' cluster: the words go under the icon when they wrap. */
 .task__note {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1);
 }

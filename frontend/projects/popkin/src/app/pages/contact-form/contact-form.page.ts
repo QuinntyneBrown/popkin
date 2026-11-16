@@ -18,11 +18,12 @@ import {
   CONTACT_CIRCLES,
   ContactCircle,
   ContactFormStore,
+  FollowUpsStore,
   KeyDateDraft,
   NO_COUNTS,
   NOT_FOUND_TEXT,
-  REMINDER_LEADS,
   PHOTO_ACCEPT,
+  REMINDER_LEADS,
   SAVE_FAILED_TEXT,
   Toaster,
   contactValuesOf,
@@ -99,6 +100,7 @@ export class ContactFormPage implements OnInit {
   private readonly router = inject(Router);
   private readonly toaster = inject(Toaster);
   private readonly dialog = inject(Dialog);
+  private readonly followUps = inject(FollowUpsStore);
   protected readonly notFound = NOT_FOUND_TEXT;
   protected readonly unread = failedText(null);
   protected readonly accept = PHOTO_ACCEPT;
@@ -222,7 +224,7 @@ export class ContactFormPage implements OnInit {
           accent: 'coral',
           contactId: editing.id,
           firstName: editing.firstName,
-          counts: NO_COUNTS,
+          counts: { ...NO_COUNTS, followUps: this.followUps.countFor(editing.id) },
         },
         ariaLabelledBy: 'dlg-title',
         hasBackdrop: false,

@@ -121,6 +121,19 @@
                       >Log a conversation</a
                     >
                   </div>
+                } @else if (current() === 'follow-ups') {
+                  <div class="stack">
+                    <div
+                      pk-add-field
+                      fieldId="new-task"
+                      [label]="'Add a follow-up for ' + profile.firstName"
+                      [placeholder]="'Something to do for ' + profile.firstName + '…'"
+                      (added)="addFollowUp($event)"
+                    ></div>
+                    @if (followUps().length) {
+                      <ul pk-task-list [tasks]="followUps()" (doneChange)="tick($event)"></ul>
+                    }
+                  </div>
                 }
               </section>
             </div>
@@ -136,5 +149,7 @@
     place="contacts"
     contactsCurrent="people"
     [members]="frame.countLine()"
+    [due]="frame.due()"
+    [dueLabel]="frame.dueLabel()"
   ></nav>
 </div>

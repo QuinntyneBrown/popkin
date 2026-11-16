@@ -4,20 +4,24 @@ import { Router, RouterLink } from '@angular/router';
 import {
   ContactProfileStore,
   ContactsFrame,
-  NOT_FOUND_TEXT,
+  FollowUpsStore,
   NO_COUNTS,
+  NOT_FOUND_TEXT,
   closestItem,
+  dueText,
   failedText,
   kindIcon,
   leadLabel,
-  profileDateLine,
-  profileDateTitle,
   loadingLine,
   possessive,
+  profileDateLine,
+  profileDateTitle,
   profileSub,
+  promiseNote,
 } from 'api';
 import {
   AddCard,
+  AddField,
   AppScreen,
   Avatar,
   BackLink,
@@ -36,6 +40,8 @@ import {
   ListHead,
   PopkinNav,
   Skeleton,
+  TaskList,
+  TaskListItem,
   ViewLink,
   ViewNav,
 } from 'components';
@@ -63,6 +69,7 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
   selector: 'pk-contact-profile-page',
   imports: [
     AddCard,
+    AddField,
     AppScreen,
     Avatar,
     BackLink,
@@ -80,6 +87,7 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     PopkinNav,
     RouterLink,
     Skeleton,
+    TaskList,
     ViewNav,
   ],
   providers: [ContactProfileStore],
@@ -93,6 +101,7 @@ export class ContactProfilePage {
   readonly view = input<string>();
   protected readonly store = inject(ContactProfileStore);
   protected readonly frame = inject(ContactsFrame);
+  protected readonly followUpsStore = inject(FollowUpsStore);
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
   protected readonly notFound = NOT_FOUND_TEXT;
@@ -134,6 +143,22 @@ export class ContactProfilePage {
       reminder: leadLabel(date.reminder),
     }));
   });
+  /** This contact's open follow-ups, soonest first (known gap 115, ruled). */
+  protected readonly followUps = computed<TaskListItem[]>(() => {
+    const today = new Date();
+    return this.followUpsStore.forContact(this.contactId()).map((f) => {
+      const note = promiseNote(f, today);
+      return {
+        id: f.id,
+        text: f.text,
+        done: f.doneAt !== null,
+        note: note ?? 'Follow-up',
+        noteIcon: note ? 'handshake' : undefined,
+        due: dueText(f.dueOn, today),
+        late: f.dueOn !== null && dueText(f.dueOn, today)?.endsWith('late') === true,
+      };
+    });
+  });
   protected readonly historyLabel = computed(() => `${possessive(this.firstName() ?? '')} history`);
   protected readonly current = computed<HistoryView>(() => {
     const view = this.view();
@@ -149,6 +174,7 @@ export class ContactProfilePage {
         link,
         query: { view: 'follow-ups' },
         current: current === 'follow-ups',
+        count: this.followUps().filter((f) => !f.done).length,
       },
       {
         label: 'Memories & files',
@@ -161,6 +187,16 @@ export class ContactProfilePage {
 
   constructor() {
     effect(() => this.store.open(this.contactId(), this.passedFirstName));
+  }
+
+  /** "Add a follow-up for {first name}" (L2-142 AC1). */
+  protected addFollowUp(text: string): void {
+    this.followUpsStore.add(text, this.contactId());
+  }
+
+  protected tick(change: { id: string; done: boolean }): void {
+    const followUp = this.followUpsStore.followUps().find((f) => f.id === change.id);
+    if (followUp) this.followUpsStore.setDone(followUp, change.done);
   }
 
   /** Add a date for this contact; the profile reads again once it is kept (L2-138 AC4). */
@@ -185,7 +221,7 @@ export class ContactProfilePage {
           accent: 'coral',
           contactId: profile.id,
           firstName: profile.firstName,
-          counts: NO_COUNTS,
+          counts: { ...NO_COUNTS, followUps: this.followUpsStore.countFor(profile.id) },
         },
         ...MODAL,
       })

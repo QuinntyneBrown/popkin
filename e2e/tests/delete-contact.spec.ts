@@ -31,7 +31,7 @@ test.describe('Delete a contact', () => {
 
     await expect(dialog.heading).toHaveText('Delete Chidi?');
     await expect(dialog.description).toHaveText(
-      'Chidi’s profile goes for good. Your Popkins don’t change, and Chidi isn’t told.',
+      'Chidi’s profile and 1 follow-up go for good. Your Popkins don’t change, and Chidi isn’t told.',
     );
     await expect(dialog.confirm('Chidi')).toBeVisible();
     await expect(dialog.keep('Chidi')).toBeFocused();

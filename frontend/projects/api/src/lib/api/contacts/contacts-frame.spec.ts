@@ -21,6 +21,24 @@ describe('ContactsFrame', () => {
               answer === 'down'
                 ? throwError(() => new HttpErrorResponse({ status: 0 }))
                 : of(answer),
+            followUps: () =>
+              of([
+                {
+                  id: 'f1',
+                  text: 'Return Ruth’s ladder',
+                  contactId: null,
+                  contactFirstName: null,
+                  contactInitials: null,
+                  contactAccent: null,
+                  contactPhotoUrl: null,
+                  dueOn: '2000-01-01',
+                  isPromise: false,
+                  promisedVia: null,
+                  promisedOn: null,
+                  createdAt: '2000-01-01T00:00:00Z',
+                  doneAt: null,
+                },
+              ]),
           },
         },
       ],
@@ -76,5 +94,14 @@ describe('ContactsFrame', () => {
     frame.open().subscribe((answer) => (open = answer));
 
     expect(open).toBe(false);
+  });
+
+  it('counts the follow-ups late or due today once Contacts opens, for the badge (L2-121 AC5)', () => {
+    expect(frame.due()).toBe(0);
+
+    frame.open().subscribe();
+
+    expect(frame.due()).toBe(1);
+    expect(frame.dueLabel()).toBe('1 follow-up late or due today');
   });
 });

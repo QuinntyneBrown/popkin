@@ -16,8 +16,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[class.contacts-grid--lead]': "layout() === 'lead'",
     '[class.contacts-grid--about]': "layout() === 'about'",
     '[class.contacts-grid--aside]': "layout() === 'aside'",
+    '[class.contacts-grid--narrow]': "layout() === 'narrow'",
   },
 })
 export class ContactsGrid {
-  readonly layout = input.required<'lead' | 'about' | 'aside'>();
+  readonly layout = input.required<'lead' | 'about' | 'aside' | 'narrow'>();
 }
