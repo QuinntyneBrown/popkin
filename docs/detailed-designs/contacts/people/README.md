@@ -56,11 +56,11 @@ contact are the Add someone, Edit and Delete designs; the profile is the profile
 
 - **Search** (gap 101). The search matches any part of the name, ignoring case and accents
   ("femi", "Bánk"), and keeps the chosen circle. `matchesName` is the one place the rule lives.
-- **The next key date's form** (gap 101). A date 30 days away or fewer reads date first, in bold
+- **The next key date's form** (gap 101). A date 90 days away or fewer reads date first, in bold
   ("Oct 7 · Birthday"); a later one reads kind first, plain ("Birthday Apr 29").
 - **Closest** (gap 100). Ordered by first name, A to Z; no limit of its own.
 - **Last talked** (gaps 99, 111). "today", "yesterday", the weekday ("Sun") within the last 6
-  days, then "{n} days ago"; drawn quiet after 30 days, the drifting threshold Today shares. A
+  days, the date ("Sep 5") up to 30 days, then "{n} days ago", drawn quiet, the drifting threshold Today shares. A
   contact with no conversation logged reads "Not yet".
 - **The circle's name.** The mock gives the list the accessible name "Family" (or "Everyone") and
   draws no heading; L2-126 AC3 and L2-127 AC2 were worded to match, so the list is named for
