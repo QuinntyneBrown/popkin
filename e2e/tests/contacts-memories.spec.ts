@@ -218,6 +218,7 @@ test.describe('Add to memories', () => {
       mimeType: 'image/jpeg',
       buffer: lake,
     });
+    await expect(dialog.upload).toBeVisible();
 
     await dialog.save.click();
 

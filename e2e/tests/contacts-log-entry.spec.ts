@@ -128,7 +128,8 @@ test.describe('Log a conversation', () => {
     expect((await request).postDataJSON()).toMatchObject({
       channel: 'Phone',
       note: 'Loving the team, hates the commute.',
-      loggedAt: expect.stringMatching(/^2026-09-15T08:40:00[+-]\d\d:\d\d$/),
+      // The clock runs on from 8:40 while the page works; "Today, 8:40 am" is to the minute.
+      loggedAt: expect.stringMatching(/^2026-09-15T08:40:\d\d[+-]\d\d:\d\d$/),
       promises: [{ text: 'Send him the flat-hunting checklist', dueOn: '2026-09-17' }],
     });
     await expect(page).toHaveURL(`/contacts/people/${chidi()}`);
