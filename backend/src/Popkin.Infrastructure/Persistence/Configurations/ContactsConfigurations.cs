@@ -73,3 +73,24 @@ public sealed class FollowUpConfiguration : IEntityTypeConfiguration<FollowUp>
         builder.HasOne<Contact>().WithMany().HasForeignKey(f => f.ContactId).OnDelete(DeleteBehavior.NoAction);
     }
 }
+
+public sealed class TimelineEntryConfiguration : IEntityTypeConfiguration<TimelineEntry>
+{
+    public void Configure(EntityTypeBuilder<TimelineEntry> builder)
+    {
+        builder.ToTable("TimelineEntries");
+        builder.HasKey(e => e.Id);
+        // A resend saves once (L2-123 AC4).
+        builder.HasIndex(e => new { e.OwnerId, e.ClientId }).IsUnique();
+        builder.HasIndex(e => e.ContactId);
+        builder.Property(e => e.Kind).HasConversion<string>().HasMaxLength(12);
+        builder.Property(e => e.Channel).HasConversion<string>().HasMaxLength(12);
+        builder.Property(e => e.MilestoneKind).HasConversion<string>().HasMaxLength(16);
+        builder.Property(e => e.Title).HasMaxLength(TimelineEntry.MaxTitleLength);
+        builder.Property(e => e.Note).HasMaxLength(TimelineEntry.MaxNoteLength);
+        // An entry goes with its account (L2-049) and with its contact (L2-132); ContactRemoval
+        // removes it in the same save, so the database never cascades from two paths.
+        builder.HasOne<Person>().WithMany().HasForeignKey(e => e.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Contact>().WithMany().HasForeignKey(e => e.ContactId).OnDelete(DeleteBehavior.NoAction);
+    }
+}

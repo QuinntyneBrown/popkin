@@ -33,6 +33,11 @@ export class ContactProfilePage {
   readonly addFollowUp: Locator;
   readonly followUps: Locator;
   readonly emptyTimeline: Locator;
+  readonly timeline: Locator;
+  readonly timelineEntries: Locator;
+  readonly timelineFilters: Locator;
+  readonly logMilestone: Locator;
+  readonly logConversation: Locator;
   /** The loading line (L2-123 AC1). */
   readonly loading: Locator;
   /** The failed and not-found states (`pk-empty-state`). */
@@ -71,6 +76,11 @@ export class ContactProfilePage {
     this.addFollowUp = page.getByRole('textbox', { name: /^Add a follow-up for / });
     this.followUps = page.locator('li.task');
     this.emptyTimeline = page.getByRole('heading', { name: /^Nothing logged with / });
+    this.timeline = page.locator('ol.contact-timeline');
+    this.timelineEntries = this.timeline.locator('li.contact-timeline__item');
+    this.timelineFilters = page.getByRole('group', { name: 'Show' });
+    this.logMilestone = page.getByRole('link', { name: 'Milestone', exact: true });
+    this.logConversation = page.getByRole('link', { name: 'Conversation', exact: true });
     this.loading = page.getByRole('status').filter({ hasText: /^Loading / });
     this.state = page.locator('.contacts-page :is([role="alert"] .empty, .empty[role="alert"])');
     this.stateHeading = this.state.getByRole('heading');
@@ -83,5 +93,9 @@ export class ContactProfilePage {
     return this.facts
       .filter({ has: this.about.page().getByText(label, { exact: true }) })
       .locator('dd');
+  }
+
+  timelineFilter(name: 'All' | 'Conversations' | 'Milestones'): Locator {
+    return this.timelineFilters.getByRole('button', { name });
   }
 }

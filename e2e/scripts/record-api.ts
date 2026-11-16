@@ -351,6 +351,28 @@ const commute = await call('POST', '/api/contacts/follow-ups', {
 });
 await call('GET', '/api/contacts/follow-ups');
 await call('PUT', `/api/contacts/follow-ups/${commute.id}/done`, { done: true });
+// Nothing is logged with Femi (L2-135 AC2). She logs Chidi's new job, every year, and a phone
+// call with a promise, as his profile draws them, then reads his timeline: all, milestones,
+// conversations (L2-133 to L2-135).
+await call('GET', `/api/contacts/people/${femiKept.id}/timeline?show=all`);
+await call('POST', `/api/contacts/people/${chidiKept.id}/milestones`, {
+  clientId: '00000000-0000-4000-c000-000000000030',
+  kind: 'NewJob',
+  title: 'Started as Senior Engineer at Arup',
+  happenedOn: '2026-08-31',
+  note: 'Bridges team. He’d been after this one for two years.',
+  everyYear: true,
+});
+await call('POST', `/api/contacts/people/${chidiKept.id}/conversations`, {
+  clientId: '00000000-0000-4000-c000-000000000031',
+  channel: 'Phone',
+  loggedAt: '2026-09-06T19:30:00+01:00',
+  note: 'Loving the team, hates the commute. Thinking of moving closer to Piccadilly by Christmas. Tomás is pushing for a dog.',
+  promises: [{ text: 'Send him the flat-hunting checklist', dueOn: '2026-09-17' }],
+});
+await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=all`);
+await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=milestones`);
+await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=conversations`);
 await call('DELETE', `/api/contacts/people/${chidiKept.id}/closest`);
 // She deletes Chidi from his profile (L2-132).
 await call('DELETE', `/api/contacts/people/${chidiKept.id}`);

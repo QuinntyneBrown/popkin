@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Net.Http.Json;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
@@ -65,8 +66,16 @@ public sealed class PurgeDeletedAccountsTests
         using var api = new ApiFactory();
         var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
         var lena = await api.SignedUpAsync("Lena Fischer", "(415) 555-0123");
-        (await mara.AddContactAsync(ContactsExtensions.Named("Chidi Okafor"), TestPhotos.WithLocation(MagickFormat.Jpeg)))
-            .EnsureSuccessStatusCode();
+        var chidi = await mara.AddContactAsync(ContactsExtensions.Named("Chidi Okafor"), TestPhotos.WithLocation(MagickFormat.Jpeg));
+        chidi.EnsureSuccessStatusCode();
+        var chidiId = (await chidi.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        (await mara.PostAsJsonAsync($"/api/contacts/people/{chidiId}/conversations", new
+        {
+            clientId = Guid.NewGuid(),
+            channel = "Phone",
+            loggedAt = "2026-09-15T08:40:00-07:00",
+            note = "First week at Arup",
+        })).EnsureSuccessStatusCode();
         await lena.AddedContactAsync("Bea Lind");
         (await mara.PostAsJsonAsync("/api/contacts/follow-ups", new { clientId = Guid.NewGuid(), text = "Call Sam" }))
             .EnsureSuccessStatusCode();
@@ -79,6 +88,7 @@ public sealed class PurgeDeletedAccountsTests
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         Assert.Equal(["Bea Lind"], db.Contacts.Select(c => c.Name).ToList());
         Assert.Empty(db.FollowUps);
+        Assert.Empty(db.TimelineEntries);
         Assert.Empty(api.Photos.Files);
     }
 

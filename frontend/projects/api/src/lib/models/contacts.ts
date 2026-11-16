@@ -211,3 +211,62 @@ export interface AddFollowUpRequest {
 
 /** Follow-ups' tabs (L2-141 AC2). */
 export type FollowUpsFilter = 'everything' | 'promises';
+
+/** A turn in a contact's life (L2-134 AC1). */
+export type MilestoneKind =
+  'NewJob' | 'Wedding' | 'NewBaby' | 'Moved' | 'Graduated' | 'SomethingElse';
+
+export type TimelineEntryKind = 'Conversation' | 'Milestone';
+
+/** A profile's Timeline filter (L2-135 AC1). */
+export type TimelineShow = 'all' | 'conversations' | 'milestones';
+
+/** One row of a contact's timeline, newest first (L2-135 AC1). */
+export interface TimelineItemView {
+  id: string;
+  kind: TimelineEntryKind;
+  /** yyyy-MM-dd. */
+  day: string;
+  channel: TalkChannel | null;
+  milestoneKind: MilestoneKind | null;
+  title: string | null;
+  note: string | null;
+}
+
+export interface TimelineView {
+  entries: TimelineItemView[];
+}
+
+/** A logged entry, and the key date a yearly milestone added. */
+export interface TimelineEntryView {
+  entry: TimelineItemView;
+  keyDateId: string | null;
+}
+
+/** A promise made in a conversation, before it is saved (known gap 106, ruled). */
+export interface PromiseDraft {
+  text: string;
+  /** yyyy-MM-dd. */
+  dueOn: string;
+}
+
+/** "Talked with {first name}" (L2-133). */
+export interface LogConversationRequest {
+  clientId: string;
+  channel: TalkChannel;
+  /** The moment Log opened, with the device's offset. */
+  loggedAt: string;
+  note: string;
+  promises: PromiseDraft[];
+}
+
+/** "{first name}'s milestone" (L2-134). */
+export interface LogMilestoneRequest {
+  clientId: string;
+  kind: MilestoneKind;
+  title: string;
+  /** yyyy-MM-dd. */
+  happenedOn: string;
+  note: string | null;
+  everyYear: boolean;
+}

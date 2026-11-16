@@ -1,4 +1,6 @@
-<span class="field__label" [id]="labelId()">{{ label() }}</span>
+<span class="field__label" [class.visually-hidden]="hideLabel()" [id]="labelId()">{{
+  label()
+}}</span>
 <div
   class="chips"
   role="radiogroup"
@@ -18,7 +20,11 @@
       (click)="choose(option.value)"
       (keydown)="move($event, i)"
     >
-      {{ option.label }}
+      @if (option.icon) {
+        <svg pk-icon [name]="option.icon" size="md"></svg>&nbsp;{{ option.label }}
+      } @else {
+        {{ option.label }}
+      }
     </button>
   }
 </div>

@@ -54,6 +54,8 @@ public interface IAppDbContext
 
     DbSet<FollowUp> FollowUps { get; }
 
+    DbSet<TimelineEntry> TimelineEntries { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }

@@ -108,7 +108,65 @@
               </div>
               <section [attr.aria-label]="historyLabel()">
                 <nav pk-view-nav [label]="historyLabel()" [views]="views()"></nav>
-                @if (current() === 'timeline') {
+                @if (current() === 'timeline' && !timeline.empty()) {
+                  <div class="cluster cluster--between">
+                    <div
+                      pk-filter-chips
+                      label="Show"
+                      [options]="shows"
+                      [value]="timeline.show()"
+                      (valueChange)="show($event)"
+                    ></div>
+                    <div class="cluster">
+                      <a
+                        pk-button
+                        variant="quiet"
+                        size="sm"
+                        [routerLink]="logLink()"
+                        [queryParams]="{ kind: 'milestone' }"
+                        >Milestone</a
+                      >
+                      <a pk-button variant="quiet" size="sm" [routerLink]="logLink()"
+                        >Conversation</a
+                      >
+                    </div>
+                  </div>
+                  @if (timeline.state() === 'failed') {
+                    <div
+                      pk-empty-state
+                      icon="server-error"
+                      [level]="3"
+                      [compact]="true"
+                      [alert]="true"
+                      [heading]="'We couldn’t load ' + profile.firstName + '’s timeline'"
+                      text="Check your connection and try again."
+                    >
+                      <button
+                        pk-button
+                        type="button"
+                        variant="primary"
+                        size="md"
+                        (click)="timeline.open(contactId())"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  } @else if (timelineItems().length) {
+                    <ol pk-contact-timeline>
+                      @for (item of timelineItems(); track item.id) {
+                        <li
+                          pk-contact-timeline-item
+                          [kind]="item.kind"
+                          [date]="item.date"
+                          [title]="item.title"
+                          [body]="item.body"
+                          [via]="item.via"
+                          [tag]="item.tag"
+                        ></li>
+                      }
+                    </ol>
+                  }
+                } @else if (current() === 'timeline') {
                   <div
                     pk-empty-state
                     icon="notebook"

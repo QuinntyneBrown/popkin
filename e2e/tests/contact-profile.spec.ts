@@ -47,7 +47,7 @@ test.describe('A contact’s profile', () => {
     ]);
     await expect(profile.makeHabit).toHaveText('Make a habit of seeing Chidi');
     await expect(profile.historyTabs).toHaveText(['Timeline', 'Follow-ups 1', 'Memories & files']);
-    await expect(profile.emptyTimeline).toHaveText('Nothing logged with Chidi yet');
+    await expect(profile.timelineEntries).toHaveCount(2);
   });
 
   // L2-128 AC3

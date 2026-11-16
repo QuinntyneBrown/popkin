@@ -1,0 +1,24 @@
+<div pk-dialog heading="Add a promise" accent="coral">
+  <div class="stack">
+    <div
+      pk-text-field
+      fieldId="promise"
+      label="What you said you’d do"
+      placeholder="Send the photos, call back…"
+      [maxlength]="200"
+      [error]="textError()"
+      [formControl]="text"
+    ></div>
+    <div
+      pk-text-field
+      fieldId="due"
+      label="Remind me"
+      type="date"
+      hint="It goes on your follow-ups for that day."
+      [formControl]="due"
+    ></div>
+  </div>
+  <button pk-button slot="footer" type="button" variant="primary" [block]="true" (click)="add()">
+    Add the promise
+  </button>
+</div>

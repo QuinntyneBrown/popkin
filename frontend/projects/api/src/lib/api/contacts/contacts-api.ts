@@ -9,6 +9,11 @@ import {
   ContactsSummaryView,
   DatesFilter,
   FollowUpView,
+  LogConversationRequest,
+  LogMilestoneRequest,
+  TimelineEntryView,
+  TimelineShow,
+  TimelineView,
   KeyDateRowView,
   PeopleView,
   ReminderPreferencesView,
@@ -56,6 +61,15 @@ export interface ContactsApi {
   addFollowUp(request: AddFollowUpRequest): Observable<FollowUpView>;
   /** "Mark done" and "Mark not done" (L2-142 AC2, AC3). */
   setFollowUpDone(id: string, done: boolean): Observable<FollowUpView>;
+  /** A contact's timeline, newest first, filtered by kind (L2-135 AC1). */
+  timeline(contactId: string, show: TimelineShow): Observable<TimelineView>;
+  /** Log a conversation and its promises (L2-133); a resend keeps it once. */
+  logConversation(
+    contactId: string,
+    request: LogConversationRequest,
+  ): Observable<TimelineEntryView>;
+  /** Log a milestone, and its yearly date when asked (L2-134). */
+  logMilestone(contactId: string, request: LogMilestoneRequest): Observable<TimelineEntryView>;
 }
 
 export const CONTACTS_API = new InjectionToken<ContactsApi>('ContactsApi');
@@ -138,5 +152,28 @@ export class HttpContactsApi implements ContactsApi {
 
   setFollowUpDone(id: string, done: boolean): Observable<FollowUpView> {
     return this.http.put<FollowUpView>(`/api/contacts/follow-ups/${id}/done`, { done });
+  }
+
+  timeline(contactId: string, show: TimelineShow): Observable<TimelineView> {
+    return this.http.get<TimelineView>(`/api/contacts/people/${contactId}/timeline`, {
+      params: { show },
+    });
+  }
+
+  logConversation(
+    contactId: string,
+    request: LogConversationRequest,
+  ): Observable<TimelineEntryView> {
+    return this.http.post<TimelineEntryView>(
+      `/api/contacts/people/${contactId}/conversations`,
+      request,
+    );
+  }
+
+  logMilestone(contactId: string, request: LogMilestoneRequest): Observable<TimelineEntryView> {
+    return this.http.post<TimelineEntryView>(
+      `/api/contacts/people/${contactId}/milestones`,
+      request,
+    );
   }
 }
