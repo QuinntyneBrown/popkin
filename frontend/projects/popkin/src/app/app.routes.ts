@@ -321,6 +321,16 @@ export const routes: Routes = [
     title: 'Profile · Contacts · Popkin',
   },
   {
+    path: 'contacts/people/:contactId/log',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-log-entry/contacts-log-entry.page').then(
+        (m) => m.ContactsLogEntryPage,
+      ),
+    data: data({ shell: 'bare', page: 'log-entry' }),
+    title: 'Log · Contacts · Popkin',
+  },
+  {
     path: 'contacts/people/:contactId/edit',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>

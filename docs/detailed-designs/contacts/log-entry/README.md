@@ -133,23 +133,28 @@ The profile's tabs (`docs/mocks/pages/contact-profile/`):
 
 ### Frontend (Popkin web app)
 
-- **`ContactsLogEntryPage`** (`pages/contacts-log-entry/contacts-log-entry.page.ts`, route
-  `/contacts/people/:id/log`, data `{ shell: 'bare', page: 'log-entry' }`; the mock has a top bar
-  and no Contacts navigation). `?kind=milestone` opens it on Milestone. Composes `pk-top-bar`,
-  `pk-segmented-control` "What to log", `pk-choice-chips` for "How you talked" and "What kind",
-  `pk-textarea`, `pk-text-field`, `pk-form-summary`, `pk-alert` for the failure, the promise row
-  of `pk-task`, `pk-photo-picker`, and `pk-setting-row` with `pk-switch`.
+- **`ContactsLogEntryPage`** (`pages/contacts-log-entry/`, route `/contacts/people/:id/log`, data
+  `{ shell: 'bare', page: 'log-entry' }`; the mock has a top bar and no Contacts navigation).
+  `?kind=milestone` opens it on Milestone. Composes `pk-top-bar` (Cancel, the contact's avatar,
+  Save), `pk-log-form`, `pk-segmented-control` "What to log", `pk-choice-chips` "How you talked"
+  (its label for assistive technology only, each with its icon) beside `pk-log-when`,
+  `pk-textarea`, `pk-log-section` for the promises (`pk-promise` rows and "Add a promise or
+  follow-up") and, divided, "Worth remembering" ("Add a date", a `pk-chip`); for a milestone
+  `pk-kind-grid`, `pk-text-field` "What happened?" and "When", `pk-textarea` "Note" and
+  `pk-setting-row` "Remember this every year"; `pk-form-summary` and `pk-alert` for the
+  failure. "Photo" and "Add a photo" come with [Memories and files](../memories/README.md).
+- **`AddPromiseDialog`** (`dialogs/add-promise/`) — "What you said you'd do" and "Remind me";
+  it closes with the promise, which Log saves with the conversation.
 - **`LogEntryStore`** (`frontend/projects/api/src/lib/api/contacts/log-entry-store.ts`) — the
-  form, its validation ("One thing to fix"), `idle | saving | failed`, the yearly title and hint,
-  and the save, sent at once under one client id. On success it navigates to the profile; on failure it
-  keeps every field. Unit tested.
-- **`ContactTimelineStore`** — the Timeline tab: `loading | ready | empty | failed`, the filter,
-  and an entry saved by Log placed first.
-- The tabs are the profile's `?view=timeline` and `?view=follow-ups`
-  ([Contact profile](../contact-profile/README.md)); they compose `pk-contact-timeline` and, for
-  follow-ups, `pk-task` with its add field (`POST /api/contacts/follow-ups`, `PUT
-  /api/contacts/follow-ups/{id}/done`); the empty timeline is `pk-empty-state`.
-- **`CONTACTS_API`** — `logConversation(contactId, body)`, `logMilestone(contactId, form)`,
+  form, its problems once Save is chosen, `idle | saving | failed`, the yearly title and hint
+  (`log-entry-text.ts`), and the save, sent at once under one client id. On success the page
+  opens the profile; on failure every field is kept. Unit tested.
+- **`ContactTimelineStore`** — the profile's Timeline: `loading | ready | failed`, the filter,
+  `empty` when nothing is logged; read each time the profile opens, so a saved entry is first.
+- The profile's Timeline composes `pk-filter-chips` "Show", the quiet buttons "Milestone" and
+  "Conversation" (Log, `?kind=milestone` for the first) and `pk-contact-timeline` with its
+  items; nothing logged is `pk-empty-state`.
+- **`CONTACTS_API`** — `logConversation(contactId, body)`, `logMilestone(contactId, body)`,
   `timeline(contactId, show)`.
 
 ### Tests
@@ -161,10 +166,10 @@ The profile's tabs (`docs/mocks/pages/contact-profile/`):
   default, titled "Chidi's work anniversary".
 - Direct tests: the filter of `GetContactTimelineQueryHandler` (all, conversations, milestones);
   the promise text of `FollowUp` per `TalkChannel`.
-- Playwright: `tests/contacts-log-entry.spec.ts` through `LogEntryPage` and `ContactProfilePage`
+- Playwright: `tests/contacts-log-entry.spec.ts` through `LogEntryPage`, `AddPromiseDialog` and `ContactProfilePage`
   page objects on recorded responses: each mock state, Cancel, a save opening the profile, the
   filter, the empty timeline and the Follow-ups tab. `routes.ts` keys each state.
-- Parity: `pk-contact-timeline` and `pk-task` with its promise row.
+- Parity: `pk-contact-timeline` (a conversation, a milestone), `pk-promise`, `pk-kind-grid`, `pk-log-form` and `pk-log-section`.
 
 ## Requirements
 

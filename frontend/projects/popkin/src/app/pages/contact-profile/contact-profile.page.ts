@@ -1,8 +1,17 @@
 import { Dialog } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  untracked,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
   ContactProfileStore,
+  ContactTimelineStore,
   ContactsFrame,
   FollowUpsStore,
   NO_COUNTS,
@@ -18,6 +27,10 @@ import {
   profileDateTitle,
   profileSub,
   promiseNote,
+  TimelineShow,
+  timelineDay,
+  timelineTag,
+  timelineVia,
 } from 'api';
 import {
   AddCard,
@@ -29,9 +42,14 @@ import {
   ContactFact,
   ContactFacts,
   ContactId,
+  ContactTimeline,
+  ContactTimelineItem,
+  ContactTimelineKind,
   ContactsGrid,
   ContactsPage,
   EmptyState,
+  FilterChipOption,
+  FilterChips,
   IconButton,
   KeyDateItem,
   KeyDates,
@@ -76,9 +94,12 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     Button,
     ContactFacts,
     ContactId,
+    ContactTimeline,
+    ContactTimelineItem,
     ContactsGrid,
     ContactsPage,
     EmptyState,
+    FilterChips,
     IconButton,
     KeyDates,
     Likes,
@@ -90,7 +111,7 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     TaskList,
     ViewNav,
   ],
-  providers: [ContactProfileStore],
+  providers: [ContactProfileStore, ContactTimelineStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './contact-profile.page.html',
 })
@@ -102,6 +123,12 @@ export class ContactProfilePage {
   protected readonly store = inject(ContactProfileStore);
   protected readonly frame = inject(ContactsFrame);
   protected readonly followUpsStore = inject(FollowUpsStore);
+  protected readonly timeline = inject(ContactTimelineStore);
+  protected readonly shows: FilterChipOption[] = [
+    { value: 'all', label: 'All' },
+    { value: 'conversations', label: 'Conversations' },
+    { value: 'milestones', label: 'Milestones' },
+  ];
   private readonly router = inject(Router);
   private readonly dialog = inject(Dialog);
   protected readonly notFound = NOT_FOUND_TEXT;
@@ -159,6 +186,19 @@ export class ContactProfilePage {
       };
     });
   });
+  /** The timeline, newest first (L2-135 AC1). */
+  protected readonly timelineItems = computed(() => {
+    const today = new Date();
+    return this.timeline.entries().map((entry) => ({
+      id: entry.id,
+      kind: entry.kind.toLowerCase() as ContactTimelineKind,
+      date: timelineDay(entry.day, today),
+      title: entry.title ?? undefined,
+      body: entry.note ?? undefined,
+      via: timelineVia(entry),
+      tag: timelineTag(entry),
+    }));
+  });
   protected readonly historyLabel = computed(() => `${possessive(this.firstName() ?? '')} history`);
   protected readonly current = computed<HistoryView>(() => {
     const view = this.view();
@@ -187,6 +227,18 @@ export class ContactProfilePage {
 
   constructor() {
     effect(() => this.store.open(this.contactId(), this.passedFirstName));
+    // The timeline is read once the contact is found, so an address that names no one asks for nothing more.
+    effect(() => {
+      const found = this.foundId();
+      if (found) untracked(() => this.timeline.open(found));
+    });
+  }
+
+  private readonly foundId = computed(() => this.store.profile()?.id);
+
+  /** "All", "Conversations" or "Milestones" (L2-135 AC1). */
+  protected show(show: string): void {
+    this.timeline.choose(show as TimelineShow);
   }
 
   /** "Add a follow-up for {first name}" (L2-142 AC1). */

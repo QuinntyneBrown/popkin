@@ -1,0 +1,7 @@
+<div>
+  <h2 class="log-section__title" [id]="headingId">{{ heading() }}</h2>
+  @if (hint()) {
+    <p class="log-section__hint">{{ hint() }}</p>
+  }
+</div>
+<ng-content />
