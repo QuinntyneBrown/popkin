@@ -12,6 +12,7 @@
       pk-chip
       type="button"
       role="radio"
+      [outline]="outline()"
       [attr.aria-checked]="option.value === value()"
       [tabIndex]="option.value === value() ? 0 : -1"
       (click)="choose(option.value)"

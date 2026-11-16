@@ -60,6 +60,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<TimeOffDay> TimeOffDays => inner.TimeOffDays;
 
+    public DbSet<Contact> Contacts => inner.Contacts;
+
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;
 
     public DbSet<Admin> Admins => inner.Admins;

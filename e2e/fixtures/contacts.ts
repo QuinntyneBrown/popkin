@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Page, Request } from '@playwright/test';
 import { answer, failNetwork, problem } from './stubs';
 
 /**
@@ -21,3 +21,11 @@ export function contactsOfMara(page: Page): Promise<void> {
 
 /** 8:40 am on Tuesday 15 September 2026, the morning of the Contacts mocks. */
 export const contactsMorning = new Date(2026, 8, 15, 8, 40);
+
+/** The part `contact` of an Add someone or Edit request, as the JSON it holds. */
+export function contactSent(request: Request): unknown {
+  const body = request.postData() ?? '';
+  const part = body.split(/\r?\n--/).find((p) => /name="contact"/.test(p));
+  if (!part) throw new Error('The request has no part "contact".');
+  return JSON.parse(part.slice(part.search(/\r?\n\r?\n/)).trim());
+}

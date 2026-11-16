@@ -1,0 +1,110 @@
+<div pk-screen body="flush">
+  <header
+    pk-top-bar
+    slot="header"
+    backLabel="Cancel"
+    backIcon="close"
+    [back]="back()"
+    [heading]="heading()"
+    [line]="true"
+    [sticky]="true"
+  >
+    <button
+      pk-button
+      slot="end"
+      variant="primary"
+      size="sm"
+      type="submit"
+      form="contact-form"
+      [busy]="saving()"
+    >
+      {{ saving() ? 'Saving…' : 'Save' }}
+    </button>
+  </header>
+  <form pk-form-sections id="contact-form" novalidate (submit)="save($event)">
+    @if (problems().length) {
+      <div pk-form-summary [problems]="problems()"></div>
+    }
+    @if (store.state() === 'failed') {
+      <div pk-banner variant="danger" [heading]="failedHeading()" [text]="failedText"></div>
+    }
+    <section pk-form-section heading="Who">
+      <div
+        pk-photo-picker
+        size="xl"
+        label="Add a photo"
+        [fixed]="!!store.editing()"
+        [photo]="store.editing()?.photoUrl ?? preview()"
+        [initial]="store.editing()?.initials ?? ''"
+        [attr.data-accent]="store.editing()?.accent"
+        [accept]="accept"
+        [disabled]="saving()"
+        (picked)="pick($event)"
+      >
+        <div
+          pk-text-field
+          fieldId="name"
+          label="Name"
+          placeholder="Their name"
+          autocomplete="off"
+          [formControl]="form.controls.name"
+          [readonly]="saving()"
+          [error]="store.state() === 'invalid' ? nameMessage : undefined"
+        ></div>
+      </div>
+      <div
+        pk-text-field
+        fieldId="relation"
+        label="How you know them"
+        placeholder="Sister, neighbour, old boss…"
+        [formControl]="form.controls.knownAs"
+        [readonly]="saving()"
+      ></div>
+      <div
+        pk-choice-chips
+        fieldId="circle"
+        label="Circle"
+        [options]="circles"
+        [outline]="true"
+        [(value)]="circle"
+        [disabled]="saving()"
+      ></div>
+    </section>
+    <section pk-form-section heading="Details" hint="Optional.">
+      <div pk-form-pair>
+        <div
+          pk-text-field
+          fieldId="phone"
+          label="Phone"
+          type="tel"
+          placeholder="+44"
+          [formControl]="form.controls.phone"
+          [readonly]="saving()"
+        ></div>
+        <div
+          pk-text-field
+          fieldId="email"
+          label="Email"
+          type="email"
+          [formControl]="form.controls.email"
+          [readonly]="saving()"
+        ></div>
+        <div
+          pk-text-field
+          fieldId="city"
+          label="City"
+          [formControl]="form.controls.city"
+          [readonly]="saving()"
+        ></div>
+        <div
+          pk-text-field
+          fieldId="likes"
+          label="Things they love"
+          placeholder="Jazz, cycling, Arsenal…"
+          [formControl]="form.controls.loves"
+          [readonly]="saving()"
+        ></div>
+      </div>
+    </section>
+  </form>
+</div>

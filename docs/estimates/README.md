@@ -1,7 +1,7 @@
 # Estimates
 
 - Overall effort: 339 days
-- Complete: 67%
+- Complete: 68%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
@@ -21,7 +21,7 @@
 | [admin-access](admin-access.md) | 16 days | 97% |
 | [plan](plan.md) | 17 days | 100% |
 | [admin-platform](admin-platform.md) | 16 days | 30% |
-| [contacts](contacts.md) | 67 days | 4% |
+| [contacts](contacts.md) | 67 days | 9% |
 
 ## Roadmap
 
@@ -29,4 +29,4 @@
 2. A Popkin's own address: choose it when starting, open a Popkin by it, keep it when the Popkin is renamed, and find an invite by a link on it.
 3. The SMS and email providers, which the crew invites need too.
 4. Reliability: a saved answer for every screen and an app that opens without a connection.
-5. Contacts, behind `Features:Contacts` until all sixteen designs are built, in the order of their pull requests: open, add, people, profile, privacy, delete, log, follow-ups, dates, memories, habits, Today, groups, connections, import and reminders.
+5. Contacts, behind `Features:Contacts` until all sixteen designs are built, in the order of their pull requests: add (with privacy's guard), profile (with privacy's not-found screen), people, the rest of open, delete, dates, follow-ups, log, memories, habits, connections, groups, import, Today and reminders. A log entry keeps its promises as follow-ups and its yearly milestone as a key date, so log comes after follow-ups and dates.

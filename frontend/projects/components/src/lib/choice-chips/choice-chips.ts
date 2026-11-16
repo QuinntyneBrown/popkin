@@ -38,6 +38,8 @@ export class ChoiceChips {
   readonly options = input.required<readonly ChipOption[]>();
   readonly value = model.required<string>();
   readonly disabled = input(false);
+  /** Outlined chips, as a form of sections draws its choices (Add someone's Circle). */
+  readonly outline = input(false);
 
   protected readonly labelId = computed(() => `${this.fieldId()}-l`);
 
