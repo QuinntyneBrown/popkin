@@ -47,9 +47,10 @@ export class Screen {
   readonly lead = input<string>();
   /**
    * `hero` centres the content of a celebration screen under a tall top; `middle` sets a short
-   * form in the middle of its part from 768 px; `invite` leaves room above an invite.
+   * form in the middle of its part from 768 px; `invite` leaves room above an invite; `flush`
+   * gives the content the full width, for a form of sections that draws its own edges.
    */
-  readonly body = input<'default' | 'hero' | 'middle' | 'invite' | 'recap'>('default');
+  readonly body = input<'default' | 'hero' | 'middle' | 'invite' | 'recap' | 'flush'>('default');
   /** The Popkin's emoji on a tile above the heading: the screen is about that Popkin. The
    * body then starts right under the top bar. */
   readonly tile = input<string>();

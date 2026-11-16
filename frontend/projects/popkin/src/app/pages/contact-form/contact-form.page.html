@@ -1,4 +1,4 @@
-<div pk-screen layout="column">
+<div pk-screen body="flush">
   <header
     pk-top-bar
     slot="header"
@@ -29,30 +29,18 @@
       <div pk-banner variant="danger" [heading]="failedHeading()" [text]="failedText"></div>
     }
     <section pk-form-section heading="Who">
-      @if (store.editing(); as editing) {
-        <div class="cluster">
-          <span
-            pk-avatar
-            size="xl"
-            [name]="editing.name"
-            [initials]="editing.initials"
-            [attr.data-accent]="editing.accent"
-            [photo]="editing.photoUrl"
-          ></span>
-          <ng-container [ngTemplateOutlet]="name" />
-        </div>
-      } @else {
-        <div
-          pk-photo-picker
-          label="Add a photo"
-          [photo]="preview()"
-          [accept]="accept"
-          [disabled]="saving()"
-          (picked)="pick($event)"
-        ></div>
-        <ng-container [ngTemplateOutlet]="name" />
-      }
-      <ng-template #name>
+      <div
+        pk-photo-picker
+        size="xl"
+        label="Add a photo"
+        [fixed]="!!store.editing()"
+        [photo]="store.editing()?.photoUrl ?? preview()"
+        [initial]="store.editing()?.initials ?? ''"
+        [attr.data-accent]="store.editing()?.accent"
+        [accept]="accept"
+        [disabled]="saving()"
+        (picked)="pick($event)"
+      >
         <div
           pk-text-field
           fieldId="name"
@@ -63,7 +51,7 @@
           [readonly]="saving()"
           [error]="store.state() === 'invalid' ? nameMessage : undefined"
         ></div>
-      </ng-template>
+      </div>
       <div
         pk-text-field
         fieldId="relation"
@@ -77,6 +65,7 @@
         fieldId="circle"
         label="Circle"
         [options]="circles"
+        [outline]="true"
         [(value)]="circle"
         [disabled]="saving()"
       ></div>

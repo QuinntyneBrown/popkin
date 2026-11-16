@@ -36,6 +36,31 @@
   box-shadow: 0 0 0 var(--space-1) var(--color-bg-canvas);
 }
 
+/* The compact picker of a form row: the avatar beside the field, their foot on one line. */
+:host(.photo-picker--xl) {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+:host(.photo-picker--xl) .photo-picker__button {
+  width: var(--space-18);
+  height: var(--space-18);
+  flex: none;
+}
+
+.photo-picker__camera {
+  position: absolute;
+  color: var(--color-fg-subtle);
+}
+
+.photo-picker__field {
+  flex: 1;
+  min-width: 0;
+}
+
 .photo-picker__file {
   display: none;
 }

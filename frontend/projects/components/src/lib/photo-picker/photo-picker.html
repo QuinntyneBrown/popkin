@@ -1,16 +1,35 @@
-<button
-  class="photo-picker__button"
-  type="button"
-  [attr.aria-label]="label()"
-  [attr.aria-describedby]="
-    error() ? 'photo-picker-error' : caption() ? 'photo-picker-caption' : null
-  "
-  [disabled]="disabled()"
-  (click)="open()"
->
-  <span pk-avatar size="2xl" [initials]="initial()" [photo]="photo()" [blank]="!photo()"></span>
-  <span class="photo-picker__badge"><svg pk-icon name="camera" size="md"></svg></span>
-</button>
+@if (fixed()) {
+  <span
+    pk-avatar
+    [size]="size() === 'xl' ? 'xl' : '2xl'"
+    [initials]="initial()"
+    [photo]="photo()"
+  ></span>
+} @else {
+  <button
+    class="photo-picker__button"
+    type="button"
+    [attr.aria-label]="label()"
+    [attr.aria-describedby]="
+      error() ? 'photo-picker-error' : caption() ? 'photo-picker-caption' : null
+    "
+    [disabled]="disabled()"
+    (click)="open()"
+  >
+    @if (size() === 'xl') {
+      <span pk-avatar size="xl" initials="" [photo]="photo()" [blank]="!photo()"></span>
+      @if (!photo()) {
+        <svg pk-icon class="photo-picker__camera" name="camera"></svg>
+      }
+    } @else {
+      <span pk-avatar size="2xl" [initials]="initial()" [photo]="photo()" [blank]="!photo()"></span>
+      <span class="photo-picker__badge"><svg pk-icon name="camera" size="md"></svg></span>
+    }
+  </button>
+}
+@if (size() === 'xl') {
+  <div class="photo-picker__field"><ng-content /></div>
+}
 <input
   #file
   class="photo-picker__file"

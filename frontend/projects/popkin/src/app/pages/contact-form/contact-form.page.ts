@@ -9,7 +9,6 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -24,7 +23,6 @@ import {
   saveFailedHeading,
 } from 'api';
 import {
-  Avatar,
   Banner,
   Button,
   ChipOption,
@@ -49,7 +47,6 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
 @Component({
   selector: 'pk-contact-form-page',
   imports: [
-    Avatar,
     Banner,
     Button,
     ChoiceChips,
@@ -57,7 +54,6 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
     FormSection,
     FormSections,
     FormSummary,
-    NgTemplateOutlet,
     PhotoPicker,
     ReactiveFormsModule,
     Screen,

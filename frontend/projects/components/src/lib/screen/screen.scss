@@ -96,6 +96,11 @@
   padding: 0 var(--space-5) var(--space-8);
 }
 
+/* A form of sections, edge to edge: each section draws its own padding and its rules. */
+.screen__body--flush {
+  padding-inline: 0;
+}
+
 /* The main action at the end of the body, pushed to the bottom of the screen. */
 .screen__actions {
   margin-top: auto;
