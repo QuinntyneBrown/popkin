@@ -12,7 +12,7 @@ using Popkin.Infrastructure.Persistence;
 namespace Popkin.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261115153104_AddContacts")]
+    [Migration("20261116082439_AddContacts")]
     partial class AddContacts
     {
         /// <inheritdoc />
@@ -869,6 +869,23 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("PlanChanges", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.PopkinFeatureOff", b =>
+                {
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Feature")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("SwitchedOffAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("PopkinId", "Feature");
+
+                    b.ToTable("PopkinFeaturesOff", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.PopkinSpace", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1127,8 +1144,8 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Purpose")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<DateTimeOffset>("SentAt")
                         .HasColumnType("datetimeoffset");
@@ -1408,6 +1425,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Popkin.Domain.PlanChange", b =>
+                {
+                    b.HasOne("Popkin.Domain.PopkinSpace", null)
+                        .WithMany()
+                        .HasForeignKey("PopkinId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PopkinFeatureOff", b =>
                 {
                     b.HasOne("Popkin.Domain.PopkinSpace", null)
                         .WithMany()
