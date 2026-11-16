@@ -5,6 +5,7 @@ import {
   ContactProfileStore,
   ContactsFrame,
   NOT_FOUND_TEXT,
+  NO_COUNTS,
   closestItem,
   failedText,
   loadingLine,
@@ -36,6 +37,10 @@ import {
   ContactActionsData,
   ContactActionsDialog,
 } from '../../dialogs/contact-actions/contact-actions.dialog';
+import {
+  DeleteContactData,
+  DeleteContactDialog,
+} from '../../dialogs/delete-contact/delete-contact.dialog';
 
 type HistoryView = 'timeline' | 'follow-ups' | 'memories';
 
@@ -138,6 +143,25 @@ export class ContactProfilePage {
     effect(() => this.store.open(this.contactId(), this.passedFirstName));
   }
 
+  /** "Delete {first name}?" (L2-132): once they are gone, People opens. */
+  private delete(): void {
+    const profile = this.profile();
+    if (!profile) return;
+    this.dialog
+      .open<boolean, DeleteContactData>(DeleteContactDialog, {
+        data: {
+          accent: 'coral',
+          contactId: profile.id,
+          firstName: profile.firstName,
+          counts: NO_COUNTS,
+        },
+        ...MODAL,
+      })
+      .closed.subscribe((deleted) => {
+        if (deleted) void this.router.navigateByUrl('/contacts/people');
+      });
+  }
+
   /** "More for {first name}" (L2-131). */
   protected more(): void {
     const profile = this.profile();
@@ -157,6 +181,7 @@ export class ContactProfilePage {
         else this.store.addToClosest();
       }
       if (action === 'edit') void this.router.navigateByUrl(this.editLink());
+      if (action === 'delete') this.delete();
       if (action === 'connections')
         void this.router.navigate(['/contacts/connections'], {
           queryParams: { contact: profile.id },

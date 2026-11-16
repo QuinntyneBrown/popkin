@@ -17,6 +17,8 @@ export interface ContactsApi {
   summary(): Observable<ContactsSummaryView>;
   /** Add someone (L2-129): the contact and, when one was picked, their photo. */
   addContact(request: SaveContactRequest, photo: File | null): Observable<ContactProfileView>;
+  /** Deletes a contact of mine and what was kept about them (L2-132). */
+  deleteContact(contactId: string): Observable<void>;
   /** People: every contact of mine, for the device's day `on` (yyyy-MM-dd) (L2-126). */
   people(on: string): Observable<PeopleView>;
   /** One contact of mine; anyone else's is 404 `contact_not_found` (L2-122 AC1). */
@@ -49,6 +51,10 @@ export class HttpContactsApi implements ContactsApi {
     form.set('contact', JSON.stringify(request));
     if (photo) form.set('photo', photo);
     return this.http.post<ContactProfileView>('/api/contacts/people', form);
+  }
+
+  deleteContact(contactId: string): Observable<void> {
+    return this.http.delete<void>(`/api/contacts/people/${contactId}`);
   }
 
   people(on: string): Observable<PeopleView> {

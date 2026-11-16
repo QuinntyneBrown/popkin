@@ -320,6 +320,8 @@ await call('GET', `/api/contacts/people/${chidiKept.id}`);
 // She opens People on the morning of the mocks: Chidi and Femi, both in Closest (L2-126).
 await call('GET', '/api/contacts/people?on=2026-09-15');
 await call('DELETE', `/api/contacts/people/${chidiKept.id}/closest`);
+// She deletes Chidi from his profile (L2-132).
+await call('DELETE', `/api/contacts/people/${chidiKept.id}`);
 
 // Photos: Mara has added none, adds one with a caption, then reads the album and the photo.
 const album = `/api/popkins/${created.id}/photos`;

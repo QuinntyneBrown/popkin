@@ -5,6 +5,8 @@ export class ContactFormPage {
   readonly root: Locator;
   readonly heading: Locator;
   readonly cancel: Locator;
+  /** Edit's "Delete {first name}", after the form (L2-132). */
+  readonly delete: Locator;
   readonly save: Locator;
   readonly saving: Locator;
   readonly who: Locator;
@@ -36,6 +38,7 @@ export class ContactFormPage {
     this.topBar = page.locator('.topbar');
     this.heading = page.getByRole('heading', { level: 1 });
     this.cancel = this.topBar.getByRole('link', { name: 'Cancel' });
+    this.delete = page.locator('.menu-list--separated').getByRole('button', { name: /^Delete / });
     this.save = this.topBar.getByRole('button', { name: 'Save' });
     this.saving = this.topBar.getByRole('button', { name: 'Saving…' });
     this.sections = page.locator('.form-sections');

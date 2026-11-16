@@ -12,11 +12,13 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Dialog } from '@angular/cdk/dialog';
 import { Router, RouterLink } from '@angular/router';
 import {
   CONTACT_CIRCLES,
   ContactCircle,
   ContactFormStore,
+  NO_COUNTS,
   NOT_FOUND_TEXT,
   PHOTO_ACCEPT,
   SAVE_FAILED_TEXT,
@@ -37,11 +39,17 @@ import {
   FormSection,
   FormSections,
   FormSummary,
+  MenuItem,
+  MenuList,
   PhotoPicker,
   Screen,
   TextField,
   TopBar,
 } from 'components';
+import {
+  DeleteContactData,
+  DeleteContactDialog,
+} from '../../dialogs/delete-contact/delete-contact.dialog';
 
 const NAME_MESSAGE = 'Add a name so you can find them later.';
 
@@ -66,6 +74,8 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
     Screen,
     TextField,
     TopBar,
+    MenuItem,
+    MenuList,
   ],
   providers: [ContactFormStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,6 +89,7 @@ export class ContactFormPage implements OnInit {
   protected readonly store = inject(ContactFormStore);
   private readonly router = inject(Router);
   private readonly toaster = inject(Toaster);
+  private readonly dialog = inject(Dialog);
   protected readonly notFound = NOT_FOUND_TEXT;
   protected readonly unread = failedText(null);
   protected readonly accept = PHOTO_ACCEPT;
@@ -173,5 +184,26 @@ export class ContactFormPage implements OnInit {
   private releasePreview(): void {
     const preview = this.preview();
     if (preview) URL.revokeObjectURL(preview);
+  }
+
+  /** Edit's "Delete {first name}" (L2-132): once they are gone, People opens. */
+  protected delete(): void {
+    const editing = this.store.editing();
+    if (!editing) return;
+    this.dialog
+      .open<boolean, DeleteContactData>(DeleteContactDialog, {
+        data: {
+          accent: 'coral',
+          contactId: editing.id,
+          firstName: editing.firstName,
+          counts: NO_COUNTS,
+        },
+        ariaLabelledBy: 'dlg-title',
+        hasBackdrop: false,
+        ariaModal: true,
+      })
+      .closed.subscribe((deleted) => {
+        if (deleted) void this.router.navigateByUrl('/contacts/people');
+      });
   }
 }
