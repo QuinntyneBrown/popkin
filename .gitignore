@@ -17,3 +17,6 @@ node_modules/
 # Videos: the voice alone, before the mix (docs/videos/README.md)
 narration.wav
 *.partial.mp4
+
+# Python bytecode (skill scripts, e.g. .claude/skills/extracting-design-systems/scripts/__pycache__/)
+__pycache__/
