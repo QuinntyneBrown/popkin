@@ -134,3 +134,5 @@ export * from './lib/api/contacts/contacts-frame';
 export * from './lib/api/contacts/connection-map';
 export * from './lib/api/contacts/contact-profile-store';
 export * from './lib/api/contacts/contact-profile-text';
+export * from './lib/api/contacts/people-store';
+export * from './lib/api/contacts/people-text';

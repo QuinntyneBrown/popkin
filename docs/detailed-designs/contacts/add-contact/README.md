@@ -133,6 +133,8 @@ authenticated policy; each sends one MediatR request.
 
 ### Frontend (Popkin web app)
 
+- **`?name=`** — People's "Add “{name}”" opens `/contacts/people/new?name=Femi`; the form
+  starts with Name filled in from it (L2-127 AC3, gap 112). Edit ignores it.
 - **`ContactFormPage`** (`app/pages/contact-form/contact-form.page.ts` and `.html`), routes
   `/contacts/people/new` and `/contacts/people/:contactId/edit`, data `{ shell: 'bare', page:
   'add-contact' }`. It composes `pk-top-bar` ("Cancel", the heading, "Save"),

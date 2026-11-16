@@ -187,6 +187,15 @@ export const routes = {
   myPopkinsOffline: { app: '/popkins', mock: 'pages/my-popkins/offline.html' },
   // Contacts (journey 25): Mara keeps nobody yet in the recording.
   contactsTodayEmpty: { app: '/contacts', mock: 'pages/contacts-today/empty.html' },
+  contactsPeople: { app: '/contacts/people', mock: 'pages/contacts-people/default.html' },
+  contactsPeopleFamily: { app: '/contacts/people', mock: 'pages/contacts-people/family.html' },
+  contactsPeopleNoResults: {
+    app: '/contacts/people',
+    mock: 'pages/contacts-people/no-results.html',
+  },
+  contactsPeopleLoading: { app: '/contacts/people', mock: 'pages/contacts-people/loading.html' },
+  contactsPeopleError: { app: '/contacts/people', mock: 'pages/contacts-people/error.html' },
+  contactsPeopleEmpty: { app: '/contacts/people', mock: 'pages/contacts-people/empty.html' },
   addContact: { app: '/contacts/people/new', mock: 'pages/add-contact/default.html' },
   addContactInvalid: { app: '/contacts/people/new', mock: 'pages/add-contact/invalid.html' },
   addContactSubmitting: { app: '/contacts/people/new', mock: 'pages/add-contact/submitting.html' },

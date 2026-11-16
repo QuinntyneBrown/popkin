@@ -21,7 +21,7 @@ Popkin uses no custom tooltips.
 | 9 | Job row | Background job table row that expands to show its runs and details. | 1 day || Built, parity pending |
 | 10 | Service health | Summary and per-service state on Health: all good, degraded or down. | 1 day | Built, parity pending |
 | 11 | Trend chart and uptime | Accessible SVG trend for one series and an uptime bar, on Dashboard, Health and Metrics. | 1.5 days || Built, parity pending |
-| 12 | Contact row | A person in the People list, linking to their profile. | 0.5 days | Built, parity pending |
+| 12 | Contact row | A person in the People list, linking to their profile. | 0.5 days | Built, with parity (row, quiet row, Closest) and a loading state |
 | 13 | Contact header and facts | Head of a person's profile with their details as a description list. | 1 day || Built; header parity done (phone, email only) |
 | 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, parity pending |
 | 15 | Contact timeline | A person's history on their profile, newest first, as an ordered list. | 1 day || Built, parity pending |
@@ -32,7 +32,7 @@ Popkin uses no custom tooltips.
 | 20 | Group browser | Navigation list of households, small groups and teams, with each group's detail. | 1 day | Built, parity pending |
 | 21 | Connection map | Draws who knows whom: your people as faces linked by relationship. | 2 days || Built, parity pending |
 | 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell. | 0.5 days | Built, parity pending |
-| 23 | Filter chips | Pressed-button filters with counts, such as the circles on People; `pk-choice-chips` is a radio group. | To estimate | |
+| 23 | Filter chips | Pressed-button filters with counts, such as the circles on People; `pk-choice-chips` is a radio group. | 0.25 days | Built, with parity |
 | 24 | List row | The design system's `list-row`, not built yet, for rows on Today and in groups. | To estimate | |
 | 25 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today. | To estimate | |
 | 26 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins; it needs a design-system page. | To estimate | |

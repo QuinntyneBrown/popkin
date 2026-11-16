@@ -20,7 +20,7 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
     '[class.empty--compact]': 'compact()',
     '[class.empty--flush]': 'flush()',
     '[class.empty--panel]': 'panel()',
-    '[attr.role]': "alert() ? 'alert' : null",
+    '[attr.role]': "alert() ? 'alert' : status() ? 'status' : null",
   },
 })
 export class EmptyState {
@@ -41,6 +41,8 @@ export class EmptyState {
   readonly text = input<string>();
   /** Announces the state when it replaces content that failed to load (L2-056 AC2). */
   readonly alert = input(false);
+  /** Says itself politely as it appears, as a search that finds nobody does (L2-127 AC3). */
+  readonly status = input(false);
   /** A reference code shown under the actions, as the server-error screen does. */
   readonly code = input<string>();
 

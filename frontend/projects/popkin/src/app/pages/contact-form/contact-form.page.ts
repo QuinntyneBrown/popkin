@@ -6,6 +6,7 @@ import {
   effect,
   inject,
   input,
+  OnInit,
   signal,
   viewChild,
 } from '@angular/core';
@@ -70,9 +71,11 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './contact-form.page.html',
 })
-export class ContactFormPage {
+export class ContactFormPage implements OnInit {
   /** The contact being edited, from `/contacts/people/:contactId/edit`; none when adding. */
   readonly contactId = input<string>();
+  /** The name typed in People's search, from `?name=`, filled in on Add someone (L2-127 AC3). */
+  readonly name = input<string>();
   protected readonly store = inject(ContactFormStore);
   private readonly router = inject(Router);
   private readonly toaster = inject(Toaster);
@@ -117,6 +120,11 @@ export class ContactFormPage {
     const contactId = this.contactId();
     return contactId ? `/contacts/people/${contactId}` : '/contacts/people';
   });
+
+  ngOnInit(): void {
+    const name = this.name()?.trim();
+    if (!this.contactId() && name) this.form.controls.name.setValue(name);
+  }
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.releasePreview());

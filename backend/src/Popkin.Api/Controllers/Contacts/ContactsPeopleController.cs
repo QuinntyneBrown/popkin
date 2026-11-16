@@ -32,6 +32,11 @@ public sealed class ContactsPeopleController(ISender sender) : ControllerBase
         return Created($"/api/contacts/people/{added.Id}", added);
     }
 
+    /// <summary>People (L2-126): every contact of the caller's, A to Z, for the device's day `on` (yyyy-MM-dd).</summary>
+    [HttpGet]
+    public Task<PeopleDto> List([FromQuery] string? on, CancellationToken cancellationToken) =>
+        sender.Send(new GetPeopleQuery(on), cancellationToken);
+
     /// <summary>One contact of the caller's (L2-128, L2-130); anyone else's is not found (L2-122 AC1).</summary>
     [HttpGet("{contactId:guid}")]
     public Task<ContactProfileDto> Get(Guid contactId, CancellationToken cancellationToken) =>
