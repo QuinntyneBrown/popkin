@@ -2,6 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { ContactCircle, ContactProfileView, SaveContactRequest } from '../../models/contacts';
 import { toApiProblem } from '../problem';
 import { CONTACTS_API } from './contacts-api';
+import { ContactsOutbox } from './contacts-outbox';
 import { isContactId } from './contacts-text';
 
 /** What the contact form holds as typed: "Things they love" is one field (known gap 102). */
@@ -56,11 +57,14 @@ export function contactValuesOf(contact: ContactProfileView): ContactFormValues 
 @Injectable()
 export class ContactFormStore {
   private readonly api = inject(CONTACTS_API);
+  private readonly outbox = inject(ContactsOutbox);
   private clientId = crypto.randomUUID();
 
   readonly state = signal<'idle' | 'invalid' | 'saving' | 'failed'>('idle');
   /** The contact once the API has kept them; the page then opens their profile (L2-129 AC5). */
   readonly saved = signal<ContactProfileView | null>(null);
+  /** An add kept on the device while offline, to be sent when the connection returns (L2-123 AC4). */
+  readonly kept = signal(false);
   /** The contact being edited, once read; null while adding someone (L2-130). */
   readonly editing = signal<ContactProfileView | null>(null);
 
@@ -99,8 +103,14 @@ export class ContactFormStore {
       this.state.set('invalid');
       return;
     }
-    this.state.set('saving');
     const editing = this.editing();
+    if (!editing && this.outbox.offline()) {
+      this.outbox.keepAdd(request, photo);
+      this.clientId = crypto.randomUUID();
+      this.kept.set(true);
+      return;
+    }
+    this.state.set('saving');
     const sent = editing
       ? this.api.editContact(editing.id, request, photo)
       : this.api.addContact(request, photo);

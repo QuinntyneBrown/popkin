@@ -4,6 +4,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContactProfileView } from '../../models/contacts';
 import { CONTACTS_API } from './contacts-api';
+import { ContactsOutbox } from './contacts-outbox';
 import {
   ContactFormStore,
   ContactFormValues,
@@ -24,6 +25,8 @@ const typed: ContactFormValues = {
 
 const femiId = '566025c4-1a2b-4c3d-8e9f-0a1b2c3d4e5f';
 const femi = { id: femiId, name: 'Femi Bankole', firstName: 'Femi' } as ContactProfileView;
+
+const outbox = { offline: vi.fn(() => false), keepAdd: vi.fn() };
 
 describe('contactRequestOf', () => {
   it('trims the name and splits the things they love at commas (known gap 102)', () => {
@@ -83,7 +86,11 @@ describe('ContactFormStore', () => {
       editContact: vi.fn(() => of(femi)),
     };
     TestBed.configureTestingModule({
-      providers: [ContactFormStore, { provide: CONTACTS_API, useValue: api }],
+      providers: [
+        ContactFormStore,
+        { provide: CONTACTS_API, useValue: api },
+        { provide: ContactsOutbox, useValue: outbox },
+      ],
     });
     store = TestBed.inject(ContactFormStore);
   });
@@ -185,5 +192,19 @@ describe('ContactFormStore', () => {
     store.edit('not-a-contact');
     expect(store.reading()).toBe('notFound');
     expect(api.contact).not.toHaveBeenCalled();
+  });
+
+  // L2-123 AC4
+  it('keeps an add made offline in the outbox, under a new client id next time', () => {
+    outbox.offline.mockReturnValue(true);
+    store.save(typed, null);
+
+    expect(outbox.keepAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Femi Bankole' }),
+      null,
+    );
+    expect(store.kept()).toBe(true);
+    expect(store.state()).toBe('idle');
+    outbox.offline.mockReturnValue(false);
   });
 });

@@ -140,6 +140,10 @@ export class ContactFormPage implements OnInit {
       this.form.setValue(values);
       this.circle.set(circle ?? '');
     });
+    // Kept offline: People opens, as Cancel does, and the outbox says so (L2-123 AC4).
+    effect(() => {
+      if (this.store.kept()) void this.router.navigateByUrl('/contacts/people');
+    });
     // The contact's profile opens once they are kept, saying so after an add (L2-129 AC5).
     effect(() => {
       const saved = this.store.saved();
