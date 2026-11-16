@@ -136,3 +136,5 @@ export * from './lib/api/contacts/contact-profile-store';
 export * from './lib/api/contacts/contact-profile-text';
 export * from './lib/api/contacts/people-store';
 export * from './lib/api/contacts/people-text';
+export * from './lib/api/contacts/contacts-outbox';
+export * from './lib/api/contacts/local-contacts-outbox-storage';

@@ -101,7 +101,8 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
 - **Photos offline** (gap 118, ruled). A photo waits with its write in memory, as chat's do; the
   write is in local storage. A reload while offline sends the write without its photo.
 - **Add someone offline.** Save keeps the contact in the outbox, shows the warning toast and
-  opens People, as Cancel does; People, offline, shows its failure state. When the connection
+  opens People, as Cancel does, when People was opened before (a screen never fetched shows
+  the offline screen, L2-056 AC4); People, offline, shows its failure state. When the connection
   returns the outbox sends the add, then the frame and an open People read again.
 - **Built in steps.** The switch, the way in from My Popkins, the Contacts navigation, Today's
   greeting and empty state, the guard that keeps a closed Contacts on My Popkins (with My

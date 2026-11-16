@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
   CircleChoice,
   ContactRowView,
   ContactsFrame,
+  ContactsOutbox,
   PeopleStore,
   drifting,
   lastTalked,
@@ -88,6 +90,10 @@ export class ContactsPeoplePage {
 
   constructor() {
     this.store.open();
+    // Someone added offline is saved once back: People reads again (L2-123 AC4).
+    inject(ContactsOutbox)
+      .sent$.pipe(takeUntilDestroyed())
+      .subscribe(() => this.store.retry());
   }
 }
 
