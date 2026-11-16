@@ -96,8 +96,13 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
   `Toaster` for the whole app, which L2-056 AC7 does not forbid.
 - **Danger toasts are polite.** The mocks put every toast in one `aria-live="polite"` region; the
   design keeps it, so a failure is announced without interrupting.
-- **Other devices.** Whether Contacts syncs between a person's devices beyond the offline queue
-  is open (known gap 110). A second device sees a change on its next read.
+- **Other devices** (gap 110, ruled). Contacts does not push between devices; a second device
+  sees a change on its next read.
+- **Photos offline** (gap 118, ruled). A photo waits with its write in memory, as chat's do; the
+  write is in local storage. A reload while offline sends the write without its photo.
+- **Add someone offline.** Save keeps the contact in the outbox, shows the warning toast and
+  opens People, as Cancel does; People, offline, shows its failure state. When the connection
+  returns the outbox sends the add, then the frame and an open People read again.
 - **Built in steps.** The switch, the way in from My Popkins, the Contacts navigation, Today's
   greeting and empty state, the guard that keeps a closed Contacts on My Popkins (with My
   Popkins as the safe answer, ADR 0023) and toasts that wait are built first. `ContactsOutbox`
