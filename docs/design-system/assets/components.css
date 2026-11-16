@@ -164,7 +164,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .textarea { height: auto; min-height: var(--space-24); padding: var(--space-3) var(--space-4); resize: vertical; }
 .input::placeholder, .textarea::placeholder { color: var(--color-fg-subtle); opacity: 1; }
 .input:focus, .textarea:focus, .select:focus, .input[data-state="focus"] { outline: none; border-color: var(--color-border-focus); box-shadow: var(--shadow-focus); }
-.input[aria-invalid="true"], .textarea[aria-invalid="true"] { border-color: var(--color-danger-border); }
+.input[aria-invalid="true"], .textarea[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--color-danger-border); }
 .input[readonly], .input:disabled, .textarea:disabled { background: var(--color-bg-subtle); color: var(--color-fg-muted); }
 .input--display { border-color: transparent; font: var(--text-title); }
 .input--code { text-align: center; font: var(--font-weight-extrabold) var(--font-size-4xl) / 1 var(--font-family-display); letter-spacing: var(--letter-spacing-code); height: var(--space-18); padding-left: var(--letter-spacing-code); font-variant-numeric: tabular-nums; }

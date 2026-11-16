@@ -23,12 +23,12 @@ Popkin uses no custom tooltips.
 | 11 | Trend chart and uptime | Accessible SVG trend for one series and an uptime bar, on Dashboard, Health and Metrics. | 1.5 days || Built, parity pending |
 | 12 | Contact row | A person in the People list, linking to their profile. | 0.5 days | Built, with parity (row, quiet row, Closest) and a loading state |
 | 13 | Contact header and facts | Head of a person's profile with their details as a description list. | 1 day || Built; header parity done (phone, email only) |
-| 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, parity pending |
+| 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, with parity (habit) |
 | 15 | Contact timeline | A person's history on their profile, newest first, as an ordered list. | 1 day | Built, with parity (conversation, milestone, memory) |
 | 16 | Form sections | Splits the long Add someone form into sections with kind toggle buttons. | 1 day | Built, parity pending |
 | 17 | Task | A follow-up to do, with the field that adds one; `pk-task-list` lists a bucket of them. | 1 day | Built, with parity (late, plain, done; the list; the add field) |
-| 18 | Keep strip and habit row | A habit's rhythm with someone, showing which times were kept. | 1 day | Built, parity pending |
-| 19 | Spotlight and date tile | The one most important thing on a screen, tinted, with a date tile. | 0.5 days || Built, parity pending |
+| 18 | Keep strip and habit row | A habit's rhythm with someone, showing which times were kept; `pk-habit-list` lists them. | 1 day | Built, with parity (first and last row) |
+| 19 | Spotlight and date tile | The one most important thing on a screen, tinted, with a date tile. | 0.5 days || Built; spotlight parity done (row), date tile pending |
 | 20 | Group browser | Navigation list of households, small groups and teams, with each group's detail. | 1 day | Built, parity pending |
 | 21 | Connection map | Draws who knows whom: your people as faces linked by relationship. | 2 days || Built, parity pending |
 | 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell; `narrow` is one column at the narrow container (Follow-ups, Habits). | 0.5 days | Built; list head with parity |

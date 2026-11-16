@@ -46,7 +46,7 @@ Popkin web app, `docs/mocks/pages/contacts-habits/`, on Tuesday 15 September 202
 
 `docs/mocks/dialogs/new-habit/`:
 
-- `default.html` — "New habit"; "With" showing Ifeoma Okafor, "Sister", and "Change"; "What"
+- `default.html` — "New habit"; "With" showing Chidi Okafor, "Brother", and "Change"; "What"
   ("Sunday call, lunch, a walk…"); "How often" as radio chips "Weekly", "Every 2 weeks" and
   "Monthly", "Weekly" chosen; "We’ll remind you when it’s due, and nudge again if a week slips
   by."; "Start the habit" (L2-145 AC1).
@@ -139,7 +139,8 @@ MediatR request. Another person's habit answers `404` `habit_not_found` (propose
   habit, `pk-habit-row` per habit, `pk-empty-state` and `pk-skeleton`. "New habit" opens
   `NewHabitDialog`.
 - **`NewHabitDialog`** (`dialogs/new-habit/new-habit.dialog.ts`) — CDK dialog in `pk-dialog`, with
-  the contact as `pk-avatar` and name, `pk-text-field` "What", `pk-choice-chips` "How often",
+  the contact as `pk-person-pick` and "Change", or "With" as `pk-select-field` of my people with no
+  habit yet (with its error), `pk-text-field` "What", `pk-choice-chips` "How often",
   `pk-form-summary` and `pk-button` "Start the habit" / "Starting…". It validates "What" before
   sending; it closes on success, and the habit then shows on Habits and the profile (L2-145 AC3).
 - **`HabitsStore`** (`frontend/projects/api/src/lib/api/contacts/habits-store.ts`) — `loading |
@@ -154,6 +155,10 @@ MediatR request. Another person's habit answers `404` `habit_not_found` (propose
   fortnight", "{habit} logged", "Your next one is due by {day}." and the rhythm words.
 - **`CONTACTS_API`** — `habits()`, `startHabit(request)`, `keepHabit(id, keptOn, clientId)`,
   `unkeepHabit(id, keptId)`.
+- The profile's habit is `pk-info-card` with a small `pk-keep-strip` and its foot; "End this habit"
+  under it ends it through `ContactProfileStore.endHabit`, with the toast "{habit} ended" and
+  Undo; without one, "Make a habit of seeing {first name}" opens New habit with them.
+- **`pk-habit-list`** lists the rows, each ruled from the one above.
 - **`pk-keep-strip`** and **`pk-habit-row`** (components, backlog row 18) — the strip is
   `role="img"` with the label "Kept {n} of the last 12", so kept is never told by colour alone.
   **`pk-spotlight`** (row 19) — the tinted lead with its actions.
@@ -180,7 +185,7 @@ The keep strip, newest periods last (K kept, · missed, D due):
 
 ### Tests
 
-- API acceptance tests (InMemory, `Popkin.Api.Tests/Contacts/HabitsTests`): a habit started is
+- API acceptance tests (InMemory, `Popkin.Api.Tests/Contacts/HabitsTests`, 10): a habit started is
   listed with its due day; "We met up" moves the due day on; Undo puts it back; a resent keep
   saves once; "What" empty is `400` `what_required`; another person's habit is `404`
   `habit_not_found`; a day kept too far from today is `400` `kept_on_out_of_range` under
@@ -188,11 +193,12 @@ The keep strip, newest periods last (K kept, · missed, D due):
 - Direct tests of `HabitSchedule.Next` and `Habit.IsOverdue`, one case per row of the table above.
 - Unit tests (api library): `habitDue`, `habitKeeping` (one case per row of the periods table),
   `HabitsStore` keep, undo and a failed keep, and `habits-text`.
-- Playwright (`e2e/tests/contacts/habits.spec.ts`) through `ContactsHabitsPage` and
-  `NewHabitDialog` with recorded responses: the overdue lead and rows as drawn, "We met up" with
-  the toast and Undo, the empty and error states, New habit's invalid and busy states, and a
-  habit started. `routes.ts` gains every state of `contacts-habits` and `new-habit`.
-- Parity: `pk-keep-strip`, `pk-habit-row` and `pk-spotlight` in its row form.
+- Playwright: `tests/contacts-habits.spec.ts` (13) through `ContactsHabitsPage`, `NewHabitDialog`
+  and `ContactProfilePage`, on recorded responses and the mocks' habits: Habits as drawn, We met up and Undo, empty,
+  failed, New habit from Habits and from a profile, Change, busy, the profile's card, and End
+  with Undo. `routes.ts` keys every state of `contacts-habits` and `new-habit`.
+- Parity: `pk-spotlight` in its row form with its strip, `pk-habit-row` (first and last),
+  `pk-info-card` (the profile's habit) and `pk-person-pick` with Change.
 
 ## Requirements
 
