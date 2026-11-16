@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, filter, map, of, switchMap, take } from 'rxjs';
 import {
   MilestoneKind,
   PromiseDraft,
@@ -10,6 +10,7 @@ import {
 import { CONTACTS_API } from './contacts-api';
 import { dayParam } from './contacts-text';
 import { loggedAtParam, yearlyHint, yearlyTitle } from './log-entry-text';
+import { tooLarge } from './memory-text';
 
 export type LogKind = 'conversation' | 'milestone';
 
@@ -56,19 +57,29 @@ export class LogEntryStore {
   readonly happenedOn = signal('');
   readonly milestoneNote = signal('');
   readonly everyYear = signal(true);
-  readonly state = signal<'idle' | 'saving' | 'failed'>('idle');
+  /** A milestone's photo, kept as a memory once the milestone is saved (known gap 107, ruled). */
+  readonly photo = signal<File | null>(null);
+  /** `photoFailed`: the milestone is saved, its photo is not; Save sends both again. */
+  readonly state = signal<'idle' | 'saving' | 'failed' | 'photoFailed'>('idle');
   /** Problems show once Save has been chosen. */
   readonly submitted = signal(false);
   private readonly milestoneLead = signal<ReminderLead>('OnTheDay');
   private readonly firstName = signal('');
   private clientId = crypto.randomUUID();
+  private photoClientId = crypto.randomUUID();
 
   readonly problems = computed<LogProblem[]>(() => {
-    if (!this.submitted()) return [];
+    const photo = this.photo();
+    const large = this.kind() === 'milestone' && photo ? tooLarge('photo', photo.size) : null;
+    const photoProblems = large
+      ? [{ fieldId: 'photo', message: large.summary, error: large.error }]
+      : [];
+    if (!this.submitted()) return photoProblems;
     if (this.kind() === 'conversation') return this.note().trim() ? [] : [NOTE_PROBLEM];
     return [
       ...(this.title().trim() ? [] : [TITLE_PROBLEM]),
       ...(this.happenedOn() ? [] : [WHEN_PROBLEM]),
+      ...photoProblems,
     ];
   });
 
@@ -98,6 +109,13 @@ export class LogEntryStore {
     this.submitted.set(false);
     this.state.set('idle');
     this.clientId = crypto.randomUUID();
+    this.photoClientId = crypto.randomUUID();
+  }
+
+  /** A photo for the milestone; another photo is sent under a new client id. */
+  pickPhoto(photo: File): void {
+    this.photo.set(photo);
+    this.photoClientId = crypto.randomUUID();
   }
 
   addPromise(promise: PromiseDraft): void {
@@ -125,14 +143,16 @@ export class LogEntryStore {
             note: this.note().trim(),
             promises: this.promises(),
           })
-        : this.api.logMilestone(contactId, {
-            clientId: this.clientId,
-            kind: this.milestoneKind(),
-            title: this.title().trim(),
-            happenedOn: this.happenedOn(),
-            note: this.milestoneNote().trim() || null,
-            everyYear: this.everyYear(),
-          });
+        : this.api
+            .logMilestone(contactId, {
+              clientId: this.clientId,
+              kind: this.milestoneKind(),
+              title: this.title().trim(),
+              happenedOn: this.happenedOn(),
+              note: this.milestoneNote().trim() || null,
+              everyYear: this.everyYear(),
+            })
+            .pipe(switchMap((entry) => this.sendPhoto(contactId, entry)));
     return new Observable<TimelineEntryView>((subscriber) =>
       sent.subscribe({
         next: (saved) => {
@@ -141,10 +161,45 @@ export class LogEntryStore {
           subscriber.complete();
         },
         error: (error: unknown) => {
-          this.state.set('failed');
+          this.state.set(error instanceof PhotoFailed ? 'photoFailed' : 'failed');
           subscriber.error(error);
         },
       }),
     );
+  }
+
+  /** The milestone's photo as a memory, captioned with what happened, on its day. */
+  private sendPhoto(contactId: string, entry: TimelineEntryView): Observable<TimelineEntryView> {
+    const photo = this.photo();
+    if (!photo) return of(entry);
+    return new Observable<TimelineEntryView>((subscriber) =>
+      this.api
+        .addPhotoMemory(
+          contactId,
+          this.photoClientId,
+          photo,
+          this.title().trim(),
+          this.happenedOn(),
+        )
+        .pipe(
+          filter((event) => event.kind === 'done'),
+          take(1),
+          map(() => entry),
+        )
+        .subscribe({
+          next: (saved) => {
+            subscriber.next(saved);
+            subscriber.complete();
+          },
+          error: (error: unknown) => subscriber.error(new PhotoFailed(error)),
+        }),
+    );
+  }
+}
+
+/** The milestone was saved; its photo was not. */
+class PhotoFailed extends Error {
+  constructor(readonly reason: unknown) {
+    super('The milestone’s photo was not saved.');
   }
 }

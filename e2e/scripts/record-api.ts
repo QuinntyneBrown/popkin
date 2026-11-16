@@ -370,6 +370,32 @@ await call('POST', `/api/contacts/people/${chidiKept.id}/conversations`, {
   note: 'Loving the team, hates the commute. Thinking of moving closer to Piccadilly by Christmas. Tomás is pushing for a dog.',
   promises: [{ text: 'Send him the flat-hunting checklist', dueOn: '2026-09-17' }],
 });
+// Memories (L2-136, known gap 107 ruled): Femi has none. Mara keeps Chidi's hot sauce night, the
+// photo his timeline draws, then the wedding speech and gift ideas, and reads them.
+await call('GET', `/api/contacts/people/${femiKept.id}/memories`);
+const hotSauce = new FormData();
+hotSauce.append(
+  'file',
+  new Blob([readFileSync(join(mockImages, 'tacos.jpg'))], { type: 'image/jpeg' }),
+  'IMG_4471.jpg',
+);
+hotSauce.append('clientId', '00000000-0000-4000-c000-000000000040');
+hotSauce.append('caption', 'Hot sauce night');
+hotSauce.append('takenOn', '2026-08-08');
+await call('POST', `/api/contacts/people/${chidiKept.id}/memories/photos`, hotSauce);
+const speech = new FormData();
+speech.append(
+  'file',
+  new Blob(['%PDF-1.7\n% The wedding speech\n'], { type: 'application/pdf' }),
+  'Wedding speech.pdf',
+);
+speech.append('clientId', '00000000-0000-4000-c000-000000000041');
+await call('POST', `/api/contacts/people/${chidiKept.id}/memories/files`, speech);
+await call('POST', `/api/contacts/people/${chidiKept.id}/memories/notes`, {
+  clientId: '00000000-0000-4000-c000-000000000042',
+  text: 'Gift ideas: Fela reissue on vinyl, Dishoom cookbook, bike lights',
+});
+await call('GET', `/api/contacts/people/${chidiKept.id}/memories`);
 await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=all`);
 await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=milestones`);
 await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=conversations`);

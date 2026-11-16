@@ -14,8 +14,10 @@ import { IconName } from '../icon/icons';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './add-card.html',
   styleUrl: './add-card.scss',
-  host: { class: 'add-card' },
+  host: { class: 'add-card', '[class.add-card--center]': 'center()' },
 })
 export class AddCard {
   readonly icon = input<IconName>('plus');
+  /** Its words in the middle, as Add to memories' "Choose a photo". */
+  readonly center = input(false);
 }

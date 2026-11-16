@@ -24,4 +24,12 @@ parity('contact-timeline', [
     before: chidi,
     snap: true,
   },
+  // The hot sauce night on Aug 8: a photo memory, its caption and photo.
+  {
+    key: 'contactProfile',
+    name: 'memory',
+    region: (page) => new ContactProfilePage(page).timelineEntries.nth(2),
+    before: chidi,
+    snap: true,
+  },
 ]);

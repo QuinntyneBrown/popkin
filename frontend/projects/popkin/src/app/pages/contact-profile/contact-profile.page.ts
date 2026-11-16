@@ -10,6 +10,8 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
+  AddedMemory,
+  ContactMemoriesStore,
   ContactProfileStore,
   ContactTimelineStore,
   ContactsFrame,
@@ -19,9 +21,12 @@ import {
   closestItem,
   dueText,
   failedText,
+  fileLine,
   kindIcon,
   leadLabel,
   loadingLine,
+  noteLine,
+  photoCaption,
   possessive,
   profileDateLine,
   profileDateTitle,
@@ -50,12 +55,17 @@ import {
   EmptyState,
   FilterChipOption,
   FilterChips,
+  Icon,
   IconButton,
   KeyDateItem,
   KeyDates,
   Likes,
   Link,
   ListHead,
+  Memory,
+  MemoryGrid,
+  MemoryList,
+  MemoryRow,
   PopkinNav,
   Skeleton,
   TaskList,
@@ -73,6 +83,7 @@ import {
   DeleteContactDialog,
 } from '../../dialogs/delete-contact/delete-contact.dialog';
 import { AddDateData, AddDateDialog } from '../../dialogs/add-date/add-date.dialog';
+import { AddMemoryData, AddMemoryDialog } from '../../dialogs/add-memory/add-memory.dialog';
 
 type HistoryView = 'timeline' | 'follow-ups' | 'memories';
 
@@ -100,6 +111,7 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     ContactsPage,
     EmptyState,
     FilterChips,
+    Icon,
     IconButton,
     KeyDates,
     Likes,
@@ -107,11 +119,13 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     ListHead,
     PopkinNav,
     RouterLink,
+    MemoryGrid,
+    MemoryList,
     Skeleton,
     TaskList,
     ViewNav,
   ],
-  providers: [ContactProfileStore, ContactTimelineStore],
+  providers: [ContactProfileStore, ContactTimelineStore, ContactMemoriesStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './contact-profile.page.html',
 })
@@ -124,6 +138,7 @@ export class ContactProfilePage {
   protected readonly frame = inject(ContactsFrame);
   protected readonly followUpsStore = inject(FollowUpsStore);
   protected readonly timeline = inject(ContactTimelineStore);
+  protected readonly memories = inject(ContactMemoriesStore);
   protected readonly shows: FilterChipOption[] = [
     { value: 'all', label: 'All' },
     { value: 'conversations', label: 'Conversations' },
@@ -197,7 +212,35 @@ export class ContactProfilePage {
       body: entry.note ?? undefined,
       via: timelineVia(entry),
       tag: timelineTag(entry),
+      photo: entry.photoUrl ?? undefined,
     }));
+  });
+  /** The photos on Memories & files, newest first (L2-136 AC1). */
+  protected readonly memoryPhotos = computed<Memory[]>(() => {
+    const today = new Date();
+    return this.memories.memories().photos.map((photo) => ({
+      photo: photo.thumbnailUrl,
+      alt: photo.caption ?? `A photo from ${timelineDay(photo.day, today)}`,
+      caption: photoCaption(photo, today),
+    }));
+  });
+  /** The files, then the notes (L2-136 AC1). */
+  protected readonly memoryRows = computed<MemoryRow[]>(() => {
+    const today = new Date();
+    const { files, notes } = this.memories.memories();
+    return [
+      ...files.map((file): MemoryRow => ({
+        kind: 'file',
+        title: file.fileName,
+        text: fileLine(file),
+        href: file.downloadUrl,
+      })),
+      ...notes.map((note): MemoryRow => ({
+        kind: 'note',
+        title: note.text,
+        text: noteLine(note.updatedOn, today),
+      })),
+    ];
   });
   protected readonly historyLabel = computed(() => `${possessive(this.firstName() ?? '')} history`);
   protected readonly current = computed<HistoryView>(() => {
@@ -232,6 +275,29 @@ export class ContactProfilePage {
       const found = this.foundId();
       if (found) untracked(() => this.timeline.open(found));
     });
+    // Memories & files are read when their tab opens (L2-136 AC1).
+    effect(() => {
+      const found = this.foundId();
+      if (found && this.current() === 'memories') untracked(() => this.memories.open(found));
+    });
+  }
+
+  /** "Add" opens Add to {first name}'s memories; what it keeps is placed first (L2-136 AC2). */
+  protected addMemory(): void {
+    const profile = this.profile();
+    if (!profile) return;
+    this.dialog
+      .open<AddedMemory, AddMemoryData>(AddMemoryDialog, {
+        data: { contactId: profile.id, firstName: profile.firstName },
+        ...MODAL,
+      })
+      .closed.subscribe((added) => {
+        if (!added) return;
+        if (added.kind === 'photo') this.memories.added('photo', added.memory);
+        else if (added.kind === 'file') this.memories.added('file', added.memory);
+        else this.memories.added('note', added.memory);
+        if (added.kind === 'photo') this.timeline.open(profile.id);
+      });
   }
 
   private readonly foundId = computed(() => this.store.profile()?.id);
@@ -273,7 +339,11 @@ export class ContactProfilePage {
           accent: 'coral',
           contactId: profile.id,
           firstName: profile.firstName,
-          counts: { ...NO_COUNTS, followUps: this.followUpsStore.countFor(profile.id) },
+          counts: {
+            ...NO_COUNTS,
+            ...profile.kept,
+            followUps: this.followUpsStore.countFor(profile.id),
+          },
         },
         ...MODAL,
       })

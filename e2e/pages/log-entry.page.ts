@@ -31,6 +31,9 @@ export class LogEntryPage {
   /** Regions for the sweeps and the parity specs. */
   readonly form: Locator;
   readonly kindGrid: Locator;
+  readonly photo: Locator;
+  readonly photoInput: Locator;
+  readonly photoError: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="log-entry"]');
@@ -41,6 +44,9 @@ export class LogEntryPage {
     this.saving = this.topBar.getByRole('button', { name: 'Saving…' });
     this.form = page.locator('form.log-form, form#form');
     this.kindGrid = page.locator('.kind-grid');
+    this.photo = page.getByRole('button', { name: /^Photo / });
+    this.photoInput = page.locator('.memory-chooser input[type="file"]');
+    this.photoError = page.locator('.memory-chooser .field__error');
     this.whatToLog = page.getByRole('tablist', { name: 'What to log' });
     this.channels = page.getByRole('radiogroup', { name: 'How you talked' });
     this.when = this.form.getByText(/^Today, /);

@@ -23,6 +23,7 @@ describe('LogEntryStore (L2-133, L2-134)', () => {
     logConversation: vi.fn(),
     logMilestone: vi.fn(),
     reminderPreferences: vi.fn(),
+    addPhotoMemory: vi.fn(),
   };
   const opened = new Date(2026, 8, 15, 8, 40);
 
@@ -125,5 +126,59 @@ describe('LogEntryStore (L2-133, L2-134)', () => {
         everyYear: true,
       }),
     );
+  });
+
+  it('a milestone’s photo is kept as a memory of what happened, on its day (gap 107, ruled)', () => {
+    api.addPhotoMemory.mockReturnValue(
+      of({ kind: 'done', memory: { id: 'p1', caption: 'Arup', day: '2026-08-31' } }),
+    );
+    const photo = new File(['x'], 'arup.jpg', { type: 'image/jpeg' });
+    store.choose('milestone');
+    store.title.set(' Started at Arup ');
+    store.happenedOn.set('2026-08-31');
+    store.photo.set(photo);
+    const done = vi.fn();
+
+    store.save('c1')!.subscribe(done);
+
+    expect(api.addPhotoMemory).toHaveBeenCalledWith(
+      'c1',
+      expect.any(String),
+      photo,
+      'Started at Arup',
+      '2026-08-31',
+    );
+    expect(done).toHaveBeenCalled();
+  });
+
+  it('a photo over 25 MB is refused before anything is sent (gap 107, ruled)', () => {
+    const photo = new File(['x'], 'big.jpg', { type: 'image/jpeg' });
+    Object.defineProperty(photo, 'size', { value: 32 * 1024 * 1024 });
+    store.choose('milestone');
+    store.photo.set(photo);
+
+    expect(store.problems().find((p) => p.fieldId === 'photo')?.error).toBe(
+      'That photo is 32 MB. A photo can be up to 25 MB.',
+    );
+  });
+
+  it('a photo that fails leaves the milestone saved, and Save sends both again', () => {
+    api.addPhotoMemory
+      .mockReturnValueOnce(throwError(() => new Error('offline')))
+      .mockReturnValueOnce(of({ kind: 'done', memory: { id: 'p1' } }));
+    store.choose('milestone');
+    store.title.set('Started at Arup');
+    store.happenedOn.set('2026-08-31');
+    store.photo.set(new File(['x'], 'arup.jpg', { type: 'image/jpeg' }));
+
+    store.save('c1')!.subscribe({ error: () => undefined });
+    expect(store.state()).toBe('photoFailed');
+    store.save('c1')!.subscribe();
+
+    const [first, second] = api.logMilestone.mock.calls;
+    expect(second[1].clientId).toBe(first[1].clientId);
+    const [one, two] = api.addPhotoMemory.mock.calls;
+    expect(two[1]).toBe(one[1]);
+    expect(store.state()).toBe('idle');
   });
 });

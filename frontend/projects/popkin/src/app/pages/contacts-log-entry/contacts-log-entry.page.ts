@@ -15,6 +15,7 @@ import {
   ContactProfileStore,
   LogEntryStore,
   LogKind,
+  MEMORY_PHOTO_TYPES,
   MILESTONE_KINDS,
   PromiseDraft,
   TALK_CHANNELS,
@@ -29,6 +30,7 @@ import {
   Button,
   Chip,
   ChoiceChips,
+  FormPair,
   FormSummary,
   Icon,
   IconName,
@@ -38,6 +40,7 @@ import {
   LogForm,
   LogSection,
   LogWhen,
+  MemoryChooser,
   ContactPromise,
   Screen,
   SegmentedControl,
@@ -79,6 +82,7 @@ const KIND_ICONS: Record<MilestoneKind, KindOption['icon']> = {
     Button,
     Chip,
     ChoiceChips,
+    FormPair,
     FormSummary,
     Icon,
     KindGrid,
@@ -86,6 +90,7 @@ const KIND_ICONS: Record<MilestoneKind, KindOption['icon']> = {
     LogForm,
     LogSection,
     LogWhen,
+    MemoryChooser,
     ContactPromise,
     ReactiveFormsModule,
     Screen,
@@ -135,6 +140,7 @@ export class ContactsLogEntryPage {
     this.store.problems().map(({ fieldId, message }) => ({ fieldId, message })),
   );
   protected readonly promiseWhen = promiseWhen;
+  protected readonly photoTypes = MEMORY_PHOTO_TYPES;
   protected readonly form = new FormGroup({
     note: new FormControl('', { nonNullable: true }),
     title: new FormControl('', { nonNullable: true }),

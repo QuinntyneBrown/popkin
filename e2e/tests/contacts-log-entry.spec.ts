@@ -220,7 +220,7 @@ test.describe('A contact’s timeline', () => {
     await pk.open('contactProfile');
     const profile = new ContactProfilePage(page);
 
-    await expect(profile.timelineEntries).toHaveCount(2);
+    await expect(profile.timelineEntries).toHaveCount(3);
     await expect(profile.timelineEntries.nth(0)).toContainText('Sep 6');
     await expect(profile.timelineEntries.nth(0)).toContainText('Phone');
     await expect(profile.timelineEntries.nth(0)).toContainText('Loving the team');

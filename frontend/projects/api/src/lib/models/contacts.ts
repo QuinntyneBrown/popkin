@@ -69,6 +69,14 @@ export interface ContactProfileView {
   alsoIn?: ContactPopkinLink | null;
   /** Their key dates, soonest first, then those passed (L2-128 AC2). */
   keyDates?: ContactKeyDateView[];
+  /** What goes with them when they are deleted (L2-132 AC1); read with the profile. */
+  kept?: ContactKeptView | null;
+}
+
+/** A contact's timeline entries and memories, counted for Delete (L2-132 AC1). */
+export interface ContactKeptView {
+  timelineEntries: number;
+  memories: number;
 }
 
 /** "Also in your Popkin “Lakeside Weekend”": a Popkin I share with a contact. */
@@ -216,7 +224,7 @@ export type FollowUpsFilter = 'everything' | 'promises';
 export type MilestoneKind =
   'NewJob' | 'Wedding' | 'NewBaby' | 'Moved' | 'Graduated' | 'SomethingElse';
 
-export type TimelineEntryKind = 'Conversation' | 'Milestone';
+export type TimelineEntryKind = 'Conversation' | 'Milestone' | 'Memory';
 
 /** A profile's Timeline filter (L2-135 AC1). */
 export type TimelineShow = 'all' | 'conversations' | 'milestones';
@@ -231,6 +239,9 @@ export interface TimelineItemView {
   milestoneKind: MilestoneKind | null;
   title: string | null;
   note: string | null;
+  /** A photo memory's thumbnail and photo (known gap 107, ruled). */
+  thumbnailUrl?: string | null;
+  photoUrl?: string | null;
 }
 
 export interface TimelineView {
@@ -270,3 +281,45 @@ export interface LogMilestoneRequest {
   note: string | null;
   everyYear: boolean;
 }
+
+/** A photo kept about a contact (L2-136 AC1). */
+export interface PhotoMemoryView {
+  id: string;
+  caption: string | null;
+  /** yyyy-MM-dd: taken, or added. */
+  day: string;
+  thumbnailUrl: string;
+  photoUrl: string;
+}
+
+/** A file kept about a contact (known gap 107, ruled). */
+export interface FileMemoryView {
+  id: string;
+  fileName: string;
+  /** yyyy-MM-dd. */
+  addedOn: string;
+  sizeBytes: number;
+  downloadUrl: string;
+}
+
+/** A note kept about a contact (known gap 107, ruled). */
+export interface NoteMemoryView {
+  id: string;
+  text: string;
+  /** yyyy-MM-dd. */
+  updatedOn: string;
+}
+
+/** "Memories & files" (L2-136 AC1): each kind newest first. */
+export interface MemoriesView {
+  photos: PhotoMemoryView[];
+  files: FileMemoryView[];
+  notes: NoteMemoryView[];
+}
+
+/** What to add to a contact's memories (L2-136 AC2). */
+export type MemoryKind = 'photo' | 'file' | 'note';
+
+/** A photo or file on its way: how much is sent, then what was kept. */
+export type MemoryUploadEvent<T> =
+  { kind: 'progress'; sent: number; total: number } | { kind: 'done'; memory: T };

@@ -185,7 +185,7 @@ public sealed class AddPhotoMemoryCommandHandler(
         var processed = (ImageSniffer.Sniff(bytes) is null ? null : processor.MakeAlbumPhoto(bytes))
             ?? throw ProblemException.Invalid("photo_type_not_allowed", "A photo must be a JPEG, PNG, WebP or HEIC image.", "file");
 
-        var name = $"contacts/{owner:N}/{Guid.NewGuid():N}";
+        var name = $"memories/{owner:N}/{Guid.NewGuid():N}";
         var displayKey = $"{name}{processed.Display.Extension}";
         var thumbnailKey = $"{name}-thumbnail{processed.Thumbnail.Extension}";
         await photos.SaveAsync(displayKey, processed.Display.Content, processed.Display.ContentType, cancellationToken);
@@ -233,7 +233,7 @@ public sealed class AddFileMemoryCommandHandler(
         var contentType = MemoryRules.FileType(bytes, fileName)
             ?? throw ProblemException.Invalid("file_type_not_allowed", "Choose a PDF, a document, a spreadsheet or a picture.", "file");
 
-        var key = $"contacts/{owner:N}/{Guid.NewGuid():N}{Path.GetExtension(fileName).ToLowerInvariant()}";
+        var key = $"memories/{owner:N}/{Guid.NewGuid():N}{Path.GetExtension(fileName).ToLowerInvariant()}";
         await photos.SaveAsync(key, bytes, contentType, cancellationToken);
         var now = clock.GetUtcNow();
         var memory = Memory.AddFile(owner, request.ClientId, contact.Id, key, fileName, contentType, bytes.LongLength, DateOnly.FromDateTime(now.UtcDateTime), now);

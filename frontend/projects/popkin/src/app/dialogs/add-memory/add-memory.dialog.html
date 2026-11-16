@@ -1,0 +1,85 @@
+<div pk-dialog [heading]="heading" accent="coral">
+  <div class="stack" [attr.aria-busy]="store.busy() ? 'true' : null">
+    @if (problems().length) {
+      <div pk-form-summary [problems]="problems()"></div>
+    }
+    @if (store.state() === 'failed') {
+      <div pk-alert heading="We couldn’t save it.">
+        Everything is still here. Check your connection and try Save again.
+      </div>
+    }
+    <div
+      pk-segmented-control
+      label="What to add"
+      kind="radio"
+      [options]="kinds"
+      [value]="store.kind()"
+      [disabled]="store.busy()"
+      (valueChange)="choose($event)"
+    ></div>
+    @if (store.kind() === 'note') {
+      <div
+        pk-textarea
+        fieldId="note"
+        label="Note"
+        hint="Up to 2,000 characters. Only you can see it."
+        [rows]="5"
+        [maxlength]="2000"
+        [formControl]="note"
+        [error]="error('note')"
+        [readonly]="store.busy()"
+      ></div>
+    } @else {
+      @if (store.file(); as file) {
+        @if (!fileError()) {
+          <div
+            pk-memory-upload
+            [src]="preview()"
+            [alt]="'The chosen photo: ' + file.name"
+            [name]="file.name"
+            [status]="store.busy() ? store.status() : undefined"
+            [percent]="store.busy() ? store.percent() : null"
+          ></div>
+        }
+      }
+      @if (!store.busy()) {
+        <div
+          pk-memory-chooser
+          fieldId="file"
+          [label]="chooseLabel()"
+          [accept]="store.kind() === 'photo' ? photoTypes : fileTypes"
+          [hint]="
+            store.kind() === 'file'
+              ? 'A PDF, a document, a spreadsheet or a picture, up to 25 MB. Only you can see it.'
+              : undefined
+          "
+          [error]="fileError()"
+          (picked)="pick($event)"
+        ></div>
+      }
+      @if (store.kind() === 'photo') {
+        <div
+          pk-text-field
+          fieldId="caption"
+          label="Caption"
+          hint="Optional. Only you can see it."
+          [maxlength]="200"
+          [formControl]="caption"
+          [error]="error('caption')"
+          [readonly]="store.busy()"
+        ></div>
+      }
+    }
+  </div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [disabled]="store.busy()"
+    (click)="save()"
+  >
+    {{ store.state() === 'uploading' ? 'Uploading…' : 'Save' }}
+  </button>
+</div>

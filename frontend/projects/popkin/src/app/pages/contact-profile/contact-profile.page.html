@@ -124,10 +124,10 @@
                         size="sm"
                         [routerLink]="logLink()"
                         [queryParams]="{ kind: 'milestone' }"
-                        >Milestone</a
+                        ><svg pk-icon name="milestone" size="md"></svg>Milestone</a
                       >
                       <a pk-button variant="quiet" size="sm" [routerLink]="logLink()"
-                        >Conversation</a
+                        ><svg pk-icon name="notebook" size="md"></svg>Conversation</a
                       >
                     </div>
                   </div>
@@ -162,6 +162,8 @@
                           [body]="item.body"
                           [via]="item.via"
                           [tag]="item.tag"
+                          [photo]="item.photo"
+                          [photoAlt]="item.title ?? ''"
                         ></li>
                       }
                     </ol>
@@ -179,6 +181,44 @@
                       >Log a conversation</a
                     >
                   </div>
+                } @else if (current() === 'memories') {
+                  <div class="cluster cluster--between">
+                    <p class="text-muted">
+                      Photos, files and notes you’ve kept about {{ profile.firstName }}. Private to
+                      you.
+                    </p>
+                    <button pk-button type="button" variant="quiet" size="sm" (click)="addMemory()">
+                      <svg pk-icon name="upload" size="md"></svg>Add
+                    </button>
+                  </div>
+                  @if (memories.state() === 'failed') {
+                    <div
+                      pk-empty-state
+                      icon="server-error"
+                      [level]="3"
+                      [compact]="true"
+                      [alert]="true"
+                      [heading]="'We couldn’t load ' + profile.firstName + '’s memories'"
+                      text="Check your connection and try again."
+                    >
+                      <button
+                        pk-button
+                        type="button"
+                        variant="primary"
+                        size="md"
+                        (click)="memories.retry()"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  } @else {
+                    @if (memoryPhotos().length) {
+                      <div pk-memory-grid [memories]="memoryPhotos()"></div>
+                    }
+                    @if (memoryRows().length) {
+                      <ul pk-memory-list [rows]="memoryRows()"></ul>
+                    }
+                  }
                 } @else if (current() === 'follow-ups') {
                   <div class="stack">
                     <div

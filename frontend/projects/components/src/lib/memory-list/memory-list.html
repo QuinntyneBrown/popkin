@@ -1,0 +1,15 @@
+@for (row of rows(); track $index) {
+  <li class="row row--short">
+    <span class="icon-tile"
+      ><svg pk-icon size="md" [name]="row.kind === 'file' ? 'file-text' : 'note'"></svg
+    ></span>
+    <div class="row__main">
+      @if (row.href) {
+        <a class="row__title" [href]="row.href" [attr.download]="row.title">{{ row.title }}</a>
+      } @else {
+        <div class="row__title">{{ row.title }}</div>
+      }
+      <div class="row__text">{{ row.text }}</div>
+    </div>
+  </li>
+}

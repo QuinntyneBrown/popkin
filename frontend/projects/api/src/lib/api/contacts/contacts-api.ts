@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, filter, map } from 'rxjs';
 import {
   AddFollowUpRequest,
   AddKeyDateRequest,
@@ -8,7 +8,12 @@ import {
   ContactProfileView,
   ContactsSummaryView,
   DatesFilter,
+  FileMemoryView,
   FollowUpView,
+  MemoriesView,
+  MemoryUploadEvent,
+  NoteMemoryView,
+  PhotoMemoryView,
   LogConversationRequest,
   LogMilestoneRequest,
   TimelineEntryView,
@@ -70,6 +75,24 @@ export interface ContactsApi {
   ): Observable<TimelineEntryView>;
   /** Log a milestone, and its yearly date when asked (L2-134). */
   logMilestone(contactId: string, request: LogMilestoneRequest): Observable<TimelineEntryView>;
+  /** "Memories & files" (L2-136 AC1). */
+  memories(contactId: string): Observable<MemoriesView>;
+  /** Keeps a photo, reporting how much is sent (L2-136 AC2, AC4); `takenOn` dates it. */
+  addPhotoMemory(
+    contactId: string,
+    clientId: string,
+    file: File,
+    caption: string,
+    takenOn?: string,
+  ): Observable<MemoryUploadEvent<PhotoMemoryView>>;
+  /** Keeps a file as it is, reporting how much is sent (known gap 107, ruled). */
+  addFileMemory(
+    contactId: string,
+    clientId: string,
+    file: File,
+  ): Observable<MemoryUploadEvent<FileMemoryView>>;
+  /** Keeps a note (known gap 107, ruled). */
+  addNoteMemory(contactId: string, clientId: string, text: string): Observable<NoteMemoryView>;
 }
 
 export const CONTACTS_API = new InjectionToken<ContactsApi>('ContactsApi');
@@ -176,4 +199,61 @@ export class HttpContactsApi implements ContactsApi {
       request,
     );
   }
+
+  memories(contactId: string): Observable<MemoriesView> {
+    return this.http.get<MemoriesView>(memories(contactId));
+  }
+
+  addPhotoMemory(
+    contactId: string,
+    clientId: string,
+    file: File,
+    caption: string,
+    takenOn?: string,
+  ): Observable<MemoryUploadEvent<PhotoMemoryView>> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    form.append('clientId', clientId);
+    if (caption) form.append('caption', caption);
+    if (takenOn) form.append('takenOn', takenOn);
+    return upload(this.http, `${memories(contactId)}/photos`, form);
+  }
+
+  addFileMemory(
+    contactId: string,
+    clientId: string,
+    file: File,
+  ): Observable<MemoryUploadEvent<FileMemoryView>> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    form.append('clientId', clientId);
+    return upload(this.http, `${memories(contactId)}/files`, form);
+  }
+
+  addNoteMemory(contactId: string, clientId: string, text: string): Observable<NoteMemoryView> {
+    return this.http.post<NoteMemoryView>(`${memories(contactId)}/notes`, { clientId, text });
+  }
+}
+
+function memories(contactId: string): string {
+  return `/api/contacts/people/${encodeURIComponent(contactId)}/memories`;
+}
+
+function upload<T>(
+  http: HttpClient,
+  url: string,
+  form: FormData,
+): Observable<MemoryUploadEvent<T>> {
+  return http.post<T>(url, form, { reportProgress: true, observe: 'events' }).pipe(
+    map((event: HttpEvent<T>): MemoryUploadEvent<T> | null => {
+      if (event.type === HttpEventType.UploadProgress) {
+        return { kind: 'progress', sent: event.loaded, total: event.total ?? event.loaded };
+      }
+      if (event.type === HttpEventType.Response && event.body) {
+        return { kind: 'done', memory: event.body };
+      }
+      return null;
+    }),
+    filter((event): event is MemoryUploadEvent<T> => event !== null),
+  );
 }
