@@ -75,6 +75,12 @@ Popkin web app, `docs/mocks/pages/add-contact/`:
   (L2-146) as it opens and shows the part when they arrive; with no group, the part is left out.
 - **The photo offline.** Whether a picked photo waits in `ContactsOutbox` with the rest is
   `<TO SUPPLY>`; until settled, an offline save keeps the photo too.
+- **Built in steps.** "Who" and "Details", the photo, Edit and the field rules come first. "Dates
+  to remember" joins with [Key dates](../key-dates/README.md), "How they connect" with
+  [Connections](../connections/README.md), "Groups" with [Groups](../groups/README.md),
+  "Delete {first name}" with [Delete a contact](../delete-contact/README.md) and the offline save
+  with the outbox of [Open Contacts](../open-contacts/README.md). Until each joins, its part of
+  the form is left out and the API takes no list for it.
 
 ### API
 
@@ -129,8 +135,9 @@ authenticated policy; each sends one MediatR request.
 - **`ContactFormPage`** (`app/pages/contact-form/contact-form.page.ts` and `.html`), routes
   `/contacts/people/new` and `/contacts/people/:contactId/edit`, data `{ shell: 'bare', page:
   'add-contact' }`. It composes `pk-top-bar` ("Cancel", the heading, "Save"),
-  `pk-form-sections`, `pk-photo-picker` ("Add a photo"), `pk-text-field`, `pk-choice-chips`
-  (Circle, a radio group), the date entries and person picks of `pk-form-sections` with
+  `pk-form-sections`, `pk-photo-picker` ("Add a photo", `size="xl"` with the name beside it;
+  `fixed` on Edit), `pk-text-field`, `pk-choice-chips`
+  (Circle, a radio group, `outline`), the date entries and person picks of `pk-form-sections` with
   `pk-select-field` and `pk-icon-button`, `pk-chip` toggles for Groups, `pk-form-summary`,
   `pk-banner` for the failed save and `pk-button` for "Delete {first name}". Phone and Email
   use `type="tel"` and `type="email"`.
