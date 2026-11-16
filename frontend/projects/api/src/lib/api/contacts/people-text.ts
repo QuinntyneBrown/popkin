@@ -8,6 +8,11 @@ const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 /** After this many days without a conversation, someone is drifting (known gap 99, ruled). */
 export const DRIFTING_AFTER_DAYS = 30;
 
+/** Whether "Last talked" is drawn quiet: drifting, past 30 days (gap 99). */
+export function drifting(days: number | null): boolean {
+  return days !== null && days > DRIFTING_AFTER_DAYS;
+}
+
 /** Text folded for matching: lower case, without accents. */
 function folded(text: string): string {
   return text
@@ -23,30 +28,30 @@ export function matchesName(name: string, search: string): boolean {
 }
 
 /**
- * A row's next key date: date first, in bold, when it is 30 days away or fewer ("Oct 7 ·
+ * A row's next key date: date first, in bold, when it is 90 days away or fewer ("Oct 7 ·
  * Birthday"); kind first after that ("Birthday Apr 29") (gap 101, ruled).
  */
 export function nextDateLine(next: NextDateView): { date: string; what: string; near: boolean } {
   return {
     date: `${MONTHS[next.month - 1]} ${next.day}`,
     what: next.title,
-    near: next.inDays <= 30,
+    near: next.inDays <= 90,
   };
 }
 
 /**
  * When we last talked, as People's last column reads it (gaps 99 and 111, ruled): "today",
- * "yesterday", the weekday within the last 6 days, then "{n} days ago"; "Not yet" with none.
+ * "yesterday", the weekday within the last 6 days, the date ("Sep 5") up to 30 days, then
+ * "{n} days ago"; "Not yet" with none.
  */
 export function lastTalked(on: string | null, days: number | null): string {
   if (on === null || days === null) return 'Not yet';
   if (days <= 0) return 'today';
   if (days === 1) return 'yesterday';
-  if (days <= 6) {
-    const [year, month, day] = on.split('-').map(Number);
-    return WEEKDAYS[new Date(year, month - 1, day).getDay()];
-  }
-  return `${days} days ago`;
+  if (days > DRIFTING_AFTER_DAYS) return `${days} days ago`;
+  const [year, month, day] = on.split('-').map(Number);
+  if (days <= 6) return WEEKDAYS[new Date(year, month - 1, day).getDay()];
+  return `${MONTHS[month - 1]} ${day}`;
 }
 
 /** "No one called “Femi”" and the way to add them (L2-127 AC3). */
