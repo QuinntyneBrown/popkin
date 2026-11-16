@@ -1642,7 +1642,8 @@
         "L2-131"
       ],
       "states": [
-        "default"
+        "default",
+        "not-closest"
       ],
       "not_applicable": {
         "busy": "A menu of links: choosing one goes straight to its screen or dialog, so nothing waits.",
