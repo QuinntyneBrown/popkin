@@ -45,7 +45,7 @@ test.describe('A contact’s profile', () => {
       'Long bike rides',
       'Hot sauce collecting',
     ]);
-    await expect(profile.makeHabit).toHaveText('Make a habit of seeing Chidi');
+    await expect(profile.habitTitle).toHaveText('Lunch with Chidi');
     await expect(profile.historyTabs).toHaveText(['Timeline', 'Follow-ups 1', 'Memories & files']);
     await expect(profile.timelineEntries).toHaveCount(3);
   });

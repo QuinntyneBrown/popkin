@@ -2,7 +2,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ContactProfileView } from '../../models/contacts';
+import { ContactProfileView, HabitView } from '../../models/contacts';
+import { Toaster } from '../toasts/toaster';
 import { CONTACTS_API } from './contacts-api';
 import { ContactProfileStore } from './contact-profile-store';
 
@@ -21,6 +22,8 @@ describe('ContactProfileStore', () => {
     contact: vi.fn(),
     addToClosest: vi.fn(),
     takeOutOfClosest: vi.fn(),
+    endHabit: vi.fn(),
+    resumeHabit: vi.fn(),
   };
   let store: ContactProfileStore;
 
@@ -84,5 +87,44 @@ describe('ContactProfileStore', () => {
     expect(api.addToClosest).toHaveBeenCalledWith(id);
     expect(api.contact).toHaveBeenCalledTimes(3);
     expect(store.state()).toBe('ready');
+  });
+
+  describe('End this habit (L2-144 AC3)', () => {
+    const lunch = { id: 'h1', what: 'Lunch', contactFirstName: 'Chidi' } as HabitView;
+
+    beforeEach(() => {
+      api.contact.mockReturnValue(of({ ...chidi, habit: lunch }));
+      api.endHabit.mockReturnValue(of(undefined));
+      api.resumeHabit.mockReturnValue(of(lunch));
+      store.open(id);
+    });
+
+    it('takes it off the profile at once, saying so with Undo', () => {
+      store.endHabit();
+
+      expect(api.endHabit).toHaveBeenCalledWith('h1');
+      expect(store.profile()?.habit).toBeNull();
+      const toast = TestBed.inject(Toaster).toasts().at(-1)!;
+      expect(toast.heading).toBe('Lunch with Chidi ended');
+      expect(toast.action?.label).toBe('Undo');
+    });
+
+    it('Undo brings it back', () => {
+      store.endHabit();
+
+      TestBed.inject(Toaster).toasts().at(-1)!.action!.run();
+
+      expect(api.resumeHabit).toHaveBeenCalledWith('h1');
+      expect(store.profile()?.habit).toEqual(lunch);
+    });
+
+    it('a failed end puts it back and says so', () => {
+      api.endHabit.mockReturnValue(problem(0));
+
+      store.endHabit();
+
+      expect(store.profile()?.habit).toEqual(lunch);
+      expect(TestBed.inject(Toaster).toasts().at(-1)!.variant).toBe('danger');
+    });
   });
 });

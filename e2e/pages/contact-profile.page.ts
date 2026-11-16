@@ -21,6 +21,13 @@ export class ContactProfilePage {
   readonly loves: Locator;
   /** "Make a habit of seeing {first name}" (L2-128 AC5). */
   readonly makeHabit: Locator;
+  /** Our habit's card (L2-128 AC5), and "End this habit" under it (L2-144 AC3). */
+  readonly habit: Locator;
+  readonly habitOver: Locator;
+  readonly habitTitle: Locator;
+  readonly habitStrip: Locator;
+  readonly habitFoot: Locator;
+  readonly endHabit: Locator;
   readonly keyDates: Locator;
   readonly keyDateRows: Locator;
   readonly addDate: Locator;
@@ -76,6 +83,12 @@ export class ContactProfilePage {
     this.facts = this.about.locator('.contact-facts__item');
     this.loves = this.about.locator('.likes__item');
     this.makeHabit = page.locator('.add-card');
+    this.habit = page.locator('.info-card').filter({ has: page.locator('.keep-strip') });
+    this.habitOver = this.habit.locator('.info-card__over');
+    this.habitTitle = this.habit.locator('.info-card__title');
+    this.habitStrip = this.habit.locator('.keep-strip');
+    this.habitFoot = this.habit.locator('.info-card__foot');
+    this.endHabit = page.getByRole('button', { name: 'End this habit' });
     this.history = page.getByRole('navigation', { name: /’s history$/ });
     this.historyNav = page.locator('nav.view-nav');
     this.addField = page.locator('.add-field');

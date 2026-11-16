@@ -1,9 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ContactProfileView } from '../../models/contacts';
+import { ContactProfileView, HabitView } from '../../models/contacts';
+import { Toaster } from '../toasts/toaster';
 import { toApiProblem } from '../problem';
 import { CONTACTS_API } from './contacts-api';
 import { isContactId } from './contacts-text';
+import { habitTitle } from './habits-text';
 
 export type ContactProfileState = 'loading' | 'ready' | 'failed' | 'notFound';
 
@@ -15,6 +17,7 @@ export type ContactProfileState = 'loading' | 'ready' | 'failed' | 'notFound';
 @Injectable()
 export class ContactProfileStore {
   private readonly api = inject(CONTACTS_API);
+  private readonly toaster = inject(Toaster);
   private contactId = '';
 
   readonly state = signal<ContactProfileState>('loading');
@@ -44,6 +47,48 @@ export class ContactProfileStore {
   /** Out of Closest (L2-131 AC2), then the profile is read again. */
   takeOutOfClosest(): void {
     this.change(this.api.takeOutOfClosest(this.contactId));
+  }
+
+  /** A habit just started with them, shown at once (L2-145 AC3). */
+  habitStarted(habit: HabitView): void {
+    this.setHabit(habit);
+  }
+
+  /** "End this habit" (L2-144 AC3): off the profile at once, with Undo; a failure puts it back. */
+  endHabit(): void {
+    const habit = this.profile()?.habit;
+    if (!habit) return;
+    this.setHabit(null);
+    this.api.endHabit(habit.id).subscribe({
+      next: () =>
+        this.toaster.show(
+          'success',
+          `${habitTitle(habit.what, habit.contactFirstName)} ended`,
+          undefined,
+          {
+            label: 'Undo',
+            run: () => {
+              this.setHabit(habit);
+              this.api.resumeHabit(habit.id).subscribe({
+                next: (saved) => this.setHabit(saved),
+                error: () => this.load(true),
+              });
+            },
+          },
+        ),
+      error: () => {
+        this.setHabit(habit);
+        this.toaster.show(
+          'danger',
+          'We couldn’t end that habit',
+          'Check your connection and try again.',
+        );
+      },
+    });
+  }
+
+  private setHabit(habit: HabitView | null): void {
+    this.profile.update((profile) => (profile ? { ...profile, habit } : profile));
   }
 
   private change(sent: Observable<void>): void {

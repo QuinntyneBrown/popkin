@@ -1,0 +1,113 @@
+<div pk-app-screen accent="coral" layout="tab" body="fill">
+  <div pk-contacts-page>
+    <div pk-page-head slot="head" heading="Habits" sub="Small rhythms that keep people close">
+      <button
+        pk-button
+        slot="actions"
+        type="button"
+        variant="primary"
+        size="sm"
+        (click)="newHabit()"
+      >
+        <svg pk-icon name="plus" size="md"></svg>New habit
+      </button>
+    </div>
+    @if (store.empty()) {
+      <div
+        pk-empty-state
+        icon="repeat"
+        heading="No habits yet"
+        text="A habit is a rhythm with someone: a Sunday call, a monthly catch-up. We’ll nudge you when one is due, and again if it slips."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="newHabit()">
+          New habit
+        </button>
+      </div>
+    } @else if (store.state() === 'failed') {
+      <div
+        pk-empty-state
+        icon="alert"
+        [alert]="true"
+        heading="We couldn’t load your habits"
+        text="Your streaks are safe. Check your connection and try again."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+          Try again
+        </button>
+      </div>
+    } @else if (store.state() === 'loading') {
+      <p class="visually-hidden" role="status">Loading your habits…</p>
+      <div pk-contacts-grid layout="narrow" aria-hidden="true">
+        <div class="stack">
+          <span pk-skeleton shape="card"></span>
+          <span pk-skeleton shape="title" [width]="60"></span>
+          <span pk-skeleton shape="title" [width]="60"></span>
+        </div>
+      </div>
+    } @else {
+      <div pk-contacts-grid layout="narrow">
+        <div>
+          @if (lead(); as lead) {
+            <section
+              pk-spotlight
+              headingId="due-h"
+              data-accent="coral"
+              [row]="true"
+              [actions]="true"
+              [strip]="true"
+              [heading]="lead.heading"
+              [sub]="lead.sub"
+              [when]="lead.when"
+              [late]="lead.late"
+            >
+              <span
+                pk-avatar
+                slot="avatar"
+                size="xl"
+                [name]="lead.habit.contactName"
+                [initials]="lead.habit.contactInitials"
+                [photo]="lead.habit.contactPhotoUrl"
+                [attr.data-accent]="lead.accent"
+              ></span>
+              @if (lead.habit.contactPhone) {
+                <a
+                  pk-button
+                  slot="actions"
+                  variant="secondary"
+                  size="sm"
+                  [href]="'tel:' + lead.habit.contactPhone"
+                >
+                  <svg pk-icon name="phone" size="md"></svg>Call {{ lead.habit.contactFirstName }}
+                </a>
+              }
+              <button
+                pk-button
+                slot="actions"
+                type="button"
+                variant="primary"
+                size="sm"
+                [attr.aria-pressed]="lead.logged"
+                (click)="store.keep(lead.habit)"
+              >
+                <svg pk-icon name="check" size="md"></svg>We met up
+              </button>
+              <div pk-keep-strip slot="strip" [periods]="lead.periods"></div>
+            </section>
+          }
+          @if (rows().length) {
+            <ul pk-habit-list [habits]="rows()"></ul>
+          }
+        </div>
+      </div>
+    }
+  </div>
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    place="contacts"
+    contactsCurrent="habits"
+    [members]="frame.countLine()"
+    [due]="frame.due()"
+    [dueLabel]="frame.dueLabel()"
+  ></nav>
+</div>

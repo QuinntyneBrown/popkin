@@ -305,6 +305,14 @@ export const routes: Routes = [
     data: data({ shell: 'app', page: 'contacts-dates' }),
   },
   {
+    path: 'contacts/habits',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-habits/contacts-habits.page').then((m) => m.ContactsHabitsPage),
+    data: data({ shell: 'app', page: 'contacts-habits' }),
+    title: 'Habits · Contacts · Popkin',
+  },
+  {
     path: 'contacts/people/new',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>
