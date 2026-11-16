@@ -27,6 +27,11 @@ export class ContactProfilePage {
   readonly keyDateList: Locator;
   readonly history: Locator;
   readonly historyTabs: Locator;
+  /** The history's view nav, for the parity specs. */
+  readonly historyNav: Locator;
+  readonly addField: Locator;
+  readonly addFollowUp: Locator;
+  readonly followUps: Locator;
   readonly emptyTimeline: Locator;
   /** The loading line (L2-123 AC1). */
   readonly loading: Locator;
@@ -60,7 +65,11 @@ export class ContactProfilePage {
     this.loves = this.about.locator('.likes__item');
     this.makeHabit = page.locator('.add-card');
     this.history = page.getByRole('navigation', { name: /’s history$/ });
+    this.historyNav = page.locator('nav.view-nav');
+    this.addField = page.locator('.add-field');
     this.historyTabs = this.history.getByRole('link');
+    this.addFollowUp = page.getByRole('textbox', { name: /^Add a follow-up for / });
+    this.followUps = page.locator('li.task');
     this.emptyTimeline = page.getByRole('heading', { name: /^Nothing logged with / });
     this.loading = page.getByRole('status').filter({ hasText: /^Loading / });
     this.state = page.locator('.contacts-page :is([role="alert"] .empty, .empty[role="alert"])');

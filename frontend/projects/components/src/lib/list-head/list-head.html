@@ -24,7 +24,8 @@
   @if (icon(); as name) {
     <svg pk-icon [name]="name" size="sm"></svg>
   }
-  {{ heading() }}
+  <!-- In its own span, so no space comes between the words and the count's margin. -->
+  <span>{{ heading() }}</span>
   @if (count() !== undefined) {
     <span class="list-head__count">{{ count() }}</span>
   }

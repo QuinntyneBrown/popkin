@@ -25,6 +25,10 @@ export class ContactsFollowUpsPage {
   readonly pageHead: Locator;
   readonly firstBucket: Locator;
   readonly firstTask: Locator;
+  readonly addField: Locator;
+  readonly overdueHeading: Locator;
+  readonly weekList: Locator;
+  readonly doneTask: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="contacts-follow-ups"]');
@@ -38,6 +42,10 @@ export class ContactsFollowUpsPage {
     this.firstBucket = this.buckets.first();
     this.tasks = page.locator('li.task');
     this.firstTask = this.tasks.first();
+    this.addField = page.locator('.add-field');
+    this.overdueHeading = page.locator('#b-overdue');
+    this.weekList = page.locator('section[aria-labelledby="b-week"] ul');
+    this.doneTask = page.locator('section[aria-labelledby="b-done"] li.task');
     this.showDone = page.getByRole('button', { name: /^Show \d+ done$/ });
     this.hideDone = page.getByRole('button', { name: 'Hide done' });
     this.done = page.getByRole('region', { name: 'Done' });

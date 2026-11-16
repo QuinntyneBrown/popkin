@@ -235,6 +235,10 @@ export const routes = {
   editContact: { app: `${femi}/edit`, mock: 'pages/add-contact/edit.html' },
   contactProfile: { app: `${chidi}`, mock: 'pages/contact-profile/default.html' },
   contactProfileEmpty: { app: femi, mock: 'pages/contact-profile/empty.html' },
+  contactProfileFollowUps: {
+    app: `${chidi}?view=follow-ups`,
+    mock: 'pages/contact-profile/follow-ups.html',
+  },
   contactProfileLoading: { app: `${chidi}`, mock: 'pages/contact-profile/loading.html' },
   contactProfileError: { app: `${chidi}`, mock: 'pages/contact-profile/error.html' },
   contactProfileNotFound: { app: `${chidi}`, mock: 'pages/contact-profile/not-found.html' },

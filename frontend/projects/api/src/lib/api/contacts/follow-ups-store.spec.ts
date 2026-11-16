@@ -150,4 +150,12 @@ describe('FollowUpsStore (L2-141, L2-142, L2-124)', () => {
     expect(store.forContact('c1').map((f) => f.id)).toEqual(['f1']);
     expect(store.forContact('c2')).toEqual([]);
   });
+
+  it('counts a contact’s follow-ups, open and done, for Delete', () => {
+    api.followUps.mockReturnValue(
+      of([ladder, { ...ladder, id: 'f2', doneAt: '2026-09-10T08:00:00Z' }]),
+    );
+    store.open();
+    expect(store.countFor('c1')).toBe(2);
+  });
 });

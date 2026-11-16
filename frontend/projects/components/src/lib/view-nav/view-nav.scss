@@ -29,3 +29,13 @@ a[aria-current='page'] {
   background: var(--color-bg-inverse);
   color: var(--color-fg-inverse);
 }
+
+/* A view's count, as the mocks draw it: "Follow-ups 1". */
+.view-nav__count {
+  color: var(--color-fg-muted);
+}
+
+/* The mocks' no-break space between the words and the count. */
+.view-nav__count::before {
+  content: '\00a0';
+}

@@ -48,7 +48,6 @@ export class FollowUpsStore {
   /** Reads every follow-up; the page shows loading until it answers. */
   open(): void {
     this.state.set('loading');
-    this.ticked.set(new Set());
     this.read();
   }
 
@@ -59,9 +58,15 @@ export class FollowUpsStore {
 
   /** A contact's open follow-ups, soonest first, for their profile. */
   forContact(contactId: string): FollowUpView[] {
-    return this.open$()
-      .filter((f) => f.contactId === contactId)
+    const ticked = this.ticked();
+    return this.followUps()
+      .filter((f) => f.contactId === contactId && (f.doneAt === null || ticked.has(f.id)))
       .sort(byDue);
+  }
+
+  /** Every follow-up of a contact's, open and done: what goes with them (L2-132 AC1). */
+  countFor(contactId: string): number {
+    return this.followUps().filter((f) => f.contactId === contactId).length;
   }
 
   /** "Add a follow-up": for nobody, or for the contact whose profile it is (L2-142 AC1). */
@@ -95,6 +100,8 @@ export class FollowUpsStore {
     this.today.set(new Date());
     this.api.followUps().subscribe({
       next: (followUps) => {
+        // A new read, as each Contacts page opens, lets ticked ones go to Done.
+        this.ticked.set(new Set());
         this.followUps.set(followUps);
         this.state.set('ready');
       },

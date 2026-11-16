@@ -23,5 +23,7 @@ parity('form-sections', [
     key: 'addContact',
     name: 'details',
     region: (page) => new ContactFormPage(page).details,
+    // Dates to remember, above it, ends at a different fraction of a pixel.
+    snap: true,
   },
 ]);
