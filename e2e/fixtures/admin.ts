@@ -5,12 +5,15 @@ interface RecordedAudit {
   entries: { at: string }[];
 }
 
-/** An hour after the newest recorded audit entry, so the recorded actions were "Today". */
+/**
+ * A minute after the newest recorded audit entry, so the recorded actions were "Today" in London
+ * even when the recording ran late in the evening.
+ */
 export const adminNow = new Date(
-  new Date(recordedBody<RecordedAudit>('GET /api/admin/audit').entries[0].at).getTime() + 3_600_000,
+  new Date(recordedBody<RecordedAudit>('GET /api/admin/audit').entries[0].at).getTime() + 60_000,
 );
 
-/** The console as the recording left it: the clock an hour after its last action. */
+/** The console as the recording left it: the clock a minute after its last action. */
 export async function atTheRecording(page: Page): Promise<void> {
   await page.clock.setFixedTime(adminNow);
 }
