@@ -8,6 +8,10 @@ import {
   NO_COUNTS,
   closestItem,
   failedText,
+  kindIcon,
+  leadLabel,
+  profileDateLine,
+  profileDateTitle,
   loadingLine,
   possessive,
   profileSub,
@@ -25,7 +29,10 @@ import {
   ContactsPage,
   EmptyState,
   IconButton,
+  KeyDateItem,
+  KeyDates,
   Likes,
+  Link,
   ListHead,
   PopkinNav,
   Skeleton,
@@ -41,6 +48,7 @@ import {
   DeleteContactData,
   DeleteContactDialog,
 } from '../../dialogs/delete-contact/delete-contact.dialog';
+import { AddDateData, AddDateDialog } from '../../dialogs/add-date/add-date.dialog';
 
 type HistoryView = 'timeline' | 'follow-ups' | 'memories';
 
@@ -65,7 +73,9 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     ContactsPage,
     EmptyState,
     IconButton,
+    KeyDates,
     Likes,
+    Link,
     ListHead,
     PopkinNav,
     RouterLink,
@@ -114,6 +124,16 @@ export class ContactProfilePage {
       facts.push({ icon: 'heart', label: 'How you met', value: profile.howWeMet });
     return facts;
   });
+  /** Key dates, soonest first, the near ones with the days left (L2-128 AC4). */
+  protected readonly keyDates = computed<KeyDateItem[]>(() => {
+    const today = new Date();
+    return (this.profile()?.keyDates ?? []).map((date) => ({
+      icon: kindIcon(date.kind),
+      title: profileDateTitle(date),
+      when: profileDateLine(date, today),
+      reminder: leadLabel(date.reminder),
+    }));
+  });
   protected readonly historyLabel = computed(() => `${possessive(this.firstName() ?? '')} history`);
   protected readonly current = computed<HistoryView>(() => {
     const view = this.view();
@@ -141,6 +161,18 @@ export class ContactProfilePage {
 
   constructor() {
     effect(() => this.store.open(this.contactId(), this.passedFirstName));
+  }
+
+  /** Add a date for this contact; the profile reads again once it is kept (L2-138 AC4). */
+  protected addDate(): void {
+    this.dialog
+      .open<unknown, AddDateData>(AddDateDialog, {
+        data: { contactId: this.contactId() },
+        ...MODAL,
+      })
+      .closed.subscribe((saved) => {
+        if (saved) this.store.retry();
+      });
   }
 
   /** "Delete {first name}?" (L2-132): once they are gone, People opens. */

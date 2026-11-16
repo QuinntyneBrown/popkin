@@ -275,3 +275,110 @@ export async function nobodyInPeople(page: Page): Promise<void> {
   await answer(page, peopleKey, { status: 200, body: { contacts: [] } });
   await answer(page, 'GET /api/contacts/summary', { status: 200, body: { people: 0 } });
 }
+
+/** Dates on the morning of the mocks (L2-137). */
+export const datesKey = 'GET /api/contacts/dates?on=2026-09-15&kind=all';
+export const birthdaysKey = 'GET /api/contacts/dates?on=2026-09-15&kind=birthdays';
+
+type DateRow = [
+  first: string,
+  accent: string,
+  photo: string | null,
+  kind: string,
+  title: string | null,
+  occursOn: string,
+  daysLeft: number,
+  years: number | null,
+  lead: string,
+];
+
+/** Mara's key dates as contacts-dates/default.html draws them on 15 September 2026. */
+const MARAS_DATES: DateRow[] = [
+  ['Grace', 'Plum', 'contact-grace.jpg', 'Birthday', null, '2026-09-19', 4, 33, 'OneWeekBefore'],
+  [
+    'Chidi',
+    'Sky',
+    'contact-chidi.jpg',
+    'Anniversary',
+    null,
+    '2026-09-26',
+    11,
+    5,
+    'ThreeDaysBefore',
+  ],
+  ['Ben', 'Amber', null, 'Other', 'Iris is one month old', '2026-10-05', 20, null, 'OnTheDay'],
+  ['Ada', 'Coral', 'contact-ada.jpg', 'Birthday', null, '2026-10-07', 22, 64, 'TwoWeeksBefore'],
+  ['Ruth', 'Teal', 'contact-ruth.jpg', 'Birthday', null, '2026-10-24', 39, 78, 'OneWeekBefore'],
+  [
+    'Dev',
+    'Sky',
+    'call3.jpg',
+    'Milestone',
+    'Dev’s 5 years at the studio',
+    '2026-11-02',
+    48,
+    null,
+    'OneDayBefore',
+  ],
+  ['Walt', 'Leaf', 'call2.jpg', 'Birthday', null, '2026-11-16', 62, 71, 'OneWeekBefore'],
+  ['Ifeoma', 'Berry', null, 'Birthday', null, '2026-12-09', 85, 29, 'OneWeekBefore'],
+  [
+    'Grace',
+    'Plum',
+    'contact-grace.jpg',
+    'Other',
+    'Grace & Femi’s wedding',
+    '2026-12-26',
+    102,
+    null,
+    'OneMonthBefore',
+  ],
+];
+
+/** Mara's dates, in the shape the recording reads a date in; `kind` narrows them as the API does. */
+export async function marasDates(page: Page, kind: 'all' | 'birthdays' = 'all'): Promise<void> {
+  type Recorded = { dates: object[]; preferences: object };
+  const recorded = recordedBody<Recorded>(datesKey);
+  await servePhotos(page);
+  const dates = MARAS_DATES.filter((d) => kind === 'all' || d[3] === 'Birthday').map(
+    ([first, accent, photo, k, title, occursOn, daysLeft, years, lead], i) => ({
+      ...recorded.dates[0],
+      id: `00000000-0000-4000-e000-${String(i + 1).padStart(12, '0')}`,
+      contactId: recordedContactId('Chidi Okafor'),
+      firstName: first,
+      photoUrl: photo ? `/api/files/contacts/${photo}` : null,
+      initials: first.slice(0, 2).toUpperCase(),
+      accent,
+      kind: k,
+      title,
+      occursOn,
+      daysLeft,
+      years,
+      lead,
+    }),
+  );
+  await answer(page, kind === 'all' ? datesKey : birthdaysKey, {
+    status: 200,
+    body: {
+      dates,
+      preferences: {
+        birthdayLead: 'OneWeekBefore',
+        anniversaryLead: 'ThreeDaysBefore',
+        milestoneLead: 'OnTheDay',
+        phoneNotifications: true,
+        mondayEmail: true,
+      },
+    },
+  });
+  await contactsOfMara(page);
+}
+
+/** No key dates yet (L2-137 AC4). */
+export async function noDates(page: Page): Promise<void> {
+  const recorded = recordedBody<{ preferences: object }>(datesKey);
+  await answer(page, datesKey, {
+    status: 200,
+    body: { dates: [], preferences: recorded.preferences },
+  });
+  await contactsOfMara(page);
+}

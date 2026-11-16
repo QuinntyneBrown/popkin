@@ -1,0 +1,70 @@
+<div pk-dialog heading="Add a date" accent="coral">
+  <div class="stack">
+    @if (problems().length) {
+      <div pk-form-summary [problems]="problems()"></div>
+    }
+    @if (failed()) {
+      <div pk-alert heading="We couldn’t save that date.">
+        Everything you chose is still here. Check your connection and try again.
+      </div>
+    }
+    @if (!data.contactId) {
+      <div pk-select-field fieldId="for" label="For" [options]="people()" [(value)]="who"></div>
+    }
+    <div
+      pk-choice-chips
+      fieldId="kind"
+      label="What kind"
+      [outline]="true"
+      [options]="kinds"
+      [disabled]="busy()"
+      [value]="kind()"
+      (valueChange)="chooseKind($event)"
+    ></div>
+    @if (kind() === 'Other') {
+      <div
+        pk-text-field
+        fieldId="title"
+        label="What’s the day?"
+        placeholder="Their wedding, a new job…"
+        [maxlength]="80"
+        [formControl]="title"
+      ></div>
+    }
+    <div
+      pk-text-field
+      fieldId="day"
+      label="The day"
+      type="date"
+      [error]="dayError()"
+      [formControl]="day"
+    ></div>
+    <div
+      pk-select-field
+      fieldId="remind"
+      label="Remind me"
+      [options]="leads"
+      [(value)]="lead"
+    ></div>
+    <div
+      pk-setting-row
+      icon="repeat"
+      heading="Every year"
+      text="It comes round again, with the same reminder."
+      [disabled]="busy()"
+      [(checked)]="everyYear"
+    ></div>
+  </div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="save()"
+  >
+    {{ busy() ? 'Saving…' : 'Save the date' }}
+  </button>
+</div>
