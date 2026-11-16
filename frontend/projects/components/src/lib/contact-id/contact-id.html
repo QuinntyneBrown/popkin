@@ -20,6 +20,10 @@
     <a pk-button class="contact-id__action" variant="secondary" size="sm" [href]="'tel:' + phone"
       ><svg pk-icon name="call" size="md"></svg>Call</a
     >
+  } @else if (email(); as email) {
+    <a pk-button class="contact-id__action" variant="primary" size="sm" [href]="'mailto:' + email"
+      ><svg pk-icon name="mail" size="md"></svg>Email</a
+    >
   }
   <a pk-button class="contact-id__action" variant="secondary" size="sm" [routerLink]="logLink()"
     ><svg pk-icon name="notebook" size="md"></svg>Log</a

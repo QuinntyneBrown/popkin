@@ -14,8 +14,16 @@ export interface ContactsApi {
   addContact(request: SaveContactRequest, photo: File | null): Observable<ContactProfileView>;
   /** One contact of mine; anyone else's is 404 `contact_not_found` (L2-122 AC1). */
   contact(contactId: string): Observable<ContactProfileView>;
-  /** Edit (L2-130): the same part `contact`, without a photo. */
-  editContact(contactId: string, request: SaveContactRequest): Observable<ContactProfileView>;
+  /** Edit (L2-130): the same part `contact`, and a photo that replaces theirs (AC4). */
+  editContact(
+    contactId: string,
+    request: SaveContactRequest,
+    photo: File | null,
+  ): Observable<ContactProfileView>;
+  /** Into Closest (L2-131 AC4). */
+  addToClosest(contactId: string): Observable<void>;
+  /** Out of Closest; they stay in People and their circle (L2-131 AC2). */
+  takeOutOfClosest(contactId: string): Observable<void>;
 }
 
 export const CONTACTS_API = new InjectionToken<ContactsApi>('ContactsApi');
@@ -40,9 +48,22 @@ export class HttpContactsApi implements ContactsApi {
     return this.http.get<ContactProfileView>(`/api/contacts/people/${contactId}`);
   }
 
-  editContact(contactId: string, request: SaveContactRequest): Observable<ContactProfileView> {
+  editContact(
+    contactId: string,
+    request: SaveContactRequest,
+    photo: File | null,
+  ): Observable<ContactProfileView> {
     const form = new FormData();
     form.set('contact', JSON.stringify(request));
+    if (photo) form.set('photo', photo);
     return this.http.put<ContactProfileView>(`/api/contacts/people/${contactId}`, form);
+  }
+
+  addToClosest(contactId: string): Observable<void> {
+    return this.http.put<void>(`/api/contacts/people/${contactId}/closest`, null);
+  }
+
+  takeOutOfClosest(contactId: string): Observable<void> {
+    return this.http.delete<void>(`/api/contacts/people/${contactId}/closest`);
   }
 }

@@ -11,21 +11,25 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   CONTACT_CIRCLES,
   ContactCircle,
   ContactFormStore,
+  NOT_FOUND_TEXT,
   PHOTO_ACCEPT,
   SAVE_FAILED_TEXT,
+  Toaster,
   contactValuesOf,
   editHeading,
+  failedText,
   saveFailedHeading,
 } from 'api';
 import {
   Banner,
   Button,
   ChipOption,
+  EmptyState,
   ChoiceChips,
   FormPair,
   FormProblem,
@@ -50,12 +54,14 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
     Banner,
     Button,
     ChoiceChips,
+    EmptyState,
     FormPair,
     FormSection,
     FormSections,
     FormSummary,
     PhotoPicker,
     ReactiveFormsModule,
+    RouterLink,
     Screen,
     TextField,
     TopBar,
@@ -69,6 +75,9 @@ export class ContactFormPage {
   readonly contactId = input<string>();
   protected readonly store = inject(ContactFormStore);
   private readonly router = inject(Router);
+  private readonly toaster = inject(Toaster);
+  protected readonly notFound = NOT_FOUND_TEXT;
+  protected readonly unread = failedText(null);
   protected readonly accept = PHOTO_ACCEPT;
   protected readonly nameMessage = NAME_MESSAGE;
   protected readonly circles: ChipOption<ContactCircle>[] = CONTACT_CIRCLES.map((circle) => ({
@@ -81,6 +90,7 @@ export class ContactFormPage {
     phone: new FormControl('', { nonNullable: true }),
     email: new FormControl('', { nonNullable: true }),
     city: new FormControl('', { nonNullable: true }),
+    howWeMet: new FormControl('', { nonNullable: true }),
     loves: new FormControl('', { nonNullable: true }),
   });
   /** No circle until one is chosen. */
@@ -122,10 +132,13 @@ export class ContactFormPage {
       this.form.setValue(values);
       this.circle.set(circle ?? '');
     });
-    // The new contact's profile opens once they are kept (L2-129 AC5).
+    // The contact's profile opens once they are kept, saying so after an add (L2-129 AC5).
     effect(() => {
       const saved = this.store.saved();
-      if (saved) void this.router.navigate(['/contacts/people', saved.id]);
+      if (!saved) return;
+      if (!this.contactId())
+        this.toaster.show('success', `${saved.firstName} is in your Contacts.`);
+      void this.router.navigate(['/contacts/people', saved.id]);
     });
   }
 

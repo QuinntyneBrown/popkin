@@ -29,7 +29,7 @@ interface Person {
 const mara: Person = { cookie: '', record: true };
 let person = mara;
 
-async function call(method: string, path: string, body?: unknown) {
+async function call(method: string, path: string, body?: unknown, record = true) {
   const key = `${method} ${path}`;
   const form = body instanceof FormData;
   const response = await fetch(`${api}${path}`, {
@@ -45,7 +45,7 @@ async function call(method: string, path: string, body?: unknown) {
   if (setCookie) person.cookie = setCookie.split(';')[0];
   const text = await response.text();
   const json = text ? JSON.parse(text) : undefined;
-  if (person.record) {
+  if (person.record && record) {
     recorded[key] =
       json === undefined ? { status: response.status } : { status: response.status, body: json };
   }
@@ -267,6 +267,7 @@ femi.append(
     phone: '',
     email: 'femi.b@mail.com',
     city: 'London',
+    howWeMet: '',
     loves: ['Arsenal', 'jazz brunches'],
   }),
 );
@@ -284,10 +285,39 @@ femiEdited.append(
     phone: '',
     email: 'femi.b@mail.com',
     city: 'Lagos',
+    howWeMet: '',
     loves: ['Arsenal', 'jazz brunches'],
   }),
 );
 await call('PUT', `/api/contacts/people/${femiKept.id}`, femiEdited);
+// Femi is not in Closest: his menu offers to put him there (L2-131 AC4).
+await call('PUT', `/api/contacts/people/${femiKept.id}/closest`);
+// She adds Chidi with his photo, as his profile draws him, puts him in Closest and opens his
+// profile, then takes him out of Closest from its menu (L2-128, L2-131).
+const chidi = new FormData();
+chidi.append(
+  'contact',
+  JSON.stringify({
+    clientId: '00000000-0000-4000-c000-000000000003',
+    name: 'Chidi Okafor',
+    knownAs: 'Brother',
+    circle: 'Family',
+    phone: '+44 7700 900788',
+    email: 'chidi@okafor.dev',
+    city: 'Manchester',
+    howWeMet: 'Little brother, 3 years younger',
+    loves: ['Man City', 'Vinyl — Fela, Sade', 'Long bike rides', 'Hot sauce collecting'],
+  }),
+);
+chidi.append(
+  'photo',
+  new Blob([readFileSync(join(mockImages, 'contact-chidi.jpg'))], { type: 'image/jpeg' }),
+  'contact-chidi.jpg',
+);
+const chidiKept = await call('POST', '/api/contacts/people', chidi, false);
+await call('PUT', `/api/contacts/people/${chidiKept.id}/closest`);
+await call('GET', `/api/contacts/people/${chidiKept.id}`);
+await call('DELETE', `/api/contacts/people/${chidiKept.id}/closest`);
 
 // Photos: Mara has added none, adds one with a caption, then reads the album and the photo.
 const album = `/api/popkins/${created.id}/photos`;

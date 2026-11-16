@@ -55,8 +55,8 @@ rows, so another person's contacts never appear to be refused.
 - **Deleting a contact** removes it from the owner's Contacts only, through `ContactRemoval`
   (shared section); which of its rows that removes is open (known gap 110).
 - **An imported contact** keeps the `PersonId` of the account it came from. That person is not
-  told, and a later change to their account does not reach the contact `<TO SUPPLY>` (known gap
-  110 covers what Import brings over).
+  told, and a later change to their account does not reach the contact. Erasing that account
+  leaves the contact as it is and clears its `PersonId` (gap 117, ruled 2026-11-16).
 
 ### API
 
@@ -94,8 +94,9 @@ Every Contacts endpoint is under `/api/contacts/**`, on a controller in
   contact, and changes no `Membership`. The Worker's `SendContactRemindersJob` writes only to the
   owner.
 - **Admins.** The admin handlers read `Person`, `PopkinSpace` and their own tables; none reads a
-  Contacts table. Deleting an account deletes its Contacts rows through the same `ContactRemoval` (L2-049). What erasing an account
-  does to the contacts other owners imported from it is `<TO SUPPLY>`.
+  Contacts table. Deleting an account deletes its Contacts rows through the same `ContactRemoval` (L2-049). Erasing an account clears
+  `Contact.PersonId` on the contacts other owners imported from it, and changes nothing else of
+  theirs.
 - **Telemetry (ADR 0012).** A Contacts route is recorded as its template
   (`/api/contacts/people/{id}`). No log, metric dimension or span carries a contact's name, phone,
   email, city, note or any text the owner typed. The ProblemDetails of `contact_not_found` holds

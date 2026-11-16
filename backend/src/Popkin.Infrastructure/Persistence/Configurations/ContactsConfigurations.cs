@@ -15,6 +15,7 @@ public sealed class ContactConfiguration : IEntityTypeConfiguration<Contact>
         builder.Property(c => c.Name).HasMaxLength(Contact.MaxNameLength).IsRequired();
         builder.Property(c => c.KnownAs).HasMaxLength(Contact.MaxKnownAsLength);
         builder.Property(c => c.City).HasMaxLength(Contact.MaxCityLength);
+        builder.Property(c => c.HowWeMet).HasMaxLength(Contact.MaxHowWeMetLength);
         builder.Property(c => c.Phone).HasMaxLength(Contact.MaxPhoneLength);
         builder.Property(c => c.Email).HasMaxLength(Contact.MaxEmailLength);
         builder.Property(c => c.PhotoKey).HasMaxLength(200);

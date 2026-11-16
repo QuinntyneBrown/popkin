@@ -4,7 +4,9 @@
 import { contactSent } from '../fixtures/contacts';
 import { expect, test } from '../fixtures/pk-test';
 import { answer, hold, problem, recordedBody } from '../fixtures/stubs';
+import { aPhoto } from '../fixtures/photos';
 import { ContactFormPage } from '../pages/contact-form.page';
+import { Toasts } from '../pages/toasts';
 
 const femi = () => recordedBody<{ id: string }>('POST /api/contacts/people');
 
@@ -31,6 +33,7 @@ test.describe('Add someone', () => {
     await expect(form.phone).toHaveAttribute('type', 'tel');
     await expect(form.email).toHaveAttribute('type', 'email');
     await expect(form.city).toBeVisible();
+    await expect(form.howWeMet).toHaveAttribute('placeholder', 'At uni, through Grace…');
     await expect(form.loves).toHaveAttribute('placeholder', 'Jazz, cycling, Arsenal…');
   });
 
@@ -75,9 +78,11 @@ test.describe('Add someone', () => {
       phone: '',
       email: 'femi.b@mail.com',
       city: 'London',
+      howWeMet: '',
       loves: ['Arsenal', 'jazz brunches'],
     });
     await expect(page).toHaveURL(`/contacts/people/${femi().id}`);
+    await expect(new Toasts(page).toast).toHaveText('Femi is in your Contacts.');
   });
 
   // L2-129 AC7
@@ -151,8 +156,11 @@ test.describe('Edit', () => {
     await expect(form.save).toBeEnabled();
   });
 
-  // L2-130 AC1
-  test('shows the photo they have, and offers no new one', async ({ page, pk }) => {
+  // L2-130 AC1, AC4
+  test('shows the photo they have as Change photo, and Save sends a new one', async ({
+    page,
+    pk,
+  }) => {
     const photoUrl =
       'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     await answer(page, read(), {
@@ -160,10 +168,19 @@ test.describe('Edit', () => {
       body: { ...recordedBody<object>(read()), photoUrl },
     });
     await pk.open('editContact');
-
     const form = new ContactFormPage(page);
     await expect(form.photo).toHaveAttribute('src', photoUrl);
     await expect(form.addPhoto).toHaveCount(0);
+
+    const chooser = page.waitForEvent('filechooser');
+    await form.changePhoto.click();
+    await (await chooser).setFiles(aPhoto('lake.jpg'));
+    const request = page.waitForRequest(
+      (r) => r.method() === 'PUT' && r.url().endsWith(`/api/contacts/people/${kept().id}`),
+    );
+    await form.save.click();
+
+    expect((await request).postData()).toContain('name="photo"');
   });
 
   // L2-130 AC2
@@ -186,6 +203,7 @@ test.describe('Edit', () => {
       phone: '',
       email: 'femi.b@mail.com',
       city: 'Lagos',
+      howWeMet: '',
       loves: ['Arsenal', 'jazz brunches'],
     });
     await expect(page).toHaveURL(`/contacts/people/${kept().id}`);

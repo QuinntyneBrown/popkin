@@ -55,31 +55,37 @@ Popkin web app, `docs/mocks/pages/contact-profile/`:
 
 Dialog `docs/mocks/dialogs/contact-actions/default.html` — titled "Chidi Okafor", it offers "Take
 Chidi out of Closest" with the hint "Chidi stays in People and Family.", "Edit profile", "See
-Chidi’s connections" and "Delete Chidi" (L2-131 AC1).
+Chidi’s connections" and "Delete Chidi" (L2-131 AC1). `not-closest.html` — for Femi, who is not in
+Closest, the first item reads "Add Femi to Closest" with the hint "Femi shows first in People."
+(L2-131 AC4).
 
 On a phone the profile shows only its "People" back link, not the Contacts tabs (L2-121 AC6).
 
-### Conflicts and gaps
+### Rulings (known gaps settled 2026-11-16)
 
-- **Closest.** Only "Take {first name} out of Closest" is drawn. How a contact enters Closest,
-  what the menu offers a contact who is not in it, and how many Closest holds are known gap 100.
-  Until it is settled, the menu leaves the first item out for a contact not in Closest. No
-  message follows taking someone out; its copy, if one is wanted, is `<TO SUPPLY>`.
-- **Days left and date order.** When a key date is near enough to show "in {n} days" is known
-  gap 101. The mock shows it at 11 days and leaves it off at 131.
-- **The name before the profile loads.** `loading.html` and `error.html` name the contact
-  ("Chidi"), which the page knows only when it was opened from a screen that showed the name. A
-  profile opened from a typed or saved address has no name until it loads; the copy of that
-  case is `<TO SUPPLY>`.
-- **Also in your Popkin.** Which Popkins count (wrapped-up ones, Popkins the contact has left) and
-  what shows when there are two or more are `<TO SUPPLY>`; the mock draws one. A contact not
-  imported from an account (`PersonId` null) is never in a Popkin.
-- **A group chip** opens Groups in the mock; what it opens is known gap 108.
+- **Closest** (gap 100). The menu offers "Take {first name} out of Closest" to a contact in
+  Closest and "Add {first name} to Closest" ("{first name} shows first in People.") to one who is
+  not. Closest has no limit of its own. No message follows either; the menu closes and the
+  profile reloads.
+- **Days left** (gap 101). A key date shows the days left when its next day is 30 days away or
+  fewer: "today", "tomorrow", "in {n} days".
+- **The name before the profile loads** (gap 111). Opened from a screen that showed the name,
+  the loading and failed copy name the contact ("Loading Chidi’s profile…"). Opened from a typed
+  or saved address, they read "Loading the profile…", "We couldn’t load this profile" and "The
+  timeline and notes are safe. Check your connection and try again.".
+- **Also in your Popkin.** Only a contact imported from an account (`PersonId` set) can have one.
+  A Popkin counts while both hold a `Membership` with no `LeftAt`, wrapped up or not. With more
+  than one, the newest is named and "and {n} more" follows (L2-128 AC2).
+- **A group chip** (gap 108) opens that group's detail, `/contacts/groups/{groupId}`.
 - **History tab address.** The mocks draw the tabs as links. This design keeps the tab in the
   query (`?view=timeline|follow-ups|memories`) so a tab can be linked and the back button
   works; the three content designs follow it.
-- **"Follow-ups {n}"** counts the open follow-ups; the delete dialog counts every follow-up. The
-  mock shows 1 for both; the meaning of the tab's number is `<TO SUPPLY>`.
+- **"Follow-ups {n}"** (gap 115) counts the open follow-ups and shows no number at none; the
+  delete dialog counts every follow-up.
+- **Built in steps.** The header, About, the menu and the states come first. `keyDates`,
+  `habit`, `connections`, `groups`, `counts` and `alsoIn` join the DTO with Key dates, Habits,
+  Connections, Groups, the history designs and Import; until each joins, the page leaves its
+  section out, shows the habit's add card and the empty timeline.
 
 ### API
 
@@ -91,19 +97,22 @@ Every endpoint is on `ContactsPeopleController` (`Popkin.Api/Controllers/Contact
   `id`, `name`, `firstName`, `initials`, `accent`, `photoUrl` (an expiring read address from
   `IPhotoStore.GetReadUrl`, or null), `knownAs`, `circle`, `city`, `phone`, `email`, `howWeMet`,
   `loves` (`string[]`), `isClosest`, `alsoIn` (`PopkinLinkDto?`: `popkinId`, `name`, `emoji`,
-  `colour`), `keyDates` (`ContactKeyDateDto[]`: `id`, `kind`, `title`, `day`, `month`, `year?`,
+  `colour`), `alsoInMore` (the number of other shared Popkins), `keyDates` (`ContactKeyDateDto[]`: `id`, `kind`, `title`, `day`, `month`, `year?`,
   `everyYear`, `reminder`, `nextOn`), `habit` (`ContactHabitDto?`: `id`, `rhythm`, `name`,
   `kept` (12 booleans, oldest first), `overdueSince?`, `nextOn?`), `connections`
   (`ContactConnectionDto[]`: `connectionId`, `contactId`, `name`, `initials`, `photoUrl`,
   `words`), `groups` (`ContactGroupChipDto[]`: `groupId`, `name`, `emoji`) and `counts`
   (`timelineEntries`, `followUps`, `openFollowUps`, `memories`). The same DTO fills the edit form.
+- `PUT /api/contacts/people/{contactId}/closest` — `204`; puts the contact in Closest (L2-131
+  AC4); one already in it changes nothing.
 - `DELETE /api/contacts/people/{contactId}/closest` — `204`; `404` `contact_not_found`. Taking
   out a contact not in Closest is a `204` that changes nothing (L2-131 AC2).
 
 ### Backend
 
 - **`Contact`** (Domain) — the entity of the shared Contacts section. This design uses
-  `IsClosest` and `LeaveClosest()`, which clears it and leaves the circle as it is.
+  `IsClosest`, `JoinClosest()`, and `LeaveClosest()`, which clears it and leaves the circle as it
+  is.
 - **`GetContactProfileQuery`** / **`GetContactProfileQueryHandler`**
   (`Popkin.Application/Contacts/Profile/`) — calls `IContactGuard.RequireOwnedAsync(contactId)`,
   then reads the contact's `KeyDate`, `Habit` with its last 12 `HabitKept` periods, `Connection`
@@ -115,8 +124,9 @@ Every endpoint is on `ContactsPeopleController` (`Popkin.Api/Controllers/Contact
 - **`alsoIn`** — when `Contact.PersonId` is set, the handler finds a `PopkinSpace` in which both
   `ICurrentPerson.PersonId` and that person hold a `Membership` with no `LeftAt`. It reads only
   the Popkin's name, emoji and colour, and tells the other person nothing.
-- **`TakeOutOfClosestCommand`** / **`…Handler`** (`Popkin.Application/Contacts/Profile/`) — the
-  guard, `Contact.LeaveClosest()` and one save.
+- **`TakeOutOfClosestCommand`** and **`AddToClosestCommand`** with their handlers
+  (`Popkin.Application/Contacts/Profile/`) — the guard, `Contact.LeaveClosest()` or
+  `JoinClosest()`, and one save.
 - No hub event is sent; telemetry records the route template only, never a name, phone or note.
 
 ### Frontend (Popkin web app)
@@ -141,21 +151,21 @@ Every endpoint is on `ContactsPeopleController` (`Popkin.Api/Controllers/Contact
 - **`contact-profile-text.ts`** (api library) — the subtitle "{knownAs} · {circle} · {city}"
   without empty parts, a key date's day ("Jan 24", "Sat, Sep 26 · in 11 days"), "Kept {n} of
   the last 12", "Overdue since {day}", "Next: {day}", and the state copy of L2-123. Unit tested.
-- **`CONTACTS_API`** — `profile(contactId)`, `takeOutOfClosest(contactId)`.
+- **`CONTACTS_API`** — `contact(contactId)`, `addToClosest(contactId)`, `takeOutOfClosest(contactId)`.
 
 ### Tests
 
 - API acceptance tests (InMemory, ADR 0005), `Popkin.Api.Tests/Contacts/ContactProfileTests.cs`:
   the owner reads the profile with its dates, habit, connections, groups and counts; another
   person's contact answers `404` `contact_not_found`, as an unknown id does; "Also in your
-  Popkin" names a Popkin both share and not one the other person has left; taking a contact out
-  of Closest keeps their circle.
+  Popkin" names a Popkin both share and not one the other person has left; adding a contact to
+  Closest and taking them out keeps their circle.
 - Direct tests of `contact-profile-text.ts` and `ContactProfileStore`, one case per row: the
   subtitle with each part missing, the phone, email-only and neither action sets, overdue and
   next habit lines.
 - Playwright, `e2e/tests/contact-profile.spec.ts` through `ContactProfilePage` and
   `ContactActionsDialog` page objects: the default, grace and empty profiles, loading, a failed
-  load with "Try again", not found, the menu and taking Chidi out of Closest. Responses are
+  load with "Try again", not found, the menu, taking Chidi out of Closest and adding Femi to it. Responses are
   recorded from `GET /api/contacts/people/{contactId}` after `popkin seed` adds Mara's Contacts
   cast, idempotently; `routes.ts` gains each state.
 - Parity for `pk-contact-id`, `pk-info-card`, `pk-keep-strip` and `pk-contacts-page`.

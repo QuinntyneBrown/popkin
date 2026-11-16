@@ -81,6 +81,23 @@ public sealed class SaveContactValidatorTests
     }
 
     [Theory]
+    [InlineData(120, null)]
+    [InlineData(121, "contact_field_too_long")]
+    public void How_you_met_is_at_most_120_characters(int length, string? refusal)
+    {
+        var request = Request() with { HowWeMet = new string('a', length) };
+
+        if (refusal is null)
+        {
+            Assert.Equal(new string('a', length), SaveContactValidator.Validate(request).Details.HowWeMet);
+        }
+        else
+        {
+            AssertRefused(request, refusal, "howWeMet");
+        }
+    }
+
+    [Theory]
     [InlineData("femi@example.com", null)]
     [InlineData(" Femi@Example.co.uk ", null)]
     [InlineData("femi@example", "contact_email_invalid")]
@@ -145,7 +162,7 @@ public sealed class SaveContactValidatorTests
         AssertRefused(Request() with { Circle = circle }, "contact_circle_not_allowed", "circle");
 
     private static SaveContactRequest Request() =>
-        new(Guid.NewGuid(), "Femi Bankole", null, null, null, null, null, []);
+        new(Guid.NewGuid(), "Femi Bankole", null, null, null, null, null, null, []);
 
     /// <summary>A number stands for a text of that many characters.</summary>
     private static string? Text(object? given) => given is int length ? new string('a', length) : (string?)given;

@@ -36,18 +36,19 @@ Popkin web app, `docs/mocks/pages/add-contact/`:
   "Builds your map of who’s who.", each connection ("Grace Adeyemi" "Partner") with "Remove the
   connection to Grace", then "Connect to someone" (L2-129 AC3); "Groups", one toggle chip per
   group of the owner ("🎓 Sheffield lot" pressed); "Details", "Optional.", with "Phone", "Email",
-  "City" and "Things they love" ("Jazz, cycling, Arsenal…").
+  "City", "How you met" ("At uni, through Grace…") and "Things they love" ("Jazz, cycling,
+  Arsenal…").
 - `invalid.html` — `pk-form-summary` "One thing to fix" with the link "Name: add a name so you
   can find them later.", and the field's error "Add a name so you can find them later." with
   `aria-invalid` (L2-129 AC4).
 - `submitting.html` — "Save" reads "Saving…" and is disabled (L2-123 AC5).
 - `error.html` — the danger `pk-banner` "We couldn’t save Femi. Everything you typed is still
   here. Check your connection and try Save again.", every value kept (L2-129 AC6).
-- `edit.html` — "Edit Chidi", every value filled in, the photo shown, and "Delete Chidi" at the
-  end (L2-130 AC1, AC3).
+- `edit.html` — "Edit Chidi", every value filled in, the photo as the picker "Change photo",
+  and "Delete Chidi" at the end (L2-130 AC1, AC3, AC4).
 - After a save, the contact's profile opens (L2-129 AC5, L2-130 AC2).
-  `docs/mocks/pages/contact-profile/empty.html` draws the toast that follows an add: "Femi
-  Bankole added", "You’ll hear about his birthday a week before.", "Undo".
+  `docs/mocks/pages/contact-profile/empty.html` draws the success toast that follows an add:
+  "Femi is in your Contacts." (L2-129 AC5), with no Undo.
 - "Cancel" saves nothing and opens People after an add, or the profile after an edit (L2-129
   AC7, L2-130 AC2).
 - Offline, "Save" keeps the contact in `ContactsOutbox` and shows "You’re offline", "What you
@@ -58,16 +59,16 @@ Popkin web app, `docs/mocks/pages/add-contact/`:
 
 - **Fields.** The length of each field, the form of a phone and an email, whether a birthday
   keeps its year, where "How you met" is entered (the profile shows it; the form has no field)
-  and "Things they love" as one comma-separated field are known gap 102. Until it is settled,
-  the form splits "Things they love" at commas and the API takes a list; every limit is
-  `<TO SUPPLY>`; the interim ruling in the register sets them. Whether a circle is required is
-  `<TO SUPPLY>`; the API accepts none.
-- **The toast after an add.** L2-129 AC5 asks only that the profile opens. The mock's toast uses
-  "his", which L2-122 AC4 forbids; the requirement stands, so the line reads "You’ll hear about
-  Femi’s birthday a week before." What "Undo" undoes is `<TO SUPPLY>`; it is not built until a
-  requirement says.
-- **Changing the photo in Edit.** `edit.html` draws the photo with no way to change or remove
-  it. Until a mock draws one, the edit form shows the photo only, and the API keeps it.
+  and "Things they love" as one comma-separated field were known gap 102, now ruled: the form
+  splits "Things they love" at commas and the API takes a list; the limits are the register's
+  ruling; a birthday may be kept without its year; "How you met" is a field of "Details", at
+  most 120 characters. A circle is not required; the API accepts none.
+- **The toast after an add** (gap 112, ruled). The profile opens with the success toast "{first
+  name} is in your Contacts." and no Undo, since nothing names what one would undo, and the
+  mock's "his" is gone (L2-122 AC4).
+- **Changing the photo in Edit** (gap 112, ruled). Edit shows the photo in the same picker as
+  Add someone, labelled "Change photo"; the photo picked replaces the old one when "Save"
+  succeeds, and the old file is deleted. A photo is replaced, never removed.
 - **Key dates in Edit.** A date's day is not changed once added (known gap 103); the form changes
   its reminder or removes it. The kinds offered are known gap 103 too.
 - **The groups list.** The manifest says the form needs no request before it shows, but the
@@ -91,10 +92,10 @@ authenticated policy; each sends one MediatR request.
   `SaveContactRequest` as JSON, and the optional part `photo` one image. `201`
   `ContactProfileDto` with `Location`. A second request with the same `clientId` answers the
   contact the first made.
-- `PUT /api/contacts/people/{contactId}` — the same parts, without `photo` (see Conflicts).
-  `200` `ContactProfileDto`; `404` `contact_not_found`.
+- `PUT /api/contacts/people/{contactId}` — the same parts; a `photo` replaces the contact's
+  photo. `200` `ContactProfileDto`; `404` `contact_not_found`.
 - `SaveContactRequest` — `clientId`, `name`, `knownAs?`, `circle?`, `phone?`, `email?`, `city?`,
-  `loves` (`string[]`), `keyDates` (`KeyDateDraftDto[]`: `id?` for a kept date, `kind`,
+  `howWeMet?`, `loves` (`string[]`), `keyDates` (`KeyDateDraftDto[]`: `id?` for a kept date, `kind`,
   `title?`, `day`, `month`, `year?`, `everyYear`, `reminder`), `connections`
   (`ConnectionDraftDto[]`: `id?`, `otherContactId`, `kind`, `words`) and `groupIds`. A kept date
   or connection missing from the lists is removed; one without `id` is added.
@@ -136,7 +137,7 @@ authenticated policy; each sends one MediatR request.
   `/contacts/people/new` and `/contacts/people/:contactId/edit`, data `{ shell: 'bare', page:
   'add-contact' }`. It composes `pk-top-bar` ("Cancel", the heading, "Save"),
   `pk-form-sections`, `pk-photo-picker` ("Add a photo", `size="xl"` with the name beside it;
-  `fixed` on Edit), `pk-text-field`, `pk-choice-chips`
+  "Change photo" on Edit), `pk-text-field`, `pk-choice-chips`
   (Circle, a radio group, `outline`), the date entries and person picks of `pk-form-sections` with
   `pk-select-field` and `pk-icon-button`, `pk-chip` toggles for Groups, `pk-form-summary`,
   `pk-banner` for the failed save and `pk-button` for "Delete {first name}". Phone and Email
@@ -152,7 +153,7 @@ authenticated policy; each sends one MediatR request.
 - **`contact-form-text.ts`** — "Edit {first name}", "Delete {first name}", "Remind me about the
   {kind}", "Remove the {kind}", "Remove the connection to {first name}", the failed banner and
   the toast. Unit tested.
-- **`CONTACTS_API`** — `addContact(request, photo?)`, `editContact(contactId, request)`.
+- **`CONTACTS_API`** — `addContact(request, photo?)`, `editContact(contactId, request, photo?)`.
 
 ### Tests
 

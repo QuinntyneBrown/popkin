@@ -132,3 +132,5 @@ export * from './lib/api/contacts/contact-form-text';
 export * from './lib/api/contacts/contacts-text';
 export * from './lib/api/contacts/contacts-frame';
 export * from './lib/api/contacts/connection-map';
+export * from './lib/api/contacts/contact-profile-store';
+export * from './lib/api/contacts/contact-profile-text';

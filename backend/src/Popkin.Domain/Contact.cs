@@ -12,7 +12,7 @@ public enum ContactCircle
 
 /// <summary>What the owner writes in "Who" and "Details" of the contact form (L2-129 AC1).</summary>
 public sealed record ContactDetails(
-    string? KnownAs, ContactCircle? Circle, string? Phone, string? Email, string? City, IReadOnlyList<string> Loves);
+    string? KnownAs, ContactCircle? Circle, string? Phone, string? Email, string? City, string? HowWeMet, IReadOnlyList<string> Loves);
 
 /// <summary>
 /// Someone a person keeps in their Contacts, whether or not they have a Popkin account (L1-031).
@@ -27,6 +27,8 @@ public sealed class Contact : IClientWrite
     public const int MaxKnownAsLength = 60;
 
     public const int MaxCityLength = 60;
+
+    public const int MaxHowWeMetLength = 120;
 
     public const int MaxPhoneLength = 20;
 
@@ -57,6 +59,8 @@ public sealed class Contact : IClientWrite
     public string? Email { get; private set; }
 
     public string? City { get; private set; }
+
+    public string? HowWeMet { get; private set; }
 
     public List<string> Loves { get; private set; } = [];
 
@@ -90,10 +94,17 @@ public sealed class Contact : IClientWrite
         Phone = Clean(details.Phone);
         Email = Clean(details.Email);
         City = Clean(details.City);
+        HowWeMet = Clean(details.HowWeMet);
         Loves = details.Loves.Select(l => l.Trim()).Where(l => l.Length > 0).ToList();
     }
 
     public void ChangePhoto(string key) => PhotoKey = key;
+
+    /// <summary>Into Closest, the owner's short list (L2-131 AC4); the circle stays as it is.</summary>
+    public void JoinClosest() => IsClosest = true;
+
+    /// <summary>Out of Closest (L2-131 AC2); they stay in People and their circle.</summary>
+    public void LeaveClosest() => IsClosest = false;
 
     private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

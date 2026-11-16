@@ -19,6 +19,7 @@ public sealed record ContactProfileDto(
     string? City,
     string? Phone,
     string? Email,
+    string? HowWeMet,
     IReadOnlyList<string> Loves,
     bool IsClosest)
 {
@@ -35,6 +36,7 @@ public sealed record ContactProfileDto(
             contact.City,
             contact.Phone,
             contact.Email,
+            contact.HowWeMet,
             contact.Loves,
             contact.IsClosest);
 }

@@ -25,12 +25,13 @@ export interface SaveContactRequest {
   phone: string;
   email: string;
   city: string;
+  howWeMet: string;
   loves: string[];
 }
 
 /**
  * A contact as their profile and the edit form show them (L2-128, L2-130). Their dates, habit,
- * connections, groups and counts join as their designs are built.
+ * connections, groups, counts and shared Popkin join as their designs are built.
  */
 export interface ContactProfileView {
   id: string;
@@ -44,6 +45,18 @@ export interface ContactProfileView {
   city: string | null;
   phone: string | null;
   email: string | null;
+  howWeMet: string | null;
   loves: string[];
   isClosest: boolean;
+  /**
+   * A Popkin we are both in, for a contact imported from an account (L2-128 AC2); absent until
+   * Import reads it.
+   */
+  alsoIn?: ContactPopkinLink | null;
+}
+
+/** "Also in your Popkin “Lakeside Weekend”": a Popkin I share with a contact. */
+export interface ContactPopkinLink {
+  popkinId: string;
+  name: string;
 }

@@ -3,10 +3,10 @@
 | Design | Effort | Complete |
 |---|---|---|
 | open-contacts | 4 days | 60% |
-| add-contact | 5 days | 55% |
+| add-contact | 5 days | 75% |
 | people | 3 days | 0% |
-| contact-profile | 4 days | 0% |
-| contacts-privacy | 2 days | 30% |
+| contact-profile | 4 days | 55% |
+| contacts-privacy | 2 days | 60% |
 | delete-contact | 2 days | 0% |
 | log-entry | 4 days | 0% |
 | follow-ups | 5 days | 0% |
