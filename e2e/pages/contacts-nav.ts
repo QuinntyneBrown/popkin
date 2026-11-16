@@ -10,6 +10,8 @@ export class ContactsNav {
   readonly tabs: Locator;
   readonly current: Locator;
   readonly followUpsBadge: Locator;
+  /** The badge's number; its name is visually hidden beside it. */
+  readonly followUpsCount: Locator;
 
   constructor(page: Page) {
     this.root = page.getByRole('navigation', { name: 'Contacts' });
@@ -19,6 +21,7 @@ export class ContactsNav {
     this.tabs = this.root.locator('li a');
     this.current = this.root.locator('a[aria-current="page"]');
     this.followUpsBadge = this.tab('Follow-ups').locator('.badge');
+    this.followUpsCount = this.followUpsBadge.locator('[aria-hidden="true"]');
   }
 
   tab(name: string): Locator {

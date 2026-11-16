@@ -2,11 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  AddFollowUpRequest,
   AddKeyDateRequest,
   ContactDatesView,
   ContactProfileView,
   ContactsSummaryView,
   DatesFilter,
+  FollowUpView,
   KeyDateRowView,
   PeopleView,
   ReminderPreferencesView,
@@ -48,6 +50,12 @@ export interface ContactsApi {
   saveReminderPreferences(
     preferences: ReminderPreferencesView,
   ): Observable<ReminderPreferencesView>;
+  /** Every follow-up of mine, open and done (L2-141). */
+  followUps(): Observable<FollowUpView[]>;
+  /** "Add a follow-up" (L2-142 AC1); a resend under the same client id keeps it once. */
+  addFollowUp(request: AddFollowUpRequest): Observable<FollowUpView>;
+  /** "Mark done" and "Mark not done" (L2-142 AC2, AC3). */
+  setFollowUpDone(id: string, done: boolean): Observable<FollowUpView>;
 }
 
 export const CONTACTS_API = new InjectionToken<ContactsApi>('ContactsApi');
@@ -118,5 +126,17 @@ export class HttpContactsApi implements ContactsApi {
       '/api/contacts/reminder-preferences',
       preferences,
     );
+  }
+
+  followUps(): Observable<FollowUpView[]> {
+    return this.http.get<FollowUpView[]>('/api/contacts/follow-ups');
+  }
+
+  addFollowUp(request: AddFollowUpRequest): Observable<FollowUpView> {
+    return this.http.post<FollowUpView>('/api/contacts/follow-ups', request);
+  }
+
+  setFollowUpDone(id: string, done: boolean): Observable<FollowUpView> {
+    return this.http.put<FollowUpView>(`/api/contacts/follow-ups/${id}/done`, { done });
   }
 }

@@ -196,6 +196,30 @@ export const routes = {
   contactsPeopleLoading: { app: '/contacts/people', mock: 'pages/contacts-people/loading.html' },
   contactsPeopleError: { app: '/contacts/people', mock: 'pages/contacts-people/error.html' },
   contactsPeopleEmpty: { app: '/contacts/people', mock: 'pages/contacts-people/empty.html' },
+  contactsFollowUps: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/default.html',
+  },
+  contactsFollowUpsPromises: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/promises.html',
+  },
+  contactsFollowUpsDone: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/done.html',
+  },
+  contactsFollowUpsEmpty: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/empty.html',
+  },
+  contactsFollowUpsLoading: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/loading.html',
+  },
+  contactsFollowUpsError: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/error.html',
+  },
   contactsDates: { app: '/contacts/dates', mock: 'pages/contacts-dates/default.html' },
   contactsDatesBirthdays: { app: '/contacts/dates', mock: 'pages/contacts-dates/birthdays.html' },
   contactsDatesEmpty: { app: '/contacts/dates', mock: 'pages/contacts-dates/empty.html' },

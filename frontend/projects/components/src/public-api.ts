@@ -235,6 +235,7 @@ export * from './lib/memory-grid/memory-grid';
 export * from './lib/contact-timeline/contact-timeline';
 export * from './lib/contact-timeline-item/contact-timeline-item';
 export * from './lib/task/task';
+export * from './lib/task-list/task-list';
 export * from './lib/add-field/add-field';
 export * from './lib/promise/promise';
 export * from './lib/spotlight/spotlight';

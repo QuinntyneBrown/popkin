@@ -179,3 +179,35 @@ export interface AddKeyDateRequest {
   everyYear: boolean;
   lead: ReminderLead;
 }
+
+/** How a conversation was had (L2-135). */
+export type TalkChannel = 'InPerson' | 'Phone' | 'Video' | 'Messages';
+
+/** A follow-up as Follow-ups and a profile list it (L2-141). */
+export interface FollowUpView {
+  id: string;
+  text: string;
+  contactId: string | null;
+  contactFirstName: string | null;
+  contactInitials: string | null;
+  contactAccent: string | null;
+  contactPhotoUrl: string | null;
+  /** yyyy-MM-dd, or none. */
+  dueOn: string | null;
+  isPromise: boolean;
+  promisedVia: TalkChannel | null;
+  promisedOn: string | null;
+  createdAt: string;
+  doneAt: string | null;
+}
+
+/** "Add a follow-up" (L2-142 AC1): for nobody on Follow-ups, for the contact on a profile. */
+export interface AddFollowUpRequest {
+  clientId: string;
+  text: string;
+  contactId?: string | null;
+  dueOn?: string | null;
+}
+
+/** Follow-ups' tabs (L2-141 AC2). */
+export type FollowUpsFilter = 'everything' | 'promises';

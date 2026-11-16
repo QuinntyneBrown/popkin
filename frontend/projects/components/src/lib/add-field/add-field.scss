@@ -1,6 +1,9 @@
 :host {
   position: relative;
   display: block;
+  /* Beside other controls in a row, it takes the room left, never under a short measure. */
+  flex: 1 1 var(--layout-measure-sm);
+  min-width: min(100%, var(--layout-measure-sm));
 }
 
 .icon {
