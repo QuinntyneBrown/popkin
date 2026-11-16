@@ -1,0 +1,35 @@
+<div
+  pk-dialog
+  [heading]="'Delete ' + data.firstName + '?'"
+  [description]="sentence"
+  [accent]="data.accent"
+>
+  @if (failed()) {
+    <div pk-alert [heading]="failure.heading">{{ failure.text }}</div>
+  }
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="danger"
+    size="md"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="delete()"
+  >
+    {{ busy() ? 'Deleting…' : 'Delete ' + data.firstName }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="quiet"
+    size="md"
+    cdkFocusInitial
+    [block]="true"
+    (click)="keep()"
+  >
+    Keep {{ data.firstName }}
+  </button>
+</div>

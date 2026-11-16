@@ -7,7 +7,7 @@
 | people | 3 days | 85% |
 | contact-profile | 4 days | 55% |
 | contacts-privacy | 2 days | 60% |
-| delete-contact | 2 days | 0% |
+| delete-contact | 2 days | 90% |
 | log-entry | 4 days | 0% |
 | follow-ups | 5 days | 0% |
 | key-dates | 6 days | 0% |

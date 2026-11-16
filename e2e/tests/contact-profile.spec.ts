@@ -105,7 +105,7 @@ test.describe('A contact’s profile', () => {
 
 test.describe('More for a contact', () => {
   // L2-131 AC1, AC2
-  test('offers Closest, Edit and connections, and takes Chidi out of Closest', async ({
+  test('offers Closest, Edit, connections and Delete, and takes Chidi out of Closest', async ({
     page,
     pk,
   }) => {
@@ -123,6 +123,7 @@ test.describe('More for a contact', () => {
       /^\s*Take Chidi out of Closest\s*Chidi stays in People and Family\.\s*$/,
       /^\s*Edit profile\s*$/,
       /^\s*See Chidi’s connections\s*$/,
+      /^\s*Delete Chidi\s*$/,
     ]);
     await menu.item('Take Chidi out of Closest').click();
 

@@ -37,8 +37,8 @@ Popkin web app, `docs/mocks/dialogs/delete-contact/`, over the profile:
   name the contact; each group, and every other contact, stays. When gap 110 is settled the
   dialog's sentence may need those rows too.
 - **Counts of zero and one.** The mock shows "5 timeline entries", "1 follow-up" and "7 memories
-  and files". The plural forms come from the counts ("1 timeline entry", "2 follow-ups"); what
-  the sentence says when a count is zero is `<TO SUPPLY>`.
+  and files". The plural forms come from the counts ("1 timeline entry", "2 follow-ups"); a count of zero is left out of the sentence, so with nothing logged it reads "Femi’s profile
+  goes for good. Your Popkins don’t change, and Femi isn’t told." (ruled 2026-11-16).
 - **No message after a delete.** L2-132 asks for none and no mock draws one, so People opens
   with no toast.
 - **Offline.** The shared Contacts rules queue an offline write in `ContactsOutbox`. A delete is
@@ -46,8 +46,8 @@ Popkin web app, `docs/mocks/dialogs/delete-contact/`, over the profile:
   without a connection.
 - **A file that cannot be deleted.** Files are deleted after the database save; a file the store
   fails to delete is left behind, as for an account's photo
-  ([Manage the account](../../accounts/manage-account/README.md)). Whether a sweep removes such
-  files later is `<TO SUPPLY>`.
+  ([Manage the account](../../accounts/manage-account/README.md)). No sweep removes such files (ruled
+  2026-11-16): the failure is logged with the count of files left, as for an account's photo.
 
 ### API
 
@@ -74,7 +74,8 @@ Popkin web app, `docs/mocks/dialogs/delete-contact/`, over the profile:
   Popkin is read for writing or changed; when the contact was imported, the account it came
   from is untouched (L2-132 AC2). Nothing is sent over the hub or to the contact (L2-122 AC3).
 - **`ContactRemoval`** (Application) — the list of Contacts tables that hold a contact's rows,
-  used by this handler and by the account deletion of L2-049, so that both remove the same rows.
+  used by this handler and by the erasure of a deleted account (`PurgeDeletedAccountsCommand`,
+  L2-049 AC4), so that both remove the same rows and files. Each later feature adds its rows.
 
 ### Frontend (Popkin web app)
 

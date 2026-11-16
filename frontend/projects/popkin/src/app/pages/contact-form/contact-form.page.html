@@ -140,6 +140,20 @@
           ></div>
         </div>
       </section>
+      @if (store.editing(); as editing) {
+        <div pk-menu-list [separated]="true">
+          <button
+            pk-menu-item
+            type="button"
+            icon="trash"
+            [danger]="true"
+            [disabled]="saving()"
+            (click)="delete()"
+          >
+            Delete {{ editing.firstName }}
+          </button>
+        </div>
+      }
     </form>
   }
 </div>
