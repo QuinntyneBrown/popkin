@@ -59,26 +59,36 @@ The profile's tabs (`docs/mocks/pages/contact-profile/`):
   follow-ups with their kind and day ("Ask Chidi how the commute is going", "Follow-up", "Sep
   20"), each with its tick (L2-135 AC3).
 
-### Conflicts and gaps
+### Rulings (known gap 106, settled)
 
-- **Title and length.** The timeline shows a conversation's title ("First week at Arup") and
-  length ("40 min"); the form has neither. Until known gap 106 is settled, a conversation shows
-  its channel without a length, and no title.
-- **When.** "Today, 8:40 am" is the moment Log opened, sent as `loggedAt`; changing it is gap 106.
-- **The promise editor.** "Add a promise or follow-up" is undrawn (gap 106). The design adds a
-  row of text and a day, drawn as the mock's `promise` row; its form is `<TO SUPPLY>`.
-- **"Worth remembering"** suggests "Biscuit the greyhound arrives in October"; what it suggests is
-  gap 106. The design shows "Add a date" alone, which opens Add a date for the contact
-  ([Key dates](../key-dates/README.md)).
-- **Required fields of a milestone.** No requirement says which of "What happened?" and "When" a
-  milestone needs: `<TO SUPPLY>`. The design requires the kind and "When".
-- **The yearly date's title** is "{first name}'s work anniversary" for "New job"; the title for
-  every other kind is `<TO SUPPLY>`. Its lead time is the owner's Milestones default, "On the
-  day" at first, and the hint names it ("with a nudge {lead}").
-- **A milestone's photo offline.** `ContactsOutbox` keeps its entries in local storage, which
-  holds no file, so a milestone with a photo is not queued; offline its save fails with the note
-  kept. Whether the outbox should keep files is `<TO SUPPLY>`.
-- **Editing and deleting** an entry or a follow-up are gap 106.
+- **Title and length.** A conversation has no title and no length: the timeline shows its channel
+  ("Phone") and its note. The mocks drop "40 min" and the conversations' titles. A milestone's
+  title is "What happened?".
+- **When.** A conversation is logged at the moment Log opened ("Today, 8:40 am"), sent as
+  `loggedAt`; it cannot be changed. A milestone's "When" is a date input, required.
+- **The promise editor** is the dialog Add a promise (`docs/mocks/dialogs/add-promise/`): "What
+  you said you'd do" (required: "Say what you'll do, so it goes on your follow-ups."; at most 200
+  characters, as a follow-up) and "Remind me", a date, tomorrow at first. "Add the promise" lists
+  it as the mock's `promise` row; "Remove this promise" takes it off before Save. Promises are
+  saved with the conversation, never alone.
+- **"Worth remembering"** offers "Add a date" alone, which opens Add a date for the contact; no
+  suggestions. The mocks drop the suggested tag.
+- **A milestone needs** its kind ("New job" at first), "What happened?" (1 to 200 characters:
+  "Say what happened.") and "When". Its note is optional, up to 2,000 characters.
+- **A conversation's note** ("What did you talk about?") is 1 to 2,000 characters.
+- **The yearly date's title** is "{first name}'s {what}": work anniversary (New job), wedding
+  anniversary (Wedding), baby's birthday (New baby), move anniversary (Moved), graduation
+  anniversary (Graduated), and for Something else the milestone's own words. The hint names the
+  owner's Milestones lead ("with a nudge on the day", "with a nudge 1 week before").
+- **A milestone's photo** waits for [Memories and files](../memories/README.md): "Add a photo"
+  opens Add a memory for the contact after the milestone is saved. A milestone carries no file of
+  its own.
+- **Offline.** Log sends at once; a failure keeps every field and shows the error state, whose
+  Save sends again under the same client id. Nothing is queued.
+- **Paging.** The timeline answers every entry of the contact, newest first; a person logs a
+  handful a month, so there is no paging.
+- **Editing and deleting** an entry or a promise are not built; an entry goes when its contact
+  does (`ContactRemoval`).
 
 ### API
 
@@ -87,17 +97,16 @@ The profile's tabs (`docs/mocks/pages/contact-profile/`):
 - `POST /api/contacts/people/{contactId}/conversations` — body `{ clientId, channel, loggedAt,
   note, promises: [{ text, dueOn }] }`. `201` `TimelineEntryDto`. A resend with the same
   `clientId` answers `200` with the entry already saved. Refusals: `400` `note_required`
-  (L2-133 AC4), `note_too_long`, `promise_text_required`, `promise_due_required`,
-  `channel_not_allowed` (each length `<TO SUPPLY>`, gap 106); `404` `contact_not_found`.
-- `POST /api/contacts/people/{contactId}/milestones` — `multipart/form-data`: `clientId`, `kind`,
-  `title`, `happenedOn`, `note?`, `everyYear`, `photo?`. `201` `TimelineEntryDto` with
-  `keyDateId` when a yearly milestone date was added. The photo follows the rules of
-  [Memories and files](../memories/README.md): `400` `photo_too_large`, `photo_type_not_allowed`.
-  Others: `400` `happened_on_required`, `kind_not_allowed`; `404` `contact_not_found`.
+  (L2-133 AC4), `note_too_long`, `promise_text_required`, `promise_text_too_long`,
+  `promise_due_required`; `404` `contact_not_found`.
+- `POST /api/contacts/people/{contactId}/milestones` — JSON: `clientId`, `kind`, `title`,
+  `happenedOn`, `note?`, `everyYear`. `201` `TimelineEntryDto` with `keyDateId` when a yearly
+  milestone date was added. Refusals: `400` `title_required`, `title_too_long`,
+  `happened_on_required`, `note_too_long`; `404` `contact_not_found`.
 - `GET /api/contacts/people/{contactId}/timeline?show={all|conversations|milestones}` — `200`
   `TimelineDto`: `entries` newest first, each `TimelineItemDto` (`id`, `kind` of `Conversation`,
   `Milestone` or `Memory`, `day`, `channel?`, `milestoneKind?`, `title?`, `note?`, `photoUrl?`).
-  A memory comes from [Memories and files](../memories/README.md). Paging is `<TO SUPPLY>`.
+  A memory comes from [Memories and files](../memories/README.md). Every entry; no paging.
 - The Follow-ups tab reads and writes through the endpoints of
   [Follow-ups](../follow-ups/README.md), filtered to the contact (L2-135 AC3, L2-142).
 
@@ -115,11 +124,9 @@ The profile's tabs (`docs/mocks/pages/contact-profile/`):
 - **`LogConversationCommandHandler`** (`Popkin.Application/Contacts/Timeline/`) —
   `IContactGuard.RequireOwnedAsync`; `LogConversationValidator`; returns the saved entry for a
   known `ClientId`; adds the entry and one promise per row; saves once.
-- **`LogMilestoneCommandHandler`** — the same guard and validation; a photo goes through
-  `IPhotoProcessor` and `IPhotoStore` under random keys as a memory's does; with `everyYear` it
+- **`LogMilestoneCommandHandler`** — the same guard and validation; with `everyYear` it
   adds a `KeyDate` of kind `Milestone`, `EveryYear`, the day and month of `happenedOn` and the lead
-  `ReminderPreferences.DefaultFor(Milestone)` (L2-134 AC2). One save; a stored photo is deleted if
-  the save fails.
+  `ReminderPreferences.DefaultFor(Milestone)` (L2-134 AC2). One save.
 - **`GetContactTimelineQueryHandler`** — the owner's entries and the contact's photo memories,
   merged newest first, with photo addresses from `IPhotoStore.GetReadUrl`.
 - No log, metric or span carries a note, a promise, a title or a name.
@@ -134,7 +141,7 @@ The profile's tabs (`docs/mocks/pages/contact-profile/`):
   of `pk-task`, `pk-photo-picker`, and `pk-setting-row` with `pk-switch`.
 - **`LogEntryStore`** (`frontend/projects/api/src/lib/api/contacts/log-entry-store.ts`) — the
   form, its validation ("One thing to fix"), `idle | saving | failed`, the yearly title and hint,
-  and the save through `ContactsOutbox`. On success it navigates to the profile; on failure it
+  and the save, sent at once under one client id. On success it navigates to the profile; on failure it
   keeps every field. Unit tested.
 - **`ContactTimelineStore`** — the Timeline tab: `loading | ready | empty | failed`, the filter,
   and an entry saved by Log placed first.
@@ -151,7 +158,7 @@ The profile's tabs (`docs/mocks/pages/contact-profile/`):
   follow-up that reads "You promised · Phone, {day}"; an empty note answers `400`
   `note_required`; another person's contact answers `404` `contact_not_found`; a resend saves
   once; a milestone with "Remember this every year" adds a `Milestone` key date at the owner's
-  default; a milestone photo over 25 MB answers `400` `photo_too_large`.
+  default, titled "Chidi's work anniversary".
 - Direct tests: the filter of `GetContactTimelineQueryHandler` (all, conversations, milestones);
   the promise text of `FollowUp` per `TalkChannel`.
 - Playwright: `tests/contacts-log-entry.spec.ts` through `LogEntryPage` and `ContactProfilePage`
