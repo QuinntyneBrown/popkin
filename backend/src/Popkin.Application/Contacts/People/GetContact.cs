@@ -30,7 +30,8 @@ public sealed class GetContactQueryHandler(
             await db.Memories.OwnedBy(current.PersonId).CountAsync(m => m.ContactId == contact.Id, cancellationToken));
         var habit = await db.Habits.OwnedBy(current.PersonId).Include(h => h.Kept).AsNoTracking()
             .SingleOrDefaultAsync(h => h.ContactId == contact.Id && h.EndedAt == null, cancellationToken);
-        return ContactProfileDto.Of(
-            contact, photos, KeyDateRules.ForProfile(dates, today), kept, habit is null ? null : HabitDto.Of(habit, contact, photos));
+        return await ContactProfileDto.Of(
+                contact, photos, KeyDateRules.ForProfile(dates, today), kept, habit is null ? null : HabitDto.Of(habit, contact, photos))
+            .WithAroundAsync(db, current.PersonId, photos, cancellationToken);
     }
 }

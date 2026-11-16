@@ -1,4 +1,5 @@
 using Popkin.Application.Abstractions;
+using Popkin.Application.Contacts.Connections;
 using Popkin.Application.Contacts.Dates;
 using Popkin.Application.Contacts.Habits;
 using Popkin.Domain;
@@ -26,8 +27,13 @@ public sealed record ContactProfileDto(
     bool IsClosest,
     IReadOnlyList<ContactKeyDateDto> KeyDates,
     ContactKeptDto? Kept = null,
-    HabitDto? Habit = null)
+    HabitDto? Habit = null,
+    IReadOnlyList<AroundDto>? Around = null)
 {
+    /// <summary>The profile with "People around {first name}" (L2-150 AC4).</summary>
+    public async Task<ContactProfileDto> WithAroundAsync(IAppDbContext db, Guid owner, IPhotoStore photos, CancellationToken cancellationToken) =>
+        this with { Around = await ConnectionReads.AroundAsync(db, owner, Id, photos, cancellationToken) };
+
     public static ContactProfileDto Of(
         Contact contact, IPhotoStore photos, IReadOnlyList<ContactKeyDateDto>? keyDates = null, ContactKeptDto? kept = null, HabitDto? habit = null) =>
         new(

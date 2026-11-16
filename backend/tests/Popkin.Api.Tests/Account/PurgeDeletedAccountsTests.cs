@@ -58,7 +58,7 @@ public sealed class PurgeDeletedAccountsTests
     }
 
     // Given Mara, who kept Chidi with his photo and then deleted her account, and Lena, who
-    // keeps Bea, when the erasure runs, then Chidi, his photo's file, his memories' files and his habit are gone and Bea stays
+    // keeps Bea, when the erasure runs, then Chidi, his photo's file, his memories' files, his habit and his connection are gone and Bea stays
     // (L2-049 AC4, L2-132; known gap 110).
     [Fact]
     public async Task A_deleted_accounts_contacts_are_erased()
@@ -91,6 +91,9 @@ public sealed class PurgeDeletedAccountsTests
             clientId = Guid.NewGuid(),
             keptOn = DateOnly.FromDateTime(api.Clock.GetUtcNow().UtcDateTime).ToString("yyyy-MM-dd"),
         })).EnsureSuccessStatusCode();
+        var tomasId = (await mara.AddedContactAsync("Tomás Reyes")).GetProperty("id").GetGuid();
+        (await mara.PostAsJsonAsync("/api/contacts/connections", new { clientId = Guid.NewGuid(), contactId = chidiId, otherContactId = tomasId, kind = "Partner", words = "Married", promised = false }))
+            .EnsureSuccessStatusCode();
         await lena.AddedContactAsync("Bea Lind");
         (await mara.PostAsJsonAsync("/api/contacts/follow-ups", new { clientId = Guid.NewGuid(), text = "Call Sam" }))
             .EnsureSuccessStatusCode();
@@ -107,6 +110,7 @@ public sealed class PurgeDeletedAccountsTests
         Assert.Empty(db.Memories);
         Assert.Empty(db.Habits);
         Assert.Empty(db.HabitKept);
+        Assert.Empty(db.Connections);
         Assert.Empty(api.Photos.Files);
     }
 

@@ -62,6 +62,8 @@ public interface IAppDbContext
 
     DbSet<HabitKept> HabitKept { get; }
 
+    DbSet<Connection> Connections { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }

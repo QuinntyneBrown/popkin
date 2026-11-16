@@ -76,6 +76,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<HabitKept> HabitKept => inner.HabitKept;
 
+    public DbSet<Connection> Connections => inner.Connections;
+
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;
 
     public DbSet<Admin> Admins => inner.Admins;
