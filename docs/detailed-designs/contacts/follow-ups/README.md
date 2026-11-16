@@ -127,9 +127,12 @@ default authenticated policy; each sends one MediatR request. Another person's f
   and its count, not by its colour alone.
 - **`FollowUpsStore`** (`frontend/projects/api/src/lib/api/contacts/follow-ups-store.ts`,
   `providedIn: 'root'`) — `loading | ready | failed`, `filter` (`everything | promises`),
-  `showDone`, `buckets`, `openCount`, `promiseCount`, `lateOrDueToday`. `add(text)` and
-  `setDone(id, done)` change the list at once, send through `ContactsOutbox`, and on a failure put
-  the row back and raise the danger toast of L2-124 AC3, whose "Try again" sends the same write.
+  `showDone`, `buckets`, `openCount`, `promiseCount`, `due`. `add(text, contactId?)` and
+  `setDone(followUp, done)` change the list at once and send the write; a failure puts the row
+  back and raises the danger toast of L2-124 AC3, whose "Try again" sends the same write under
+  the same client id. (`ContactsOutbox` keeps adds of contacts only; a follow-up written offline
+  fails at once and says so.) A follow-up ticked stays in its bucket, struck through, until the
+  list is read again, as each Contacts page opens.
   `setDone(id, true)` raises the toast "Marked done" with the text and "Undo" (L2-124 AC4).
 - **`followUpBuckets(followUps, today, filter)`** (`follow-up-buckets.ts`, pure) — the rule table
   below, each bucket sorted by due day. `lateOrDueToday(followUps, today)` counts open follow-ups
@@ -139,6 +142,15 @@ default authenticated policy; each sends one MediatR request. Another person's f
   days late", "You promised · {how}, {when}", "Done {day}", "Show {n} done", "Mark done: {text}"
   and "Mark not done: {text}".
 - **`CONTACTS_API`** — `followUps()`, `addFollowUp(request)`, `setFollowUpDone(id, done)`.
+- **`pk-task-list`** (components) — a bucket's tasks, divided by hairlines; Done's list is not.
+  The bucket's heading is `pk-list-head` (`tone="late"` for Overdue); the page lays out in
+  `pk-contacts-grid layout="narrow"`.
+- **A profile's tab** — "Follow-ups {n}" (`pk-view-nav`'s `count`), `pk-add-field` "Add a
+  follow-up for {first name}" and the contact's open follow-ups as one `pk-task-list`, each with
+  "Follow-up" or its promise, read from the same store. Delete counts the contact's follow-ups,
+  open and done.
+- **The badge** — `ContactsFrame` reads the follow-ups again each time a Contacts page opens and
+  gives `due` and its name to every Contacts page's `pk-popkin-nav`.
 - **`pk-task`** (components, backlog row 17) — a check button with `aria-pressed` and the label
   "Mark done: {text}" or "Mark not done: {text}", the text (struck through when done, and the
   label says so), the meta line with the contact link, and the field form that adds one. It works
@@ -165,11 +177,11 @@ default authenticated policy; each sends one MediatR request. Another person's f
   dates around Tuesday 15 September 2026, including Saturday 19 and Sunday 20 September;
   `lateOrDueToday`; the Promises filter and its counts; `FollowUpsStore` marking done, the undo
   and a failed save that puts the row back; `follow-ups-text`.
-- Playwright (`e2e/tests/contacts/follow-ups.spec.ts`) through `ContactsFollowUpsPage` with
+- Playwright (`e2e/tests/contacts-follow-ups.spec.ts`, `profile-follow-ups.spec.ts`) through `ContactsFollowUpsPage` with
   recorded responses: the buckets and counts as drawn, Promises, Show and Hide done, marking done
   with the toast and Undo, a failed save's danger toast, quick add, the empty and error states,
   and the badge. New `routes.ts` entries cover every state of the manifest.
-- Parity: `pk-task` and its quick-add field.
+- Parity: `pk-task`, `pk-task-list`, `pk-add-field`, `pk-list-head` and the view nav's count.
 
 ## Requirements
 

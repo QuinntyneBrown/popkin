@@ -1758,6 +1758,7 @@ a.segmented__option { display: inline-flex; align-items: center; gap: var(--spac
 .list-head__title { font: var(--text-h3); }
 .list-head__title--late { color: var(--color-fg-accent); }
 .list-head__title--quiet { font: var(--text-meta); color: var(--color-fg-subtle); }
+.contacts-grid--narrow { gap: var(--space-6); max-width: var(--layout-container-narrow); }
 .list-head__count { margin-left: var(--space-1); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-subtle); }
 
 /* The one that matters most: the next date on Today, the habit slipping on Habits. Tinted in its colour. */

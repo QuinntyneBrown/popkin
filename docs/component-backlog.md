@@ -26,19 +26,22 @@ Popkin uses no custom tooltips.
 | 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, parity pending |
 | 15 | Contact timeline | A person's history on their profile, newest first, as an ordered list. | 1 day || Built, parity pending |
 | 16 | Form sections | Splits the long Add someone form into sections with kind toggle buttons. | 1 day | Built, parity pending |
-| 17 | Task | A follow-up to do, with the field that adds one. | 1 day || Built, parity pending |
+| 17 | Task | A follow-up to do, with the field that adds one; `pk-task-list` lists a bucket of them. | 1 day | Built, with parity (late, plain, done; the list; the add field) |
 | 18 | Keep strip and habit row | A habit's rhythm with someone, showing which times were kept. | 1 day | Built, parity pending |
 | 19 | Spotlight and date tile | The one most important thing on a screen, tinted, with a date tile. | 0.5 days || Built, parity pending |
 | 20 | Group browser | Navigation list of households, small groups and teams, with each group's detail. | 1 day | Built, parity pending |
 | 21 | Connection map | Draws who knows whom: your people as faces linked by relationship. | 2 days || Built, parity pending |
-| 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell. | 0.5 days | Built, parity pending |
+| 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell; `narrow` is one column at the narrow container (Follow-ups, Habits). | 0.5 days | Built; list head with parity |
 | 23 | Filter chips | Pressed-button filters with counts, such as the circles on People; `pk-choice-chips` is a radio group. | 0.25 days | Built, with parity |
 | 24 | List row | The design system's `list-row`, not built yet, for rows on Today and in groups. | To estimate | |
 | 25 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today. | To estimate | |
 | 26 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins; it needs a design-system page. | To estimate | |
 | 27 | Back link | The page head's `page-head__back` on its own, beside a profile's actions ("People"). | 0.25 days | Built, with parity |
+| 28 | Date list | Dates' rows: the date tile, the faces, the title, its line and "in {n} days". | 0.5 days | Built, with parity |
+| 29 | Key dates | A profile's dates with their reminders. | 0.25 days | Built, with parity |
+| 30 | Reminder defaults | Dates' aside: the default lead per kind, and phone and Monday email. | 0.5 days | Built, with parity |
 
-Total: 26 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
+Total: 29 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
 26 came from the Contacts designs and are not estimated yet.
 
 The even-numbered components were built on 15 November 2026, in the library only, before their
