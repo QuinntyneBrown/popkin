@@ -319,6 +319,28 @@ await call('PUT', `/api/contacts/people/${chidiKept.id}/closest`);
 await call('GET', `/api/contacts/people/${chidiKept.id}`);
 // She opens People on the morning of the mocks: Chidi and Femi, both in Closest (L2-126).
 await call('GET', '/api/contacts/people?on=2026-09-15');
+// She adds Chidi's birthday, then opens Dates, everything and birthdays, and changes the
+// birthday default (L2-137 to L2-139).
+await call('POST', `/api/contacts/people/${chidiKept.id}/key-dates`, {
+  clientId: '00000000-0000-4000-c000-000000000010',
+  kind: 'Birthday',
+  title: null,
+  month: 1,
+  day: 24,
+  year: 1990,
+  everyYear: true,
+  lead: 'OneWeekBefore',
+});
+await call('GET', '/api/contacts/dates?on=2026-09-15&kind=all');
+await call('GET', '/api/contacts/dates?on=2026-09-15&kind=birthdays');
+await call('PUT', '/api/contacts/reminder-preferences', {
+  birthdayLead: 'TwoWeeksBefore',
+  anniversaryLead: 'ThreeDaysBefore',
+  milestoneLead: 'OnTheDay',
+  phoneNotifications: true,
+  mondayEmail: true,
+});
+await call('GET', '/api/contacts/reminder-preferences');
 await call('DELETE', `/api/contacts/people/${chidiKept.id}/closest`);
 // She deletes Chidi from his profile (L2-132).
 await call('DELETE', `/api/contacts/people/${chidiKept.id}`);

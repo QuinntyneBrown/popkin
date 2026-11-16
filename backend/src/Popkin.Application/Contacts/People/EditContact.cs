@@ -1,5 +1,6 @@
 using MediatR;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Contacts.Dates;
 using Popkin.Application.Contacts.Security;
 using Popkin.Application.Invites;
 using Popkin.Application.Photos;
@@ -14,7 +15,7 @@ namespace Popkin.Application.Contacts.People;
 public sealed record EditContactCommand(Guid ContactId, SaveContactRequest Contact, PhotoUpload? Photo = null) : IRequest<ContactProfileDto>;
 
 public sealed class EditContactCommandHandler(
-    IAppDbContext db, ContactsSwitch contacts, IContactGuard guard, IPhotoProcessor processor, IPhotoStore photos)
+    IAppDbContext db, ContactsSwitch contacts, IContactGuard guard, IPhotoProcessor processor, IPhotoStore photos, TimeProvider clock)
     : IRequestHandler<EditContactCommand, ContactProfileDto>
 {
     public async Task<ContactProfileDto> Handle(EditContactCommand request, CancellationToken cancellationToken)
@@ -22,13 +23,21 @@ public sealed class EditContactCommandHandler(
         contacts.Require();
         var contact = await guard.RequireOwnedAsync(request.ContactId, cancellationToken);
         var (name, details) = SaveContactValidator.Validate(request.Contact);
+        var drafts = KeyDateDrafts.Validate(request.Contact.KeyDates);
+        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         var avatar = request.Photo is null ? null : await AvatarPhotos.ReadAsync(request.Photo, processor, cancellationToken);
         contact.Rename(name);
         contact.ChangeDetails(details);
+        // Without the list, the dates stay as they are.
+        if (request.Contact.KeyDates is not null)
+        {
+            await KeyDateDrafts.ApplyAsync(db, contact, drafts, clock.GetUtcNow(), cancellationToken);
+        }
+
         if (avatar is null)
         {
             await db.SaveChangesAsync(cancellationToken);
-            return ContactProfileDto.Of(contact, photos);
+            return ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken));
         }
 
         var old = contact.PhotoKey;
@@ -50,6 +59,6 @@ public sealed class EditContactCommandHandler(
             await photos.DeleteAsync(old, CancellationToken.None);
         }
 
-        return ContactProfileDto.Of(contact, photos);
+        return ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken));
     }
 }

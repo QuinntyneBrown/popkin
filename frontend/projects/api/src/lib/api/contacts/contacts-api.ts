@@ -2,9 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  AddKeyDateRequest,
+  ContactDatesView,
   ContactProfileView,
   ContactsSummaryView,
+  DatesFilter,
+  KeyDateRowView,
   PeopleView,
+  ReminderPreferencesView,
   SaveContactRequest,
 } from '../../models/contacts';
 
@@ -33,6 +38,16 @@ export interface ContactsApi {
   addToClosest(contactId: string): Observable<void>;
   /** Out of Closest; they stay in People and their circle (L2-131 AC2). */
   takeOutOfClosest(contactId: string): Observable<void>;
+  /** Dates: every next occurrence within a year, soonest first, for the device's day (L2-137). */
+  dates(on: string, kind: DatesFilter): Observable<ContactDatesView>;
+  /** Add a date for a contact of mine (L2-138). */
+  addKeyDate(contactId: string, request: AddKeyDateRequest): Observable<KeyDateRowView>;
+  /** My default lead times and reminder ways; the defaults until I change them (L2-139 AC1). */
+  reminderPreferences(): Observable<ReminderPreferencesView>;
+  /** Saves my default lead times and reminder ways (L2-139). */
+  saveReminderPreferences(
+    preferences: ReminderPreferencesView,
+  ): Observable<ReminderPreferencesView>;
 }
 
 export const CONTACTS_API = new InjectionToken<ContactsApi>('ContactsApi');
@@ -82,5 +97,26 @@ export class HttpContactsApi implements ContactsApi {
 
   takeOutOfClosest(contactId: string): Observable<void> {
     return this.http.delete<void>(`/api/contacts/people/${contactId}/closest`);
+  }
+
+  dates(on: string, kind: DatesFilter): Observable<ContactDatesView> {
+    return this.http.get<ContactDatesView>('/api/contacts/dates', { params: { on, kind } });
+  }
+
+  addKeyDate(contactId: string, request: AddKeyDateRequest): Observable<KeyDateRowView> {
+    return this.http.post<KeyDateRowView>(`/api/contacts/people/${contactId}/key-dates`, request);
+  }
+
+  reminderPreferences(): Observable<ReminderPreferencesView> {
+    return this.http.get<ReminderPreferencesView>('/api/contacts/reminder-preferences');
+  }
+
+  saveReminderPreferences(
+    preferences: ReminderPreferencesView,
+  ): Observable<ReminderPreferencesView> {
+    return this.http.put<ReminderPreferencesView>(
+      '/api/contacts/reminder-preferences',
+      preferences,
+    );
   }
 }

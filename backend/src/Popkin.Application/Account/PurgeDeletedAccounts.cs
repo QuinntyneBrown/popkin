@@ -76,6 +76,7 @@ public sealed class PurgeDeletedAccountsCommandHandler(
         // Their Contacts go with them, and the files they kept (L2-132, known gap 110).
         var contactFiles = await ContactRemoval.RemoveAsync(
             db, db.Contacts.Where(c => c.OwnerId == person.Id), CancellationToken.None);
+        db.ReminderPreferences.RemoveRange(db.ReminderPreferences.Where(p => p.OwnerId == person.Id));
         person.Erase(clock.GetUtcNow());
         await db.SaveChangesAsync(CancellationToken.None);
         await ContactRemoval.DeleteFilesAsync(photos, contactFiles, logger);

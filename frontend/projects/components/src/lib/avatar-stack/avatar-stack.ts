@@ -33,7 +33,8 @@ export class AvatarStack {
    * `xs` is the stack of the home header: 28 px faces and a 24 px "+N". `2xs` is the stack of a
    * tab's header: 24 px faces.
    */
-  readonly size = input<'sm' | 'xs' | '2xs'>('sm');
+  /** `base` is the avatar's own size, as in the rows of Dates. */
+  readonly size = input<'base' | 'sm' | 'xs' | '2xs'>('sm');
   /** How many people are not shown; 0 shows no "+N". */
   readonly more = input(0);
 }

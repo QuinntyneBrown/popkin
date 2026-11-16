@@ -289,6 +289,13 @@ export const routes: Routes = [
     data: data({ shell: 'app', page: 'contacts-people' }),
   },
   {
+    path: 'contacts/dates',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-dates/contacts-dates.page').then((m) => m.ContactsDatesPage),
+    data: data({ shell: 'app', page: 'contacts-dates' }),
+  },
+  {
     path: 'contacts/people/new',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>

@@ -1,4 +1,5 @@
 using Popkin.Application.Abstractions;
+using Popkin.Application.Contacts.Dates;
 using Popkin.Domain;
 
 namespace Popkin.Application.Contacts.People;
@@ -21,9 +22,10 @@ public sealed record ContactProfileDto(
     string? Email,
     string? HowWeMet,
     IReadOnlyList<string> Loves,
-    bool IsClosest)
+    bool IsClosest,
+    IReadOnlyList<ContactKeyDateDto> KeyDates)
 {
-    public static ContactProfileDto Of(Contact contact, IPhotoStore photos) =>
+    public static ContactProfileDto Of(Contact contact, IPhotoStore photos, IReadOnlyList<ContactKeyDateDto>? keyDates = null) =>
         new(
             contact.Id,
             contact.Name,
@@ -38,5 +40,6 @@ public sealed record ContactProfileDto(
             contact.Email,
             contact.HowWeMet,
             contact.Loves,
-            contact.IsClosest);
+            contact.IsClosest,
+            keyDates ?? []);
 }

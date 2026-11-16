@@ -1,0 +1,13 @@
+@for (date of dates(); track $index) {
+  <li class="row row--short">
+    <svg pk-icon class="row__icon" size="md" [name]="date.icon"></svg>
+    <div class="row__main">
+      <div class="row__title">{{ date.title }}</div>
+      <div class="row__text">{{ date.when }}</div>
+      <div class="row__reminder">
+        <svg pk-icon size="sm" name="bell"></svg
+        ><span><span class="visually-hidden">Reminder: </span>{{ date.reminder }}</span>
+      </div>
+    </div>
+  </li>
+}

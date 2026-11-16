@@ -49,6 +49,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Contact> Contacts => Set<Contact>();
 
+    public DbSet<KeyDate> KeyDates => Set<KeyDate>();
+
+    public DbSet<ReminderPreferences> ReminderPreferences => Set<ReminderPreferences>();
+
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();
 
     public DbSet<Admin> Admins => Set<Admin>();

@@ -76,6 +76,15 @@
             </section>
             <div pk-contacts-grid layout="about">
               <div class="stack stack--lg">
+                <section aria-labelledby="dates">
+                  <div pk-list-head headingId="dates" heading="Key dates"></div>
+                  @if (keyDates().length) {
+                    <ul pk-key-dates [dates]="keyDates()"></ul>
+                  }
+                  <button pk-link type="button" variant="accent" (click)="addDate()">
+                    Add a date
+                  </button>
+                </section>
                 <a
                   pk-add-card
                   routerLink="/contacts/habits"

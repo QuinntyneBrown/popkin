@@ -48,6 +48,10 @@ public interface IAppDbContext
 
     DbSet<Contact> Contacts { get; }
 
+    DbSet<KeyDate> KeyDates { get; }
+
+    DbSet<ReminderPreferences> ReminderPreferences { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }

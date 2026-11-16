@@ -27,6 +27,20 @@ export interface SaveContactRequest {
   city: string;
   howWeMet: string;
   loves: string[];
+  /** "Dates to remember", saved with the contact; Edit leaves the dates alone without it. */
+  keyDates?: KeyDateDraft[];
+}
+
+/** A key date held by the contact form until "Save": `id` for one kept (L2-129 AC2). */
+export interface KeyDateDraft {
+  id?: string;
+  kind: KeyDateKind;
+  title: string | null;
+  month: number;
+  day: number;
+  year: number | null;
+  everyYear: boolean;
+  reminder: ReminderLead;
 }
 
 /**
@@ -53,6 +67,8 @@ export interface ContactProfileView {
    * Import reads it.
    */
   alsoIn?: ContactPopkinLink | null;
+  /** Their key dates, soonest first, then those passed (L2-128 AC2). */
+  keyDates?: ContactKeyDateView[];
 }
 
 /** "Also in your Popkin “Lakeside Weekend”": a Popkin I share with a contact. */
@@ -89,4 +105,77 @@ export interface ContactRowView {
 /** People: every contact I keep, A to Z (L2-126). */
 export interface PeopleView {
   contacts: ContactRowView[];
+}
+
+/** What a key date marks (known gap 103, ruled); `Other` is "Something else". */
+export type KeyDateKind = 'Birthday' | 'Anniversary' | 'Milestone' | 'Other';
+
+/** How far ahead a key date's reminder comes (L2-138 AC1). */
+export type ReminderLead =
+  | 'OnTheDay'
+  | 'OneDayBefore'
+  | 'ThreeDaysBefore'
+  | 'OneWeekBefore'
+  | 'TwoWeeksBefore'
+  | 'OneMonthBefore';
+
+/** What Dates shows: everything, or one kind (L2-137 AC2). */
+export type DatesFilter = 'all' | 'birthdays' | 'anniversaries' | 'milestones';
+
+/** One key date on Dates: its next occurrence within a year (L2-137 AC1). */
+export interface KeyDateRowView {
+  id: string;
+  contactId: string;
+  firstName: string;
+  photoUrl: string | null;
+  initials: string;
+  accent: string;
+  kind: KeyDateKind;
+  title: string | null;
+  /** yyyy-MM-dd. */
+  occursOn: string;
+  daysLeft: number;
+  /** The age or the years, when the first year is known. */
+  years: number | null;
+  lead: ReminderLead;
+}
+
+/** A key date as a profile shows it; `nextOn` is null once a one-off date has passed. */
+export interface ContactKeyDateView {
+  id: string;
+  kind: KeyDateKind;
+  title: string | null;
+  month: number;
+  day: number;
+  year: number | null;
+  everyYear: boolean;
+  reminder: ReminderLead;
+  nextOn: string | null;
+  daysLeft: number | null;
+}
+
+/** My default lead time per kind and how reminders reach me (L2-139, L2-140). */
+export interface ReminderPreferencesView {
+  birthdayLead: ReminderLead;
+  anniversaryLead: ReminderLead;
+  milestoneLead: ReminderLead;
+  phoneNotifications: boolean;
+  mondayEmail: boolean;
+}
+
+export interface ContactDatesView {
+  dates: KeyDateRowView[];
+  preferences: ReminderPreferencesView;
+}
+
+/** Add a date (L2-138); with no `lead` the date takes my default for its kind. */
+export interface AddKeyDateRequest {
+  clientId: string;
+  kind: KeyDateKind;
+  title: string | null;
+  month: number;
+  day: number;
+  year: number | null;
+  everyYear: boolean;
+  lead: ReminderLead;
 }

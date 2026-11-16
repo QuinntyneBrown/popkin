@@ -1,5 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { ContactCircle, ContactProfileView, SaveContactRequest } from '../../models/contacts';
+import {
+  ContactCircle,
+  ContactProfileView,
+  KeyDateDraft,
+  ReminderLead,
+  SaveContactRequest,
+} from '../../models/contacts';
 import { toApiProblem } from '../problem';
 import { CONTACTS_API } from './contacts-api';
 import { ContactsOutbox } from './contacts-outbox';
@@ -67,6 +73,8 @@ export class ContactFormStore {
   readonly kept = signal(false);
   /** The contact being edited, once read; null while adding someone (L2-130). */
   readonly editing = signal<ContactProfileView | null>(null);
+  /** "Dates to remember": the kept dates, then those added, until "Save" (L2-129 AC2). */
+  readonly dates = signal<KeyDateDraft[]>([]);
 
   /**
    * Reading the contact to edit: `notFound` for one that is not mine, or an address that cannot
@@ -84,7 +92,21 @@ export class ContactFormStore {
     }
     this.reading.set('idle');
     this.api.contact(contactId).subscribe({
-      next: (contact) => this.editing.set(contact),
+      next: (contact) => {
+        this.dates.set(
+          (contact.keyDates ?? []).map((d) => ({
+            id: d.id,
+            kind: d.kind,
+            title: d.title,
+            month: d.month,
+            day: d.day,
+            year: d.year,
+            everyYear: d.everyYear,
+            reminder: d.reminder,
+          })),
+        );
+        this.editing.set(contact);
+      },
       error: (error: unknown) =>
         this.reading.set(toApiProblem(error).code === 'contact_not_found' ? 'notFound' : 'failed'),
     });
@@ -95,10 +117,25 @@ export class ContactFormStore {
     this.edit(this.editingId);
   }
 
+  /** "Another date": a date chosen in Add a date, saved with the contact. */
+  addDate(draft: KeyDateDraft): void {
+    this.dates.update((dates) => [...dates, draft]);
+  }
+
+  /** "Remove the {kind}". */
+  removeDate(index: number): void {
+    this.dates.update((dates) => dates.filter((_, i) => i !== index));
+  }
+
+  /** "Remind me about the {kind}". */
+  changeReminder(index: number, reminder: ReminderLead): void {
+    this.dates.update((dates) => dates.map((d, i) => (i === index ? { ...d, reminder } : d)));
+  }
+
   /** With no name, nothing is sent and the form is invalid (L2-129 AC4). */
   save(values: ContactFormValues, photo: File | null): void {
     if (this.state() === 'saving') return;
-    const request = contactRequestOf(values, this.clientId);
+    const request = { ...contactRequestOf(values, this.clientId), keyDates: this.dates() };
     if (request.name.length === 0) {
       this.state.set('invalid');
       return;

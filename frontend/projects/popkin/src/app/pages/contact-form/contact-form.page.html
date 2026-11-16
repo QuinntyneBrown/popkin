@@ -96,6 +96,29 @@
           [disabled]="saving()"
         ></div>
       </section>
+      <section
+        pk-form-section
+        heading="Dates to remember"
+        hint="We’ll nudge you ahead of each one."
+      >
+        @for (date of store.dates(); track $index; let i = $index) {
+          <div
+            pk-date-entry
+            [fieldId]="'remind-' + i"
+            [kind]="draftKind(date)"
+            [date]="draftDay(date)"
+            [options]="leads"
+            [remind]="date.reminder"
+            (remindChange)="store.changeReminder(i, $any($event))"
+            (removed)="store.removeDate(i)"
+          ></div>
+        }
+        <div>
+          <button pk-link type="button" variant="accent" [disabled]="saving()" (click)="addDate()">
+            Another date
+          </button>
+        </div>
+      </section>
       <section pk-form-section heading="Details" hint="Optional.">
         <div pk-form-pair>
           <div

@@ -1,0 +1,36 @@
+@if (loading()) {
+  @for (row of skeletons; track row) {
+    <li class="row">
+      <span pk-skeleton shape="circle"></span>
+      <span class="row__main row__lines">
+        <span pk-skeleton shape="text" [width]="40"></span>
+        <span pk-skeleton shape="text" [width]="70"></span>
+      </span>
+    </li>
+  }
+} @else {
+  @for (date of dates(); track $index) {
+    <li>
+      <a class="row" [routerLink]="date.link">
+        <span pk-date-tile [top]="date.top" [day]="date.day" [soon]="date.soon ?? false"></span>
+        <span pk-avatar-stack size="base" [avatars]="date.avatars"></span>
+        <span class="row__main">
+          <span class="row__heading">
+            <svg pk-icon class="row__icon" size="sm" [name]="date.icon"></svg>
+            <span class="row__title">{{ date.title }}</span>
+          </span>
+          @if (date.line) {
+            <span class="row__text">{{ date.line }}</span>
+          }
+        </span>
+        <span class="row__when">
+          <span class="row__days">{{ date.when }}</span>
+          <span class="row__reminder"
+            ><svg pk-icon size="sm" name="bell"></svg
+            ><span class="visually-hidden">, reminder </span> {{ date.reminder }}</span
+          >
+        </span>
+      </a>
+    </li>
+  }
+}

@@ -21,6 +21,10 @@ export class ContactProfilePage {
   readonly loves: Locator;
   /** "Make a habit of seeing {first name}" (L2-128 AC5). */
   readonly makeHabit: Locator;
+  readonly keyDates: Locator;
+  readonly keyDateRows: Locator;
+  readonly addDate: Locator;
+  readonly keyDateList: Locator;
   readonly history: Locator;
   readonly historyTabs: Locator;
   readonly emptyTimeline: Locator;
@@ -48,6 +52,10 @@ export class ContactProfilePage {
     this.email = this.header.getByRole('link', { name: 'Email' });
     this.log = this.header.getByRole('link', { name: 'Log' });
     this.about = page.getByRole('region', { name: /^About / });
+    this.keyDates = page.getByRole('region', { name: 'Key dates' });
+    this.keyDateList = this.keyDates.locator('ul.divided');
+    this.keyDateRows = this.keyDates.locator('li');
+    this.addDate = this.keyDates.getByRole('button', { name: 'Add a date' });
     this.facts = this.about.locator('.contact-facts__item');
     this.loves = this.about.locator('.likes__item');
     this.makeHabit = page.locator('.add-card');

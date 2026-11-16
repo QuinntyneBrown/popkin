@@ -564,6 +564,60 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("FeatureSettings", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.KeyDate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Day")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("EveryYear")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<string>("Lead")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<int?>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("OwnerId", "ClientId")
+                        .IsUnique();
+
+                    b.ToTable("KeyDates", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Membership", b =>
                 {
                     b.Property<Guid>("Id")
@@ -979,6 +1033,37 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("Popkins", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.ReminderPreferences", b =>
+                {
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AnniversaryLead")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("BirthdayLead")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("MilestoneLead")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<bool>("MondayEmail")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PhoneNotifications")
+                        .HasColumnType("bit");
+
+                    b.HasKey("OwnerId");
+
+                    b.ToTable("ReminderPreferences", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Session", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1336,6 +1421,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Popkin.Domain.KeyDate", b =>
+                {
+                    b.HasOne("Popkin.Domain.Contact", null)
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Popkin.Domain.Membership", b =>
                 {
                     b.HasOne("Popkin.Domain.Person", null)
@@ -1455,6 +1549,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("HostPersonId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ReminderPreferences", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

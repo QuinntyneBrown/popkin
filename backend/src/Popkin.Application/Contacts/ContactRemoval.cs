@@ -19,6 +19,8 @@ public static class ContactRemoval
     {
         var removed = await contacts.ToListAsync(cancellationToken);
         var files = removed.Select(c => c.PhotoKey).OfType<string>().ToList();
+        var ids = removed.Select(c => c.Id).ToList();
+        db.KeyDates.RemoveRange(await db.KeyDates.Where(d => ids.Contains(d.ContactId)).ToListAsync(cancellationToken));
         db.Contacts.RemoveRange(removed);
         return files;
     }
