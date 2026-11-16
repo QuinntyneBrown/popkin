@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countLine, greeting, longDay } from './contacts-text';
+import { countLine, firstName, greeting, isContactId, longDay } from './contacts-text';
 
 describe('countLine', () => {
   // L2-121 AC3
@@ -33,4 +33,21 @@ describe('longDay', () => {
     [new Date(2026, 8, 15), 'Tuesday, 15 September'],
     [new Date(2027, 0, 1), 'Friday, 1 January'],
   ])('%s reads "%s"', (day, text) => expect(longDay(day)).toBe(text));
+});
+
+describe('firstName', () => {
+  // L2-122 AC4
+  it.each([
+    ['Grace Adeyemi', 'Grace'],
+    ['  Chidi  Okafor ', 'Chidi'],
+    ['Femi', 'Femi'],
+  ])('of "%s" is "%s"', (name, first) => expect(firstName(name)).toBe(first));
+});
+
+describe('isContactId', () => {
+  it.each([
+    ['566025c4-1a2b-4c3d-8e9f-0a1b2c3d4e5f', true],
+    ['not-a-contact', false],
+    ['566025c4', false],
+  ])('"%s" is %s', (id, can) => expect(isContactId(id)).toBe(can));
 });

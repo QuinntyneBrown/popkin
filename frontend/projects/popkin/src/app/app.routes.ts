@@ -289,6 +289,14 @@ export const routes: Routes = [
     title: 'Add someone · Contacts · Popkin',
   },
   {
+    path: 'contacts/people/:contactId',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contact-profile/contact-profile.page').then((m) => m.ContactProfilePage),
+    data: data({ shell: 'app', page: 'contact-profile' }),
+    title: 'Profile · Contacts · Popkin',
+  },
+  {
     path: 'contacts/people/:contactId/edit',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>

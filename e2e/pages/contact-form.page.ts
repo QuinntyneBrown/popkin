@@ -11,7 +11,8 @@ export class ContactFormPage {
   readonly details: Locator;
   readonly detailsHint: Locator;
   readonly addPhoto: Locator;
-  /** Edit shows the photo they have, with no way to change it (add-contact design, Conflicts). */
+  /** Edit shows the photo they have as "Change photo" (L2-130 AC4). */
+  readonly changePhoto: Locator;
   readonly photo: Locator;
   readonly name: Locator;
   readonly nameError: Locator;
@@ -20,6 +21,7 @@ export class ContactFormPage {
   readonly phone: Locator;
   readonly email: Locator;
   readonly city: Locator;
+  readonly howWeMet: Locator;
   readonly loves: Locator;
   readonly summary: Locator;
   readonly summaryHeading: Locator;
@@ -41,6 +43,7 @@ export class ContactFormPage {
     this.details = page.getByRole('region', { name: 'Details' });
     this.detailsHint = this.details.locator('.form-section__hint');
     this.addPhoto = page.getByRole('button', { name: 'Add a photo' });
+    this.changePhoto = page.getByRole('button', { name: 'Change photo' });
     this.photo = this.who.locator('.avatar img');
     this.name = page.getByRole('textbox', { name: 'Name' });
     this.nameError = page.locator('#name-err');
@@ -49,6 +52,7 @@ export class ContactFormPage {
     this.phone = page.getByRole('textbox', { name: 'Phone' });
     this.email = page.getByRole('textbox', { name: 'Email' });
     this.city = page.getByRole('textbox', { name: 'City' });
+    this.howWeMet = page.getByRole('textbox', { name: 'How you met' });
     this.loves = page.getByRole('textbox', { name: 'Things they love' });
     this.summary = page.locator('.form-summary');
     this.summaryHeading = this.summary.getByRole('heading');

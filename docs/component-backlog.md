@@ -22,7 +22,7 @@ Popkin uses no custom tooltips.
 | 10 | Service health | Summary and per-service state on Health: all good, degraded or down. | 1 day | Built, parity pending |
 | 11 | Trend chart and uptime | Accessible SVG trend for one series and an uptime bar, on Dashboard, Health and Metrics. | 1.5 days || Built, parity pending |
 | 12 | Contact row | A person in the People list, linking to their profile. | 0.5 days | Built, parity pending |
-| 13 | Contact header and facts | Head of a person's profile with their details as a description list. | 1 day || Built, parity pending |
+| 13 | Contact header and facts | Head of a person's profile with their details as a description list. | 1 day || Built; header parity done (phone, email only) |
 | 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, parity pending |
 | 15 | Contact timeline | A person's history on their profile, newest first, as an ordered list. | 1 day || Built, parity pending |
 | 16 | Form sections | Splits the long Add someone form into sections with kind toggle buttons. | 1 day | Built, parity pending |
@@ -36,6 +36,7 @@ Popkin uses no custom tooltips.
 | 24 | List row | The design system's `list-row`, not built yet, for rows on Today and in groups. | To estimate | |
 | 25 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today. | To estimate | |
 | 26 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins; it needs a design-system page. | To estimate | |
+| 27 | Back link | The page head's `page-head__back` on its own, beside a profile's actions ("People"). | 0.25 days | Built, with parity |
 
 Total: 26 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
 26 came from the Contacts designs and are not estimated yet.

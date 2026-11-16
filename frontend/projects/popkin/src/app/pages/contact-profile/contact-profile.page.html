@@ -1,0 +1,131 @@
+<div pk-app-screen accent="coral" layout="tab" body="fill">
+  <div pk-contacts-page>
+    <div slot="head" class="cluster cluster--between">
+      <a pk-back-link routerLink="/contacts/people">People</a>
+      @if (store.state() !== 'notFound' && firstName()) {
+        <div class="cluster">
+          <a pk-icon-button icon="edit" label="Edit profile" [routerLink]="editLink()"></a>
+          <button
+            pk-icon-button
+            type="button"
+            icon="more"
+            [label]="'More for ' + firstName()"
+            (click)="more()"
+          ></button>
+        </div>
+      }
+    </div>
+    @switch (store.state()) {
+      @case ('loading') {
+        <h1 class="visually-hidden">{{ firstName() ?? 'Contact' }}</h1>
+        <p class="visually-hidden" role="status">{{ loading() }}</p>
+        <div class="stack stack--lg" aria-hidden="true">
+          <span pk-skeleton shape="title" [width]="50"></span>
+          <span pk-skeleton shape="text" [width]="40"></span>
+          <span pk-skeleton shape="text" [width]="70"></span>
+        </div>
+      }
+      @case ('failed') {
+        <h1 class="visually-hidden">{{ firstName() ?? 'Contact' }}</h1>
+        <div
+          pk-empty-state
+          icon="server-error"
+          [alert]="true"
+          [heading]="failed().heading"
+          [text]="failed().text"
+        >
+          <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+            Try again
+          </button>
+        </div>
+      }
+      @case ('notFound') {
+        <div
+          pk-empty-state
+          icon="not-found"
+          [level]="1"
+          [alert]="true"
+          [heading]="notFound.heading"
+          [text]="notFound.text"
+        >
+          <a pk-button variant="primary" size="md" routerLink="/contacts/people">Go to People</a>
+        </div>
+      }
+      @case ('ready') {
+        @if (profile(); as profile) {
+          <div class="stack stack--lg">
+            <section
+              pk-contact-id
+              [name]="profile.name"
+              [sub]="sub()"
+              [phone]="profile.phone"
+              [email]="profile.email"
+              [popkin]="profile.alsoIn?.name"
+              [popkinLink]="profile.alsoIn ? ['/p', profile.alsoIn.popkinId] : undefined"
+              [logLink]="logLink()"
+            >
+              <span
+                pk-avatar
+                slot="avatar"
+                size="xl"
+                [name]="profile.name"
+                [initials]="profile.initials"
+                [photo]="profile.photoUrl"
+                [attr.data-accent]="profile.accent.toLowerCase()"
+              ></span>
+            </section>
+            <div pk-contacts-grid layout="about">
+              <div class="stack stack--lg">
+                <a
+                  pk-add-card
+                  routerLink="/contacts/habits"
+                  [queryParams]="{ new: 1, contact: profile.id }"
+                  >Make a habit of seeing {{ profile.firstName }}</a
+                >
+                <section aria-labelledby="about">
+                  <div
+                    pk-list-head
+                    headingId="about"
+                    [heading]="'About ' + profile.firstName"
+                  ></div>
+                  @if (facts().length) {
+                    <dl pk-contact-facts [facts]="facts()"></dl>
+                  }
+                  @if (profile.loves.length) {
+                    <h3 class="text-sm text-muted">Loves</h3>
+                    <ul pk-likes data-accent="amber" [items]="profile.loves"></ul>
+                  }
+                </section>
+              </div>
+              <section [attr.aria-label]="historyLabel()">
+                <nav pk-view-nav [label]="historyLabel()" [views]="views()"></nav>
+                @if (current() === 'timeline') {
+                  <div
+                    pk-empty-state
+                    icon="notebook"
+                    [level]="3"
+                    [compact]="true"
+                    [heading]="'Nothing logged with ' + profile.firstName + ' yet'"
+                    text="Jot down what you talked about after your next chat. Future you will thank you."
+                  >
+                    <a pk-button variant="primary" size="md" [routerLink]="logLink()"
+                      >Log a conversation</a
+                    >
+                  </div>
+                }
+              </section>
+            </div>
+          </div>
+        }
+      }
+    }
+  </div>
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    class="only-m-up"
+    place="contacts"
+    contactsCurrent="people"
+    [members]="frame.countLine()"
+  ></nav>
+</div>

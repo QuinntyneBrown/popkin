@@ -33,3 +33,24 @@ const MONTHS = [
 export function longDay(day: Date): string {
   return `${WEEKDAYS[day.getDay()]}, ${day.getDate()} ${MONTHS[day.getMonth()]}`;
 }
+
+/** The first word of a contact's name: the only way Contacts names them (L2-122 AC4). */
+export function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? '';
+}
+
+/** "Chidi’s", "Tomás’s": a contact's first name as the owner of something. */
+export function possessive(first: string): string {
+  return `${first}’s`;
+}
+
+/** What a link to a contact not in my Contacts shows, and nothing else (L2-122 AC2). */
+export const NOT_FOUND_TEXT = {
+  heading: 'This person isn’t in your contacts',
+  text: 'They may have been deleted, or the link came from someone else’s contacts. Only you can see yours.',
+} as const;
+
+/** Whether an address's id can name a contact at all; one that cannot is not asked for. */
+export function isContactId(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+}

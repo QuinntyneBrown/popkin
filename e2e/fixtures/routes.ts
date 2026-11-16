@@ -33,6 +33,15 @@ const plan = `${home}/plan`;
 const idea = `${experiences}/00000000-0000-4000-b000-000000000001`;
 // The contact the recording adds and edits: Femi.
 const femi = `/contacts/people/${responses['POST /api/contacts/people'].body.id}`;
+// The contact whose profile the mocks draw: Chidi, with his photo and phone, read once.
+const chidi = Object.keys(responses)
+  .filter((key) => /^GET \/api\/contacts\/people\/[^/]+$/.test(key))
+  .map((key) => key.slice('GET /api'.length))
+  .find(
+    (path) =>
+      (responses as Record<string, { body?: { name?: string } }>)[`GET /api${path}`].body?.name ===
+      'Chidi Okafor',
+  );
 
 /** Where the suite serves the marketing site, a second application (ADR 0017). */
 export const MARKETING = 'http://localhost:4201';
@@ -183,6 +192,13 @@ export const routes = {
   addContactSubmitting: { app: '/contacts/people/new', mock: 'pages/add-contact/submitting.html' },
   addContactError: { app: '/contacts/people/new', mock: 'pages/add-contact/error.html' },
   editContact: { app: `${femi}/edit`, mock: 'pages/add-contact/edit.html' },
+  contactProfile: { app: `${chidi}`, mock: 'pages/contact-profile/default.html' },
+  contactProfileEmpty: { app: femi, mock: 'pages/contact-profile/empty.html' },
+  contactProfileLoading: { app: `${chidi}`, mock: 'pages/contact-profile/loading.html' },
+  contactProfileError: { app: `${chidi}`, mock: 'pages/contact-profile/error.html' },
+  contactProfileNotFound: { app: `${chidi}`, mock: 'pages/contact-profile/not-found.html' },
+  contactActions: { app: `${chidi}`, mock: 'dialogs/contact-actions/default.html' },
+  contactActionsNotClosest: { app: femi, mock: 'dialogs/contact-actions/not-closest.html' },
   scanToJoin: { app: '/popkins', mock: 'dialogs/scan-to-join/default.html' },
   scanToJoinBusy: { app: '/popkins', mock: 'dialogs/scan-to-join/busy.html' },
   scanToJoinInvalid: { app: '/popkins', mock: 'dialogs/scan-to-join/invalid.html' },

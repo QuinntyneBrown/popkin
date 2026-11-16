@@ -1,0 +1,17 @@
+<div pk-dialog [heading]="data.name" [accent]="data.accent">
+  <div pk-menu-list>
+    <button
+      pk-menu-item
+      type="button"
+      icon="star"
+      [hint]="data.closest.hint"
+      (click)="choose('closest')"
+    >
+      {{ data.closest.label }}
+    </button>
+    <button pk-menu-item type="button" icon="edit" (click)="choose('edit')">Edit profile</button>
+    <button pk-menu-item type="button" icon="network" (click)="choose('connections')">
+      See {{ data.firstName }}’s connections
+    </button>
+  </div>
+</div>

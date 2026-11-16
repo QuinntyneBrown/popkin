@@ -224,6 +224,7 @@ export * from './lib/job-detail/job-detail';
 export * from './lib/trend/trend';
 export * from './lib/uptime/uptime';
 export * from './lib/contact-id/contact-id';
+export * from './lib/back-link/back-link';
 export * from './lib/contact-facts/contact-facts';
 export * from './lib/likes/likes';
 export * from './lib/memory-grid/memory-grid';

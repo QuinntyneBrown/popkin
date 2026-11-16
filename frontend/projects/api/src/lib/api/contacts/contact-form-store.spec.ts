@@ -18,10 +18,12 @@ const typed: ContactFormValues = {
   phone: '',
   email: 'femi.b@mail.com',
   city: 'London',
+  howWeMet: 'At the wedding',
   loves: 'Arsenal, jazz brunches, ,',
 };
 
-const femi = { id: 'c1', name: 'Femi Bankole', firstName: 'Femi' } as ContactProfileView;
+const femiId = '566025c4-1a2b-4c3d-8e9f-0a1b2c3d4e5f';
+const femi = { id: femiId, name: 'Femi Bankole', firstName: 'Femi' } as ContactProfileView;
 
 describe('contactRequestOf', () => {
   it('trims the name and splits the things they love at commas (known gap 102)', () => {
@@ -33,6 +35,7 @@ describe('contactRequestOf', () => {
       phone: '',
       email: 'femi.b@mail.com',
       city: 'London',
+      howWeMet: 'At the wedding',
       loves: ['Arsenal', 'jazz brunches'],
     });
   });
@@ -48,6 +51,7 @@ describe('contactValuesOf', () => {
       phone: null,
       email: 'chidi@okafor.dev',
       city: 'Manchester',
+      howWeMet: null,
       loves: ['Man City', 'Hot sauce collecting'],
     } as ContactProfileView;
 
@@ -58,6 +62,7 @@ describe('contactValuesOf', () => {
       phone: '',
       email: 'chidi@okafor.dev',
       city: 'Manchester',
+      howWeMet: '',
       loves: 'Man City, Hot sauce collecting',
     });
   });
@@ -137,27 +142,48 @@ describe('ContactFormStore', () => {
   });
 
   it('editing, holds the contact read and saves the edit to them, not a new contact (L2-130 AC2)', () => {
-    store.edit('c1');
-    expect(api.contact).toHaveBeenCalledWith('c1');
+    store.edit(femiId);
+    expect(api.contact).toHaveBeenCalledWith(femiId);
     expect(store.editing()).toEqual(femi);
 
     store.save(typed, null);
 
     expect(api.addContact).not.toHaveBeenCalled();
     expect(api.editContact).toHaveBeenCalledWith(
-      'c1',
+      femiId,
       expect.objectContaining({ name: 'Femi Bankole' }),
+      null,
     );
     expect(store.saved()).toEqual(femi);
   });
 
   it('editing, a failed save is failed and keeps the contact being edited', () => {
     api.editContact.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0 })));
-    store.edit('c1');
+    store.edit(femiId);
 
     store.save(typed, null);
 
     expect(store.state()).toBe('failed');
     expect(store.editing()).toEqual(femi);
+  });
+
+  // L2-122 AC2
+  it.each([
+    ['a contact not mine', 'contact_not_found', 'notFound'],
+    ['a failed read', undefined, 'failed'],
+  ])('editing, %s reads as %s', (_, code, reading) => {
+    api.contact.mockReturnValueOnce(
+      throwError(
+        () => new HttpErrorResponse({ status: code ? 404 : 0, error: code ? { code } : null }),
+      ),
+    );
+    store.edit(femiId);
+    expect(store.reading()).toBe(reading);
+  });
+
+  it('editing, never asks for an address that cannot name a contact', () => {
+    store.edit('not-a-contact');
+    expect(store.reading()).toBe('notFound');
+    expect(api.contact).not.toHaveBeenCalled();
   });
 });
