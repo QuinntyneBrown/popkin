@@ -61,8 +61,9 @@ The dialog checks the size in the browser before any upload, and the API checks 
   `note_too_long`.
 - **A milestone's photo** — Log's "Photo" ("Add a photo") chooses a photo; once the milestone is
   saved, the photo is added as a photo memory captioned with what happened and dated by the
-  milestone's day. If that upload fails the milestone stays saved and the danger toast "We
-  couldn't add the photo" offers "Try again".
+  milestone's day. If that upload fails the milestone stays saved and Log stays open with "We
+  couldn't add the photo." and "{first name}'s milestone is saved. Check your connection and try
+  Save again."; Save resends the milestone, kept once under its client id, then the photo.
 - **The timeline** lists photo memories among the entries, by their day, each with its caption
   as its title and its thumbnail (L2-135 AC1).
 - **Editing and deleting** a memory are not built; memories and their files go with their
@@ -121,22 +122,31 @@ The dialog checks the size in the browser before any upload, and the API checks 
 
 ### Frontend (Popkin web app)
 
-- **`AddMemoryDialog`** (`dialogs/add-memory/add-memory.dialog.ts`) — CDK Dialog opened from the
-  profile's "Add" with the contact's id and first name. Composes `pk-dialog`, `pk-form-summary`,
-  `pk-segmented-control` "What to add", the add card of `pk-info-card` for "Choose a photo"
-  through `pk-files-input`, `pk-upload-item` for the chosen file and its progress, `pk-text-field`
-  "Caption" with its hint, and `pk-button` "Save" / "Uploading…". It closes with the saved memory.
-  `pk-upload-item` gains an input that leaves out its own caption field, since the dialog's
-  caption is a field of its own.
-- **`memory-rules.ts`** (api library) — 25 MB, the types, "Photo: that one is {n} MB; choose one
-  up to 25 MB.", "That photo is {n} MB. A photo can be up to 25 MB.", "Uploading · {sent} of
-  {total} MB" and a file's size in KB or MB. Unit tested.
-- **`ContactMemoriesStore`** — the tab: `loading | ready | failed`, and a saved memory placed
-  first.
-- The tab is the profile's `?view=memories` ([Contact profile](../contact-profile/README.md));
-  it composes the memory grid and rows of `pk-contact-id` (backlog row 13).
-- **`CONTACTS_API`** — `memories(contactId)` and `addPhotoMemory(contactId, file, caption)`,
-  which posts with `reportProgress` and emits progress and the saved memory.
+- **`AddMemoryDialog`** (`dialogs/add-memory/`) — CDK Dialog opened from the profile's "Add"
+  with the contact's id and first name. Composes `pk-dialog`, `pk-form-summary`, `pk-alert`,
+  `pk-segmented-control` "What to add" (radios), `pk-memory-chooser` ("Choose a photo", "Choose a
+  file" with its hint, "Choose another photo" once one is chosen or refused), `pk-memory-upload`
+  for the chosen photo or file and its progress, `pk-text-field` "Caption" and `pk-textarea`
+  "Note". It closes with what was kept. States: default, chosen, file, note, invalid, busy.
+- **`AddMemoryStore`** (api library) — the kind, the chosen file, the caption and note, the
+  problems (a file over 25 MB as soon as it is chosen, the rest once Save is chosen, the API's
+  refusals at their field), `idle | uploading | saving | failed`, how much is sent, and one
+  client id per memory. Unit tested.
+- **`memory-text.ts`** (api library) — 25 MB, the photo and file types, "Photo: that one is {n}
+  MB; choose one up to 25 MB.", "That photo is {n} MB. A photo can be up to 25 MB.", "Uploading ·
+  {sent} of {total} MB", a file's size in KB or MB, "Sep 2021 · 84 KB", "Updated Aug 31" and
+  "Hot sauce night · Aug 8". Unit tested.
+- **`ContactMemoriesStore`** (api library) — the tab: `loading | ready | failed`, and a memory
+  just saved placed first among its kind. Unit tested.
+- The tab is the profile's `?view=memories`: the line and "Add", `pk-memory-grid` for the photos
+  and `pk-memory-list` for the files (their name downloads them) and notes; a failed read is
+  `pk-empty-state` with "Try again". The timeline draws a photo memory with its photo.
+- Log's milestone pairs "When" with `pk-memory-chooser` "Photo" in `pk-form-pair`;
+  `LogEntryStore` sends the photo once the milestone is saved.
+- **`CONTACTS_API`** — `memories(contactId)`, `addPhotoMemory(contactId, clientId, file,
+  caption, takenOn?)` and `addFileMemory(contactId, clientId, file)`, which post with
+  `reportProgress` and emit progress and the saved memory, and `addNoteMemory(contactId,
+  clientId, text)`.
 
 ### Tests
 
@@ -145,10 +155,13 @@ The dialog checks the size in the browser before any upload, and the API checks 
   `photo_type_not_allowed`; another person's contact answers `404` `contact_not_found`; a resend
   saves once; a failed save leaves no file.
 - Direct test of `memory-rules.ts`: each size at and around 25 MB, each size text.
-- Playwright: `tests/contacts-memories.spec.ts` through `ContactProfilePage` and
-  `AddMemoryDialog` page objects on recorded responses, with stubs for the progress and the
-  refusal: the tab, a photo too large, uploading, a saved photo. `routes.ts` keys each state.
-- Parity: `pk-upload-item` without its caption, and the memory grid of `pk-contact-id`.
+- Playwright: `tests/contacts-memories.spec.ts` through `ContactProfilePage`, `AddMemoryDialog`
+  and `LogEntryPage` on recorded responses, with stubs for the progress and the refusals: the
+  tab, nothing kept, a failed read, a photo on the timeline, the dialog, a photo too large,
+  uploading, a saved photo, a refused photo, a file, a note, a failure, and a milestone's photo.
+  `routes.ts` keys each state.
+- Parity: `pk-memory-grid`, `pk-memory-list`, `pk-memory-chooser` (photo, file, refused, Log),
+  `pk-memory-upload` (chosen) and the timeline's photo memory.
 
 ## Requirements
 

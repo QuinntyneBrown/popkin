@@ -24,7 +24,7 @@ Popkin uses no custom tooltips.
 | 12 | Contact row | A person in the People list, linking to their profile. | 0.5 days | Built, with parity (row, quiet row, Closest) and a loading state |
 | 13 | Contact header and facts | Head of a person's profile with their details as a description list. | 1 day || Built; header parity done (phone, email only) |
 | 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, parity pending |
-| 15 | Contact timeline | A person's history on their profile, newest first, as an ordered list. | 1 day | Built, with parity (conversation, milestone) |
+| 15 | Contact timeline | A person's history on their profile, newest first, as an ordered list. | 1 day | Built, with parity (conversation, milestone, memory) |
 | 16 | Form sections | Splits the long Add someone form into sections with kind toggle buttons. | 1 day | Built, parity pending |
 | 17 | Task | A follow-up to do, with the field that adds one; `pk-task-list` lists a bucket of them. | 1 day | Built, with parity (late, plain, done; the list; the add field) |
 | 18 | Keep strip and habit row | A habit's rhythm with someone, showing which times were kept. | 1 day | Built, parity pending |
@@ -41,8 +41,9 @@ Popkin uses no custom tooltips.
 | 29 | Key dates | A profile's dates with their reminders. | 0.25 days | Built, with parity |
 | 30 | Reminder defaults | Dates' aside: the default lead per kind, and phone and Monday email. | 0.5 days | Built, with parity |
 | 31 | Log form, section and when | Log's one column, its parts named like fields, and when a conversation is logged. | 0.5 days | Built, with parity (form, promises, divided) |
+| 32 | Memory list, chooser and upload | Memories' files and notes, Add's "Choose a photo", and the chosen photo or file with its progress. | 0.5 days | Built, with parity (list, chooser ×4, chosen) |
 
-Total: 30 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
+Total: 31 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
 26 came from the Contacts designs and are not estimated yet.
 
 The even-numbered components were built on 15 November 2026, in the library only, before their
