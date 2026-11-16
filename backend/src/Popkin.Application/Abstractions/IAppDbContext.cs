@@ -56,6 +56,8 @@ public interface IAppDbContext
 
     DbSet<TimelineEntry> TimelineEntries { get; }
 
+    DbSet<Memory> Memories { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }

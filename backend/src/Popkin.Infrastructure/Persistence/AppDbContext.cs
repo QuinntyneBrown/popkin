@@ -57,6 +57,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<TimelineEntry> TimelineEntries => Set<TimelineEntry>();
 
+    public DbSet<Memory> Memories => Set<Memory>();
+
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();
 
     public DbSet<Admin> Admins => Set<Admin>();

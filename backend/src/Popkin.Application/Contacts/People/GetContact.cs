@@ -24,6 +24,9 @@ public sealed class GetContactQueryHandler(
         var contact = await guard.RequireOwnedAsync(request.ContactId, cancellationToken);
         var dates = await db.KeyDates.OwnedBy(current.PersonId).AsNoTracking()
             .Where(d => d.ContactId == contact.Id).ToListAsync(cancellationToken);
-        return ContactProfileDto.Of(contact, photos, KeyDateRules.ForProfile(dates, today));
+        var kept = new ContactKeptDto(
+            await db.TimelineEntries.OwnedBy(current.PersonId).CountAsync(e => e.ContactId == contact.Id, cancellationToken),
+            await db.Memories.OwnedBy(current.PersonId).CountAsync(m => m.ContactId == contact.Id, cancellationToken));
+        return ContactProfileDto.Of(contact, photos, KeyDateRules.ForProfile(dates, today), kept);
     }
 }
