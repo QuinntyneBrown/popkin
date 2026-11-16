@@ -33,6 +33,13 @@ public static class ContactsExtensions
     public static Task<HttpResponseMessage> AddContactAsync(this HttpClient owner, object contact, byte[]? photo = null) =>
         owner.PostAsync("/api/contacts/people", ContactForm(contact, photo));
 
+    /// <summary>Edit: the same part `contact`, without a photo (L2-130).</summary>
+    public static Task<HttpResponseMessage> EditContactAsync(this HttpClient owner, Guid contactId, object contact) =>
+        owner.PutAsync($"/api/contacts/people/{contactId}", ContactForm(contact));
+
+    public static Task<HttpResponseMessage> GetContactAsync(this HttpClient owner, Guid contactId) =>
+        owner.GetAsync($"/api/contacts/people/{contactId}");
+
     /// <summary>Adds a contact that must be saved, and returns its profile.</summary>
     public static async Task<JsonElement> AddedContactAsync(this HttpClient owner, string name)
     {

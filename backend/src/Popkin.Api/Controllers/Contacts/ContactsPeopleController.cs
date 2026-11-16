@@ -30,4 +30,14 @@ public sealed class ContactsPeopleController(ISender sender) : ControllerBase
             new AddContactCommand(JsonSerializer.Deserialize<SaveContactRequest>(contact, Json)!, upload), cancellationToken);
         return Created($"/api/contacts/people/{added.Id}", added);
     }
+
+    /// <summary>One contact of the caller's (L2-128, L2-130); anyone else's is not found (L2-122 AC1).</summary>
+    [HttpGet("{contactId:guid}")]
+    public Task<ContactProfileDto> Get(Guid contactId, CancellationToken cancellationToken) =>
+        sender.Send(new GetContactQuery(contactId), cancellationToken);
+
+    /// <summary>Edit (L2-130): the part `contact` as Add someone sends it, without a photo.</summary>
+    [HttpPut("{contactId:guid}")]
+    public Task<ContactProfileDto> Edit(Guid contactId, [FromForm] string contact, CancellationToken cancellationToken) =>
+        sender.Send(new EditContactCommand(contactId, JsonSerializer.Deserialize<SaveContactRequest>(contact, Json)!), cancellationToken);
 }

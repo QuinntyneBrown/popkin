@@ -81,6 +81,8 @@ public sealed class Contact : IClientWrite
         return contact;
     }
 
+    public void Rename(string name) => Name = name.Trim();
+
     public void ChangeDetails(ContactDetails details)
     {
         KnownAs = Clean(details.KnownAs);
