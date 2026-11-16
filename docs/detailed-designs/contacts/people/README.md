@@ -52,24 +52,26 @@ contact are the Add someone, Edit and Delete designs; the profile is the profile
   someone" and "Import from your Popkins" (the import dialog, L2-151); no search, circles or
   Connections (L2-126 AC4).
 
-### Conflicts and gaps
+### Rulings (known gaps settled 2026-11-16)
 
-- **Search.** Whether the search matches the whole name or a part, a first or a last name, and
-  whether it keeps the chosen circle is open (known gap 101). `matchesName` is the one place the
-  rule lives.
-- **The next key date's form.** Some rows read "Oct 7 · Birthday" in bold, others "Birthday Apr
-  29" plain; which form a date takes is open (known gap 101).
-- **Closest.** How a contact enters Closest, how many it holds and its order are open (known gap
-  100). The mock orders it by first name.
-- **Last talked.** "59 days ago" and "33 days ago" are drawn quiet, for Sam and Joel, who are
-  drifting on Today; the threshold is known gap 99. The rule for "Sun" against "Sep 5" is `<TO
-  SUPPLY>`, as it is for Today. A contact with no conversation logged shows `<TO SUPPLY>`.
+- **Search** (gap 101). The search matches any part of the name, ignoring case and accents
+  ("femi", "Bánk"), and keeps the chosen circle. `matchesName` is the one place the rule lives.
+- **The next key date's form** (gap 101). A date 30 days away or fewer reads date first, in bold
+  ("Oct 7 · Birthday"); a later one reads kind first, plain ("Birthday Apr 29").
+- **Closest** (gap 100). Ordered by first name, A to Z; no limit of its own.
+- **Last talked** (gaps 99, 111). "today", "yesterday", the weekday ("Sun") within the last 6
+  days, then "{n} days ago"; drawn quiet after 30 days, the drifting threshold Today shares. A
+  contact with no conversation logged reads "Not yet".
 - **The circle's name.** The mock gives the list the accessible name "Family" (or "Everyone") and
   draws no heading; L2-126 AC3 and L2-127 AC2 were worded to match, so the list is named for
   assistive technology only.
-- **"Add “{name}”"** passes the typed name to Add someone as `?name=`; whether the form starts
-  with it filled in is the Add someone design's `<TO SUPPLY>`.
-- **How many contacts** a person may keep is open (known gap 110); People reads them all at once.
+- **"Add “{name}”"** passes the typed name to Add someone as `?name=`, which fills in Name (gap
+  112, ruled).
+- **How many contacts** (gap 110). No limit; People reads them all at once.
+- **Built in steps.** The next key date joins with [Key dates](../key-dates/README.md) and last
+  talked with [Log](../log-entry/README.md); until then `nextDate` and `lastTalkedOn` are null
+  and the cells are empty. "Import from your Popkins" in the empty state joins with
+  [Import](../import-from-popkins/README.md).
 
 ### API
 
