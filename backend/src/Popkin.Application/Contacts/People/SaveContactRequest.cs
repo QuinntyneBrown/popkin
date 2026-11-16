@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Popkin.Application.Contacts.Dates;
 using Popkin.Application.Problems;
 using Popkin.Domain;
 
@@ -17,7 +18,8 @@ public sealed record SaveContactRequest(
     string? Email,
     string? City,
     string? HowWeMet,
-    IReadOnlyList<string>? Loves);
+    IReadOnlyList<string>? Loves,
+    IReadOnlyList<KeyDateDraftDto>? KeyDates = null);
 
 /// <summary>
 /// The rules of the contact form, for add and edit alike (L2-129 AC4), with the limits on

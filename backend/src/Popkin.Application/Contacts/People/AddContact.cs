@@ -1,5 +1,6 @@
 using MediatR;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Contacts.Dates;
 using Popkin.Application.Invites;
 using Popkin.Application.Photos;
 using Popkin.Domain;
@@ -21,19 +22,22 @@ public sealed class AddContactCommandHandler(
     {
         contacts.Require();
         var owner = current.PersonId;
+        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         if (await ClientWrites.FindAsync(db.Contacts, owner, request.Contact.ClientId, cancellationToken) is { } saved)
         {
-            return ContactProfileDto.Of(saved, photos);
+            return ContactProfileDto.Of(saved, photos, await KeyDateDrafts.ForProfileAsync(db, saved, today, cancellationToken));
         }
 
         var (name, details) = SaveContactValidator.Validate(request.Contact);
+        var drafts = KeyDateDrafts.Validate(request.Contact.KeyDates);
         var avatar = request.Photo is null ? null : await AvatarPhotos.ReadAsync(request.Photo, processor, cancellationToken);
         var contact = Contact.Create(owner, request.Contact.ClientId, name, details, clock.GetUtcNow());
         db.Contacts.Add(contact);
+        await KeyDateDrafts.ApplyAsync(db, contact, drafts, clock.GetUtcNow(), cancellationToken);
         if (avatar is null)
         {
             await db.SaveChangesAsync(cancellationToken);
-            return ContactProfileDto.Of(contact, photos);
+            return ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken));
         }
 
         var key = $"contacts/{Guid.NewGuid():N}{avatar.Extension}";
@@ -49,6 +53,6 @@ public sealed class AddContactCommandHandler(
             throw;
         }
 
-        return ContactProfileDto.Of(contact, photos);
+        return ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken));
     }
 }

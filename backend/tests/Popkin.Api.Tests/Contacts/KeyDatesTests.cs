@@ -200,4 +200,72 @@ public sealed class KeyDatesTests
 
         await (await mara.GetAsync("/api/contacts/dates?kind=all")).AssertProblem(HttpStatusCode.BadRequest, "invalid_date");
     }
+
+    // Given Add someone with a birthday and a wedding, when it is saved, then both are kept with
+    // their reminders; Edit then removes the wedding, changes the birthday's reminder and adds an
+    // anniversary (L2-129 AC2, L2-130 AC3).
+    [Fact]
+    public async Task Dates_to_remember_are_saved_with_the_contact_and_changed_by_Edit()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+        var added = await mara.AddContactAsync(new
+        {
+            clientId = Guid.NewGuid(),
+            name = "Femi Bankole",
+            loves = Array.Empty<string>(),
+            keyDates = new object[]
+            {
+                new { kind = "Birthday", month = 3, day = 9, everyYear = true, reminder = "OneWeekBefore" },
+                new { kind = "Other", title = "Wedding", month = 12, day = 26, year = 2026, everyYear = false, reminder = "OneMonthBefore" },
+            },
+        });
+        added.EnsureSuccessStatusCode();
+        var femi = await added.Content.ReadFromJsonAsync<JsonElement>();
+        var kept = femi.GetProperty("keyDates").EnumerateArray().ToList();
+        Assert.Equal(["Other", "Birthday"], kept.Select(d => d.GetProperty("kind").GetString()!));
+        var birthday = kept[1].GetProperty("id").GetGuid();
+
+        var edited = await mara.EditContactAsync(femi.GetProperty("id").GetGuid(), new
+        {
+            clientId = Guid.NewGuid(),
+            name = "Femi Bankole",
+            loves = Array.Empty<string>(),
+            keyDates = new object[]
+            {
+                new { id = birthday, kind = "Birthday", month = 3, day = 9, everyYear = true, reminder = "OnTheDay" },
+                new { kind = "Anniversary", month = 6, day = 1, year = 2024, everyYear = true, reminder = "ThreeDaysBefore" },
+            },
+        });
+
+        edited.EnsureSuccessStatusCode();
+        var dates = (await edited.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("keyDates").EnumerateArray().ToList();
+        Assert.Equal(2, dates.Count);
+        var kept2 = dates.Single(d => d.GetProperty("kind").GetString() == "Birthday");
+        Assert.Equal(birthday, kept2.GetProperty("id").GetGuid());
+        Assert.Equal("OnTheDay", kept2.GetProperty("reminder").GetString());
+        Assert.Contains(dates, d => d.GetProperty("kind").GetString() == "Anniversary");
+    }
+
+    // Given a date without a real day, or a reminder not offered, when Add someone saves, then
+    // nothing is kept (L2-129 AC4).
+    [Theory]
+    [InlineData(4, 31, "OneWeekBefore", "key_date_invalid")]
+    [InlineData(4, 1, "Fortnightly", "reminder_not_allowed")]
+    public async Task A_date_to_remember_that_is_not_right_refuses_the_save(int month, int day, string reminder, string code)
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+
+        var response = await mara.AddContactAsync(new
+        {
+            clientId = Guid.NewGuid(),
+            name = "Femi Bankole",
+            loves = Array.Empty<string>(),
+            keyDates = new object[] { new { kind = "Birthday", month, day, everyYear = true, reminder } },
+        });
+
+        await response.AssertProblem(HttpStatusCode.BadRequest, code);
+        Assert.Equal(0, await mara.ContactsCountAsync());
+    }
 }
