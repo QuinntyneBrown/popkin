@@ -82,10 +82,10 @@ On a phone the profile shows only its "People" back link, not the Contacts tabs 
   works; the three content designs follow it.
 - **"Follow-ups {n}"** (gap 115) counts the open follow-ups and shows no number at none; the
   delete dialog counts every follow-up.
-- **Built in steps.** The header, About, the menu and the states come first. Key dates, the
-  habit, People around and the history tabs' contents join with their own designs; until then
-  the DTO's lists are empty, `habit` is null, and the page shows the add card and the empty
-  timeline.
+- **Built in steps.** The header, About, the menu and the states come first. `keyDates`,
+  `habit`, `connections`, `groups`, `counts` and `alsoIn` join the DTO with Key dates, Habits,
+  Connections, Groups, the history designs and Import; until each joins, the page leaves its
+  section out, shows the habit's add card and the empty timeline.
 
 ### API
 

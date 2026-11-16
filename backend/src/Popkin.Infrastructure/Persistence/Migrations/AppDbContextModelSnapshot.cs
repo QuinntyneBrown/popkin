@@ -350,6 +350,10 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(254)
                         .HasColumnType("nvarchar(254)");
 
+                    b.Property<string>("HowWeMet")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
                     b.Property<bool>("IsClosest")
                         .HasColumnType("bit");
 

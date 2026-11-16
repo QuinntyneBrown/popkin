@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Popkin.Api.RateLimiting;
 using Popkin.Application.Contacts.People;
+using Popkin.Application.Contacts.Profile;
 using Popkin.Application.Invites;
 
 namespace Popkin.Api.Controllers.Contacts;
@@ -35,6 +36,22 @@ public sealed class ContactsPeopleController(ISender sender) : ControllerBase
     [HttpGet("{contactId:guid}")]
     public Task<ContactProfileDto> Get(Guid contactId, CancellationToken cancellationToken) =>
         sender.Send(new GetContactQuery(contactId), cancellationToken);
+
+    /// <summary>Into Closest (L2-131 AC4); one already in it is left as it is.</summary>
+    [HttpPut("{contactId:guid}/closest")]
+    public async Task<IActionResult> JoinClosest(Guid contactId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new AddToClosestCommand(contactId), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>Out of Closest (L2-131 AC2); they stay in People and their circle.</summary>
+    [HttpDelete("{contactId:guid}/closest")]
+    public async Task<IActionResult> LeaveClosest(Guid contactId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new TakeOutOfClosestCommand(contactId), cancellationToken);
+        return NoContent();
+    }
 
     /// <summary>Edit (L2-130): the part `contact` as Add someone sends it, without a photo.</summary>
     [HttpPut("{contactId:guid}")]

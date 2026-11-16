@@ -16,6 +16,7 @@ public sealed record SaveContactRequest(
     string? Phone,
     string? Email,
     string? City,
+    string? HowWeMet,
     IReadOnlyList<string>? Loves);
 
 /// <summary>
@@ -40,6 +41,7 @@ public static partial class SaveContactValidator
             PhoneOf(request.Phone),
             EmailOf(request.Email),
             Limited(request.City, Contact.MaxCityLength, "city"),
+            Limited(request.HowWeMet, Contact.MaxHowWeMetLength, "howWeMet"),
             LovesOf(request.Loves ?? [])));
     }
 
