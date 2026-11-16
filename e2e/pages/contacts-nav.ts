@@ -8,6 +8,8 @@ export class ContactsNav {
   /** "13 people · only you", or "Only you can see them" with nobody. */
   readonly countLine: Locator;
   readonly tabs: Locator;
+  /** Each tab's name, without the Follow-ups badge. */
+  readonly tabNames: Locator;
   readonly current: Locator;
   readonly followUpsBadge: Locator;
   /** The badge's number; its name is visually hidden beside it. */
@@ -19,6 +21,7 @@ export class ContactsNav {
     this.name = this.root.locator('.popkin-nav__id strong');
     this.countLine = this.root.locator('.popkin-nav__id-text');
     this.tabs = this.root.locator('li a');
+    this.tabNames = this.tabs.locator('> span:not(.badge)');
     this.current = this.root.locator('a[aria-current="page"]');
     this.followUpsBadge = this.tab('Follow-ups').locator('.badge');
     this.followUpsCount = this.followUpsBadge.locator('[aria-hidden="true"]');

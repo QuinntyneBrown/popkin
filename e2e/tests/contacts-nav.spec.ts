@@ -62,7 +62,7 @@ test.describe('the Contacts navigation', () => {
     await expect(nav.name).toHaveText('Contacts');
     await expect(nav.countLine).toHaveText('ContactsOnly you can see them');
     await expect(nav.back).toHaveAttribute('href', '/popkins');
-    await expect(nav.tabs).toHaveText([
+    await expect(nav.tabNames).toHaveText([
       'Today',
       'People',
       'Dates',
@@ -94,7 +94,7 @@ test.describe('the Contacts navigation', () => {
     await pk.open('contactsTodayEmpty');
 
     const nav = new ContactsTodayPage(page).nav;
-    await expect(nav.tabs.locator('visible=true')).toHaveText([
+    await expect(nav.tabNames.locator('visible=true')).toHaveText([
       'Today',
       'People',
       'Dates',
