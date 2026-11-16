@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 using Popkin.Api.Tests.Support;
@@ -67,6 +68,8 @@ public sealed class PurgeDeletedAccountsTests
         (await mara.AddContactAsync(ContactsExtensions.Named("Chidi Okafor"), TestPhotos.WithLocation(MagickFormat.Jpeg)))
             .EnsureSuccessStatusCode();
         await lena.AddedContactAsync("Bea Lind");
+        (await mara.PostAsJsonAsync("/api/contacts/follow-ups", new { clientId = Guid.NewGuid(), text = "Call Sam" }))
+            .EnsureSuccessStatusCode();
         (await mara.DeleteAsync("/api/account")).EnsureSuccessStatusCode();
         api.Clock.Advance(TimeSpan.FromDays(1));
 
@@ -75,6 +78,7 @@ public sealed class PurgeDeletedAccountsTests
         using var scope = api.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         Assert.Equal(["Bea Lind"], db.Contacts.Select(c => c.Name).ToList());
+        Assert.Empty(db.FollowUps);
         Assert.Empty(api.Photos.Files);
     }
 

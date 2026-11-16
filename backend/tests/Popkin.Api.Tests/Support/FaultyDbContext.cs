@@ -66,6 +66,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<ReminderPreferences> ReminderPreferences => inner.ReminderPreferences;
 
+    public DbSet<FollowUp> FollowUps => inner.FollowUps;
+
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;
 
     public DbSet<Admin> Admins => inner.Admins;
