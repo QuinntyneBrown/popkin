@@ -27,6 +27,20 @@ export interface SaveContactRequest {
   city: string;
   howWeMet: string;
   loves: string[];
+  /** "Dates to remember", saved with the contact; Edit leaves the dates alone without it. */
+  keyDates?: KeyDateDraft[];
+}
+
+/** A key date held by the contact form until "Save": `id` for one kept (L2-129 AC2). */
+export interface KeyDateDraft {
+  id?: string;
+  kind: KeyDateKind;
+  title: string | null;
+  month: number;
+  day: number;
+  year: number | null;
+  everyYear: boolean;
+  reminder: ReminderLead;
 }
 
 /**

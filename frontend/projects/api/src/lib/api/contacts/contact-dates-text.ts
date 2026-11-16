@@ -1,5 +1,6 @@
 import {
   ContactKeyDateView,
+  KeyDateDraft,
   DatesFilter,
   KeyDateKind,
   KeyDateRowView,
@@ -165,4 +166,18 @@ export function dayFromInput(
     day,
     year: everyYear && year >= today.getFullYear() ? null : year,
   };
+}
+
+/** A date to remember's name in the contact form: "Birthday", "Anniversary" or its title. */
+export function draftKind(draft: Pick<KeyDateDraft, 'kind' | 'title'>): string {
+  if (draft.kind === 'Birthday' || draft.kind === 'Anniversary') return draft.kind;
+  return draft.title ?? 'Something else';
+}
+
+/** "9 March"; a one-off date with its year, "26 December 2026". */
+export function draftDay(
+  draft: Pick<KeyDateDraft, 'month' | 'day' | 'year' | 'everyYear'>,
+): string {
+  const day = `${draft.day} ${MONTHS[draft.month - 1]}`;
+  return draft.everyYear || draft.year === null ? day : `${day} ${draft.year}`;
 }

@@ -12,6 +12,7 @@ import {
   ADD_DATE_KINDS,
   CONTACTS_API,
   DEFAULT_REMINDERS,
+  KeyDateDraft,
   KeyDateKind,
   KeyDateRowView,
   REMINDER_LEADS,
@@ -38,6 +39,11 @@ export interface AddDateData {
   contactId?: string;
   /** My defaults, when the opener has them; otherwise the dialog reads them. */
   preferences?: ReminderPreferencesView;
+  /**
+   * From Add someone or Edit: for the contact on the form, saving nothing; it closes with the
+   * date for the form to save with the contact.
+   */
+  draft?: boolean;
 }
 
 const DAY_MESSAGE = 'Pick the day, so we know when to remind you.';
@@ -67,7 +73,7 @@ const FOR_MESSAGE = 'For: choose who the date is for.';
 })
 export class AddDateDialog {
   protected readonly data = inject<AddDateData>(DIALOG_DATA);
-  private readonly ref = inject<DialogRef<KeyDateRowView>>(DialogRef);
+  private readonly ref = inject<DialogRef<KeyDateRowView | KeyDateDraft>>(DialogRef);
   private readonly api = inject(CONTACTS_API);
   private readonly today = new Date();
   private clientId = crypto.randomUUID();
@@ -75,7 +81,7 @@ export class AddDateDialog {
   protected readonly kinds = ADD_DATE_KINDS;
   protected readonly leads: SelectOption[] = REMINDER_LEADS.map((l) => ({ ...l }));
   protected readonly people = signal<SelectOption[]>([{ value: '', label: 'Choose someone' }]);
-  protected readonly who = signal(this.data.contactId ?? '');
+  protected readonly who = signal(this.data.contactId ?? (this.data.draft ? 'draft' : ''));
   protected readonly kind = signal<KeyDateKind>('Birthday');
   private preferences = this.data.preferences ?? DEFAULT_REMINDERS;
   protected readonly lead = signal<string>(this.preferences.birthdayLead);
@@ -106,7 +112,7 @@ export class AddDateDialog {
         this.chooseKind(this.kind());
       });
     }
-    if (!this.data.contactId) {
+    if (!this.data.contactId && !this.data.draft) {
       this.api
         .people(dayParam(this.today))
         .subscribe((view) =>
@@ -138,6 +144,18 @@ export class AddDateDialog {
     const day = dayFromInput(this.day.value, this.everyYear(), this.today);
     if (!this.who() || !day) {
       setTimeout(() => this.summary()?.focus());
+      return;
+    }
+    if (this.data.draft) {
+      this.ref.close({
+        kind: this.kind(),
+        title: this.kind() === 'Other' ? this.title.value.trim() || null : null,
+        month: day.month,
+        day: day.day,
+        year: day.year,
+        everyYear: this.everyYear(),
+        reminder: this.lead() as ReminderLead,
+      });
       return;
     }
     this.busy.set(true);

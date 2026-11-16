@@ -8,7 +8,7 @@
         Everything you chose is still here. Check your connection and try again.
       </div>
     }
-    @if (!data.contactId) {
+    @if (!data.contactId && !data.draft) {
       <div pk-select-field fieldId="for" label="For" [options]="people()" [(value)]="who"></div>
     }
     <div

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { KeyDateRowView } from '../../models/contacts';
 import {
   dateLine,
+  draftDay,
+  draftKind,
   dateTitle,
   dateWhen,
   dayFromInput,
@@ -90,5 +92,29 @@ describe('Dates text (L2-137, known gaps 103 and 113)', () => {
     expect(dayFromInput('2026-09-19', true, today)).toEqual({ month: 9, day: 19, year: null });
     expect(dayFromInput('2027-09-04', false, today)).toEqual({ month: 9, day: 4, year: 2027 });
     expect(dayFromInput('', true, today)).toBeNull();
+  });
+
+  it('names a date to remember by its kind or its title, and its day', () => {
+    const birthday = {
+      kind: 'Birthday' as const,
+      title: null,
+      month: 3,
+      day: 9,
+      year: null,
+      everyYear: true,
+    };
+    const wedding = {
+      kind: 'Other' as const,
+      title: 'Wedding',
+      month: 12,
+      day: 26,
+      year: 2026,
+      everyYear: false,
+    };
+    expect(draftKind(birthday)).toBe('Birthday');
+    expect(draftKind(wedding)).toBe('Wedding');
+    expect(draftKind({ ...wedding, title: null })).toBe('Something else');
+    expect(draftDay(birthday)).toBe('9 March');
+    expect(draftDay(wedding)).toBe('26 December 2026');
   });
 });

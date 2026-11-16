@@ -31,7 +31,7 @@ Popkin web app, `docs/mocks/pages/contact-profile/`:
 - `default.html` — "People" back, the icon buttons "Edit profile" and "More for Chidi", then
   `pk-contact-id`: the photo, "Chidi Okafor", "Brother · Family · Manchester" and "Also in your
   Popkin “Lakeside Weekend”", with "Message", "Call" and "Log" (L2-128 AC1 to AC3). "Key dates"
-  lists "Birthday" "Jan 24" with "Reminder: 1 week before", and "Chidi & Tomás’s anniversary"
+  lists "Birthday" "Jan 24" with "Reminder: 1 week before", and "Anniversary"
   "Sat, Sep 26 · in 11 days" with "Reminder: 3 days before", then "Add a date" (L2-128 AC4). The
   habit card reads "Every 2 weeks", "Lunch with Chidi", the keep strip "Kept 9 of the last 12"
   and "Overdue since Sep 13" (L2-128 AC5). "About Chidi" lists Phone, Email, City, How you met and
@@ -98,7 +98,7 @@ Every endpoint is on `ContactsPeopleController` (`Popkin.Api/Controllers/Contact
   `IPhotoStore.GetReadUrl`, or null), `knownAs`, `circle`, `city`, `phone`, `email`, `howWeMet`,
   `loves` (`string[]`), `isClosest`, `alsoIn` (`PopkinLinkDto?`: `popkinId`, `name`, `emoji`,
   `colour`), `alsoInMore` (the number of other shared Popkins), `keyDates` (`ContactKeyDateDto[]`: `id`, `kind`, `title`, `day`, `month`, `year?`,
-  `everyYear`, `reminder`, `nextOn`), `habit` (`ContactHabitDto?`: `id`, `rhythm`, `name`,
+  `everyYear`, `reminder`, `nextOn`, `daysLeft`; read with `?on=`, the device's day), `habit` (`ContactHabitDto?`: `id`, `rhythm`, `name`,
   `kept` (12 booleans, oldest first), `overdueSince?`, `nextOn?`), `connections`
   (`ContactConnectionDto[]`: `connectionId`, `contactId`, `name`, `initials`, `photoUrl`,
   `words`), `groups` (`ContactGroupChipDto[]`: `groupId`, `name`, `emoji`) and `counts`

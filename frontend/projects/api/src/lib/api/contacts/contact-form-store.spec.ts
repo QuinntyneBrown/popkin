@@ -164,6 +164,74 @@ describe('ContactFormStore', () => {
     expect(store.saved()).toEqual(femi);
   });
 
+  it('sends Dates to remember with the contact: added, reminder changed, removed (L2-129 AC2)', () => {
+    store.addDate({
+      kind: 'Birthday',
+      title: null,
+      month: 3,
+      day: 9,
+      year: null,
+      everyYear: true,
+      reminder: 'OneWeekBefore',
+    });
+    store.addDate({
+      kind: 'Other',
+      title: 'Wedding',
+      month: 12,
+      day: 26,
+      year: 2026,
+      everyYear: false,
+      reminder: 'OneMonthBefore',
+    });
+    store.changeReminder(0, 'OnTheDay');
+    store.removeDate(1);
+
+    store.save(typed, null);
+
+    expect(api.addContact).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keyDates: [expect.objectContaining({ kind: 'Birthday', reminder: 'OnTheDay' })],
+      }),
+      null,
+    );
+  });
+
+  it('editing, starts Dates to remember from the dates kept (L2-130 AC1)', () => {
+    api.contact.mockReturnValue(
+      of({
+        ...femi,
+        keyDates: [
+          {
+            id: 'd1',
+            kind: 'Birthday',
+            title: null,
+            month: 3,
+            day: 9,
+            year: null,
+            everyYear: true,
+            reminder: 'OneWeekBefore',
+            nextOn: '2027-03-09',
+            daysLeft: 175,
+          },
+        ],
+      }),
+    );
+    store.edit(femiId);
+
+    expect(store.dates()).toEqual([
+      {
+        id: 'd1',
+        kind: 'Birthday',
+        title: null,
+        month: 3,
+        day: 9,
+        year: null,
+        everyYear: true,
+        reminder: 'OneWeekBefore',
+      },
+    ]);
+  });
+
   it('editing, a failed save is failed and keeps the contact being edited', () => {
     api.editContact.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0 })));
     store.edit(femiId);

@@ -80,6 +80,7 @@ test.describe('Add someone', () => {
       city: 'London',
       howWeMet: '',
       loves: ['Arsenal', 'jazz brunches'],
+      keyDates: [],
     });
     await expect(page).toHaveURL(`/contacts/people/${femi().id}`);
     await expect(new Toasts(page).toast).toHaveText('Femi is in your Contacts.');
@@ -206,6 +207,7 @@ test.describe('Edit', () => {
       city: 'Lagos',
       howWeMet: '',
       loves: ['Arsenal', 'jazz brunches'],
+      keyDates: [],
     });
     await expect(page).toHaveURL(`/contacts/people/${kept().id}`);
   });

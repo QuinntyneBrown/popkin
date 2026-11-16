@@ -87,8 +87,17 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
   February** falls on 28 February in a year without it.
 - **"Today"** — Dates counts from the device day it sends, as Today does. The Worker's time zone
   is ruled with [Reminders](../reminders/README.md) (gap 104).
+- **The day field.** "The day" is a full date. A date every year keeps its year only when it is
+  before this year, its first year ("Turns 33"); a later one is its next day. A one-off date keeps
+  its year.
+- **A profile's days left** count from the device's day against `nextOn`, as Dates does.
+- **Components.** Dates' rows are `pk-date-list` (the date tile of `pk-spotlight`, the faces of
+  `pk-avatar-stack`, `size="base"`), its aside `pk-reminder-defaults`; a profile's dates are
+  `pk-key-dates` with "Add a date" as an accent `pk-link`; the form's are `pk-date-entry`.
 - **Built in steps.** Add someone's "Dates to remember" saves its drafts with the contact
-  ([Add someone](../add-contact/README.md)); a milestone date arises with Log.
+  ([Add someone](../add-contact/README.md)): Add a date opens in draft mode, without "For". A
+  milestone date arises with Log; the reminders themselves go out with
+  [Reminders](../reminders/README.md).
 
 ### API
 
@@ -104,7 +113,7 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
 - `POST /api/contacts/people/{contactId}/key-dates` — body `{ clientId, kind, title?, month,
   day, year?, everyYear, lead }`. `201` `KeyDateRowDto`. A resend with the same `clientId`
   answers `200` with the date already saved. Refusals: `400` `day_required`, `day_not_valid`,
-  `kind_not_allowed`, `lead_not_allowed`, `title_too_long` (length `<TO SUPPLY>`, gap 103);
+  `kind_not_allowed`, `lead_not_allowed`, `title_too_long` (80 characters, gap 103);
   `404` `contact_not_found`.
 - `PUT /api/contacts/key-dates/{keyDateId}/reminder` — body `{ lead }`. `200` `KeyDateRowDto`;
   `404` `key_date_not_found` (L2-139 AC3). Add someone's "Remind me about the {kind}" uses it
@@ -130,7 +139,7 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
   `AnniversaryLead` (`ThreeDaysBefore`), `MilestoneLead` (`OnTheDay`), `PhoneNotifications` and
   `MondayEmail` (both `true`, L2-140 AC4). `Defaults(ownerId)` and `DefaultFor(kind)`.
 - **`IOwnerClock`** (Application) — `Today(ownerId)` and `LocalNow(ownerId)` over `TimeProvider`,
-  in the owner's zone (`<TO SUPPLY>`, gap 104), for the Worker, which has no device day
+  in the owner's zone (ruled with [Reminders](../reminders/README.md), gap 104), for the Worker, which has no device day
   ([Reminders](../reminders/README.md)).
 - **`GetContactDatesQueryHandler`** — reads the owner's key dates with their contact's first
   name and avatar, computes each occurrence, days left and years from `on`, filters by kind,

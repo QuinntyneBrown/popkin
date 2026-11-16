@@ -18,12 +18,16 @@ import {
   CONTACT_CIRCLES,
   ContactCircle,
   ContactFormStore,
+  KeyDateDraft,
   NO_COUNTS,
   NOT_FOUND_TEXT,
+  REMINDER_LEADS,
   PHOTO_ACCEPT,
   SAVE_FAILED_TEXT,
   Toaster,
   contactValuesOf,
+  draftDay,
+  draftKind,
   editHeading,
   failedText,
   saveFailedHeading,
@@ -32,6 +36,8 @@ import {
   Banner,
   Button,
   ChipOption,
+  DateEntry,
+  Link,
   EmptyState,
   ChoiceChips,
   FormPair,
@@ -46,6 +52,7 @@ import {
   TextField,
   TopBar,
 } from 'components';
+import { AddDateData, AddDateDialog } from '../../dialogs/add-date/add-date.dialog';
 import {
   DeleteContactData,
   DeleteContactDialog,
@@ -62,6 +69,8 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
   imports: [
     Banner,
     Button,
+    DateEntry,
+    Link,
     ChoiceChips,
     EmptyState,
     FormPair,
@@ -94,6 +103,9 @@ export class ContactFormPage implements OnInit {
   protected readonly unread = failedText(null);
   protected readonly accept = PHOTO_ACCEPT;
   protected readonly nameMessage = NAME_MESSAGE;
+  protected readonly leads = REMINDER_LEADS.map((l) => ({ ...l }));
+  protected readonly draftKind = draftKind;
+  protected readonly draftDay = draftDay;
   protected readonly circles: ChipOption<ContactCircle>[] = CONTACT_CIRCLES.map((circle) => ({
     value: circle,
     label: circle,
@@ -184,6 +196,20 @@ export class ContactFormPage implements OnInit {
   private releasePreview(): void {
     const preview = this.preview();
     if (preview) URL.revokeObjectURL(preview);
+  }
+
+  /** "Another date": Add a date for the contact on the form, saved with them (L2-129 AC2). */
+  protected addDate(): void {
+    this.dialog
+      .open<KeyDateDraft, AddDateData>(AddDateDialog, {
+        data: { draft: true },
+        ariaLabelledBy: 'dlg-title',
+        hasBackdrop: false,
+        ariaModal: true,
+      })
+      .closed.subscribe((draft) => {
+        if (draft) this.store.addDate(draft);
+      });
   }
 
   /** Edit's "Delete {first name}" (L2-132): once they are gone, People opens. */
