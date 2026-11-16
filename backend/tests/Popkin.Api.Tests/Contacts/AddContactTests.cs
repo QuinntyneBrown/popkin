@@ -100,6 +100,31 @@ public sealed class AddContactTests
     }
 
     [Fact]
+    public async Task Given_a_phone_that_is_not_a_number_when_Mara_saves_then_it_is_refused_naming_the_phone_and_nothing_is_saved()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+
+        var response = await mara.AddContactAsync(new { clientId = Guid.NewGuid(), name = "Femi Bankole", phone = "call me", loves = Array.Empty<string>() });
+
+        var problem = await response.AssertProblem(HttpStatusCode.BadRequest, "contact_phone_invalid");
+        Assert.Equal("phone", problem.GetProperty("field").GetString());
+        Assert.Equal(0, await mara.ContactsCountAsync());
+    }
+
+    [Fact]
+    public async Task Given_a_city_longer_than_60_characters_when_Mara_saves_then_it_is_refused_naming_the_city()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+
+        var response = await mara.AddContactAsync(new { clientId = Guid.NewGuid(), name = "Femi Bankole", city = new string('a', 61), loves = Array.Empty<string>() });
+
+        var problem = await response.AssertProblem(HttpStatusCode.BadRequest, "contact_field_too_long");
+        Assert.Equal("city", problem.GetProperty("field").GetString());
+    }
+
+    [Fact]
     public async Task Given_Contacts_is_switched_off_when_Mara_adds_someone_then_it_is_not_found_as_off()
     {
         using var api = new ApiFactory();

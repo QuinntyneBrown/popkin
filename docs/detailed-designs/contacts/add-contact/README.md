@@ -60,7 +60,8 @@ Popkin web app, `docs/mocks/pages/add-contact/`:
   keeps its year, where "How you met" is entered (the profile shows it; the form has no field)
   and "Things they love" as one comma-separated field are known gap 102. Until it is settled,
   the form splits "Things they love" at commas and the API takes a list; every limit is
-  `<TO SUPPLY>`. Whether a circle is required is `<TO SUPPLY>`; the API accepts none.
+  `<TO SUPPLY>`; the interim ruling in the register sets them. Whether a circle is required is
+  `<TO SUPPLY>`; the API accepts none.
 - **The toast after an add.** L2-129 AC5 asks only that the profile opens. The mock's toast uses
   "his", which L2-122 AC4 forbids; the requirement stands, so the line reads "You’ll hear about
   Femi’s birthday a week before." What "Undo" undoes is `<TO SUPPLY>`; it is not built until a
@@ -103,10 +104,12 @@ authenticated policy; each sends one MediatR request.
 - **`Contact`** (Domain) — `Contact.Create(ownerId, clientId, name, details, now)`,
   `ChangeDetails(details)`, `ChangePhoto(key)`; `details` is a `ContactDetails` record of the
   fields of "Who" and "Details". The name is trimmed.
-- **`ContactRules`** (Domain) — the field rules of gap 102 in one place, with the
-  `ReminderLead` values "On the day" to "1 month before".
-- **`SaveContactValidator`** (Application, a static class as `ReactionValidator` is) — applies
-  `ContactRules` to `SaveContactRequest` for add and edit, and throws
+- **The limits** (Domain) — the field limits of gap 102 as constants on `Contact`
+  (`MaxNameLength` and the rest), as `Experience` keeps its own; the `ReminderLead` values "On
+  the day" to "1 month before" come with [Key dates](../key-dates/README.md). (`ContactRules`
+  already names the sign-in rules for a phone or email, so the form's rules do not take it.)
+- **`SaveContactValidator`** (Application, a static class as `ExperienceFields` is) — applies
+  the limits to `SaveContactRequest` for add and edit, and throws
   `ProblemException.Invalid(code, title, field)` with the codes above.
 - **`AddContactCommand`** / **`AddContactCommandHandler`** (`Popkin.Application/Contacts/People/`)
   — returns the existing contact when `(OwnerId, ClientId)` already exists. Otherwise it checks

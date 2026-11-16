@@ -20,6 +20,22 @@ public sealed record ContactDetails(
 /// </summary>
 public sealed class Contact : IClientWrite
 {
+    // The limits of the contact form: the interim ruling of known gap 102. A name is as long as
+    // a person's may be.
+    public const int MaxNameLength = Person.MaxNameLength;
+
+    public const int MaxKnownAsLength = 60;
+
+    public const int MaxCityLength = 60;
+
+    public const int MaxPhoneLength = 20;
+
+    public const int MaxEmailLength = 254;
+
+    public const int MaxLoves = 12;
+
+    public const int MaxLoveLength = 40;
+
     private Contact()
     {
     }
