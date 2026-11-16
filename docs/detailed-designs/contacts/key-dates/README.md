@@ -47,7 +47,8 @@ Every key date belongs to one owner, and only that owner sees or changes it (L2-
 
 `docs/mocks/dialogs/add-date/` (opens from Dates and from a profile's "Add a date"):
 
-- `default.html` — "Add a date"; "For" with the contact ("Ben Hale", "Uni friend") and "Change";
+- `default.html` — "Add a date"; "For", a select of the owner's people with "Ben Hale" chosen
+  (from a profile, that contact alone);
   "What kind" as a radio group of "Birthday", "Anniversary" and "Something else"; "What's the
   day?" ("Their wedding, a new job…"); "The day" (a date field); "Remind me" with the six lead
   times; the switch "Every year" ("It comes round again, with the same reminder."); "Save the
@@ -61,31 +62,33 @@ and on the contact's profile, and a date kept every year comes round each year w
 reminder (L2-138 AC4). A changed default applies to dates added after it; a kept date keeps its
 own lead time (L2-139 AC2), and changing one date's reminder changes that date alone (AC3).
 
-### Conflicts and gaps
+### Rulings (known gaps 103 and 113, settled 2026-11-16)
 
-- **Kinds.** Add a date offers three kinds; Dates filters "Milestones" and lists a work
-  anniversary. The design keeps four kinds: `Milestone` arises from a milestone remembered every
-  year ([Log a conversation or milestone](../log-entry/README.md)), and `Other` is "Something
-  else". Under "Milestones" Dates shows `Milestone` and `Other`. The default of `Other` is
-  `<TO SUPPLY>` (the mock starts it at "1 week before"); known gap 103.
-- **How far ahead** Dates looks, changing a date's day once added and how a one-off date such as
-  "Iris is one month old" arises are known gap 103. Until it is settled, Dates lists every next
-  occurrence, whatever its distance.
-- **The line.** "Hackney Town Hall, 2 pm", "Ben & Kate's daughter" and "Work anniversary" are
-  lines Add a date has no field for. The design shows the age or the years when the year is
-  known and nothing otherwise. Proposed as a new known gap.
-- **Two contacts on one date.** "Chidi & Tomás's anniversary" shows both avatars; "For" names one
-  contact. The design keeps one `ContactId` per key date and shows that contact alone. Proposed
-  as a new known gap.
-- **"For" from Dates.** On a profile, "For" is that contact. From Dates the mock names Ben with
-  "Change", and no picker is drawn. What "For" starts with and what "Change" opens are
-  `<TO SUPPLY>`; proposed as a new known gap.
-- **"Soon" and "near".** The tile of the first two rows is tinted (`date-tile--soon`); the
-  distance that tints it is `<TO SUPPLY>`, as the profile's "when it is near" is (gap 101).
-- **"1 month before"** and a birthday on 29 February in a year without one: the reminder day of
-  each is `<TO SUPPLY>`.
-- **"Today"** — Dates counts from the device day it sends, as Today does
-  ([Today](../today/README.md)). The Worker needs the owner's time zone, which is known gap 104.
+- **Kinds.** Four kinds: `Birthday`, `Anniversary`, `Milestone` (from a milestone remembered every
+  year, [Log](../log-entry/README.md)) and `Other` ("Something else"). Add a date offers three;
+  under "Milestones" Dates shows `Milestone` and `Other`. `Other` starts at "1 week before".
+- **How far ahead.** Dates lists the next occurrence of every key date, at most a year ahead,
+  soonest first; a one-off date that has passed is not listed. A date's day is not changed once
+  added: it is removed and added again.
+- **One-off dates.** "Iris is one month old" is Something else with "Every year" off.
+- **The line.** No field: the line is the age ("Turns 33") or the years ("5 years married") when
+  the first year is known, and nothing otherwise. The mocks' "Ben & Kate’s daughter" and "Work
+  anniversary" lines are gone.
+- **One contact per date.** "Chidi’s anniversary" shows Chidi alone; the mocks draw it so.
+- **Titles.** Dates names a birthday or an anniversary "{first name}’s birthday" / "…’s
+  anniversary", and any other date by its title; a profile names them "Birthday", "Anniversary"
+  or the title.
+- **"For" from Dates.** A select "For" of the owner's people, A to Z, starting at "Choose
+  someone"; with nobody chosen the dialog says "For: choose who the date is for.". From a
+  profile, "For" is that contact, with no "Change".
+- **Soon.** Dates tints a date 14 days away or fewer and always reads "today", "tomorrow" or "in
+  {n} days"; a profile shows the days left at 30 or fewer (gap 101).
+- **"1 month before"** is the same day of the month before, or that month's last day. **29
+  February** falls on 28 February in a year without it.
+- **"Today"** — Dates counts from the device day it sends, as Today does. The Worker's time zone
+  is ruled with [Reminders](../reminders/README.md) (gap 104).
+- **Built in steps.** Add someone's "Dates to remember" saves its drafts with the contact
+  ([Add someone](../add-contact/README.md)); a milestone date arises with Log.
 
 ### API
 
