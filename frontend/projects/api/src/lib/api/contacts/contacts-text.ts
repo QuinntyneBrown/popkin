@@ -54,3 +54,15 @@ export const NOT_FOUND_TEXT = {
 export function isContactId(id: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
+
+/** The device's day as the API reads it, `?on=2026-09-15` (open-contacts design). */
+export function dayParam(day: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`;
+}
+
+/** People's line under its heading (L2-126 AC1, AC4). */
+export function peopleLine(people: number): string {
+  if (people === 0) return 'Only you can see them';
+  return `${people === 1 ? '1 person' : `${people} people`} · only you can see them`;
+}

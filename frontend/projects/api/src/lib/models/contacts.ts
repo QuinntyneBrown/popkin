@@ -60,3 +60,33 @@ export interface ContactPopkinLink {
   popkinId: string;
   name: string;
 }
+
+/** A contact's soonest key date from the device's day (L2-126 AC3); joins with Key dates. */
+export interface NextDateView {
+  month: number;
+  day: number;
+  kind: string;
+  title: string;
+  inDays: number;
+}
+
+/** One row of People (L2-126 AC3). */
+export interface ContactRowView {
+  id: string;
+  name: string;
+  firstName: string;
+  knownAs: string | null;
+  circle: ContactCircle | null;
+  isClosest: boolean;
+  photoUrl: string | null;
+  initials: string;
+  accent: string;
+  nextDate: NextDateView | null;
+  lastTalkedOn: string | null;
+  lastTalkedDays: number | null;
+}
+
+/** People: every contact I keep, A to Z (L2-126). */
+export interface PeopleView {
+  contacts: ContactRowView[];
+}

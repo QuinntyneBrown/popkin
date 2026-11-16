@@ -1,7 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ContactProfileView, ContactsSummaryView, SaveContactRequest } from '../../models/contacts';
+import {
+  ContactProfileView,
+  ContactsSummaryView,
+  PeopleView,
+  SaveContactRequest,
+} from '../../models/contacts';
 
 /**
  * My own Contacts (docs/detailed-designs/contacts). Every call answers 404 `feature_off` while
@@ -12,6 +17,8 @@ export interface ContactsApi {
   summary(): Observable<ContactsSummaryView>;
   /** Add someone (L2-129): the contact and, when one was picked, their photo. */
   addContact(request: SaveContactRequest, photo: File | null): Observable<ContactProfileView>;
+  /** People: every contact of mine, for the device's day `on` (yyyy-MM-dd) (L2-126). */
+  people(on: string): Observable<PeopleView>;
   /** One contact of mine; anyone else's is 404 `contact_not_found` (L2-122 AC1). */
   contact(contactId: string): Observable<ContactProfileView>;
   /** Edit (L2-130): the same part `contact`, and a photo that replaces theirs (AC4). */
@@ -42,6 +49,10 @@ export class HttpContactsApi implements ContactsApi {
     form.set('contact', JSON.stringify(request));
     if (photo) form.set('photo', photo);
     return this.http.post<ContactProfileView>('/api/contacts/people', form);
+  }
+
+  people(on: string): Observable<PeopleView> {
+    return this.http.get<PeopleView>('/api/contacts/people', { params: { on } });
   }
 
   contact(contactId: string): Observable<ContactProfileView> {
