@@ -1330,11 +1330,27 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("BirthdayLead")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
                     b.Property<int>("BundlingMinutes")
                         .HasColumnType("int");
 
                     b.Property<int>("DailyMost")
                         .HasColumnType("int");
+
+                    b.Property<string>("DefaultFrequency")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTimeOffset?>("DefaultsChangedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DefaultsChangedByName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTimeOffset?>("EmailPausedAt")
                         .HasColumnType("datetimeoffset");
@@ -1806,7 +1822,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("BirthdayLead")
-                        .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("nvarchar(16)");
 

@@ -69,4 +69,16 @@ public sealed class EffectiveNotificationSettingsTests
         Assert.False(settings.EmailOn);
         Assert.Equal(NotificationFrequency.DailyDigest, settings.Frequency);
     }
+
+    // A person who hasn't chosen how often gets the Owner's default; one who chose keeps theirs (L2-173).
+    [Fact]
+    public void The_frequency_not_chosen_is_the_owners_default()
+    {
+        var chose = NotificationPreferences.For(Mara);
+        chose.ChooseFrequency(NotificationFrequency.AsItHappens, Now);
+
+        Assert.Equal(NotificationFrequency.WeeklyDigest, new EffectiveNotificationSettings(null, [], NotificationFrequency.WeeklyDigest).Frequency);
+        Assert.Equal(NotificationFrequency.WeeklyDigest, new EffectiveNotificationSettings(NotificationPreferences.For(Mara), [], NotificationFrequency.WeeklyDigest).Frequency);
+        Assert.Equal(NotificationFrequency.AsItHappens, new EffectiveNotificationSettings(chose, [], NotificationFrequency.WeeklyDigest).Frequency);
+    }
 }

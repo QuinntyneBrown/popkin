@@ -121,7 +121,7 @@ public sealed class DispatchNotificationsCommandHandler(
             && await db.PushSubscriptions.AnyAsync(s => s.PersonId == person, cancellationToken);
         var preferences = await db.NotificationPreferences.AsNoTracking().FirstOrDefaultAsync(p => p.PersonId == person, cancellationToken);
         var choices = await db.NotificationKindChoices.AsNoTracking().Where(c => c.PersonId == person).ToListAsync(cancellationToken);
-        var settings = new EffectiveNotificationSettings(preferences, choices);
+        var settings = new EffectiveNotificationSettings(preferences, choices, platform.DefaultFrequency);
         return new NotificationQuestion(notification.Kind, channel, now, LocalClock.ZoneOf(preferences?.TimeZone))
         {
             RecipientIsActor = person == notification.ActorPersonId,

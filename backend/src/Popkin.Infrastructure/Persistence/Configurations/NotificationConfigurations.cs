@@ -79,6 +79,10 @@ public sealed class NotificationPlatformConfiguration : IEntityTypeConfiguration
         builder.Property(p => p.PauseReason).HasMaxLength(500);
         builder.Property(p => p.PausedByName).HasMaxLength(200);
         builder.Ignore(p => p.IsPaused);
+        builder.Ignore(p => p.CurrentDefaults);
+        builder.Property(p => p.DefaultFrequency).HasConversion<string>().HasMaxLength(16);
+        builder.Property(p => p.BirthdayLead).HasConversion<string>().HasMaxLength(16);
+        builder.Property(p => p.DefaultsChangedByName).HasMaxLength(200);
     }
 }
 

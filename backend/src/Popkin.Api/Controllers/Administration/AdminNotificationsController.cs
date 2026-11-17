@@ -28,6 +28,20 @@ public sealed class AdminNotificationsController(ISender sender) : AdminControll
     public async Task<ActionResult<AdminNotificationKindDto>> SwitchKind(string kind, SwitchKindRequest request, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new SwitchNotificationKindCommand(kind, request.On, request.Reason), cancellationToken));
 
+    [HttpGet("defaults")]
+    public async Task<ActionResult<AdminNotificationDefaultsDto>> GetDefaults(CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetNotificationDefaultsQuery(), cancellationToken));
+
+    public sealed record DefaultsRequest(
+        string? ActivityEmail, int BundleMinutes, int MostEmailsPerDay, string? QuietFrom, string? QuietTo, string? BirthdayLead, string? Reason);
+
+    [HttpPut("defaults")]
+    public async Task<ActionResult<AdminNotificationDefaultsDto>> ChangeDefaults(DefaultsRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(
+            new ChangeNotificationDefaultsCommand(
+                request.ActivityEmail, request.BundleMinutes, request.MostEmailsPerDay, request.QuietFrom, request.QuietTo, request.BirthdayLead, request.Reason),
+            cancellationToken));
+
     [HttpGet("holds")]
     public async Task<ActionResult<AdminNotificationHoldsDto>> GetHolds(CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetNotificationHoldsQuery(), cancellationToken));

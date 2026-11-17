@@ -41,6 +41,7 @@ public enum AuditAction
     TurnedNotificationKindOn,
     HeldNotifications,
     ReleasedNotificationHold,
+    ChangedNotificationDefaults,
 }
 
 /// <summary>What an audit entry is about.</summary>
@@ -60,4 +61,5 @@ public enum AuditTargetKind
     ModerationView,
     MemberEmail,
     NotificationKind,
+    NotificationDefaults,
 }

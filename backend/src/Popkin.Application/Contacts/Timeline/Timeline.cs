@@ -188,7 +188,7 @@ public sealed class LogMilestoneCommandHandler(
         if (body.EveryYear)
         {
             var yearly = TimelineEntry.YearlyTitle(body.Kind, PersonName.FirstName(contact.Name), title);
-            var lead = (await KeyDateRules.PreferencesAsync(db, owner, cancellationToken)).DefaultFor(KeyDateKind.Milestone);
+            var lead = (await KeyDateRules.PreferencesAsync(db, owner, cancellationToken)).DefaultFor(KeyDateKind.Milestone, null) ?? ReminderLead.OnTheDay;
             var keyDate = KeyDate.Create(
                 owner,
                 Guid.NewGuid(),

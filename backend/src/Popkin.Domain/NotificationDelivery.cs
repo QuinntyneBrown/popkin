@@ -246,8 +246,41 @@ public sealed class NotificationPlatform
 
     public TimeOnly QuietUntil { get; private set; } = new(8, 0);
 
+    /// <summary>How often activity email comes to a member who hasn't chosen (L2-173).</summary>
+    public NotificationFrequency DefaultFrequency { get; private set; } = NotificationFrequency.AsItHappens;
+
+    /// <summary>How early a new birthday reminds until the person chooses; null for "Off" (L2-173, L2-139 AC4).</summary>
+    public ReminderLead? BirthdayLead { get; private set; } = ReminderLead.OneWeekBefore;
+
+    public DateTimeOffset? DefaultsChangedAt { get; private set; }
+
+    public string? DefaultsChangedByName { get; private set; }
+
     /// <summary>The settings as they stand before any Owner changes them.</summary>
     public static NotificationPlatform Defaults() => new();
+
+    /// <summary>The five defaults as they stand.</summary>
+    public NotificationDefaults CurrentDefaults =>
+        new(DefaultFrequency, BundlingMinutes, DailyMost, QuietFrom, QuietUntil, BirthdayLead);
+
+    /// <summary>Saves new defaults (L2-173 AC4); false, changing nothing, when none differs.</summary>
+    public bool ChangeDefaults(NotificationDefaults next, string adminName, DateTimeOffset now)
+    {
+        if (next == CurrentDefaults)
+        {
+            return false;
+        }
+
+        DefaultFrequency = next.ActivityEmail;
+        BundlingMinutes = next.BundleMinutes;
+        DailyMost = next.MostEmailsPerDay;
+        QuietFrom = next.QuietFrom;
+        QuietUntil = next.QuietTo;
+        BirthdayLead = next.BirthdayLead;
+        DefaultsChangedAt = now;
+        DefaultsChangedByName = adminName;
+        return true;
+    }
 
     public string? PausedByName { get; private set; }
 

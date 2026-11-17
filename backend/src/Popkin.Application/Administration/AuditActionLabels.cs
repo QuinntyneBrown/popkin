@@ -45,6 +45,7 @@ public static class AuditActionLabels
         [AuditAction.TurnedNotificationKindOn] = "Turned notification on",
         [AuditAction.HeldNotifications] = "Held notifications",
         [AuditAction.ReleasedNotificationHold] = "Released hold",
+        [AuditAction.ChangedNotificationDefaults] = "Changed notification defaults",
     };
 
     public static string Of(AuditAction action) => Labels[action];

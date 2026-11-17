@@ -40,8 +40,9 @@ public sealed record ReminderPreferencesDto(
     ReminderLead AnniversaryLead,
     ReminderLead MilestoneLead)
 {
-    public static ReminderPreferencesDto Of(ReminderPreferences p) =>
-        new(p.BirthdayLead, p.AnniversaryLead, p.MilestoneLead);
+    /// <summary>The leads as they apply now: a birthday lead not chosen is the Owner's default, or 1 week before when that is "Off".</summary>
+    public static ReminderPreferencesDto Of(ReminderPreferences p, ReminderLead? birthdayDefault) =>
+        new(p.BirthdayLead ?? birthdayDefault ?? ReminderLead.OneWeekBefore, p.AnniversaryLead, p.MilestoneLead);
 }
 
 public sealed record ContactDatesDto(IReadOnlyList<KeyDateRowDto> Dates, ReminderPreferencesDto Preferences);

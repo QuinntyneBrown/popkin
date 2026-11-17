@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Notifications;
 using Popkin.Application.Problems;
 using Popkin.Domain;
 
@@ -45,7 +46,7 @@ public sealed class GetAdminNotificationsQueryHandler(IAppDbContext db, IAdminGu
     {
         await guard.CurrentAdminAsync(cancellationToken);
         var traffic = await stats.ReadAsync(clock.GetUtcNow(), cancellationToken);
-        var platform = await AdminNotificationPlatform.ReadAsync(db, cancellationToken);
+        var platform = await NotificationPlatformRow.ReadAsync(db, cancellationToken);
         var off = await db.NotificationKindSwitches.AsNoTracking().ToDictionaryAsync(s => s.Kind, cancellationToken);
         var groups = NotificationCatalogue.Groups
             .Select(g => new AdminNotificationGroupDto(
@@ -70,7 +71,7 @@ public sealed class PauseMemberEmailCommandHandler(IAppDbContext db, IAdminGuard
     {
         var me = await guard.RequireAsync(AdminAction.ManageNotifications, cancellationToken);
         var reason = ReasonRules.Required(request.Reason);
-        var platform = await AdminNotificationPlatform.LoadAsync(db, cancellationToken);
+        var platform = await NotificationPlatformRow.LoadAsync(db, cancellationToken);
         var now = clock.GetUtcNow();
         if (!platform.PauseEmail(me.Id, me.Name, reason, now))
         {
@@ -94,7 +95,7 @@ public sealed class ResumeMemberEmailCommandHandler(IAppDbContext db, IAdminGuar
     {
         await guard.RequireAsync(AdminAction.ManageNotifications, cancellationToken);
         var reason = ReasonRules.Required(request.Reason);
-        var platform = await AdminNotificationPlatform.LoadAsync(db, cancellationToken);
+        var platform = await NotificationPlatformRow.LoadAsync(db, cancellationToken);
         if (!platform.ResumeEmail())
         {
             throw new ProblemException(409, "email_not_paused", "Member email isn't paused.");
@@ -169,23 +170,6 @@ internal static class AdminNotificationPlatform
     /// dialog's "about {m} minutes", not a limit the dispatcher keeps.
     /// </summary>
     public const int ResumeSendsPerMinute = 100;
-
-    /// <summary>The one row, as it stands; its first values while no Owner has changed it.</summary>
-    public static async Task<NotificationPlatform> ReadAsync(IAppDbContext db, CancellationToken cancellationToken) =>
-        await db.NotificationPlatforms.AsNoTracking().FirstOrDefaultAsync(cancellationToken) ?? NotificationPlatform.Defaults();
-
-    /// <summary>The one row to change, added with its first values when missing.</summary>
-    public static async Task<NotificationPlatform> LoadAsync(IAppDbContext db, CancellationToken cancellationToken)
-    {
-        var platform = await db.NotificationPlatforms.FirstOrDefaultAsync(cancellationToken);
-        if (platform is null)
-        {
-            platform = NotificationPlatform.Defaults();
-            db.NotificationPlatforms.Add(platform);
-        }
-
-        return platform;
-    }
 
     public static AdminSendStatusDto StatusOf(NotificationPlatform platform, NotificationTraffic traffic) => new(
         platform.IsPaused,

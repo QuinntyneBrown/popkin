@@ -45,7 +45,8 @@ public sealed class SendDigestsCommandHandler(IAppDbContext db, TimeProvider clo
     private async Task<bool> GatherAsync(Guid person, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var preferences = await db.NotificationPreferences.AsNoTracking().FirstOrDefaultAsync(p => p.PersonId == person, cancellationToken);
-        var frequency = new EffectiveNotificationSettings(preferences, []).Frequency;
+        var defaultFrequency = (await NotificationPlatformRow.ReadAsync(db, cancellationToken)).DefaultFrequency;
+        var frequency = new EffectiveNotificationSettings(preferences, [], defaultFrequency).Frequency;
         var local = TimeZoneInfo.ConvertTime(now, LocalClock.ZoneOf(preferences?.TimeZone));
         if (!DigestRules.IsDue(frequency, local))
         {

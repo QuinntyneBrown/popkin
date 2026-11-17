@@ -44,6 +44,12 @@ public static class KeyDateRules
     public static async Task<KeyDate> RequireOwnedAsync(IAppDbContext db, Guid ownerId, Guid keyDateId, CancellationToken cancellationToken) =>
         await db.KeyDates.OwnedBy(ownerId).FirstOrDefaultAsync(d => d.Id == keyDateId, cancellationToken) ?? throw NotFound();
 
+    /// <summary>The owner's leads as the screens show them, with the Owner's birthday default.</summary>
+    public static async Task<ReminderPreferencesDto> PreferencesDtoAsync(IAppDbContext db, Guid ownerId, CancellationToken cancellationToken) =>
+        ReminderPreferencesDto.Of(
+            await PreferencesAsync(db, ownerId, cancellationToken),
+            (await Notifications.NotificationPlatformRow.ReadAsync(db, cancellationToken)).BirthdayLead);
+
     public static async Task<ReminderPreferences> PreferencesAsync(IAppDbContext db, Guid ownerId, CancellationToken cancellationToken) =>
         await db.ReminderPreferences.OwnedBy(ownerId).AsNoTracking().FirstOrDefaultAsync(cancellationToken)
         ?? ReminderPreferences.Defaults(ownerId);

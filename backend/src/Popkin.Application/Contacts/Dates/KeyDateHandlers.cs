@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Contacts.Security;
+using Popkin.Application.Notifications;
 using Popkin.Application.Problems;
 using Popkin.Domain;
 
@@ -40,7 +41,7 @@ public sealed class GetContactDatesQueryHandler(IAppDbContext db, ICurrentPerson
             .ThenBy(x => people[x.Date.ContactId].Name, StringComparer.OrdinalIgnoreCase)
             .Select(x => KeyDateRules.Row(x.Date, people[x.Date.ContactId], x.Next!.Value, today, photos))
             .ToList();
-        return new ContactDatesDto(rows, ReminderPreferencesDto.Of(await KeyDateRules.PreferencesAsync(db, owner, cancellationToken)));
+        return new ContactDatesDto(rows, await KeyDateRules.PreferencesDtoAsync(db, owner, cancellationToken));
     }
 }
 
@@ -69,11 +70,19 @@ public sealed class AddKeyDateCommandHandler(
 
         var kind = KeyDateRules.Kind(request.Date.Kind);
         var (month, day) = KeyDateRules.Day(request.Date);
+        // A birthday the Owner's default leaves "Off" starts with its reminders off (L2-139 AC4).
         var lead = request.Date.Lead is null
-            ? (await KeyDateRules.PreferencesAsync(db, owner, cancellationToken)).DefaultFor(kind)
+            ? (await KeyDateRules.PreferencesAsync(db, owner, cancellationToken))
+                .DefaultFor(kind, (await NotificationPlatformRow.ReadAsync(db, cancellationToken)).BirthdayLead)
             : KeyDateRules.Lead(request.Date.Lead);
         var date = KeyDate.Create(
-            owner, request.Date.ClientId, contact.Id, kind, request.Date.Title, month, day, request.Date.Year, request.Date.EveryYear, lead, clock.GetUtcNow());
+            owner, request.Date.ClientId, contact.Id, kind, request.Date.Title, month, day, request.Date.Year, request.Date.EveryYear,
+            lead ?? ReminderLead.OneWeekBefore, clock.GetUtcNow());
+        if (lead is null)
+        {
+            date.TurnReminders(false);
+        }
+
         db.KeyDates.Add(date);
         await db.SaveChangesAsync(cancellationToken);
         return new AddedKeyDate(KeyDateRules.Row(date, contact, today, photos), true);
@@ -137,7 +146,7 @@ public sealed class GetReminderPreferencesQueryHandler(IAppDbContext db, ICurren
     public async Task<ReminderPreferencesDto> Handle(GetReminderPreferencesQuery request, CancellationToken cancellationToken)
     {
         contacts.Require();
-        return ReminderPreferencesDto.Of(await KeyDateRules.PreferencesAsync(db, current.PersonId, cancellationToken));
+        return await KeyDateRules.PreferencesDtoAsync(db, current.PersonId, cancellationToken);
     }
 }
 
@@ -162,8 +171,10 @@ public sealed class SaveReminderPreferencesCommandHandler(IAppDbContext db, ICur
             db.ReminderPreferences.Add(row);
         }
 
-        row.Change(birthday, anniversary, milestone);
+        // The birthday lead stays the Owner's default until the person picks another (L2-173).
+        var shown = await KeyDateRules.PreferencesDtoAsync(db, owner, cancellationToken);
+        row.Change(row.BirthdayLead is null && birthday == shown.BirthdayLead ? null : birthday, anniversary, milestone);
         await db.SaveChangesAsync(cancellationToken);
-        return ReminderPreferencesDto.Of(row);
+        return await KeyDateRules.PreferencesDtoAsync(db, owner, cancellationToken);
     }
 }

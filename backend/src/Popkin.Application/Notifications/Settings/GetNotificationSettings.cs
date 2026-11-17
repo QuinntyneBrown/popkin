@@ -43,7 +43,8 @@ public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurre
         var email = await db.People.AsNoTracking().Where(p => p.Id == personId).Select(p => p.Email).SingleAsync(cancellationToken);
         var preferences = await db.NotificationPreferences.AsNoTracking().SingleOrDefaultAsync(p => p.PersonId == personId, cancellationToken);
         var choices = await db.NotificationKindChoices.AsNoTracking().Where(c => c.PersonId == personId).ToListAsync(cancellationToken);
-        var settings = new EffectiveNotificationSettings(preferences, choices);
+        var platformRow = await NotificationPlatformRow.ReadAsync(db, cancellationToken);
+        var settings = new EffectiveNotificationSettings(preferences, choices, platformRow.DefaultFrequency);
 
         var available = email is not null;
         var groups = NotificationCatalogue.Groups
