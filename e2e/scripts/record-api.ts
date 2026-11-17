@@ -9,7 +9,7 @@
  * and leaves it, she adds the album's first photo, she shares an experience, rates it and
  * comments on it, she wraps the Popkin up and reads its recap, and Dev leaves it. Then she gives her full name, reads her
  * account and saves a photo; Joel signs out; and Mara deletes her account. Last, Lena Fischer
- * signs in to the admin app, adds three admins and turns Schedules off. Each answer is keyed
+ * signs in to the admin app, adds three admins, turns Schedules off and reads and changes Notifications. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -587,6 +587,12 @@ await call('GET', '/api/admin/audit');
 // Popkin matches "lake" now Lakeside Weekend has wrapped up.
 await call('GET', '/api/admin/features');
 await call('GET', '/api/admin/features/Schedules/popkins/search?q=lake');
+// Notifications (L2-169 to L2-173): sending, the twelve kinds, Mara held automatically while her
+// account is deleted, no live Popkin to hold now Lakeside has wrapped up, and the first defaults.
+await call('GET', '/api/admin/notifications');
+await call('GET', '/api/admin/notifications/holds');
+await call('GET', '/api/admin/notifications/holds/popkin-search?q=lake');
+await call('GET', '/api/admin/notifications/defaults');
 // Then she makes Aiko a Viewer and removes Marco; the list and the log above stay as they were.
 await call('PUT', `/api/admin/admins/${aiko.id}/role`, {
   role: 'Viewer',
@@ -598,6 +604,23 @@ await call('POST', `/api/admin/admins/${marco.id}/remove`, { reason: null });
 await call('PUT', '/api/admin/features/Schedules', {
   mode: 'Off',
   reason: 'Sync bug on Android 3.4.0',
+});
+// And she pauses member email and resumes it, turns Experiences off for everyone and saves a
+// 15-minute bundle; the pages above stay as they were.
+await call('POST', '/api/admin/notifications/pause', { reason: 'Digest sending twice.' });
+await call('POST', '/api/admin/notifications/resume', { reason: 'Fixed the digest.' });
+await call('PUT', '/api/admin/notifications/kinds/Experiences', {
+  on: false,
+  reason: 'Rating emails firing on every star change',
+});
+await call('PUT', '/api/admin/notifications/defaults', {
+  activityEmail: 'AsItHappens',
+  bundleMinutes: 15,
+  mostEmailsPerDay: 12,
+  quietFrom: '21:00',
+  quietTo: '08:00',
+  birthdayLead: 'OneWeekBefore',
+  reason: 'Fewer emails at launch',
 });
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');

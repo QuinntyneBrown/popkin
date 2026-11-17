@@ -1,14 +1,11 @@
 import path from 'node:path';
 import type { Page } from '@playwright/test';
-import { recordedMe } from './admin';
 
 /**
- * The admin Notifications page's answers. No API serves `/api/admin/notifications` yet (ADR 0030),
- * so nothing is recorded: these build the designed DTOs from the mocks, in L2-154's words.
+ * The admin Notifications page's answers, in the shape of the recorded ones (`responses.json`,
+ * `GET /api/admin/notifications` and the rest) but with the mocks' data, which a fresh local API
+ * cannot have: the day's counts, the holds and the busy, failed and refused states.
  */
-
-/** What the Owner may do once notifications are built: the recording's actions and the two new ones. */
-export const OWNER_ALLOWED = [...recordedMe.allowed, 'ManageNotifications', 'HoldNotifications'];
 
 export interface MockKind {
   kind: string;
@@ -159,8 +156,8 @@ export const mockGroups = (): MockGroup[] => [
 ];
 
 /**
- * The Notifications page of the mocks at noon on 14 July, signed in as the Owner with the
- * notification actions. `change` alters the answer before it is sent; the returned object is the
+ * The Notifications page of the mocks at noon on 14 July, signed in as the recorded Owner, who may
+ * manage and hold notifications. `change` alters the answer before it is sent; the returned object is the
  * one the stub answers from, so a test's write stub can change it.
  */
 export async function theMockNotifications(
@@ -174,9 +171,6 @@ export async function theMockNotifications(
     holdCount: 4,
   };
   change?.(notifications);
-  await page.route('**/api/admin/me', (route) =>
-    route.fulfill({ json: { ...recordedMe, role: 'Owner', allowed: OWNER_ALLOWED } }),
-  );
   await page.route('**/api/admin/notifications', (route) =>
     route.request().method() === 'GET' ? route.fulfill({ json: notifications }) : route.fallback(),
   );

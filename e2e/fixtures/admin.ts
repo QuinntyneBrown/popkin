@@ -94,15 +94,15 @@ const OWNER_ONLY = [
 ];
 
 /**
- * The console as an admin of `role` sees it: the recorded admin with that role's actions, and
- * holding notifications for Support (L2-086). Call it after a page's `theMock…`, whose own
+ * The console as an admin of `role` sees it: the recorded admin with that role's actions; Support
+ * keeps holding notifications (L2-086). Call it after a page's `theMock…`, whose own
  * answer to `/api/admin/me` it then replaces.
  */
 export async function signedInAs(page: Page, role: 'Support' | 'Viewer'): Promise<void> {
   const allowed =
     role === 'Viewer'
       ? ['ExportAuditLog']
-      : [...recordedMe.allowed, 'HoldNotifications'].filter((a) => !OWNER_ONLY.includes(a));
+      : recordedMe.allowed.filter((a) => !OWNER_ONLY.includes(a));
   await page.route('**/api/admin/me', (route) =>
     route.fulfill({ status: 200, json: { ...recordedMe, role, allowed } }),
   );
