@@ -10,13 +10,14 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   ContactProfileStore,
   LogEntryStore,
   LogKind,
   MEMORY_PHOTO_TYPES,
   MILESTONE_KINDS,
+  NOT_FOUND_TEXT,
   PromiseDraft,
   TALK_CHANNELS,
   TalkChannel,
@@ -30,6 +31,7 @@ import {
   Button,
   Chip,
   ChoiceChips,
+  EmptyState,
   FormPair,
   FormSummary,
   Icon,
@@ -82,6 +84,7 @@ const KIND_ICONS: Record<MilestoneKind, KindOption['icon']> = {
     Button,
     Chip,
     ChoiceChips,
+    EmptyState,
     FormPair,
     FormSummary,
     Icon,
@@ -93,6 +96,7 @@ const KIND_ICONS: Record<MilestoneKind, KindOption['icon']> = {
     MemoryChooser,
     ContactPromise,
     ReactiveFormsModule,
+    RouterLink,
     Screen,
     SegmentedControl,
     SettingRow,
@@ -139,6 +143,7 @@ export class ContactsLogEntryPage {
   protected readonly problems = computed(() =>
     this.store.problems().map(({ fieldId, message }) => ({ fieldId, message })),
   );
+  protected readonly notFound = NOT_FOUND_TEXT;
   protected readonly promiseWhen = promiseWhen;
   protected readonly photoTypes = MEMORY_PHOTO_TYPES;
   protected readonly form = new FormGroup({
