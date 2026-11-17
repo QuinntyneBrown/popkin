@@ -1,7 +1,7 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ConversationsStore, accentOf } from 'api';
+import { ConversationsStore, accentOf, dialogConfig } from 'api';
 import { DirectConversation, EveryoneConversation } from 'components';
 import { NewMessageData, NewMessageDialog } from '../../dialogs/new-message/new-message.dialog';
 
@@ -65,14 +65,13 @@ export class ConversationList {
   newMessage(popkinName: string, accent: string): void {
     const popkinId = this.popkinId;
     this.dialog
-      .open<string, NewMessageData>(NewMessageDialog, {
-        data: { popkinId, popkinName, accent },
-        ariaLabelledBy: 'dlg-title',
-        autoFocus: 'input[type=search]',
-        // pk-dialog draws its own backdrop, as the mocks do.
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+      .open<string, NewMessageData>(
+        NewMessageDialog,
+        dialogConfig({
+          data: { popkinId, popkinName, accent },
+          autoFocus: 'input[type=search]',
+        }),
+      )
       .closed.subscribe((memberId) => {
         if (memberId) void this.router.navigate(['/p', popkinId, 'chat', memberId]);
       });
