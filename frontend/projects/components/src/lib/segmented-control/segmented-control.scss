@@ -79,3 +79,26 @@
   gap: var(--space-1-5);
   white-space: nowrap;
 }
+
+:host(.segmented--levels) {
+  flex: none;
+  align-self: flex-start;
+}
+
+@media (min-width: 40rem) {
+  :host(.segmented--levels) {
+    align-self: auto;
+  }
+}
+
+:host(.segmented--levels) .segmented__option[aria-checked='true'] {
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  box-shadow: var(--shadow-1);
+}
+
+:host(.segmented--levels) .segmented__option[data-level='muted'][aria-checked='true'] {
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+  box-shadow: none;
+}

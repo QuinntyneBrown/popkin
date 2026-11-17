@@ -36,6 +36,8 @@ export * from './lib/name-preview/name-preview';
 export * from './lib/popkin-tile/popkin-tile';
 export * from './lib/choice-card/choice-card';
 export * from './lib/notif-group/notif-group';
+export * from './lib/setting-list/setting-list';
+export * from './lib/setting-list-item/setting-list-item';
 export * from './lib/notif-matrix/notif-matrix';
 export * from './lib/settings-section/settings-section';
 export * from './lib/undo-bar/undo-bar';

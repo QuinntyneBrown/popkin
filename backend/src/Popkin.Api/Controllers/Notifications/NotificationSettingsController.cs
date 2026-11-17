@@ -45,4 +45,14 @@ public sealed class NotificationSettingsController(ISender sender) : ControllerB
         await sender.Send(new SetActivityFrequencyCommand(request.Frequency), cancellationToken);
         return NoContent();
     }
+
+    public sealed record LevelRequest(string? Level);
+
+    /// <summary>One Popkin's level (L2-158): 400 `invalid_level`, 404 `popkin_not_found`, 409 `popkin_wrapped_up`.</summary>
+    [HttpPut("popkins/{popkinId:guid}")]
+    public async Task<IActionResult> SetLevel(Guid popkinId, LevelRequest request, CancellationToken cancellationToken)
+    {
+        await sender.Send(new SetPopkinNotificationLevelCommand(popkinId, request.Level), cancellationToken);
+        return NoContent();
+    }
 }

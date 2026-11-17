@@ -69,7 +69,7 @@ public sealed class NotificationTelemetryTests
         Assert.Contains(Of("popkin.notifications.deliveries"), m => m.Tags is { } t && t["kind"] == "MentionsAndReplies" && t["channel"] == "phone" && t["outcome"] == "sent");
         Assert.Contains(Of("popkin.notifications.deliveries"), m => m.Tags is { } t && t["channel"] == "email" && t["outcome"] == "sent");
         Assert.Contains(Of("popkin.notifications.deliveries"), m => m.Tags["outcome"] == "suppressed");
-        Assert.Contains(Of("popkin.notifications.suppressed"), m => m.Tags["rule"] == "NoDevice");
+        Assert.Contains(Of("popkin.notifications.suppressed"), m => m.Tags["rule"] == "no_device");
         Assert.Single(Of("popkin.notifications.email_latency"));
         Assert.NotEmpty(Of("popkin.notifications.phone_latency"));
         Assert.Contains(Of("popkin.notifications.settings_changed"), m => m.Tags is { } t && t["setting"] == "kind" && t["channel"] == "phone");

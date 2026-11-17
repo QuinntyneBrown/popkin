@@ -499,6 +499,9 @@ await call('GET', `${experiences}?filter=did`);
 // account would wrap up (journey 19).
 await call('GET', '/api/account/deletion-impact');
 
+// Mara mutes Lakeside Weekend before it wraps up; no Worker runs, so nothing else changes (L2-158).
+await call('PUT', `/api/me/notifications/popkins/${created.id}`, { level: 'Muted' });
+
 // Wrap up: Mara reads what the wrap-up screen says, wraps Lakeside Weekend up keeping its album,
 // reads the recap and asks for the album as a zip (journey 9). It comes last: every answer
 // above is of a Popkin that is still open. No Worker runs beside the recording, so the zip is

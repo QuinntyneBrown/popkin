@@ -69,8 +69,12 @@ public sealed class PopkinMetrics
     public void Suppressed(Domain.NotificationKind kind, Domain.NotificationChannel channel, Domain.SuppressionRule rule)
     {
         NotificationDelivered(kind.ToString(), channel == Domain.NotificationChannel.Phone ? "phone" : "email", "suppressed");
-        _notificationsSuppressed.Add(1, new KeyValuePair<string, object?>("rule", rule.ToString()));
+        _notificationsSuppressed.Add(1, new KeyValuePair<string, object?>("rule", SnakeCase(rule.ToString())));
     }
+
+    /// <summary>A rule as the designs name it: `PopkinMuted` is `popkin_muted`.</summary>
+    private static string SnakeCase(string name) =>
+        string.Concat(name.Select((c, i) => char.IsUpper(c) ? (i > 0 ? "_" : "") + char.ToLowerInvariant(c) : c.ToString()));
 
     public void EmailAccepted(TimeSpan latency) => _emailLatency.Record(Math.Max(0, latency.TotalSeconds));
 

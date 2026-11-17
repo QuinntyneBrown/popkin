@@ -1,0 +1,12 @@
+<div class="setting-list__main">
+  <ng-content select="[slot=lead]" />
+  <div class="setting-list__text">
+    <span class="setting-list__name" [class.setting-list__name--display]="display()">{{
+      name()
+    }}</span>
+    @if (sub()) {
+      <span class="setting-list__sub">{{ sub() }}</span>
+    }
+  </div>
+</div>
+<ng-content />

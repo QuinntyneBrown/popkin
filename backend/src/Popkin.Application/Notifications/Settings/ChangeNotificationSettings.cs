@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
+using Popkin.Application.Security;
 using Popkin.Domain;
 
 namespace Popkin.Application.Notifications.Settings;
@@ -13,6 +14,8 @@ public static class NotificationNames
     public static bool TryKind(string? value, out NotificationKind kind) => TryName(value, out kind);
 
     public static bool TryFrequency(string? value, out NotificationFrequency frequency) => TryName(value, out frequency);
+
+    public static bool TryLevel(string? value, out PopkinNotificationLevel level) => TryName(value, out level);
 
     private static bool TryName<T>(string? value, out T result)
         where T : struct, Enum
@@ -145,5 +148,29 @@ public sealed class SetActivityFrequencyCommandHandler(IAppDbContext db, ICurren
         preferences.ChooseFrequency(frequency, clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
         metrics.NotificationSettingChanged("frequency", "email");
+    }
+}
+
+/// <summary>How much one Popkin tells the person (L2-158): 400 `invalid_level`, 404 `popkin_not_found`, 409 `popkin_wrapped_up`.</summary>
+public sealed record SetPopkinNotificationLevelCommand(Guid PopkinId, string? Level) : IRequest;
+
+public sealed class SetPopkinNotificationLevelCommandHandler(IAppDbContext db, IMembershipGuard guard)
+    : IRequestHandler<SetPopkinNotificationLevelCommand>
+{
+    public async Task Handle(SetPopkinNotificationLevelCommand request, CancellationToken cancellationToken)
+    {
+        if (!NotificationNames.TryLevel(request.Level, out var level))
+        {
+            throw new ProblemException(400, "invalid_level", "Choose Everything, Just for me or Muted.");
+        }
+
+        var (_, membership) = await guard.RequireActiveMemberAsync(request.PopkinId, cancellationToken);
+        if (membership.NotificationLevel == level)
+        {
+            return;
+        }
+
+        membership.SetNotificationLevel(level);
+        await db.SaveChangesAsync(cancellationToken);
     }
 }

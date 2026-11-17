@@ -30,9 +30,9 @@ public sealed class NotificationRulesTests
         { "8 the kind is off for everyone", Ask() with { KindOffForEveryone = true, Held = true }, SuppressionRule.KindOffForEveryone },
         { "9 held", Ask() with { Held = true, ActorMuted = true }, SuppressionRule.Held },
         { "10 email turned off", Ask(NotificationChannel.Email) with { EmailOn = false, ActorMuted = true }, SuppressionRule.Unsubscribed },
-        { "11 the actor is muted", Ask() with { ActorMuted = true, Level = NotificationLevel.Muted }, SuppressionRule.MutedPerson },
-        { "12 the Popkin is muted", Ask() with { Level = NotificationLevel.Muted, SwitchOn = false }, SuppressionRule.PopkinMuted },
-        { "13 just for me, group chat", Ask() with { Level = NotificationLevel.JustForMe, SwitchOn = false }, SuppressionRule.JustForMe },
+        { "11 the actor is muted", Ask() with { ActorMuted = true, Level = PopkinNotificationLevel.Muted }, SuppressionRule.MutedPerson },
+        { "12 the Popkin is muted", Ask() with { Level = PopkinNotificationLevel.Muted, SwitchOn = false }, SuppressionRule.PopkinMuted },
+        { "13 just for me, group chat", Ask() with { Level = PopkinNotificationLevel.JustForMe, SwitchOn = false }, SuppressionRule.JustForMe },
         { "14 the person's switch is off", Ask(now: TenAtNight) with { SwitchOn = false }, SuppressionRule.KindSwitchedOff },
     };
 
@@ -97,22 +97,22 @@ public sealed class NotificationRulesTests
 
     // L2-158: each level against each kind it treats differently.
     [Theory]
-    [InlineData(NotificationLevel.Everything, NotificationKind.GroupChat, false, true)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.GroupChat, false, false)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.NewPhotos, false, false)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.ScheduleChanges, false, false)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.PeopleJoining, false, false)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.Experiences, false, false)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.PlanChanges, false, false)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.PlanChanges, true, true)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.MentionsAndReplies, true, true)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.DirectMessages, true, true)]
-    [InlineData(NotificationLevel.JustForMe, NotificationKind.StoriesDue, true, true)]
-    [InlineData(NotificationLevel.Muted, NotificationKind.MentionsAndReplies, true, false)]
-    [InlineData(NotificationLevel.Muted, NotificationKind.DirectMessages, true, false)]
-    [InlineData(NotificationLevel.Muted, NotificationKind.StoriesDue, true, true)]
-    [InlineData(NotificationLevel.Muted, NotificationKind.PopkinWrappingUp, false, true)]
-    public void Each_level_lets_through_what_L2_158_says(NotificationLevel level, NotificationKind kind, bool named, bool sends)
+    [InlineData(PopkinNotificationLevel.Everything, NotificationKind.GroupChat, false, true)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.GroupChat, false, false)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.NewPhotos, false, false)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.ScheduleChanges, false, false)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.PeopleJoining, false, false)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.Experiences, false, false)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.PlanChanges, false, false)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.PlanChanges, true, true)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.MentionsAndReplies, true, true)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.DirectMessages, true, true)]
+    [InlineData(PopkinNotificationLevel.JustForMe, NotificationKind.StoriesDue, true, true)]
+    [InlineData(PopkinNotificationLevel.Muted, NotificationKind.MentionsAndReplies, true, false)]
+    [InlineData(PopkinNotificationLevel.Muted, NotificationKind.DirectMessages, true, false)]
+    [InlineData(PopkinNotificationLevel.Muted, NotificationKind.StoriesDue, true, true)]
+    [InlineData(PopkinNotificationLevel.Muted, NotificationKind.PopkinWrappingUp, false, true)]
+    public void Each_level_lets_through_what_L2_158_says(PopkinNotificationLevel level, NotificationKind kind, bool named, bool sends)
     {
         var decision = NotificationRules.Decide(Ask(kind: kind) with { Level = level, RecipientIsNamed = named });
 

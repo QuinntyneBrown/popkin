@@ -24,6 +24,12 @@ export class NotificationSettingsPage {
   readonly undoBar: Locator;
   readonly turnEmailBackOn: Locator;
   readonly dismissBar: Locator;
+  /** The views of the screen: "What you hear about", "Popkins" (L2-155 AC1). */
+  readonly views: Locator;
+  /** The Popkins view: one row per active Popkin (L2-158 AC1). */
+  readonly popkinRows: Locator;
+  /** "Undo" on the bar after a Popkin is muted (L2-158 AC4). */
+  readonly undo: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly topBar: Locator;
   readonly firstGroup: Locator;
@@ -32,6 +38,8 @@ export class NotificationSettingsPage {
   readonly optionGrid: Locator;
   readonly skeleton: Locator;
   readonly empty: Locator;
+  readonly settingList: Locator;
+  readonly firstLevels: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="notification-settings"]');
@@ -61,6 +69,36 @@ export class NotificationSettingsPage {
     this.undoBar = page.locator('.undo-bar');
     this.turnEmailBackOn = this.undoBar.getByRole('button', { name: 'Turn email back on' });
     this.dismissBar = this.undoBar.getByRole('button', { name: 'Dismiss' });
+    this.views = page.getByRole('navigation', { name: 'Notification settings' });
+    this.settingList = page.locator('.setting-list');
+    this.firstLevels = page.locator('.segmented--levels').first();
+    this.popkinRows = this.settingList.locator('.setting-list__item');
+    this.undo = this.undoBar.getByRole('button', { name: 'Undo' });
+  }
+
+  /** A view's link: "What you hear about" or "Popkins". */
+  view(name: string): Locator {
+    return this.views.getByRole('link', { name, exact: true });
+  }
+
+  /** One Popkin's row on the Popkins view. */
+  popkinRow(name: string): Locator {
+    return this.popkinRows.filter({ hasText: name });
+  }
+
+  /** One Popkin's three levels, a radio group. */
+  levels(name: string): Locator {
+    return this.page.getByRole('radiogroup', { name: `How much you hear from ${name}` });
+  }
+
+  /** Lakeside Weekend muted, as `muted.html` draws it. */
+  async muteLakeside(): Promise<void> {
+    await this.level('Lakeside Weekend', 'Muted').click();
+    await this.page.mouse.move(0, 0);
+  }
+
+  level(popkin: string, level: string): Locator {
+    return this.levels(popkin).getByRole('radio', { name: level, exact: true });
   }
 
   /** A group by its name: "When something changes", "Reminders" or "Your account". */

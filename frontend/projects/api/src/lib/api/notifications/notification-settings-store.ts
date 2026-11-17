@@ -1,9 +1,11 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   NotificationFrequency,
   NotificationKind,
   NotificationSettingsView,
+  PopkinLevelView,
+  PopkinNotificationLevel,
 } from '../../models/notifications';
 import { DelayedLoading } from '../loading/delayed-loading';
 import { Toaster } from '../toasts/toaster';
@@ -37,6 +39,35 @@ export const UNSUBSCRIBED_TEXT =
 
 export type NotificationChannel = 'email' | 'phone';
 
+/** The three levels, in the words of L2-158 AC1. */
+export const LEVEL_CHOICES: readonly { value: PopkinNotificationLevel; label: string }[] = [
+  { value: 'Everything', label: 'Everything' },
+  { value: 'JustForMe', label: 'Just for me' },
+  { value: 'Muted', label: 'Muted' },
+];
+
+const WEEK = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * The line under a Popkin's name on the Popkins view: its people and when it wraps up ("wraps up
+ * Sunday" within the week, "until Nov 30" after, "ongoing" with no end), or, muted, what it still
+ * sends (L2-158 AC3).
+ */
+export function popkinLine(
+  popkin: Pick<PopkinLevelView, 'people' | 'endsAt' | 'level'>,
+  now: Date = new Date(),
+): string {
+  if (popkin.level === 'Muted') return 'Muted. Nothing but reminders';
+  const people = popkin.people === 1 ? '1 person' : `${popkin.people} people`;
+  if (!popkin.endsAt) return `${people} · ongoing`;
+  const ends = new Date(popkin.endsAt);
+  const when =
+    ends.getTime() - now.getTime() < WEEK
+      ? `wraps up ${ends.toLocaleDateString('en-US', { weekday: 'long' })}`
+      : `until ${ends.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  return `${people} · ${when}`;
+}
+
 /**
  * The Notifications screen (docs/detailed-designs/notifications/notification-settings): the
  * person's settings, read in one request, and each change saved at once. A change shows at once;
@@ -53,8 +84,14 @@ export class NotificationSettingsStore {
   /** `pending` shows nothing yet; `loading` once 300 ms pass without an answer. */
   readonly state = this.loading.state;
   readonly settings = signal<NotificationSettingsView | null>(null);
-  /** The banner the last change raised: email switched off (L2-156 AC3). */
-  readonly banner = signal<'unsubscribed' | null>(null);
+  /** The banner the last change raised: email switched off (L2-156 AC3) or a Popkin muted (L2-158 AC4). */
+  readonly banner = signal<'unsubscribed' | 'popkinMuted' | null>(null);
+  /** The Popkin the muted bar is about, for its words and its "Undo". */
+  private readonly mutedPopkin = signal<PopkinLevelView | null>(null);
+  readonly mutedText = computed(() => {
+    const popkin = this.mutedPopkin();
+    return popkin ? `${popkin.name} is muted. You’ll still get its reminders.` : '';
+  });
   /** The kinds whose phone switch was turned on here while this device refused alerts. */
   readonly refusedOnThisDevice = signal<ReadonlySet<NotificationKind>>(new Set());
 
@@ -116,6 +153,30 @@ export class NotificationSettingsStore {
       (settings) => ({ ...settings, email: { ...settings.email, frequency } }),
       this.api.setFrequency(frequency),
     );
+  }
+
+  /** One Popkin's level; Muted raises the bar that can undo it (L2-158 AC2, AC4). */
+  setLevel(popkinId: string, level: PopkinNotificationLevel): void {
+    const popkin = this.settings()?.popkins.find((p) => p.popkinId === popkinId);
+    if (!popkin) return;
+    this.change(
+      (settings) => ({
+        ...settings,
+        popkins: settings.popkins.map((p) => (p.popkinId === popkinId ? { ...p, level } : p)),
+      }),
+      this.api.setLevel(popkinId, level),
+      () => {
+        this.mutedPopkin.set(level === 'Muted' ? popkin : null);
+        this.banner.set(level === 'Muted' ? 'popkinMuted' : null);
+      },
+    );
+  }
+
+  /** "Undo" on the muted bar: the Popkin goes back to Everything. */
+  undo(): void {
+    const popkin = this.mutedPopkin();
+    if (this.banner() !== 'popkinMuted' || !popkin) return;
+    this.setLevel(popkin.popkinId, 'Everything');
   }
 
   dismissBanner(): void {

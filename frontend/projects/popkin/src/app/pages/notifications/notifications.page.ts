@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   FREQUENCY_CHOICES,
@@ -8,6 +8,12 @@ import {
   NotificationSettingsStore,
   UNSUBSCRIBED_TEXT,
   DEVICE_REFUSED,
+  LEVEL_CHOICES,
+  PopkinColour,
+  PopkinLevelView,
+  PopkinNotificationLevel,
+  accentOf,
+  popkinLine,
 } from 'api';
 import {
   Button,
@@ -19,12 +25,17 @@ import {
   NotifRow,
   NotifSwitch,
   PageHead,
+  PopkinTile,
   Screen,
+  SegmentedControl,
+  SettingList,
+  SettingListItem,
   SettingsSection,
   Skeleton,
   Stack,
   TopBar,
   UndoBar,
+  ViewNav,
 } from 'components';
 
 /**
@@ -41,13 +52,18 @@ import {
     NotifGroup,
     NotifMatrix,
     PageHead,
+    PopkinTile,
     RouterLink,
     Screen,
+    SegmentedControl,
+    SettingList,
+    SettingListItem,
     SettingsSection,
     Skeleton,
     Stack,
     TopBar,
     UndoBar,
+    ViewNav,
   ],
   providers: [NotificationSettingsStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +75,24 @@ export class NotificationsPage implements OnInit {
   protected readonly unsubscribedText = UNSUBSCRIBED_TEXT;
   protected readonly email = computed(() => this.store.settings()?.email);
   protected readonly groups = computed(() => this.store.settings()?.groups ?? []);
+  protected readonly popkins = computed(() => this.store.settings()?.popkins ?? []);
+  protected readonly levels = LEVEL_CHOICES.map((c) => ({ value: c.value, label: c.label }));
+
+  /** The view, from `?tab=`: "types" (what you hear about) or "popkins" (L2-155 AC1). */
+  readonly tab = input<string>();
+  protected readonly views = computed(() => [
+    {
+      label: 'What you hear about',
+      link: '/account/notifications',
+      current: this.tab() !== 'popkins',
+    },
+    {
+      label: 'Popkins',
+      link: '/account/notifications',
+      query: { tab: 'popkins' },
+      current: this.tab() === 'popkins',
+    },
+  ]);
 
   ngOnInit(): void {
     this.store.open();
@@ -66,6 +100,18 @@ export class NotificationsPage implements OnInit {
 
   protected switched(change: NotifSwitch): void {
     this.store.setKind(change.key as NotificationKind, change.channel, change.on);
+  }
+
+  protected chooseLevel(popkinId: string, level: string): void {
+    this.store.setLevel(popkinId, level as PopkinNotificationLevel);
+  }
+
+  protected line(popkin: PopkinLevelView): string {
+    return popkinLine(popkin);
+  }
+
+  protected accent(colour: PopkinColour): string {
+    return accentOf(colour);
   }
 
   protected chooseFrequency(value: string): void {

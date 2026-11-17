@@ -3,7 +3,7 @@ import { Observable, Subject, of, throwError } from 'rxjs';
 import { NotificationSettingsView } from '../../models/notifications';
 import { Toaster } from '../toasts/toaster';
 import { NOTIFICATIONS_API, NotificationsApi } from './notifications-api';
-import { NotificationSettingsStore, SAVE_FAILED } from './notification-settings-store';
+import { NotificationSettingsStore, SAVE_FAILED, popkinLine } from './notification-settings-store';
 import { PUSH_SUBSCRIBER, PushOutcome } from './push-subscriber';
 
 const settings: NotificationSettingsView = {
@@ -24,6 +24,17 @@ const settings: NotificationSettingsView = {
           offForEveryone: false,
         },
       ],
+    },
+  ],
+  popkins: [
+    {
+      popkinId: 'p1',
+      name: 'Lakeside Weekend',
+      emoji: '🏕️',
+      colour: 'Teal',
+      people: 14,
+      endsAt: null,
+      level: 'Everything',
     },
   ],
 };
@@ -189,5 +200,69 @@ describe('NotificationSettingsStore', () => {
     store.setKind('GroupChat', 'email', true);
 
     expect(device.subscribe).not.toHaveBeenCalled();
+  });
+
+  describe('Popkin levels', () => {
+    const lakeside = (store: NotificationSettingsStore) => store.settings()!.popkins[0];
+
+    it('shows a level at once and saves it', () => {
+      const answer = new Subject<void>();
+      const setLevel = vi.fn(() => answer);
+      const { store } = storeWith({ setLevel });
+      store.open();
+
+      store.setLevel('p1', 'JustForMe');
+
+      expect(lakeside(store).level).toBe('JustForMe');
+      expect(setLevel).toHaveBeenCalledWith('p1', 'JustForMe');
+      expect(store.banner()).toBeNull();
+    });
+
+    it('raises the muted bar on Muted, and Undo puts Everything back', () => {
+      const setLevel = vi.fn(saved);
+      const { store } = storeWith({ setLevel });
+      store.open();
+
+      store.setLevel('p1', 'Muted');
+      expect(store.banner()).toBe('popkinMuted');
+      expect(store.mutedText()).toBe('Lakeside Weekend is muted. You’ll still get its reminders.');
+
+      store.undo();
+      expect(lakeside(store).level).toBe('Everything');
+      expect(setLevel).toHaveBeenLastCalledWith('p1', 'Everything');
+      expect(store.banner()).toBeNull();
+    });
+
+    it('puts the old level back when saving fails', () => {
+      const { store, toaster } = storeWith({ setLevel: failed });
+      store.open();
+
+      store.setLevel('p1', 'Muted');
+
+      expect(lakeside(store).level).toBe('Everything');
+      expect(store.banner()).toBeNull();
+      expect(toaster.toasts().map((t) => t.heading)).toEqual([SAVE_FAILED]);
+    });
+  });
+
+  describe('popkinLine', () => {
+    const now = new Date('2026-11-17T12:00:00Z');
+    const row = { people: 14, endsAt: null as string | null, level: 'Everything' as const };
+
+    it.each([
+      [null, '14 people · ongoing'],
+      ['2026-11-22T20:00:00Z', '14 people · wraps up Sunday'],
+      ['2026-11-30T20:00:00Z', '14 people · until Nov 30'],
+    ])('reads an end of %s as "%s"', (endsAt, line) => {
+      expect(popkinLine({ ...row, endsAt }, now)).toBe(line);
+    });
+
+    it('says a muted Popkin sends nothing but reminders', () => {
+      expect(popkinLine({ ...row, level: 'Muted' }, now)).toBe('Muted. Nothing but reminders');
+    });
+
+    it('counts one person', () => {
+      expect(popkinLine({ ...row, people: 1 }, now)).toBe('1 person · ongoing');
+    });
   });
 });

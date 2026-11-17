@@ -107,9 +107,10 @@ public sealed class DispatchNotificationsCommandHandler(
             .Where(p => p.Id == person)
             .Select(p => new { p.Email, p.DeletedAt })
             .FirstOrDefaultAsync(cancellationToken);
-        var member = account is { DeletedAt: null }
-            && (notification.PopkinId is not { } popkinId
-                || await db.Memberships.AnyAsync(m => m.PopkinId == popkinId && m.PersonId == person && m.LeftAt == null, cancellationToken));
+        var membership = notification.PopkinId is { } popkinId
+            ? await db.Memberships.AsNoTracking().FirstOrDefaultAsync(m => m.PopkinId == popkinId && m.PersonId == person && m.LeftAt == null, cancellationToken)
+            : null;
+        var member = account is { DeletedAt: null } && (notification.PopkinId is null || membership is not null);
         var wrappedUp = notification.PopkinId is { } id
             && await db.Popkins.AnyAsync(p => p.Id == id && p.Status == PopkinStatus.WrappedUp, cancellationToken);
         var feature = NotificationCatalogue.Of(notification.Kind).Feature;
@@ -131,6 +132,7 @@ public sealed class DispatchNotificationsCommandHandler(
             EmailOn = settings.EmailOn,
             Frequency = settings.Frequency,
             RecipientIsNamed = person == notification.RecipientPersonId,
+            Level = membership?.NotificationLevel ?? PopkinNotificationLevel.Everything,
             SwitchOn = settings.IsOn(notification.Kind, channel),
             QuietHours = new QuietHours(platform.QuietFrom, platform.QuietUntil),
         };

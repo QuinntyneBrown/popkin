@@ -64,3 +64,56 @@ export async function emailCanBeTurnedBackOn(page: Page): Promise<void> {
 export async function savingTheKind(page: Page, kind: string): Promise<void> {
   await answer(page, `PUT /api/me/notifications/kinds/${kind}`, { status: 204 });
 }
+
+/** The day `popkins.html` is drawn on, a Tuesday: Lakeside wraps up that Sunday. */
+const DRAWN_ON = new Date('2026-11-17T12:00:00');
+
+/** The three Popkins of `popkins.html`, each with its level (L2-158 AC1). */
+export const MOCK_POPKINS = [
+  {
+    popkinId: '7d1c2a40-0000-4000-8000-000000000001',
+    name: 'Lakeside Weekend',
+    emoji: '🏕️',
+    colour: 'Teal',
+    people: 14,
+    endsAt: '2026-11-22T20:00:00',
+    level: 'Everything',
+  },
+  {
+    popkinId: '7d1c2a40-0000-4000-8000-000000000002',
+    name: 'Thursday Night Group',
+    emoji: '🕯️',
+    colour: 'Amber',
+    people: 9,
+    endsAt: null,
+    level: 'JustForMe',
+  },
+  {
+    popkinId: '7d1c2a40-0000-4000-8000-000000000003',
+    name: 'Tigers U9 Parents',
+    emoji: '⚽',
+    colour: 'Leaf',
+    people: 22,
+    endsAt: '2026-11-30T20:00:00',
+    level: 'Everything',
+  },
+];
+
+/**
+ * Mara's settings with the mock's three Popkins on the day the mock is drawn, and each level saved
+ * as the API does.
+ */
+export async function theMockPopkinLevels(page: Page): Promise<void> {
+  await page.clock.setFixedTime(DRAWN_ON);
+  await answer(page, 'GET /api/me/notifications', {
+    status: 200,
+    body: {
+      ...settings,
+      email: { on: true, available: true, frequency: 'AsItHappens' },
+      popkins: MOCK_POPKINS,
+    },
+  });
+  for (const popkin of MOCK_POPKINS) {
+    await answer(page, `PUT /api/me/notifications/popkins/${popkin.popkinId}`, { status: 204 });
+  }
+}

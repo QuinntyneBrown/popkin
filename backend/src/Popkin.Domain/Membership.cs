@@ -28,6 +28,9 @@ public sealed class Membership
     /// <summary>The member credited with the invite; null for the Host, who started the Popkin.</summary>
     public Guid? InvitedByMembershipId { get; private set; }
 
+    /// <summary>How much this Popkin tells the member; every membership starts on Everything (L2-158 AC6).</summary>
+    public PopkinNotificationLevel NotificationLevel { get; private set; }
+
     public static Membership Join(
         Guid popkinId, Guid personId, string displayName, MembershipRole role, DateTimeOffset now, Guid? invitedByMembershipId = null) => new()
     {
@@ -50,6 +53,8 @@ public sealed class Membership
 
     /// <summary>The name the other members see changed with the account's (L2-048 AC2).</summary>
     public void Rename(string displayName) => DisplayName = displayName;
+
+    public void SetNotificationLevel(PopkinNotificationLevel level) => NotificationLevel = level;
 
     /// <summary>
     /// The account was deleted: the member leaves, and what they shared stays under

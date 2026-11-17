@@ -4,6 +4,8 @@ import {
   savingTheKind,
   settingsWithoutAnEmailAddress,
   theMockNotificationSettings,
+  theMockPopkinLevels,
+  MOCK_POPKINS,
   theNotificationSettingsFailing,
   theNotificationSettingsFailingOnce,
   theNotificationSettingsLoading,
@@ -273,6 +275,94 @@ test.describe('this device', () => {
     );
     await expect(notifications.group('When something changes')).toContainText(
       'This device hasn’t allowed alerts.',
+    );
+  });
+});
+
+test.describe('each Popkin’s level', () => {
+  const lakeside = MOCK_POPKINS[0];
+  const saved = (page: import('@playwright/test').Page) =>
+    page.waitForRequest(
+      (request) =>
+        request.method() === 'PUT' &&
+        request.url().endsWith(`/api/me/notifications/popkins/${lakeside.popkinId}`),
+    );
+
+  // L2-158 AC1
+  test('the Popkins view lists each Popkin with its people and its level', async ({ page, pk }) => {
+    await theMockPopkinLevels(page);
+    await pk.open('notificationSettings');
+    const notifications = new NotificationSettingsPage(page);
+
+    await notifications.view('Popkins').click();
+
+    await expect(page).toHaveURL('/account/notifications?tab=popkins');
+    await expect(notifications.view('Popkins')).toHaveAttribute('aria-current', 'page');
+    await expect(notifications.popkinRows).toHaveCount(3);
+    await expect(notifications.popkinRow('Lakeside Weekend')).toContainText(
+      '14 people · wraps up Sunday',
+    );
+    await expect(notifications.popkinRow('Tigers U9 Parents')).toContainText(
+      '22 people · until Nov 30',
+    );
+    await expect(notifications.level('Lakeside Weekend', 'Everything')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(notifications.level('Thursday Night Group', 'Just for me')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(notifications.groups).toHaveCount(0);
+    await expect(
+      page.getByText('New Popkins you join start on Everything.', { exact: false }),
+    ).toBeVisible();
+  });
+
+  // L2-158 AC2, AC3, AC4
+  test('muting a Popkin says what still comes, and Undo puts Everything back', async ({
+    page,
+    pk,
+  }) => {
+    await theMockPopkinLevels(page);
+    await pk.open('notificationSettingsPopkins');
+    const notifications = new NotificationSettingsPage(page);
+
+    const muted = saved(page);
+    await notifications.level('Lakeside Weekend', 'Muted').click();
+
+    expect((await muted).postDataJSON()).toEqual({ level: 'Muted' });
+    await expect(notifications.popkinRow('Lakeside Weekend')).toContainText(
+      'Muted. Nothing but reminders',
+    );
+    await expect(notifications.undoBar).toContainText(
+      'Lakeside Weekend is muted. You’ll still get its reminders.',
+    );
+    const undone = saved(page);
+    await notifications.undo.click();
+    expect((await undone).postDataJSON()).toEqual({ level: 'Everything' });
+    await expect(notifications.level('Lakeside Weekend', 'Everything')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(notifications.undoBar).toHaveCount(0);
+  });
+
+  // L2-158 AC2; the radio group takes one tab stop and the arrow keys choose
+  test('a level is chosen with the arrow keys', async ({ page, pk }) => {
+    await theMockPopkinLevels(page);
+    await pk.open('notificationSettingsPopkins');
+    const notifications = new NotificationSettingsPage(page);
+    await notifications.level('Lakeside Weekend', 'Everything').focus();
+
+    const chosen = saved(page);
+    await page.keyboard.press('ArrowRight');
+
+    expect((await chosen).postDataJSON()).toEqual({ level: 'JustForMe' });
+    await expect(notifications.level('Lakeside Weekend', 'Just for me')).toBeFocused();
+    await expect(notifications.level('Lakeside Weekend', 'Just for me')).toHaveAttribute(
+      'aria-checked',
+      'true',
     );
   });
 });

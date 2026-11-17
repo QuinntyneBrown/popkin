@@ -17,7 +17,11 @@ public sealed record NotificationGroupDto(NotificationGroup Group, string Name, 
 /// The Notifications screen in one read (L2-155). The words come from the catalogue, so the web app
 /// keeps no copy of the list. The Popkins, birthdays and muted people come with their own designs.
 /// </summary>
-public sealed record NotificationSettingsDto(ActivityEmailDto Email, IReadOnlyList<NotificationGroupDto> Groups);
+/// <summary>One active Popkin and the level the person keeps for it (L2-158 AC1).</summary>
+public sealed record PopkinLevelDto(
+    Guid PopkinId, string Name, string Emoji, PopkinColour Colour, int People, DateTimeOffset? EndsAt, PopkinNotificationLevel Level);
+
+public sealed record NotificationSettingsDto(ActivityEmailDto Email, IReadOnlyList<NotificationGroupDto> Groups, IReadOnlyList<PopkinLevelDto> Popkins);
 
 public sealed record GetNotificationSettingsQuery : IRequest<NotificationSettingsDto>;
 
@@ -51,6 +55,21 @@ public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurre
                     .ToList()))
             .ToList();
 
-        return new NotificationSettingsDto(new ActivityEmailDto(available && settings.EmailOn, available, settings.Frequency), groups);
+        // The person's active Popkins, most recently active first as on My Popkins.
+        var popkins = await db.Memberships.AsNoTracking()
+            .Where(m => m.PersonId == personId && m.LeftAt == null)
+            .Join(db.Popkins.Where(p => p.Status != PopkinStatus.WrappedUp), m => m.PopkinId, p => p.Id, (m, p) => new { Membership = m, Popkin = p })
+            .OrderByDescending(x => x.Popkin.LastActivityAt)
+            .Select(x => new PopkinLevelDto(
+                x.Popkin.Id,
+                x.Popkin.Name,
+                x.Popkin.Emoji,
+                x.Popkin.Colour,
+                db.Memberships.Count(o => o.PopkinId == x.Popkin.Id && o.LeftAt == null),
+                x.Popkin.EndsAt,
+                x.Membership.NotificationLevel))
+            .ToListAsync(cancellationToken);
+
+        return new NotificationSettingsDto(new ActivityEmailDto(available && settings.EmailOn, available, settings.Frequency), groups, popkins);
     }
 }

@@ -962,6 +962,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset?>("LeftAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("NotificationLevel")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uniqueidentifier");
 

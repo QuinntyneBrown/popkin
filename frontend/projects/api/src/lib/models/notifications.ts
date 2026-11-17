@@ -1,3 +1,5 @@
+import { PopkinColour } from './popkin';
+
 /** The twelve kinds of notification of L2-154, as the API names them. */
 export type NotificationKind =
   | 'MentionsAndReplies'
@@ -42,8 +44,24 @@ export interface NotificationGroupView {
   kinds: NotificationKindView[];
 }
 
+/** How much one Popkin tells the person (L2-158). */
+export type PopkinNotificationLevel = 'Everything' | 'JustForMe' | 'Muted';
+
+/** One active Popkin and the level the person keeps for it (L2-158 AC1). */
+export interface PopkinLevelView {
+  popkinId: string;
+  name: string;
+  emoji: string;
+  colour: PopkinColour;
+  people: number;
+  /** When it wraps up; null for an ongoing Popkin. */
+  endsAt: string | null;
+  level: PopkinNotificationLevel;
+}
+
 /** The Notifications screen in one read (`GET /api/me/notifications`, L2-155). */
 export interface NotificationSettingsView {
   email: ActivityEmailView;
   groups: NotificationGroupView[];
+  popkins: PopkinLevelView[];
 }

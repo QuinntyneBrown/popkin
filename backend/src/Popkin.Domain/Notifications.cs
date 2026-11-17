@@ -165,7 +165,7 @@ public sealed class NotificationKindChoice
 }
 
 /// <summary>How much a member hears from one Popkin (L2-158).</summary>
-public enum NotificationLevel
+public enum PopkinNotificationLevel
 {
     Everything,
     JustForMe,

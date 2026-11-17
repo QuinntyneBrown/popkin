@@ -33,7 +33,7 @@ public sealed record NotificationQuestion(NotificationKind Kind, NotificationCha
 
     public bool ActorMuted { get; init; }
 
-    public NotificationLevel Level { get; init; } = NotificationLevel.Everything;
+    public PopkinNotificationLevel Level { get; init; } = PopkinNotificationLevel.Everything;
 
     /// <summary>The event names this person (a reply's author, a story's new owner).</summary>
     public bool RecipientIsNamed { get; init; }
@@ -73,6 +73,17 @@ public readonly record struct NotificationDecision(NotificationOutcome Outcome, 
 public static class NotificationRules
 {
     /// <summary>The kinds "Just for me" leaves out unless the event names the person (L2-158 AC2).</summary>
+    /// <summary>
+    /// What a Popkin's level lets through (popkin-levels, "What each level lets through"): a plan
+    /// change is for the person when it gives them a story. A level only narrows.
+    /// </summary>
+    public static bool LevelAllows(PopkinNotificationLevel level, NotificationKind kind, bool isForThePerson) => level switch
+    {
+        PopkinNotificationLevel.Muted => NotificationCatalogue.Of(kind).Group != NotificationGroup.Activity,
+        PopkinNotificationLevel.JustForMe => !NotJustForMe.Contains(kind) || (kind == NotificationKind.PlanChanges && isForThePerson),
+        _ => true,
+    };
+
     private static readonly HashSet<NotificationKind> NotJustForMe =
     [
         NotificationKind.GroupChat,
@@ -110,8 +121,8 @@ public static class NotificationRules
             : q.Held ? SuppressionRule.Held
             : email && !q.EmailOn ? SuppressionRule.Unsubscribed
             : q.ActorMuted ? SuppressionRule.MutedPerson
-            : q.Level == NotificationLevel.Muted && entry.Group == NotificationGroup.Activity ? SuppressionRule.PopkinMuted
-            : q.Level == NotificationLevel.JustForMe && NotJustForMe.Contains(q.Kind) && !(q.Kind == NotificationKind.PlanChanges && q.RecipientIsNamed) ? SuppressionRule.JustForMe
+            : !LevelAllows(q.Level, q.Kind, q.RecipientIsNamed)
+                ? q.Level == PopkinNotificationLevel.Muted ? SuppressionRule.PopkinMuted : SuppressionRule.JustForMe
             : !q.SwitchOn ? SuppressionRule.KindSwitchedOff
             : null;
         if (rule is { } late)

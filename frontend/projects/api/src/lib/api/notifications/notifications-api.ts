@@ -5,6 +5,7 @@ import {
   NotificationFrequency,
   NotificationKind,
   NotificationSettingsView,
+  PopkinNotificationLevel,
 } from '../../models/notifications';
 import { PushSubscriptionRequest } from '../../models/reminders';
 
@@ -23,6 +24,8 @@ export interface NotificationsApi {
   setEmail(on: boolean): Observable<void>;
   /** 400 `invalid_frequency`. */
   setFrequency(frequency: NotificationFrequency): Observable<void>;
+  /** 400 `invalid_level`, 404 `popkin_not_found`, 409 `popkin_wrapped_up` (L2-158). */
+  setLevel(popkinId: string, level: PopkinNotificationLevel): Observable<void>;
   /** The device's IANA zone, sent once when the app starts (L2-161 AC7); 400 `invalid_time_zone`. */
   saveTimeZone(zone: string): Observable<void>;
   /** Web Push's public key, empty while none is configured (ADR 0028). */
@@ -55,6 +58,10 @@ export class HttpNotificationsApi implements NotificationsApi {
 
   saveTimeZone(zone: string): Observable<void> {
     return this.http.put<void>('/api/me/time-zone', { zone });
+  }
+
+  setLevel(popkinId: string, level: PopkinNotificationLevel): Observable<void> {
+    return this.http.put<void>(`/api/me/notifications/popkins/${popkinId}`, { level });
   }
 
   pushKey(): Observable<{ publicKey: string }> {

@@ -15,6 +15,15 @@
         (dismissed)="store.dismissBanner()"
       ></div>
     }
+    @if (store.banner() === 'popkinMuted') {
+      <div
+        pk-undo-bar
+        [text]="store.mutedText()"
+        action="Undo"
+        (acted)="store.undo()"
+        (dismissed)="store.dismissBanner()"
+      ></div>
+    }
   </div>
   @switch (store.state()) {
     @case ('loading') {
@@ -68,10 +77,52 @@
           }
         </section>
       }
-      @for (group of groups(); track group.group) {
-        <section pk-notif-group [heading]="group.name" [about]="group.about">
-          <ul pk-notif-matrix [rows]="rows(group)" (switched)="switched($event)"></ul>
+      <nav pk-view-nav label="Notification settings" [views]="views()"></nav>
+      @if (tab() === 'popkins') {
+        <section class="stack" aria-label="Popkins">
+          <p class="text-muted text-sm">
+            <strong>Just for me</strong> keeps mentions, direct messages, stories given to you and
+            reminders. <strong>Muted</strong> stops everything but reminders.
+          </p>
+          <ul pk-setting-list>
+            @for (popkin of popkins(); track popkin.popkinId) {
+              <li
+                pk-setting-list-item
+                [name]="popkin.name"
+                [sub]="line(popkin)"
+                [stack]="true"
+                [display]="true"
+              >
+                <span
+                  pk-popkin-tile
+                  slot="lead"
+                  size="sm"
+                  [emoji]="popkin.emoji"
+                  [muted]="popkin.level === 'Muted'"
+                  [attr.data-accent]="accent(popkin.colour)"
+                ></span>
+                <div
+                  pk-segmented-control
+                  kind="radio"
+                  [levels]="true"
+                  [label]="'How much you hear from ' + popkin.name"
+                  [options]="levels"
+                  [value]="popkin.level"
+                  (valueChange)="chooseLevel(popkin.popkinId, $event)"
+                ></div>
+              </li>
+            }
+          </ul>
+          <p class="text-muted text-sm">
+            Wrapped-up Popkins never email you. New Popkins you join start on Everything.
+          </p>
         </section>
+      } @else {
+        @for (group of groups(); track group.group) {
+          <section pk-notif-group [heading]="group.name" [about]="group.about">
+            <ul pk-notif-matrix [rows]="rows(group)" (switched)="switched($event)"></ul>
+          </section>
+        }
       }
     }
   }

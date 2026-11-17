@@ -72,8 +72,8 @@ which the plan's handler sets when a story's owner becomes that member.
 On `NotificationSettingsController` (`api/me/notifications`), default authenticated policy:
 
 - `GET /api/me/notifications` — its `popkins` field: one `PopkinLevelDto` per active membership of
-  the caller (`popkinId`, `name`, `emoji`, `colour`, `people`, `endsAt`, `level`), in the order of
-  My Popkins. A wrapped-up Popkin is not listed.
+  the caller (`popkinId`, `name`, `emoji`, `colour`, `people`, `endsAt`, `level`), most recently
+  active first (`PopkinSpace.LastActivityAt`), as My Popkins orders them. A wrapped-up Popkin is not listed.
 - `PUT /api/me/notifications/popkins/{popkinId}` `{ level }` — `204`. `400` `invalid_level` for a
   value other than `Everything`, `JustForMe` or `Muted`. `404` `popkin_not_found` for a Popkin the
   caller does not belong to or has left (L2-158 AC7, L2-051). `409` `popkin_wrapped_up` for a
@@ -81,7 +81,7 @@ On `NotificationSettingsController` (`api/me/notifications`), default authentica
 
 ### Backend
 
-- **`PopkinNotificationLevel`** (Domain enum) — `Everything` (value 0, the column's default),
+- **`PopkinNotificationLevel`** (Domain enum, stored by name) — `Everything` (value 0, the column's default),
   `JustForMe`, `Muted`.
 - **`Membership.NotificationLevel`** — new column, `Everything` for every membership, existing and
   new (L2-158 AC6). `SetNotificationLevel(level)`. `Membership.Join` leaves it at `Everything`.
@@ -106,7 +106,8 @@ On `NotificationSettingsController` (`api/me/notifications`), default authentica
   `popkinMuted`, the sentence, then a `pk-setting-list` of rows. Each row composes
   `pk-popkin-tile` (with its `muted` input on `Muted`), the name, the line ("{n} people · wraps up
   {when}", "ongoing", or "Muted. Nothing but reminders"), and `pk-segmented-control kind="radio"`
-  with the three options, labelled "{Popkin} notifications". The closing sentence follows.
+  (its `levels` form) with the three options, labelled "How much you hear from {Popkin}", as the
+  mock names it. The view is chosen with `pk-view-nav` ("What you hear about", "Popkins"). The closing sentence follows.
 - **`NotificationSettingsStore.setLevel(popkinId, level)`** — shows the change at once, raises the
   `popkinMuted` banner for `Muted`, saves, and on failure puts the old level back with the toast
   "We couldn't save that. Try again.". `undo()` for this banner sets `Everything` and closes it.

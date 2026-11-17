@@ -339,6 +339,14 @@ export const routes = {
     app: '/account/notifications',
     mock: 'pages/notification-settings/unsubscribed.html',
   },
+  notificationSettingsPopkins: {
+    app: '/account/notifications?tab=popkins',
+    mock: 'pages/notification-settings/popkins.html',
+  },
+  notificationSettingsMuted: {
+    app: '/account/notifications?tab=popkins',
+    mock: 'pages/notification-settings/muted.html',
+  },
   notificationSettingsLoading: {
     app: '/account/notifications',
     mock: 'pages/notification-settings/loading.html',
