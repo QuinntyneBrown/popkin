@@ -27,7 +27,8 @@ public static class ReminderFacts
 /// </summary>
 public sealed class StoryDueEmailComposer(IAppDbContext db, NotificationLinks links, NotificationEmailSettings settings)
 {
-    private static readonly CultureInfo English = CultureInfo.GetCultureInfo("en-GB");
+    // The invariant culture: English names that do not change with the server's ICU ("Sep", never "Sept").
+    private static readonly CultureInfo English = CultureInfo.InvariantCulture;
 
     /// <summary>The story and its Popkin when the reminder still stands for `personId`.</summary>
     public static async Task<(Story Story, PopkinSpace Popkin, Membership Owner)?> StandingAsync(
