@@ -89,8 +89,8 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
 ### Conflicts and gaps
 
 - **One person.** The count line reads "{n} people · only you" and the badge "{n} follow-ups late
-  or due today". The count line reads "1 person · only you" for one; the badge's words for one
-  follow-up are `<TO SUPPLY>`.
+  or due today". The count line reads "1 person · only you" for one, and the badge "1 follow-up
+  late or due today" (known gap 111, ruled 2026-11-16).
 - **Toasts that wait.** `Toaster` removes a success toast after 8 seconds whatever the pointer
   does; L2-124 AC2 asks it to wait while hovered or focused. This design adds the wait to
   `Toaster` for the whole app, which L2-056 AC7 does not forbid.
@@ -109,8 +109,9 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
   Popkins as the safe answer, ADR 0023) and toasts that wait are built first. `ContactsOutbox`
   comes with the first write (Add someone), the loading and failure states with the first page
   that reads its own data (People), and the Follow-ups badge with Follow-ups.
-- **Time zone.** The device day is the day the person sees. The Worker's reminders need the
-  owner's time zone, which is open (known gap 104).
+- **Time zone.** The device day is the day the person sees. Each Contacts page that opens saves
+  the device's zone, and the Worker's reminders come at 9 am there
+  ([Reminders](../reminders/README.md), known gap 104 ruled).
 
 ### API
 

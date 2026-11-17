@@ -65,6 +65,16 @@ test.describe('A contact’s profile', () => {
     await expect(profile.call).toHaveCount(0);
   });
 
+  // L2-128 AC1, L2-151 AC3: an imported contact is kept with their name alone.
+  test('leaves About out for someone known by name alone', async ({ page, pk }) => {
+    await femiProfile(page, { phone: null, email: null, city: null, howWeMet: null, loves: [] });
+    await pk.open('contactProfileEmpty');
+
+    const profile = new ContactProfilePage(page);
+    await expect(profile.name).toHaveText('Femi Bankole');
+    await expect(profile.about).toHaveCount(0);
+  });
+
   // L2-121 AC6
   test('on a phone, shows only its People back link and no Contacts tabs', async ({ page, pk }) => {
     await page.setViewportSize({ width: 390, height: 844 });

@@ -28,6 +28,9 @@ export class LogEntryPage {
   readonly summaryHeading: Locator;
   readonly summaryLinks: Locator;
   readonly alert: Locator;
+  /** The state of a contact not in the person's Contacts (L2-122 AC2). */
+  readonly state: Locator;
+  readonly goToPeople: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly form: Locator;
   readonly kindGrid: Locator;
@@ -43,6 +46,8 @@ export class LogEntryPage {
     this.save = this.topBar.getByRole('button', { name: 'Save' });
     this.saving = this.topBar.getByRole('button', { name: 'Saving…' });
     this.form = page.locator('form.log-form, form#form');
+    this.state = page.locator('.empty');
+    this.goToPeople = this.state.getByRole('link', { name: 'Go to People' });
     this.kindGrid = page.locator('.kind-grid');
     this.photo = page.getByRole('button', { name: /^Photo / });
     this.photoInput = page.locator('.memory-chooser input[type="file"]');

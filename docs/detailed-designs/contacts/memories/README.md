@@ -85,8 +85,8 @@ The dialog checks the size in the browser before any upload, and the API checks 
   `clientId` answers `200`. Refusals: `400` `validation_failed` without a file, `photo_too_large`
   over 25 MB, `photo_type_not_allowed`, `caption_too_long`, `taken_on_not_valid`; `404` `contact_not_found`; `413`
   `request_too_large` for a body over 50 MB, twice the largest photo as
-  [Add photos](../../photos/add-photos/README.md) sets its limit; `429` `rate_limited` under a
-  policy `<TO SUPPLY>`. The checks run in this order: ownership, caption, missing file, size, type.
+  [Add photos](../../photos/add-photos/README.md) sets its limit; `429` `rate_limited` under the
+  Photos policy, as for a Popkin's photos. The checks run in this order: ownership, caption, missing file, size, type.
 - `POST …/memories/files` — `multipart/form-data` with `file` and `clientId`. `201`
   `FileMemoryDto`, `200` for a resend. Refusals: `validation_failed` without a file,
   `file_too_large`, `file_type_not_allowed` (the type is read from the file's bytes, and for an

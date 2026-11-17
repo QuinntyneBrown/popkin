@@ -1,6 +1,12 @@
 <div pk-app-screen accent="coral" layout="tab" body="fill">
   <div pk-contacts-page>
-    <div pk-page-head slot="head" [heading]="heading()" [sub]="day"></div>
+    <div pk-page-head slot="head" [heading]="heading()" [sub]="day">
+      @if (!empty()) {
+        <a pk-button slot="actions" variant="secondary" size="sm" routerLink="/contacts/people/new"
+          ><svg pk-icon name="user-plus" size="sm"></svg>Add someone</a
+        >
+      }
+    </div>
     @if (empty()) {
       <section
         pk-contacts-start
@@ -10,7 +16,154 @@
         <a pk-button slot="action" variant="primary" size="md" routerLink="/contacts/people/new"
           ><svg pk-icon name="user-plus" size="md"></svg>Add someone</a
         >
+        <button
+          pk-button
+          slot="action"
+          type="button"
+          variant="secondary"
+          size="md"
+          (click)="importPeople()"
+        >
+          <svg pk-icon name="download" size="md"></svg>Import from your Popkins
+        </button>
+        @if (importLine(); as line) {
+          <p slot="note" class="text-sm text-muted">{{ line }}</p>
+        }
       </section>
+    } @else if (store.state() === 'failed') {
+      <div
+        pk-empty-state
+        icon="alert"
+        [alert]="true"
+        heading="We couldn’t load your day"
+        text="Nothing you saved is lost. Check your connection and try again."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+          Try again
+        </button>
+      </div>
+    } @else if (store.state() === 'loading') {
+      <p class="visually-hidden" role="status">Loading your day…</p>
+      <div pk-contacts-grid layout="lead" aria-hidden="true">
+        <div class="stack">
+          <span pk-skeleton shape="card"></span>
+          <span pk-skeleton shape="title" [width]="40"></span>
+          <ul pk-date-list [dates]="[]" [loading]="true"></ul>
+        </div>
+        <div class="stack">
+          <span pk-skeleton shape="title" [width]="40"></span>
+          <span pk-skeleton shape="card"></span>
+        </div>
+      </div>
+    } @else if (ready()) {
+      <div pk-contacts-grid layout="lead">
+        <div class="stack stack--lg">
+          @if (spotlight(); as next) {
+            <section
+              pk-spotlight
+              headingId="next-date"
+              data-accent="amber"
+              whenIcon="cake"
+              [actions]="true"
+              [when]="next.when"
+              [heading]="next.heading"
+              [sub]="next.sub"
+              [facts]="next.facts"
+            >
+              <a slot="avatar" [routerLink]="next.profile" [attr.aria-label]="next.profileLabel"
+                ><span
+                  pk-avatar
+                  size="xl"
+                  [initials]="next.face.initials"
+                  [photo]="next.face.photo"
+                  [attr.data-accent]="next.face.accent"
+                ></span
+              ></a>
+              @if (next.message) {
+                <a pk-button slot="actions" variant="primary" size="sm" [href]="next.message"
+                  ><svg pk-icon name="message-circle" size="sm"></svg>{{ next.messageLabel }}</a
+                >
+              }
+              <a pk-button slot="actions" variant="secondary" size="sm" [routerLink]="next.profile"
+                >Open profile</a
+              >
+            </section>
+          }
+          @if (comingUp().length) {
+            <section aria-labelledby="coming">
+              <div
+                pk-list-head
+                headingId="coming"
+                heading="Coming up"
+                link="/contacts/dates"
+                linkLabel="All dates"
+              ></div>
+              <ul pk-today-dates [dates]="comingUp()"></ul>
+            </section>
+          }
+        </div>
+        <div class="stack stack--lg">
+          @if (toDo()) {
+            <section aria-labelledby="todo">
+              <div pk-list-head headingId="todo" heading="To do today"></div>
+              <ul class="stack stack--sm">
+                @for (item of followUps(); track item.followUp.id) {
+                  <li
+                    pk-task
+                    variant="card"
+                    [text]="item.followUp.text"
+                    [note]="item.note"
+                    [late]="item.late"
+                    [done]="item.done"
+                    (doneChange)="toggle(item.followUp)"
+                  >
+                    @if (item.followUp.contactInitials) {
+                      <span
+                        pk-avatar
+                        size="sm"
+                        [initials]="item.followUp.contactInitials"
+                        [photo]="item.followUp.contactPhotoUrl"
+                        [attr.data-accent]="item.followUp.contactAccent?.toLowerCase()"
+                      ></span>
+                    }
+                  </li>
+                }
+                @for (habit of habits(); track habit.id) {
+                  <li
+                    pk-task
+                    variant="outline"
+                    icon="repeat"
+                    data-accent="coral"
+                    link="/contacts/habits"
+                    [text]="habit.text"
+                    [note]="habit.note"
+                  >
+                    @if (habit.call) {
+                      <a pk-button variant="quiet" size="sm" [href]="habit.call"
+                        ><svg pk-icon name="phone" size="sm"></svg>Call</a
+                      >
+                    }
+                  </li>
+                }
+              </ul>
+              <a pk-link variant="accent" routerLink="/contacts/follow-ups">All follow-ups</a>
+            </section>
+          }
+          @if (recently().length) {
+            <section aria-labelledby="recent">
+              <div pk-list-head headingId="recent" heading="Recently"></div>
+              <ul pk-recent-list [entries]="recently()"></ul>
+            </section>
+          }
+          @if (drifting().length) {
+            <section class="stack" aria-labelledby="drift">
+              <h2 class="visually-hidden" id="drift">It’s been a while</h2>
+              <p class="text-muted"><strong>It’s been a while</strong>{{ driftLine() }}</p>
+              <div pk-drift-chips [people]="driftChips()"></div>
+            </section>
+          }
+        </div>
+      </div>
     }
   </div>
   <nav

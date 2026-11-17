@@ -85,8 +85,8 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
   {n} days"; a profile shows the days left at 30 or fewer (gap 101).
 - **"1 month before"** is the same day of the month before, or that month's last day. **29
   February** falls on 28 February in a year without it.
-- **"Today"** — Dates counts from the device day it sends, as Today does. The Worker's time zone
-  is ruled with [Reminders](../reminders/README.md) (gap 104).
+- **"Today"** — Dates counts from the device day it sends, as Today does. The Worker reminds at 9 am
+  in the zone the device last saved ([Reminders](../reminders/README.md), gap 104 ruled).
 - **The day field.** "The day" is a full date. A date every year keeps its year only when it is
   before this year, its first year ("Turns 33"); a later one is its next day. A one-off date keeps
   its year.
@@ -138,9 +138,8 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
 - **`ReminderPreferences`** (Domain) — one row per owner: `BirthdayLead` (`OneWeekBefore`),
   `AnniversaryLead` (`ThreeDaysBefore`), `MilestoneLead` (`OnTheDay`), `PhoneNotifications` and
   `MondayEmail` (both `true`, L2-140 AC4). `Defaults(ownerId)` and `DefaultFor(kind)`.
-- **`IOwnerClock`** (Application) — `Today(ownerId)` and `LocalNow(ownerId)` over `TimeProvider`,
-  in the owner's zone (ruled with [Reminders](../reminders/README.md), gap 104), for the Worker, which has no device day
-  ([Reminders](../reminders/README.md)).
+- **`ReminderPreferences.TimeZone`** and **`ReminderRules.LocalNow`** — the owner's 9 am for the
+  Worker, which has no device day ([Reminders](../reminders/README.md), gap 104 ruled).
 - **`GetContactDatesQueryHandler`** — reads the owner's key dates with their contact's first
   name and avatar, computes each occurrence, days left and years from `on`, filters by kind,
   orders by occurrence, and adds the preferences.

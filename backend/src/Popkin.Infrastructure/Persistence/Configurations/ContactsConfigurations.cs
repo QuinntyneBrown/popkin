@@ -21,6 +21,8 @@ public sealed class ContactConfiguration : IEntityTypeConfiguration<Contact>
         builder.Property(c => c.PhotoKey).HasMaxLength(200);
         builder.Property(c => c.Circle).HasConversion<string>().HasMaxLength(12);
         builder.PrimitiveCollection(c => c.Loves);
+        // Who was imported, so Import offers them no more (L2-151 AC2).
+        builder.HasIndex(c => new { c.OwnerId, c.PersonId });
         // A person's contacts go with their account (L2-049).
         builder.HasOne<Person>().WithMany().HasForeignKey(c => c.OwnerId).OnDelete(DeleteBehavior.Cascade);
     }
@@ -52,6 +54,7 @@ public sealed class ReminderPreferencesConfiguration : IEntityTypeConfiguration<
         builder.Property(p => p.BirthdayLead).HasConversion<string>().HasMaxLength(16);
         builder.Property(p => p.AnniversaryLead).HasConversion<string>().HasMaxLength(16);
         builder.Property(p => p.MilestoneLead).HasConversion<string>().HasMaxLength(16);
+        builder.Property(p => p.TimeZone).HasMaxLength(64);
         builder.HasOne<Person>().WithMany().HasForeignKey(p => p.OwnerId).OnDelete(DeleteBehavior.Cascade);
     }
 }
@@ -195,5 +198,57 @@ public sealed class ContactGroupMemberConfiguration : IEntityTypeConfiguration<C
         builder.HasIndex(m => m.ContactId);
         // ContactRemoval removes a deleted contact's memberships; the group stays (L2-147 AC7).
         builder.HasOne<Contact>().WithMany().HasForeignKey(m => m.ContactId).OnDelete(DeleteBehavior.NoAction);
+    }
+}
+
+public sealed class ImportBatchConfiguration : IEntityTypeConfiguration<ImportBatch>
+{
+    public void Configure(EntityTypeBuilder<ImportBatch> builder)
+    {
+        builder.ToTable("ImportBatches");
+        builder.HasKey(b => b.Id);
+        // A resend imports once (L2-123 AC4).
+        builder.HasIndex(b => new { b.OwnerId, b.ClientId }).IsUnique();
+        builder.HasOne<Person>().WithMany().HasForeignKey(b => b.OwnerId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class ContactReminderConfiguration : IEntityTypeConfiguration<ContactReminder>
+{
+    public void Configure(EntityTypeBuilder<ContactReminder> builder)
+    {
+        builder.ToTable("ContactReminders");
+        builder.HasKey(r => r.Id);
+        builder.Property(r => r.Kind).HasConversion<string>().HasMaxLength(16);
+        builder.Property(r => r.Words).HasMaxLength(ContactReminder.MaxWordsLength).IsRequired();
+        builder.HasIndex(r => new { r.Kind, r.SubjectId, r.DueOn }).IsUnique();
+        builder.HasIndex(r => new { r.OwnerId, r.DismissedAt });
+        builder.HasIndex(r => r.ContactId);
+        builder.HasOne<Person>().WithMany().HasForeignKey(r => r.OwnerId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class ContactWeeklyEmailConfiguration : IEntityTypeConfiguration<ContactWeeklyEmail>
+{
+    public void Configure(EntityTypeBuilder<ContactWeeklyEmail> builder)
+    {
+        builder.ToTable("ContactWeeklyEmails");
+        builder.HasKey(e => new { e.OwnerId, e.WeekOf });
+        builder.HasOne<Person>().WithMany().HasForeignKey(e => e.OwnerId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class PushSubscriptionConfiguration : IEntityTypeConfiguration<PushSubscription>
+{
+    public void Configure(EntityTypeBuilder<PushSubscription> builder)
+    {
+        builder.ToTable("PushSubscriptions");
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.Endpoint).HasMaxLength(PushSubscription.MaxEndpointLength).IsRequired();
+        builder.Property(s => s.P256dh).HasMaxLength(PushSubscription.MaxKeyLength).IsRequired();
+        builder.Property(s => s.Auth).HasMaxLength(PushSubscription.MaxKeyLength).IsRequired();
+        builder.HasIndex(s => s.Endpoint).IsUnique();
+        builder.HasIndex(s => s.PersonId);
+        builder.HasOne<Person>().WithMany().HasForeignKey(s => s.PersonId).OnDelete(DeleteBehavior.Cascade);
     }
 }

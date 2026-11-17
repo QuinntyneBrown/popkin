@@ -74,8 +74,9 @@ Popkin web app, `docs/mocks/pages/add-contact/`:
 - **The groups list.** The manifest says the form needs no request before it shows, but the
   "Groups" chips are the owner's groups. The form reads them through Groups' own endpoint
   (L2-146) as it opens and shows the part when they arrive; with no group, the part is left out.
-- **The photo offline.** Whether a picked photo waits in `ContactsOutbox` with the rest is
-  `<TO SUPPLY>`; until settled, an offline save keeps the photo too.
+- **The photo offline.** A picked photo waits in `ContactsOutbox` with its write, in memory; a
+  reload while offline sends the write without it, and Edit can add it (known gap 118, ruled
+  2026-11-16).
 - **Built in steps.** "Who" and "Details", the photo, Edit and the field rules come first. "Dates
   to remember" joins with [Key dates](../key-dates/README.md), "How they connect" with
   [Connections](../connections/README.md), "Groups" with [Groups](../groups/README.md),

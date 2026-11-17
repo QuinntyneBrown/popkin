@@ -4,7 +4,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContactDatesView, KeyDateRowView } from '../../models/contacts';
 import { Toaster } from '../toasts/toaster';
 import { CONTACTS_API } from './contacts-api';
-import { DEFAULT_REMINDERS, DatesStore, PREFERENCES_FAILED_HEADING } from './dates-store';
+import {
+  DEFAULT_REMINDERS,
+  DatesStore,
+  NOTIFICATIONS_BLOCKED_HEADING,
+  PREFERENCES_FAILED_HEADING,
+} from './dates-store';
+import { PUSH_SUBSCRIBER } from './push-subscriber';
 
 const date = (id: string, occursOn: string) => ({ id, occursOn }) as KeyDateRowView;
 const view = (dates: KeyDateRowView[]): ContactDatesView => ({
@@ -15,6 +21,7 @@ const view = (dates: KeyDateRowView[]): ContactDatesView => ({
 describe('DatesStore', () => {
   const api = { dates: vi.fn(), saveReminderPreferences: vi.fn() };
   const toaster = { show: vi.fn() };
+  const devices = { subscribe: vi.fn(), unsubscribe: vi.fn() };
   let store: DatesStore;
 
   beforeEach(() => {
@@ -24,6 +31,7 @@ describe('DatesStore', () => {
         DatesStore,
         { provide: CONTACTS_API, useValue: api },
         { provide: Toaster, useValue: toaster },
+        { provide: PUSH_SUBSCRIBER, useValue: devices },
       ],
     });
     store = TestBed.inject(DatesStore);
@@ -84,5 +92,34 @@ describe('DatesStore', () => {
       PREFERENCES_FAILED_HEADING,
       expect.any(String),
     );
+  });
+
+  // L2-140 AC2, ADR 0028
+  it('subscribes this device when Phone notifications is turned on, and says when it is blocked', async () => {
+    api.saveReminderPreferences.mockReturnValue(of(DEFAULT_REMINDERS));
+    devices.subscribe.mockResolvedValue('blocked');
+
+    store.changeWay('phoneNotifications', true);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(devices.subscribe).toHaveBeenCalledOnce();
+    expect(toaster.show).toHaveBeenCalledWith(
+      'warning',
+      NOTIFICATIONS_BLOCKED_HEADING,
+      'Allow them for Popkin in your browser’s settings to get reminders on this device.',
+    );
+  });
+
+  // ADR 0028
+  it('forgets this device when Phone notifications is turned off, and leaves it for the email', () => {
+    api.saveReminderPreferences.mockReturnValue(of(DEFAULT_REMINDERS));
+    devices.unsubscribe.mockResolvedValue(undefined);
+
+    store.changeWay('phoneNotifications', false);
+    store.changeWay('mondayEmail', false);
+
+    expect(devices.unsubscribe).toHaveBeenCalledOnce();
+    expect(devices.subscribe).not.toHaveBeenCalled();
   });
 });

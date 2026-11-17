@@ -28,7 +28,7 @@ Popkin web app, `docs/mocks/dialogs/import-contacts/`, over the empty Today:
 - `default.html` — "Import from your Popkins", "Everyone you share a Popkin with, once each. They
   aren’t told, and only you will see them.", "Tick nobody", then one section per shared Popkin
   with its tile, name and number of people ("🏕️ Lakeside Weekend" "13 people", "🕯️ Thursday
-  Night Group" "8 people", "⚽ Tigers U9 Parents" "21 people"). Under each are its people, each a
+  Night Group" "8 people", "⚽ Tigers U9 Parents" "18 people"). Under each are its people, each a
   ticked checkbox with avatar and name ("Walt Brennan", "Dev Patel"…), then "Show 9 more". The
   footer offers "Import 23 people" and "Not now" (L2-151 AC1). Walt Brennan, in two of the
   Popkins, counts once in the 23 (L2-151 AC2).
@@ -42,25 +42,31 @@ Popkin web app, `docs/mocks/dialogs/import-contacts/`, over the empty Today:
   `docs/mocks/pages/contacts-today/empty.html`), and People's empty state offers "Import from
   your Popkins" beside "Add someone".
 
-### Conflicts and gaps
+### Rulings (known gaps 110 and 117, settled 2026-11-16)
 
-- **What is imported.** What Import brings over (name, photo, phone, email), whether wrapped-up
-  Popkins and people already in Contacts are offered, and whether Import is offered once
-  Contacts has people are known gap 110. Until it is settled: the imported contact takes the
-  name the candidate shows in the Popkin listed first, and nothing else; every Popkin the owner
-  has not left is listed, wrapped up or not; and no second contact is made for a `PersonId`
-  that already has one, so "once each" holds across imports too (L2-151 AC2).
-- **"Tick nobody".** The mock offers no way back to everyone ticked. Whether the link becomes
-  "Tick everyone" once nobody is ticked is `<TO SUPPLY>`.
-- **How many show before "Show {n} more".** The mock shows four, three and two people in its
-  three sections; the number is `<TO SUPPLY>`.
-- **The circle of an imported contact.** None is drawn; the contact has none until edited
-  (known gap 102).
-- **A failed import.** No mock draws it. The dialog stays open with every tick kept and an alert
-  whose copy is `<TO SUPPLY>`; nothing is imported, since the save is one transaction.
+- **What is imported.** The name the candidate shows in the first Popkin listed, and nothing
+  else: their photo, phone and email stay theirs. Every Popkin the owner has not left is listed,
+  wrapped up or not, in the order My Popkins uses. A person who already has a contact (by
+  `PersonId`) is never offered again, so "once each" holds across imports too (L2-151 AC2).
+  Import is offered from the empty Today and the empty People, where its entry points are drawn.
+- **People in a Popkin** are listed A to Z by name. The first four show; "Show {n} more" shows
+  the rest of that Popkin and goes (L2-151 AC6). `default.html` is redrawn to match.
+- **"Tick nobody"** becomes "Tick everyone" once nobody is ticked (`nobody.html`; L2-151 AC3).
+- **One person.** "Import 1 person", "Importing 1 person…".
+- **Loading and a failed read.** The dialog shows skeleton rows while the candidates load
+  (`loading.html`). A failed read says "We couldn’t load your Popkins’ people." and "Check your
+  connection and try again." with "Try again" (`error.html`; L2-151 AC7).
+- **Nobody to import.** With no candidates the dialog reads "No one to import yet" and "When you
+  share a Popkin with someone, they show here." and offers "Close" alone (`empty.html`; L2-151
+  AC8).
+- **A failed import.** The dialog stays open with every tick kept, and an alert says "We
+  couldn’t import them." and "Everyone you ticked is still ticked. Check your connection and try
+  again." Nothing is imported, since the save is one transaction (`failed.html`; L2-151 AC9).
 - **Offline.** An import is not queued in `ContactsOutbox`; without a connection it fails as
   above, because it depends on the candidates the API holds.
-- **A large import.** How many contacts a person may keep is known gap 110.
+- **The circle of an imported contact.** None; the contact has none until edited.
+- **A resend** is kept once by `ImportBatch`, an `IClientWrite` row like every other Contacts
+  write.
 
 ### API
 
@@ -92,9 +98,9 @@ Endpoints on `ContactsImportController` (`Popkin.Api/Controllers/Contacts/`) und
   `PersonId` the owner already holds, adds one `Contact` per remaining person through
   `Contact.Import(ownerId, personId, name, now)`, and saves once. It records the client id of
   the import so a resend saves once.
-- **`ImportBatch`** (Domain, new table) — `OwnerId`, `ClientId`, `Imported`, `At`; the record of
-  one import that makes a resend safe. `<TO SUPPLY>` whether the shared `ContactsOutbox` rules
-  prefer another form.
+- **`ImportBatch`** (Domain, new table, `IClientWrite`) — `Id`, `OwnerId`, `ClientId`,
+  `Imported`, `At`; the record of one import that makes a resend safe, read through
+  `ClientWrites.FindAsync` as the other Contacts writes are. Erasing the account removes it.
 - Nobody is told: no notification, no hub event, no row in any Popkin and nothing on the
   imported person's account (L2-151 AC4, L2-122 AC3). Logs and metrics carry the route
   template, the status and the count imported, never a name or an id of a person.
@@ -105,9 +111,9 @@ Endpoints on `ContactsImportController` (`Popkin.Api/Controllers/Contacts/`) und
   `.html`) — CDK Dialog with `pk-dialog` (heading, the sentence as its description), a
   `pk-tick-list` per shared Popkin, "Tick nobody" as a text `pk-button`, the primary
   `pk-button` "Import {n} people" / "Import nobody" / "Importing {n} people…" and the quiet "Not
-  now". It opens with a skeleton while the candidates load; its loading and load-failure copy
-  is `<TO SUPPLY>`. On success it closes with `imported` and the opener navigates to
-  `/contacts/people`.
+  now" ("Close" alone with nobody to import). It opens with skeleton rows while the candidates
+  load, and a failed read or import shows its alert as ruled above. On success it closes with
+  `imported` and the opener navigates to `/contacts/people`.
 - **`pk-tick-list`** (components, new) — a section headed by a `pk-popkin-tile`, a name and
   "{n} people", a list of rows each with a native checkbox, `pk-avatar` and the name as its
   label, and "Show {n} more". It takes `ticked` as a set of keys and emits `toggled(key)`, so
@@ -117,7 +123,7 @@ Endpoints on `ContactsImportController` (`Popkin.Api/Controllers/Contacts/`) und
   failed | importing | importFailed`, the ticked set (every candidate at first), `count` of
   distinct ticked people, `tickNobody()`, `toggle(personId)` and `import()`. Unit tested
   (ADR 0011).
-- **`import-contacts-text.ts`** — "Import {n} people", "Import 1 person" `<TO SUPPLY>`, "Import
+- **`import-contacts-text.ts`** — "Import {n} people", "Import 1 person", "Import
   nobody", "Importing {n} people…", "{n} people", "Show {n} more", and Today's "{n} people from
   your Popkins are ready to import. Only you can see your contacts." Unit tested.
 - **`CONTACTS_API`** — `importCandidates()`, `importPeople(clientId, personIds)`.

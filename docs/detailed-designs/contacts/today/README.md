@@ -61,31 +61,37 @@ day their device shows. The greeting and the date line are the device's own.
 A section with nothing to show is left out: no spotlight without a key date, no "Coming up"
 without a second, no "To do today", "Recently" or "It's been a while" without entries.
 
-### Conflicts and gaps
+### Rulings (known gaps 99 and 111, settled 2026-11-16)
 
-- **What counts as "a while", how far "Coming up" looks and how many it shows, and what "Last
-  time:" quotes** are open (known gap 99). The mocks show Sam at 59 days and Joel at 33, and not
-  Ben at 11 days or Grace at 10.
-- **The greeting.** Only "Morning" at 8:40 am is drawn. The owner chose the other hours:
-  "Morning" before noon, "Afternoon" until 6 pm and "Evening" after, by the device's clock
-  (L2-125 AC1); `greeting` in `contacts-text.ts` holds the rule.
-- **How many "Recently" shows.** The mock shows 5; the number is `<TO SUPPLY>`.
-- **When an entry happened.** "Recently" reads "Sun" and "Sat" for this week, but "Sep 11" (a
-  Friday, 4 days ago) beside them; the rule for a weekday against a date is `<TO SUPPLY>`.
-- **Lines and titles of key dates.** "Turns 33" needs the birthday's year (known gap 102); "Mum's
-  birthday" is Ada's by her relation, while Grace's is "Grace's birthday"; "Iris is one month
-  old" is a one-off date (known gap 103). Who writes a date's title and line is `<TO SUPPLY>`;
-  this design shows the title and line the key date holds.
-- **"in 4 days" and "Tomorrow".** The words for a date today or tomorrow are `<TO SUPPLY>`.
+- **"It's been a while"** holds the contacts whose last logged conversation was more than 30
+  days before `on`, as People rules drifting, most days first, at most five. A contact with no
+  conversation logged is not drifting: there is no "a while" to count yet. The mocks' Sam at 59
+  days and Joel at 33, not Ben at 11 or Grace at 10, hold.
+- **"Coming up"** takes the occurrences after the next date within 60 days of `on`, soonest
+  first, at most four: the mock's four, to Ruth's at 39 days, with Walt's at 62 days left out.
+- **"Recently"** shows the five latest entries, newest first. An entry reads as People's "Last
+  talked" does: the weekday ("Sun", "Fri") within the last 6 days, the date ("Sep 7") before.
+  The mock's "Sep 11" (a Friday, 4 days before) is redrawn as "Fri".
+- **"Last time:"** quotes the first sentence of the latest conversation's note, the owner's own
+  words, so Popkin puts no pronoun in their mouth (L2-122 AC4): "Last time: Venue’s booked."
+  With no conversation logged it is left out. The mock is redrawn to match.
+- **A "Recently" row** reads "{first name} · {how}": a conversation by its channel ("Ada ·
+  Phone"), a milestone by its title ("Dev · Moved to Chapel Allerton"), then its note. The mock's
+  made-up conversation titles ("Sunday call") are redrawn as channels.
+- **The spotlight's day** reads "Today" or "Tomorrow" for those days, else the weekday and "in
+  {n} days" ("Saturday · in 4 days"). A coming-up row reads "Today", "Tomorrow" or "{n} days".
+- **Titles and lines** are the key date's own, as Dates reads them (`KeyDateRules.Row`): a
+  birthday is "{first name}'s birthday" with "Turns {n}" when its year is known; another date is
+  its title. 29 February falls on 28 February in a year without it, as Key dates rules.
 - **No phone.** "Message {first name}" and "Call" are links to the contact's phone; with no phone
-  they are left out `<TO SUPPLY>`.
+  they are left out.
+- **The greeting.** "Morning" before noon, "Afternoon" until 6 pm and "Evening" after, by the
+  device's clock (L2-125 AC1); `greeting` in `contacts-text.ts` holds the rule.
 - **The import count** "{n} people from your Popkins are ready to import" is the `total` of
-  `GET /api/contacts/import` ([Import from your Popkins](../import-from-popkins/README.md));
-  whether wrapped-up Popkins count is open (known gap 110). With none, the line is left out
-  (L2-125 AC8).
-- **Overdue habit.** When a habit is overdue is the Habits rule (known gap 105).
-- **Pronouns.** "Last time: she asked you…" is a pronoun; see [Only you see your
-  Contacts](../contacts-privacy/README.md).
+  `GET /api/contacts/import` ([Import from your Popkins](../import-from-popkins/README.md)), read
+  only when `people` is 0; with none, the line is left out (L2-125 AC8).
+- **Overdue habit.** When a habit is overdue is the Habits rule (`Habit.IsOverdue`, known gap 105,
+  ruled).
 
 ### API
 
@@ -117,12 +123,12 @@ On `ContactsController` (`api/contacts`), one MediatR request:
 - **`KeyDate.NextOccurrence(on)`** (Domain, defined by [Key dates](../key-dates/README.md)) —
   the day the date next falls on or after `on`, or null for a one-off date that has passed; the
   handler counts `InDays` from it. `KeyDate.YearsOn(day)` gives "Turns 33" and "5 years married".
-  29 February in a year without it is `<TO SUPPLY>`.
+  29 February falls on 28 February in a year without it.
 - **`TodayRules`** (Application) — the order and the cuts: the next date is the soonest
   occurrence; "Coming up" takes the following ones up to `TodayRules.ComingUpDays` and
   `TodayRules.ComingUpMax`; follow-ups due on or before `on` are ordered most late first;
   "Recently" takes `TodayRules.RecentMax`; a contact is drifting after `TodayRules.DriftDays`.
-  Each value is `<TO SUPPLY>` (known gap 99).
+  The values are ruled above: 60 days and four, five, and 30 days (known gap 99).
 - **Overdue habits** come from the Habits rule `Habit.IsOverdue(on)` (known gap 105).
 - **`ContactsDayValidator`** validates `on` (`400` `invalid_date`).
 
@@ -134,7 +140,8 @@ On `ContactsController` (`api/contacts`), one MediatR request:
   `pk-page-head`, and by state: `pk-skeleton` shapes beside the status line, `pk-empty-state`
   with "Try again" as an alert, the empty section, or the page.
 - **`TodayStore`** (`api/src/lib/api/contacts/today-store.ts`) — `ContactsPageState`, loads with
-  the device day, reads the import candidates' `total` only when `people` is 0, `retry()`, and `toggle(followUpId)`, which marks the follow-up done or open at
+  the device day; with nobody in Contacts (known from the frame's count before the page opens)
+  `openEmpty()` reads no day, only the import candidates' `total`, as it does when `people` is 0; `retry()`, and `toggle(followUpId)`, which marks the follow-up done or open at
   once, writes it through `ContactsOutbox` (`PUT /api/contacts/follow-ups/{id}/done`, defined by
   [Follow-ups](../follow-ups/README.md)), shows "Marked done" with "Undo", and on refusal puts
   it back with the danger toast "We couldn't save that follow-up" (L2-124 AC3). Unit tested.
@@ -149,8 +156,9 @@ On `ContactsController` (`api/contacts`), one MediatR request:
   `pk-spotlight` with `pk-date-tile` (backlog row 19), `pk-task` (row 17) for
   follow-ups and the overdue habit, `pk-contacts-page` (row 22), `pk-avatar-stack` (faces of a
   coming-up row), `pk-avatar`, `pk-page-head`, `pk-button`, `pk-empty-state`, `pk-skeleton`. The
-  coming-up and recent rows are the design system's `list-row` and the drifting chips its
-  `who-chip` as a link; neither is built.
+  coming-up and recent rows are the design system's `list-row`, built as `pk-today-dates` and
+  `pk-recent-list`, and the drifting chips its `who-chip` as a link, `pk-drift-chips` (backlog
+  rows 24 and 25).
 
 ### Tests
 
@@ -162,13 +170,14 @@ On `ContactsController` (`api/contacts`), one MediatR request:
   of "Coming up"; each cut; follow-ups most late first. `KeyDate.NextOccurrence` is tested by Key
   dates.
 - Unit tests: `TodayStore` (states, toggle, undo, refusal) and `today-text.ts`.
-- Playwright: `tests/contacts-today.spec.ts` through `ContactsTodayPage`
+- Playwright: `tests/contacts-today.spec.ts` (nobody yet) and `tests/contacts-today-day.spec.ts` (the day) through `ContactsTodayPage`
   (`pages/contacts-today.page.ts`) with the page clock at 08:40 on 15 September 2026: the page as
   drawn; ticking a follow-up and undoing it; a drifting chip opens Log; loading, failed with "Try
   again", and empty. Recorded responses add `GET /api/contacts/today`; `stubs.ts` adds the empty
   day and the delayed and failed answers; `routes.ts` gains `contactsToday`, `contactsTodayDone`,
   `contactsTodayLoading`, `contactsTodayEmpty` and `contactsTodayError`.
-- Parity: `spotlight`, `date-tile`, `task` and `contacts-layout`.
+- Parity: `spotlight`, `date-tile`, `task`, `contacts-layout`, `today-dates`, `recent-list` (at
+  1280) and `drift-chips`.
 
 ## Requirements
 

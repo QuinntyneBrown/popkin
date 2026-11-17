@@ -24,6 +24,9 @@
         text="Add the people who matter, or bring in the people you already know from your Popkins."
       >
         <a pk-button variant="primary" size="md" routerLink="/contacts/people/new">Add someone</a>
+        <button pk-button type="button" variant="secondary" size="md" (click)="importPeople()">
+          Import from your Popkins
+        </button>
       </div>
     } @else if (store.state() === 'failed') {
       <div

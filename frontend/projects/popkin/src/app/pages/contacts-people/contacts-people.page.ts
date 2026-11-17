@@ -1,3 +1,4 @@
+import { Dialog } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -29,6 +30,7 @@ import {
   PopkinNav,
   SearchField,
 } from 'components';
+import { ImportContactsDialog } from '../../dialogs/import-contacts/import-contacts.dialog';
 
 /**
  * People (L2-126, L2-127): every contact, searched by name and narrowed to a circle on the
@@ -58,6 +60,7 @@ import {
 export class ContactsPeoplePage {
   protected readonly store = inject(PeopleStore);
   protected readonly frame = inject(ContactsFrame);
+  private readonly dialog = inject(Dialog);
 
   /** Nobody in Contacts: by the summary while the list loads, then by the list (L2-126 AC4). */
   protected readonly empty = computed(
@@ -94,6 +97,17 @@ export class ContactsPeoplePage {
     inject(ContactsOutbox)
       .sent$.pipe(takeUntilDestroyed())
       .subscribe(() => this.store.retry());
+  }
+
+  /** "Import from your Popkins" (L2-151): those imported show at once. */
+  protected importPeople(): void {
+    this.dialog
+      .open<number>(ImportContactsDialog, { ariaLabelledBy: 'dlg-title' })
+      .closed.subscribe((imported) => {
+        if (!imported) return;
+        this.frame.refresh();
+        this.store.retry();
+      });
   }
 }
 

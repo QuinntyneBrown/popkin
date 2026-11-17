@@ -66,6 +66,14 @@ public interface IAppDbContext
 
     DbSet<ContactGroup> ContactGroups { get; }
 
+    DbSet<ImportBatch> ImportBatches { get; }
+
+    DbSet<ContactReminder> ContactReminders { get; }
+
+    DbSet<ContactWeeklyEmail> ContactWeeklyEmails { get; }
+
+    DbSet<PushSubscription> PushSubscriptions { get; }
+
     DbSet<ContactGroupMember> ContactGroupMembers { get; }
 
     DbSet<WorkingStretch> WorkingStretches { get; }

@@ -3,6 +3,8 @@ import type { Locator, Page } from '@playwright/test';
 /** Add someone, `/contacts/people/new`, and Edit, `/contacts/people/:id/edit` (L2-129, L2-130). */
 export class ContactFormPage {
   readonly root: Locator;
+  /** The first pair of fields side by side. */
+  readonly firstPair: Locator;
   readonly heading: Locator;
   readonly cancel: Locator;
   /** Edit's "Delete {first name}", after the form (L2-132). */
@@ -43,6 +45,7 @@ export class ContactFormPage {
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="add-contact"]');
+    this.firstPair = page.locator('.form-section__pair').first();
     this.topBar = page.locator('.topbar');
     this.heading = page.getByRole('heading', { level: 1 });
     this.cancel = this.topBar.getByRole('link', { name: 'Cancel' });

@@ -10,6 +10,14 @@ export interface ToastMessage {
   text?: string;
   /** What the toast offers to do: its label, and what choosing it does. */
   action?: ToastAction;
+  /** Called once it is dismissed or acted on. */
+  dismissed?: () => void;
+}
+
+export interface ToastOptions {
+  /** An info toast that stays until dismissed, as a reminder does (L2-140 AC1). */
+  lasting?: boolean;
+  dismissed?: () => void;
 }
 
 export interface ToastAction {
@@ -34,10 +42,19 @@ export class Toaster {
 
   readonly toasts = this.state.asReadonly();
 
-  show(variant: ToastVariant, heading: string, text?: string, action?: ToastAction): void {
+  show(
+    variant: ToastVariant,
+    heading: string,
+    text?: string,
+    action?: ToastAction,
+    options: ToastOptions = {},
+  ): void {
     const id = ++this.next;
-    this.state.update((toasts) => [...toasts, { id, variant, heading, text, action }]);
-    if (variant === 'success' || variant === 'info') {
+    this.state.update((toasts) => [
+      ...toasts,
+      { id, variant, heading, text, action, dismissed: options.dismissed },
+    ]);
+    if ((variant === 'success' || variant === 'info') && !options.lasting) {
       this.timers.set(
         id,
         setTimeout(() => this.dismiss(id), SHOWN_MS),
@@ -71,6 +88,8 @@ export class Toaster {
   dismiss(id: number): void {
     clearTimeout(this.timers.get(id) ?? undefined);
     this.timers.delete(id);
-    this.state.update((toasts) => toasts.filter((toast) => toast.id !== id));
+    const toast = this.state().find((shown) => shown.id === id);
+    this.state.update((toasts) => toasts.filter((shown) => shown.id !== id));
+    toast?.dismissed?.();
   }
 }

@@ -108,20 +108,22 @@
                     Make a habit of seeing {{ profile.firstName }}
                   </button>
                 }
-                <section aria-labelledby="about">
-                  <div
-                    pk-list-head
-                    headingId="about"
-                    [heading]="'About ' + profile.firstName"
-                  ></div>
-                  @if (facts().length) {
-                    <dl pk-contact-facts [facts]="facts()"></dl>
-                  }
-                  @if (profile.loves.length) {
-                    <h3 class="text-sm text-muted">Loves</h3>
-                    <ul pk-likes data-accent="amber" [items]="profile.loves"></ul>
-                  }
-                </section>
+                @if (facts().length || profile.loves.length) {
+                  <section aria-labelledby="about">
+                    <div
+                      pk-list-head
+                      headingId="about"
+                      [heading]="'About ' + profile.firstName"
+                    ></div>
+                    @if (facts().length) {
+                      <dl pk-contact-facts [facts]="facts()"></dl>
+                    }
+                    @if (profile.loves.length) {
+                      <h3 class="text-sm text-muted">Loves</h3>
+                      <ul pk-likes data-accent="amber" [items]="profile.loves"></ul>
+                    }
+                  </section>
+                }
                 @if (around().length || groupChips().length) {
                   <section aria-labelledby="around">
                     <div

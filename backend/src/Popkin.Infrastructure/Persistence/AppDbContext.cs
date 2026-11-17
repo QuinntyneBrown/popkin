@@ -67,6 +67,14 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<ContactGroup> ContactGroups => Set<ContactGroup>();
 
+    public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
+
+    public DbSet<ContactReminder> ContactReminders => Set<ContactReminder>();
+
+    public DbSet<ContactWeeklyEmail> ContactWeeklyEmails => Set<ContactWeeklyEmail>();
+
+    public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
+
     public DbSet<ContactGroupMember> ContactGroupMembers => Set<ContactGroupMember>();
 
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();

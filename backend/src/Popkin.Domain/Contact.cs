@@ -70,6 +70,12 @@ public sealed class Contact : IClientWrite
 
     public DateTimeOffset CreatedAt { get; private set; }
 
+    /// <summary>
+    /// The account the contact was imported from (L2-151), or null for one added by hand; cleared
+    /// when that account is erased, so "Also in your Popkin" no longer shows (known gap 117).
+    /// </summary>
+    public Guid? PersonId { get; private set; }
+
     /// <summary>A new contact; the name is trimmed, as every field is.</summary>
     public static Contact Create(Guid ownerId, Guid clientId, string name, ContactDetails details, DateTimeOffset now)
     {
@@ -84,6 +90,20 @@ public sealed class Contact : IClientWrite
         contact.ChangeDetails(details);
         return contact;
     }
+
+    /// <summary>
+    /// A contact made by Import from someone the owner shares a Popkin with: their name and nothing
+    /// else, linked to their account (L2-151, known gap 110).
+    /// </summary>
+    public static Contact Import(Guid ownerId, Guid personId, string name, DateTimeOffset now)
+    {
+        var contact = Create(ownerId, Guid.NewGuid(), name, new ContactDetails(null, null, null, null, null, null, []), now);
+        contact.PersonId = personId;
+        return contact;
+    }
+
+    /// <summary>The account it was imported from is erased: the link goes, the contact stays.</summary>
+    public void ForgetPerson() => PersonId = null;
 
     public void Rename(string name) => Name = name.Trim();
 

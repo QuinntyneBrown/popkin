@@ -4,6 +4,8 @@ import { ContactsNav } from './contacts-nav';
 /** Groups, `/contacts/groups` and an open group, `/contacts/groups/{id}` (L2-146 to L2-148). */
 export class ContactsGroupsPage {
   readonly root: Locator;
+  /** A group’s note, on its card. */
+  readonly noteLine: Locator;
   readonly nav: ContactsNav;
   readonly heading: Locator;
   readonly sub: Locator;
@@ -41,6 +43,7 @@ export class ContactsGroupsPage {
 
   constructor(page: Page) {
     this.root = page.locator('body[data-page="contacts-groups"]');
+    this.noteLine = page.locator('.info-card__line').first();
     this.nav = new ContactsNav(page);
     this.heading = page.getByRole('heading', { level: 1 });
     this.pageHead = page.locator('.page-head');

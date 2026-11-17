@@ -3,6 +3,10 @@ import type { Locator, Page } from '@playwright/test';
 /** A contact's profile, `/contacts/people/:contactId` (L2-128, L2-122 AC2, L2-123). */
 export class ContactProfilePage {
   readonly root: Locator;
+  /** About’s facts, the whole list. */
+  readonly factsList: Locator;
+  /** “Loves”, the whole list. */
+  readonly lovesList: Locator;
   readonly main: Locator;
   readonly back: Locator;
   readonly edit: Locator;
@@ -67,6 +71,8 @@ export class ContactProfilePage {
 
   constructor(page: Page) {
     this.root = page.locator('body[data-page="contact-profile"]');
+    this.factsList = page.locator('dl.contact-facts');
+    this.lovesList = page.locator('ul.likes');
     this.main = page.locator('.contacts-page');
     this.back = this.main.getByRole('link', { name: 'People', exact: true });
     this.edit = page.getByRole('link', { name: 'Edit profile' });

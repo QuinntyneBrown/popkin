@@ -15,6 +15,8 @@ public sealed class PopkinMetrics
     private readonly Histogram<double> _wrapUpLateness;
     private readonly Gauge<double> _wrapUpLastTick;
     private readonly Counter<long> _auditEntriesPurged;
+    private readonly Counter<long> _remindersSent;
+    private readonly Counter<long> _reminderSendFailures;
 
     public PopkinMetrics(IMeterFactory meters)
     {
@@ -29,6 +31,10 @@ public sealed class PopkinMetrics
             "popkin.wrap_up.last_tick", unit: "s", description: "When the Worker last finished a wrap-up tick, in seconds since the Unix epoch.");
         _auditEntriesPurged = meter.CreateCounter<long>(
             "popkin.audit.entries_purged", description: "Audit entries deleted at two years old (L2-120 AC6).");
+        _remindersSent = meter.CreateCounter<long>(
+            "popkin.contacts.reminders.sent", description: "Contacts reminders added in the app, or sent by phone or email (L2-140).");
+        _reminderSendFailures = meter.CreateCounter<long>(
+            "popkin.contacts.reminders.send_failures", description: "Contacts reminders a phone or email provider could not send.");
     }
 
     /// <summary>L2-044 AC1: a Popkin wraps up within one minute of its end date.</summary>
@@ -45,4 +51,16 @@ public sealed class PopkinMetrics
         _hubSendFailures.Add(1, new KeyValuePair<string, object?>("event", eventName));
 
     public void AuditEntriesPurged(int count) => _auditEntriesPurged.Add(count);
+
+    /// <summary>L2-140: `channel` is one of in_app, phone and email.</summary>
+    public void RemindersSent(string channel, int count)
+    {
+        if (count > 0)
+        {
+            _remindersSent.Add(count, new KeyValuePair<string, object?>("channel", channel));
+        }
+    }
+
+    public void ReminderSendFailed(string channel) =>
+        _reminderSendFailures.Add(1, new KeyValuePair<string, object?>("channel", channel));
 }

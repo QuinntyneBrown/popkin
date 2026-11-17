@@ -80,6 +80,16 @@ public sealed class PurgeDeletedAccountsCommandHandler(
         db.ContactGroups.RemoveRange(db.ContactGroups.Where(g => g.OwnerId == person.Id));
         // A follow-up for nobody names no contact, so ContactRemoval leaves it.
         db.FollowUps.RemoveRange(db.FollowUps.Where(f => f.OwnerId == person.Id));
+        db.ImportBatches.RemoveRange(db.ImportBatches.Where(b => b.OwnerId == person.Id));
+        db.ContactReminders.RemoveRange(db.ContactReminders.Where(r => r.OwnerId == person.Id));
+        db.ContactWeeklyEmails.RemoveRange(db.ContactWeeklyEmails.Where(e => e.OwnerId == person.Id));
+        db.PushSubscriptions.RemoveRange(db.PushSubscriptions.Where(s => s.PersonId == person.Id));
+        // Others keep the contact they imported of them, but no longer linked to the account,
+        // so "Also in your Popkin" goes (known gap 117, ruled).
+        foreach (var imported in await db.Contacts.Where(c => c.PersonId == person.Id).ToListAsync(CancellationToken.None))
+        {
+            imported.ForgetPerson();
+        }
         person.Erase(clock.GetUtcNow());
         await db.SaveChangesAsync(CancellationToken.None);
         await ContactRemoval.DeleteFilesAsync(photos, contactFiles, logger);
