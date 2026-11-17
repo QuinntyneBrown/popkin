@@ -73,8 +73,9 @@ origin (`App:Origin`, `https://app.popkin.community`). Each opens `/account/noti
     URL. `AcsNotificationEmailSender` adds the headers
     `List-Unsubscribe: <{that URL}>` and `List-Unsubscribe-Post: List-Unsubscribe=One-Click` to
     every activity and reminder email (L2-168 AC4). Azure Communication Services shall sign both
-    headers with DKIM, as mailbox providers require. Whether its DKIM signature covers custom
-    headers is `<TO SUPPLY>`.
+    headers with DKIM, as mailbox providers require. Both headers go on every email either way: a
+    provider that does not trust them offers no one-click button, and the footer's "Unsubscribe
+    from all email" link works the same (L2-168 AC1).
 - **The page.** `UnsubscribePage` (`frontend/projects/popkin/src/app/pages/unsubscribe/`) is
   served at `/unsubscribe`, with route data `{ shell: 'bare', page: 'unsubscribe' }` and no
   guard. It reads `t` and posts it once with `NOTIFICATIONS_API.unsubscribe(token)`. It then

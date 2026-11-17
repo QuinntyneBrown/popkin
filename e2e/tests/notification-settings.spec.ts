@@ -5,6 +5,7 @@ import {
   settingsWithoutAnEmailAddress,
   theMockNotificationSettings,
   theMockPopkinLevels,
+  noOneMatches,
   theMockMutedPeople,
   MOCK_POPKINS,
   theNotificationSettingsFailing,
@@ -413,6 +414,23 @@ test.describe('muted people', () => {
     await expect(notifications.picker).toHaveCount(0);
     await expect(notifications.muteSomeone).toBeFocused();
     await expect(notifications.mutedRows.first()).toContainText('Walt Brennan');
+  });
+
+  // L2-160: a search that finds nobody says so, and a muted person with no Popkin left in common says that
+  test('the picker says when nobody matches, and a muted person may share no Popkin now', async ({
+    page,
+    pk,
+  }) => {
+    await noOneMatches(page);
+    await pk.open('notificationSettingsMuteNoMatch');
+    const notifications = new NotificationSettingsPage(page);
+
+    await expect(notifications.mutedRow('Joel Kim')).toContainText('No Popkins in common now');
+    await notifications.muteSomeone.click();
+    await notifications.pickerSearch.fill('zed');
+
+    await expect(notifications.pickerNote).toHaveText('No one in your Popkins matches that.');
+    await expect(notifications.pickerPeople).toHaveCount(0);
   });
 
   // Escape closes the picker and returns focus

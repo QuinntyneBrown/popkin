@@ -224,6 +224,15 @@ export async function theMockMutedPeople(
   }
 }
 
+/**
+ * Mara's People view where Joel, still muted, shares no Popkin with her any more, and a search
+ * for "zed" finds nobody (`mute-no-match.html`, L2-160).
+ */
+export async function noOneMatches(page: Page): Promise<void> {
+  await theMockMutedPeople(page, [MOCK_MUTED[0], { ...MOCK_MUTED[1], sharedPopkins: [] }]);
+  await answer(page, 'GET /api/me/notifications/mute-candidates?q=zed', { status: 200, body: [] });
+}
+
 /** Mara's People view with no birthday in her contacts (`no-birthdays.html`, L2-159 AC6). */
 export async function noBirthdaysYet(page: Page): Promise<void> {
   await theMockMutedPeople(page, MOCK_MUTED, []);

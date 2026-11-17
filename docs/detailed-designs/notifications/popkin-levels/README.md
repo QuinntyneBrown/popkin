@@ -44,7 +44,8 @@ The specs stand where the mock differs, and the mock changes:
   when a Popkin is muted on the screen, and the design does the same. The undo bar is not shown
   for "Everything" or "Just for me".
 - A member of no active Popkin sees the view's sentences and no rows. No mock draws it; the words
-  for that case are `<TO SUPPLY>`.
+  for that case are the view's own: it says what each level does, and that new Popkins start on
+  Everything.
 
 ### What each level lets through (L2-158 AC2, AC3)
 

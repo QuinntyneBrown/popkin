@@ -79,8 +79,9 @@ The emails are in `docs/mocks/notifications/email-birthday/` (manifest id `email
    email, the phone alert and the in-app message share the words of `ReminderRules`, which give a
    weekday within six days and the date after ("Grace turns 33 on 19 September"; gaps 104 and
    114). The subject names both, so the day is never ambiguous.
-8. **"On your list".** Until the `<TO SUPPLY>` below is answered, any open follow-up of the
-   contact due on or before the day counts.
+8. **"On your list".** Any open follow-up of the contact due on or before the day counts: a
+   follow-up's text is the person's own words, and Popkin does not guess which ones are about
+   the birthday.
 9. **The relation line.** `ahead.html`'s "Best friend from uni" is the contact's "How we met".
 
 ### What is due and when (L2-162)
@@ -130,8 +131,8 @@ Rules that apply to all three:
   its window, and the one already sent stands.
 - **A short Popkin.** A Popkin created less than 24 hours before its end ("Just today", a weekend
   started on Saturday) sends no wrap-up reminder. Its members have only just joined, and the
-  email would arrive as they start (`<TO SUPPLY>`: confirmation of this reading of "24 hours
-  before").
+  email would arrive as they start. "24 hours before" is read as a moment the Popkin lived
+  through.
 - **Late start.** The jobs tick every 5 minutes. A reminder due while the Worker was down is
   sent at the next tick, as long as its moment has not passed: the key date's day, the story's
   due date, the Popkin's end.
@@ -167,8 +168,8 @@ Rules that apply to all three:
   - The badge shows the age from `KeyDate.YearsOn` when the year is known, and nothing without
     it.
   - "On your list" appears only ahead of the day. It shows the contact's earliest open follow-up
-    due on or before the occurrence, with "You planned it for {day}" (AC3). `<TO SUPPLY>`: whether
-    only a follow-up whose text names the birthday counts.
+    due on or before the occurrence, with "You planned it for {day}" (AC3), whatever its text
+    says (difference 8).
   - "Things {name} loves, from your notes" lists the `Loves`, and "Last time you talked · {date}"
     shows the latest conversation's title and text cut at 300. Each is left out when empty (AC4).
   - Buttons: "Open {name}'s page" ahead; on the day, "Say happy birthday" and "{name}'s page".

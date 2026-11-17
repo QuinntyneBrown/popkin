@@ -199,6 +199,7 @@
               pk-pick-list
               label="People in your Popkins"
               [options]="candidates()"
+              [notes]="store.noOneMatches() ? ['No one in your Popkins matches that.'] : []"
               (valueChange)="mute($event)"
             ></ul>
           </div>

@@ -375,6 +375,29 @@ describe('NotificationSettingsStore', () => {
       expect(store.candidates()).toEqual([joel]);
     });
 
+    it('says nobody matches only when a search answered with no one', () => {
+      const answers: Subject<(typeof joel)[]>[] = [];
+      const muteCandidates = vi.fn(() => {
+        const answer = new Subject<(typeof joel)[]>();
+        answers.push(answer);
+        return answer;
+      });
+      const { store } = storeWith({ muteCandidates });
+      store.open();
+      expect(store.noOneMatches()).toBe(false);
+
+      store.searchMuteCandidates('zed');
+      vi.advanceTimersByTime(250);
+      expect(store.noOneMatches()).toBe(false);
+      answers[0].next([]);
+      expect(store.noOneMatches()).toBe(true);
+
+      store.searchMuteCandidates('');
+      vi.advanceTimersByTime(250);
+      answers[1].next([]);
+      expect(store.noOneMatches()).toBe(false);
+    });
+
     it('adds the person muted, newest first', () => {
       const muted = { muteId: 'm2', ...joel };
       const { store } = storeWith({ mute: vi.fn(() => of(muted)) });

@@ -114,6 +114,12 @@ export class NotificationSettingsStore {
   readonly refusedOnThisDevice = signal<ReadonlySet<NotificationKind>>(new Set());
   /** The people "Mute someone" offers for what was typed (L2-160 AC2). */
   readonly candidates = signal<MuteCandidateView[]>([]);
+  /** What the answered search was for; empty before any, or for an empty search. */
+  private readonly answeredFor = signal('');
+  /** A search for a name answered with no one (L2-160 AC2). */
+  readonly noOneMatches = computed(
+    () => this.answeredFor().trim() !== '' && this.candidates().length === 0,
+  );
   private readonly searches = new Subject<string>();
 
   constructor() {
@@ -121,10 +127,15 @@ export class NotificationSettingsStore {
     this.searches
       .pipe(
         debounceTime(250),
-        switchMap((q) => this.api.muteCandidates(q)),
+        switchMap((q) => this.api.muteCandidates(q).pipe(map((people) => ({ q, people })))),
         takeUntilDestroyed(),
       )
-      .subscribe({ next: (people) => this.candidates.set(people) });
+      .subscribe({
+        next: ({ q, people }) => {
+          this.candidates.set(people);
+          this.answeredFor.set(q);
+        },
+      });
   }
 
   /** Reads the settings, then applies what a footer link asked for, if anything (L2-168 AC1). */

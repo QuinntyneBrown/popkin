@@ -57,8 +57,8 @@ Where the mock and the specs differ, the specs stand and the mock changes:
   navigation that carries `aria-current="page"`, so the screen uses `pk-view-nav` with links.
 - The mock's note says turning any switch off shows an undo bar for 8 seconds. L2-156 to L2-159
   ask for an undo bar after three changes only: email off, a Popkin muted and a birthday's reminder
-  off. Other switches show no bar. Whether the bar closes by itself after 8 seconds is
-  `<TO SUPPLY>`; until settled it stays until dismissed or the screen is left.
+  off. Other switches show no bar. The bar does not close by itself: it stays until dismissed or
+  the screen is left, so no one has to beat a timer to undo (WCAG 2.2.1).
 - The "Email" switch's text for an account without an email address (L2-156 AC5) is not drawn.
 
 ### API
@@ -162,7 +162,7 @@ another person's settings (L2-174 AC4).
   - new `pk-option-grid` (block `option-grid`, `role="radiogroup"`) and `pk-option-card` (block
     `option-card`, `button`, `role="radio"`, `aria-checked`). Arrow keys move the choice; the
     chosen card is marked by its filled radio as well as its border. `pk-choice-card` differs in
-    shape, and whether it can serve instead is `<TO SUPPLY>`.
+    shape (an icon tile, no radio), so it does not serve: `pk-option-card` is the one used.
   - new `pk-notif-group` (block `notif-group`) — a group's title, sentence and the column labels
     "Email" and "Phone" (`aria-hidden`, since each switch carries its own name).
   - new `pk-notif-matrix` (block `notif-matrix`) — the rows of one group. Each row has a name,

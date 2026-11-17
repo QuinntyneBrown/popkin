@@ -355,6 +355,11 @@ export const routes = {
     app: '/account/notifications?tab=people',
     mock: 'pages/notification-settings/mute-search.html',
   },
+  // The picker finding nobody, and Joel no longer in any Popkin with Mara.
+  notificationSettingsMuteNoMatch: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/mute-no-match.html',
+  },
   notificationSettingsNoOneMuted: {
     app: '/account/notifications?tab=people',
     mock: 'pages/notification-settings/no-one-muted.html',

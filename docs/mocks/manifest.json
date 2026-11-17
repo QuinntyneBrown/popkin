@@ -838,6 +838,7 @@
         "birthday-off",
         "unsubscribed",
         "mute-search",
+        "mute-no-match",
         "no-one-muted",
         "no-birthdays",
         "loading",

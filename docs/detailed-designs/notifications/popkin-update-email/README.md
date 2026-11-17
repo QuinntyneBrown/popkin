@@ -87,8 +87,8 @@ The requirements stand and the mocks change (L1, "Source and assumptions"):
   same links. The HTML sets `lang="en"`, every image has `alt` text (empty for a decorative
   avatar beside a name already written), no word is only in an image, and text colours meet
   WCAG 2.2 AA on their backgrounds (AC4). The colours are the light theme's tokens. Emails take
-  no dark theme of their own, since mail clients recolour them unpredictably (`<TO SUPPLY>`:
-  whether to add `color-scheme` meta tags once the mocks' dark toggle is ruled on).
+  no dark theme of their own, since mail clients recolour them unpredictably, and carry no
+  `color-scheme` meta tag, so a client that recolours does so from the light design.
 - **Footer.** The reason, then the narrowest mute, "Notification settings" and "Unsubscribe from
   all email", then Popkin's postal address from `Email:PostalAddress` (AC5). The links are built
   by [Unsubscribe](../unsubscribe/README.md).
@@ -124,8 +124,8 @@ The changes come from the `NotificationEvent` rows a bundle holds
 | Experiences | `Experiences`, the experience | the experience, its new rating or comment | "{first name} added {experience}" | "Open Experiences" |
 
 Popkin chat has no mention yet: `Message` has `ReplyToMessageId` but no mentioned members.
-"Mentioned you" is drawn only for when a message can name members (`<TO SUPPLY>`: the
-requirement for @mentions, named in L2-154 but specified nowhere else).
+"Mentioned you" is drawn only for when a message can name members, which an @mention feature in
+Chat will bring ([Deliver notifications](../deliver-notifications/README.md)).
 
 A change read at send time that no longer stands is left out: a deleted message, a removed
 photo, a story deleted, a member who left before the window closed. A bundle that has nothing
@@ -209,10 +209,11 @@ exist today.
   dimension, log or span holds an address, a name, text or a link (L2-174 AC3).
 - **Settings** (ADR 0013, `docs/deployment.md`):
   - `Notifications:EmailSender` (API and Worker): the sender address on `popkin.community`
-    (`<TO SUPPLY>`: its local part, `notify` in the designs).
+    `DoNotReply@` the verified domain, as `infra/communication.bicep` provisions it.
   - `Email:PostalAddress` (Worker): the footer's address. Without it no notification email is
-    sent, since a commercial email without a postal address breaks anti-spam law (`<TO SUPPLY>`:
-    the address, gap 127).
+    sent, since a commercial email without a postal address breaks anti-spam law. It is the
+    legal address of whoever runs Popkin (gap 127, with gap 78's legal name), set once as
+    `postalAddress` in `infra/main.bicep`.
 
 ### Frontend
 

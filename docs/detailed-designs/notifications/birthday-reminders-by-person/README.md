@@ -44,8 +44,8 @@ The specs stand where the mock differs, and the mock changes:
   says so.
 - L2-159 AC1 lists five lead times. Dates and the profile offer six, with "1 month before"
   (L2-139 AC1). A birthday whose lead is "1 month before" shows that sixth option in its select,
-  so the screen never shows a value it cannot hold. Whether the People view should offer it for
-  every birthday is `<TO SUPPLY>`.
+  so the screen never shows a value it cannot hold. The People view offers L2-159's five to every
+  other birthday; "1 month before" stays on Dates and the profile, where it is chosen.
 - The empty state "No birthdays yet. Add one to a contact and it shows here." (L2-159 AC6) is
   drawn in `no-birthdays.html`, as the setting list's empty line, like "No one's muted".
 - L2-159 AC5 asks for the undo bar when a birthday's reminder is stopped from an email. The mock

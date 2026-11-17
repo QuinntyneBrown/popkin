@@ -41,8 +41,10 @@ The specs stand where the mock differs, and the mock changes:
   The mock's "Former manager", "Thursday group" and "Colleague" are contact relations, and a mute
   does not read Contacts (L2-160 AC1).
 - A muted person who no longer shares any active Popkin stays muted. Their line then reads "No
-  Popkins in common now". Those words are `<TO SUPPLY>`; no mock draws the case.
-- The words for a search that finds nobody are `<TO SUPPLY>`.
+  Popkins in common now" (`mute-no-match.html`).
+- A search that finds nobody reads "No one in your Popkins matches that." in the picker, as a
+  note of `pk-pick-list`, and only once a search for a name has answered
+  (`NotificationSettingsStore.noOneMatches`, `mute-no-match.html`).
 
 ### API
 

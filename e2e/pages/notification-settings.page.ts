@@ -46,6 +46,8 @@ export class NotificationSettingsPage {
   /** Regions for the parity specs of the People view. */
   readonly popover: Locator;
   readonly pickList: Locator;
+  /** What the picker says when a search finds nobody. */
+  readonly pickerNote: Locator;
   readonly mutedList: Locator;
   /** "Undo" on the bar after a Popkin is muted (L2-158 AC4). */
   readonly undo: Locator;
@@ -116,6 +118,7 @@ export class NotificationSettingsPage {
     this.pickerPeople = this.picker.getByRole('option');
     this.popover = page.locator('.popover');
     this.pickList = page.locator('.popover .pick-list');
+    this.pickerNote = page.locator('.popover .pick-list__note');
     this.mutedList = this.mutedSection.locator('.setting-list');
   }
 

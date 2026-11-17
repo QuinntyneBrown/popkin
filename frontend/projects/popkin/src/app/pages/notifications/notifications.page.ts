@@ -218,7 +218,7 @@ export class NotificationsPage implements OnInit {
 
   /** "in Lakeside Weekend, Thursday Night Group" (L2-160 AC1). */
   protected shared(popkins: string[]): string {
-    return popkins.length ? `in ${popkins.join(', ')}` : '';
+    return popkins.length ? `in ${popkins.join(', ')}` : 'No Popkins in common now';
   }
 
   protected line(popkin: PopkinLevelView): string {
