@@ -10,7 +10,7 @@ Popkin uses no custom tooltips.
 
 | # | Component | Description | Effort | Status |
 |---|---|---|---|---|
-| 1 | Status pill | Record state beside a name or in a table column, on People, Jobs and Exports. | 0.5 days | Built, parity pending |
+| 1 | Status pill | Record state beside a name or in a table column, on People, Jobs and Exports. | 0.5 days | Not built: built with its screen (ADR 0029) |
 | 2 | Key values | Facts of one record on an admin detail page, as a description list. | 0.5 days | Not built: built with its screen (ADR 0029) |
 | 3 | Report review | Reports queue and the evidence for one report, so a moderator can decide it. | 1.5 days | Not built: built with its screen (ADR 0029) |
 | 4 | Activity lists | Five to ten recent items in a panel on Dashboard, Person and Announcements. | 1 day | Not built: built with its screen (ADR 0029) |
@@ -52,7 +52,7 @@ Popkin uses no custom tooltips.
 Total: 38 rows. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
 26 came from the Contacts designs and are not estimated yet.
 
-Rows 2 to 11 were built on 15 November 2026, in the library only, before their screens
+Rows 1 to 11 were built on 15 November 2026, in the library only, before their screens
 ([ADR 0025](adr/0025-library-components-ahead-of-their-screens.md)), and removed on 17 November
 2026 unused ([ADR 0029](adr/0029-one-library-no-unused-components.md)): a component exists only
 while a screen uses it. Each is "Not built: built with its screen": the screen's change builds it

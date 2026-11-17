@@ -42,6 +42,8 @@ change to the library.
   `settings-list`, `tile`, `tiles`, `trend` and `uptime`. `trendChartOf` and its spec go with
   `trend`. Each name was searched for across the workspace and the e2e suite first: `tile` and
   `tiles` were used only by each other, the rest by nothing.
+- `status` (the status pill) goes the same way. The audit counted it as used, but the search it
+  matched was `pk-status-note`; nothing uses `pk-status`.
 - Their design-system pages and mocks stay: they are the source the screen's change rebuilds
   them from. `docs/component-backlog.md` marks their rows "Not built: built with its screen".
 
