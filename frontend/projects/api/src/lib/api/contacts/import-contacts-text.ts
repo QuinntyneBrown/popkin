@@ -1,3 +1,4 @@
+import { counted } from '../text/counts';
 /** How many show under a Popkin before "Show {n} more" (L2-151 AC6). */
 export const IMPORT_SHOWN = 4;
 
@@ -14,7 +15,7 @@ export function importingLabel(count: number): string {
 
 /** A Popkin's number of people: "13 people". */
 export function importPeople(count: number): string {
-  return count === 1 ? '1 person' : `${count} people`;
+  return counted(count, 'person', 'people');
 }
 
 /** "Show 9 more". */

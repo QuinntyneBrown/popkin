@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { counted } from './text/counts';
 
 /** A refusal or failure as a page branches on it: the status and the API's `code`. */
 export interface ApiProblem {
@@ -33,9 +34,9 @@ export function toApiProblem(error: unknown): ApiProblem {
 /** "Try again in 35 minutes." from a refusal's `retryAfterSeconds` (L2-053 AC4). */
 export function tryAgainIn(seconds: number | undefined): string {
   if (!seconds || seconds <= 0) return 'Try again in a little while.';
-  if (seconds < 60) return `Try again in ${seconds} ${seconds === 1 ? 'second' : 'seconds'}.`;
+  if (seconds < 60) return `Try again in ${counted(seconds, 'second')}.`;
   const minutes = Math.ceil(seconds / 60);
-  if (minutes < 60) return `Try again in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}.`;
+  if (minutes < 60) return `Try again in ${counted(minutes, 'minute')}.`;
   const hours = Math.ceil(minutes / 60);
-  return `Try again in ${hours} ${hours === 1 ? 'hour' : 'hours'}.`;
+  return `Try again in ${counted(hours, 'hour')}.`;
 }

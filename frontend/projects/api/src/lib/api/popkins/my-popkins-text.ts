@@ -1,7 +1,7 @@
 import { LatestMessageView } from '../../models/my-popkins';
 import { timeLeft } from './time-left';
+import { SHORT_MONTHS as MONTHS } from '../text/calendar';
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const WEEK_MS = 7 * 24 * 60 * 60_000;
 
 /** "Nov 30", with the year when it is not this one. */

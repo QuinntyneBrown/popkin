@@ -2,18 +2,12 @@ import { KeyDateRowView } from '../../models/contacts';
 import { DriftingView, RecentEntryView } from '../../models/today';
 import { parseDay } from './contact-dates-text';
 import { channelLabel } from './log-entry-text';
-
-const LONG_WEEKDAYS = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-];
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+import {
+  LONG_WEEKDAYS,
+  SHORT_MONTHS as MONTHS,
+  SHORT_WEEKDAYS as WEEKDAYS,
+} from '../text/calendar';
+import { capitalised, daysAway } from '../text/relative-day';
 
 function joined(words: readonly string[]): string {
   return words.length === 1 ? words[0] : `${words.slice(0, -1).join(', ')} and ${words.at(-1)}`;
@@ -21,9 +15,8 @@ function joined(words: readonly string[]): string {
 
 /** The spotlight's day: "Today", "Tomorrow", else "Saturday · in 4 days" (known gap 111, ruled). */
 export function spotlightWhen(date: Pick<KeyDateRowView, 'occursOn' | 'daysLeft'>): string {
-  if (date.daysLeft === 0) return 'Today';
-  if (date.daysLeft === 1) return 'Tomorrow';
-  return `${LONG_WEEKDAYS[parseDay(date.occursOn).getDay()]} · in ${date.daysLeft} days`;
+  if (date.daysLeft === 0 || date.daysLeft === 1) return capitalised(daysAway(date.daysLeft));
+  return `${LONG_WEEKDAYS[parseDay(date.occursOn).getDay()]} · ${daysAway(date.daysLeft)}`;
 }
 
 /** A Coming up row's days: "Today", "Tomorrow" or "{n} days". */
