@@ -437,6 +437,64 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("Contacts", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.ContactGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "ClientId")
+                        .IsUnique();
+
+                    b.ToTable("ContactGroups", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ContactGroupMember", b =>
+                {
+                    b.Property<Guid>("GroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("GroupId", "ContactId");
+
+                    b.HasIndex("ContactId");
+
+                    b.ToTable("ContactGroupMembers", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1658,6 +1716,30 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Popkin.Domain.ContactGroup", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ContactGroupMember", b =>
+                {
+                    b.HasOne("Popkin.Domain.Contact", null)
+                        .WithMany()
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.ContactGroup", null)
+                        .WithMany("Members")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
                 {
                     b.HasOne("Popkin.Domain.Person", null)
@@ -1993,6 +2075,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasForeignKey("MembershipId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ContactGroup", b =>
+                {
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("Popkin.Domain.Habit", b =>

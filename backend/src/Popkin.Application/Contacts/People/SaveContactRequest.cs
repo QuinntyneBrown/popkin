@@ -22,7 +22,8 @@ public sealed record SaveContactRequest(
     IReadOnlyList<string>? Loves,
     IReadOnlyList<KeyDateDraftDto>? KeyDates = null,
     IReadOnlyList<ConnectionDraftDto>? Connect = null,
-    IReadOnlyList<Guid>? Disconnect = null);
+    IReadOnlyList<Guid>? Disconnect = null,
+    IReadOnlyList<Guid>? GroupIds = null);
 
 /// <summary>
 /// The rules of the contact form, for add and edit alike (L2-129 AC4), with the limits on

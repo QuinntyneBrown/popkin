@@ -78,6 +78,10 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<Connection> Connections => inner.Connections;
 
+    public DbSet<ContactGroup> ContactGroups => inner.ContactGroups;
+
+    public DbSet<ContactGroupMember> ContactGroupMembers => inner.ContactGroupMembers;
+
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;
 
     public DbSet<Admin> Admins => inner.Admins;

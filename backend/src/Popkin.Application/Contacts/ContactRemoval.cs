@@ -24,6 +24,7 @@ public static class ContactRemoval
         db.FollowUps.RemoveRange(await db.FollowUps.Where(f => f.ContactId != null && ids.Contains(f.ContactId.Value)).ToListAsync(cancellationToken));
         db.Habits.RemoveRange(await db.Habits.Include(h => h.Kept).Where(h => ids.Contains(h.ContactId)).ToListAsync(cancellationToken));
         db.Connections.RemoveRange(await db.Connections.Where(c => ids.Contains(c.ContactId) || ids.Contains(c.OtherContactId)).ToListAsync(cancellationToken));
+        db.ContactGroupMembers.RemoveRange(await db.ContactGroupMembers.Where(m => ids.Contains(m.ContactId)).ToListAsync(cancellationToken));
         db.TimelineEntries.RemoveRange(await db.TimelineEntries.Where(e => ids.Contains(e.ContactId)).ToListAsync(cancellationToken));
         var memories = await db.Memories.Where(m => ids.Contains(m.ContactId)).ToListAsync(cancellationToken);
         files.AddRange(memories.SelectMany(m => m.Keys));

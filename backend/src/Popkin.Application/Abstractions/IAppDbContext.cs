@@ -64,6 +64,10 @@ public interface IAppDbContext
 
     DbSet<Connection> Connections { get; }
 
+    DbSet<ContactGroup> ContactGroups { get; }
+
+    DbSet<ContactGroupMember> ContactGroupMembers { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }
