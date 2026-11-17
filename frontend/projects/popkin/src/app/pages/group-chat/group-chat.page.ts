@@ -17,17 +17,19 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import {
   CallBannerStore,
+  ConversationList,
   ConversationsStore,
   DraftStore,
   ErrorScreens,
+  MessageActions,
   MessageOutbox,
   MessageRow,
   NETWORK_STATUS,
   POPKIN_REALTIME,
   PopkinFrame,
   ThreadStore,
-  WrapUpWatch,
   UnreadTracker,
+  WrapUpWatch,
   accentOf,
   othersHere,
   threadSub,
@@ -55,8 +57,6 @@ import {
   TopBar,
 } from 'components';
 import { Toaster } from 'api';
-import { ConversationList } from '../conversations/conversation-list';
-import { MessageActions } from '../conversations/message-actions';
 
 /** How long "Back online. 2 messages sent." stays. */
 const BACK_ONLINE_MS = 5_000;

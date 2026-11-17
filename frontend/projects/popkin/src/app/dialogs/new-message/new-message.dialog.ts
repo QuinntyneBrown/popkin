@@ -1,15 +1,9 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { POPKINS_API, accentOf, matchesMember } from 'api';
+import { NewMessageData, POPKINS_API, accentOf, matchesMember } from 'api';
 import { DialogFrame, MemberPicker } from 'components';
 import { catchError, map, of } from 'rxjs';
-
-export interface NewMessageData {
-  popkinId: string;
-  popkinName: string;
-  accent: string;
-}
 
 /**
  * "New message" (L2-022 AC4): the Popkin's members other than the member, with a search that

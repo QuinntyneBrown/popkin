@@ -1,23 +1,47 @@
-import { Dialog } from '@angular/cdk/dialog';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ConversationsStore, accentOf, dialogConfig } from 'api';
-import { DirectConversation, EveryoneConversation } from 'components';
-import { NewMessageData, NewMessageDialog } from '../../dialogs/new-message/new-message.dialog';
+import { accentOf } from '../../models/popkin';
+import { CHAT_DIALOGS } from './chat-dialogs';
+import { ConversationsStore } from './conversations-store';
+
+/** Where a conversation opens: `/p/:popkinId/chat/everyone` or `/p/:popkinId/chat/:memberId`. */
+export type ConversationLink = readonly string[];
+
+/** The Everyone card of the Chat tab (`pk-conversations`). */
+export interface EveryoneConversationView {
+  emoji: string;
+  link: ConversationLink;
+  time: string;
+  latest: string;
+  unread: number;
+}
+
+/** A direct message's row of the Chat tab (`pk-conversations`). */
+export interface DirectConversationView {
+  key: string;
+  name: string;
+  /** Initials, the `data-accent` of their colour, and a photo. */
+  avatar: { initials: string; accent: string; photoUrl: string | null };
+  link: ConversationLink;
+  time: string;
+  latest: string;
+  unread: boolean;
+}
 
 /**
  * The list of a member's conversations as the Chat tab and the list pane beside a thread show
- * it (L2-022), and "New message", which opens the direct message with the member chosen.
+ * it (L2-022), and "New message", which opens the direct message with the member chosen. One per
+ * screen; the page provides it.
  */
 @Injectable()
 export class ConversationList {
   readonly store = inject(ConversationsStore);
-  private readonly dialog = inject(Dialog);
+  private readonly dialogs = inject(CHAT_DIALOGS);
   private readonly router = inject(Router);
   private popkinId = '';
   private readonly emoji = signal('');
 
-  readonly everyone = computed<EveryoneConversation | null>(() => {
+  readonly everyone = computed<EveryoneConversationView | null>(() => {
     const card = this.store.everyone();
     return card
       ? {
@@ -31,12 +55,12 @@ export class ConversationList {
   });
 
   /** The Everyone card beside the Everyone thread: it is being read, so it counts nothing. */
-  readonly everyoneOpen = computed<EveryoneConversation | null>(() => {
+  readonly everyoneOpen = computed<EveryoneConversationView | null>(() => {
     const card = this.everyone();
     return card ? { ...card, unread: 0 } : null;
   });
 
-  readonly direct = computed<DirectConversation[]>(() =>
+  readonly direct = computed<DirectConversationView[]>(() =>
     this.store.rows().map((row) => ({
       key: row.memberId,
       name: row.name,
@@ -62,18 +86,11 @@ export class ConversationList {
     this.emoji.set(emoji);
   }
 
+  /** New message (L2-022 AC4): opens the direct message with the member chosen. */
   newMessage(popkinName: string, accent: string): void {
     const popkinId = this.popkinId;
-    this.dialog
-      .open<string, NewMessageData>(
-        NewMessageDialog,
-        dialogConfig({
-          data: { popkinId, popkinName, accent },
-          autoFocus: 'input[type=search]',
-        }),
-      )
-      .closed.subscribe((memberId) => {
-        if (memberId) void this.router.navigate(['/p', popkinId, 'chat', memberId]);
-      });
+    this.dialogs.newMessage({ popkinId, popkinName, accent }).subscribe((memberId) => {
+      if (memberId) void this.router.navigate(['/p', popkinId, 'chat', memberId]);
+    });
   }
 }
