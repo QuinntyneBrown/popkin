@@ -52,6 +52,7 @@ public sealed class JobTests : IDisposable
         { nameof(DispatchNotificationsJob), 15, typeof(DispatchNotificationsCommand) },
         { nameof(SendPopkinRemindersJob), 300, typeof(SendPopkinRemindersCommand) },
         { nameof(SendDigestsJob), 300, typeof(SendDigestsCommand) },
+        { nameof(PurgeNotificationHistoryJob), 86400, typeof(PurgeNotificationHistoryCommand) },
     };
 
     private BackgroundService Job(string name)
@@ -71,6 +72,7 @@ public sealed class JobTests : IDisposable
             nameof(DispatchNotificationsJob) => new DispatchNotificationsJob(scopes, _clock, NullLogger<DispatchNotificationsJob>.Instance),
             nameof(SendPopkinRemindersJob) => new SendPopkinRemindersJob(
                 scopes, _clock, _services.GetRequiredService<PopkinMetrics>(), NullLogger<SendPopkinRemindersJob>.Instance),
+            nameof(PurgeNotificationHistoryJob) => new PurgeNotificationHistoryJob(scopes, _clock, NullLogger<PurgeNotificationHistoryJob>.Instance),
             nameof(SendDigestsJob) => new SendDigestsJob(
                 scopes, _clock, _services.GetRequiredService<PopkinMetrics>(), NullLogger<SendDigestsJob>.Instance),
             _ => throw new ArgumentOutOfRangeException(nameof(name)),

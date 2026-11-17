@@ -256,8 +256,11 @@ This feature adds no endpoint of its own. It sets the rules every notification e
 - **`IPhoneNotificationSender`** (Application) — widened from `PhoneReminder` to
   `PhoneAlert(Title, Body, Url)`; `WebPushPhoneNotificationSender` keeps its removal of gone
   subscriptions and returns how many devices took the alert.
-- **`PurgeNotificationHistoryJob`** (Worker) — removes events, deliveries and outgoing emails
-  older than `<TO SUPPLY>` days. No requirement sets the retention.
+- **`PurgeNotificationHistoryJob`** (Worker) — once a day, removes the deliveries and dispatched
+  events that happened 90 days ago or more, and the settled emails (sent, suppressed, dropped or
+  failed) opened then. No requirement sets the retention: 90 days is long after any retry
+  (6 hours) or digest period (7 days), and a reminder's moment has passed by then, so no
+  once-only key is needed again.
 - **Telemetry** (`PopkinMetrics`, meter `Popkin`): `popkin.notifications.events` by `kind`;
   `popkin.notifications.deliveries` by `kind`, `channel` and `outcome`;
   `popkin.notifications.suppressed` by `rule`; `popkin.notifications.email_latency` (seconds from
