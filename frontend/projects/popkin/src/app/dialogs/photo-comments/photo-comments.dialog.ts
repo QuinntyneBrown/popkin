@@ -1,7 +1,7 @@
 import { Dialog, DIALOG_DATA } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { PhotoCommentsStore, accentOf } from 'api';
+import { PhotoCommentsStore, accentOf, dialogConfig } from 'api';
 import { Alert, Comment, Comments, Composer, DialogFrame, EmptyState } from 'components';
 import {
   DELETE_COMMENT,
@@ -40,10 +40,13 @@ export class PhotoCommentsDialog {
 
   /** L2-035 AC5: gone once the member has confirmed. */
   protected async delete(commentId: string): Promise<void> {
-    const ref = this.dialog.open<boolean, DeleteCommentData>(DeleteCommentDialog, {
-      ...DELETE_COMMENT,
-      data: { accent: this.data.accent },
-    });
+    const ref = this.dialog.open<boolean, DeleteCommentData>(
+      DeleteCommentDialog,
+      dialogConfig({
+        ...DELETE_COMMENT,
+        data: { accent: this.data.accent },
+      }),
+    );
     if (await firstValueFrom(ref.closed)) this.store.remove(commentId);
   }
 }

@@ -20,6 +20,7 @@ import {
   QUICK_REACTIONS,
   accentOf,
   reactionName,
+  dialogConfig,
 } from 'api';
 import { PhotoViewer } from 'components';
 import {
@@ -50,7 +51,6 @@ import { Toaster } from 'api';
  * deletes it (L2-034 to L2-036). A wrapped-up Popkin shows all of it read-only (L2-045).
  */
 /** Named by its title, and modal, as the app's other dialogs are. */
-const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true } as const;
 
 @Component({
   selector: 'pk-photo-view-page',
@@ -166,26 +166,30 @@ export class PhotoViewPage {
 
   /** "More reactions" (L2-034 AC1): the emoji chosen is toggled as a quick one is. */
   protected async moreReactions(): Promise<void> {
-    const ref = this.dialog.open<string, PhotoReactionsData>(PhotoReactionsDialog, {
-      ...MODAL,
-      data: {
-        accent: this.frame.accent(),
-        pressed: this.store
-          .reactions()
-          .filter((r) => r.mine)
-          .map((r) => r.emoji),
-      },
-    });
+    const ref = this.dialog.open<string, PhotoReactionsData>(
+      PhotoReactionsDialog,
+      dialogConfig({
+        data: {
+          accent: this.frame.accent(),
+          pressed: this.store
+            .reactions()
+            .filter((r) => r.mine)
+            .map((r) => r.emoji),
+        },
+      }),
+    );
     const emoji = await firstValueFrom(ref.closed);
     if (emoji) this.store.react(emoji);
   }
 
   /** Below 1024 px, "Comment" and the count open the Photo comments dialog (L2-035 AC1). */
   protected openComments(): void {
-    this.dialog.open<void, PhotoCommentsData>(PhotoCommentsDialog, {
-      ...MODAL,
-      data: { accent: this.frame.accent(), store: this.comments, readOnly: this.readOnly() },
-    });
+    this.dialog.open<void, PhotoCommentsData>(
+      PhotoCommentsDialog,
+      dialogConfig({
+        data: { accent: this.frame.accent(), store: this.comments, readOnly: this.readOnly() },
+      }),
+    );
   }
 
   /** The side panel's field posts as the dialog's does (L2-035 AC2). */
@@ -195,25 +199,32 @@ export class PhotoViewPage {
 
   /** L2-035 AC5: gone once the member has confirmed. */
   protected async deleteComment(commentId: string): Promise<void> {
-    const ref = this.dialog.open<boolean, DeleteCommentData>(DeleteCommentDialog, {
-      ...DELETE_COMMENT,
-      data: { accent: this.frame.accent() },
-    });
+    const ref = this.dialog.open<boolean, DeleteCommentData>(
+      DeleteCommentDialog,
+      dialogConfig({
+        ...DELETE_COMMENT,
+        data: { accent: this.frame.accent() },
+      }),
+    );
     if (await firstValueFrom(ref.closed)) this.comments.remove(commentId);
   }
 
   /** L2-036 AC2: Photo actions, then "Delete this photo?"; once gone, back where it was listed. */
   protected async actions(): Promise<void> {
     const accent = this.frame.accent();
-    const chosen = this.dialog.open<boolean, PhotoActionsData>(PhotoActionsDialog, {
-      ...MODAL,
-      data: { accent },
-    });
+    const chosen = this.dialog.open<boolean, PhotoActionsData>(
+      PhotoActionsDialog,
+      dialogConfig({
+        data: { accent },
+      }),
+    );
     if (!(await firstValueFrom(chosen.closed))) return;
-    const asked = this.dialog.open<boolean, DeletePhotoData>(DeletePhotoDialog, {
-      ...MODAL,
-      data: { accent, store: this.store },
-    });
+    const asked = this.dialog.open<boolean, DeletePhotoData>(
+      DeletePhotoDialog,
+      dialogConfig({
+        data: { accent, store: this.store },
+      }),
+    );
     if (!(await firstValueFrom(asked.closed))) return;
     this.toaster.show('success', 'Photo deleted.');
     if (this.cameFromTheApp) this.location.back();
