@@ -34,6 +34,11 @@ export class PhotoTalkPage {
   readonly confirmPhoto: Locator;
   readonly confirmPhotoDelete: Locator;
   readonly confirmPhotoProblem: Locator;
+  readonly confirmPhotoClose: Locator;
+  /** "Deleting…", the delete while it is sent. */
+  readonly confirmPhotoDeleting: Locator;
+  /** "Cancel", which waits while the photo is deleted (L2-056 AC8). */
+  readonly confirmPhotoCancel: Locator;
   /** The removed state of a photo deleted while it was open. */
   readonly removed: Locator;
   readonly backToPhotos: Locator;
@@ -67,6 +72,9 @@ export class PhotoTalkPage {
     this.confirmPhoto = page.getByRole('dialog', { name: 'Delete this photo?' });
     this.confirmPhotoDelete = this.confirmPhoto.getByRole('button', { name: 'Delete photo' });
     this.confirmPhotoProblem = this.confirmPhoto.getByRole('alert');
+    this.confirmPhotoClose = this.confirmPhoto.getByRole('button', { name: 'Close' });
+    this.confirmPhotoDeleting = this.confirmPhoto.getByRole('button', { name: 'Deleting…' });
+    this.confirmPhotoCancel = this.confirmPhoto.getByRole('button', { name: 'Cancel' });
     this.removed = screen.getByRole('heading', { name: 'This photo was removed' });
     this.backToPhotos = screen.getByRole('link', { name: 'Back to Photos' });
   }

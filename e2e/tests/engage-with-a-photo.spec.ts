@@ -249,6 +249,28 @@ test.describe('saving and deleting a photo (L2-036)', () => {
     await expect(new PhotoViewPage(page).root).toBeAttached();
   });
 
+  // L2-056 AC8
+  test('the delete cannot be closed while it is sent: Escape, Close and Cancel wait', async ({
+    page,
+  }) => {
+    const { url, talk: server } = await maraOnTheDock(page);
+    const release = server.holdDelete();
+    await page.goto(url);
+    const talk = new PhotoTalkPage(page);
+    await talk.actions.click();
+    await talk.deletePhoto.click();
+
+    await talk.confirmPhotoDelete.click();
+    await expect(talk.confirmPhotoDeleting).toBeDisabled();
+    await page.keyboard.press('Escape');
+    await talk.confirmPhotoClose.click();
+
+    await expect(talk.confirmPhoto).toHaveCount(1);
+    await expect(talk.confirmPhotoCancel).toBeDisabled();
+    release();
+    await expect(page).toHaveURL(albumUrl);
+  });
+
   test('offers no Photo actions on a photo the member may not delete (AC2)', async ({ page }) => {
     const { url } = await maraOnTheDock(page, (dock) => (dock.canDelete = false));
     await page.goto(url);

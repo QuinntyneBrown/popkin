@@ -1,7 +1,9 @@
 <div
   pk-dialog
-  heading="Delete this message?"
-  description="It’s removed for everyone in this chat."
+  [heading]="data.heading"
+  [titleId]="data.titleId ?? 'dlg-title'"
+  [descriptionId]="data.descriptionId ?? 'dlg-desc'"
+  [description]="data.description"
   [accent]="data.accent"
 >
   <button
@@ -23,6 +25,6 @@
     [block]="true"
     (click)="close(false)"
   >
-    Keep
+    {{ data.keep }}
   </button>
 </div>

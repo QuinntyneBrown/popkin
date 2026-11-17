@@ -4,10 +4,11 @@ import { firstValueFrom } from 'rxjs';
 import { PhotoCommentsStore, accentOf, dialogConfig } from 'api';
 import { Alert, Comment, Comments, Composer, DialogFrame, EmptyState } from 'components';
 import {
+  ConfirmDeleteData,
+  ConfirmDeleteDialog,
   DELETE_COMMENT,
-  DeleteCommentDialog,
-  DeleteCommentData,
-} from '../delete-comment/delete-comment.dialog';
+  deleteComment,
+} from '../confirm-delete/confirm-delete.dialog';
 
 export interface PhotoCommentsData {
   accent: string;
@@ -40,11 +41,11 @@ export class PhotoCommentsDialog {
 
   /** L2-035 AC5: gone once the member has confirmed. */
   protected async delete(commentId: string): Promise<void> {
-    const ref = this.dialog.open<boolean, DeleteCommentData>(
-      DeleteCommentDialog,
+    const ref = this.dialog.open<boolean, ConfirmDeleteData>(
+      ConfirmDeleteDialog,
       dialogConfig({
         ...DELETE_COMMENT,
-        data: { accent: this.data.accent },
+        data: deleteComment(this.data.accent),
       }),
     );
     if (await firstValueFrom(ref.closed)) this.store.remove(commentId);

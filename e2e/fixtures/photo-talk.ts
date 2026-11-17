@@ -41,6 +41,7 @@ export const theMockReactions = () => [
  * deletion, answered from the album's photos as the API would, each request kept for a spec.
  */
 export class PhotoTalk {
+  private deleteHeld: Promise<void> = Promise.resolve();
   readonly reacted: { method: string; emoji: string }[] = [];
   readonly posted: string[] = [];
   readonly deletedComments: string[] = [];
@@ -72,6 +73,13 @@ export class PhotoTalk {
     await this.page.route(`${base}/*`, (route) =>
       route.request().method() === 'DELETE' ? this.deletePhoto(route) : route.fallback(),
     );
+  }
+
+  /** Holds the next photo delete until the returned function is called. */
+  holdDelete(): () => void {
+    let release: () => void = () => undefined;
+    this.deleteHeld = new Promise<void>((resolve) => (release = resolve));
+    return release;
   }
 
   fail(what: Failing): void {
@@ -161,6 +169,7 @@ export class PhotoTalk {
   }
 
   private async deletePhoto(route: Route): Promise<void> {
+    await this.deleteHeld;
     const shot = this.shot(route);
     if (!shot) return this.refuse(route, 404, 'photo_not_found');
     this.deletedPhotos.push(shot.id);

@@ -105,4 +105,22 @@ test.describe('Delete a contact', () => {
 
     await expect(new DeleteContactDialog(page).heading).toHaveText('Delete Chidi?');
   });
+
+  // L2-056 AC8
+  test('cannot be closed while it deletes: Escape, Close and Keep Chidi wait', async ({
+    page,
+    pk,
+  }) => {
+    await hold(page, deleteKey());
+    await pk.open('deleteContactBusy');
+    const dialog = await askToDelete(page);
+
+    await dialog.confirm('Chidi').click();
+    await expect(dialog.deleting).toBeDisabled();
+    await page.keyboard.press('Escape');
+    await dialog.close.click();
+
+    await expect(dialog.root).toHaveCount(1);
+    await expect(dialog.keep('Chidi')).toBeDisabled();
+  });
 });

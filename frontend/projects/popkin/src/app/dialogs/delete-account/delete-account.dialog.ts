@@ -1,12 +1,13 @@
 import { ViewportScroller } from '@angular/common';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   ACCOUNT_API,
   DeletionImpactView,
+  ConfirmDialogState,
   POPKIN_REALTIME,
   POPKINS_SNAPSHOT,
   SessionStore,
@@ -51,37 +52,26 @@ export class DeleteAccountDialog {
   protected readonly confirmation = new FormControl('', { nonNullable: true });
   private readonly typed = toSignal(this.confirmation.valueChanges, { initialValue: '' });
   protected readonly canDelete = computed(() => this.typed().trim().toLowerCase() === CONFIRMATION);
-  protected readonly busy = signal(false);
-  protected readonly failed = signal(false);
+  private readonly state = new ConfirmDialogState(this.ref);
+  protected readonly busy = this.state.busy;
+  protected readonly failed = this.state.failed;
 
-  protected delete(): void {
-    if (!this.canDelete() || this.busy()) return;
-    this.busy.set(true);
-    this.failed.set(false);
-    // Escape does not close it while the request is under way.
-    this.ref.disableClose = true;
-    this.api.deleteAccount().subscribe({
-      next: () => {
-        this.realtime.stop();
-        this.sessions.clear();
-        // Nothing of the person stays on the device (L2-054).
-        this.snapshot.clear();
-        this.ref.close();
-        void this.router.navigateByUrl('/').then(() => {
-          // The landing page opens at its top, not where the account was scrolled to.
-          this.scroller.scrollToPosition([0, 0]);
-          this.toaster.show(
-            'success',
-            'Your account is deleted',
-            'Your personal data is erased within 30 days.',
-          );
-        });
-      },
-      error: () => {
-        this.ref.disableClose = false;
-        this.busy.set(false);
-        this.failed.set(true);
-      },
+  protected async delete(): Promise<void> {
+    if (!this.canDelete()) return;
+    if (!(await this.state.send(() => this.api.deleteAccount()))) return;
+    this.realtime.stop();
+    this.sessions.clear();
+    // Nothing of the person stays on the device (L2-054).
+    this.snapshot.clear();
+    this.ref.close();
+    void this.router.navigateByUrl('/').then(() => {
+      // The landing page opens at its top, not where the account was scrolled to.
+      this.scroller.scrollToPosition([0, 0]);
+      this.toaster.show(
+        'success',
+        'Your account is deleted',
+        'Your personal data is erased within 30 days.',
+      );
     });
   }
 

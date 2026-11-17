@@ -3,9 +3,10 @@ import { Injectable, computed, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MessageRow, ThreadStore, dialogConfig } from 'api';
 import {
-  DeleteMessageData,
-  DeleteMessageDialog,
-} from '../../dialogs/delete-message/delete-message.dialog';
+  ConfirmDeleteData,
+  ConfirmDeleteDialog,
+  deleteMessage,
+} from '../../dialogs/confirm-delete/confirm-delete.dialog';
 import {
   MessageAction,
   ReactionsData,
@@ -92,10 +93,10 @@ export class MessageActions {
   }
 
   private confirmDelete(messageId: string, accent: string): void {
-    const opened = this.dialog.open<boolean, DeleteMessageData>(
-      DeleteMessageDialog,
+    const opened = this.dialog.open<boolean, ConfirmDeleteData>(
+      ConfirmDeleteDialog,
       dialogConfig({
-        data: { accent },
+        data: deleteMessage(accent),
         ariaDescribedBy: 'dlg-desc',
       }),
     );

@@ -1,6 +1,7 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { ADMIN_ACCESS_API, AdminRole, AdminRow, ROLE_SENTENCES, toApiProblem } from 'api';
+import { ADMIN_ACCESS_API, AdminRole, AdminRow, ConfirmDialogState, ROLE_SENTENCES } from 'api';
+import { tap } from 'rxjs';
 import { Alert, Button, ChoiceCard, ChoiceOption, DialogFrame, TextField } from 'components';
 
 export interface AddAdminData {
@@ -32,10 +33,11 @@ export class AddAdminDialog {
   protected readonly email = signal('');
   protected readonly role = signal<string>('Support');
   protected readonly emailError = signal<string | undefined>(undefined);
-  protected readonly busy = signal(false);
-  protected readonly failed = signal(false);
+  private readonly state = new ConfirmDialogState(this.ref);
+  protected readonly busy = this.state.busy;
+  protected readonly failed = this.state.failed;
 
-  protected send(): void {
+  protected async send(): Promise<void> {
     if (this.busy()) return;
     const email = this.email().trim();
     if (!/^[^\s@]+@popkin\.app$/i.test(email)) {
@@ -43,23 +45,17 @@ export class AddAdminDialog {
       return;
     }
     this.emailError.set(undefined);
-    this.failed.set(false);
-    this.busy.set(true);
-    this.ref.disableClose = true;
-    this.api.addAdmin(email, this.role() as AdminRole).subscribe({
-      next: (row) => {
-        this.ref.disableClose = false;
-        this.ref.close(row);
-      },
-      error: (error: unknown) => {
-        this.busy.set(false);
-        this.ref.disableClose = false;
-        const problem = toApiProblem(error);
+    let row: AdminRow | undefined;
+    const sent = await this.state.send(
+      () => this.api.addAdmin(email, this.role() as AdminRole).pipe(tap((added) => (row = added))),
+      (problem) => {
         if (problem.code === 'email_not_staff') this.emailError.set(NOT_STAFF);
         else if (problem.code === 'admin_exists') this.emailError.set(this.existsText(email));
-        else this.failed.set(true);
+        else return 'failed';
+        return 'idle';
       },
-    });
+    );
+    if (sent && row) this.ref.close(row);
   }
 
   protected cancel(): void {

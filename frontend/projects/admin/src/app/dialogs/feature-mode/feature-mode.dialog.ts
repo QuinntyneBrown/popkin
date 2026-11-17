@@ -33,7 +33,7 @@ export class FeatureModeDialog {
   private readonly ref = inject<DialogRef<AdminFeature>>(DialogRef);
   private readonly api = inject(ADMIN_PLATFORM_API);
 
-  protected readonly state = new ActionDialogState('Optional');
+  protected readonly state = new ActionDialogState('Optional', this.ref);
   protected readonly reason = signal('');
   protected readonly maxLength = REASON_MAX_LENGTH;
   protected readonly failed = FEATURE_SAVE_FAILED;
@@ -43,17 +43,15 @@ export class FeatureModeDialog {
     this.data.feature.chosen.map((p) => p.name),
   );
   protected readonly off = this.data.mode === 'Off';
-  protected readonly busy = computed(() => this.state.status() === 'busy');
+  protected readonly busy = this.state.busy;
   protected readonly action = computed(() =>
     this.off ? (this.busy() ? 'Turning off…' : 'Turn it off') : this.busy() ? 'Applying…' : 'Apply',
   );
 
   protected async confirm(): Promise<void> {
-    this.ref.disableClose = true;
     const saved = await this.state.confirm(this.reason(), (reason) =>
       this.api.changeMode(this.data.feature.feature, this.data.mode, reason),
     );
-    this.ref.disableClose = false;
     if (saved) this.ref.close(saved);
   }
 

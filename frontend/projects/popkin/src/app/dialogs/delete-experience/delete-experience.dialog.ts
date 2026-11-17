@@ -1,6 +1,6 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { EXPERIENCES_API } from 'api';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ConfirmDialogState, EXPERIENCES_API } from 'api';
 import { Alert, Button, DialogFrame } from 'components';
 
 export interface DeleteExperienceData {
@@ -24,20 +24,15 @@ export class DeleteExperienceDialog {
   private readonly ref = inject<DialogRef<boolean>>(DialogRef);
   private readonly api = inject(EXPERIENCES_API);
 
-  protected readonly busy = signal(false);
-  protected readonly failed = signal(false);
+  private readonly state = new ConfirmDialogState(this.ref);
+  protected readonly busy = this.state.busy;
+  protected readonly failed = this.state.failed;
 
-  protected delete(): void {
-    if (this.busy()) return;
-    this.busy.set(true);
-    this.failed.set(false);
-    this.api.remove(this.data.popkinId, this.data.experienceId).subscribe({
-      next: () => this.ref.close(true),
-      error: () => {
-        this.busy.set(false);
-        this.failed.set(true);
-      },
-    });
+  protected async delete(): Promise<void> {
+    const sent = await this.state.send(() =>
+      this.api.remove(this.data.popkinId, this.data.experienceId),
+    );
+    if (sent) this.ref.close(true);
   }
 
   protected keep(): void {
