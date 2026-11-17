@@ -128,7 +128,8 @@ test.describe('Log a conversation', () => {
     expect((await request).postDataJSON()).toMatchObject({
       channel: 'Phone',
       note: 'Loving the team, hates the commute.',
-      loggedAt: expect.stringMatching(/^2026-09-15T08:40:00[+-]\d\d:\d\d$/),
+      // The clock runs on from 8:40 while the page works; "Today, 8:40 am" is to the minute.
+      loggedAt: expect.stringMatching(/^2026-09-15T08:40:\d\d[+-]\d\d:\d\d$/),
       promises: [{ text: 'Send him the flat-hunting checklist', dueOn: '2026-09-17' }],
     });
     await expect(page).toHaveURL(`/contacts/people/${chidi()}`);
@@ -220,7 +221,7 @@ test.describe('A contact’s timeline', () => {
     await pk.open('contactProfile');
     const profile = new ContactProfilePage(page);
 
-    await expect(profile.timelineEntries).toHaveCount(2);
+    await expect(profile.timelineEntries).toHaveCount(3);
     await expect(profile.timelineEntries.nth(0)).toContainText('Sep 6');
     await expect(profile.timelineEntries.nth(0)).toContainText('Phone');
     await expect(profile.timelineEntries.nth(0)).toContainText('Loving the team');

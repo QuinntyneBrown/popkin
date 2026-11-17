@@ -224,7 +224,11 @@ export class ContactFormPage implements OnInit {
           accent: 'coral',
           contactId: editing.id,
           firstName: editing.firstName,
-          counts: { ...NO_COUNTS, followUps: this.followUps.countFor(editing.id) },
+          counts: {
+            ...NO_COUNTS,
+            ...editing.kept,
+            followUps: this.followUps.countFor(editing.id),
+          },
         },
         ariaLabelledBy: 'dlg-title',
         hasBackdrop: false,

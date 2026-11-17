@@ -49,8 +49,8 @@ export function recordedContactId(name: string): string {
 export const contactPhoto = '/api/files/contacts/contact-chidi.jpg';
 
 /** Serves `contactPhoto` from the mocks, so a profile draws the picture the mock does. */
-export function serveContactPhoto(page: Page): Promise<void> {
-  return page.route(`**${contactPhoto}`, (route) =>
+export async function serveContactPhoto(page: Page): Promise<void> {
+  await page.route(`**${contactPhoto}`, (route) =>
     route.fulfill({ path: join(MOCK_IMAGES, 'contact-chidi.jpg'), contentType: 'image/jpeg' }),
   );
 }
@@ -64,9 +64,10 @@ async function profileAsDrawn(page: Page, name: string, change: object): Promise
   await answer(page, key, { status: 200, body: { ...recordedBody<object>(key), ...change } });
 }
 
-/** Chidi's profile, as default.html draws him: his photo, in sky. */
+/** Chidi's profile, as default.html draws him: his photo, in sky, and his timeline's photo. */
 export async function chidiProfile(page: Page, change: object = {}): Promise<void> {
   await serveContactPhoto(page);
+  await serveMemoryPhotos(page);
   await profileAsDrawn(page, 'Chidi Okafor', { photoUrl: contactPhoto, accent: 'Sky', ...change });
 }
 
@@ -76,8 +77,8 @@ export function femiProfile(page: Page, change: object = {}): Promise<void> {
 }
 
 /** Serves a picture from the mocks at `/api/files/contacts/{file}`, as a contact's photo. */
-export function servePhotos(page: Page): Promise<void> {
-  return page.route('**/api/files/contacts/*.jpg', (route) =>
+export async function servePhotos(page: Page): Promise<void> {
+  await page.route('**/api/files/contacts/*.jpg', (route) =>
     route.fulfill({
       path: join(MOCK_IMAGES, new URL(route.request().url()).pathname.split('/').pop() ?? ''),
       contentType: 'image/jpeg',
@@ -264,8 +265,8 @@ export async function marasPeople(page: Page): Promise<void> {
 }
 
 /** The photos the recording made: each is the mocks' picture of Chidi. */
-export function serveRecordedPhotos(page: Page): Promise<void> {
-  return page.route('**/api/files/contacts/*.jpg?*', (route) =>
+export async function serveRecordedPhotos(page: Page): Promise<void> {
+  await page.route('**/api/files/contacts/*.jpg?*', (route) =>
     route.fulfill({ path: join(MOCK_IMAGES, 'contact-chidi.jpg'), contentType: 'image/jpeg' }),
   );
 }
@@ -535,5 +536,64 @@ export async function answerTicks(page: Page): Promise<void> {
     await route.fulfill({
       json: { id, text, doneAt: done ? '2026-09-15T07:40:00Z' : null },
     });
+  });
+}
+
+/** Serves every photo the recording kept as a memory: each is the mocks' hot sauce night. */
+export async function serveMemoryPhotos(page: Page): Promise<void> {
+  await page.route('**/api/files/memories/**', (route) =>
+    route.fulfill({ path: join(MOCK_IMAGES, 'tacos.jpg'), contentType: 'image/jpeg' }),
+  );
+}
+
+export const chidisMemoriesKey = (): string =>
+  `GET /api/contacts/people/${recordedContactId('Chidi Okafor')}/memories`;
+
+/**
+ * Chidi's memories as memories.html draws them on Tuesday 15 September 2026 (L2-136 AC1): four
+ * photos, two files and a note, each newest first. The photos are the mocks' pictures.
+ */
+export async function chidisMemories(page: Page): Promise<void> {
+  await servePhotos(page);
+  const photo = (id: string, caption: string, day: string, file: string) => ({
+    id,
+    caption,
+    day,
+    thumbnailUrl: `/api/files/contacts/${file}`,
+    photoUrl: `/api/files/contacts/${file}`,
+  });
+  await answer(page, chidisMemoriesKey(), {
+    status: 200,
+    body: {
+      photos: [
+        photo('m1', 'Hot sauce night', '2026-08-08', 'tacos.jpg'),
+        photo('m2', 'Ridge trail', '2026-07-19', 'hike.jpg'),
+        photo('m3', 'Lakeside, the dock', '2026-07-18', 'lake.jpg'),
+        photo('m4', 'Wedding day bonfire', '2021-09-26', 'bonfire.jpg'),
+      ],
+      files: [
+        {
+          id: 'f1',
+          fileName: 'Dad’s recipe for egusi.jpg',
+          addedOn: '2022-12-24',
+          sizeBytes: Math.round(2.1 * 1024 * 1024),
+          downloadUrl: '/api/files/memories/recipe.jpg?download=1',
+        },
+        {
+          id: 'f2',
+          fileName: 'Wedding speech.pdf',
+          addedOn: '2021-09-20',
+          sizeBytes: 84 * 1024,
+          downloadUrl: '/api/files/memories/speech.pdf?download=1',
+        },
+      ],
+      notes: [
+        {
+          id: 'n1',
+          text: 'Gift ideas: Fela reissue on vinyl, Dishoom cookbook, bike lights',
+          updatedOn: '2026-08-31',
+        },
+      ],
+    },
   });
 }

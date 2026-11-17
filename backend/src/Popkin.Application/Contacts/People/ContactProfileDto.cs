@@ -23,9 +23,11 @@ public sealed record ContactProfileDto(
     string? HowWeMet,
     IReadOnlyList<string> Loves,
     bool IsClosest,
-    IReadOnlyList<ContactKeyDateDto> KeyDates)
+    IReadOnlyList<ContactKeyDateDto> KeyDates,
+    ContactKeptDto? Kept = null)
 {
-    public static ContactProfileDto Of(Contact contact, IPhotoStore photos, IReadOnlyList<ContactKeyDateDto>? keyDates = null) =>
+    public static ContactProfileDto Of(
+        Contact contact, IPhotoStore photos, IReadOnlyList<ContactKeyDateDto>? keyDates = null, ContactKeptDto? kept = null) =>
         new(
             contact.Id,
             contact.Name,
@@ -41,5 +43,9 @@ public sealed record ContactProfileDto(
             contact.HowWeMet,
             contact.Loves,
             contact.IsClosest,
-            keyDates ?? []);
+            keyDates ?? [],
+            kept);
 }
+
+/// <summary>What is kept about a contact and would go with them (L2-132 AC1): their timeline entries and memories.</summary>
+public sealed record ContactKeptDto(int TimelineEntries, int Memories);

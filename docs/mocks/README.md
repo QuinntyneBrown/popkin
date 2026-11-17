@@ -311,7 +311,8 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Import from your Popkins (`import-contacts`) | [✅](dialogs/import-contacts/default.html) | [✅](dialogs/import-contacts/busy.html) | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-123`, `L2-151` |
 | Contact actions (`contact-actions`) | [✅](dialogs/contact-actions/default.html) | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](dialogs/contact-actions/not-closest.html) | `L2-131` |
 | Delete a contact (`delete-contact`) | [✅](dialogs/delete-contact/default.html) | [✅](dialogs/delete-contact/busy.html) | ➖ |  |  |  |  |  |  |  |  | [✅](dialogs/delete-contact/failed.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-123`, `L2-132` |
-| Add to memories (`add-memory`) | [✅](dialogs/add-memory/default.html) | [✅](dialogs/add-memory/busy.html) | [✅](dialogs/add-memory/invalid.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-123`, `L2-136` |
+| Add to memories (`add-memory`) | [✅](dialogs/add-memory/default.html) | [✅](dialogs/add-memory/busy.html) | [✅](dialogs/add-memory/invalid.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-123`, `L2-136`; also chosen, file, note |
+| Add a promise (`add-promise`) | [✅](dialogs/add-promise/default.html) | ➖ | [✅](dialogs/add-promise/invalid.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-133` |
 | Add people to a group (`group-add-people`) | [✅](dialogs/group-add-people/default.html) | [✅](dialogs/group-add-people/busy.html) | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-123`, `L2-147` |
 
 ### Notifications

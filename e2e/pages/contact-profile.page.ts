@@ -38,6 +38,13 @@ export class ContactProfilePage {
   readonly timelineFilters: Locator;
   readonly logMilestone: Locator;
   readonly logConversation: Locator;
+  readonly memoriesIntro: Locator;
+  readonly addMemory: Locator;
+  readonly memoryGrid: Locator;
+  readonly memoryPhotos: Locator;
+  readonly memoryList: Locator;
+  readonly memoryRows: Locator;
+  readonly memoriesFailed: Locator;
   /** The loading line (L2-123 AC1). */
   readonly loading: Locator;
   /** The failed and not-found states (`pk-empty-state`). */
@@ -81,6 +88,13 @@ export class ContactProfilePage {
     this.timelineFilters = page.getByRole('group', { name: 'Show' });
     this.logMilestone = page.getByRole('link', { name: 'Milestone', exact: true });
     this.logConversation = page.getByRole('link', { name: 'Conversation', exact: true });
+    this.memoriesIntro = page.getByText(/Photos, files and notes you’ve kept about /);
+    this.addMemory = page.getByRole('button', { name: 'Add', exact: true });
+    this.memoryGrid = page.locator('.memory-grid');
+    this.memoryPhotos = this.memoryGrid.locator('figcaption');
+    this.memoryList = page.locator('ul.memory-list');
+    this.memoryRows = this.memoryList.locator('li');
+    this.memoriesFailed = page.getByRole('heading', { name: /^We couldn’t load .*’s memories$/ });
     this.loading = page.getByRole('status').filter({ hasText: /^Loading / });
     this.state = page.locator('.contacts-page :is([role="alert"] .empty, .empty[role="alert"])');
     this.stateHeading = this.state.getByRole('heading');

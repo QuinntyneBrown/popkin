@@ -142,7 +142,8 @@ The profile's tabs (`docs/mocks/pages/contact-profile/`):
   follow-up") and, divided, "Worth remembering" ("Add a date", a `pk-chip`); for a milestone
   `pk-kind-grid`, `pk-text-field` "What happened?" and "When", `pk-textarea` "Note" and
   `pk-setting-row` "Remember this every year"; `pk-form-summary` and `pk-alert` for the
-  failure. "Photo" and "Add a photo" come with [Memories and files](../memories/README.md).
+  failure. "Photo" ("Add a photo") is `pk-memory-chooser` beside "When"; the photo is kept as a
+  memory once the milestone is saved ([Memories and files](../memories/README.md)).
 - **`AddPromiseDialog`** (`dialogs/add-promise/`) — "What you said you'd do" and "Remind me";
   it closes with the promise, which Log saves with the conversation.
 - **`LogEntryStore`** (`frontend/projects/api/src/lib/api/contacts/log-entry-store.ts`) — the

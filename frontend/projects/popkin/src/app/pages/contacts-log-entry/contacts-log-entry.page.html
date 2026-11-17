@@ -26,6 +26,11 @@
     @if (problems().length) {
       <div pk-form-summary [problems]="problems()"></div>
     }
+    @if (store.state() === 'photoFailed') {
+      <div pk-alert heading="We couldn’t add the photo.">
+        {{ firstName() }}’s milestone is saved. Check your connection and try Save again.
+      </div>
+    }
     @if (store.state() === 'failed') {
       <div pk-alert heading="We couldn’t save this.">
         Your note is still here. Check your connection and try Save again.
@@ -109,15 +114,27 @@
         [error]="error('what')"
         [readonly]="saving()"
       ></div>
-      <div
-        pk-text-field
-        fieldId="when"
-        label="When"
-        type="date"
-        [formControl]="form.controls.happenedOn"
-        [error]="error('when')"
-        [readonly]="saving()"
-      ></div>
+      <div pk-form-pair>
+        <div
+          pk-text-field
+          fieldId="when"
+          label="When"
+          type="date"
+          [formControl]="form.controls.happenedOn"
+          [error]="error('when')"
+          [readonly]="saving()"
+        ></div>
+        <div
+          pk-memory-chooser
+          fieldId="photo"
+          heading="Photo"
+          [label]="store.photo()?.name ?? 'Add a photo'"
+          [accept]="photoTypes"
+          [error]="error('photo')"
+          [disabled]="saving()"
+          (picked)="store.pickPhoto($event)"
+        ></div>
+      </div>
       <div
         pk-textarea
         fieldId="note"

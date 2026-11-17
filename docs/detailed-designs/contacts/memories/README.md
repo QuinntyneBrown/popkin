@@ -32,6 +32,9 @@ vinyl, Dishoom cookbook, bike lights", "Updated Aug 31") (L2-136 AC1).
 
 - `default.html` — "Add to Chidi's memories"; "What to add" of "Photo", "File" and "Note";
   "Choose a photo"; "Caption" with "Optional. Only you can see it."; "Save" (L2-136 AC2).
+- `file.html` — "File": "Choose a file" and "A PDF, a document, a spreadsheet or a picture, up to
+  25 MB. Only you can see it." (L2-136 AC5).
+- `note.html` — "Note" with "Up to 2,000 characters. Only you can see it." (L2-136 AC6).
 - `invalid.html` — "One thing to fix", "Photo: that one is 32 MB; choose one up to 25 MB.", and
   at the field "That photo is 32 MB. A photo can be up to 25 MB." with "Choose another photo"
   (L2-136 AC3).
@@ -40,23 +43,34 @@ vinyl, Dishoom cookbook, bike lights", "Updated Aug 31") (L2-136 AC1).
 
 The dialog checks the size in the browser before any upload, and the API checks it again.
 
-### Conflicts and gaps
+### Rulings (known gap 107, settled)
 
-- **File and Note** have no form in the mocks: the files accepted and their size, a note's
-  length, and editing or deleting a memory are known gap 107. The tab lists both kinds; "File"
-  and "Note" in the dialog are `<TO SUPPLY>`, and their endpoints are not designed here.
-- **A photo's day** — the mock dates photos by when they were taken ("Sep 26, 2021"). The day is
-  the photo's capture time when the upload carries one, and the day it was added otherwise.
-- **Caption and title** — the dialog takes a caption alone, so the timeline shows a memory's
-  caption as its title and no note; the profile mock was changed to match ("Hot sauce night").
-- **Caption length** is `<TO SUPPLY>` (gap 107).
-- **Photo types** — the album's types (`image/jpeg`, `image/png`, `image/webp`, `image/heic`) are
-  used; L2-136 names none.
-- **Offline** — `ContactsOutbox` keeps its entries in local storage, which holds no file, so a
-  photo is not queued; whether the outbox should keep files is `<TO SUPPLY>`.
-- **Deleting a contact or an account** removes the memory rows and their files (`FileKey`,
-  `ThumbnailKey`) through `ContactRemoval` ([Delete a contact](../delete-contact/README.md));
-  what deleting a contact does beyond that is gap 110.
+- **Caption** — optional, up to 200 characters ("Keep it to 200 characters.").
+- **A photo's day** — its capture time when the upload carries one, otherwise the day it was
+  added; a `takenOn` sent with the upload (`yyyy-MM-dd`) is used instead, as a milestone's photo
+  is dated by the milestone.
+- **File** (`docs/mocks/dialogs/add-memory/file.html`) — "Choose a file": a PDF, a Word document,
+  a spreadsheet, plain text or a picture (`application/pdf`, `.doc`/`.docx`, `.xls`/`.xlsx`,
+  `text/plain`, and the photo types), up to 25 MB, kept as it is under a random key. It is listed
+  with its name, the month it was added and its size ("Sep 2021 · 84 KB") and opens through a
+  download address that expires. Refusals: `file_too_large` ("That file is {n} MB. A file can be
+  up to 25 MB."), `file_type_not_allowed` ("Choose a PDF, a document, a spreadsheet or a
+  picture.").
+- **Note** (`docs/mocks/dialogs/add-memory/note.html`) — 1 to 2,000 characters; "Updated {day}"
+  is the day it was added, since a note is not edited. Refusals: `note_required`,
+  `note_too_long`.
+- **A milestone's photo** — Log's "Photo" ("Add a photo") chooses a photo; once the milestone is
+  saved, the photo is added as a photo memory captioned with what happened and dated by the
+  milestone's day. If that upload fails the milestone stays saved and Log stays open with "We
+  couldn't add the photo." and "{first name}'s milestone is saved. Check your connection and try
+  Save again."; Save resends the milestone, kept once under its client id, then the photo.
+- **The timeline** lists photo memories among the entries, by their day, each with its caption
+  as its title and its thumbnail (L2-135 AC1).
+- **Editing and deleting** a memory are not built; memories and their files go with their
+  contact (`ContactRemoval`) and with a deleted account.
+- **Offline** — nothing is queued; a failed upload keeps the choice and the caption, and Save
+  sends again under the same client id.
+- **Rate limit** — the album's `photos` policy covers photo and file uploads.
 
 ### API
 
@@ -69,11 +83,20 @@ The dialog checks the size in the browser before any upload, and the API checks 
 - `POST /api/contacts/people/{contactId}/memories/photos` — `multipart/form-data` with `file`,
   `caption?` and `clientId`. `201` `PhotoMemoryDto` and a `Location`. A resend with the same
   `clientId` answers `200`. Refusals: `400` `validation_failed` without a file, `photo_too_large`
-  over 25 MB, `photo_type_not_allowed`, `caption_too_long`; `404` `contact_not_found`; `413`
+  over 25 MB, `photo_type_not_allowed`, `caption_too_long`, `taken_on_not_valid`; `404` `contact_not_found`; `413`
   `request_too_large` for a body over 50 MB, twice the largest photo as
   [Add photos](../../photos/add-photos/README.md) sets its limit; `429` `rate_limited` under a
   policy `<TO SUPPLY>`. The checks run in this order: ownership, caption, missing file, size, type.
-- Files and notes: `<TO SUPPLY>` (gap 107).
+- `POST …/memories/files` — `multipart/form-data` with `file` and `clientId`. `201`
+  `FileMemoryDto`, `200` for a resend. Refusals: `validation_failed` without a file,
+  `file_too_large`, `file_type_not_allowed` (the type is read from the file's bytes, and for an
+  Office document its name).
+- `POST …/memories/notes` — JSON `{ clientId, text }`. `201` `NoteMemoryDto`, `200` for a resend.
+  Refusals: `note_required`, `note_too_long`.
+- `POST …/memories/photos` also takes `takenOn` (`yyyy-MM-dd`), which dates the photo instead of
+  its capture time; a milestone's photo sends the milestone's day.
+- `GET …/timeline?show=all` lists photo memories as items of kind `Memory` with `thumbnailUrl` and
+  `photoUrl`.
 
 ### Backend
 
@@ -99,22 +122,31 @@ The dialog checks the size in the browser before any upload, and the API checks 
 
 ### Frontend (Popkin web app)
 
-- **`AddMemoryDialog`** (`dialogs/add-memory/add-memory.dialog.ts`) — CDK Dialog opened from the
-  profile's "Add" with the contact's id and first name. Composes `pk-dialog`, `pk-form-summary`,
-  `pk-segmented-control` "What to add", the add card of `pk-info-card` for "Choose a photo"
-  through `pk-files-input`, `pk-upload-item` for the chosen file and its progress, `pk-text-field`
-  "Caption" with its hint, and `pk-button` "Save" / "Uploading…". It closes with the saved memory.
-  `pk-upload-item` gains an input that leaves out its own caption field, since the dialog's
-  caption is a field of its own.
-- **`memory-rules.ts`** (api library) — 25 MB, the types, "Photo: that one is {n} MB; choose one
-  up to 25 MB.", "That photo is {n} MB. A photo can be up to 25 MB.", "Uploading · {sent} of
-  {total} MB" and a file's size in KB or MB. Unit tested.
-- **`ContactMemoriesStore`** — the tab: `loading | ready | failed`, and a saved memory placed
-  first.
-- The tab is the profile's `?view=memories` ([Contact profile](../contact-profile/README.md));
-  it composes the memory grid and rows of `pk-contact-id` (backlog row 13).
-- **`CONTACTS_API`** — `memories(contactId)` and `addPhotoMemory(contactId, file, caption)`,
-  which posts with `reportProgress` and emits progress and the saved memory.
+- **`AddMemoryDialog`** (`dialogs/add-memory/`) — CDK Dialog opened from the profile's "Add"
+  with the contact's id and first name. Composes `pk-dialog`, `pk-form-summary`, `pk-alert`,
+  `pk-segmented-control` "What to add" (radios), `pk-memory-chooser` ("Choose a photo", "Choose a
+  file" with its hint, "Choose another photo" once one is chosen or refused), `pk-memory-upload`
+  for the chosen photo or file and its progress, `pk-text-field` "Caption" and `pk-textarea`
+  "Note". It closes with what was kept. States: default, chosen, file, note, invalid, busy.
+- **`AddMemoryStore`** (api library) — the kind, the chosen file, the caption and note, the
+  problems (a file over 25 MB as soon as it is chosen, the rest once Save is chosen, the API's
+  refusals at their field), `idle | uploading | saving | failed`, how much is sent, and one
+  client id per memory. Unit tested.
+- **`memory-text.ts`** (api library) — 25 MB, the photo and file types, "Photo: that one is {n}
+  MB; choose one up to 25 MB.", "That photo is {n} MB. A photo can be up to 25 MB.", "Uploading ·
+  {sent} of {total} MB", a file's size in KB or MB, "Sep 2021 · 84 KB", "Updated Aug 31" and
+  "Hot sauce night · Aug 8". Unit tested.
+- **`ContactMemoriesStore`** (api library) — the tab: `loading | ready | failed`, and a memory
+  just saved placed first among its kind. Unit tested.
+- The tab is the profile's `?view=memories`: the line and "Add", `pk-memory-grid` for the photos
+  and `pk-memory-list` for the files (their name downloads them) and notes; a failed read is
+  `pk-empty-state` with "Try again". The timeline draws a photo memory with its photo.
+- Log's milestone pairs "When" with `pk-memory-chooser` "Photo" in `pk-form-pair`;
+  `LogEntryStore` sends the photo once the milestone is saved.
+- **`CONTACTS_API`** — `memories(contactId)`, `addPhotoMemory(contactId, clientId, file,
+  caption, takenOn?)` and `addFileMemory(contactId, clientId, file)`, which post with
+  `reportProgress` and emit progress and the saved memory, and `addNoteMemory(contactId,
+  clientId, text)`.
 
 ### Tests
 
@@ -123,10 +155,13 @@ The dialog checks the size in the browser before any upload, and the API checks 
   `photo_type_not_allowed`; another person's contact answers `404` `contact_not_found`; a resend
   saves once; a failed save leaves no file.
 - Direct test of `memory-rules.ts`: each size at and around 25 MB, each size text.
-- Playwright: `tests/contacts-memories.spec.ts` through `ContactProfilePage` and
-  `AddMemoryDialog` page objects on recorded responses, with stubs for the progress and the
-  refusal: the tab, a photo too large, uploading, a saved photo. `routes.ts` keys each state.
-- Parity: `pk-upload-item` without its caption, and the memory grid of `pk-contact-id`.
+- Playwright: `tests/contacts-memories.spec.ts` through `ContactProfilePage`, `AddMemoryDialog`
+  and `LogEntryPage` on recorded responses, with stubs for the progress and the refusals: the
+  tab, nothing kept, a failed read, a photo on the timeline, the dialog, a photo too large,
+  uploading, a saved photo, a refused photo, a file, a note, a failure, and a milestone's photo.
+  `routes.ts` keys each state.
+- Parity: `pk-memory-grid`, `pk-memory-list`, `pk-memory-chooser` (photo, file, refused, Log),
+  `pk-memory-upload` (chosen) and the timeline's photo memory.
 
 ## Requirements
 

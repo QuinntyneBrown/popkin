@@ -10,18 +10,36 @@ using Popkin.Domain;
 
 namespace Popkin.Application.Contacts.Timeline;
 
-/// <summary>One row of a contact's timeline (L2-135 AC1): a conversation's channel, a milestone's kind and title.</summary>
+/// <summary>What a row of the timeline is: a logged entry, or a photo memory (L2-135 AC1).</summary>
+public enum TimelineItemKind
+{
+    Conversation,
+    Milestone,
+    Memory,
+}
+
+/// <summary>
+/// One row of a contact's timeline (L2-135 AC1): a conversation's channel, a milestone's kind and
+/// title, a photo memory's caption as its title and its addresses.
+/// </summary>
 public sealed record TimelineItemDto(
     Guid Id,
-    TimelineEntryKind Kind,
+    TimelineItemKind Kind,
     DateOnly Day,
     TalkChannel? Channel,
     MilestoneKind? MilestoneKind,
     string? Title,
-    string? Note)
+    string? Note,
+    string? ThumbnailUrl = null,
+    string? PhotoUrl = null)
 {
     public static TimelineItemDto Of(TimelineEntry entry) =>
-        new(entry.Id, entry.Kind, entry.Day, entry.Channel, entry.MilestoneKind, entry.Title, entry.Note);
+        new(entry.Id, entry.Kind == TimelineEntryKind.Milestone ? TimelineItemKind.Milestone : TimelineItemKind.Conversation,
+            entry.Day, entry.Channel, entry.MilestoneKind, entry.Title, entry.Note);
+
+    public static TimelineItemDto Of(Memory photo, IPhotoStore photos) =>
+        new(photo.Id, TimelineItemKind.Memory, photo.Day, null, null, photo.Caption, null,
+            photos.GetReadUrl(photo.ThumbnailKey!), photos.GetReadUrl(photo.FileKey!));
 }
 
 public sealed record TimelineDto(IReadOnlyList<TimelineItemDto> Entries);
@@ -196,7 +214,7 @@ public sealed class LogMilestoneCommandHandler(
 public sealed record GetContactTimelineQuery(Guid ContactId, TimelineShow Show) : IRequest<TimelineDto>;
 
 public sealed class GetContactTimelineQueryHandler(
-    IAppDbContext db, ICurrentPerson current, ContactsSwitch contacts, IContactGuard guard)
+    IAppDbContext db, ICurrentPerson current, ContactsSwitch contacts, IContactGuard guard, IPhotoStore photos)
     : IRequestHandler<GetContactTimelineQuery, TimelineDto>
 {
     public async Task<TimelineDto> Handle(GetContactTimelineQuery request, CancellationToken cancellationToken)
@@ -206,10 +224,18 @@ public sealed class GetContactTimelineQueryHandler(
         var entries = await db.TimelineEntries.OwnedBy(current.PersonId).AsNoTracking()
             .Where(e => e.ContactId == contact.Id)
             .ToListAsync(cancellationToken);
+        // Photo memories are on the timeline under "All" (known gap 107, ruled).
+        var memories = request.Show == TimelineShow.All
+            ? await db.Memories.OwnedBy(current.PersonId).AsNoTracking()
+                .Where(m => m.ContactId == contact.Id && m.Kind == MemoryKind.Photo)
+                .ToListAsync(cancellationToken)
+            : [];
         return new TimelineDto(Filter(entries, request.Show)
-            .OrderByDescending(e => e.Day)
-            .ThenByDescending(e => e.CreatedAt)
-            .Select(TimelineItemDto.Of)
+            .Select(e => (Item: TimelineItemDto.Of(e), At: e.CreatedAt))
+            .Concat(memories.Select(m => (Item: TimelineItemDto.Of(m, photos), At: m.AddedAt)))
+            .OrderByDescending(x => x.Item.Day)
+            .ThenByDescending(x => x.At)
+            .Select(x => x.Item)
             .ToList());
     }
 

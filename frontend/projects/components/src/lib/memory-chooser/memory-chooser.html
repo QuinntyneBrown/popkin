@@ -1,0 +1,34 @@
+@if (heading()) {
+  <span class="field__label" [id]="fieldId() + '-label'">{{ heading() }}</span>
+}
+<button
+  pk-add-card
+  type="button"
+  icon="photo-add"
+  [center]="true"
+  [id]="fieldId()"
+  [disabled]="disabled()"
+  [attr.aria-invalid]="error() ? 'true' : null"
+  [attr.aria-describedby]="describedBy()"
+  [attr.aria-labelledby]="heading() ? fieldId() + '-label ' + fieldId() : null"
+  (click)="open()"
+>
+  {{ label() }}
+</button>
+@if (hint()) {
+  <p class="memory-chooser__hint" [id]="fieldId() + '-hint'">{{ hint() }}</p>
+}
+@if (error()) {
+  <p class="field__error" [id]="fieldId() + '-error'">
+    <svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span>
+  </p>
+}
+<input
+  #file
+  class="memory-chooser__file"
+  type="file"
+  tabindex="-1"
+  aria-hidden="true"
+  [accept]="accept()"
+  (change)="choose()"
+/>

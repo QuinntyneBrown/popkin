@@ -94,3 +94,26 @@ public sealed class TimelineEntryConfiguration : IEntityTypeConfiguration<Timeli
         builder.HasOne<Contact>().WithMany().HasForeignKey(e => e.ContactId).OnDelete(DeleteBehavior.NoAction);
     }
 }
+
+public sealed class MemoryConfiguration : IEntityTypeConfiguration<Memory>
+{
+    public void Configure(EntityTypeBuilder<Memory> builder)
+    {
+        builder.ToTable("Memories");
+        builder.HasKey(m => m.Id);
+        // A resend saves once (L2-123 AC4).
+        builder.HasIndex(m => new { m.OwnerId, m.ClientId }).IsUnique();
+        builder.HasIndex(m => m.ContactId);
+        builder.Property(m => m.Kind).HasConversion<string>().HasMaxLength(8);
+        builder.Property(m => m.Caption).HasMaxLength(Memory.MaxCaptionLength);
+        builder.Property(m => m.FileKey).HasMaxLength(200);
+        builder.Property(m => m.ThumbnailKey).HasMaxLength(200);
+        builder.Property(m => m.FileName).HasMaxLength(Memory.MaxFileNameLength);
+        builder.Property(m => m.ContentType).HasMaxLength(100);
+        builder.Property(m => m.Text).HasMaxLength(Memory.MaxNoteLength);
+        // A memory goes with its account (L2-049) and with its contact (L2-132); ContactRemoval
+        // removes it and its files in the same save, so the database never cascades from two paths.
+        builder.HasOne<Person>().WithMany().HasForeignKey(m => m.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Contact>().WithMany().HasForeignKey(m => m.ContactId).OnDelete(DeleteBehavior.NoAction);
+    }
+}

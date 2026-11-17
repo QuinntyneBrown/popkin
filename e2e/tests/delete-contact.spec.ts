@@ -1,7 +1,12 @@
 // Acceptance Test
 // Traces to: L2-132, L2-123 AC5
 // Description: Deleting a contact asks first, then removes them and opens People.
-import { chidiProfile, contactsMorning, recordedContactId } from '../fixtures/contacts';
+import {
+  chidiProfile,
+  contactsMorning,
+  recordedContactId,
+  serveRecordedPhotos,
+} from '../fixtures/contacts';
 import { expect, test } from '../fixtures/pk-test';
 import { failNetwork, hold } from '../fixtures/stubs';
 import { ContactActionsDialog } from '../pages/contact-actions.dialog';
@@ -50,6 +55,8 @@ test.describe('Delete a contact', () => {
 
   // L2-132 AC2
   test('Delete Chidi removes him and opens People', async ({ page, pk }) => {
+    // People then draws the recorded photos.
+    await serveRecordedPhotos(page);
     await pk.open('deleteContact');
     const dialog = await askToDelete(page);
     const sent = page.waitForRequest(

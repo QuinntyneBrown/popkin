@@ -1,0 +1,42 @@
+:host {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.memory-upload__photo,
+.memory-upload__tile {
+  flex: none;
+  width: var(--space-16);
+  height: var(--space-16);
+  border-radius: var(--radius-md);
+}
+
+.memory-upload__photo {
+  object-fit: cover;
+}
+
+.memory-upload__tile {
+  display: grid;
+  place-items: center;
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+}
+
+.memory-upload__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.memory-upload__name {
+  overflow: hidden;
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memory-upload__status {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
