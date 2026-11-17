@@ -154,6 +154,7 @@
                   [columns]="holdColumns"
                   [groups]="holdGroups()"
                   [loading]="store.holdsStatus() !== 'ready'"
+                  (acted)="release($event)"
                 ></div>
               </section>
               @if (store.holdsStatus() === 'ready') {

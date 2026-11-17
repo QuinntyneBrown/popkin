@@ -10,6 +10,7 @@ import {
   untracked,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import {
   ADMIN_PLATFORM_API,
   AdminNotificationHold,
@@ -23,9 +24,11 @@ import {
   PopkinColour,
   accentOf,
   heldNote,
+  RELEASED_TOAST,
   heldToast,
   holdBy,
   holdDialog,
+  releaseDialog,
   holdLine,
   holdName,
   holdUntil,
@@ -47,6 +50,7 @@ import {
   AsideNote,
   Button,
   DataTable,
+  DataTableAction,
   DataTableCell,
   DataTableColumn,
   DataTableGroup,
@@ -246,6 +250,22 @@ export class NotificationsPage {
       if (!hold) return;
       this.store.holdAdded(hold);
       this.toaster.show('success', ...heldToast(match.name));
+    });
+  }
+
+  /** "Release the hold on {name}?" with a reason (L2-172 AC4). */
+  protected release(event: DataTableAction): void {
+    const hold = this.store.holds()?.holds.find((h) => h.id === event.rowId);
+    if (!hold?.id) return;
+    const holdId = hold.id;
+    this.ask<true>({
+      text: releaseDialog(holdName(hold)),
+      danger: false,
+      send: (reason) => this.api.releaseHold(holdId, reason).pipe(map(() => true as const)),
+    }).subscribe((released) => {
+      if (!released) return;
+      this.store.holdReleased(holdId);
+      this.toaster.show('success', ...RELEASED_TOAST);
     });
   }
 
