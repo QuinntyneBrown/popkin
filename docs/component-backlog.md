@@ -44,6 +44,7 @@ Popkin uses no custom tooltips.
 | 32 | Memory list, chooser and upload | Memories' files and notes, Add's "Choose a photo", and the chosen photo or file with its progress. | 0.5 days | Built, with parity (list, chooser ×4, chosen) |
 | 33 | People around and person choice | A contact's people as short linked rows, keyed on Connections; Connect's "Who" as a radio list. | 0.5 days | Built, with parity (panel; chosen, invalid) |
 | 34 | Group members, Coming up, group chips and toggle chips | A group's members and its next dates; a profile's groups as links; the form's Groups as toggles. | 0.5 days | Built; members and Coming up with parity (thursday, sheffield; two, three) |
+| 35 | It's been a while | Today's drifting people set apart under Recently by a hairline: the line and its who chips (`pk-drift`). | 0.25 days | Built, with parity |
 
 Total: 31 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
 26 came from the Contacts designs and are not estimated yet.

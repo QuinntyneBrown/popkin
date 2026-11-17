@@ -52,7 +52,7 @@ public sealed class ContactRemindersTests
     // then nothing is added before 9; at 9 "Grace turns 33 on Saturday" is added once, sent to her
     // phone once, and the week ahead is emailed to her once; she reads it with Grace's first name,
     // dismisses it, and it is gone; dismissing twice changes nothing; Lena cannot dismiss it
-    // (L2-140 AC1 to AC3, L2-122).
+    // (L2-140 AC1, AC2, AC3; L2-122).
     [Fact]
     public async Task A_reminder_comes_once_at_nine_by_the_app_the_phone_and_the_Monday_email()
     {

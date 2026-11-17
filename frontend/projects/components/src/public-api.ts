@@ -257,6 +257,7 @@ export * from './lib/tick-list/tick-list';
 export * from './lib/tick-group/tick-group';
 export * from './lib/today-dates/today-dates';
 export * from './lib/recent-list/recent-list';
+export * from './lib/drift/drift';
 export * from './lib/drift-chips/drift-chips';
 export * from './lib/group-chips/group-chips';
 export * from './lib/toggle-chips/toggle-chips';

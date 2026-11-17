@@ -156,8 +156,7 @@
             </section>
           }
           @if (drifting().length) {
-            <section class="stack" aria-labelledby="drift">
-              <h2 class="visually-hidden" id="drift">It’s been a while</h2>
+            <section pk-drift headingId="drift" heading="It’s been a while">
               <p class="text-muted"><strong>It’s been a while</strong>{{ driftLine() }}</p>
               <div pk-drift-chips [people]="driftChips()"></div>
             </section>
