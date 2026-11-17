@@ -41,8 +41,8 @@ shares. Records 0009 to 0013 come from the audit
 | [0028](0028-phone-reminders-by-web-push.md) | Phone reminders are sent by Web Push, signed with VAPID by the Worker | Accepted |
 | [0029](0029-one-library-no-unused-components.md) | One component library: a component exists only while a screen uses it, look-alikes merge only where the mocks draw one block, and logic the apps share lives once in `api` | Accepted |
 | [0030](0030-admin-notifications-on-a-fake-backend.md) | The admin app's Notifications page runs on a fake backend, an interceptor switched on by one build-time setting and off in e2e, until the API serves it | Accepted |
-| [0030](0030-notification-emails-by-razor-components.md) | Notification emails are Razor components rendered with `HtmlRenderer`, one shared shell, every member's text encoded | Accepted |
-| [0031](0031-one-data-protection-key-ring-in-blob-storage.md) | One Data Protection key ring for the API and the Worker, kept in Blob Storage and wrapped by Key Vault | Accepted |
+| [0031](0031-notification-emails-by-razor-components.md) | Notification emails are Razor components rendered with `HtmlRenderer`, one shared shell, every member's text encoded | Accepted |
+| [0032](0032-one-data-protection-key-ring-in-blob-storage.md) | One Data Protection key ring for the API and the Worker, kept in Blob Storage and wrapped by Key Vault | Accepted |
 
 ## Format
 

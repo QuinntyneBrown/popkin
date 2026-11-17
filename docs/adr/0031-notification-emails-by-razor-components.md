@@ -1,4 +1,4 @@
-# 0030. Notification emails are Razor components rendered with HtmlRenderer
+# 0031. Notification emails are Razor components rendered with HtmlRenderer
 
 ## Status
 

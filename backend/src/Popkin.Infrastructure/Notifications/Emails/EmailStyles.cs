@@ -2,7 +2,7 @@ namespace Popkin.Infrastructure.Notifications.Emails;
 
 /// <summary>
 /// The light theme's tokens as inline styles: mail clients ignore style sheets unevenly, so every
-/// element carries its own (ADR 0030). Values from docs/design-system/tokens/tokens.css; text
+/// element carries its own (ADR 0031). Values from docs/design-system/tokens/tokens.css; text
 /// colours meet WCAG 2.2 AA on their backgrounds (L2-163 AC4).
 /// </summary>
 internal static class EmailStyles

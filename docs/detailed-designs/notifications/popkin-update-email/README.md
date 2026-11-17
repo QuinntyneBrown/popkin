@@ -104,7 +104,7 @@ The requirements stand and the mocks change (L1, "Source and assumptions"):
   with a `Content-ID`, a 320 px thumbnail at most, and the HTML refers to it as `cid:`. Inline
   attachments keep every picture private to its recipient. Azure Communication Services email
   supports them. Their total size per email is kept under 1 MB, and photos past the fifth are
-  counted in the "+{n}" tile, not attached ([ADR 0030](../../../adr/0030-notification-emails-by-razor-components.md)).
+  counted in the "+{n}" tile, not attached ([ADR 0031](../../../adr/0031-notification-emails-by-razor-components.md)).
 
 ### The four changes (L2-164)
 
@@ -187,7 +187,7 @@ exist today.
   (`Subject`, `Html`, `Text`, `InlineImages[]` of `ContentId`, `BlobKey` and `MediaType`).
   `NotificationEmailRenderer` (Infrastructure) renders HTML and text from templates and encodes
   all text. The templates are Razor components rendered with `HtmlRenderer`
-  ([ADR 0030](../../../adr/0030-notification-emails-by-razor-components.md)).
+  ([ADR 0031](../../../adr/0031-notification-emails-by-razor-components.md)).
 - **`INotificationEmailSender`** (Application port) — `SendAsync(OutgoingMessage,
   CancellationToken) → SendResult` (`Accepted(providerMessageId)`, `Transient(reason)` or
   `Permanent(reason)`). `OutgoingMessage` holds `To`, `FromDisplayName`, `RenderedEmail`,

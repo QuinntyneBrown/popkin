@@ -1,4 +1,4 @@
-# 0031. One Data Protection key ring, kept in Blob Storage and wrapped by Key Vault
+# 0032. One Data Protection key ring, kept in Blob Storage and wrapped by Key Vault
 
 ## Status
 

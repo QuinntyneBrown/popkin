@@ -2,13 +2,13 @@ using Popkin.Application.Notifications.Emails;
 
 namespace Popkin.Application.Abstractions;
 
-/// <summary>A picture carried inside the email, referred to as `cid:{ContentId}` (ADR 0030).</summary>
+/// <summary>A picture carried inside the email, referred to as `cid:{ContentId}` (ADR 0031).</summary>
 public sealed record InlineImage(string ContentId, string BlobKey, string MediaType);
 
 /// <summary>An email made from its model: the same words in an HTML part and a plain-text part.</summary>
 public sealed record RenderedEmail(string Subject, string Html, string Text, IReadOnlyList<InlineImage> InlineImages);
 
-/// <summary>Turns an email's model into its two parts, encoding every member's words (ADR 0030).</summary>
+/// <summary>Turns an email's model into its two parts, encoding every member's words (ADR 0031).</summary>
 public interface INotificationEmailRenderer
 {
     Task<RenderedEmail> RenderAsync(EmailModel model, CancellationToken cancellationToken);

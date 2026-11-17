@@ -172,10 +172,10 @@ public static class DependencyInjection
             services.AddSingleton<IContactsEmailSender, Contacts.NoContactsEmailSender>();
         }
 
-        // Notification emails (ADR 0030): rendered from Razor components, and sent only when the
+        // Notification emails (ADR 0031): rendered from Razor components, and sent only when the
         // service, the sender address and the footer's postal address are all configured
         // (L2-163 AC5); otherwise each is marked failed and nothing is sent.
-        // ADR 0031: one key ring for the API and the Worker, so the API reads the unsubscribe
+        // ADR 0032: one key ring for the API and the Worker, so the API reads the unsubscribe
         // links the Worker writes, kept in Blob Storage and wrapped by Key Vault. Without it,
         // outside Development, no notification email is sent.
         var dataProtection = services.AddDataProtection().SetApplicationName("Popkin");

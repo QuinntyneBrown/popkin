@@ -98,9 +98,10 @@ person id leaves the API.
   `aria-expanded`). Under it, a `pk-setting-list` of muted people (`pk-avatar`, name, the shared
   Popkins, and "Unmute", whose accessible name is "Unmute {name}"), or the empty line
   (`setting-list__empty`).
-- **Picker** — `pk-popover`, the card anchored under "Mute someone" as the mock draws it
-  (block `popover`, the dashed button its `popover__trigger`), holding a
-  `pk-search-field` labelled "Search people in your Popkins" and a `pk-pick-list` of up to five
+- **Picker** — `pk-popover` with `add`, the card anchored under "Mute someone" as the mock draws
+  it (block `popover`, the dashed button its `popover__trigger`; the same component as the admin
+  app's "Hold a Popkin", ADR 0029), holding a `pk-search-field` of variant `popover` labelled
+  "Search people in your Popkins" and a `pk-pick-list` of up to five
   people. Focus moves into the field when it opens. Arrow keys move through the list, Enter
   chooses, and Escape or a tap outside closes it and returns focus to "Mute someone". The list is
   announced as a list box. The card is a popover, not a page dialog, so no inline form is

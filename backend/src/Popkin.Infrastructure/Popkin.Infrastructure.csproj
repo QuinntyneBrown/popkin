@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <ItemGroup>
-    <!-- Notification emails are Razor components rendered with HtmlRenderer (ADR 0030). -->
+    <!-- Notification emails are Razor components rendered with HtmlRenderer (ADR 0031). -->
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\Popkin.Application\Popkin.Application.csproj" />
     <PackageReference Include="Azure.Communication.Email" />

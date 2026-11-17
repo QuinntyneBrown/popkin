@@ -117,7 +117,7 @@ origin (`App:Origin`, `https://app.popkin.community`). Each opens `/account/noti
 - **Deleted account.** A token whose person has `DeletedAt` set, or does not exist, is refused.
 - **Keys.** The Worker issues tokens and the API reads them, so both shall share one Data
   Protection key ring with the application name `Popkin`
-  ([ADR 0031](../../../adr/0031-one-data-protection-key-ring-in-blob-storage.md)): the blob
+  ([ADR 0032](../../../adr/0032-one-data-protection-key-ring-in-blob-storage.md)): the blob
   `dataprotection/keys.xml` in `stpopkin{suffix}`, its keys wrapped by the key `dataprotection`
   in `kvpopkin{suffix}`. Keys roll every 90 days by default; a retired key still unprotects until
   it is removed, so a token outlives a key roll.

@@ -9,7 +9,7 @@ namespace Popkin.Infrastructure.Notifications;
 /// Sends a notification email through Azure Communication Services (ADR 0021): HTML and plain
 /// text from `Notifications:EmailSender`, with the one-click unsubscribe headers (L2-168 AC4) and
 /// no `Reply-To`, since replies are not read. Pictures travel inline, read from the private photo
-/// store, under 1 MB in all (ADR 0030). Nothing it is given is logged.
+/// store, under 1 MB in all (ADR 0031). Nothing it is given is logged.
 /// </summary>
 public sealed class AcsNotificationEmailSender(EmailClient client, string senderAddress, IPhotoStore photos) : INotificationEmailSender
 {

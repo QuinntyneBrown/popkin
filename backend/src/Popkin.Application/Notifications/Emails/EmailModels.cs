@@ -17,7 +17,7 @@ public sealed record EmailShellModel(
     string UnsubscribeUrl,
     string PostalAddress);
 
-/// <summary>A notification email's model, rendered by its template (ADR 0030).</summary>
+/// <summary>A notification email's model, rendered by its template (ADR 0031).</summary>
 public abstract record EmailModel(EmailShellModel Shell);
 
 /// <summary>A line under "Also new in the last {n} minutes" (L2-164 AC6).</summary>

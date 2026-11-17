@@ -28,6 +28,8 @@ parity('search-field', [
     region: (page) => new NotificationSettingsPage(page).pickerSearch,
     before: theMockMutedPeople,
     app: (page) => new NotificationSettingsPage(page).openPicker(),
+    // The mock's field has `autofocus`, so its focus ring shows.
+    prepare: (page) => new NotificationSettingsPage(page).pickerSearch.focus(),
     snap: true,
   },
 ]);

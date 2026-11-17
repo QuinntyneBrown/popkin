@@ -10,7 +10,7 @@ using Popkin.Application.Notifications.Emails;
 namespace Popkin.Infrastructure.Notifications.Emails;
 
 /// <summary>
-/// Renders an email's model with its Razor components (ADR 0030): the HTML part from one, the
+/// Renders an email's model with its Razor components (ADR 0031): the HTML part from one, the
 /// plain-text part from a text-only rendering of the same model, so the two never disagree. No
 /// model value is ever written as markup.
 /// </summary>

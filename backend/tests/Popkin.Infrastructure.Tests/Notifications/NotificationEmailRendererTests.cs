@@ -8,7 +8,7 @@ using Popkin.Infrastructure.Notifications.Emails;
 
 namespace Popkin.Infrastructure.Tests.Notifications;
 
-/// <summary>The renderer of notification emails (ADR 0030, L2-163).</summary>
+/// <summary>The renderer of notification emails (ADR 0031, L2-163).</summary>
 public sealed partial class NotificationEmailRendererTests
 {
     private static readonly EmailShellModel Shell = new(

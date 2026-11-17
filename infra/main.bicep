@@ -152,14 +152,14 @@ resource photosContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   properties: { publicAccess: 'None' }
 }
 
-// ADR 0031: the one Data Protection key ring of the API and the Worker, beside the photos.
+// ADR 0032: the one Data Protection key ring of the API and the Worker, beside the photos.
 resource dataProtectionContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
   parent: blobService
   name: 'dataprotection'
   properties: { publicAccess: 'None' }
 }
 
-// ADR 0031: the key that wraps the ring's keys at rest. Soft delete and purge protection stay on:
+// ADR 0032: the key that wraps the ring's keys at rest. Soft delete and purge protection stay on:
 // losing the key would break every unsubscribe link and protected cookie at once.
 resource vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: 'kvpopkin${suffix}'
@@ -253,7 +253,7 @@ var photosEnv = [
   { name: 'Photos__Container', value: photosContainer.name }
   { name: 'Photos__ClientId', value: identity.properties.clientId }
 ]
-// ADR 0031: the API reads the unsubscribe links the Worker writes.
+// ADR 0032: the API reads the unsubscribe links the Worker writes.
 var dataProtectionEnv = [
   { name: 'DataProtection__BlobUri', value: '${storage.properties.primaryEndpoints.blob}${dataProtectionContainer.name}/keys.xml' }
   { name: 'DataProtection__KeyId', value: dataProtectionKey.properties.keyUri }
