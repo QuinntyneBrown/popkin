@@ -87,6 +87,8 @@ public interface IAppDbContext
 
     DbSet<NotificationKindSwitch> NotificationKindSwitches { get; }
 
+    DbSet<NotificationHold> NotificationHolds { get; }
+
     DbSet<OutgoingEmail> OutgoingEmails { get; }
 
     DbSet<ContactGroupMember> ContactGroupMembers { get; }

@@ -11,4 +11,7 @@ public interface INotificationPlatform
 {
     /// <summary>Whether an Owner switched the kind off for everyone (L2-171).</summary>
     bool IsKindOff(NotificationKind kind);
+
+    /// <summary>Whether an admin holds every notification about the Popkin (L2-172).</summary>
+    bool IsPopkinHeld(Guid popkinId);
 }

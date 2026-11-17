@@ -28,6 +28,8 @@ public sealed class PlatformSnapshot(IServiceScopeFactory scopes, TimeProvider c
 
     public bool IsKindOff(NotificationKind kind) => _values.KindsOff.Contains(kind);
 
+    public bool IsPopkinHeld(Guid popkinId) => _values.HeldPopkins.Contains(popkinId);
+
     public void Invalidate() => _stale = true;
 
     public async Task RefreshIfStaleAsync(CancellationToken cancellationToken)
@@ -54,12 +56,14 @@ public sealed class PlatformSnapshot(IServiceScopeFactory scopes, TimeProvider c
             var chosen = await db.FeatureChosenPopkins.AsNoTracking().Select(c => new { c.Feature, c.PopkinId }).ToListAsync(cancellationToken);
             var hostOff = await db.PopkinFeaturesOff.AsNoTracking().Select(o => new { o.Feature, o.PopkinId }).ToListAsync(cancellationToken);
             var kindsOff = await db.NotificationKindSwitches.AsNoTracking().Select(s => s.Kind).ToListAsync(cancellationToken);
+            var held = await db.NotificationHolds.AsNoTracking().Where(h => h.ReleasedAt == null).Select(h => h.PopkinId).ToListAsync(cancellationToken);
             _values = new PlatformValues(
                 modes,
                 chosen.GroupBy(c => c.Feature).ToDictionary(g => g.Key, g => (IReadOnlySet<Guid>)g.Select(c => c.PopkinId).ToHashSet()),
                 hostOff.GroupBy(o => o.Feature).ToDictionary(g => g.Key, g => (IReadOnlySet<Guid>)g.Select(o => o.PopkinId).ToHashSet()))
             {
                 KindsOff = kindsOff.ToHashSet(),
+                HeldPopkins = held.ToHashSet(),
             };
         }
         catch
@@ -92,6 +96,9 @@ public sealed record PlatformValues(
 
     /// <summary>The kinds an Owner switched off for everyone (L2-171).</summary>
     public IReadOnlySet<NotificationKind> KindsOff { get; init; } = new HashSet<NotificationKind>();
+
+    /// <summary>The Popkins with an active hold (L2-172).</summary>
+    public IReadOnlySet<Guid> HeldPopkins { get; init; } = new HashSet<Guid>();
 
     public bool IsOffered(Feature feature, Guid popkinId) => Modes.GetValueOrDefault(feature, FeatureMode.Off) switch
     {

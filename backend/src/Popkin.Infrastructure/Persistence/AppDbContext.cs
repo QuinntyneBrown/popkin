@@ -88,6 +88,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<NotificationKindSwitch> NotificationKindSwitches => Set<NotificationKindSwitch>();
 
+    public DbSet<NotificationHold> NotificationHolds => Set<NotificationHold>();
+
     public DbSet<OutgoingEmail> OutgoingEmails => Set<OutgoingEmail>();
 
     public DbSet<ContactGroupMember> ContactGroupMembers => Set<ContactGroupMember>();

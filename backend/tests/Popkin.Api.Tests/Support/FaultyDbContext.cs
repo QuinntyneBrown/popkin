@@ -101,6 +101,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<NotificationKindSwitch> NotificationKindSwitches => inner.NotificationKindSwitches;
 
+    public DbSet<NotificationHold> NotificationHolds => inner.NotificationHolds;
+
     public DbSet<OutgoingEmail> OutgoingEmails => inner.OutgoingEmails;
 
     public DbSet<ContactGroupMember> ContactGroupMembers => inner.ContactGroupMembers;

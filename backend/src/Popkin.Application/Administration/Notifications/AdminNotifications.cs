@@ -55,7 +55,8 @@ public sealed class GetAdminNotificationsQueryHandler(IAppDbContext db, IAdminGu
                     .Select(k => AdminNotificationPlatform.KindOf(k, off.GetValueOrDefault(k.Kind), traffic))
                     .ToList()))
             .ToList();
-        return new AdminNotificationsDto(AdminNotificationPlatform.StatusOf(platform, traffic), groups, 0);
+        return new AdminNotificationsDto(
+            AdminNotificationPlatform.StatusOf(platform, traffic), groups, await NotificationHoldList.CountAsync(db, cancellationToken));
     }
 }
 

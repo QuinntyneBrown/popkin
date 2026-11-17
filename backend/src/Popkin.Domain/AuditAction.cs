@@ -39,6 +39,8 @@ public enum AuditAction
     ResumedMemberEmail,
     TurnedNotificationKindOff,
     TurnedNotificationKindOn,
+    HeldNotifications,
+    ReleasedNotificationHold,
 }
 
 /// <summary>What an audit entry is about.</summary>

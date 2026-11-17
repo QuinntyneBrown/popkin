@@ -27,4 +27,25 @@ public sealed class AdminNotificationsController(ISender sender) : AdminControll
     [HttpPut("kinds/{kind}")]
     public async Task<ActionResult<AdminNotificationKindDto>> SwitchKind(string kind, SwitchKindRequest request, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new SwitchNotificationKindCommand(kind, request.On, request.Reason), cancellationToken));
+
+    [HttpGet("holds")]
+    public async Task<ActionResult<AdminNotificationHoldsDto>> GetHolds(CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetNotificationHoldsQuery(), cancellationToken));
+
+    [HttpGet("holds/popkin-search")]
+    public async Task<ActionResult<IReadOnlyList<HoldPopkinMatchDto>>> SearchPopkins([FromQuery] string? q, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SearchHoldPopkinsQuery(q), cancellationToken));
+
+    public sealed record HoldRequest(Guid PopkinId, string? Reason);
+
+    [HttpPost("holds")]
+    public async Task<ActionResult<AdminNotificationHoldDto>> Hold(HoldRequest request, CancellationToken cancellationToken) =>
+        StatusCode(StatusCodes.Status201Created, await sender.Send(new HoldPopkinNotificationsCommand(request.PopkinId, request.Reason), cancellationToken));
+
+    [HttpPost("holds/{holdId:guid}/release")]
+    public async Task<IActionResult> Release(Guid holdId, ReasonRequest request, CancellationToken cancellationToken)
+    {
+        await sender.Send(new ReleaseNotificationHoldCommand(holdId, request.Reason), cancellationToken);
+        return Ok();
+    }
 }

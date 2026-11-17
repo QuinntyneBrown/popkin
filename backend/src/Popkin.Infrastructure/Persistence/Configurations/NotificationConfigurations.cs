@@ -94,6 +94,21 @@ public sealed class NotificationKindSwitchConfiguration : IEntityTypeConfigurati
     }
 }
 
+public sealed class NotificationHoldConfiguration : IEntityTypeConfiguration<NotificationHold>
+{
+    public void Configure(EntityTypeBuilder<NotificationHold> builder)
+    {
+        builder.ToTable("NotificationHolds");
+        builder.HasKey(h => h.Id);
+        builder.Property(h => h.Reason).HasMaxLength(500);
+        builder.Property(h => h.HeldByName).HasMaxLength(200);
+        builder.Property(h => h.ReleaseReason).HasMaxLength(500);
+        builder.Ignore(h => h.IsActive);
+        // One active hold on a Popkin.
+        builder.HasIndex(h => h.PopkinId).IsUnique().HasFilter("[ReleasedAt] IS NULL");
+    }
+}
+
 public sealed class OutgoingEmailConfiguration : IEntityTypeConfiguration<OutgoingEmail>
 {
     public void Configure(EntityTypeBuilder<OutgoingEmail> builder)

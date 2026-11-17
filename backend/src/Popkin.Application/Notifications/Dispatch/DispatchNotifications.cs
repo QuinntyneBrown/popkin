@@ -107,7 +107,7 @@ public sealed class DispatchNotificationsCommandHandler(
     {
         var account = await db.People.AsNoTracking()
             .Where(p => p.Id == person)
-            .Select(p => new { p.Email, p.DeletedAt })
+            .Select(p => new { p.Email, p.DeletedAt, p.ErasedAt })
             .FirstOrDefaultAsync(cancellationToken);
         var membership = notification.PopkinId is { } popkinId
             ? await db.Memberships.AsNoTracking().FirstOrDefaultAsync(m => m.PopkinId == popkinId && m.PersonId == person && m.LeftAt == null, cancellationToken)
@@ -132,6 +132,8 @@ public sealed class DispatchNotificationsCommandHandler(
             HasDevice = hasDevice,
             EmailPaused = platform.EmailPausedAt is not null,
             KindOffForEveryone = notifications.IsKindOff(notification.Kind),
+            Held = notification.PopkinId is { } heldPopkin && notifications.IsPopkinHeld(heldPopkin)
+                || account is not null && NotificationHoldRules.HeldAutomatically(account.DeletedAt, account.ErasedAt) is not null,
             EmailOn = settings.EmailOn,
             Frequency = settings.Frequency,
             RecipientIsNamed = person == notification.RecipientPersonId,

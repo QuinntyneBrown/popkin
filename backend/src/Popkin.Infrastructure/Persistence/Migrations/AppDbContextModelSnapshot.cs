@@ -1233,6 +1233,50 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("NotificationEvents", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.NotificationHold", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("HeldAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("HeldByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("HeldByName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ReleaseReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset?>("ReleasedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ReleasedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PopkinId")
+                        .IsUnique()
+                        .HasFilter("[ReleasedAt] IS NULL");
+
+                    b.ToTable("NotificationHolds", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.NotificationKindChoice", b =>
                 {
                     b.Property<Guid>("PersonId")
