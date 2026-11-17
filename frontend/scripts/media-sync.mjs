@@ -6,7 +6,7 @@ import { join } from 'node:path';
 
 const root = join(import.meta.dirname, '..', '..');
 const site = join(root, 'frontend', 'projects', 'marketing', 'public');
-const film = join(root, 'docs', 'videos', '19-meet-popkin', '19-meet-popkin.mp4');
+const film = join(root, 'docs', 'videos', '00-meet-popkin', '00-meet-popkin.mp4');
 const images = join(root, 'docs', 'mocks', 'assets', 'images');
 
 mkdirSync(join(site, 'media'), { recursive: true });
