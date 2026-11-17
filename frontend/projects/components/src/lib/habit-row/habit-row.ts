@@ -6,7 +6,7 @@ import { KeepPeriod, KeepStrip } from '../keep-strip/keep-strip';
 /**
  * Habit row (docs/design-system/components/keep-strip.html, `habit-row`): a habit in the list:
  * who and how often, as one link to the person (at least 48 px tall); the keep strip; the streak
- * and the next one. Stacked below M; three columns from M. Ruled from the habit above.
+ * and the next one. Stacked below M; three columns from M. `pk-habit-list` rules each from the one above.
  */
 @Component({
   selector: 'li[pk-habit-row]',

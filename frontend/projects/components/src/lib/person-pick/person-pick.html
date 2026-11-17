@@ -11,11 +11,17 @@
     <div class="row__text">{{ text() }}</div>
   }
 </div>
-<button
-  pk-icon-button
-  type="button"
-  icon="close"
-  size="md"
-  [label]="'Remove the connection to ' + firstName()"
-  (click)="removed.emit()"
-></button>
+@if (changeLabel()) {
+  <button pk-link type="button" variant="accent" (click)="changed.emit()">
+    {{ changeLabel() }}
+  </button>
+} @else {
+  <button
+    pk-icon-button
+    type="button"
+    icon="close"
+    size="md"
+    [label]="'Remove the connection to ' + firstName()"
+    (click)="removed.emit()"
+  ></button>
+}

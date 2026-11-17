@@ -64,11 +64,16 @@ async function profileAsDrawn(page: Page, name: string, change: object): Promise
   await answer(page, key, { status: 200, body: { ...recordedBody<object>(key), ...change } });
 }
 
-/** Chidi's profile, as default.html draws him: his photo, in sky, and his timeline's photo. */
+/** Chidi's profile, as default.html draws him: his photo, in sky, his habit and his timeline's photo. */
 export async function chidiProfile(page: Page, change: object = {}): Promise<void> {
   await serveContactPhoto(page);
   await serveMemoryPhotos(page);
-  await profileAsDrawn(page, 'Chidi Okafor', { photoUrl: contactPhoto, accent: 'Sky', ...change });
+  await profileAsDrawn(page, 'Chidi Okafor', {
+    photoUrl: contactPhoto,
+    accent: 'Sky',
+    habit: chidisHabit(),
+    ...change,
+  });
 }
 
 /** Femi's profile, as empty.html draws him: initials in leaf. */
@@ -596,4 +601,167 @@ export async function chidisMemories(page: Page): Promise<void> {
       ],
     },
   });
+}
+
+export const habitsKey = 'GET /api/contacts/habits';
+
+/** A day moved back by whole periods, as the API's HabitSchedule steps. */
+function stepBack(day: string, rhythm: string, steps: number): string {
+  const [y, m, d] = day.split('-').map(Number);
+  const date =
+    rhythm === 'Monthly'
+      ? new Date(
+          Date.UTC(y, m - 1 - steps, Math.min(d, new Date(Date.UTC(y, m - steps, 0)).getUTCDate())),
+        )
+      : new Date(Date.UTC(y, m - 1, d - (rhythm === 'Weekly' ? 7 : 14) * steps));
+  return date.toISOString().slice(0, 10);
+}
+
+/** [id, what, first name, name, accent, photo, phone, rhythm, due, strip oldest first (K kept)] */
+type HabitRow = [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string | null,
+  string,
+  string,
+  string,
+];
+
+/** Mara's habits as Habits draws them on Tuesday 15 September 2026. */
+const MARAS_HABITS: HabitRow[] = [
+  [
+    '1',
+    'Lunch',
+    'Chidi',
+    'Chidi Okafor',
+    'Sky',
+    'contact-chidi.jpg',
+    '+447700900788',
+    'EveryTwoWeeks',
+    '2026-09-13',
+    'KK.KKK.KKKKD',
+  ],
+  [
+    '2',
+    'Sunday call',
+    'Ada',
+    'Ada Okafor',
+    'Coral',
+    'contact-ada.jpg',
+    null,
+    'Weekly',
+    '2026-09-20',
+    'K.KKKKKKKKKK',
+  ],
+  [
+    '3',
+    'Garden tea',
+    'Ruth',
+    'Ruth Lindqvist',
+    'Teal',
+    'contact-ruth.jpg',
+    null,
+    'Monthly',
+    '2026-10-03',
+    '....K.K.KKKK',
+  ],
+  [
+    '4',
+    'Catch-up',
+    'Grace',
+    'Grace Adeyemi',
+    'Plum',
+    'contact-grace.jpg',
+    null,
+    'Monthly',
+    '2026-10-11',
+    '.KK.KKKKKKKK',
+  ],
+];
+
+/** The id of Mara's habit drawn n-th (from 1). */
+export function habitId(n: number): string {
+  return `00000000-0000-4000-a000-${String(n).padStart(12, '0')}`;
+}
+
+/**
+ * A habit as drawn: each kept cell of its strip is a day kept at the start of that period, the
+ * periods counting back from its due day (known gap 105, ruled).
+ */
+function habitOf([
+  n,
+  what,
+  first,
+  name,
+  accent,
+  photo,
+  phone,
+  rhythm,
+  dueOn,
+  strip,
+]: HabitRow): object {
+  const latest = strip.endsWith('D') ? 0 : 1;
+  const kept = [...strip]
+    .reverse()
+    .map((cell, j) => (cell === 'K' ? stepBack(dueOn, rhythm, j + latest) : null))
+    .filter((day): day is string => day !== null)
+    .map((on, i) => ({ id: `00000000-0000-4000-b${n}00-${String(i).padStart(12, '0')}`, on }));
+  return {
+    id: habitId(Number(n)),
+    contactId: recordedContactId('Chidi Okafor'),
+    contactFirstName: first,
+    contactName: name,
+    contactInitials: name
+      .split(' ')
+      .map((part) => part[0])
+      .join(''),
+    contactAccent: accent,
+    contactPhone: phone,
+    contactPhotoUrl: `/api/files/contacts/${photo}`,
+    what,
+    rhythm,
+    startedOn: '2025-01-01',
+    lastTime: kept[0]?.on ?? '2025-01-01',
+    dueOn,
+    kept,
+  };
+}
+
+/** Mara's habit with Chidi, as his profile's card draws it. */
+export function chidisHabit(): object {
+  return habitOf(MARAS_HABITS[0]);
+}
+
+/** Habits answers with the mocks' four, Chidi's overdue leading. */
+export async function marasHabits(page: Page): Promise<void> {
+  await servePhotos(page);
+  await answer(page, habitsKey, { status: 200, body: MARAS_HABITS.map(habitOf) });
+}
+
+/** No habits yet. */
+export function noHabits(page: Page): Promise<void> {
+  return answer(page, habitsKey, { status: 200, body: [] });
+}
+
+/** "We met up" with Chidi on the mocks' Tuesday: kept today, due a fortnight on. */
+export async function answerChidisKeep(page: Page): Promise<void> {
+  const habit = chidisHabit() as { kept: { id: string; on: string }[] };
+  await page.route(`**/api/contacts/habits/${habitId(1)}/kept`, (route) =>
+    route.fulfill({
+      status: 201,
+      json: {
+        keptId: '00000000-0000-4000-b900-000000000001',
+        habit: {
+          ...habit,
+          lastTime: '2026-09-15',
+          dueOn: '2026-09-29',
+          kept: [{ id: '00000000-0000-4000-b900-000000000001', on: '2026-09-15' }, ...habit.kept],
+        },
+      },
+    }),
+  );
 }

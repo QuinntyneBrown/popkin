@@ -59,6 +59,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Memory> Memories => Set<Memory>();
 
+    public DbSet<Habit> Habits => Set<Habit>();
+
+    public DbSet<HabitKept> HabitKept => Set<HabitKept>();
+
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();
 
     public DbSet<Admin> Admins => Set<Admin>();

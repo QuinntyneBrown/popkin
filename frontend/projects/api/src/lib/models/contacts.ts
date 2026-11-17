@@ -71,6 +71,8 @@ export interface ContactProfileView {
   keyDates?: ContactKeyDateView[];
   /** What goes with them when they are deleted (L2-132 AC1); read with the profile. */
   kept?: ContactKeptView | null;
+  /** Our habit, running, or none (L2-128 AC5). */
+  habit?: HabitView | null;
 }
 
 /** A contact's timeline entries and memories, counted for Delete (L2-132 AC1). */
@@ -323,3 +325,47 @@ export type MemoryKind = 'photo' | 'file' | 'note';
 /** A photo or file on its way: how much is sent, then what was kept. */
 export type MemoryUploadEvent<T> =
   { kind: 'progress'; sent: number; total: number } | { kind: 'done'; memory: T };
+
+/** How often a habit comes round (L2-145). */
+export type HabitRhythm = 'Weekly' | 'EveryTwoWeeks' | 'Monthly';
+
+/** A day a habit was kept, with the id its Undo removes. */
+export interface HabitKeptDay {
+  id: string;
+  /** yyyy-MM-dd. */
+  on: string;
+}
+
+/** A running habit as Habits and a profile show it (L2-143, L2-128 AC5). */
+export interface HabitView {
+  id: string;
+  contactId: string;
+  contactFirstName: string;
+  contactName: string;
+  contactInitials: string;
+  contactAccent: string;
+  contactPhone: string | null;
+  contactPhotoUrl: string | null;
+  what: string;
+  rhythm: HabitRhythm;
+  /** yyyy-MM-dd, each. */
+  startedOn: string;
+  lastTime: string;
+  dueOn: string;
+  /** The days kept as far back as the strip reaches, newest first. */
+  kept: HabitKeptDay[];
+}
+
+/** "We met up" kept: the keep Undo removes, and the habit due on (L2-144 AC1). */
+export interface HabitKeptView {
+  keptId: string;
+  habit: HabitView;
+}
+
+/** "Start the habit" (L2-145 AC1). */
+export interface StartHabitRequest {
+  clientId: string;
+  contactId: string;
+  what: string;
+  rhythm: HabitRhythm;
+}

@@ -3,8 +3,19 @@
   [for]="fieldId()"
   >{{ label() }}</label
 >
-<select class="select-field__select" [id]="fieldId()" (change)="chose($event)">
+<select
+  class="select-field__select"
+  [id]="fieldId()"
+  [attr.aria-invalid]="error() ? 'true' : null"
+  [attr.aria-describedby]="error() ? fieldId() + '-err' : null"
+  (change)="chose($event)"
+>
   @for (option of options(); track option.value) {
     <option [value]="option.value" [selected]="option.value === value()">{{ option.label }}</option>
   }
 </select>
+@if (error()) {
+  <span class="field__error" [id]="fieldId() + '-err'"
+    ><svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span></span
+  >
+}

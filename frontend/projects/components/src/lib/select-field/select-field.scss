@@ -47,3 +47,17 @@
     transition: none;
   }
 }
+
+.select-field__select[aria-invalid='true'] {
+  border-color: var(--color-danger-border);
+}
+
+.field__error {
+  display: flex;
+  gap: var(--space-1-5);
+  align-items: flex-start;
+  margin-top: var(--space-2);
+  font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-danger-fg);
+}

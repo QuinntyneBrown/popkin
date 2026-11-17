@@ -351,6 +351,22 @@ const commute = await call('POST', '/api/contacts/follow-ups', {
 });
 await call('GET', '/api/contacts/follow-ups');
 await call('PUT', `/api/contacts/follow-ups/${commute.id}/done`, { done: true });
+// Habits (L2-143 to L2-145, known gap 105 ruled): none yet; she starts lunch every 2 weeks with
+// Chidi, says they met up and undoes it, ends it and undoes that, and reads Habits again.
+await call('GET', '/api/contacts/habits');
+const lunch = await call('POST', '/api/contacts/habits', {
+  clientId: '00000000-0000-4000-c000-000000000050',
+  contactId: chidiKept.id,
+  what: 'Lunch',
+  rhythm: 'EveryTwoWeeks',
+});
+const metUp = await call('POST', `/api/contacts/habits/${lunch.id}/kept`, {
+  clientId: '00000000-0000-4000-c000-000000000051',
+  keptOn: new Date().toISOString().slice(0, 10),
+});
+await call('DELETE', `/api/contacts/habits/${lunch.id}/kept/${metUp.keptId}`);
+await call('POST', `/api/contacts/habits/${lunch.id}/end`);
+await call('DELETE', `/api/contacts/habits/${lunch.id}/end`);
 // Nothing is logged with Femi (L2-135 AC2). She logs Chidi's new job, every year, and a phone
 // call with a promise, as his profile draws them, then reads his timeline: all, milestones,
 // conversations (L2-133 to L2-135).

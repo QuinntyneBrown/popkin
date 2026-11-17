@@ -85,12 +85,29 @@
                     Add a date
                   </button>
                 </section>
-                <a
-                  pk-add-card
-                  routerLink="/contacts/habits"
-                  [queryParams]="{ new: 1, contact: profile.id }"
-                  >Make a habit of seeing {{ profile.firstName }}</a
-                >
+                @if (habitCard(); as habit) {
+                  <div>
+                    <section
+                      pk-info-card
+                      overIcon="repeat"
+                      link="/contacts/habits"
+                      [level]="2"
+                      [over]="habit.over"
+                      [heading]="habit.heading"
+                      [foot]="habit.foot"
+                      [late]="habit.late"
+                    >
+                      <div pk-keep-strip size="sm" [periods]="habit.periods"></div>
+                    </section>
+                    <button pk-link type="button" variant="accent" (click)="store.endHabit()">
+                      End this habit
+                    </button>
+                  </div>
+                } @else {
+                  <button pk-add-card type="button" (click)="newHabit()">
+                    Make a habit of seeing {{ profile.firstName }}
+                  </button>
+                }
                 <section aria-labelledby="about">
                   <div
                     pk-list-head

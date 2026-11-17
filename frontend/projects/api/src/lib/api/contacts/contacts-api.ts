@@ -10,19 +10,22 @@ import {
   DatesFilter,
   FileMemoryView,
   FollowUpView,
+  HabitKeptView,
+  HabitView,
+  KeyDateRowView,
+  LogConversationRequest,
+  LogMilestoneRequest,
   MemoriesView,
   MemoryUploadEvent,
   NoteMemoryView,
+  PeopleView,
   PhotoMemoryView,
-  LogConversationRequest,
-  LogMilestoneRequest,
+  ReminderPreferencesView,
+  SaveContactRequest,
+  StartHabitRequest,
   TimelineEntryView,
   TimelineShow,
   TimelineView,
-  KeyDateRowView,
-  PeopleView,
-  ReminderPreferencesView,
-  SaveContactRequest,
 } from '../../models/contacts';
 
 /**
@@ -66,6 +69,18 @@ export interface ContactsApi {
   addFollowUp(request: AddFollowUpRequest): Observable<FollowUpView>;
   /** "Mark done" and "Mark not done" (L2-142 AC2, AC3). */
   setFollowUpDone(id: string, done: boolean): Observable<FollowUpView>;
+  /** Habits (L2-143): every running habit, the one due soonest first. */
+  habits(): Observable<HabitView[]>;
+  /** "Start the habit" (L2-145). */
+  startHabit(request: StartHabitRequest): Observable<HabitView>;
+  /** "We met up" on the device's day (L2-144 AC1). */
+  keepHabit(id: string, keptOn: string, clientId: string): Observable<HabitKeptView>;
+  /** Its Undo (L2-144 AC2). */
+  unkeepHabit(id: string, keptId: string): Observable<HabitView>;
+  /** "End this habit" (L2-144 AC3). */
+  endHabit(id: string): Observable<void>;
+  /** Its Undo. */
+  resumeHabit(id: string): Observable<HabitView>;
   /** A contact's timeline, newest first, filtered by kind (L2-135 AC1). */
   timeline(contactId: string, show: TimelineShow): Observable<TimelineView>;
   /** Log a conversation and its promises (L2-133); a resend keeps it once. */
@@ -175,6 +190,30 @@ export class HttpContactsApi implements ContactsApi {
 
   setFollowUpDone(id: string, done: boolean): Observable<FollowUpView> {
     return this.http.put<FollowUpView>(`/api/contacts/follow-ups/${id}/done`, { done });
+  }
+
+  habits(): Observable<HabitView[]> {
+    return this.http.get<HabitView[]>('/api/contacts/habits');
+  }
+
+  startHabit(request: StartHabitRequest): Observable<HabitView> {
+    return this.http.post<HabitView>('/api/contacts/habits', request);
+  }
+
+  keepHabit(id: string, keptOn: string, clientId: string): Observable<HabitKeptView> {
+    return this.http.post<HabitKeptView>(`/api/contacts/habits/${id}/kept`, { clientId, keptOn });
+  }
+
+  unkeepHabit(id: string, keptId: string): Observable<HabitView> {
+    return this.http.delete<HabitView>(`/api/contacts/habits/${id}/kept/${keptId}`);
+  }
+
+  endHabit(id: string): Observable<void> {
+    return this.http.post<void>(`/api/contacts/habits/${id}/end`, null);
+  }
+
+  resumeHabit(id: string): Observable<HabitView> {
+    return this.http.delete<HabitView>(`/api/contacts/habits/${id}/end`);
   }
 
   timeline(contactId: string, show: TimelineShow): Observable<TimelineView> {

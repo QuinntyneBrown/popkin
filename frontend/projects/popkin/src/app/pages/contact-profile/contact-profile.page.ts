@@ -19,6 +19,12 @@ import {
   NO_COUNTS,
   NOT_FOUND_TEXT,
   closestItem,
+  habitFoot,
+  habitDue,
+  habitKeeping,
+  habitRhythmLabel,
+  habitTitle,
+  HabitView,
   dueText,
   failedText,
   fileLine,
@@ -57,6 +63,8 @@ import {
   FilterChips,
   Icon,
   IconButton,
+  InfoCard,
+  KeepStrip,
   KeyDateItem,
   KeyDates,
   Likes,
@@ -84,6 +92,7 @@ import {
 } from '../../dialogs/delete-contact/delete-contact.dialog';
 import { AddDateData, AddDateDialog } from '../../dialogs/add-date/add-date.dialog';
 import { AddMemoryData, AddMemoryDialog } from '../../dialogs/add-memory/add-memory.dialog';
+import { NewHabitData, NewHabitDialog } from '../../dialogs/new-habit/new-habit.dialog';
 
 type HistoryView = 'timeline' | 'follow-ups' | 'memories';
 
@@ -113,6 +122,8 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     FilterChips,
     Icon,
     IconButton,
+    InfoCard,
+    KeepStrip,
     KeyDates,
     Likes,
     Link,
@@ -315,6 +326,43 @@ export class ContactProfilePage {
   protected tick(change: { id: string; done: boolean }): void {
     const followUp = this.followUpsStore.followUps().find((f) => f.id === change.id);
     if (followUp) this.followUpsStore.setDone(followUp, change.done);
+  }
+
+  /** Our habit as its card shows it (L2-128 AC5). */
+  protected readonly habitCard = computed(() => {
+    const habit = this.profile()?.habit;
+    if (!habit) return null;
+    const today = new Date();
+    return {
+      over: habitRhythmLabel(habit.rhythm),
+      heading: habitTitle(habit.what, habit.contactFirstName),
+      periods: habitKeeping(habit, today).periods,
+      foot: habitFoot(habit.dueOn, today),
+      late: habitDue(habit.dueOn, today).state === 'overdue',
+    };
+  });
+
+  /** "Make a habit of seeing {first name}": New habit with them (L2-145). */
+  protected newHabit(): void {
+    const profile = this.profile();
+    if (!profile) return;
+    this.dialog
+      .open<HabitView, NewHabitData>(NewHabitDialog, {
+        data: {
+          contact: {
+            id: profile.id,
+            name: profile.name,
+            text: profile.knownAs ?? profile.circle ?? undefined,
+            initials: profile.initials,
+            accent: profile.accent.toLowerCase(),
+            photoUrl: profile.photoUrl,
+          },
+        },
+        ...MODAL,
+      })
+      .closed.subscribe((started) => {
+        if (started) this.store.habitStarted(started);
+      });
   }
 
   /** Add a date for this contact; the profile reads again once it is kept (L2-138 AC4). */

@@ -209,6 +209,7 @@ export * from './lib/date-entry/date-entry';
 export * from './lib/person-pick/person-pick';
 export * from './lib/kind-grid/kind-grid';
 export * from './lib/keep-strip/keep-strip';
+export * from './lib/habit-list/habit-list';
 export * from './lib/habit-row/habit-row';
 export * from './lib/group-browser/group-browser';
 export * from './lib/contacts-page/contacts-page';

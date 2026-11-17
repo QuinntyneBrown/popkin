@@ -1,0 +1,72 @@
+<div pk-dialog heading="New habit" accent="coral">
+  <div class="stack">
+    @if (problems().length) {
+      <div pk-form-summary [problems]="problems()"></div>
+    }
+    @if (failed()) {
+      <div pk-alert heading="We couldn’t start that habit.">
+        Everything you chose is still here. Check your connection and try again.
+      </div>
+    }
+    @if (contact(); as person) {
+      <div>
+        <span class="field__label" id="with-label">With</span>
+        <div
+          pk-person-pick
+          aria-labelledby="with-label"
+          changeLabel="Change"
+          [name]="person.name"
+          [text]="person.text"
+          [initials]="person.initials"
+          [photo]="person.photoUrl"
+          [accent]="person.accent"
+          (changed)="change()"
+        ></div>
+      </div>
+    } @else {
+      <div
+        pk-select-field
+        fieldId="with"
+        label="With"
+        [options]="people()"
+        [error]="error('with')"
+        [(value)]="who"
+      ></div>
+    }
+    <div
+      pk-text-field
+      fieldId="what"
+      label="What"
+      placeholder="Sunday call, lunch, a walk…"
+      [maxlength]="80"
+      [error]="error('what')"
+      [readonly]="busy()"
+      [formControl]="what"
+    ></div>
+    <div
+      pk-choice-chips
+      fieldId="often"
+      label="How often"
+      [outline]="true"
+      [options]="rhythms"
+      [disabled]="busy()"
+      [value]="rhythm()"
+      (valueChange)="rhythm.set($any($event))"
+    ></div>
+    <p class="text-sm text-muted">
+      We’ll remind you when it’s due, and nudge again if a week slips by.
+    </p>
+  </div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="start()"
+  >
+    {{ busy() ? 'Starting…' : 'Start the habit' }}
+  </button>
+</div>
