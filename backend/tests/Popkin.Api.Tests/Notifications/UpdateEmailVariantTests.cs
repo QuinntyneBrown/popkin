@@ -224,7 +224,7 @@ public sealed class UpdateEmailVariantTests
         await ruth.AllowsAlertsAsync();
         var everyone = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
         var asked = (await ruth.SentMessageAsync(lakeside.Id, everyone, "Paddles?")).Id();
-        Platform(api, p => p.PauseEmail(Guid.NewGuid(), "Bounce rate", api.Clock.GetUtcNow()));
+        Platform(api, p => p.PauseEmail(Guid.NewGuid(), "Owner", "Bounce rate", api.Clock.GetUtcNow()));
 
         await joel.RepliedAsync(lakeside.Id, everyone, asked, "Mine");
         await WindowEndsAsync(api);
@@ -236,7 +236,7 @@ public sealed class UpdateEmailVariantTests
         Assert.Single(api.PhoneAlerts.Sent);
         Assert.Single(api.NotificationEmails.Sent);
 
-        Platform(api, p => p.PauseEmail(Guid.NewGuid(), "Bounce rate", api.Clock.GetUtcNow()));
+        Platform(api, p => p.PauseEmail(Guid.NewGuid(), "Owner", "Bounce rate", api.Clock.GetUtcNow()));
         await joel.RepliedAsync(lakeside.Id, everyone, asked, "And the oars");
         await WindowEndsAsync(api);
         api.Clock.Advance(TimeSpan.FromHours(7));

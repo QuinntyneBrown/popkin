@@ -22,6 +22,8 @@ public enum AdminAction
     ChangeFeature,
     ChangeLimits,
     PublishAnnouncement,
+    ManageNotifications,
+    HoldNotifications,
     ManageAdmins,
     ExportAuditLog,
 }

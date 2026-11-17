@@ -35,6 +35,8 @@ public enum AuditAction
     ChangedAdminRole,
     RemovedAdmin,
     ExportedAuditLog,
+    PausedMemberEmail,
+    ResumedMemberEmail,
 }
 
 /// <summary>What an audit entry is about.</summary>
@@ -52,4 +54,5 @@ public enum AuditTargetKind
     Announcement,
     Admin,
     ModerationView,
+    MemberEmail,
 }

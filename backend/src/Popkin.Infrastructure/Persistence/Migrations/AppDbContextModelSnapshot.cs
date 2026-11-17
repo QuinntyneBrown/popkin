@@ -1269,11 +1269,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("PauseReason")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("PausedByAdminId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PausedByName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<TimeOnly>("QuietFrom")
                         .HasColumnType("time");

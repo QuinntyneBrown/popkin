@@ -39,6 +39,8 @@ public static class AuditActionLabels
         [AuditAction.ChangedAdminRole] = "Changed role",
         [AuditAction.RemovedAdmin] = "Removed admin",
         [AuditAction.ExportedAuditLog] = "Exported audit log",
+        [AuditAction.PausedMemberEmail] = "Paused member email",
+        [AuditAction.ResumedMemberEmail] = "Resumed member email",
     };
 
     public static string Of(AuditAction action) => Labels[action];

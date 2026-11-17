@@ -249,17 +249,37 @@ public sealed class NotificationPlatform
     /// <summary>The settings as they stand before any Owner changes them.</summary>
     public static NotificationPlatform Defaults() => new();
 
-    public void PauseEmail(Guid adminId, string reason, DateTimeOffset now)
+    public string? PausedByName { get; private set; }
+
+    public bool IsPaused => EmailPausedAt is not null;
+
+    /// <summary>Stops every member email (L2-170 AC1); false, changing nothing, when already paused.</summary>
+    public bool PauseEmail(Guid adminId, string adminName, string reason, DateTimeOffset now)
     {
-        EmailPausedAt ??= now;
+        if (IsPaused)
+        {
+            return false;
+        }
+
+        EmailPausedAt = now;
         PausedByAdminId = adminId;
+        PausedByName = adminName;
         PauseReason = reason;
+        return true;
     }
 
-    public void ResumeEmail()
+    /// <summary>Starts member email again (L2-170 AC3); false, changing nothing, when not paused.</summary>
+    public bool ResumeEmail()
     {
+        if (!IsPaused)
+        {
+            return false;
+        }
+
         EmailPausedAt = null;
         PausedByAdminId = null;
+        PausedByName = null;
         PauseReason = null;
+        return true;
     }
 }

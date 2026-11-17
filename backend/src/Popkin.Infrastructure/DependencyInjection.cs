@@ -232,6 +232,7 @@ public static class DependencyInjection
             }
         });
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+        services.AddScoped<Popkin.Application.Administration.Notifications.INotificationStats, Notifications.NotificationStats>();
         return services;
     }
 }

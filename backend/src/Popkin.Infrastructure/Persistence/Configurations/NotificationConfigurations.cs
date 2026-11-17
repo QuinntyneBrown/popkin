@@ -76,7 +76,9 @@ public sealed class NotificationPlatformConfiguration : IEntityTypeConfiguration
     {
         builder.ToTable("NotificationPlatform");
         builder.HasKey(p => p.Id);
-        builder.Property(p => p.PauseReason).HasMaxLength(200);
+        builder.Property(p => p.PauseReason).HasMaxLength(500);
+        builder.Property(p => p.PausedByName).HasMaxLength(200);
+        builder.Ignore(p => p.IsPaused);
     }
 }
 
