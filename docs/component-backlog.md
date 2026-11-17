@@ -10,17 +10,17 @@ Popkin uses no custom tooltips.
 
 | # | Component | Description | Effort | Status |
 |---|---|---|---|---|
-| 1 | Status pill | Record state beside a name or in a table column, on People, Jobs and Exports. | 0.5 days || Built, parity pending |
-| 2 | Key values | Facts of one record on an admin detail page, as a description list. | 0.5 days | Built, parity pending |
-| 3 | Report review | Reports queue and the evidence for one report, so a moderator can decide it. | 1.5 days || Built, parity pending |
-| 4 | Activity lists | Five to ten recent items in a panel on Dashboard, Person and Announcements. | 1 day | Built, parity pending |
-| 5 | Figures and tiles | Headline numbers on Dashboard and Metrics, as tabs or links to the detail. | 1 day || Built, parity pending |
-| 6 | Limit row and save bar | Number input per limit, with a save bar that holds unsaved edits. | 1 day | Built, parity pending |
-| 7 | Announcement preview | Shows how an announcement will look in the app, beside its form. | 1 day || Built, parity pending |
-| 8 | Settings list | Read-only list of configuration values and the release, filterable, on Settings. | 0.5 days | Built, parity pending |
-| 9 | Job row | Background job table row that expands to show its runs and details. | 1 day || Built, parity pending |
-| 10 | Service health | Summary and per-service state on Health: all good, degraded or down. | 1 day | Built, parity pending |
-| 11 | Trend chart and uptime | Accessible SVG trend for one series and an uptime bar, on Dashboard, Health and Metrics. | 1.5 days || Built, parity pending |
+| 1 | Status pill | Record state beside a name or in a table column, on People, Jobs and Exports. | 0.5 days | Built, parity pending |
+| 2 | Key values | Facts of one record on an admin detail page, as a description list. | 0.5 days | Not built: built with its screen (ADR 0029) |
+| 3 | Report review | Reports queue and the evidence for one report, so a moderator can decide it. | 1.5 days | Not built: built with its screen (ADR 0029) |
+| 4 | Activity lists | Five to ten recent items in a panel on Dashboard, Person and Announcements. | 1 day | Not built: built with its screen (ADR 0029) |
+| 5 | Figures and tiles | Headline numbers on Dashboard and Metrics, as tabs or links to the detail. | 1 day | Not built: built with its screen (ADR 0029) |
+| 6 | Limit row and save bar | Number input per limit, with a save bar that holds unsaved edits. | 1 day | Not built: built with its screen (ADR 0029) |
+| 7 | Announcement preview | Shows how an announcement will look in the app, beside its form. | 1 day | Not built: built with its screen (ADR 0029) |
+| 8 | Settings list | Read-only list of configuration values and the release, filterable, on Settings. | 0.5 days | Not built: built with its screen (ADR 0029) |
+| 9 | Job row | Background job table row that expands to show its runs and details. | 1 day | Not built: built with its screen (ADR 0029) |
+| 10 | Service health | Summary and per-service state on Health: all good, degraded or down. | 1 day | Not built: built with its screen (ADR 0029) |
+| 11 | Trend chart and uptime | Accessible SVG trend for one series and an uptime bar, on Dashboard, Health and Metrics. | 1.5 days | Not built: built with its screen (ADR 0029) |
 | 12 | Contact row | A person in the People list, linking to their profile. | 0.5 days | Built, with parity (row, quiet row, Closest) and a loading state |
 | 13 | Contact header and facts | Head of a person's profile with their details as a description list. | 1 day || Built; header parity done (phone, email only) |
 | 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, with parity (habit) |
@@ -45,14 +45,16 @@ Popkin uses no custom tooltips.
 | 33 | People around and person choice | A contact's people as short linked rows, keyed on Connections; Connect's "Who" as a radio list. | 0.5 days | Built, with parity (panel; chosen, invalid) |
 | 34 | Group members, Coming up, group chips and toggle chips | A group's members and its next dates; a profile's groups as links; the form's Groups as toggles. | 0.5 days | Built; members and Coming up with parity (thursday, sheffield; two, three) |
 | 35 | It's been a while | Today's drifting people set apart under Recently by a hairline: the line and its who chips (`pk-drift`). | 0.25 days | Built, with parity |
+| 36 | Who chip | The design system's `who-chip` on its own (`pk-who-chip`, a button or a link), composed by `pk-who-chips` and `pk-drift-chips` ([ADR 0029](adr/0029-one-library-no-unused-components.md)). | 0.25 days | To build (ADR 0029) |
+| 37 | Stack and cluster | The layout utilities' spacing as knobs (`pk-stack` `gap`, `pk-cluster` `justify`), so an application template writes no modifier class ([ADR 0029](adr/0029-one-library-no-unused-components.md)). | 0.25 days | To build (ADR 0029) |
+| 38 | Term list | What goes and what stays in Delete your account: each item a bold term and its sentence (`pk-term-list`). | 0.25 days | To build (ADR 0029) |
 
-Total: 31 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
+Total: 38 rows. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
 26 came from the Contacts designs and are not estimated yet.
 
-The even-numbered components were built on 15 November 2026, in the library only, before their
-screens ([ADR 0025](adr/0025-library-components-ahead-of-their-screens.md)): each one's parity
-spec comes with the first screen that uses it. The Contacts ones were built ahead of the Contacts
-requirements, which now exist; a Contacts screen still waits for its slice. The odd-numbered ones (#1 to #21) were built the same day, the same way. Service health still
-takes the status pill and the uptime bar in slots; it can compose `pk-status` and `pk-uptime` when
-its screen is built. The job row's toggle and details (#9) are built; putting them into
-`pk-data-table` (a job cell, a status cell and the row that opens) waits for the Jobs screen.
+Rows 2 to 11 were built on 15 November 2026, in the library only, before their screens
+([ADR 0025](adr/0025-library-components-ahead-of-their-screens.md)), and removed on 17 November
+2026 unused ([ADR 0029](adr/0029-one-library-no-unused-components.md)): a component exists only
+while a screen uses it. Each is "Not built: built with its screen": the screen's change builds it
+from its design-system page, with its parity spec. The Contacts ones built ahead of the Contacts
+requirements are all used by Contacts screens now.
