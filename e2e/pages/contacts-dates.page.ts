@@ -4,6 +4,8 @@ import { ContactsNav } from './contacts-nav';
 /** Dates, `/contacts/dates` (L2-137, L2-139). */
 export class ContactsDatesPage {
   readonly root: Locator;
+  /** The date tile of the first row. */
+  readonly firstTile: Locator;
   readonly nav: ContactsNav;
   readonly heading: Locator;
   readonly sub: Locator;
@@ -28,6 +30,7 @@ export class ContactsDatesPage {
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="contacts-dates"]');
+    this.firstTile = page.locator('ul.divided a.row').first().locator('.date-tile');
     this.nav = new ContactsNav(page);
     this.heading = page.getByRole('heading', { level: 1 });
     this.pageHead = page.locator('.page-head');

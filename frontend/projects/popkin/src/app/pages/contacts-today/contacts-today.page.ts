@@ -115,9 +115,8 @@ export class ContactsTodayPage implements OnInit {
     const d = next.date;
     const facts: SpotlightFact[] = [];
     const loves = lovesLine(next.loves);
-    if (loves) facts.push({ icon: 'heart', lead: `${d.firstName} is into`, text: loves });
-    if (next.lastTime)
-      facts.push({ icon: 'message-circle', lead: 'Last time:', text: next.lastTime });
+    if (loves) facts.push({ icon: 'gift', lead: `${d.firstName} is into`, text: loves });
+    if (next.lastTime) facts.push({ icon: 'heart', lead: 'Last time:', text: next.lastTime });
     return {
       when: spotlightWhen(d),
       heading: dateTitle(d),

@@ -4,6 +4,10 @@ import { ContactsNav } from './contacts-nav';
 /** Habits, `/contacts/habits` (L2-143, L2-144). */
 export class ContactsHabitsPage {
   readonly root: Locator;
+  /** The kept periods of the first habit. */
+  readonly firstStrip: Locator;
+  /** The page's grid of columns. */
+  readonly grid: Locator;
   readonly nav: ContactsNav;
   readonly heading: Locator;
   readonly sub: Locator;
@@ -35,6 +39,8 @@ export class ContactsHabitsPage {
 
   constructor(page: Page) {
     this.root = page.locator('body[data-page="contacts-habits"]');
+    this.grid = page.locator('.contacts-grid').first();
+    this.firstStrip = page.locator('li.habit-row').first().locator('.keep-strip');
     this.nav = new ContactsNav(page);
     this.heading = page.getByRole('heading', { level: 1 });
     this.pageHead = page.locator('.page-head');

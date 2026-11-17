@@ -1,9 +1,12 @@
 :host {
   display: block;
+  /* The screen's body, as the mocks draw it: it fills the screen below the head. */
+  flex: 1 0 auto;
   padding: var(--space-5) var(--space-5) var(--space-24);
 }
 
 .contacts-page__head {
+  --pk-page-head-gap: var(--space-5);
   margin-bottom: var(--space-5);
 }
 

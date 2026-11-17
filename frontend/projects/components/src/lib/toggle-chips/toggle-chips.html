@@ -10,9 +10,10 @@
       (click)="toggle(option.value)"
     >
       @if (option.emoji) {
-        <span aria-hidden="true">{{ option.emoji }}</span>&nbsp;
+        <span aria-hidden="true">{{ option.emoji }}</span>&nbsp;{{ option.label }}
+      } @else {
+        {{ option.label }}
       }
-      {{ option.label }}
     </button>
   }
 </div>

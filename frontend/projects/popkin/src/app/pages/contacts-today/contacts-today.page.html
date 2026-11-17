@@ -24,7 +24,7 @@
           size="md"
           (click)="importPeople()"
         >
-          <svg pk-icon name="users" size="md"></svg>Import from your Popkins
+          <svg pk-icon name="download" size="md"></svg>Import from your Popkins
         </button>
         @if (importLine(); as line) {
           <p slot="note" class="text-sm text-muted">{{ line }}</p>
@@ -81,7 +81,7 @@
               ></a>
               @if (next.message) {
                 <a pk-button slot="actions" variant="primary" size="sm" [href]="next.message"
-                  ><svg pk-icon name="message-square" size="sm"></svg>{{ next.messageLabel }}</a
+                  ><svg pk-icon name="message-circle" size="sm"></svg>{{ next.messageLabel }}</a
                 >
               }
               <a pk-button slot="actions" variant="secondary" size="sm" [routerLink]="next.profile"
@@ -104,9 +104,9 @@
         </div>
         <div class="stack stack--lg">
           @if (toDo()) {
-            <section class="stack" aria-labelledby="todo">
+            <section aria-labelledby="todo">
               <div pk-list-head headingId="todo" heading="To do today"></div>
-              <ul class="stack">
+              <ul class="stack stack--sm">
                 @for (item of followUps(); track item.followUp.id) {
                   <li
                     pk-task
