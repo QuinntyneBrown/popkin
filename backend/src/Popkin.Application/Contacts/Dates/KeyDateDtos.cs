@@ -28,7 +28,8 @@ public sealed record ContactKeyDateDto(
     bool EveryYear,
     ReminderLead Reminder,
     DateOnly? NextOn,
-    int? DaysLeft);
+    int? DaysLeft,
+    bool RemindersOn);
 
 /// <summary>
 /// The owner's default lead time per kind (L2-139). How reminders reach them is the "Birthdays"
@@ -56,7 +57,7 @@ public sealed record AddKeyDateRequest(
     bool EveryYear,
     string? Lead);
 
-public sealed record ChangeReminderRequest(string? Lead);
+public sealed record ChangeReminderRequest(string? Lead, bool? On);
 
 public sealed record SaveReminderPreferencesRequest(
     string? BirthdayLead,

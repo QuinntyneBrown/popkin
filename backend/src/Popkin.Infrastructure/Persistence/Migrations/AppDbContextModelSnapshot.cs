@@ -909,6 +909,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("RemindersOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Title")
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");

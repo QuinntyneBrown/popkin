@@ -13,20 +13,28 @@ public sealed record NotificationKindDto(
 
 public sealed record NotificationGroupDto(NotificationGroup Group, string Name, string About, IReadOnlyList<NotificationKindDto> Kinds);
 
-/// <summary>
-/// The Notifications screen in one read (L2-155). The words come from the catalogue, so the web app
-/// keeps no copy of the list. The Popkins, birthdays and muted people come with their own designs.
-/// </summary>
 /// <summary>One active Popkin and the level the person keeps for it (L2-158 AC1).</summary>
 public sealed record PopkinLevelDto(
     Guid PopkinId, string Name, string Emoji, PopkinColour Colour, int People, DateTimeOffset? EndsAt, PopkinNotificationLevel Level);
 
+/// <summary>
+/// The Notifications screen in one read (L2-155). The words come from the catalogue, so the web app
+/// keeps no copy of the list. The Popkins, birthdays and muted people come with their own designs.
+/// </summary>
 public sealed record NotificationSettingsDto(
-    ActivityEmailDto Email, IReadOnlyList<NotificationGroupDto> Groups, IReadOnlyList<PopkinLevelDto> Popkins, IReadOnlyList<Mutes.MutedPersonDto> Muted);
+    ActivityEmailDto Email,
+    IReadOnlyList<NotificationGroupDto> Groups,
+    IReadOnlyList<PopkinLevelDto> Popkins,
+    IReadOnlyList<Mutes.MutedPersonDto> Muted,
+    IReadOnlyList<BirthdayReminderDto> Birthdays)
+{
+    /// <summary>"Show all {n} contacts with birthdays" (L2-159 AC2).</summary>
+    public int BirthdayCount => Birthdays.Count;
+}
 
 public sealed record GetNotificationSettingsQuery : IRequest<NotificationSettingsDto>;
 
-public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurrentPerson current, IPhotoStore photos)
+public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurrentPerson current, IPhotoStore photos, Contacts.ContactsSwitch contacts, TimeProvider clock)
     : IRequestHandler<GetNotificationSettingsQuery, NotificationSettingsDto>
 {
     public async Task<NotificationSettingsDto> Handle(GetNotificationSettingsQuery request, CancellationToken cancellationToken)
@@ -71,6 +79,11 @@ public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurre
                 x.Membership.NotificationLevel))
             .ToListAsync(cancellationToken);
 
-        return new NotificationSettingsDto(new ActivityEmailDto(available && settings.EmailOn, available, settings.Frequency), groups, popkins, await Mutes.MutedPeople.OfAsync(db, photos, personId, cancellationToken));
+        return new NotificationSettingsDto(
+            new ActivityEmailDto(available && settings.EmailOn, available, settings.Frequency),
+            groups,
+            popkins,
+            await Mutes.MutedPeople.OfAsync(db, photos, personId, cancellationToken),
+            await BirthdayReminders.OfAsync(db, photos, contacts, personId, preferences?.TimeZone, clock.GetUtcNow(), cancellationToken));
     }
 }

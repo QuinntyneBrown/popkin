@@ -839,11 +839,12 @@
         "unsubscribed",
         "mute-search",
         "no-one-muted",
+        "no-birthdays",
         "loading",
         "error"
       ],
       "not_applicable": {
-        "empty": "Every member has the same kinds of notification, so the list is never empty. An empty muted list is no-one-muted."
+        "empty": "Every member has the same kinds of notification, so the list is never empty. An empty muted list is no-one-muted; no birthdays in Contacts is no-birthdays."
       },
       "notes": "From the Magic Patterns Popkin App › Notifications design. Every email's footer links land here: mute → muted or birthday-off, settings → default, unsubscribe → unsubscribed. No requirement covers it yet."
     },

@@ -10,6 +10,7 @@ import {
   theNotificationSettingsFailing,
   theNotificationSettingsFailingOnce,
   theNotificationSettingsLoading,
+  noBirthdaysYet,
 } from '../fixtures/notifications';
 import { expect, test } from '../fixtures/pk-test';
 import { AccountPage } from '../pages/account.page';
@@ -441,5 +442,101 @@ test.describe('muted people', () => {
     await expect(notifications.noOneMuted).toHaveText(
       'No one’s muted. You hear about everyone in your Popkins.',
     );
+  });
+});
+
+test.describe('birthday reminders by person', () => {
+  test.beforeEach(async ({ page }) => {
+    await theMockMutedPeople(page);
+  });
+
+  // L2-159 AC1, AC2
+  test('the People view lists the five soonest birthdays, and Show all lists the rest', async ({
+    page,
+    pk,
+  }) => {
+    await pk.open('notificationSettingsPeople');
+    const settings = new NotificationSettingsPage(page);
+
+    await expect(settings.birthdaySection).toContainText(
+      'From the birthdays in your contacts. Pick how early, person by person.',
+    );
+    await expect(settings.birthdayRows.locator('.setting-list__name')).toHaveText([
+      'Grace Adeyemi',
+      'Ada Okafor',
+      'Ruth Lindqvist',
+      'Chidi Okafor',
+      'Ifeoma Okafor',
+    ]);
+    await expect(settings.birthdayRow('Grace Adeyemi')).toContainText(
+      'Sat 19 Sep · turns 33 · in 7 days',
+    );
+    await expect(settings.birthdayLead('Ruth Lindqvist')).toHaveValue('ThreeDaysBefore');
+    await expect(settings.birthdaySwitch('Grace Adeyemi')).toHaveAttribute('aria-checked', 'true');
+    await expect(settings.birthdaySwitch('Ifeoma Okafor')).toHaveAttribute('aria-checked', 'false');
+    await expect(settings.birthdayLead('Ifeoma Okafor')).toBeDisabled();
+
+    await settings.showAllBirthdays.click();
+
+    await expect(settings.birthdayRows).toHaveCount(7);
+    await expect(settings.birthdayRow('Walt Brennan')).toContainText('Tue 2 Mar · in 171 days');
+    await expect(settings.birthdayLead('Walt Brennan')).toBeFocused();
+    await expect(settings.showAllBirthdays).toHaveCount(0);
+  });
+
+  // L2-159 AC3, L2-139 AC5
+  test('a lead chosen here is saved on the date itself', async ({ page, pk }) => {
+    await pk.open('notificationSettingsPeople');
+    const settings = new NotificationSettingsPage(page);
+    const sent = page.waitForRequest(
+      (r) => r.method() === 'PUT' && r.url().includes('/api/contacts/key-dates/'),
+    );
+
+    await settings.birthdayLead('Grace Adeyemi').selectOption('TwoWeeksBefore');
+
+    expect((await sent).postDataJSON()).toEqual({ lead: 'TwoWeeksBefore' });
+    await expect(settings.birthdayLead('Grace Adeyemi')).toHaveValue('TwoWeeksBefore');
+    await expect(settings.undoBar).toHaveCount(0);
+  });
+
+  // L2-159 AC4, AC5
+  test('switching a birthday off greys its lead and says so, and Undo turns it on', async ({
+    page,
+    pk,
+  }) => {
+    await pk.open('notificationSettingsBirthdayOff');
+    const settings = new NotificationSettingsPage(page);
+
+    await settings.stopGracesBirthday();
+
+    await expect(settings.birthdaySwitch('Grace Adeyemi')).toHaveAttribute('aria-checked', 'false');
+    await expect(settings.birthdayLead('Grace Adeyemi')).toBeDisabled();
+    await expect(settings.birthdayLead('Grace Adeyemi')).toHaveValue('OneWeekBefore');
+    await expect(settings.undoBar).toContainText(
+      'Birthday reminders for Grace Adeyemi are off. The birthday stays in your contacts.',
+    );
+    const sent = page.waitForRequest(
+      (r) => r.method() === 'PUT' && r.url().includes('/api/contacts/key-dates/'),
+    );
+
+    await settings.undo.click();
+
+    expect((await sent).postDataJSON()).toEqual({ on: true });
+    await expect(settings.birthdaySwitch('Grace Adeyemi')).toHaveAttribute('aria-checked', 'true');
+    await expect(settings.birthdayLead('Grace Adeyemi')).toBeEnabled();
+    await expect(settings.undoBar).toHaveCount(0);
+  });
+
+  // L2-159 AC6
+  test('with no birthday in Contacts the section says how to add one', async ({ page, pk }) => {
+    await noBirthdaysYet(page);
+    await pk.open('notificationSettingsNoBirthdays');
+    const settings = new NotificationSettingsPage(page);
+
+    await expect(settings.noBirthdays).toHaveText(
+      'No birthdays yet. Add one to a contact and it shows here.',
+    );
+    await expect(settings.birthdayRows).toHaveCount(0);
+    await expect(settings.showAllBirthdays).toHaveCount(0);
   });
 });

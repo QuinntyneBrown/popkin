@@ -29,6 +29,12 @@ export class NotificationSettingsPage {
   /** The Popkins view: one row per active Popkin (L2-158 AC1). */
   readonly popkinRows: Locator;
   /** "Muted people" on the People view (L2-160). */
+  readonly birthdaySection: Locator;
+  readonly birthdayList: Locator;
+  readonly birthdayRows: Locator;
+  readonly showAllBirthdays: Locator;
+  readonly birthdaysMore: Locator;
+  readonly noBirthdays: Locator;
   readonly mutedSection: Locator;
   readonly mutedRows: Locator;
   readonly noOneMuted: Locator;
@@ -87,6 +93,16 @@ export class NotificationSettingsPage {
     this.firstLevels = page.locator('.segmented--levels').first();
     this.popkinRows = this.settingList.locator('.setting-list__item');
     this.undo = this.undoBar.getByRole('button', { name: 'Undo' });
+    this.birthdaySection = page.locator('.settings-section').filter({
+      has: page.getByRole('heading', { name: 'Birthday reminders' }),
+    });
+    this.birthdayList = this.birthdaySection.locator('.setting-list');
+    this.birthdayRows = this.birthdaySection.locator('.setting-list__item');
+    this.showAllBirthdays = this.birthdaySection.getByRole('button', {
+      name: /^Show all \d+ contacts with birthdays$/,
+    });
+    this.noBirthdays = this.birthdaySection.locator('.setting-list__empty');
+    this.birthdaysMore = this.birthdaySection.locator('.setting-list__more');
     this.mutedSection = page.locator('.settings-section').filter({
       has: page.getByRole('heading', { name: 'Muted people' }),
     });
@@ -101,6 +117,28 @@ export class NotificationSettingsPage {
     this.popover = page.locator('.popover');
     this.pickList = page.locator('.popover .pick-list');
     this.mutedList = this.mutedSection.locator('.setting-list');
+  }
+
+  /** One birthday's row on the People view. */
+  birthdayRow(name: string): Locator {
+    return this.birthdayRows.filter({ hasText: name });
+  }
+
+  /** "When to remind you about {name}". */
+  birthdayLead(name: string): Locator {
+    return this.page.getByRole('combobox', { name: `When to remind you about ${name}` });
+  }
+
+  /** "Birthday reminders for {name}". */
+  birthdaySwitch(name: string): Locator {
+    return this.page.getByRole('switch', { name: `Birthday reminders for ${name}`, exact: true });
+  }
+
+  /** Grace's birthday switched off, as `birthday-off.html` draws it. */
+  async stopGracesBirthday(): Promise<void> {
+    await this.birthdaySwitch('Grace Adeyemi').click();
+    await this.undoBar.waitFor();
+    await this.page.mouse.move(0, 0);
   }
 
   /** One muted person's row. */

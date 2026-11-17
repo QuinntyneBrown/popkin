@@ -1,4 +1,5 @@
 import { AvatarView } from './invite';
+import { ReminderLead } from './contacts';
 import { PopkinColour } from './popkin';
 
 /** The twelve kinds of notification of L2-154, as the API names them. */
@@ -77,9 +78,26 @@ export interface MuteCandidateView {
 }
 
 /** The Notifications screen in one read (`GET /api/me/notifications`, L2-155). */
+/** One birthday on the People view, with its own lead and switch (L2-159 AC1). */
+export interface BirthdayReminderView {
+  keyDateId: string;
+  contactId: string;
+  name: string;
+  photoUrl: string | null;
+  initials: string;
+  accent: PopkinColour;
+  occursOn: string;
+  turns: number | null;
+  inDays: number;
+  lead: ReminderLead;
+  remindersOn: boolean;
+}
+
 export interface NotificationSettingsView {
   email: ActivityEmailView;
   groups: NotificationGroupView[];
   popkins: PopkinLevelView[];
   muted: MutedPersonView[];
+  birthdays: BirthdayReminderView[];
+  birthdayCount: number;
 }

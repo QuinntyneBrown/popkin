@@ -56,6 +56,9 @@ public sealed class KeyDate : IClientWrite
 
     public ReminderLead Lead { get; private set; }
 
+    /// <summary>Whether the date reminds at all; off, it stays in Contacts and nothing reminds of it (L2-159 AC4).</summary>
+    public bool RemindersOn { get; private set; } = true;
+
     public DateTimeOffset CreatedAt { get; private set; }
 
     public static KeyDate Create(
@@ -131,6 +134,9 @@ public sealed class KeyDate : IClientWrite
         Year is { } year && occursOn.Year > year ? occursOn.Year - year : null;
 
     public void ChangeLead(ReminderLead lead) => Lead = lead;
+
+    /// <summary>Turns the reminder on or off; the lead is kept, so turning it on brings it back.</summary>
+    public void TurnReminders(bool on) => RemindersOn = on;
 
     /// <summary>The day in `year`; 29 February falls on 28 February in a year without it.</summary>
     private DateOnly On(int year) =>

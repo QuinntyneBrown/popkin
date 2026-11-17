@@ -28,4 +28,12 @@ parity('setting-list', [
     before: theMockMutedPeople,
     snap: true,
   },
+  // Birthday reminders: a face, the name, the day, the lead and the switch; Ifeoma's off (L2-159 AC1).
+  {
+    key: 'notificationSettingsPeople',
+    name: 'birthdays',
+    region: (page) => new NotificationSettingsPage(page).birthdayList,
+    before: theMockMutedPeople,
+    snap: true,
+  },
 ]);

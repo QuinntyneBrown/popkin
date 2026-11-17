@@ -56,7 +56,7 @@ public static class KeyDateRules
             .ThenBy(x => x.Next)
             .Select(x => new ContactKeyDateDto(
                 x.Date.Id, x.Date.Kind, x.Date.Title, x.Date.Month, x.Date.Day, x.Date.Year, x.Date.EveryYear, x.Date.Lead,
-                x.Next, x.Next is { } next ? next.DayNumber - today.DayNumber : null))
+                x.Next, x.Next is { } next ? next.DayNumber - today.DayNumber : null, x.Date.RemindersOn))
             .ToList();
 
     /// <summary>A date as Dates lists it, on its occurrence `next`.</summary>

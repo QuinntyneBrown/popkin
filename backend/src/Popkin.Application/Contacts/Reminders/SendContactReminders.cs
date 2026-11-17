@@ -73,7 +73,8 @@ public sealed class SendContactRemindersCommandHandler(
         var people = await db.Contacts.OwnedBy(owner)
             .Select(c => new { c.Id, c.Name })
             .ToDictionaryAsync(c => c.Id, c => PersonName.FirstName(c.Name), cancellationToken);
-        var dates = (await db.KeyDates.OwnedBy(owner).ToListAsync(cancellationToken))
+        // A date switched off reminds of nothing (L2-159 AC4).
+        var dates = (await db.KeyDates.OwnedBy(owner).Where(d => d.RemindersOn).ToListAsync(cancellationToken))
             .Where(d => people.ContainsKey(d.ContactId))
             .Select(d => (Date: d, On: d.NextOccurrence(today)))
             .Where(o => o.On is not null)

@@ -15,6 +15,15 @@
         (dismissed)="store.dismissBanner()"
       ></div>
     }
+    @if (store.banner() === 'birthdayOff') {
+      <div
+        pk-undo-bar
+        [text]="store.birthdayOffText()"
+        action="Undo"
+        (acted)="store.undo()"
+        (dismissed)="store.dismissBanner()"
+      ></div>
+    }
     @if (store.banner() === 'popkinMuted') {
       <div
         pk-undo-bar
@@ -118,6 +127,54 @@
           </p>
         </section>
       } @else if (tab() === 'people') {
+        <section
+          pk-settings-section
+          heading="Birthday reminders"
+          text="From the birthdays in your contacts. Pick how early, person by person."
+          [small]="true"
+        >
+          @if (birthdays().length) {
+            <ul pk-setting-list>
+              @for (birthday of shownBirthdays(); track birthday.keyDateId) {
+                <li pk-setting-list-item [name]="birthday.name" [sub]="birthdayLine(birthday)">
+                  <span
+                    pk-avatar
+                    slot="lead"
+                    [name]="birthday.name"
+                    [initials]="birthday.initials"
+                    [photo]="birthday.photoUrl"
+                    [attr.data-accent]="accent(birthday.accent)"
+                  ></span>
+                  <div
+                    pk-select-field
+                    variant="row"
+                    [fieldId]="'lead-' + birthday.keyDateId"
+                    [label]="'When to remind you about ' + birthday.name"
+                    [options]="leadsFor(birthday)"
+                    [value]="birthday.lead"
+                    [disabled]="!birthday.remindersOn"
+                    (valueChange)="chooseLead(birthday.keyDateId, $event)"
+                  ></div>
+                  <button
+                    pk-switch
+                    [attr.aria-label]="'Birthday reminders for ' + birthday.name"
+                    [checked]="birthday.remindersOn"
+                    (checkedChange)="store.setBirthdayReminder(birthday.keyDateId, { on: $event })"
+                  ></button>
+                </li>
+              }
+            </ul>
+            @if (shownBirthdays().length < birthdays().length) {
+              <div pk-setting-list-more>
+                <button pk-link variant="accent" type="button" (click)="showAllBirthdays()">
+                  Show all {{ birthdays().length }} contacts with birthdays
+                </button>
+              </div>
+            }
+          } @else {
+            <p pk-setting-list-empty>No birthdays yet. Add one to a contact and it shows here.</p>
+          }
+        </section>
         <section
           pk-settings-section
           heading="Muted people"

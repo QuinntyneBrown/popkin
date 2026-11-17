@@ -40,13 +40,14 @@ and no contact is told (L2-122).
 The specs stand where the mock differs, and the mock changes:
 
 - The undo bar reads "Birthday reminders for {name} are off. The birthday stays in your
-  contacts." (L2-159 AC5). A contact is named, never given a pronoun (L2-122 AC4).
+  contacts." (L2-159 AC5). A contact is named, never given a pronoun (L2-122 AC4). The mock now
+  says so.
 - L2-159 AC1 lists five lead times. Dates and the profile offer six, with "1 month before"
   (L2-139 AC1). A birthday whose lead is "1 month before" shows that sixth option in its select,
   so the screen never shows a value it cannot hold. Whether the People view should offer it for
   every birthday is `<TO SUPPLY>`.
-- The empty state "No birthdays yet. Add one to a contact and it shows here." (L2-159 AC6) is not
-  drawn.
+- The empty state "No birthdays yet. Add one to a contact and it shows here." (L2-159 AC6) is
+  drawn in `no-birthdays.html`, as the setting list's empty line, like "No one's muted".
 - L2-159 AC5 asks for the undo bar when a birthday's reminder is stopped from an email. The mock
   shows it on the screen too, and the design does the same when the switch is turned off here.
 
@@ -61,8 +62,9 @@ time has one writer.
   `remindersOn`). `birthdayCount` is their number. The list is empty when Contacts is switched off
   for the platform (`ContactsSwitch`), and the view then shows no "Birthday reminders" section.
 - `PUT /api/contacts/key-dates/{keyDateId}/reminder` `{ lead?, on? }` — widened from `{ lead }`.
-  `200` `ContactKeyDateDto`. `404` `key_date_not_found` for a date that is not the caller's.
-  `400` `invalid_lead` for an unknown lead. A request with neither field is `400`
+  `200` `ContactKeyDateDto`, which now carries `remindersOn`. `404` `key_date_not_found` for a
+  date that is not the caller's. `400` `lead_not_allowed` for an unknown lead, the code Dates and
+  the profile already handle. A request with neither field is `400`
   `nothing_to_change`. Dates and the profile keep calling it with `lead` alone.
 - `GET /api/contacts/reminder-preferences` — its `birthdayLead` is now the effective default
   (L2-139 AC4), and its `phoneNotifications` and `mondayEmail` are removed
@@ -75,6 +77,9 @@ time has one writer.
 - **`ChangeKeyDateReminderCommand(KeyDateId, Lead?, On?)`** — the existing handler gains `On`. It
   stays one load, one change and one save, guarded by `KeyDateRules.RequireOwnedAsync` and
   `ContactsSwitch.Require()`.
+- **Not built with the app side.** The default for new members is an admin setting (L2-173), so
+  `ReminderPreferences.BirthdayLead` nullable and `ReminderDefaults.ForNewBirthday` below come
+  with the admin plan. Until then a new birthday starts at the person's own default, as before.
 - **`ReminderPreferences.BirthdayLead`** — becomes nullable. Null means the person has never
   changed "Birthdays: remind me". Saving it on Dates sets it, as now.
 - **`ReminderDefaults.ForNewBirthday(ownerId)`** (Application) — returns the lead and the switch
@@ -100,11 +105,12 @@ time has one writer.
 - **People view** (`NotificationsPage`, `tab=people`) — `pk-undo-bar` when the banner is
   `birthdayOff`, then the section "Birthday reminders" with its sentence, a `pk-setting-list` of
   the first five birthdays, and "Show all {n} contacts with birthdays" (`pk-button` as a text
-  button) when there are more than five. It shows the rest and moves focus to the sixth row
-  (L2-159 AC2). With none, the section shows `pk-empty-state` with the words of AC6.
+  button, `pk-link` in `pk-setting-list-more`) when there are more than five. It shows the rest
+  and moves focus to the sixth row's select (L2-159 AC2). With none, the section shows
+  `pk-setting-list-empty` with the words of AC6.
 - **Each row** — `pk-avatar`, the name, the line "{weekday} {d} {month} · turns {n} · in {d} days"
-  (or without "turns" when the year is unknown), a `pk-select-field` labelled "When to remind you
-  about {name}", and a `pk-switch` labelled "Birthday reminders for {name}". The select is
+  (or without "turns" when the year is unknown; `birthdayLine` in the `api` library), a
+  `pk-select-field` of variant `row` labelled "When to remind you about {name}", and a `pk-switch` labelled "Birthday reminders for {name}". The select is
   disabled while the switch is off (L2-159 AC4).
 - **`NotificationSettingsStore.setBirthdayReminder(keyDateId, { lead?, on? })`** — calls
   `CONTACTS_API.changeReminder`, shows the change at once, raises the `birthdayOff` banner when

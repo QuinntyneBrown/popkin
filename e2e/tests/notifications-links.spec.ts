@@ -5,7 +5,12 @@ import {
   theLinkIsSlow,
   theLinkWorks,
 } from '../fixtures/notification-links';
-import { MOCK_POPKINS, theMockPopkinLevels } from '../fixtures/notifications';
+import {
+  MOCK_BIRTHDAYS,
+  MOCK_POPKINS,
+  theMockMutedPeople,
+  theMockPopkinLevels,
+} from '../fixtures/notifications';
 import { asVisitor } from '../fixtures/journeys';
 import { expect, test } from '../fixtures/pk-test';
 import { NotificationSettingsPage } from '../pages/notification-settings.page';
@@ -103,5 +108,29 @@ test.describe('an email’s footer links', () => {
       'aria-checked',
       'true',
     );
+  });
+
+  // L2-159 AC5, L2-168 AC1: "Stop birthday reminders for {name}" switches that birthday off,
+  // offers Undo, and is not applied twice.
+  test('"Stop birthday reminders" switches that birthday off, and Undo turns it on', async ({
+    page,
+  }) => {
+    await theMockMutedPeople(page);
+    const grace = MOCK_BIRTHDAYS[0];
+    const notifications = new NotificationSettingsPage(page);
+    const stopped = page.waitForRequest(
+      (r) => r.method() === 'PUT' && r.url().endsWith(`/key-dates/${grace.keyDateId}/reminder`),
+    );
+
+    await page.goto(`/account/notifications?tab=people&stop-birthday=${grace.keyDateId}`);
+
+    expect((await stopped).postDataJSON()).toEqual({ on: false });
+    await expect(notifications.birthdaySwitch(grace.name)).toHaveAttribute('aria-checked', 'false');
+    await expect(notifications.undoBar).toContainText(
+      `Birthday reminders for ${grace.name} are off. The birthday stays in your contacts.`,
+    );
+    await expect(page).toHaveURL('/account/notifications?tab=people');
+    await notifications.undo.click();
+    await expect(notifications.birthdaySwitch(grace.name)).toHaveAttribute('aria-checked', 'true');
   });
 });

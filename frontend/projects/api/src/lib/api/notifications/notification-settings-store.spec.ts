@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
 import { NotificationSettingsView } from '../../models/notifications';
+import { CONTACTS_API } from '../contacts/contacts-api';
 import { Toaster } from '../toasts/toaster';
 import { NOTIFICATIONS_API, NotificationsApi } from './notifications-api';
 import { NotificationSettingsStore, SAVE_FAILED, popkinLine } from './notification-settings-store';
@@ -45,10 +46,28 @@ const settings: NotificationSettingsView = {
       sharedPopkins: ['Thursday Night Group'],
     },
   ],
+  birthdays: [
+    {
+      keyDateId: 'k1',
+      contactId: 'c1',
+      name: 'Grace Adeyemi',
+      photoUrl: null,
+      initials: 'GA',
+      accent: 'Plum',
+      occursOn: '2026-09-19',
+      turns: 33,
+      inDays: 7,
+      lead: 'OneWeekBefore',
+      remindersOn: true,
+    },
+  ],
+  birthdayCount: 1,
 };
 
 const saved = (): Observable<void> => of(undefined);
 const failed = (): Observable<void> => throwError(() => new Error('down'));
+
+const contacts = { changeKeyDateReminder: vi.fn() };
 
 const device = { outcome: 'on' as PushOutcome, subscribe: vi.fn(), unsubscribe: vi.fn() };
 
@@ -63,6 +82,7 @@ function storeWith(api: Partial<NotificationsApi>): {
       NotificationSettingsStore,
       { provide: NOTIFICATIONS_API, useValue: { settings: () => of(settings), ...api } },
       { provide: PUSH_SUBSCRIBER, useValue: device },
+      { provide: CONTACTS_API, useValue: contacts },
     ],
   });
   return { store: TestBed.inject(NotificationSettingsStore), toaster: TestBed.inject(Toaster) };
@@ -278,6 +298,17 @@ describe('NotificationSettingsStore', () => {
       expect(store.banner()).toBeNull();
     });
 
+    it('stops the birthday it names, with the bar that can undo it (L2-159 AC5)', () => {
+      contacts.changeKeyDateReminder.mockReturnValue(of({}));
+      const { store } = storeWith({});
+
+      store.open({ tab: 'people', mute: { keyDateId: 'k1' } });
+
+      expect(contacts.changeKeyDateReminder).toHaveBeenCalledWith('k1', { on: false });
+      expect(store.settings()!.birthdays[0].remindersOn).toBe(false);
+      expect(store.banner()).toBe('birthdayOff');
+    });
+
     it('changes nothing for a link with no mute', () => {
       const setLevel = vi.fn(saved);
       const { store } = storeWith({ setLevel });
@@ -365,6 +396,58 @@ describe('NotificationSettingsStore', () => {
 
       expect(store.settings()!.muted.map((m) => m.name)).toEqual(['Sam Ortega']);
       expect(toaster.toasts().map((t) => t.heading)).toEqual([SAVE_FAILED]);
+    });
+  });
+
+  describe('birthdays by person', () => {
+    beforeEach(() => contacts.changeKeyDateReminder.mockReset());
+
+    it('changes a lead at once through Contacts, and raises no bar', () => {
+      contacts.changeKeyDateReminder.mockReturnValue(of({}));
+      const { store } = storeWith({});
+      store.open();
+
+      store.setBirthdayReminder('k1', { lead: 'TwoWeeksBefore' });
+
+      expect(contacts.changeKeyDateReminder).toHaveBeenCalledWith('k1', { lead: 'TwoWeeksBefore' });
+      expect(store.settings()!.birthdays[0].lead).toBe('TwoWeeksBefore');
+      expect(store.banner()).toBeNull();
+    });
+
+    it('switches a birthday off with its bar, and Undo turns it on again (L2-159 AC4, AC5)', () => {
+      contacts.changeKeyDateReminder.mockReturnValue(of({}));
+      const { store } = storeWith({});
+      store.open();
+
+      store.setBirthdayReminder('k1', { on: false });
+
+      expect(store.settings()!.birthdays[0]).toMatchObject({
+        remindersOn: false,
+        lead: 'OneWeekBefore',
+      });
+      expect(store.banner()).toBe('birthdayOff');
+      expect(store.birthdayOffText()).toBe(
+        'Birthday reminders for Grace Adeyemi are off. The birthday stays in your contacts.',
+      );
+
+      store.undo();
+
+      expect(contacts.changeKeyDateReminder).toHaveBeenLastCalledWith('k1', { on: true });
+      expect(store.settings()!.birthdays[0].remindersOn).toBe(true);
+      expect(store.banner()).toBeNull();
+    });
+
+    it('puts the birthday back and says so when saving fails', () => {
+      contacts.changeKeyDateReminder.mockReturnValue(throwError(() => new Error('down')));
+      const { store, toaster } = storeWith({});
+      const show = vi.spyOn(toaster, 'show');
+      store.open();
+
+      store.setBirthdayReminder('k1', { on: false });
+
+      expect(store.settings()!.birthdays[0].remindersOn).toBe(true);
+      expect(store.banner()).toBeNull();
+      expect(show).toHaveBeenCalledWith('danger', SAVE_FAILED);
     });
   });
 });

@@ -359,6 +359,15 @@ export const routes = {
     app: '/account/notifications?tab=people',
     mock: 'pages/notification-settings/no-one-muted.html',
   },
+  // Birthday reminders by person (L2-159): one switched off, and none in Contacts.
+  notificationSettingsBirthdayOff: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/birthday-off.html',
+  },
+  notificationSettingsNoBirthdays: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/no-birthdays.html',
+  },
   notificationSettingsLoading: {
     app: '/account/notifications',
     mock: 'pages/notification-settings/loading.html',

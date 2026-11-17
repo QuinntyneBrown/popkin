@@ -7,6 +7,7 @@ import {
   AddFollowUpRequest,
   AddKeyDateRequest,
   ContactDatesView,
+  ContactKeyDateView,
   ContactProfileView,
   ContactsSummaryView,
   DatesFilter,
@@ -22,6 +23,7 @@ import {
   NoteMemoryView,
   PeopleView,
   PhotoMemoryView,
+  ReminderLead,
   ReminderPreferencesView,
   SaveContactRequest,
   StartHabitRequest,
@@ -62,6 +64,14 @@ export interface ContactsApi {
   dates(on: string, kind: DatesFilter): Observable<ContactDatesView>;
   /** Add a date for a contact of mine (L2-138). */
   addKeyDate(contactId: string, request: AddKeyDateRequest): Observable<KeyDateRowView>;
+  /**
+   * One date's own reminder: how early, whether at all, or both (L2-139 AC3, L2-159). 404
+   * `key_date_not_found`, 400 `lead_not_allowed`.
+   */
+  changeKeyDateReminder(
+    keyDateId: string,
+    change: { lead?: ReminderLead; on?: boolean },
+  ): Observable<ContactKeyDateView>;
   /** My default lead times and reminder ways; the defaults until I change them (L2-139 AC1). */
   reminderPreferences(): Observable<ReminderPreferencesView>;
   /** Saves my default lead times and reminder ways (L2-139). */
@@ -192,6 +202,16 @@ export class HttpContactsApi implements ContactsApi {
 
   addKeyDate(contactId: string, request: AddKeyDateRequest): Observable<KeyDateRowView> {
     return this.http.post<KeyDateRowView>(`/api/contacts/people/${contactId}/key-dates`, request);
+  }
+
+  changeKeyDateReminder(
+    keyDateId: string,
+    change: { lead?: ReminderLead; on?: boolean },
+  ): Observable<ContactKeyDateView> {
+    return this.http.put<ContactKeyDateView>(
+      `/api/contacts/key-dates/${keyDateId}/reminder`,
+      change,
+    );
   }
 
   reminderPreferences(): Observable<ReminderPreferencesView> {

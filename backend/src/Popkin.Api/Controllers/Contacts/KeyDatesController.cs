@@ -14,10 +14,10 @@ public sealed class KeyDatesController(ISender sender) : ControllerBase
     public Task<ContactDatesDto> List([FromQuery] string? on, [FromQuery] string? kind, CancellationToken cancellationToken) =>
         sender.Send(new GetContactDatesQuery(on, kind), cancellationToken);
 
-    /// <summary>One date's own reminder (L2-139 AC3).</summary>
+    /// <summary>One date's own reminder: `lead`, `on`, or both (L2-139 AC3, L2-159).</summary>
     [HttpPut("key-dates/{keyDateId:guid}/reminder")]
     public Task<ContactKeyDateDto> ChangeReminder(Guid keyDateId, ChangeReminderRequest request, CancellationToken cancellationToken) =>
-        sender.Send(new ChangeKeyDateReminderCommand(keyDateId, request.Lead), cancellationToken);
+        sender.Send(new ChangeKeyDateReminderCommand(keyDateId, request.Lead, request.On), cancellationToken);
 
     /// <summary>Removes one key date; 404 `key_date_not_found` for one not the caller's.</summary>
     [HttpDelete("key-dates/{keyDateId:guid}")]

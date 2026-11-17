@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  Injector,
   OnInit,
+  afterNextRender,
   computed,
   inject,
   input,
@@ -10,6 +12,8 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
+  BIRTHDAYS_SHOWN,
+  BirthdayReminderView,
   FREQUENCY_CHOICES,
   NotificationFrequency,
   NotificationGroupView,
@@ -21,7 +25,10 @@ import {
   PopkinColour,
   PopkinLevelView,
   PopkinNotificationLevel,
+  ReminderLead,
   accentOf,
+  birthdayLeads,
+  birthdayLine,
   parseNotificationLink,
   popkinLine,
 } from 'api';
@@ -31,6 +38,7 @@ import {
   ChoiceCard,
   EmptyState,
   Icon,
+  Link,
   NotifGroup,
   NotifMatrix,
   NotifRow,
@@ -42,13 +50,16 @@ import {
   PopkinTile,
   SearchField,
   Screen,
+  SelectField,
   SegmentedControl,
   SettingList,
   SettingListEmpty,
   SettingListItem,
+  SettingListMore,
   SettingsSection,
   Skeleton,
   Stack,
+  Switch,
   TopBar,
   UndoBar,
   ViewNav,
@@ -66,6 +77,7 @@ import {
     ChoiceCard,
     EmptyState,
     Icon,
+    Link,
     NotifGroup,
     NotifMatrix,
     PageHead,
@@ -76,12 +88,15 @@ import {
     Screen,
     SearchField,
     SegmentedControl,
+    SelectField,
     SettingList,
     SettingListEmpty,
     SettingListItem,
+    SettingListMore,
     SettingsSection,
     Skeleton,
     Stack,
+    Switch,
     TopBar,
     UndoBar,
     ViewNav,
@@ -121,6 +136,13 @@ export class NotificationsPage implements OnInit {
     },
   ]);
   protected readonly muted = computed(() => this.store.settings()?.muted ?? []);
+  protected readonly birthdays = computed(() => this.store.settings()?.birthdays ?? []);
+  /** The first five, or every one once "Show all" is chosen (L2-159 AC2). */
+  private readonly allBirthdays = signal(false);
+  protected readonly shownBirthdays = computed(() =>
+    this.allBirthdays() ? this.birthdays() : this.birthdays().slice(0, BIRTHDAYS_SHOWN),
+  );
+  private readonly injector = inject(Injector);
   /** Whether the "Mute someone" picker is open. */
   protected readonly picking = signal(false);
   private readonly popover = viewChild(Popover);
@@ -170,6 +192,28 @@ export class NotificationsPage implements OnInit {
     if (!membershipId) return;
     this.store.mute(membershipId);
     this.popover()?.close();
+  }
+
+  /** "Show all" lists the rest and moves focus to the first row it adds (L2-159 AC2). */
+  protected showAllBirthdays(): void {
+    const next = this.birthdays()[BIRTHDAYS_SHOWN];
+    this.allBirthdays.set(true);
+    if (!next) return;
+    afterNextRender(() => document.getElementById(`lead-${next.keyDateId}`)?.focus(), {
+      injector: this.injector,
+    });
+  }
+
+  protected birthdayLine(birthday: BirthdayReminderView): string {
+    return birthdayLine(birthday);
+  }
+
+  protected leadsFor(birthday: BirthdayReminderView): readonly { value: string; label: string }[] {
+    return birthdayLeads(birthday.lead);
+  }
+
+  protected chooseLead(keyDateId: string, lead: string): void {
+    this.store.setBirthdayReminder(keyDateId, { lead: lead as ReminderLead });
   }
 
   /** "in Lakeside Weekend, Thursday Night Group" (L2-160 AC1). */

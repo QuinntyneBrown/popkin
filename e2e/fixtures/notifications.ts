@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import responses from './api/responses.json';
+import { servePhotos } from './contacts';
 import { answer, answerOnce, hold, problem } from './stubs';
 
 const settings = responses['GET /api/me/notifications'].body;
@@ -149,18 +150,62 @@ export const MOCK_CANDIDATES = [
 }));
 
 /**
- * Mara's settings with Sam and Joel muted, the people she could mute, and muting and unmuting
- * answered as the API does.
+ * The seven birthdays in Mara's contacts as `people.html` draws them on Saturday 12 September,
+ * soonest first; Ifeoma's is switched off (L2-159 AC1).
  */
-export async function theMockMutedPeople(page: Page, muted = MOCK_MUTED): Promise<void> {
+export const MOCK_BIRTHDAYS = (
+  [
+    ['Grace Adeyemi', 'Plum', 'contact-grace.jpg', '2026-09-19', 33, 7, 'OneWeekBefore', true],
+    ['Ada Okafor', 'Amber', 'contact-ada.jpg', '2026-10-07', 64, 25, 'OneWeekBefore', true],
+    ['Ruth Lindqvist', 'Teal', null, '2026-10-24', 78, 42, 'ThreeDaysBefore', true],
+    ['Chidi Okafor', 'Leaf', 'contact-chidi.jpg', '2027-01-24', 34, 134, 'OneWeekBefore', true],
+    ['Ifeoma Okafor', 'Berry', null, '2027-02-11', 29, 152, 'OnTheDay', false],
+    ['Walt Brennan', 'Sky', null, '2027-03-02', null, 171, 'OneWeekBefore', true],
+    ['Dev Patel', 'Coral', null, '2027-06-14', 41, 275, 'OneDayBefore', true],
+  ] as const
+).map(([name, accent, photo, occursOn, turns, inDays, lead, remindersOn], i) => ({
+  keyDateId: `6b1d4e30-0000-4000-8000-00000000000${i + 1}`,
+  contactId: `6b1d4e30-0000-4000-9000-00000000000${i + 1}`,
+  name,
+  photoUrl: photo ? `/api/files/contacts/${photo}` : null,
+  initials: name
+    .split(' ')
+    .map((part) => part[0])
+    .join(''),
+  accent,
+  occursOn,
+  turns,
+  inDays,
+  lead,
+  remindersOn,
+}));
+
+/**
+ * Mara's settings with Sam and Joel muted and her seven birthdays, the people she could mute, and
+ * muting, unmuting and each birthday's change answered as the API does.
+ */
+export async function theMockMutedPeople(
+  page: Page,
+  muted = MOCK_MUTED,
+  birthdays: readonly object[] = MOCK_BIRTHDAYS,
+): Promise<void> {
+  await servePhotos(page);
   await answer(page, 'GET /api/me/notifications', {
     status: 200,
     body: {
       ...settings,
       email: { on: true, available: true, frequency: 'AsItHappens' },
       muted,
+      birthdays,
+      birthdayCount: birthdays.length,
     },
   });
+  for (const birthday of MOCK_BIRTHDAYS) {
+    await answer(page, `PUT /api/contacts/key-dates/${birthday.keyDateId}/reminder`, {
+      status: 200,
+      body: {},
+    });
+  }
   await answer(page, 'GET /api/me/notifications/mute-candidates?q=', {
     status: 200,
     body: MOCK_CANDIDATES,
@@ -177,4 +222,9 @@ export async function theMockMutedPeople(page: Page, muted = MOCK_MUTED): Promis
   for (const mute of MOCK_MUTED) {
     await answer(page, `DELETE /api/me/notifications/mutes/${mute.muteId}`, { status: 204 });
   }
+}
+
+/** Mara's People view with no birthday in her contacts (`no-birthdays.html`, L2-159 AC6). */
+export async function noBirthdaysYet(page: Page): Promise<void> {
+  await theMockMutedPeople(page, MOCK_MUTED, []);
 }

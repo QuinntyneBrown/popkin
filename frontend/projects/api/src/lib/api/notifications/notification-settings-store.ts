@@ -1,7 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, Subject, debounceTime, switchMap } from 'rxjs';
+import { Observable, Subject, debounceTime, map, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ReminderLead } from '../../models/contacts';
 import {
+  BirthdayReminderView,
   NotificationFrequency,
   NotificationKind,
   NotificationSettingsView,
@@ -9,6 +11,7 @@ import {
   PopkinLevelView,
   PopkinNotificationLevel,
 } from '../../models/notifications';
+import { CONTACTS_API } from '../contacts/contacts-api';
 import { DelayedLoading } from '../loading/delayed-loading';
 import { Toaster } from '../toasts/toaster';
 import { NOTIFICATIONS_API } from './notifications-api';
@@ -80,6 +83,7 @@ export function popkinLine(
 @Injectable()
 export class NotificationSettingsStore {
   private readonly api = inject(NOTIFICATIONS_API);
+  private readonly contacts = inject(CONTACTS_API);
   private readonly toaster = inject(Toaster);
   private readonly devices = inject(PUSH_SUBSCRIBER);
   private readonly loading = new DelayedLoading();
@@ -87,8 +91,19 @@ export class NotificationSettingsStore {
   /** `pending` shows nothing yet; `loading` once 300 ms pass without an answer. */
   readonly state = this.loading.state;
   readonly settings = signal<NotificationSettingsView | null>(null);
-  /** The banner the last change raised: email switched off (L2-156 AC3) or a Popkin muted (L2-158 AC4). */
-  readonly banner = signal<'unsubscribed' | 'popkinMuted' | null>(null);
+  /**
+   * The banner the last change raised: email switched off (L2-156 AC3), a Popkin muted (L2-158
+   * AC4) or a birthday's reminders stopped (L2-159 AC5).
+   */
+  readonly banner = signal<'unsubscribed' | 'popkinMuted' | 'birthdayOff' | null>(null);
+  /** The birthday the stopped bar is about, for its words and its "Undo". */
+  private readonly stoppedBirthday = signal<BirthdayReminderView | null>(null);
+  readonly birthdayOffText = computed(() => {
+    const birthday = this.stoppedBirthday();
+    return birthday
+      ? `Birthday reminders for ${birthday.name} are off. The birthday stays in your contacts.`
+      : '';
+  });
   /** The Popkin the muted bar is about, for its words and its "Undo". */
   private readonly mutedPopkin = signal<PopkinLevelView | null>(null);
   readonly mutedText = computed(() => {
@@ -126,11 +141,40 @@ export class NotificationSettingsStore {
   }
 
   /**
-   * "Mute {Popkin}" mutes it as a tap would, with the bar that can undo it (L2-158 AC4). A Popkin
-   * the person is not in changes nothing. "Stop birthday reminders" is applied with birthdays by person.
+   * "Mute {Popkin}" mutes it, and "Stop birthday reminders for {name}" switches that birthday off,
+   * each as a tap would, with the bar that can undo it (L2-158 AC4, L2-159 AC5). One the person
+   * does not have changes nothing.
    */
   applyLinkIntent(intent: NotificationLinkIntent): void {
     if (intent.mute && 'popkinId' in intent.mute) this.setLevel(intent.mute.popkinId, 'Muted');
+    if (intent.mute && 'keyDateId' in intent.mute) {
+      this.setBirthdayReminder(intent.mute.keyDateId, { on: false });
+    }
+  }
+
+  /**
+   * One birthday's lead or switch, saved through Contacts so Dates and the profile read the same
+   * value (L2-159 AC3). Off raises the bar that can undo it (AC4, AC5).
+   */
+  setBirthdayReminder(keyDateId: string, change: { lead?: ReminderLead; on?: boolean }): void {
+    const birthday = this.settings()?.birthdays.find((b) => b.keyDateId === keyDateId);
+    if (!birthday) return;
+    this.change(
+      (settings) => ({
+        ...settings,
+        birthdays: settings.birthdays.map((b) =>
+          b.keyDateId === keyDateId
+            ? { ...b, lead: change.lead ?? b.lead, remindersOn: change.on ?? b.remindersOn }
+            : b,
+        ),
+      }),
+      this.contacts.changeKeyDateReminder(keyDateId, change).pipe(map(() => undefined)),
+      () => {
+        if (change.on === undefined) return;
+        this.stoppedBirthday.set(change.on ? null : birthday);
+        this.banner.set(change.on ? null : 'birthdayOff');
+      },
+    );
   }
 
   /** Every email switch and the frequency are off and disabled while email is off (AC3). */
@@ -227,11 +271,14 @@ export class NotificationSettingsStore {
     );
   }
 
-  /** "Undo" on the muted bar: the Popkin goes back to Everything. */
+  /** "Undo" on a bar: a muted Popkin goes back to Everything, a stopped birthday is on again. */
   undo(): void {
     const popkin = this.mutedPopkin();
-    if (this.banner() !== 'popkinMuted' || !popkin) return;
-    this.setLevel(popkin.popkinId, 'Everything');
+    if (this.banner() === 'popkinMuted' && popkin) this.setLevel(popkin.popkinId, 'Everything');
+    const birthday = this.stoppedBirthday();
+    if (this.banner() === 'birthdayOff' && birthday) {
+      this.setBirthdayReminder(birthday.keyDateId, { on: true });
+    }
   }
 
   dismissBanner(): void {

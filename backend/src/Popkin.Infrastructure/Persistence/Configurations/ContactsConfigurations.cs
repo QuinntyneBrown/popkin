@@ -40,6 +40,7 @@ public sealed class KeyDateConfiguration : IEntityTypeConfiguration<KeyDate>
         builder.Property(d => d.Title).HasMaxLength(KeyDate.MaxTitleLength);
         builder.Property(d => d.Kind).HasConversion<string>().HasMaxLength(12);
         builder.Property(d => d.Lead).HasConversion<string>().HasMaxLength(16);
+        builder.Property(d => d.RemindersOn).HasDefaultValue(true);
         // A date goes with its contact (L2-132); ContactRemoval removes it in the same save.
         builder.HasOne<Contact>().WithMany().HasForeignKey(d => d.ContactId).OnDelete(DeleteBehavior.Cascade);
     }
