@@ -55,6 +55,12 @@ export const routes: Routes = [
         title: 'Notifications · Popkin Admin',
       },
       {
+        path: 'limits',
+        loadComponent: () => import('./pages/limits/limits.page').then((m) => m.LimitsPage),
+        data: data({ shell: 'admin', page: 'limits' }),
+        title: 'Limits · Popkin Admin',
+      },
+      {
         path: 'audit',
         loadComponent: () => import('./pages/audit/audit.page').then((m) => m.AuditPage),
         data: data({ shell: 'admin', page: 'audit' }),

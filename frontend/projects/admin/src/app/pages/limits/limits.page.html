@@ -1,0 +1,62 @@
+<div pk-page-head heading="Limits" [sub]="sub()"></div>
+@switch (store.status()) {
+  @case ('failed') {
+    <section pk-panel>
+      <div
+        pk-empty-state
+        icon="alert"
+        heading="Couldn’t load the limits"
+        text="The admin API didn’t answer. Nothing has changed; try again, or check Health if it keeps happening."
+        [compact]="true"
+        [panel]="true"
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.load()">
+          <svg pk-icon name="retry" size="sm"></svg>Try again
+        </button>
+        <a pk-button variant="secondary" size="md" routerLink="/health">Open Health</a>
+      </div>
+    </section>
+  }
+  @case ('ready') {
+    @if (sessions(); as view) {
+      <section pk-panel heading="Sessions" [sub]="sessionsSub">
+        <div>
+          @for (row of view.rows; track row.limit) {
+            <div
+              pk-limit-row
+              fieldId="lim-session"
+              [name]="row.name"
+              [help]="row.help"
+              [unit]="row.unit"
+              [fields]="row.fields"
+              [error]="row.error"
+              [readonly]="!!blocked()"
+              (changed)="edit($event)"
+            ></div>
+          }
+        </div>
+      </section>
+      @if (view.draft.unsaved > 0) {
+        <div
+          pk-save-bar
+          saveLabel="Save limits"
+          [count]="view.draft.unsaved"
+          [blocked]="view.draft.valid ? null : 'Fix the highlighted limit to save'"
+          (discard)="store.discard()"
+          (save)="save()"
+        ></div>
+      }
+    }
+  }
+  @default {
+    <p class="visually-hidden" role="status">Loading the limits…</p>
+    <section pk-panel heading="Sessions" [body]="true">
+      <div class="split" aria-hidden="true">
+        <span class="stack">
+          <span pk-skeleton shape="text" [width]="40"></span>
+        </span>
+        <span pk-skeleton shape="pill"></span>
+      </div>
+    </section>
+  }
+}
