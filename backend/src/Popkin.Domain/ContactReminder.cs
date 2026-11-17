@@ -62,24 +62,6 @@ public sealed class ContactReminder : IOwnedByPerson
     public void Dismiss(DateTimeOffset now) => DismissedAt ??= now;
 }
 
-/// <summary>The Monday email of one week, sent once (L2-140 AC3).</summary>
-public sealed class ContactWeeklyEmail : IOwnedByPerson
-{
-    private ContactWeeklyEmail()
-    {
-    }
-
-    public Guid OwnerId { get; private set; }
-
-    /// <summary>The Monday the week starts on.</summary>
-    public DateOnly WeekOf { get; private set; }
-
-    public DateTimeOffset SentAt { get; private set; }
-
-    public static ContactWeeklyEmail Sent(Guid ownerId, DateOnly weekOf, DateTimeOffset now) =>
-        new() { OwnerId = ownerId, WeekOf = weekOf, SentAt = now };
-}
-
 /// <summary>A device that takes phone reminders by Web Push (ADR 0028): one per endpoint.</summary>
 public sealed class PushSubscription
 {

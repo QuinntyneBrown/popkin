@@ -549,22 +549,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("ContactReminders", (string)null);
                 });
 
-            modelBuilder.Entity("Popkin.Domain.ContactWeeklyEmail", b =>
-                {
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly>("WeekOf")
-                        .HasColumnType("date");
-
-                    b.Property<DateTimeOffset>("SentAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("OwnerId", "WeekOf");
-
-                    b.ToTable("ContactWeeklyEmails", (string)null);
-                });
-
             modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1751,12 +1735,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("nvarchar(16)");
 
-                    b.Property<bool>("MondayEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("PhoneNotifications")
-                        .HasColumnType("bit");
-
                     b.HasKey("OwnerId");
 
                     b.ToTable("ReminderPreferences", (string)null);
@@ -2148,15 +2126,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Popkin.Domain.ContactReminder", b =>
-                {
-                    b.HasOne("Popkin.Domain.Person", null)
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Popkin.Domain.ContactWeeklyEmail", b =>
                 {
                     b.HasOne("Popkin.Domain.Person", null)
                         .WithMany()

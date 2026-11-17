@@ -53,9 +53,6 @@ public static class ReminderRules
 
     public static bool IsTime(DateTimeOffset localNow) => localNow.Hour >= Hour;
 
-    /// <summary>The Monday a day's week starts on.</summary>
-    public static DateOnly WeekOf(DateOnly day) => day.AddDays(-(((int)day.DayOfWeek + 6) % 7));
-
     public static TimeZoneInfo? TryZone(string? zone)
     {
         if (string.IsNullOrWhiteSpace(zone))

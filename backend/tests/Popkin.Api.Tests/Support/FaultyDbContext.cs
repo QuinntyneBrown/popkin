@@ -84,7 +84,6 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<ContactReminder> ContactReminders => inner.ContactReminders;
 
-    public DbSet<ContactWeeklyEmail> ContactWeeklyEmails => inner.ContactWeeklyEmails;
 
     public DbSet<PushSubscription> PushSubscriptions => inner.PushSubscriptions;
 

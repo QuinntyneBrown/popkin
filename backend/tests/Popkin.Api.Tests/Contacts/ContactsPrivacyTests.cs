@@ -51,6 +51,6 @@ public sealed class ContactsPrivacyTests
         Assert.Equal(codesBefore, api.Codes.Sent.Count);
         Assert.Equal(invitesBefore, api.CrewInvites.Sent.Count);
         Assert.Empty(api.PhoneAlerts.Sent);
-        Assert.Empty(api.WeekAheadEmails.Sent);
+        Assert.Empty(api.NotificationEmails.Sent);
     }
 }

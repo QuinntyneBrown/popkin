@@ -70,7 +70,6 @@ public interface IAppDbContext
 
     DbSet<ContactReminder> ContactReminders { get; }
 
-    DbSet<ContactWeeklyEmail> ContactWeeklyEmails { get; }
 
     DbSet<PushSubscription> PushSubscriptions { get; }
 

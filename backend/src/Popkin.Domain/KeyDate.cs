@@ -155,19 +155,13 @@ public sealed class ReminderPreferences : IOwnedByPerson
 
     public ReminderLead MilestoneLead { get; private set; }
 
-    public bool PhoneNotifications { get; private set; }
-
-    public bool MondayEmail { get; private set; }
-
-    /// <summary>1 week before, 3 days before and on the day; both ways on (L2-139 AC1, L2-140 AC4).</summary>
+    /// <summary>1 week before, 3 days before and on the day (L2-139 AC1).</summary>
     public static ReminderPreferences Defaults(Guid ownerId) => new()
     {
         OwnerId = ownerId,
         BirthdayLead = ReminderLead.OneWeekBefore,
         AnniversaryLead = ReminderLead.ThreeDaysBefore,
         MilestoneLead = ReminderLead.OnTheDay,
-        PhoneNotifications = true,
-        MondayEmail = true,
     };
 
     /// <summary>A new date's lead time; Something else starts at 1 week before (gap 113).</summary>
@@ -179,12 +173,10 @@ public sealed class ReminderPreferences : IOwnedByPerson
         _ => ReminderLead.OneWeekBefore,
     };
 
-    public void Change(ReminderLead birthday, ReminderLead anniversary, ReminderLead milestone, bool phone, bool email)
+    public void Change(ReminderLead birthday, ReminderLead anniversary, ReminderLead milestone)
     {
         BirthdayLead = birthday;
         AnniversaryLead = anniversary;
         MilestoneLead = milestone;
-        PhoneNotifications = phone;
-        MondayEmail = email;
     }
 }

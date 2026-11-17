@@ -24,16 +24,3 @@ public sealed class CapturingPhoneNotifications : IPhoneNotificationSender
         return Task.FromResult(1);
     }
 }
-
-public sealed class CapturingWeekAheadEmails : IContactsEmailSender
-{
-    private readonly List<(string Email, WeekAheadEmail Week)> _sent = [];
-
-    public IReadOnlyList<(string Email, WeekAheadEmail Week)> Sent => _sent;
-
-    public Task SendWeekAheadAsync(string email, WeekAheadEmail week, CancellationToken cancellationToken)
-    {
-        _sent.Add((email, week));
-        return Task.CompletedTask;
-    }
-}

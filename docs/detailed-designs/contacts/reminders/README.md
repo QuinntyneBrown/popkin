@@ -140,9 +140,10 @@ same day supersedes a ruling, the ruling is marked.
 
   No dimension or log carries an owner, a contact, the words or an address.
 
-### To be removed
+### Removed
 
-The change to L2-140 removes code that is built today:
+The change to L2-140 removed, on 17 November 2026 (migration `RemoveMondayEmail`, which carries
+"Phone notifications" off into the "Birthdays" phone choice of Notifications):
 
 - **Domain:**
   - `ReminderPreferences.PhoneNotifications`, `ReminderPreferences.MondayEmail` and

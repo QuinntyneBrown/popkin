@@ -73,8 +73,8 @@ test.describe('Dates', () => {
     await expect(dates.defaultFor('Birthdays')).toHaveValue('OneWeekBefore');
     await expect(dates.defaultFor('Anniversaries')).toHaveValue('ThreeDaysBefore');
     await expect(dates.defaultFor('Milestones')).toHaveValue('OnTheDay');
-    await expect(dates.phone).toHaveAttribute('aria-checked', 'true');
-    await expect(dates.email).toHaveAttribute('aria-checked', 'true');
+    // How reminders arrive moved to Notifications; Dates keeps the lead times only (L2-140 AC4).
+    await expect(dates.reminders.getByRole('switch')).toHaveCount(0);
     await expect(dates.nav.current).toHaveText(/Dates/);
   });
 
@@ -155,8 +155,6 @@ test.describe('Dates', () => {
       birthdayLead: 'TwoWeeksBefore',
       anniversaryLead: 'ThreeDaysBefore',
       milestoneLead: 'OnTheDay',
-      phoneNotifications: true,
-      mondayEmail: true,
     });
   });
 });

@@ -227,16 +227,6 @@ public sealed class ContactReminderConfiguration : IEntityTypeConfiguration<Cont
     }
 }
 
-public sealed class ContactWeeklyEmailConfiguration : IEntityTypeConfiguration<ContactWeeklyEmail>
-{
-    public void Configure(EntityTypeBuilder<ContactWeeklyEmail> builder)
-    {
-        builder.ToTable("ContactWeeklyEmails");
-        builder.HasKey(e => new { e.OwnerId, e.WeekOf });
-        builder.HasOne<Person>().WithMany().HasForeignKey(e => e.OwnerId).OnDelete(DeleteBehavior.Cascade);
-    }
-}
-
 public sealed class PushSubscriptionConfiguration : IEntityTypeConfiguration<PushSubscription>
 {
     public void Configure(EntityTypeBuilder<PushSubscription> builder)

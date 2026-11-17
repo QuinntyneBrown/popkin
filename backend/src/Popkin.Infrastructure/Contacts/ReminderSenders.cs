@@ -67,24 +67,3 @@ public sealed class NoPhoneNotificationSender : IPhoneNotificationSender
 {
     public Task<int> SendAsync(Guid personId, PhoneAlert alert, CancellationToken cancellationToken) => Task.FromResult(0);
 }
-
-/// <summary>Sends the Monday email through Azure Communication Services (ADR 0021).</summary>
-public sealed class EmailContactsSender(EmailClient client, string sender, string datesLink) : IContactsEmailSender
-{
-    public async Task SendWeekAheadAsync(string email, WeekAheadEmail week, CancellationToken cancellationToken)
-    {
-        var text = "This week in Contacts:\n\n"
-            + string.Join("\n", week.Dates.Select(d => $"- {d}"))
-            + $"\n\nSee all your dates: {datesLink}\n\nTurn this email off under Reminders on your Dates page.";
-        if (!await CommunicationText.TrySendEmailAsync(client, sender, email, "Your week in Contacts", text, cancellationToken))
-        {
-            throw new InvalidOperationException("The Monday email could not be sent.");
-        }
-    }
-}
-
-/// <summary>Sends nothing: no email provider is configured, as on a developer's machine.</summary>
-public sealed class NoContactsEmailSender : IContactsEmailSender
-{
-    public Task SendWeekAheadAsync(string email, WeekAheadEmail week, CancellationToken cancellationToken) => Task.CompletedTask;
-}

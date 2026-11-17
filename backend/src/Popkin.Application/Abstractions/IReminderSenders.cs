@@ -12,12 +12,3 @@ public interface IPhoneNotificationSender
     /// <summary>How many of the person's devices took the alert; throws when none of several did.</summary>
     Task<int> SendAsync(Guid personId, PhoneAlert alert, CancellationToken cancellationToken);
 }
-
-/// <summary>The Monday email: the words of each key date of the week ahead, soonest first.</summary>
-public sealed record WeekAheadEmail(IReadOnlyList<string> Dates);
-
-/// <summary>Sends the Monday email of the week ahead (L2-140 AC3). Nothing it is given is logged.</summary>
-public interface IContactsEmailSender
-{
-    Task SendWeekAheadAsync(string email, WeekAheadEmail week, CancellationToken cancellationToken);
-}

@@ -66,8 +66,4 @@ public sealed class ReminderRulesTests
         Assert.Equal(D(day), DateOnly.FromDateTime(local.DateTime));
         Assert.Equal(due, ReminderRules.IsTime(local));
     }
-
-    [Fact]
-    public void The_week_ahead_starts_on_its_Monday() =>
-        Assert.Equal(D("2026-09-14"), ReminderRules.WeekOf(D("2026-09-17")));
 }

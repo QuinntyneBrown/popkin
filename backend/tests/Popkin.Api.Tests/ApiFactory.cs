@@ -44,7 +44,6 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public CapturingNotificationEmails NotificationEmails { get; } = new();
 
-    public CapturingWeekAheadEmails WeekAheadEmails { get; } = new();
 
     public FixedCodeGenerator CodeGenerator { get; } = new();
 
@@ -108,8 +107,6 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<IPhoneNotificationSender>(PhoneAlerts);
             services.RemoveAll<INotificationEmailSender>();
             services.AddSingleton<INotificationEmailSender>(NotificationEmails);
-            services.RemoveAll<IContactsEmailSender>();
-            services.AddSingleton<IContactsEmailSender>(WeekAheadEmails);
         });
     }
 

@@ -159,19 +159,6 @@ public static class DependencyInjection
             }
         }
 
-        // Contacts reminders: the Monday email by Azure Communication Services (ADR 0021) and the
-        // phone by Web Push (ADR 0028). Unconfigured, each sends nothing; the in-app reminder stands.
-        if (communicationCredential is not null && emailSender is { Length: > 0 })
-        {
-            var datesLink = $"{(configuration["App:Origin"] ?? "https://app.popkin.community").TrimEnd('/')}/contacts/dates";
-            services.AddSingleton<IContactsEmailSender>(
-                new Contacts.EmailContactsSender(new EmailClient(new Uri(communicationEndpoint!), communicationCredential), emailSender, datesLink));
-        }
-        else
-        {
-            services.AddSingleton<IContactsEmailSender, Contacts.NoContactsEmailSender>();
-        }
-
         // Notification emails (ADR 0031): rendered from Razor components, and sent only when the
         // service, the sender address and the footer's postal address are all configured
         // (L2-163 AC5); otherwise each is marked failed and nothing is sent.

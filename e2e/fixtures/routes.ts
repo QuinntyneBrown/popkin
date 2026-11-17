@@ -401,12 +401,8 @@ export const routes = {
   contactsTodayDone: { app: '/contacts', mock: 'pages/contacts-today/done.html' },
   contactsTodayLoading: { app: '/contacts', mock: 'pages/contacts-today/loading.html' },
   contactsTodayError: { app: '/contacts', mock: 'pages/contacts-today/error.html' },
-  // Reminders (L2-140): a reminder over Today, and a browser that blocks notifications on Dates.
+  // Reminders (L2-140): a reminder over Today.
   contactsReminder: { app: '/contacts', mock: 'notifications/contacts-toast/info.html' },
-  contactsNotificationsBlocked: {
-    app: '/contacts/dates',
-    mock: 'notifications/contacts-toast/blocked.html',
-  },
   // Import from your Popkins (L2-151), opened from People with nobody in it.
   importContacts: { app: '/contacts/people', mock: 'dialogs/import-contacts/default.html' },
   importContactsBusy: { app: '/contacts/people', mock: 'dialogs/import-contacts/busy.html' },

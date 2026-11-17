@@ -337,8 +337,6 @@ await call('PUT', '/api/contacts/reminder-preferences', {
   birthdayLead: 'TwoWeeksBefore',
   anniversaryLead: 'ThreeDaysBefore',
   milestoneLead: 'OnTheDay',
-  phoneNotifications: true,
-  mondayEmail: true,
 });
 await call('GET', '/api/contacts/reminder-preferences');
 // She adds a follow-up for Chidi, due the Sunday after the mocks' Tuesday, reads Follow-ups,

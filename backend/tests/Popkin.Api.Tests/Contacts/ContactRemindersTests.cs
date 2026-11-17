@@ -1,6 +1,6 @@
 // Acceptance Test
 // Traces to: L2-140, L2-133 AC2, L2-145 AC4, L2-122, ADR 0028, known gaps 104 and 114 (ruled)
-// Description: At 9 am where the owner is, the Worker's command adds each reminder once, sends it to the phone when that is on, and on Monday sends the week ahead once; the owner reads and dismisses only their own; the zone and the devices are saved.
+// Description: At 9 am where the owner is, the Worker's command adds each reminder once and sends it to the phone when "Birthdays" is on for the phone; no Monday email is sent (L2-140, as changed 17 November 2026); the owner reads and dismisses only their own.
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -49,12 +49,12 @@ public sealed class ContactRemindersTests
 
     // Given Mara, signed in by email, who keeps Grace's birthday on Saturday, and Lena, who keeps none,
     // when the Worker ticks at 8:59 and at 9:00 on Monday, and again at 9:05,
-    // then nothing is added before 9; at 9 "Grace turns 33 on Saturday" is added once, sent to her
-    // phone once, and the week ahead is emailed to her once; she reads it with Grace's first name,
+    // then nothing is added before 9; at 9 "Grace turns 33 on Saturday" is added once and sent to
+    // her phone once, and no week-ahead email goes; she reads it with Grace's first name,
     // dismisses it, and it is gone; dismissing twice changes nothing; Lena cannot dismiss it
-    // (L2-140 AC1, AC2, AC3; L2-122).
+    // (L2-140 AC1, AC2, AC4; L2-122).
     [Fact]
-    public async Task A_reminder_comes_once_at_nine_by_the_app_the_phone_and_the_Monday_email()
+    public async Task A_reminder_comes_once_at_nine_by_the_app_and_the_phone_and_no_Monday_email()
     {
         using var api = new ApiFactory();
         var mara = await SignedUpByEmailAsync(api, "Mara Okafor", "mara@example.com");
@@ -74,9 +74,7 @@ public sealed class ContactRemindersTests
         var phone = Assert.Single(api.PhoneAlerts.Sent);
         Assert.Equal("Grace turns 33 on Saturday", phone.Alert.Title);
         Assert.Equal($"/contacts/people/{grace}", phone.Alert.Url);
-        var email = Assert.Single(api.WeekAheadEmails.Sent);
-        Assert.Equal("mara@example.com", email.Email);
-        Assert.Equal(["Grace turns 33 on Saturday"], email.Week.Dates);
+        Assert.Empty(api.NotificationEmails.Sent);
         var reminder = Assert.Single(await RemindersAsync(mara));
         Assert.Equal("Grace turns 33 on Saturday", reminder.GetProperty("words").GetString());
         Assert.Equal("Grace", reminder.GetProperty("firstName").GetString());
@@ -95,9 +93,9 @@ public sealed class ContactRemindersTests
         Assert.Empty(await RemindersAsync(mara));
     }
 
-    // Given Mara in Los Angeles with both ways off, when the Worker ticks at 9 am UTC and at 9 am
-    // in Los Angeles, then the reminder waits for 9 am there, and goes neither to the phone nor by
-    // email; a zone the server does not know is refused (L2-140 AC1 to AC3, known gap 104).
+    // Given Mara in Los Angeles with "Birthdays" off for the phone, when the Worker ticks at 9 am
+    // UTC and at 9 am in Los Angeles, then the reminder waits for 9 am there and goes to no phone;
+    // a zone the server does not know is refused (L2-140 AC1, AC2, known gap 104).
     [Fact]
     public async Task Nine_am_is_where_the_owner_is_and_the_switches_are_kept()
     {
@@ -108,11 +106,7 @@ public sealed class ContactRemindersTests
         await BirthdayAsync(mara, "Grace Lin", saturday, saturday.Year - 33);
         var zone = await mara.PutAsJsonAsync("/api/me/time-zone", new { zone = "America/Los_Angeles" });
         var wrong = await mara.PutAsJsonAsync("/api/me/time-zone", new { zone = "Lakeside/Weekend" });
-        (await mara.PutAsJsonAsync("/api/contacts/reminder-preferences", new
-        {
-            birthdayLead = "OneWeekBefore", anniversaryLead = "ThreeDaysBefore", milestoneLead = "OnTheDay",
-            phoneNotifications = false, mondayEmail = false,
-        })).EnsureSuccessStatusCode();
+        (await mara.PutAsJsonAsync("/api/me/notifications/kinds/Birthdays", new { phone = false })).EnsureSuccessStatusCode();
         api.Clock.SetUtcNow(monday);
 
         var utcNine = await api.SendAsync(new SendContactRemindersCommand());
@@ -125,7 +119,6 @@ public sealed class ContactRemindersTests
         Assert.Equal((0, 1), (utcNine, losAngelesNine));
         Assert.Single(await RemindersAsync(mara));
         Assert.Empty(api.PhoneAlerts.Sent);
-        Assert.Empty(api.WeekAheadEmails.Sent);
     }
 
     // Given Mara's weekly lunch with Chidi, started today, and her follow-up due in a week, when the

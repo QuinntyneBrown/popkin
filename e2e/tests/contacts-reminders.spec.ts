@@ -1,11 +1,10 @@
 // Acceptance Test
 // Traces to: L2-140 AC1, AC2, L2-124, ADR 0028, known gaps 104 and 114 (ruled)
-// Description: A reminder shows over Contacts until dismissed, opens the contact's profile, and is dismissed for good; Contacts saves the device's zone; turning Phone notifications on in a browser that blocks notifications says so.
-import { chidiProfile, contactsMorning, marasDates } from '../fixtures/contacts';
+// Description: A reminder shows over Contacts until dismissed, opens the contact's profile, and is dismissed for good; Contacts saves the device's zone.
+import { chidiProfile, contactsMorning } from '../fixtures/contacts';
 import { expect, test } from '../fixtures/pk-test';
 import { chidisReminder, gracesReminder, marasReminders } from '../fixtures/reminders';
 import { marasToday } from '../fixtures/today';
-import { ContactsDatesPage } from '../pages/contacts-dates.page';
 import { Toasts } from '../pages/toasts';
 
 test.use({ timezoneId: 'Europe/London' });
@@ -51,25 +50,5 @@ test.describe('Reminders in Contacts', () => {
 
     await expect(page).toHaveURL(/\/contacts\/people\/[^/]+$/);
     await expect(toasts.headed('Chidi’s anniversary on 26 September')).toHaveCount(0);
-  });
-
-  // L2-140 AC2, ADR 0028
-  test('says when the browser blocks notifications as Phone notifications is turned on', async ({
-    page,
-    pk,
-  }) => {
-    await marasDates(page);
-    await pk.open('contactsNotificationsBlocked');
-    const dates = new ContactsDatesPage(page);
-
-    await dates.phone.click();
-    await dates.phone.click();
-
-    const toasts = new Toasts(page);
-    await expect(toasts.warning).toContainText('Notifications are blocked in this browser');
-    await expect(toasts.warning).toContainText(
-      'Allow them for Popkin in your browser’s settings to get reminders on this device.',
-    );
-    await expect(dates.phone).toBeChecked();
   });
 });

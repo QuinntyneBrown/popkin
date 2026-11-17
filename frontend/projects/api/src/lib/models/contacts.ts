@@ -180,8 +180,6 @@ export interface ReminderPreferencesView {
   birthdayLead: ReminderLead;
   anniversaryLead: ReminderLead;
   milestoneLead: ReminderLead;
-  phoneNotifications: boolean;
-  mondayEmail: boolean;
 }
 
 export interface ContactDatesView {

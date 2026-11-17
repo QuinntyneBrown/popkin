@@ -926,7 +926,7 @@
         "warning": "An email has no severity variant; its states are what it carries.",
         "danger": "An email has no severity variant; its states are what it carries."
       },
-      "notes": "Sent at 8 am local, as early as the member chose for that contact. L2-140 AC3 specifies a weekly Monday email instead; see Open questions."
+      "notes": "Sent at 8 am local, as early as the member chose for that contact (L2-140, as changed 17 November 2026: no Monday email)."
     },
     {
       "id": "email-plan-reminder",

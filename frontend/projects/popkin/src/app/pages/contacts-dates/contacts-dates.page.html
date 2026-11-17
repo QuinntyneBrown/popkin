@@ -70,10 +70,6 @@
           pk-reminder-defaults
           [defaults]="defaults()"
           [options]="leads"
-          [phone]="store.preferences().phoneNotifications"
-          [email]="store.preferences().mondayEmail"
-          (phoneChange)="store.changeWay('phoneNotifications', $event)"
-          (emailChange)="store.changeWay('mondayEmail', $event)"
           (changed)="changeDefault($event)"
         ></aside>
       </div>

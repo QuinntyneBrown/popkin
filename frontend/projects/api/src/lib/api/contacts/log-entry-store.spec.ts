@@ -35,8 +35,6 @@ describe('LogEntryStore (L2-133, L2-134)', () => {
         birthdayLead: 'OneWeekBefore',
         anniversaryLead: 'ThreeDaysBefore',
         milestoneLead: 'OnTheDay',
-        phoneNotifications: true,
-        mondayEmail: true,
       }),
     );
     TestBed.configureTestingModule({

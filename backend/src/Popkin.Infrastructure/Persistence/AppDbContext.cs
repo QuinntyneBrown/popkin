@@ -71,7 +71,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<ContactReminder> ContactReminders => Set<ContactReminder>();
 
-    public DbSet<ContactWeeklyEmail> ContactWeeklyEmails => Set<ContactWeeklyEmail>();
 
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
 

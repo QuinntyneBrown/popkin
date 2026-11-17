@@ -228,10 +228,9 @@ depends on one says so.
     emails and the admin Notifications page (in `admin/`) come only from the designs, so their
     manifest entries list no requirement except the birthday email (L1-033, L2-140). They need
     `engineering-requirements` and a detailed design before anything is built.
-12. Which birthday email? L2-140 AC3 and the Contacts reminders design send one "Monday email"
-    for the week ahead. The designs send one email per person, as early as the member chooses
-    (`email-birthday`). The "Phone notifications" and "Monday email" switches on
-    `contacts-dates` overlap with `notification-settings`, and one of them should go.
+12. Which birthday email? Settled 17 November 2026: L2-140 withdrew the Monday email, so one
+    email goes per date, as early as the member chooses (`email-birthday`), and the "Phone
+    notifications" and "Monday email" switches left `contacts-dates` for `notification-settings`.
 13. The Weekly digest can be chosen on `notification-settings` but has no email design. The
     "Show all 7 contacts with birthdays" link opens `contacts-dates/birthdays`, where the
     reminders can't be changed.
