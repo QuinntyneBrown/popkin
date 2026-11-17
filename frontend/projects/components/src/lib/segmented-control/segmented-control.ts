@@ -29,6 +29,7 @@ export interface SegmentedOption<T extends string = string> {
     '[attr.role]': "kind() === 'radio' ? 'radiogroup' : 'tablist'",
     '[attr.aria-label]': 'label()',
     '[class.segmented--stretch]': 'stretch()',
+    '[class.segmented--scroll]': 'scroll()',
   },
 })
 export class SegmentedControl {
@@ -45,6 +46,10 @@ export class SegmentedControl {
   readonly disabledReason = input<string | null>(null);
   /** Below 768 px the options share the full width, as a feature's modes do. */
   readonly stretch = input(false);
+  /** Page tabs: the options keep their width and the row scrolls when it is wider than the page. */
+  readonly scroll = input(false);
+  /** Gives each option the id `{idPrefix}-{value}`, for a tab panel to be labelled by. */
+  readonly idPrefix = input<string>();
 
   private readonly buttons = viewChildren<ElementRef<HTMLButtonElement>>('option');
 

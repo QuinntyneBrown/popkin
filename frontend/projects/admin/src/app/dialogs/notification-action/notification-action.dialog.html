@@ -1,0 +1,38 @@
+<div pk-dialog [heading]="text.heading" [description]="text.description">
+  @if (state.status() === 'failed') {
+    <div pk-alert [heading]="failed.heading">{{ failed.text }}</div>
+  }
+  <div
+    pk-textarea
+    fieldId="reason"
+    label="Reason, for the audit log"
+    hint="Other admins see it beside the change."
+    [placeholder]="text.placeholder"
+    [rows]="2"
+    [maxlength]="maxLength"
+    [error]="state.reasonError() ?? undefined"
+    [readonly]="busy()"
+    (changed)="reason.set($event)"
+  ></div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    [variant]="data.danger ? 'danger' : 'primary'"
+    [block]="true"
+    [busy]="busy()"
+    (click)="confirm()"
+  >
+    {{ action() }}
+  </button>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    [block]="true"
+    [disabled]="busy()"
+    (click)="cancel()"
+  >
+    {{ text.keep }}
+  </button>
+</div>

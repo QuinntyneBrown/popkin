@@ -100,6 +100,162 @@ export const routes = {
   adminFeaturesError: { app: `${ADMIN}/features`, mock: 'admin/pages/features/error.html' },
   adminFeaturesViewer: { app: `${ADMIN}/features`, mock: 'admin/pages/features/viewer.html' },
   adminFeaturesSupport: { app: `${ADMIN}/features`, mock: 'admin/pages/features/support.html' },
+  adminNotifications: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/pages/notifications/default.html',
+  },
+  adminNotificationsPaused: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/pages/notifications/paused.html',
+  },
+  adminNotificationsHolds: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/pages/notifications/holds.html',
+  },
+  adminNotificationsHoldAdding: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/pages/notifications/hold-adding.html',
+  },
+  adminNotificationsDefaults: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/pages/notifications/defaults.html',
+  },
+  adminNotificationsDefaultsEdited: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/pages/notifications/defaults-edited.html',
+  },
+  adminNotificationsDefaultsInvalid: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/pages/notifications/defaults-invalid.html',
+  },
+  adminNotificationsDefaultsSaved: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/pages/notifications/defaults-saved.html',
+  },
+  adminNotificationsDefaultsLoading: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/pages/notifications/defaults-loading.html',
+  },
+  adminNotificationsDefaultsError: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/pages/notifications/defaults-error.html',
+  },
+  adminNotificationsSupport: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/pages/notifications/support.html',
+  },
+  adminNotificationsViewer: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/pages/notifications/viewer.html',
+  },
+  adminNotificationsLoading: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/pages/notifications/loading.html',
+  },
+  adminNotificationsError: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/pages/notifications/error.html',
+  },
+  adminPauseEmail: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notifications-pause/default.html',
+  },
+  adminPauseEmailBusy: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notifications-pause/busy.html',
+  },
+  adminPauseEmailFailed: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notifications-pause/failed.html',
+  },
+  adminPauseEmailInvalid: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notifications-pause/invalid.html',
+  },
+  adminResumeEmail: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notifications-resume/default.html',
+  },
+  adminResumeEmailBusy: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notifications-resume/busy.html',
+  },
+  adminResumeEmailFailed: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notifications-resume/failed.html',
+  },
+  adminResumeEmailInvalid: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notifications-resume/invalid.html',
+  },
+  adminKindSwitch: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notification-kind-switch/default.html',
+  },
+  adminKindSwitchTurnOn: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notification-kind-switch/turn-on.html',
+  },
+  adminKindSwitchBusy: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notification-kind-switch/busy.html',
+  },
+  adminKindSwitchFailed: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notification-kind-switch/failed.html',
+  },
+  adminKindSwitchInvalid: {
+    app: `${ADMIN}/notifications`,
+    mock: 'admin/dialogs/notification-kind-switch/invalid.html',
+  },
+  adminReleaseHold: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/dialogs/notification-hold-release/default.html',
+  },
+  adminReleaseHoldBusy: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/dialogs/notification-hold-release/busy.html',
+  },
+  adminReleaseHoldFailed: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/dialogs/notification-hold-release/failed.html',
+  },
+  adminReleaseHoldInvalid: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/dialogs/notification-hold-release/invalid.html',
+  },
+  adminHoldPopkin: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/dialogs/notification-hold-add/default.html',
+  },
+  adminHoldPopkinBusy: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/dialogs/notification-hold-add/busy.html',
+  },
+  adminHoldPopkinInvalid: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/dialogs/notification-hold-add/invalid.html',
+  },
+  adminHoldPopkinFailed: {
+    app: `${ADMIN}/notifications?tab=holds`,
+    mock: 'admin/dialogs/notification-hold-add/failed.html',
+  },
+  adminSaveDefaults: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/dialogs/notification-defaults-save/default.html',
+  },
+  adminSaveDefaultsBusy: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/dialogs/notification-defaults-save/busy.html',
+  },
+  adminSaveDefaultsInvalid: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/dialogs/notification-defaults-save/invalid.html',
+  },
+  adminSaveDefaultsFailed: {
+    app: `${ADMIN}/notifications?tab=defaults`,
+    mock: 'admin/dialogs/notification-defaults-save/failed.html',
+  },
   adminTurnOffFeature: {
     app: `${ADMIN}/features`,
     mock: 'admin/dialogs/turn-off-feature/default.html',

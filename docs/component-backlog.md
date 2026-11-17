@@ -10,7 +10,7 @@ Popkin uses no custom tooltips.
 
 | # | Component | Description | Effort | Status |
 |---|---|---|---|---|
-| 1 | Status pill | Record state beside a name or in a table column, on People, Jobs and Exports. | 0.5 days | Not built: built with its screen (ADR 0029) |
+| 1 | Status pill | Record state beside a name or in a table column, on People, Jobs and Exports; "Off for everyone" on Notifications. | 0.5 days | Built with Notifications, with parity (bad) |
 | 2 | Key values | Facts of one record on an admin detail page, as a description list. | 0.5 days | Not built: built with its screen (ADR 0029) |
 | 3 | Report review | Reports queue and the evidence for one report, so a moderator can decide it. | 1.5 days | Not built: built with its screen (ADR 0029) |
 | 4 | Activity lists | Five to ten recent items in a panel on Dashboard, Person and Announcements. | 1 day | Not built: built with its screen (ADR 0029) |

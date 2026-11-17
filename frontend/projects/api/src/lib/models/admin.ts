@@ -24,6 +24,8 @@ export type AdminAction =
   | 'ChangeFeature'
   | 'ChangeLimits'
   | 'PublishAnnouncement'
+  | 'ManageNotifications'
+  | 'HoldNotifications'
   | 'ManageAdmins'
   | 'ExportAuditLog'
   | (string & {});
@@ -139,4 +141,63 @@ export interface FeaturePopkinMatch {
   colour: string;
   inviteCode: string;
   alreadyOn: boolean;
+}
+
+/** A kind of notification (L2-154). */
+export type NotificationKindId =
+  | 'MentionsAndReplies'
+  | 'DirectMessages'
+  | 'GroupChat'
+  | 'NewPhotos'
+  | 'PlanChanges'
+  | 'ScheduleChanges'
+  | 'PeopleJoining'
+  | 'Experiences'
+  | 'Birthdays'
+  | 'StoriesDue'
+  | 'PopkinWrappingUp'
+  | 'SignInAndSecurity';
+
+export type NotificationGroupId = 'Activity' | 'Reminders' | 'Account';
+
+/** Whether member email is going out (L2-169 AC2, AC3). A figure not counted yet is null. */
+export interface AdminSendStatus {
+  paused: boolean;
+  pausedAt: string | null;
+  pausedByName: string | null;
+  pauseReason: string | null;
+  queued: number;
+  /** About how long the queue takes to send once resumed. */
+  resumeMinutes: number | null;
+  sentToday: number;
+  bouncedPercent: number | null;
+  medianSecondsToInbox: number | null;
+}
+
+/** One kind on the Kinds tab (L2-169 AC4, L2-171 AC2). */
+export interface AdminNotificationKind {
+  kind: NotificationKindId;
+  name: string;
+  about: string;
+  /** "Sign-in codes and security": it cannot be switched off (L2-154 AC2). */
+  required: boolean;
+  offForEveryone: boolean;
+  offSince: string | null;
+  offByName: string | null;
+  offReason: string | null;
+  sent24h: number;
+  openedPercent: number | null;
+}
+
+export interface AdminNotificationGroup {
+  group: NotificationGroupId;
+  name: string;
+  kinds: AdminNotificationKind[];
+}
+
+/** `GET /api/admin/notifications` (docs/detailed-designs/admin-platform/notifications). */
+export interface AdminNotifications {
+  status: AdminSendStatus;
+  groups: AdminNotificationGroup[];
+  holdCount: number;
 }

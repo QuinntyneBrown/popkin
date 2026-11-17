@@ -39,6 +39,8 @@
                 [attr.data-label]="$first ? null : columnAt($index).label"
                 [class.data-table__time]="cell.kind === 'time'"
                 [class.data-table__end]="columnAt($index).end"
+                [class.data-table__num]="columnAt($index).num"
+                [class.only-m-up]="columnAt($index).wide"
               >
                 @switch (cell.kind) {
                   @case ('strong') {
@@ -96,6 +98,35 @@
                     >
                       {{ cell.text }}
                     </button>
+                  }
+                  @case ('kind') {
+                    <span>
+                      <span class="kind-name" [class.kind-name--off]="!!cell.off"
+                        >{{ cell.text }}
+                        @if (cell.off) {
+                          <span pk-status tone="bad">{{ cell.off }}</span>
+                        }
+                      </span>
+                      <span class="kind-about">{{ cell.sub }}</span>
+                      @if (cell.totals) {
+                        <span class="kind-totals only-below-m">{{ cell.totals }}</span>
+                      }
+                    </span>
+                  }
+                  @case ('switch') {
+                    <button
+                      #toggle
+                      pk-switch
+                      [checked]="cell.on ?? false"
+                      [attr.aria-label]="cell.label"
+                      [disabledReason]="cell.disabledReason ?? null"
+                      (checkedChange)="turned(toggle, row.id, $event)"
+                    ></button>
+                  }
+                  @case ('lock') {
+                    <span class="lock-note"
+                      ><svg pk-icon name="lock" size="sm"></svg>{{ cell.text }}</span
+                    >
                   }
                   @default {
                     @if (cell.text) {

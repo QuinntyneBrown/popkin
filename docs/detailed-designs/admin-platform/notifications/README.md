@@ -35,7 +35,12 @@ either lever. They come back as they were when the lever is released.
 > **Built against a fake backend.** The admin app's side is built first, on the fake of
 > [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md); the API, Domain and Worker
 > parts below are not built yet. The dialogs take the reason with `pk-textarea` and
-> `ActionDialogState`, as Features does; `pk-reason-field` is not built.
+> `ActionDialogState`, as Features does; `pk-reason-field` is not built. One
+> `NotificationActionDialog` serves the pause, the resume and a kind's switch. The kinds table
+> reuses `pk-data-table` (ADR 0029): its existing group rows, and new `kind`, `switch` and `lock`
+> cells that keep the classes `kind-name`, `kind-about`, `kind-totals` and `lock-note`, in place
+> of `pk-table-group`, `pk-notification-kind` and `pk-lock-note`. "Off for everyone" is
+> `pk-status` with the `bad` tone, as the mocks draw it.
 
 ## Description
 

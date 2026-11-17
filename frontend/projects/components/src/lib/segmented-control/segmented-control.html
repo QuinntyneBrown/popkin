@@ -3,6 +3,7 @@
     #option
     class="segmented__option"
     type="button"
+    [attr.id]="idPrefix() ? idPrefix() + '-' + option.value : null"
     [attr.role]="kind() === 'radio' ? 'radio' : 'tab'"
     [attr.aria-checked]="kind() === 'radio' ? option.value === value() : null"
     [attr.aria-selected]="kind() === 'radio' ? null : option.value === value()"

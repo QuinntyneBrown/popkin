@@ -1,6 +1,8 @@
 import { theMockAdmins } from '../../fixtures/admin';
+import { theMockNotifications } from '../../fixtures/admin-notifications';
 import { parity } from '../../fixtures/parity';
 import { AdminsPage } from '../../pages/admin/admins.page';
+import { NotificationsPage } from '../../pages/admin/notifications.page';
 
 // People, roles chosen in place and an action per row: Admins & roles (L2-119 AC1).
 parity('data-table', [
@@ -9,5 +11,14 @@ parity('data-table', [
     name: 'admins',
     region: (page) => new AdminsPage(page).tableWrap,
     before: theMockAdmins,
+  },
+  // Kinds in their groups, figures, a switch per kind and a locked kind (L2-169 AC4). The mock
+  // draws no phone layout for AC5, where the figures go under the name, so 1280 px only.
+  {
+    key: 'adminNotifications',
+    name: 'notification-kinds',
+    region: (page) => new NotificationsPage(page).panel,
+    before: async (page) => void (await theMockNotifications(page)),
+    widths: [1280],
   },
 ]);
