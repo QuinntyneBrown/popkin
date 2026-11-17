@@ -35,7 +35,8 @@ Popkin web app, `docs/mocks/pages/contact-profile/`:
   "Sat, Sep 26 · in 11 days" with "Reminder: 3 days before", then "Add a date" (L2-128 AC4). The
   habit card reads "Every 2 weeks", "Lunch with Chidi", the keep strip "Kept 9 of the last 12"
   and "Overdue since Sep 13" (L2-128 AC5). "About Chidi" lists Phone, Email, City, How you met and
-  "Loves", one item per thing loved (L2-128 AC6). "People around Chidi" lists "Tomás Reyes"
+  "Loves", one item per thing loved (L2-128 AC6); a contact with none of these, such as one
+  imported with their name alone, has no "About" section at all. "People around Chidi" lists "Tomás Reyes"
   "Married" and the group chip "🏙️ Chidi & Tomás" (L2-128 AC7). The history tabs "Timeline",
   "Follow-ups 1" and "Memories & files" close the page (L2-128 AC8).
 - `grace.html` — a habit kept on time: "Monthly", "Catch-up with Grace", "Kept 10 of the last
