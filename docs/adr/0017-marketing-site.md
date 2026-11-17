@@ -7,7 +7,7 @@ Accepted, 13 November 2026.
 ## Context
 
 L1-020 asks for a public marketing site, separate from the app, that shows the pitch film "Meet
-Popkin" (`docs/videos/19-meet-popkin/`) beside what the landing page already says. ADR 0002 says
+Popkin" (`docs/videos/00-meet-popkin/`) beside what the landing page already says. ADR 0002 says
 a further application is added by its own decision record. The app's landing page (L2-001,
 L2-002) runs inside the app: it waits for the session check, and a signed-in person who opens it
 is sent to My Popkins. A page that is shared, linked from elsewhere and shows a 98-second film
@@ -31,7 +31,7 @@ choice in its ADR 0013 and has run it since.
 - It is served at `https://about.popkin.community`. `about` is already a reserved address
   (L2-063 AC5), so no Popkin can take it. The apex keeps the app and its landing page.
 - Nothing is loaded from another host (L2-061 AC2). `npm run media:sync` copies the film from
-  `docs/videos/19-meet-popkin/19-meet-popkin.mp4` and the pictures from `docs/mocks/assets/images`
+  `docs/videos/00-meet-popkin/00-meet-popkin.mp4` and the pictures from `docs/mocks/assets/images`
   into `projects/marketing/public` before the site is served or built; the copies are ignored by
   git. The film's narration is burned into the picture, so the player adds no caption track.
 - `npm run start:marketing` serves it on port 4201 and `npm run build:marketing` builds it. The

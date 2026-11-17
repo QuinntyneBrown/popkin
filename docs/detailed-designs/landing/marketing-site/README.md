@@ -4,7 +4,7 @@
 
 Popkin is a platform for pop-up communities. This feature covers the marketing site, a
 public page separate from the app that says what the landing page says and shows the pitch film
-"Meet Popkin" (`docs/videos/19-meet-popkin/`), then sends a person to the app to start a Popkin or
+"Meet Popkin" (`docs/videos/00-meet-popkin/`), then sends a person to the app to start a Popkin or
 sign in.
 
 - **marketing site** — the static Angular application `marketing`, served at `https://about.popkin.community` (ADR 0017)

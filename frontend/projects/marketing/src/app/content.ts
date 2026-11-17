@@ -9,7 +9,7 @@ import type { CompareRow, FilmChapter, HeroPreview, StepView } from 'components'
  */
 
 /**
- * The pitch film "Meet Popkin" (L2-080), docs/videos/19-meet-popkin, copied into `public/media` by
+ * The pitch film "Meet Popkin" (L2-080), docs/videos/00-meet-popkin, copied into `public/media` by
  * `npm run media:sync`. Its narration is burned into the picture (AC5). The chapters are its
  * acts: the moment and the group chat (0:00), Popkin itself (0:16) and the send-off (1:08).
  */
