@@ -36,6 +36,39 @@ test.describe('Today with people in Contacts', () => {
     await expect(today.spotlight.getByRole('link', { name: 'Grace’s profile' })).toBeVisible();
   });
 
+  // L2-125 AC9
+  test('on a wide screen, sets the next date and Coming up beside To do today and Recently', async ({
+    page,
+    pk,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await marasToday(page);
+
+    await pk.open('contactsToday');
+
+    const today = new ContactsTodayPage(page);
+    const [spotlight, comingUp, toDo, recent] = await Promise.all(
+      [today.spotlight, today.comingUp, today.toDo, today.recent].map((part) => part.boundingBox()),
+    );
+    expect(toDo!.x).toBeGreaterThanOrEqual(spotlight!.x + spotlight!.width);
+    expect(recent!.x).toBeGreaterThanOrEqual(comingUp!.x + comingUp!.width);
+    expect(toDo!.y).toBeLessThan(spotlight!.y + spotlight!.height);
+  });
+
+  // L2-125 AC9
+  test('on a phone, stacks them one above the next', async ({ page, pk }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await marasToday(page);
+
+    await pk.open('contactsToday');
+
+    const today = new ContactsTodayPage(page);
+    const [spotlight, toDo] = await Promise.all(
+      [today.spotlight, today.toDo].map((part) => part.boundingBox()),
+    );
+    expect(toDo!.y).toBeGreaterThanOrEqual(spotlight!.y + spotlight!.height);
+  });
+
   // L2-125 AC3
   test('lists what is coming up, soonest first, with the days left', async ({ page, pk }) => {
     await marasToday(page);

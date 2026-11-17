@@ -106,7 +106,7 @@ test.describe('Memories & files', () => {
     await expect(profile.memoryPhotos).toHaveCount(4);
   });
 
-  // L2-135 AC1, gap 107: a photo memory is on the timeline under All
+  // L2-135 AC1, L2-136 AC7, gap 107: a photo memory is on the timeline under All
   test('a photo memory is on the timeline, by its day, with its caption and photo', async ({
     page,
     pk,
@@ -241,7 +241,7 @@ test.describe('Add to memories', () => {
     await expect(dialog.panel).toBeVisible();
   });
 
-  // Gap 107, ruled: a file
+  // L2-136 AC5, gap 107 ruled: a file
   test('a file is chosen and kept, first among the files', async ({ page, pk }) => {
     await pk.open('contactProfileMemories');
     const profile = new ContactProfilePage(page);
@@ -271,7 +271,7 @@ test.describe('Add to memories', () => {
     ]);
   });
 
-  // Gap 107, ruled: a note
+  // L2-136 AC6, gap 107 ruled: a note
   test('a note needs words, then is kept first among the notes', async ({ page, pk }) => {
     await pk.open('contactProfileMemories');
     const profile = new ContactProfilePage(page);

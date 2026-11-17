@@ -742,6 +742,17 @@ export async function marasHabits(page: Page): Promise<void> {
   await answer(page, habitsKey, { status: 200, body: MARAS_HABITS.map(habitOf) });
 }
 
+/** Habits with Ada overdue a day after Chidi and Ruth's due today (L2-143 AC7). */
+export async function marasHabitsTwoOverdue(page: Page): Promise<void> {
+  await servePhotos(page);
+  const rows = MARAS_HABITS.map((row): HabitRow => {
+    if (row[0] === '2') return [...row.slice(0, 8), '2026-09-14', 'K.KKKKKKKKKD'] as HabitRow;
+    if (row[0] === '3') return [...row.slice(0, 8), '2026-09-15', '....K.K.KKKD'] as HabitRow;
+    return row;
+  });
+  await answer(page, habitsKey, { status: 200, body: rows.map(habitOf) });
+}
+
 /** No habits yet. */
 export function noHabits(page: Page): Promise<void> {
   return answer(page, habitsKey, { status: 200, body: [] });

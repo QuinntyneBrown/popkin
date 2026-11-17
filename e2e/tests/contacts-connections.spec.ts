@@ -96,7 +96,7 @@ test.describe('Connections', () => {
     await expect(connections.panelHeading).toHaveText('Tap anyone to see their people');
   });
 
-  // L2-149 AC8
+  // L2-149 AC8, L2-131 AC3
   test('opens with a contact chosen from their profile', async ({ page, pk }) => {
     await marasConnections(page);
     await pk.open('contactsConnections');
@@ -264,7 +264,7 @@ test.describe('Connect', () => {
 });
 
 test.describe('Connections on a profile and in the form', () => {
-  // L2-150 AC4
+  // L2-150 AC4, L2-128 AC7
   test('a profile lists the people around them with the words', async ({ page, pk }) => {
     await chidiProfile(page, {
       around: [
@@ -319,7 +319,7 @@ test.describe('Connections on a profile and in the form', () => {
     });
   });
 
-  // L2-150 AC9
+  // L2-150 AC9, L2-129 AC3
   test('Remove the connection takes it off before Save', async ({ page, pk }) => {
     await marasConnections(page);
     await pk.open('addContact');

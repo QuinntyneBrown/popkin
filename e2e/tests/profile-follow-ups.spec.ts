@@ -25,7 +25,7 @@ test.describe('A profile’s follow-ups', () => {
     await expect(profile.followUps.first()).toContainText('Sep 20');
   });
 
-  // L2-142 AC1
+  // L2-142 AC1, L2-135 AC3
   test('Add a follow-up for Chidi adds one for him', async ({ page, pk }) => {
     await chidiProfile(page);
     await pk.open('contactProfileFollowUps');

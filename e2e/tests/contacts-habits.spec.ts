@@ -9,6 +9,7 @@ import {
   habitId,
   habitsKey,
   marasHabits,
+  marasHabitsTwoOverdue,
   noHabits,
   recordedContactId,
 } from '../fixtures/contacts';
@@ -65,6 +66,28 @@ test.describe('Habits', () => {
       'href',
       `/contacts/people/${chidi()}`,
     );
+  });
+
+  // L2-143 AC7
+  test('with two overdue, the one overdue longest leads, and a habit due today says so', async ({
+    page,
+    pk,
+  }) => {
+    await marasHabitsTwoOverdue(page);
+    await pk.open('contactsHabits');
+    const habits = new ContactsHabitsPage(page);
+
+    await expect(habits.leadTitle).toHaveText('Lunch with Chidi');
+    await expect(habits.rowTitles).toHaveText([
+      'Sunday call with Ada',
+      'Garden tea with Ruth',
+      'Catch-up with Grace',
+    ]);
+    await expect(habits.rowNext).toHaveText([
+      'Overdue since Sep 14',
+      'Due today',
+      'Next Sun, Oct 11',
+    ]);
   });
 
   // L2-144 AC1, AC2

@@ -12,7 +12,7 @@ const chidi = () => recordedContactId('Chidi Okafor');
 const femi = () => recordedContactId('Femi Bankole');
 
 test.describe('A contact’s profile', () => {
-  // L2-128 AC1, AC3, AC6, AC8
+  // L2-128 AC1, AC3, AC6, AC8; L2-122 AC4 (first name, never a pronoun)
   test('shows Chidi: who he is, how to reach him, about him and his history', async ({
     page,
     pk,

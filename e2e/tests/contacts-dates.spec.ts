@@ -24,7 +24,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('Dates', () => {
-  // L2-137 AC1, AC3; L2-139 AC1
+  // L2-137 AC1, AC3; L2-139 AC1; L2-140 AC4 (both ways on at a first visit)
   test('lists Mara’s dates by month, soonest first, with her reminder defaults', async ({
     page,
     pk,
