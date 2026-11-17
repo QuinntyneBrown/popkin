@@ -264,7 +264,8 @@
                     type="button"
                     variant="primary"
                     size="sm"
-                    [disabled]="true"
+                    [disabled]="!manageBlocked()"
+                    [disabledReason]="manageBlocked()"
                   >
                     Save defaults
                   </button>

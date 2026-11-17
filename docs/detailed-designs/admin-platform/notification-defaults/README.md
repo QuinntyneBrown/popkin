@@ -28,7 +28,10 @@ side is [Notification settings](../../notifications/notification-settings/README
 > **Built against a fake backend.** The admin app's side is built first, on the fake of
 > [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md); the API, Domain and Worker
 > parts below are not built yet. The dialogs take the reason with `pk-textarea` and
-> `ActionDialogState`, as Features does; `pk-reason-field` is not built.
+> `ActionDialogState`, as Features does; `pk-reason-field` is not built. "Save new defaults?" is
+> the one `NotificationActionDialog` of the page, given the change list (`pk-change-list`), not a
+> dialog of its own. `pk-limit-row` draws the text fields and the select itself, as the mock's
+> bare `input` and pill `select`, and takes `pk-segmented-control` as a projected control.
 
 ## Description
 
@@ -79,7 +82,10 @@ its reason (L2-173 AC5).
   21:00.".
 - **Equal quiet hours.** A start equal to its end is either no quiet hours or a whole day of
   them. Which, or whether it is refused, is `<TO SUPPLY>`; until settled it is refused as
-  invalid.
+  invalid, on the end field: "Quiet hours can’t start and end at the same time.".
+- **Who changed them.** The foot reads "Last changed today by {admin}." or "Last changed {Sun 12
+  Jul} by {admin}." once an Owner has saved, from `changedAt` and `changedByName`, as
+  `defaults-saved.html` draws it, and "Nothing changed yet." before.
 - **Birthday leads.** The defaults offer five values, without "2 weeks before" or "1 month
   before", which a person can choose for a date (L2-139, L2-159). The narrower list is the
   requirement's and stands.
