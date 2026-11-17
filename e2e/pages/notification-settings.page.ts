@@ -28,6 +28,19 @@ export class NotificationSettingsPage {
   readonly views: Locator;
   /** The Popkins view: one row per active Popkin (L2-158 AC1). */
   readonly popkinRows: Locator;
+  /** "Muted people" on the People view (L2-160). */
+  readonly mutedSection: Locator;
+  readonly mutedRows: Locator;
+  readonly noOneMuted: Locator;
+  readonly muteSomeone: Locator;
+  /** The picker "Mute someone" opens: a search and up to five people. */
+  readonly picker: Locator;
+  readonly pickerSearch: Locator;
+  readonly pickerPeople: Locator;
+  /** Regions for the parity specs of the People view. */
+  readonly popover: Locator;
+  readonly pickList: Locator;
+  readonly mutedList: Locator;
   /** "Undo" on the bar after a Popkin is muted (L2-158 AC4). */
   readonly undo: Locator;
   /** Regions for the sweeps and the parity specs. */
@@ -74,6 +87,40 @@ export class NotificationSettingsPage {
     this.firstLevels = page.locator('.segmented--levels').first();
     this.popkinRows = this.settingList.locator('.setting-list__item');
     this.undo = this.undoBar.getByRole('button', { name: 'Undo' });
+    this.mutedSection = page.locator('.settings-section').filter({
+      has: page.getByRole('heading', { name: 'Muted people' }),
+    });
+    this.mutedRows = this.mutedSection.locator('.setting-list__item');
+    this.noOneMuted = this.mutedSection.locator('.setting-list__empty');
+    this.muteSomeone = page.getByRole('button', { name: 'Mute someone' });
+    this.picker = page.getByRole('dialog', { name: 'Mute someone' });
+    this.pickerSearch = this.picker.getByRole('searchbox', {
+      name: 'Search people in your Popkins',
+    });
+    this.pickerPeople = this.picker.getByRole('option');
+    this.popover = page.locator('.popover');
+    this.pickList = page.locator('.popover .pick-list');
+    this.mutedList = this.mutedSection.locator('.setting-list');
+  }
+
+  /** One muted person's row. */
+  mutedRow(name: string): Locator {
+    return this.mutedRows.filter({ hasText: name });
+  }
+
+  unmute(name: string): Locator {
+    return this.mutedSection.getByRole('button', { name: `Unmute ${name}` });
+  }
+
+  /** "Mute someone" open, as `mute-search.html` draws it, with no option under the pointer. */
+  async openPicker(): Promise<void> {
+    await this.muteSomeone.click();
+    await this.pickerPeople.first().waitFor();
+    await this.page.mouse.move(0, 0);
+  }
+
+  pickerPerson(name: string): Locator {
+    return this.picker.getByRole('option', { name: new RegExp(`^${name}`) });
   }
 
   /** A view's link: "What you hear about" or "Popkins". */

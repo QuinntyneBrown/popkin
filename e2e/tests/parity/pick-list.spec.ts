@@ -1,3 +1,5 @@
+import { NotificationSettingsPage } from '../../pages/notification-settings.page';
+import { theMockMutedPeople } from '../../fixtures/notifications';
 import { mockMatches, searchingFeaturePopkins, theMockFeatures } from '../../fixtures/admin';
 import { parity } from '../../fixtures/parity';
 import { problem } from '../../fixtures/stubs';
@@ -68,5 +70,14 @@ parity('pick-list', [
       await dialog.search.fill('zzz');
       await dialog.notes.waitFor();
     },
+  },
+  // People who share a Popkin: a face, the name and the Popkins (L2-160 AC2).
+  {
+    key: 'notificationSettingsMuteSearch',
+    name: 'people',
+    region: (page) => new NotificationSettingsPage(page).pickList,
+    before: theMockMutedPeople,
+    app: (page) => new NotificationSettingsPage(page).openPicker(),
+    snap: true,
   },
 ]);

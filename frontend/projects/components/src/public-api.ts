@@ -38,6 +38,8 @@ export * from './lib/choice-card/choice-card';
 export * from './lib/notif-group/notif-group';
 export * from './lib/setting-list/setting-list';
 export * from './lib/setting-list-item/setting-list-item';
+export * from './lib/setting-list-empty/setting-list-empty';
+export * from './lib/popover/popover';
 export * from './lib/notif-matrix/notif-matrix';
 export * from './lib/settings-section/settings-section';
 export * from './lib/undo-bar/undo-bar';

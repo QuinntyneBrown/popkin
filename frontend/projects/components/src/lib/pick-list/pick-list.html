@@ -11,9 +11,21 @@
       (click)="value.set(option.id)"
       (keydown)="move($event, i)"
     >
-      <span pk-popkin-tile size="xs" [emoji]="option.emoji"></span>
-      <span class="pick-list__name">{{ option.name }}</span>
-      <span class="pick-list__detail">{{ option.detail }}</span>
+      @if (option.person; as person) {
+        <span
+          pk-avatar
+          size="xs"
+          [name]="option.name"
+          [initials]="person.initials"
+          [photo]="person.photo"
+        ></span>
+        <span class="pick-list__name">{{ option.name }}</span>
+        <span class="pick-list__meta">{{ person.meta }}</span>
+      } @else {
+        <span pk-popkin-tile size="xs" [emoji]="option.emoji ?? ''"></span>
+        <span class="pick-list__name">{{ option.name }}</span>
+        <span class="pick-list__detail">{{ option.detail }}</span>
+      }
     </button>
   </li>
 }

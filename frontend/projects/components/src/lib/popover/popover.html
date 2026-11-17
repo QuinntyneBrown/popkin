@@ -1,3 +1,14 @@
+@if (add()) {
+  <button
+    class="popover__trigger"
+    type="button"
+    aria-haspopup="dialog"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()"
+  >
+    <svg pk-icon name="plus" size="sm"></svg> {{ label() }}
+  </button>
+}
 <ng-content select="[slot=trigger]" />
 @if (open()) {
   <div

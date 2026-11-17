@@ -501,6 +501,10 @@ await call('GET', '/api/account/deletion-impact');
 
 // Mara mutes Lakeside Weekend before it wraps up; no Worker runs, so nothing else changes (L2-158).
 await call('PUT', `/api/me/notifications/popkins/${created.id}`, { level: 'Muted' });
+// She looks for someone to mute, mutes Walt, then unmutes him (L2-160).
+await call('GET', '/api/me/notifications/mute-candidates?q=');
+const mute = await call('POST', '/api/me/notifications/mutes', { membershipId: waltsId });
+await call('DELETE', `/api/me/notifications/mutes/${mute.muteId}`);
 
 // Wrap up: Mara reads what the wrap-up screen says, wraps Lakeside Weekend up keeping its album,
 // reads the recap and asks for the album as a zip (journey 9). It comes last: every answer

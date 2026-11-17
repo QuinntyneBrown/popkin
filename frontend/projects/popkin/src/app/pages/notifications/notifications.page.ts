@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   FREQUENCY_CHOICES,
@@ -16,6 +25,7 @@ import {
   popkinLine,
 } from 'api';
 import {
+  Avatar,
   Button,
   ChoiceCard,
   EmptyState,
@@ -25,10 +35,15 @@ import {
   NotifRow,
   NotifSwitch,
   PageHead,
+  PickList,
+  PickListOption,
+  Popover,
   PopkinTile,
+  SearchField,
   Screen,
   SegmentedControl,
   SettingList,
+  SettingListEmpty,
   SettingListItem,
   SettingsSection,
   Skeleton,
@@ -45,6 +60,7 @@ import {
 @Component({
   selector: 'pk-notifications-page',
   imports: [
+    Avatar,
     Button,
     ChoiceCard,
     EmptyState,
@@ -52,11 +68,15 @@ import {
     NotifGroup,
     NotifMatrix,
     PageHead,
+    PickList,
+    Popover,
     PopkinTile,
     RouterLink,
     Screen,
+    SearchField,
     SegmentedControl,
     SettingList,
+    SettingListEmpty,
     SettingListItem,
     SettingsSection,
     Skeleton,
@@ -92,7 +112,29 @@ export class NotificationsPage implements OnInit {
       query: { tab: 'popkins' },
       current: this.tab() === 'popkins',
     },
+    {
+      label: 'People',
+      link: '/account/notifications',
+      query: { tab: 'people' },
+      current: this.tab() === 'people',
+    },
   ]);
+  protected readonly muted = computed(() => this.store.settings()?.muted ?? []);
+  /** Whether the "Mute someone" picker is open. */
+  protected readonly picking = signal(false);
+  private readonly popover = viewChild(Popover);
+  protected readonly candidates = computed<PickListOption[]>(() =>
+    this.store.candidates().map((person) => ({
+      id: person.membershipId,
+      name: person.name,
+      accent: accentOf(person.avatar.accent),
+      person: {
+        initials: person.avatar.initials,
+        photo: person.avatar.photoUrl,
+        meta: person.sharedPopkins.join(', '),
+      },
+    })),
+  );
 
   ngOnInit(): void {
     this.store.open();
@@ -104,6 +146,23 @@ export class NotificationsPage implements OnInit {
 
   protected chooseLevel(popkinId: string, level: string): void {
     this.store.setLevel(popkinId, level as PopkinNotificationLevel);
+  }
+
+  /** Opening the picker lists the first people before anything is typed. */
+  protected pick(open: boolean): void {
+    this.picking.set(open);
+    if (open) this.store.searchMuteCandidates('');
+  }
+
+  protected mute(membershipId: string | null): void {
+    if (!membershipId) return;
+    this.store.mute(membershipId);
+    this.popover()?.close();
+  }
+
+  /** "in Lakeside Weekend, Thursday Night Group" (L2-160 AC1). */
+  protected shared(popkins: string[]): string {
+    return popkins.length ? `in ${popkins.join(', ')}` : '';
   }
 
   protected line(popkin: PopkinLevelView): string {

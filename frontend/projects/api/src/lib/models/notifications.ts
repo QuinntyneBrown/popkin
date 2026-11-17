@@ -1,3 +1,4 @@
+import { AvatarView } from './invite';
 import { PopkinColour } from './popkin';
 
 /** The twelve kinds of notification of L2-154, as the API names them. */
@@ -59,9 +60,26 @@ export interface PopkinLevelView {
   level: PopkinNotificationLevel;
 }
 
+/** A person the caller muted, and the Popkins the two share (L2-160 AC1). */
+export interface MutedPersonView {
+  muteId: string;
+  name: string;
+  avatar: AvatarView;
+  sharedPopkins: string[];
+}
+
+/** Someone the caller could mute: they share an active Popkin (L2-160 AC2). */
+export interface MuteCandidateView {
+  membershipId: string;
+  name: string;
+  avatar: AvatarView;
+  sharedPopkins: string[];
+}
+
 /** The Notifications screen in one read (`GET /api/me/notifications`, L2-155). */
 export interface NotificationSettingsView {
   email: ActivityEmailView;
   groups: NotificationGroupView[];
   popkins: PopkinLevelView[];
+  muted: MutedPersonView[];
 }

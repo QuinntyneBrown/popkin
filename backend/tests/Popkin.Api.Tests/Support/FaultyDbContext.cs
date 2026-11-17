@@ -92,6 +92,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<NotificationKindChoice> NotificationKindChoices => inner.NotificationKindChoices;
 
+    public DbSet<PersonMute> PersonMutes => inner.PersonMutes;
+
     public DbSet<NotificationEvent> NotificationEvents => inner.NotificationEvents;
 
     public DbSet<NotificationDelivery> NotificationDeliveries => inner.NotificationDeliveries;

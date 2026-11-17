@@ -1,4 +1,4 @@
-import { theMockPopkinLevels } from '../../fixtures/notifications';
+import { theMockMutedPeople, theMockPopkinLevels } from '../../fixtures/notifications';
 import { parity } from '../../fixtures/parity';
 import { NotificationSettingsPage } from '../../pages/notification-settings.page';
 
@@ -19,5 +19,13 @@ parity('setting-list', [
     snap: true,
     before: theMockPopkinLevels,
     app: (page) => new NotificationSettingsPage(page).muteLakeside(),
+  },
+  // Muted people: a face, the name, the Popkins shared, and "Unmute" (L2-160 AC1).
+  {
+    key: 'notificationSettingsPeople',
+    name: 'muted-people',
+    region: (page) => new NotificationSettingsPage(page).mutedList,
+    before: theMockMutedPeople,
+    snap: true,
   },
 ]);

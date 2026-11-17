@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Popkin.Application.Notifications.Mutes;
 using Popkin.Application.Notifications.Settings;
 
 namespace Popkin.Api.Controllers.Notifications;
@@ -53,6 +54,26 @@ public sealed class NotificationSettingsController(ISender sender) : ControllerB
     public async Task<IActionResult> SetLevel(Guid popkinId, LevelRequest request, CancellationToken cancellationToken)
     {
         await sender.Send(new SetPopkinNotificationLevelCommand(popkinId, request.Level), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>Up to five people the caller shares an active Popkin with (L2-160 AC2): 400 `invalid_query`.</summary>
+    [HttpGet("mute-candidates")]
+    public async Task<ActionResult<IReadOnlyList<MuteCandidateDto>>> MuteCandidates(string? q, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SearchMuteCandidatesQuery(q), cancellationToken));
+
+    public sealed record MuteRequest(Guid MembershipId);
+
+    /// <summary>Mutes a person (L2-160 AC1): the existing row when muted already; 404 `person_not_found` (AC7).</summary>
+    [HttpPost("mutes")]
+    public async Task<ActionResult<MutedPersonDto>> Mute(MuteRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new MutePersonCommand(request.MembershipId), cancellationToken));
+
+    /// <summary>Unmutes (L2-160 AC5): 404 `mute_not_found` for a row that is not the caller's.</summary>
+    [HttpDelete("mutes/{muteId:guid}")]
+    public async Task<IActionResult> Unmute(Guid muteId, CancellationToken cancellationToken)
+    {
+        await sender.Send(new UnmutePersonCommand(muteId), cancellationToken);
         return NoContent();
     }
 }

@@ -27,6 +27,8 @@ export class SettingsSection {
   readonly toggleName = input<string>();
   readonly checked = model(false);
   readonly toggleDisabled = input(false);
+  /** A section of a view, under the screen's own sections: its title one step smaller. */
+  readonly small = input(false);
 
   protected readonly id = `pk-settings-section-${++sections}`;
 }

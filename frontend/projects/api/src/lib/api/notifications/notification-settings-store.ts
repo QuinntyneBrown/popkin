@@ -1,9 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subject, debounceTime, switchMap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   NotificationFrequency,
   NotificationKind,
   NotificationSettingsView,
+  MuteCandidateView,
   PopkinLevelView,
   PopkinNotificationLevel,
 } from '../../models/notifications';
@@ -94,6 +96,20 @@ export class NotificationSettingsStore {
   });
   /** The kinds whose phone switch was turned on here while this device refused alerts. */
   readonly refusedOnThisDevice = signal<ReadonlySet<NotificationKind>>(new Set());
+  /** The people "Mute someone" offers for what was typed (L2-160 AC2). */
+  readonly candidates = signal<MuteCandidateView[]>([]);
+  private readonly searches = new Subject<string>();
+
+  constructor() {
+    // 250 ms after the last keystroke; a newer search drops the answer of an older one.
+    this.searches
+      .pipe(
+        debounceTime(250),
+        switchMap((q) => this.api.muteCandidates(q)),
+        takeUntilDestroyed(),
+      )
+      .subscribe({ next: (people) => this.candidates.set(people) });
+  }
 
   open(): void {
     this.loading.begin();
@@ -169,6 +185,34 @@ export class NotificationSettingsStore {
         this.mutedPopkin.set(level === 'Muted' ? popkin : null);
         this.banner.set(level === 'Muted' ? 'popkinMuted' : null);
       },
+    );
+  }
+
+  searchMuteCandidates(q: string): void {
+    this.searches.next(q);
+  }
+
+  /** Mutes someone; their row comes first (L2-160 AC1). */
+  mute(membershipId: string): void {
+    this.api.mute(membershipId).subscribe({
+      next: (muted) =>
+        this.settings.update((settings) =>
+          settings
+            ? {
+                ...settings,
+                muted: [muted, ...settings.muted.filter((m) => m.muteId !== muted.muteId)],
+              }
+            : settings,
+        ),
+      error: () => this.toaster.show('danger', SAVE_FAILED),
+    });
+  }
+
+  /** Unmutes at once, and puts the row back if saving fails (L2-160 AC5). */
+  unmute(muteId: string): void {
+    this.change(
+      (settings) => ({ ...settings, muted: settings.muted.filter((m) => m.muteId !== muteId) }),
+      this.api.unmute(muteId),
     );
   }
 

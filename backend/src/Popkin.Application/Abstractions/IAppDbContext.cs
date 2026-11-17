@@ -78,6 +78,8 @@ public interface IAppDbContext
 
     DbSet<NotificationKindChoice> NotificationKindChoices { get; }
 
+    DbSet<PersonMute> PersonMutes { get; }
+
     DbSet<NotificationEvent> NotificationEvents { get; }
 
     DbSet<NotificationDelivery> NotificationDeliveries { get; }

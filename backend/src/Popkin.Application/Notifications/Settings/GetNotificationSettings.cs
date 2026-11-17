@@ -21,11 +21,12 @@ public sealed record NotificationGroupDto(NotificationGroup Group, string Name, 
 public sealed record PopkinLevelDto(
     Guid PopkinId, string Name, string Emoji, PopkinColour Colour, int People, DateTimeOffset? EndsAt, PopkinNotificationLevel Level);
 
-public sealed record NotificationSettingsDto(ActivityEmailDto Email, IReadOnlyList<NotificationGroupDto> Groups, IReadOnlyList<PopkinLevelDto> Popkins);
+public sealed record NotificationSettingsDto(
+    ActivityEmailDto Email, IReadOnlyList<NotificationGroupDto> Groups, IReadOnlyList<PopkinLevelDto> Popkins, IReadOnlyList<Mutes.MutedPersonDto> Muted);
 
 public sealed record GetNotificationSettingsQuery : IRequest<NotificationSettingsDto>;
 
-public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurrentPerson current)
+public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurrentPerson current, IPhotoStore photos)
     : IRequestHandler<GetNotificationSettingsQuery, NotificationSettingsDto>
 {
     public async Task<NotificationSettingsDto> Handle(GetNotificationSettingsQuery request, CancellationToken cancellationToken)
@@ -70,6 +71,6 @@ public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurre
                 x.Membership.NotificationLevel))
             .ToListAsync(cancellationToken);
 
-        return new NotificationSettingsDto(new ActivityEmailDto(available && settings.EmailOn, available, settings.Frequency), groups, popkins);
+        return new NotificationSettingsDto(new ActivityEmailDto(available && settings.EmailOn, available, settings.Frequency), groups, popkins, await Mutes.MutedPeople.OfAsync(db, photos, personId, cancellationToken));
     }
 }

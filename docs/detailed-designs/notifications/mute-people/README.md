@@ -57,7 +57,8 @@ person id leaves the API.
   Popkin with the caller, is not the caller and is not muted. The name matches when `q` occurs
   anywhere in it, ignoring case and accents. With an empty `q` the first five are listed by name.
   A person in several shared Popkins appears once. `q` is at most 40 characters, else `400`
-  `invalid_query`. Rate limited by the existing per-person read policy (`RateLimitPolicyNames`).
+  `invalid_query`. No per-person read policy exists in `RateLimitPolicyNames`, so it is not rate
+  limited; the answer is bounded by the caller's own Popkins.
 - `POST /api/me/notifications/mutes` `{ membershipId }` — `200` `MutedPersonDto`. Muting someone
   already muted answers with the existing row. `404` `person_not_found` when the membership is the
   caller's own, belongs to someone who shares no active Popkin with the caller, or does not exist.
@@ -97,12 +98,13 @@ person id leaves the API.
   `aria-expanded`). Under it, a `pk-setting-list` of muted people (`pk-avatar`, name, the shared
   Popkins, and "Unmute", whose accessible name is "Unmute {name}"), or the empty line
   (`setting-list__empty`).
-- **Picker** — a CDK overlay anchored to "Mute someone" (block `popover`), holding a
+- **Picker** — `pk-popover`, the card anchored under "Mute someone" as the mock draws it
+  (block `popover`, the dashed button its `popover__trigger`), holding a
   `pk-search-field` labelled "Search people in your Popkins" and a `pk-pick-list` of up to five
   people. Focus moves into the field when it opens. Arrow keys move through the list, Enter
   chooses, and Escape or a tap outside closes it and returns focus to "Mute someone". The list is
-  announced as a list box with its count. The overlay is a popover, not a page dialog, so no
-  inline form is hand-rolled (AGENTS.md).
+  announced as a list box. The card is a popover, not a page dialog, so no inline form is
+  hand-rolled (AGENTS.md).
 - **`NotificationSettingsStore`** — `searchMuteCandidates(q)` debounced 250 ms, cancelling an older
   request; `mute(membershipId)` adds the row on success; `unmute(muteId)` removes the row at once
   and puts it back with the toast "We couldn't save that. Try again." on failure.

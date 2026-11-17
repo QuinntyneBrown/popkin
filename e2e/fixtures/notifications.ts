@@ -117,3 +117,64 @@ export async function theMockPopkinLevels(page: Page): Promise<void> {
     await answer(page, `PUT /api/me/notifications/popkins/${popkin.popkinId}`, { status: 204 });
   }
 }
+
+/** The two people `people.html` shows muted, each with the Popkins they share with Mara (L2-160 AC1). */
+export const MOCK_MUTED = [
+  {
+    muteId: '5e0e7a10-0000-4000-8000-000000000001',
+    name: 'Sam Ortega',
+    avatar: { initials: 'SO', accent: 'Amber', photoUrl: null },
+    sharedPopkins: ['Thursday Night Group'],
+  },
+  {
+    muteId: '5e0e7a10-0000-4000-8000-000000000002',
+    name: 'Joel Kim',
+    avatar: { initials: 'JK', accent: 'Sky', photoUrl: null },
+    sharedPopkins: ['Lakeside Weekend'],
+  },
+];
+
+/** The people "Mute someone" offers before anything is typed (`mute-search.html`). */
+export const MOCK_CANDIDATES = [
+  ['Dev Patel', 'DP', 'Sky', 'Lakeside Weekend'],
+  ['Grace Adeyemi', 'GA', 'Plum', 'Lakeside Weekend'],
+  ['Priya Nair', 'PN', 'Coral', 'Tigers U9 Parents'],
+  ['Ruth Lindqvist', 'RL', 'Teal', 'Lakeside Weekend'],
+  ['Walt Brennan', 'WB', 'Leaf', 'Thursday Night Group'],
+].map(([name, initials, accent, popkin], i) => ({
+  membershipId: `3c5a9b20-0000-4000-8000-00000000000${i + 1}`,
+  name,
+  avatar: { initials, accent, photoUrl: null },
+  sharedPopkins: [popkin],
+}));
+
+/**
+ * Mara's settings with Sam and Joel muted, the people she could mute, and muting and unmuting
+ * answered as the API does.
+ */
+export async function theMockMutedPeople(page: Page, muted = MOCK_MUTED): Promise<void> {
+  await answer(page, 'GET /api/me/notifications', {
+    status: 200,
+    body: {
+      ...settings,
+      email: { on: true, available: true, frequency: 'AsItHappens' },
+      muted,
+    },
+  });
+  await answer(page, 'GET /api/me/notifications/mute-candidates?q=', {
+    status: 200,
+    body: MOCK_CANDIDATES,
+  });
+  await answer(page, 'GET /api/me/notifications/mute-candidates?q=wa', {
+    status: 200,
+    body: MOCK_CANDIDATES.filter((c) => c.name.toLowerCase().includes('wa')),
+  });
+  const walt = MOCK_CANDIDATES[4];
+  await answer(page, 'POST /api/me/notifications/mutes', {
+    status: 200,
+    body: { ...walt, membershipId: undefined, muteId: '5e0e7a10-0000-4000-8000-000000000003' },
+  });
+  for (const mute of MOCK_MUTED) {
+    await answer(page, `DELETE /api/me/notifications/mutes/${mute.muteId}`, { status: 204 });
+  }
+}

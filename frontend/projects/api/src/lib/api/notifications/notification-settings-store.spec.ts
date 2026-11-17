@@ -37,6 +37,14 @@ const settings: NotificationSettingsView = {
       level: 'Everything',
     },
   ],
+  muted: [
+    {
+      muteId: 'm1',
+      name: 'Sam Ortega',
+      avatar: { initials: 'SO', accent: 'Amber', photoUrl: null },
+      sharedPopkins: ['Thursday Night Group'],
+    },
+  ],
 };
 
 const saved = (): Observable<void> => of(undefined);
@@ -263,6 +271,64 @@ describe('NotificationSettingsStore', () => {
 
     it('counts one person', () => {
       expect(popkinLine({ ...row, people: 1 }, now)).toBe('1 person · ongoing');
+    });
+  });
+
+  describe('muted people', () => {
+    const joel = {
+      membershipId: 'j1',
+      name: 'Joel Kim',
+      avatar: { initials: 'JK', accent: 'Sky' as const, photoUrl: null },
+      sharedPopkins: ['Lakeside Weekend'],
+    };
+
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it('searches 250 ms after the last keystroke, and an older answer is dropped', () => {
+      const answers: Subject<(typeof joel)[]>[] = [];
+      const muteCandidates = vi.fn(() => {
+        const answer = new Subject<(typeof joel)[]>();
+        answers.push(answer);
+        return answer;
+      });
+      const { store } = storeWith({ muteCandidates });
+      store.open();
+
+      store.searchMuteCandidates('Jo');
+      vi.advanceTimersByTime(249);
+      expect(muteCandidates).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      store.searchMuteCandidates('Joe');
+      vi.advanceTimersByTime(250);
+      answers[0].next([]);
+      answers[1].next([joel]);
+
+      expect(muteCandidates.mock.calls).toEqual([['Jo'], ['Joe']]);
+      expect(store.candidates()).toEqual([joel]);
+    });
+
+    it('adds the person muted, newest first', () => {
+      const muted = { muteId: 'm2', ...joel };
+      const { store } = storeWith({ mute: vi.fn(() => of(muted)) });
+      store.open();
+
+      store.mute('j1');
+
+      expect(store.settings()!.muted.map((m) => m.name)).toEqual(['Joel Kim', 'Sam Ortega']);
+    });
+
+    it('takes an unmuted person away at once, and puts them back if saving fails', () => {
+      const answer = new Subject<void>();
+      const { store, toaster } = storeWith({ unmute: vi.fn(() => answer) });
+      store.open();
+
+      store.unmute('m1');
+      expect(store.settings()!.muted).toEqual([]);
+      answer.error(new Error('down'));
+
+      expect(store.settings()!.muted.map((m) => m.name)).toEqual(['Sam Ortega']);
+      expect(toaster.toasts().map((t) => t.heading)).toEqual([SAVE_FAILED]);
     });
   });
 });

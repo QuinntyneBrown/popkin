@@ -2,6 +2,26 @@
   position: relative;
 }
 
+/* The dashed pill with a plus that opens the card (the mocks' add button). */
+.popover__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border: var(--border-width-thick) dashed var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-fg-muted);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+}
+
+.popover__trigger:hover,
+.popover__trigger[aria-expanded='true'] {
+  border-color: var(--color-fg-subtle);
+  color: var(--color-fg-default);
+}
+
 .popover {
   position: absolute;
   left: 0;

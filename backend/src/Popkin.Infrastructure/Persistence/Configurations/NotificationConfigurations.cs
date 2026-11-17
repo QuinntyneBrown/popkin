@@ -27,6 +27,18 @@ public sealed class NotificationKindChoiceConfiguration : IEntityTypeConfigurati
     }
 }
 
+public sealed class PersonMuteConfiguration : IEntityTypeConfiguration<PersonMute>
+{
+    public void Configure(EntityTypeBuilder<PersonMute> builder)
+    {
+        builder.ToTable("PersonMutes");
+        builder.HasKey(m => m.Id);
+        builder.HasIndex(m => new { m.PersonId, m.MutedPersonId }).IsUnique();
+        builder.HasOne<Person>().WithMany().HasForeignKey(m => m.PersonId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Person>().WithMany().HasForeignKey(m => m.MutedPersonId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public sealed class NotificationEventConfiguration : IEntityTypeConfiguration<NotificationEvent>
 {
     public void Configure(EntityTypeBuilder<NotificationEvent> builder)

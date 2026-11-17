@@ -18,6 +18,10 @@
   font: var(--text-h2);
 }
 
+.settings-section__title--sm {
+  font: var(--text-title);
+}
+
 .settings-section__sub {
   margin-top: var(--space-0-5);
   font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)

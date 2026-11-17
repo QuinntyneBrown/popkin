@@ -1428,6 +1428,31 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("People", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.PersonMute", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("MutedPersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MutedPersonId");
+
+                    b.HasIndex("PersonId", "MutedPersonId")
+                        .IsUnique();
+
+                    b.ToTable("PersonMutes", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Photo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2359,6 +2384,21 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Popkin.Domain.OutgoingEmail", b =>
                 {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PersonMute", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("MutedPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Popkin.Domain.Person", null)
                         .WithMany()
                         .HasForeignKey("PersonId")

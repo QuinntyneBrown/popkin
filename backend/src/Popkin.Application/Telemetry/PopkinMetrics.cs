@@ -23,6 +23,7 @@ public sealed class PopkinMetrics
     private readonly Histogram<double> _emailLatency;
     private readonly Histogram<double> _phoneLatency;
     private readonly Counter<long> _settingsChanged;
+    private readonly Counter<long> _mutes;
 
     public PopkinMetrics(IMeterFactory meters)
     {
@@ -53,7 +54,12 @@ public sealed class PopkinMetrics
             "popkin.notifications.phone_latency", unit: "s", description: "From a change to the push service accepting its alert (L2-175 AC1).");
         _settingsChanged = meter.CreateCounter<long>(
             "popkin.notifications.settings_changed", description: "Notification settings saved, by setting (email, frequency, kind) and channel.");
+        _mutes = meter.CreateCounter<long>(
+            "popkin.notifications.mutes", description: "People muted and unmuted, by action (L2-160).");
     }
+
+    /// <summary>`action` is mute or unmute; neither person is a dimension.</summary>
+    public void PersonMuted(string action) => _mutes.Add(1, new KeyValuePair<string, object?>("action", action));
 
     public void NotificationEvent(string kind) => _notificationEvents.Add(1, new KeyValuePair<string, object?>("kind", kind));
 

@@ -133,6 +133,9 @@ public sealed class DispatchNotificationsCommandHandler(
             Frequency = settings.Frequency,
             RecipientIsNamed = person == notification.RecipientPersonId,
             Level = membership?.NotificationLevel ?? PopkinNotificationLevel.Everything,
+            ActorMuted = NotificationRules.ActorMuted(
+                await db.PersonMutes.Where(m => m.PersonId == person).Select(m => m.MutedPersonId).ToListAsync(cancellationToken),
+                notification.ActorPersonId),
             SwitchOn = settings.IsOn(notification.Kind, channel),
             QuietHours = new QuietHours(platform.QuietFrom, platform.QuietUntil),
         };

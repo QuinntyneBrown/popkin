@@ -84,6 +84,10 @@ public static class NotificationRules
         _ => true,
     };
 
+    /// <summary>The recipient muted whoever made the change; a reminder has no actor (L2-160 AC3).</summary>
+    public static bool ActorMuted(IReadOnlyCollection<Guid> recipientMutes, Guid? actorPersonId) =>
+        actorPersonId is { } actor && recipientMutes.Contains(actor);
+
     private static readonly HashSet<NotificationKind> NotJustForMe =
     [
         NotificationKind.GroupChat,

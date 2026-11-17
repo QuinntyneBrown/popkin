@@ -117,6 +117,56 @@
             Wrapped-up Popkins never email you. New Popkins you join start on Everything.
           </p>
         </section>
+      } @else if (tab() === 'people') {
+        <section
+          pk-settings-section
+          heading="Muted people"
+          text="No email or phone alerts about what they post, in any Popkin. They aren’t told."
+          [small]="true"
+        >
+          <div
+            pk-popover
+            slot="action"
+            label="Mute someone"
+            [add]="true"
+            [open]="picking()"
+            (openChange)="pick($event)"
+          >
+            <div
+              pk-search-field
+              variant="popover"
+              label="Search people in your Popkins"
+              (valueChange)="store.searchMuteCandidates($event)"
+            ></div>
+            <ul
+              pk-pick-list
+              label="People in your Popkins"
+              [options]="candidates()"
+              (valueChange)="mute($event)"
+            ></ul>
+          </div>
+          @if (muted().length) {
+            <ul pk-setting-list>
+              @for (person of muted(); track person.muteId) {
+                <li pk-setting-list-item [name]="person.name" [sub]="shared(person.sharedPopkins)">
+                  <span
+                    pk-avatar
+                    slot="lead"
+                    [name]="person.name"
+                    [initials]="person.avatar.initials"
+                    [photo]="person.avatar.photoUrl"
+                    [attr.data-accent]="accent(person.avatar.accent)"
+                  ></span>
+                  <button pk-button size="sm" type="button" (click)="store.unmute(person.muteId)">
+                    Unmute<span class="visually-hidden"> {{ person.name }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p pk-setting-list-empty>No one’s muted. You hear about everyone in your Popkins.</p>
+          }
+        </section>
       } @else {
         @for (group of groups(); track group.group) {
           <section pk-notif-group [heading]="group.name" [about]="group.about">

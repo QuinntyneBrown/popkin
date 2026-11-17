@@ -5,6 +5,7 @@ import {
   settingsWithoutAnEmailAddress,
   theMockNotificationSettings,
   theMockPopkinLevels,
+  theMockMutedPeople,
   MOCK_POPKINS,
   theNotificationSettingsFailing,
   theNotificationSettingsFailingOnce,
@@ -363,6 +364,82 @@ test.describe('each Popkin’s level', () => {
     await expect(notifications.level('Lakeside Weekend', 'Just for me')).toHaveAttribute(
       'aria-checked',
       'true',
+    );
+  });
+});
+
+test.describe('muted people', () => {
+  // L2-160 AC1
+  test('the People view lists the people muted, with the Popkins they share', async ({
+    page,
+    pk,
+  }) => {
+    await theMockMutedPeople(page);
+    await pk.open('notificationSettings');
+    const notifications = new NotificationSettingsPage(page);
+
+    await notifications.view('People').click();
+
+    await expect(page).toHaveURL('/account/notifications?tab=people');
+    await expect(notifications.mutedRows).toHaveCount(2);
+    await expect(notifications.mutedRow('Sam Ortega')).toContainText('in Thursday Night Group');
+    await expect(notifications.unmute('Joel Kim')).toBeVisible();
+  });
+
+  // L2-160 AC1, AC2: the picker by keyboard
+  test('Mute someone finds a person by name and mutes them by keyboard', async ({ page, pk }) => {
+    await theMockMutedPeople(page);
+    await pk.open('notificationSettingsPeople');
+    const notifications = new NotificationSettingsPage(page);
+
+    await notifications.muteSomeone.click();
+    await expect(notifications.muteSomeone).toHaveAttribute('aria-expanded', 'true');
+    await expect(notifications.pickerSearch).toBeFocused();
+    await expect(notifications.pickerPeople).toHaveCount(5);
+    await notifications.pickerSearch.fill('wa');
+    await expect(notifications.pickerPeople).toHaveCount(1);
+    const muted = page.waitForRequest(
+      (request) =>
+        request.method() === 'POST' && request.url().endsWith('/api/me/notifications/mutes'),
+    );
+    await page.keyboard.press('ArrowDown');
+    await expect(notifications.pickerPerson('Walt Brennan')).toBeFocused();
+    await page.keyboard.press('Enter');
+
+    expect((await muted).postDataJSON()).toEqual({
+      membershipId: '3c5a9b20-0000-4000-8000-000000000005',
+    });
+    await expect(notifications.picker).toHaveCount(0);
+    await expect(notifications.muteSomeone).toBeFocused();
+    await expect(notifications.mutedRows.first()).toContainText('Walt Brennan');
+  });
+
+  // Escape closes the picker and returns focus
+  test('Escape closes the picker', async ({ page, pk }) => {
+    await theMockMutedPeople(page);
+    await pk.open('notificationSettingsPeople');
+    const notifications = new NotificationSettingsPage(page);
+    await notifications.muteSomeone.click();
+
+    await page.keyboard.press('Escape');
+
+    await expect(notifications.picker).toHaveCount(0);
+    await expect(notifications.muteSomeone).toBeFocused();
+    await expect(notifications.muteSomeone).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  // L2-160 AC5
+  test('unmuting the last person says no one is muted', async ({ page, pk }) => {
+    await theMockMutedPeople(page);
+    await pk.open('notificationSettingsPeople');
+    const notifications = new NotificationSettingsPage(page);
+
+    await notifications.unmute('Sam Ortega').click();
+    await notifications.unmute('Joel Kim').click();
+
+    await expect(notifications.mutedRows).toHaveCount(0);
+    await expect(notifications.noOneMuted).toHaveText(
+      'No one’s muted. You hear about everyone in your Popkins.',
     );
   });
 });
