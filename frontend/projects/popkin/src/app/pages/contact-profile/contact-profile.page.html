@@ -122,6 +122,16 @@
                     <ul pk-likes data-accent="amber" [items]="profile.loves"></ul>
                   }
                 </section>
+                @if (around().length) {
+                  <section aria-labelledby="around">
+                    <div
+                      pk-list-head
+                      headingId="around"
+                      [heading]="'People around ' + profile.firstName"
+                    ></div>
+                    <ul pk-people-around [people]="around()"></ul>
+                  </section>
+                }
               </div>
               <section [attr.aria-label]="historyLabel()">
                 <nav pk-view-nav [label]="historyLabel()" [views]="views()"></nav>

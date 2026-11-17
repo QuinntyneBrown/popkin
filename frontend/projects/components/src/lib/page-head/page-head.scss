@@ -46,3 +46,9 @@
     font: var(--text-h1);
   }
 }
+
+/* The back link takes a line of its own above the title. */
+.page-head__back {
+  margin-right: 100%;
+  margin-bottom: var(--space-3);
+}

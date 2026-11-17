@@ -49,6 +49,12 @@
   border-radius: var(--radius-lg);
 }
 
+/* Connections' map while it loads, in the map's own proportions. */
+:host(.skeleton--map) {
+  aspect-ratio: 1000 / 680;
+  border-radius: var(--radius-xl);
+}
+
 /* The picture of an experience card that is loading. */
 :host(.skeleton--media) {
   aspect-ratio: 16 / 9;

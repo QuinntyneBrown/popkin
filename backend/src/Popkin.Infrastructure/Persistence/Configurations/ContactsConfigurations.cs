@@ -147,3 +147,23 @@ public sealed class HabitKeptConfiguration : IEntityTypeConfiguration<HabitKept>
         builder.HasIndex(k => new { k.HabitId, k.ClientId }).IsUnique();
     }
 }
+
+public sealed class ConnectionConfiguration : IEntityTypeConfiguration<Connection>
+{
+    public void Configure(EntityTypeBuilder<Connection> builder)
+    {
+        builder.ToTable("Connections");
+        builder.HasKey(c => c.Id);
+        // A resend saves once (L2-123 AC4); a pair is connected once, kept smaller id first (gap 109).
+        builder.HasIndex(c => new { c.OwnerId, c.ClientId }).IsUnique();
+        builder.HasIndex(c => new { c.OwnerId, c.ContactId, c.OtherContactId }).IsUnique();
+        builder.HasIndex(c => c.OtherContactId);
+        builder.Property(c => c.Kind).HasConversion<string>().HasMaxLength(16);
+        builder.Property(c => c.Words).HasMaxLength(Connection.MaxWordsLength);
+        // A connection goes with its account (L2-049) and with either contact (L2-132);
+        // ContactRemoval removes it in the same save, so the database never cascades from two paths.
+        builder.HasOne<Person>().WithMany().HasForeignKey(c => c.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Contact>().WithMany().HasForeignKey(c => c.ContactId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne<Contact>().WithMany().HasForeignKey(c => c.OtherContactId).OnDelete(DeleteBehavior.NoAction);
+    }
+}

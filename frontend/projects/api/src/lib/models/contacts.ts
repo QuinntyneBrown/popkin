@@ -1,3 +1,4 @@
+import type { AroundView, ConnectionDraft } from './connections';
 /** How many contacts I keep: the count line of every Contacts screen (L2-121, L2-126 AC1). */
 export interface ContactsSummaryView {
   people: number;
@@ -29,6 +30,10 @@ export interface SaveContactRequest {
   loves: string[];
   /** "Dates to remember", saved with the contact; Edit leaves the dates alone without it. */
   keyDates?: KeyDateDraft[];
+  /** "How they connect": connections made in the form, saved with the contact (L2-150 AC9). */
+  connect?: ConnectionDraft[];
+  /** Edit: the kept connections removed in the form. */
+  disconnect?: string[];
 }
 
 /** A key date held by the contact form until "Save": `id` for one kept (L2-129 AC2). */
@@ -73,6 +78,8 @@ export interface ContactProfileView {
   kept?: ContactKeptView | null;
   /** Our habit, running, or none (L2-128 AC5). */
   habit?: HabitView | null;
+  /** "People around {first name}": their connections (L2-150 AC4). */
+  around?: AroundView[];
 }
 
 /** A contact's timeline entries and memories, counted for Delete (L2-132 AC1). */

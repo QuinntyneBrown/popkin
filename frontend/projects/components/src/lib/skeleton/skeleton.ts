@@ -24,6 +24,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     '[class.skeleton--pill]': "shape() === 'pill'",
     '[class.skeleton--bubble]': "shape() === 'bubble'",
     '[class.skeleton--square]': "shape() === 'square'",
+    '[class.skeleton--map]': "shape() === 'map'",
     '[class.thumb]': "shape() === 'thumb'",
     '[class.w-20]': 'width() === 20',
     '[class.w-30]': 'width() === 30',
@@ -49,6 +50,7 @@ export class Skeleton {
     | 'bubble'
     | 'square'
     | 'thumb'
+    | 'map'
   >();
   /** `full` stretches the shape across its container; a number is that share of it in percent. */
   readonly width = input<SkeletonWidth>('auto');

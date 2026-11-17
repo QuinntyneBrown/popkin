@@ -8,6 +8,9 @@ export class ContactFormPage {
   /** Edit's "Delete {first name}", after the form (L2-132). */
   readonly delete: Locator;
   readonly save: Locator;
+  /** "How they connect" (L2-150 AC9). */
+  readonly connections: Locator;
+  readonly connectTo: Locator;
   readonly saving: Locator;
   readonly who: Locator;
   readonly details: Locator;
@@ -43,6 +46,13 @@ export class ContactFormPage {
     this.cancel = this.topBar.getByRole('link', { name: 'Cancel' });
     this.delete = page.locator('.menu-list--separated').getByRole('button', { name: /^Delete / });
     this.save = this.topBar.getByRole('button', { name: 'Save' });
+    this.connections = page
+      .getByRole('region', { name: 'How they connect' })
+      .or(page.locator('section').filter({ hasText: 'How they connect' }))
+      .locator('.person-pick');
+    this.connectTo = page
+      .getByRole('button', { name: 'Connect to someone' })
+      .or(page.getByRole('link', { name: 'Connect to someone' }));
     this.saving = this.topBar.getByRole('button', { name: 'Saving…' });
     this.sections = page.locator('.form-sections');
     this.who = page.getByRole('region', { name: 'Who' });

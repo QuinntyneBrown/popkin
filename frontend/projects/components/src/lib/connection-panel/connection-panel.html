@@ -1,0 +1,28 @@
+@if (person(); as person) {
+  <div class="connection-panel__head">
+    <span
+      pk-avatar
+      size="lg"
+      [name]="person.name"
+      [initials]="person.initials"
+      [photo]="person.photo"
+      [attr.data-accent]="person.accent"
+    ></span>
+    <div class="connection-panel__who">
+      <h2 class="connection-panel__name truncate" [id]="headingId">{{ person.name }}</h2>
+      <p class="connection-panel__sub truncate">{{ person.sub }}</p>
+    </div>
+    <button
+      pk-icon-button
+      type="button"
+      icon="close"
+      label="Clear the focus"
+      (click)="cleared.emit()"
+    ></button>
+  </div>
+} @else {
+  <h2 class="connection-panel__hint" [id]="headingId">{{ hint() }}</h2>
+  <p class="connection-panel__legend">{{ legend() }}</p>
+}
+<div class="connection-panel__list"><ng-content select="[slot=list]" /></div>
+<div class="connection-panel__actions"><ng-content select="[slot=actions]" /></div>

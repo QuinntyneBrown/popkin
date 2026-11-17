@@ -28,6 +28,8 @@ export class ContactProfilePage {
   readonly habitStrip: Locator;
   readonly habitFoot: Locator;
   readonly endHabit: Locator;
+  /** "People around {first name}" (L2-150 AC4). */
+  readonly around: Locator;
   readonly keyDates: Locator;
   readonly keyDateRows: Locator;
   readonly addDate: Locator;
@@ -89,6 +91,7 @@ export class ContactProfilePage {
     this.habitStrip = this.habit.locator('.keep-strip');
     this.habitFoot = this.habit.locator('.info-card__foot');
     this.endHabit = page.getByRole('button', { name: 'End this habit' });
+    this.around = page.getByRole('region', { name: /^People around / });
     this.history = page.getByRole('navigation', { name: /’s history$/ });
     this.historyNav = page.locator('nav.view-nav');
     this.addField = page.locator('.add-field');

@@ -1,4 +1,6 @@
-<span class="setting-row__icon"><svg pk-icon size="md" [name]="icon()"></svg></span>
+@if (icon(); as icon) {
+  <span class="setting-row__icon"><svg pk-icon size="md" [name]="icon"></svg></span>
+}
 <span class="setting-row__words">
   <span class="setting-row__title">{{ heading() }}</span>
   @if (text()) {

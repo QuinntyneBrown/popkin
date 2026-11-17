@@ -196,6 +196,57 @@ describe('ContactFormStore', () => {
     );
   });
 
+  it('editing, sends the connections added and removes those taken off on Save (L2-150 AC9)', () => {
+    api.contact.mockReturnValue(
+      of({
+        ...femi,
+        around: [
+          {
+            id: 'k1',
+            contactId: 'grace',
+            name: 'Grace Adeyemi',
+            initials: 'GA',
+            accent: 'Plum',
+            photoUrl: null,
+            kind: 'Partner',
+            words: null,
+            promised: false,
+          },
+        ],
+      }),
+    );
+    api.editContact.mockReturnValue(of(femi));
+    store.edit(femiId);
+    expect(store.connections().map((c) => [c.id, c.name, c.accent])).toEqual([
+      ['k1', 'Grace Adeyemi', 'plum'],
+    ]);
+
+    store.addConnection({
+      id: null,
+      otherContactId: 'chidi',
+      name: 'Chidi Okafor',
+      initials: 'CO',
+      accent: 'sky',
+      photoUrl: null,
+      kind: 'Friend',
+      words: 'Old friends',
+      promised: true,
+    });
+    store.removeConnection(0);
+    store.save(typed, null);
+
+    expect(api.editContact).toHaveBeenCalledWith(
+      femiId,
+      expect.objectContaining({
+        connect: [
+          { otherContactId: 'chidi', kind: 'Friend', words: 'Old friends', promised: true },
+        ],
+        disconnect: ['k1'],
+      }),
+      null,
+    );
+  });
+
   it('editing, starts Dates to remember from the dates kept (L2-130 AC1)', () => {
     api.contact.mockReturnValue(
       of({

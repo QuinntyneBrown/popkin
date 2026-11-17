@@ -1,5 +1,6 @@
 using MediatR;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Contacts.Connections;
 using Popkin.Application.Contacts.Dates;
 using Popkin.Application.Contacts.Security;
 using Popkin.Application.Invites;
@@ -24,6 +25,7 @@ public sealed class EditContactCommandHandler(
         var contact = await guard.RequireOwnedAsync(request.ContactId, cancellationToken);
         var (name, details) = SaveContactValidator.Validate(request.Contact);
         var drafts = KeyDateDrafts.Validate(request.Contact.KeyDates);
+        var connect = ConnectionDrafts.Validate(request.Contact.Connect);
         var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         var avatar = request.Photo is null ? null : await AvatarPhotos.ReadAsync(request.Photo, processor, cancellationToken);
         contact.Rename(name);
@@ -34,10 +36,11 @@ public sealed class EditContactCommandHandler(
             await KeyDateDrafts.ApplyAsync(db, contact, drafts, clock.GetUtcNow(), cancellationToken);
         }
 
+        await ConnectionDrafts.ApplyAsync(db, guard, contact, connect, request.Contact.Disconnect, clock.GetUtcNow(), cancellationToken);
         if (avatar is null)
         {
             await db.SaveChangesAsync(cancellationToken);
-            return ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken));
+            return await ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken)).WithAroundAsync(db, contact.OwnerId, photos, cancellationToken);
         }
 
         var old = contact.PhotoKey;
@@ -59,6 +62,6 @@ public sealed class EditContactCommandHandler(
             await photos.DeleteAsync(old, CancellationToken.None);
         }
 
-        return ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken));
+        return await ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken)).WithAroundAsync(db, contact.OwnerId, photos, cancellationToken);
     }
 }

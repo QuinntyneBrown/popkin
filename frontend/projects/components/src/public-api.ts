@@ -248,4 +248,7 @@ export * from './lib/memory-upload/memory-upload';
 export * from './lib/spotlight/spotlight';
 export * from './lib/date-tile/date-tile';
 export * from './lib/connection-map/connection-map';
+export * from './lib/connection-panel/connection-panel';
+export * from './lib/people-around/people-around';
+export * from './lib/person-choice/person-choice';
 export * from './lib/link-key/link-key';

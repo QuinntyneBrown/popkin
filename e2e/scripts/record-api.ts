@@ -367,6 +367,19 @@ const metUp = await call('POST', `/api/contacts/habits/${lunch.id}/kept`, {
 await call('DELETE', `/api/contacts/habits/${lunch.id}/kept/${metUp.keptId}`);
 await call('POST', `/api/contacts/habits/${lunch.id}/end`);
 await call('DELETE', `/api/contacts/habits/${lunch.id}/end`);
+// Connections (L2-149, L2-150, known gap 109 ruled): her map starts with her; she connects Chidi
+// and Femi as old friends, reads the map, and removes it again.
+await call('GET', '/api/contacts/connections', undefined, false);
+const oldFriends = await call('POST', '/api/contacts/connections', {
+  clientId: '00000000-0000-4000-c000-000000000060',
+  contactId: chidiKept.id,
+  otherContactId: femiKept.id,
+  kind: 'Friend',
+  words: 'Old friends',
+  promised: false,
+});
+await call('GET', '/api/contacts/connections');
+await call('DELETE', `/api/contacts/connections/${oldFriends.id}`);
 // Nothing is logged with Femi (L2-135 AC2). She logs Chidi's new job, every year, and a phone
 // call with a promise, as his profile draws them, then reads his timeline: all, milestones,
 // conversations (L2-133 to L2-135).

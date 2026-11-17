@@ -1,6 +1,8 @@
 using MediatR;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Contacts.Connections;
 using Popkin.Application.Contacts.Dates;
+using Popkin.Application.Contacts.Security;
 using Popkin.Application.Invites;
 using Popkin.Application.Photos;
 using Popkin.Domain;
@@ -15,7 +17,7 @@ namespace Popkin.Application.Contacts.People;
 public sealed record AddContactCommand(SaveContactRequest Contact, PhotoUpload? Photo = null) : IRequest<ContactProfileDto>;
 
 public sealed class AddContactCommandHandler(
-    IAppDbContext db, ICurrentPerson current, ContactsSwitch contacts, IPhotoProcessor processor, IPhotoStore photos, TimeProvider clock)
+    IAppDbContext db, ICurrentPerson current, ContactsSwitch contacts, IContactGuard guard, IPhotoProcessor processor, IPhotoStore photos, TimeProvider clock)
     : IRequestHandler<AddContactCommand, ContactProfileDto>
 {
     public async Task<ContactProfileDto> Handle(AddContactCommand request, CancellationToken cancellationToken)
@@ -25,19 +27,21 @@ public sealed class AddContactCommandHandler(
         var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         if (await ClientWrites.FindAsync(db.Contacts, owner, request.Contact.ClientId, cancellationToken) is { } saved)
         {
-            return ContactProfileDto.Of(saved, photos, await KeyDateDrafts.ForProfileAsync(db, saved, today, cancellationToken));
+            return await ContactProfileDto.Of(saved, photos, await KeyDateDrafts.ForProfileAsync(db, saved, today, cancellationToken)).WithAroundAsync(db, saved.OwnerId, photos, cancellationToken);
         }
 
         var (name, details) = SaveContactValidator.Validate(request.Contact);
         var drafts = KeyDateDrafts.Validate(request.Contact.KeyDates);
+        var connect = ConnectionDrafts.Validate(request.Contact.Connect);
         var avatar = request.Photo is null ? null : await AvatarPhotos.ReadAsync(request.Photo, processor, cancellationToken);
         var contact = Contact.Create(owner, request.Contact.ClientId, name, details, clock.GetUtcNow());
         db.Contacts.Add(contact);
         await KeyDateDrafts.ApplyAsync(db, contact, drafts, clock.GetUtcNow(), cancellationToken);
+        await ConnectionDrafts.ApplyAsync(db, guard, contact, connect, null, clock.GetUtcNow(), cancellationToken);
         if (avatar is null)
         {
             await db.SaveChangesAsync(cancellationToken);
-            return ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken));
+            return await ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken)).WithAroundAsync(db, contact.OwnerId, photos, cancellationToken);
         }
 
         var key = $"contacts/{Guid.NewGuid():N}{avatar.Extension}";
@@ -53,6 +57,6 @@ public sealed class AddContactCommandHandler(
             throw;
         }
 
-        return ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken));
+        return await ContactProfileDto.Of(contact, photos, await KeyDateDrafts.ForProfileAsync(db, contact, today, cancellationToken)).WithAroundAsync(db, contact.OwnerId, photos, cancellationToken);
     }
 }

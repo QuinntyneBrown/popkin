@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
+  connectionWords,
   AddedMemory,
   ContactMemoriesStore,
   ContactProfileStore,
@@ -65,6 +66,8 @@ import {
   IconButton,
   InfoCard,
   KeepStrip,
+  PeopleAround,
+  AroundItem,
   KeyDateItem,
   KeyDates,
   Likes,
@@ -124,6 +127,7 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     IconButton,
     InfoCard,
     KeepStrip,
+    PeopleAround,
     KeyDates,
     Likes,
     Link,
@@ -329,6 +333,18 @@ export class ContactProfilePage {
   }
 
   /** Our habit as its card shows it (L2-128 AC5). */
+  /** "People around {first name}": each connection's other contact and its words (L2-150 AC4). */
+  protected readonly around = computed<AroundItem[]>(() =>
+    (this.store.profile()?.around ?? []).map((a) => ({
+      name: a.name,
+      initials: a.initials,
+      photo: a.photoUrl,
+      accent: a.accent.toLowerCase(),
+      meta: connectionWords(a.words, a.kind),
+      link: ['/contacts/people', a.contactId],
+    })),
+  );
+
   protected readonly habitCard = computed(() => {
     const habit = this.profile()?.habit;
     if (!habit) return null;
