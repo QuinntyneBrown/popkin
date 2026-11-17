@@ -12,6 +12,7 @@ import {
 import { DelayedLoading } from '../loading/delayed-loading';
 import { Toaster } from '../toasts/toaster';
 import { NOTIFICATIONS_API } from './notifications-api';
+import { NotificationLinkIntent } from './notification-link';
 import { PUSH_SUBSCRIBER } from './push-subscriber';
 
 /** The three ways activity email can come, in the words of L2-156 AC1. */
@@ -111,15 +112,25 @@ export class NotificationSettingsStore {
       .subscribe({ next: (people) => this.candidates.set(people) });
   }
 
-  open(): void {
+  /** Reads the settings, then applies what a footer link asked for, if anything (L2-168 AC1). */
+  open(intent?: NotificationLinkIntent): void {
     this.loading.begin();
     this.api.settings().subscribe({
       next: (settings) => {
         this.settings.set(settings);
         this.loading.ready();
+        if (intent) this.applyLinkIntent(intent);
       },
       error: () => this.loading.failed(),
     });
+  }
+
+  /**
+   * "Mute {Popkin}" mutes it as a tap would, with the bar that can undo it (L2-158 AC4). A Popkin
+   * the person is not in changes nothing. "Stop birthday reminders" is applied with birthdays by person.
+   */
+  applyLinkIntent(intent: NotificationLinkIntent): void {
+    if (intent.mute && 'popkinId' in intent.mute) this.setLevel(intent.mute.popkinId, 'Muted');
   }
 
   /** Every email switch and the frequency are off and disabled while email is off (AC3). */

@@ -367,6 +367,17 @@ export const routes = {
     app: '/account/notifications',
     mock: 'pages/notification-settings/error.html',
   },
+  // The page "Unsubscribe from all email" opens (L2-168 AC3, AC5).
+  unsubscribe: { app: '/unsubscribe?t=a-working-link', mock: 'pages/unsubscribe/default.html' },
+  unsubscribeWorking: {
+    app: '/unsubscribe?t=a-working-link',
+    mock: 'pages/unsubscribe/working.html',
+  },
+  unsubscribeExpired: {
+    app: '/unsubscribe?t=an-expired-link',
+    mock: 'pages/unsubscribe/expired.html',
+  },
+  unsubscribeError: { app: '/unsubscribe?t=a-working-link', mock: 'pages/unsubscribe/error.html' },
   landing: { app: '/', mock: 'pages/landing/default.html' },
   // The marketing site (ADR 0017), a second application served on :4201.
   marketingHome: { app: `${MARKETING}/`, mock: 'pages/marketing-home/default.html' },

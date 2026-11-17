@@ -533,6 +533,9 @@ await call('GET', '/api/me/notifications');
 await call('PUT', '/api/me/notifications/kinds/GroupChat', { email: true });
 await call('PUT', '/api/me/notifications/frequency', { frequency: 'DailyDigest' });
 await call('PUT', '/api/me/notifications/email', { on: false });
+// A link the API cannot read: the unsubscribe page's expired state (L2-168 AC5). A working
+// token cannot be recorded, since only the Worker issues one; the specs stub it.
+await call('POST', '/api/notifications/unsubscribe?t=an-expired-link').catch(() => undefined);
 const portrait = new FormData();
 portrait.append(
   'photo',

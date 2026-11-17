@@ -8,7 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   FREQUENCY_CHOICES,
   NotificationFrequency,
@@ -22,6 +22,7 @@ import {
   PopkinLevelView,
   PopkinNotificationLevel,
   accentOf,
+  parseNotificationLink,
   popkinLine,
 } from 'api';
 import {
@@ -136,8 +137,19 @@ export class NotificationsPage implements OnInit {
     })),
   );
 
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+
+  /**
+   * A footer link's intent (L2-168 AC1): the mute it asks for is applied once the settings
+   * arrive, and dropped from the address so a reload does not apply it again.
+   */
   ngOnInit(): void {
-    this.store.open();
+    const intent = parseNotificationLink(this.route.snapshot.queryParamMap);
+    this.store.open(intent);
+    if (intent.mute) {
+      void this.router.navigate([], { queryParams: { tab: intent.tab }, replaceUrl: true });
+    }
   }
 
   protected switched(change: NotifSwitch): void {

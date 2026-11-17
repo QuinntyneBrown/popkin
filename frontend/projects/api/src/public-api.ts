@@ -188,3 +188,5 @@ export * from './lib/api/contacts/contact-memories-store';
 export * from './lib/api/contacts/add-memory-store';
 export * from './lib/api/contacts/memory-text';
 export * from './lib/api/contacts/local-contacts-outbox-storage';
+export * from './lib/api/notifications/notification-link';
+export * from './lib/api/notifications/unsubscribe-link';

@@ -34,6 +34,8 @@ export interface NotificationsApi {
   mute(membershipId: string): Observable<MutedPersonView>;
   /** 404 `mute_not_found`. */
   unmute(muteId: string): Observable<void>;
+  /** "Unsubscribe from all email" with the link's token and no session; 410 `unsubscribe_link_expired` (L2-168). */
+  unsubscribe(token: string): Observable<void>;
   /** The device's IANA zone, sent once when the app starts (L2-161 AC7); 400 `invalid_time_zone`. */
   saveTimeZone(zone: string): Observable<void>;
   /** Web Push's public key, empty while none is configured (ADR 0028). */
@@ -62,6 +64,10 @@ export class HttpNotificationsApi implements NotificationsApi {
 
   setFrequency(frequency: NotificationFrequency): Observable<void> {
     return this.http.put<void>('/api/me/notifications/frequency', { frequency });
+  }
+
+  unsubscribe(token: string): Observable<void> {
+    return this.http.post<void>('/api/notifications/unsubscribe', null, { params: { t: token } });
   }
 
   saveTimeZone(zone: string): Observable<void> {

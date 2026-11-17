@@ -253,6 +253,42 @@ describe('NotificationSettingsStore', () => {
     });
   });
 
+  describe('a footer link', () => {
+    it('mutes the Popkin it names once the settings arrive, with the bar that can undo it', () => {
+      const answer = new Subject<NotificationSettingsView>();
+      const setLevel = vi.fn(saved);
+      const { store } = storeWith({ settings: () => answer, setLevel });
+
+      store.open({ tab: 'popkins', mute: { popkinId: 'p1' } });
+      expect(setLevel).not.toHaveBeenCalled();
+      answer.next(settings);
+
+      expect(store.settings()!.popkins[0].level).toBe('Muted');
+      expect(setLevel).toHaveBeenCalledWith('p1', 'Muted');
+      expect(store.banner()).toBe('popkinMuted');
+    });
+
+    it('changes nothing for a Popkin the person is not in', () => {
+      const setLevel = vi.fn(saved);
+      const { store } = storeWith({ setLevel });
+
+      store.open({ tab: 'popkins', mute: { popkinId: 'elsewhere' } });
+
+      expect(setLevel).not.toHaveBeenCalled();
+      expect(store.banner()).toBeNull();
+    });
+
+    it('changes nothing for a link with no mute', () => {
+      const setLevel = vi.fn(saved);
+      const { store } = storeWith({ setLevel });
+
+      store.open({ tab: 'types' });
+
+      expect(setLevel).not.toHaveBeenCalled();
+      expect(store.settings()).toEqual(settings);
+    });
+  });
+
   describe('popkinLine', () => {
     const now = new Date('2026-11-17T12:00:00Z');
     const row = { people: 14, endsAt: null as string | null, level: 'Everything' as const };

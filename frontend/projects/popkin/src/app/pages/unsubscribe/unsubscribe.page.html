@@ -1,0 +1,57 @@
+<div pk-screen>
+  <header pk-top-bar slot="header"><a pk-logo routerLink="/popkins"></a></header>
+  @switch (link.outcome()) {
+    @case ('working') {
+      <h1 class="visually-hidden">Unsubscribe</h1>
+      <p class="visually-hidden" role="status">Unsubscribing you…</p>
+      <div class="stack" aria-hidden="true">
+        <span pk-skeleton shape="title" [width]="70"></span>
+        <span pk-skeleton shape="text" [width]="40"></span>
+        <span pk-skeleton shape="btn" [width]="50"></span>
+      </div>
+    }
+    @case ('unsubscribed') {
+      <div
+        pk-empty-state
+        icon="mail"
+        [level]="1"
+        heading="You’re unsubscribed from all Popkin email."
+        text="Sign-in codes still arrive."
+      >
+        <a
+          pk-button
+          variant="primary"
+          size="md"
+          routerLink="/account/notifications"
+          [queryParams]="{ tab: 'types' }"
+          >Turn email back on</a
+        >
+      </div>
+    }
+    @case ('expired') {
+      <div
+        pk-empty-state
+        icon="clock"
+        [level]="1"
+        heading="This link has expired."
+        text="Sign in to change your email settings."
+      >
+        <a pk-button variant="primary" size="md" routerLink="/account/notifications">Sign in</a>
+      </div>
+    }
+    @case ('failed') {
+      <div
+        pk-empty-state
+        icon="offline"
+        [level]="1"
+        [alert]="true"
+        heading="We couldn’t unsubscribe you."
+        text="Nothing has changed. Check your connection and try again."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="link.retry()">
+          Try again
+        </button>
+      </div>
+    }
+  }
+</div>

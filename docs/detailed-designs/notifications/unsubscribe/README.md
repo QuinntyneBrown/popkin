@@ -159,12 +159,14 @@ The mute links use the settings endpoints of [Notification settings](../notifica
 
 - **`UnsubscribePage`** — as above; route `/unsubscribe` added to `app.routes.ts` beside the
   other public routes, title "Unsubscribe · Popkin".
-- **`NOTIFICATIONS_API`** — `unsubscribe(token): Observable<void>`, which maps `410` to an
-  `expired` result.
+- **`NOTIFICATIONS_API`** — `unsubscribe(token): Observable<void>`.
+- **`UnsubscribeLink`** (`api`) — the page's outcome: `working`, `unsubscribed`, `expired` (a
+  `410`, or no token at all) or `failed` (anything else), with `retry()`; unit tested.
 - **`parseNotificationLink`** (`api`) — the link intent, with its unit specs: each row of the
   footer links table, an unknown tab, a malformed id and no query.
-- **`NotificationSettingsStore`** — `applyLinkIntent(intent)` mutes, shows the banner, and
-  clears the query.
+- **`NotificationSettingsStore`** — `open(intent)` reads the settings, then
+  `applyLinkIntent(intent)` mutes and shows the banner; the page clears the query with
+  `replaceUrl`.
 
 ### Tests
 
