@@ -14,7 +14,7 @@ test.describe('signing in', () => {
     await signIn.open();
 
     await expect(signIn.heading).toHaveText('Welcome back');
-    await expect(signIn.lead).toHaveText('Tell us where to send your code. Still no passwords.');
+    await expect(signIn.lead).toHaveText('Tell us where to send your code.');
     await expect(signIn.contact).toBeFocused();
     await expect(signIn.contact).toHaveAttribute('autocomplete', 'username');
     await expect(signIn.contact).toHaveAccessibleDescription('The one you signed up with.');

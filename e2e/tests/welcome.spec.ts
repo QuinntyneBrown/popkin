@@ -15,7 +15,7 @@ test.describe('The welcome screen', () => {
     await expect(welcome.root).toBeVisible();
     await expect(welcome.heading).toHaveText('Your people, popped up in seconds.');
     await expect(welcome.lead).toHaveText(
-      'A little home for your group. Chat, photos, plans and calls, all in one place.',
+      'Chat, share photos, make plans and more all in one place.',
     );
   });
 
