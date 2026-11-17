@@ -44,7 +44,8 @@ public sealed class AcsNotificationEmailSender(EmailClient client, string sender
                 email.Attachments.Add(new EmailAttachment(image.ContentId, stored.ContentType, data) { ContentId = image.ContentId });
             }
 
-            var operation = await client.SendAsync(WaitUntil.Started, email, cancellationToken);
+            // The email's own id as the operation id: a resend after a lost answer is the same operation (L2-175 AC3).
+            var operation = await client.SendAsync(WaitUntil.Started, email, message.OperationId, cancellationToken);
             return new EmailSendResult.Accepted(operation.Id);
         }
         catch (RequestFailedException failure) when (failure.Status is 0 or 408 or 429 or >= 500)

@@ -65,8 +65,9 @@ member's membership, or the Popkin for its event; the email reads that member's 
 A reply in Everyone records two events: `GroupChat` for the Popkin and `MentionsAndReplies` for
 the author of the message replied to. Fan-out gives the author the more specific event only, so
 one message never reaches one person twice. Chat has no @mention: no requirement or mock defines
-how a mention is written or recognised. `MentionsAndReplies` therefore comes from replies alone
-until mentions are specified (`<TO SUPPLY>`).
+how a mention is written or recognised. `MentionsAndReplies` comes from replies alone. An
+@mention is a Chat feature with its own requirement; when Chat records one, it adds the same
+event with the person mentioned as recipient, and nothing here changes.
 
 Reactions, keen, photo comments and deletions record no event; L2-154 names no kind for them.
 The reminder kinds (`Birthdays`, `StoriesDue`, `PopkinWrappingUp`) are recorded by
@@ -166,9 +167,9 @@ On each tick, after fan-out, the handler sends what is due.
 
 The `DedupKey` of an update email is `update:{OutgoingEmail.Id}`. The email is marked `Sending`
 and saved before the provider is called. Its id is passed to Azure Communication Services as the
-operation id, so a retry after a lost answer does not send it twice. Whether the .NET SDK
-exposes the operation id on `EmailClient.SendAsync` is `<TO SUPPLY>`; without it, a crash
-between the provider accepting and the save can send one email twice.
+operation id (`EmailClient.SendAsync(WaitUntil, EmailMessage, Guid operationId, …)` in
+Azure.Communication.Email 1.1), so a retry after a lost answer is the same operation and is not
+sent twice.
 
 ### Pause
 
@@ -273,7 +274,7 @@ This feature adds no endpoint of its own. It sets the rules every notification e
 
 | Setting | Container | When missing |
 |---|---|---|
-| `Notifications:EmailSender` | Worker | No notification email is sent; deliveries are marked sent. The address on `popkin.community`, `<TO SUPPLY>` (for example `notify@popkin.community`) |
+| `Notifications:EmailSender` | Worker | No notification email is sent; deliveries are marked sent. `DoNotReply@` the verified domain, as `infra/communication.bicep` provisions it |
 | `Email:PostalAddress` | Worker | No notification email is sent, since the footer must carry a postal address (L2-163 AC5) |
 | `Communication:Endpoint`, `Communication:ClientId` | Worker | As for codes: no email is sent |
 | `Push:PublicKey`, `Push:PrivateKey`, `Push:Subject` | API, Worker | No phone alert is sent (ADR 0028) |
@@ -287,8 +288,8 @@ This feature adds no endpoint of its own. It sets the rules every notification e
   are within 5 minutes (L2-175 AC1). `popkin.notifications.email_latency` measures it.
 - **Phone.** A phone alert waits for the next tick: 7.5 s at the median with a 15 s period, plus
   the push service's answer. L2-175 AC1 asks for 10 s at the median. That leaves about 2.5 s for
-  the push call, which `popkin.notifications.phone_latency` measures. A shorter period for phone
-  alerts may be needed (`<TO SUPPLY>`).
+  the push call, which `popkin.notifications.phone_latency` measures. The period stays 15 s; if that
+  metric's median passes 10 s, the period is shortened (`DispatchNotificationsJob.Period`).
 - **A tick** reads at most 200 events and sends what is due. The queries use the index on
   `NotificationEvent.DispatchedAt`, and on `OutgoingEmail` (`Status`, `SendAfter`).
 

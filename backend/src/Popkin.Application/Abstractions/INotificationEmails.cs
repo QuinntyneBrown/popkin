@@ -15,7 +15,7 @@ public interface INotificationEmailRenderer
 }
 
 /// <summary>An email ready for the provider, with its one-click unsubscribe (L2-168 AC4).</summary>
-public sealed record OutgoingEmailMessage(string To, string FromDisplayName, RenderedEmail Email, string UnsubscribeUrl, string UnsubscribePostUrl);
+public sealed record OutgoingEmailMessage(string To, string FromDisplayName, RenderedEmail Email, string UnsubscribeUrl, string UnsubscribePostUrl, Guid OperationId);
 
 /// <summary>What the provider answered.</summary>
 public abstract record EmailSendResult

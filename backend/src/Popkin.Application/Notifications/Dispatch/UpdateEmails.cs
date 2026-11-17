@@ -189,7 +189,7 @@ public sealed class UpdateEmails(
         email.MarkSending();
         await db.SaveChangesAsync(cancellationToken);
         var result = await sender.SendAsync(
-            new OutgoingEmailMessage(address, model.Shell.FromDisplayName, rendered, model.Shell.UnsubscribeUrl, links.UnsubscribePost(email.PersonId)),
+            new OutgoingEmailMessage(address, model.Shell.FromDisplayName, rendered, model.Shell.UnsubscribeUrl, links.UnsubscribePost(email.PersonId), email.Id),
             cancellationToken);
         switch (result)
         {
