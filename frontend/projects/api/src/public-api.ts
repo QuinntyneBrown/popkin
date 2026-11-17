@@ -137,6 +137,7 @@ export * from './lib/api/admin/platform/admin-features.store';
 export * from './lib/api/admin/platform/features-text';
 export * from './lib/api/admin/platform/admin-notifications.store';
 export * from './lib/api/admin/platform/notifications-text';
+export * from './lib/api/admin/platform/holds-text';
 export * from './lib/api/admin/platform/fake/fake-admin-notifications.interceptor';
 export * from './lib/api/admin/platform/fake/fake-notifications-backend';
 export * from './lib/models/contacts';

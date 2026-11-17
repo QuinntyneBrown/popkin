@@ -1,10 +1,14 @@
 import {
   AdminAction,
+  AdminHoldPopkin,
   AdminMe,
   AdminNotificationGroup,
+  AdminNotificationHold,
+  AdminNotificationHolds,
   AdminNotificationKind,
   AdminNotifications,
   AdminSendStatus,
+  HoldPopkinMatch,
   NotificationKindId,
 } from '../../../../models/admin';
 import { REASON_MAX_LENGTH } from '../../dialogs/action-dialog-state';
@@ -19,6 +23,8 @@ export interface FakeAnswer {
 export interface FakeRequest {
   method: string;
   path: string;
+  /** The query string's values: the search's `q`. */
+  query?: Record<string, string>;
   body: unknown;
   admin: Pick<AdminMe, 'name' | 'role'> | null;
 }
@@ -123,6 +129,96 @@ function seedGroups(now: Date): AdminNotificationGroup[] {
   ];
 }
 
+/** A Popkin the fake knows, and whether it has wrapped up. */
+interface FakePopkin extends AdminHoldPopkin {
+  wrappedUp: boolean;
+}
+
+const popkin = (
+  id: string,
+  name: string,
+  emoji: string,
+  colour: string,
+  members: number,
+  inviteCode: string,
+  wrappedUp = false,
+): FakePopkin => ({ id, name, emoji, colour, members, inviteCode, wrappedUp });
+
+/** The Popkins of the mocks: one held, five to hold, one wrapped up. */
+const seedPopkins = (): FakePopkin[] => [
+  popkin('popkin-reunion', 'Class of 2015 Reunion', '🎓', 'Plum', 46, 'GRAD-1507'),
+  popkin('popkin-bakery', 'Bakery Launch Crew', '🥐', 'Amber', 12, 'CRMB-0093'),
+  popkin('popkin-brunch', 'Sunday Brunch Club', '🥞', 'Coral', 9, 'SYRP-7710'),
+  popkin('popkin-lakeside', 'Lakeside Weekend', '🏕️', 'Teal', 14, 'PINE-4821'),
+  popkin('popkin-owl', 'Hackathon Team Owl', '🦉', 'Sky', 6, 'OWLS-2201'),
+  popkin('popkin-hornets', 'U10 Hornets Parents', '⚽', 'Leaf', 31, 'HRNT-0410'),
+  popkin('popkin-camp', 'Summer Camp 2025', '🏕️', 'Leaf', 40, 'CAMP-2025', true),
+];
+
+const heldPart = (p: FakePopkin): AdminHoldPopkin => ({
+  id: p.id,
+  name: p.name,
+  emoji: p.emoji,
+  colour: p.colour,
+  members: p.members,
+  inviteCode: p.inviteCode,
+});
+
+/** The most matches the search gives (the design's `MaxMatches`). */
+const MAX_MATCHES = 20;
+
+/** The holds `holds.html` draws: two by hand, then two automatic. */
+function seedHolds(now: Date, reunion: AdminHoldPopkin): AdminNotificationHold[] {
+  const daysAgo = (days: number) => new Date(now.getTime() - days * 24 * 3_600_000).toISOString();
+  const person = (id: string, name: string, email: string) => ({ id, name, email, avatar: null });
+  return [
+    {
+      id: 'hold-reunion',
+      target: 'Popkin',
+      automatic: false,
+      popkin: reunion,
+      person: null,
+      why: 'Reported for spam invites; 46 members, 3 reports',
+      byName: 'Aiko Tanaka',
+      since: daysAgo(2),
+      until: 'UntilReleased',
+    },
+    {
+      id: 'hold-priya',
+      target: 'Person',
+      automatic: false,
+      popkin: null,
+      person: person('person-priya', 'Priya Nair', 'priya.nair@fastmail.com'),
+      why: 'Asked support to stop all mail while travelling',
+      byName: 'Aiko Tanaka',
+      since: daysAgo(4),
+      until: 'UntilReleased',
+    },
+    {
+      id: null,
+      target: 'Person',
+      automatic: true,
+      popkin: null,
+      person: person('person-ruth', 'Ruth Lindqvist', 'ruth.lindqvist@proton.me'),
+      why: 'Account suspended',
+      byName: 'System',
+      since: daysAgo(8),
+      until: 'WhileSuspended',
+    },
+    {
+      id: null,
+      target: 'Person',
+      automatic: true,
+      popkin: null,
+      person: person('person-grace', 'Grace Adeyemi', 'grace.adeyemi@gmail.com'),
+      why: 'Account being deleted',
+      byName: 'System',
+      since: daysAgo(13),
+      until: 'UntilDeleted',
+    },
+  ];
+}
+
 /**
  * The admin notification endpoints, answered from memory (ADR 0030). It keeps the rules the
  * designs give the API: the role check, a required reason of at most 500 characters, and each
@@ -131,7 +227,9 @@ function seedGroups(now: Date): AdminNotificationGroup[] {
 export class FakeNotificationsBackend {
   private readonly status: AdminSendStatus;
   private readonly groups: AdminNotificationGroup[];
-  private readonly holdCount = 4;
+  private readonly popkins = seedPopkins();
+  private holds: AdminNotificationHold[];
+  private nextHold = 1;
 
   constructor(private readonly clock: () => Date = () => new Date()) {
     this.status = {
@@ -146,6 +244,7 @@ export class FakeNotificationsBackend {
       medianSecondsToInbox: 41,
     };
     this.groups = seedGroups(this.clock());
+    this.holds = seedHolds(this.clock(), heldPart(this.popkins[0]));
   }
 
   /** The `allowed` of `GET /api/admin/me`, with what the admin's role may do here. */
@@ -174,11 +273,90 @@ export class FakeNotificationsBackend {
         this.switchKind(switchKind[1], on, reason, admin),
       );
     }
+    if (path === '/api/admin/notifications/holds' && method === 'GET') {
+      return ok(this.readHolds());
+    }
+    if (path === '/api/admin/notifications/holds/popkin-search' && method === 'GET') {
+      return ok(this.search(request.query?.['q'] ?? ''));
+    }
+    if (path === '/api/admin/notifications/holds' && method === 'POST') {
+      const popkinId = String((request.body as { popkinId?: unknown } | null)?.popkinId ?? '');
+      return this.guarded(request, 'HoldNotifications', (reason, admin) =>
+        this.hold(popkinId, reason, admin),
+      );
+    }
+    const release = /^\/api\/admin\/notifications\/holds\/([^/]+)\/release$/.exec(path);
+    if (release && method === 'POST') {
+      return this.guarded(request, 'HoldNotifications', () => this.release(release[1]));
+    }
     return null;
   }
 
   private read(): AdminNotifications {
-    return structuredClone({ status: this.status, groups: this.groups, holdCount: this.holdCount });
+    return structuredClone({
+      status: this.status,
+      groups: this.groups,
+      holdCount: this.holds.length,
+    });
+  }
+
+  /** Manual holds first, then automatic, each newest first (the design's order). */
+  private readHolds(): AdminNotificationHolds {
+    const newest = (a: AdminNotificationHold, b: AdminNotificationHold) =>
+      b.since.localeCompare(a.since);
+    const manual = this.holds.filter((h) => !h.automatic).sort(newest);
+    const automatic = this.holds.filter((h) => h.automatic).sort(newest);
+    // The provider's count is unknown until gap 129 is settled.
+    return structuredClone({ holds: [...manual, ...automatic], suppressedAddresses: null });
+  }
+
+  private isHeld(popkinId: string): boolean {
+    return this.holds.some((h) => h.popkin?.id === popkinId);
+  }
+
+  /** Active Popkins not held whose name contains the text or whose code is it, by name. */
+  private search(text: string): HoldPopkinMatch[] {
+    const wanted = text.trim().toLowerCase();
+    const matches = (p: FakePopkin) =>
+      !wanted || p.name.toLowerCase().includes(wanted) || p.inviteCode.toLowerCase() === wanted;
+    return this.popkins
+      .filter((p) => !p.wrappedUp && !this.isHeld(p.id) && matches(p))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .slice(0, MAX_MATCHES)
+      .map(({ id, name, emoji, colour, inviteCode }) => ({
+        popkinId: id,
+        name,
+        emoji,
+        colour,
+        inviteCode,
+      }));
+  }
+
+  private hold(popkinId: string, reason: string, admin: string): FakeAnswer {
+    const found = this.popkins.find((p) => p.id === popkinId);
+    if (!found) return problem(404, 'popkin_not_found');
+    if (found.wrappedUp) return problem(409, 'popkin_wrapped_up');
+    if (this.isHeld(popkinId)) return problem(409, 'popkin_already_held');
+    const hold: AdminNotificationHold = {
+      id: `hold-${this.nextHold++}`,
+      target: 'Popkin',
+      automatic: false,
+      popkin: heldPart(found),
+      person: null,
+      why: reason,
+      byName: admin,
+      since: this.clock().toISOString(),
+      until: 'UntilReleased',
+    };
+    this.holds.push(hold);
+    return ok(structuredClone(hold), 201);
+  }
+
+  private release(holdId: string): FakeAnswer {
+    const found = this.holds.find((h) => h.id === holdId);
+    if (!found) return problem(404, 'hold_not_found');
+    this.holds = this.holds.filter((h) => h !== found);
+    return ok(null);
   }
 
   /** The role, then the reason (L2-086, L2-087), then the action. */

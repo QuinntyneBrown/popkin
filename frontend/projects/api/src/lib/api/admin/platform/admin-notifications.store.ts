@@ -1,5 +1,11 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { AdminNotificationKind, AdminNotifications, AdminSendStatus } from '../../../models/admin';
+import {
+  AdminNotificationHold,
+  AdminNotificationHolds,
+  AdminNotificationKind,
+  AdminNotifications,
+  AdminSendStatus,
+} from '../../../models/admin';
 import { ADMIN_PLATFORM_API } from './admin-platform-api';
 
 /** How often the page reads the status and the counts again (the admin app polls; ADR 0015). */
@@ -22,6 +28,10 @@ export class AdminNotificationsStore {
   readonly kindCount = computed(() => this.groups().reduce((n, g) => n + g.kinds.length, 0));
   readonly holdCount = computed(() => this.notifications()?.holdCount ?? 0);
 
+  /** The Holds tab, read when it first opens (L2-172). */
+  readonly holdsStatus = signal<'idle' | 'loading' | 'ready' | 'failed'>('idle');
+  readonly holds = signal<AdminNotificationHolds | null>(null);
+
   constructor() {
     const poll = setInterval(() => this.refresh(), NOTIFICATIONS_POLL_MS);
     inject(DestroyRef).onDestroy(() => clearInterval(poll));
@@ -39,13 +49,46 @@ export class AdminNotificationsStore {
     });
   }
 
-  /** Reads the page again quietly; a failed poll keeps what shows. */
+  /** Reads the page again quietly, and the holds once read; a failed poll keeps what shows. */
   refresh(): void {
     if (this.status() !== 'ready') return;
     this.api.notifications().subscribe({
       next: (notifications) => this.notifications.set(notifications),
       error: () => undefined,
     });
+    if (this.holdsStatus() !== 'ready') return;
+    this.api.notificationHolds().subscribe({
+      next: (holds) => this.holds.set(holds),
+      error: () => undefined,
+    });
+  }
+
+  /** Reads the holds, showing them loading; "Try again" calls it too. */
+  loadHolds(): void {
+    this.holdsStatus.set('loading');
+    this.api.notificationHolds().subscribe({
+      next: (holds) => {
+        this.holds.set(holds);
+        this.holdsStatus.set('ready');
+      },
+      error: () => this.holdsStatus.set('failed'),
+    });
+  }
+
+  /** A hold just added: first of the manual holds, and counted in the tab (L2-172 AC2). */
+  holdAdded(hold: AdminNotificationHold): void {
+    this.holds.update((h) => (h ? { ...h, holds: [hold, ...h.holds] } : h));
+    this.countHolds(1);
+  }
+
+  /** A hold just released: gone from the list and the tab's count (L2-172 AC4). */
+  holdReleased(holdId: string): void {
+    this.holds.update((h) => (h ? { ...h, holds: h.holds.filter((x) => x.id !== holdId) } : h));
+    this.countHolds(-1);
+  }
+
+  private countHolds(by: number): void {
+    this.notifications.update((n) => (n ? { ...n, holdCount: Math.max(0, n.holdCount + by) } : n));
   }
 
   /** The status as a pause or a resume saved it (L2-170). */

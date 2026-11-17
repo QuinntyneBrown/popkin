@@ -23,7 +23,7 @@ export function fakeAdminNotificationsBackend(
 ): HttpInterceptorFn {
   let admin: FakeRequest['admin'] = null;
   return (request, next): Observable<HttpEvent<unknown>> => {
-    const url = new URL(request.url, 'http://popkin.local');
+    const url = new URL(request.urlWithParams, 'http://popkin.local');
     if (request.method === 'GET' && url.pathname === '/api/admin/me') {
       return next(request).pipe(
         map((event) => {
@@ -37,6 +37,7 @@ export function fakeAdminNotificationsBackend(
     const answer = backend.handle({
       method: request.method,
       path: url.pathname,
+      query: Object.fromEntries(url.searchParams),
       body: request.body,
       admin,
     });

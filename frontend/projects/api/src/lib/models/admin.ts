@@ -201,3 +201,56 @@ export interface AdminNotifications {
   groups: AdminNotificationGroup[];
   holdCount: number;
 }
+
+/** Until when a hold lasts (L2-172 AC1). */
+export type NotificationHoldUntil = 'UntilReleased' | 'WhileSuspended' | 'UntilDeleted';
+
+/** The Popkin a hold is on. */
+export interface AdminHoldPopkin {
+  id: string;
+  name: string;
+  emoji: string;
+  colour: string;
+  members: number;
+  inviteCode: string;
+}
+
+/** The person a hold is on. */
+export interface AdminHoldPerson {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string | null;
+}
+
+/**
+ * One hold (docs/detailed-designs/admin-platform/notification-holds). An automatic hold has no
+ * id, is by "System" and cannot be released here (L2-172 AC5).
+ */
+export interface AdminNotificationHold {
+  id: string | null;
+  target: 'Popkin' | 'Person';
+  automatic: boolean;
+  popkin: AdminHoldPopkin | null;
+  person: AdminHoldPerson | null;
+  why: string;
+  byName: string;
+  since: string;
+  until: NotificationHoldUntil;
+}
+
+/** `GET /api/admin/notifications/holds`: manual holds first, then automatic, newest first. */
+export interface AdminNotificationHolds {
+  holds: AdminNotificationHold[];
+  /** The mail provider's count of hard-bounced addresses; null until gap 129 is settled. */
+  suppressedAddresses: number | null;
+}
+
+/** An active Popkin not already held, as "Hold a Popkin" finds it (L2-172 AC2). */
+export interface HoldPopkinMatch {
+  popkinId: string;
+  name: string;
+  emoji: string;
+  colour: string;
+  inviteCode: string;
+}

@@ -85,6 +85,48 @@
           ></div>
         </section>
       }
+      @case ('holds') {
+        <div role="tabpanel" aria-labelledby="tab-holds">
+          @switch (store.holdsStatus()) {
+            @case ('failed') {
+              <section pk-panel>
+                <div
+                  pk-empty-state
+                  icon="alert"
+                  heading="Couldn’t load holds"
+                  text="The admin API didn’t answer. Nothing has changed; try again, or check Health if it keeps happening."
+                  [compact]="true"
+                  [panel]="true"
+                >
+                  <button
+                    pk-button
+                    type="button"
+                    variant="primary"
+                    size="md"
+                    (click)="store.loadHolds()"
+                  >
+                    <svg pk-icon name="retry" size="sm"></svg>Try again
+                  </button>
+                </div>
+              </section>
+            }
+            @default {
+              <section pk-panel heading="Held" [sub]="heldSub">
+                <div
+                  pk-data-table
+                  label="Popkins and people whose notifications are held, why, and until when"
+                  [columns]="holdColumns"
+                  [groups]="holdGroups()"
+                  [loading]="store.holdsStatus() !== 'ready'"
+                ></div>
+              </section>
+              @if (store.holdsStatus() === 'ready') {
+                <p pk-aside-note>{{ heldNote() }}</p>
+              }
+            }
+          }
+        </div>
+      }
     }
   }
 }

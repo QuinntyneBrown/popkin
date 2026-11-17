@@ -26,6 +26,31 @@ export class NotificationKindRow {
   }
 }
 
+/** One hold on the Holds tab (L2-172 AC1, AC5). */
+export class NotificationHoldRow {
+  readonly row: Locator;
+  readonly name: Locator;
+  readonly line: Locator;
+  readonly why: Locator;
+  readonly by: Locator;
+  readonly until: Locator;
+  readonly release: Locator;
+  readonly automatic: Locator;
+
+  constructor(panel: Locator, name: string) {
+    this.row = panel.locator('.data-table tbody tr').filter({
+      has: panel.page().locator('.who__name', { hasText: name }),
+    });
+    this.name = this.row.locator('.who__name');
+    this.line = this.row.locator('.who__sub');
+    this.why = this.row.locator('td[data-label="Why"]');
+    this.by = this.why.locator('.kind-about');
+    this.until = this.row.locator('td[data-label="Until"]');
+    this.release = this.row.getByRole('button', { name: `Release the hold on ${name}` });
+    this.automatic = this.row.locator('.status', { hasText: 'Automatic' });
+  }
+}
+
 /** Notifications (L2-169 to L2-173): the sending status and the Kinds, Holds and Defaults tabs. */
 export class NotificationsPage {
   readonly root: Locator;
@@ -43,6 +68,12 @@ export class NotificationsPage {
   readonly empty: Locator;
   readonly tryAgain: Locator;
   readonly toast: Locator;
+  /** The Holds tab (L2-172). */
+  readonly held: Locator;
+  readonly heldSub: Locator;
+  readonly holdRows: Locator;
+  readonly holdAPopkin: Locator;
+  readonly heldNote: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly pageHead: Locator;
   readonly pageTabs: Locator;
@@ -64,6 +95,13 @@ export class NotificationsPage {
     this.empty = page.locator('.panel .empty');
     this.tryAgain = page.getByRole('button', { name: 'Try again' });
     this.toast = page.locator('.toast');
+    this.held = page.locator('.panel').filter({
+      has: page.getByRole('heading', { name: 'Held', exact: true }),
+    });
+    this.heldSub = this.held.locator('.panel__sub');
+    this.holdRows = this.held.locator('.data-table tbody tr');
+    this.holdAPopkin = this.held.getByRole('button', { name: 'Hold a Popkin' });
+    this.heldNote = page.locator('.panel__aside-note');
     this.pageHead = page.locator('.page-head');
     this.pageTabs = page.locator('.page-tabs');
     this.panel = page.locator('.panel').first();
@@ -71,6 +109,10 @@ export class NotificationsPage {
 
   tab(name: 'Kinds' | 'Holds' | 'Defaults'): Locator {
     return this.tabs.getByRole('tab', { name: new RegExp(`^${name}`) });
+  }
+
+  hold(name: string): NotificationHoldRow {
+    return new NotificationHoldRow(this.held, name);
   }
 
   kind(name: string): NotificationKindRow {
