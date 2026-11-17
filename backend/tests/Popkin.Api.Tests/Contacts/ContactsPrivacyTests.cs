@@ -50,7 +50,7 @@ public sealed class ContactsPrivacyTests
         Assert.DoesNotContain(waltHub.Received, e => e.Name.Contains("Contact", StringComparison.OrdinalIgnoreCase));
         Assert.Equal(codesBefore, api.Codes.Sent.Count);
         Assert.Equal(invitesBefore, api.CrewInvites.Sent.Count);
-        Assert.Empty(api.PhoneReminders.Sent);
+        Assert.Empty(api.PhoneAlerts.Sent);
         Assert.Empty(api.WeekAheadEmails.Sent);
     }
 }

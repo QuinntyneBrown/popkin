@@ -40,7 +40,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public CapturingAdminInviteSender AdminInvites { get; } = new();
 
-    public CapturingPhoneNotifications PhoneReminders { get; } = new();
+    public CapturingPhoneNotifications PhoneAlerts { get; } = new();
 
     public CapturingWeekAheadEmails WeekAheadEmails { get; } = new();
 
@@ -101,7 +101,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Phone));
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Email));
             services.RemoveAll<IPhoneNotificationSender>();
-            services.AddSingleton<IPhoneNotificationSender>(PhoneReminders);
+            services.AddSingleton<IPhoneNotificationSender>(PhoneAlerts);
             services.RemoveAll<IContactsEmailSender>();
             services.AddSingleton<IContactsEmailSender>(WeekAheadEmails);
         });

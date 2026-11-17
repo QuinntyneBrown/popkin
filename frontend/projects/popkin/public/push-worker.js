@@ -1,9 +1,10 @@
-// Popkin's push worker (ADR 0028): shows a Contacts reminder and opens it. It caches nothing.
+// Popkin's push worker (ADR 0028): shows a phone alert and opens what it is about. It caches nothing.
 self.addEventListener('push', (event) => {
-  const reminder = event.data ? event.data.json() : {};
+  const alert = event.data ? event.data.json() : {};
   event.waitUntil(
-    self.registration.showNotification(reminder.title || 'Popkin', {
-      data: { url: reminder.url || '/contacts' },
+    self.registration.showNotification(alert.title || 'Popkin', {
+      body: alert.body || undefined,
+      data: { url: alert.url || '/' },
     }),
   );
 });

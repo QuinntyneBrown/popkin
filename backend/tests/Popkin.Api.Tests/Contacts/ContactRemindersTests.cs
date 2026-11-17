@@ -71,9 +71,9 @@ public sealed class ContactRemindersTests
         var again = await api.SendAsync(new SendContactRemindersCommand());
 
         Assert.Equal((0, 1, 0), (early, nine, again));
-        var phone = Assert.Single(api.PhoneReminders.Sent);
-        Assert.Equal("Grace turns 33 on Saturday", phone.Reminder.Words);
-        Assert.Equal(grace, phone.Reminder.ContactId);
+        var phone = Assert.Single(api.PhoneAlerts.Sent);
+        Assert.Equal("Grace turns 33 on Saturday", phone.Alert.Title);
+        Assert.Equal($"/contacts/people/{grace}", phone.Alert.Url);
         var email = Assert.Single(api.WeekAheadEmails.Sent);
         Assert.Equal("mara@example.com", email.Email);
         Assert.Equal(["Grace turns 33 on Saturday"], email.Week.Dates);
@@ -124,7 +124,7 @@ public sealed class ContactRemindersTests
         Assert.Equal("invalid_time_zone", (await wrong.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString());
         Assert.Equal((0, 1), (utcNine, losAngelesNine));
         Assert.Single(await RemindersAsync(mara));
-        Assert.Empty(api.PhoneReminders.Sent);
+        Assert.Empty(api.PhoneAlerts.Sent);
         Assert.Empty(api.WeekAheadEmails.Sent);
     }
 
@@ -171,16 +171,16 @@ public sealed class ContactRemindersTests
         await BirthdayAsync(mara, "Grace Lin", saturday, saturday.Year - 33);
         await BirthdayAsync(lena, "Bea Fischer", saturday, saturday.Year - 40);
         api.Clock.SetUtcNow(monday);
-        api.PhoneReminders.Fail = true;
+        api.PhoneAlerts.Fail = true;
 
         var nine = await api.SendAsync(new SendContactRemindersCommand());
-        api.PhoneReminders.Fail = false;
+        api.PhoneAlerts.Fail = false;
         api.Clock.Advance(TimeSpan.FromMinutes(5));
         await api.SendAsync(new SendContactRemindersCommand());
 
         Assert.Equal(2, nine);
         Assert.Single(await RemindersAsync(mara));
         Assert.Single(await RemindersAsync(lena));
-        Assert.Equal(["Bea turns 40 on Saturday", "Grace turns 33 on Saturday"], api.PhoneReminders.Sent.Select(s => s.Reminder.Words).Order(StringComparer.Ordinal));
+        Assert.Equal(["Bea turns 40 on Saturday", "Grace turns 33 on Saturday"], api.PhoneAlerts.Sent.Select(s => s.Alert.Title).Order(StringComparer.Ordinal));
     }
 }

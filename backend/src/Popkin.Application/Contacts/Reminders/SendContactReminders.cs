@@ -136,7 +136,7 @@ public sealed class SendContactRemindersCommandHandler(
             {
                 if (preferences.PhoneNotifications)
                 {
-                    await SendAsync("phone", () => phone.SendAsync(owner, new PhoneReminder(reminder.Words, reminder.ContactId), cancellationToken));
+                    await SendAsync("phone", () => phone.SendAsync(owner, new PhoneAlert(reminder.Words, "", reminder.ContactId is { } id ? $"/contacts/people/{id}" : "/contacts"), cancellationToken));
                 }
 
                 reminder.MarkNotified(now);
