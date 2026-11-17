@@ -35,3 +35,27 @@ export async function theNotificationSettingsFailingOnce(page: Page): Promise<vo
   await theMockNotificationSettings(page);
   await answerOnce(page, 'GET /api/me/notifications', problem(500, 'unexpected'));
 }
+
+/** Saving any one setting fails (L2-155 AC5). */
+export async function savingFails(page: Page): Promise<void> {
+  for (const key of [
+    'PUT /api/me/notifications/kinds/GroupChat',
+    'PUT /api/me/notifications/frequency',
+    'PUT /api/me/notifications/email',
+  ]) {
+    await answer(page, key, problem(500, 'unexpected'));
+  }
+}
+
+/** Mara's settings with the daily digest chosen, as `daily.html` draws them. */
+export async function theDailyDigestChosen(page: Page): Promise<void> {
+  await answer(page, 'GET /api/me/notifications', {
+    status: 200,
+    body: { ...settings, email: { on: true, available: true, frequency: 'DailyDigest' } },
+  });
+}
+
+/** Turning email on again is answered as the API does for an account with an address. */
+export async function emailCanBeTurnedBackOn(page: Page): Promise<void> {
+  await answer(page, 'PUT /api/me/notifications/email', { status: 204 });
+}

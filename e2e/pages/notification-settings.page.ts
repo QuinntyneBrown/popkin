@@ -20,6 +20,10 @@ export class NotificationSettingsPage {
   readonly error: Locator;
   readonly tryAgain: Locator;
   readonly yourAccount: Locator;
+  /** The bar after email is switched off, and its actions (L2-156 AC3, AC4). */
+  readonly undoBar: Locator;
+  readonly turnEmailBackOn: Locator;
+  readonly dismissBar: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly topBar: Locator;
   readonly firstGroup: Locator;
@@ -54,6 +58,9 @@ export class NotificationSettingsPage {
     this.error = page.getByRole('heading', { name: 'We couldn’t load your notification settings' });
     this.tryAgain = page.getByRole('button', { name: 'Try again' });
     this.yourAccount = this.empty.getByRole('link', { name: 'Your account' });
+    this.undoBar = page.locator('.undo-bar');
+    this.turnEmailBackOn = this.undoBar.getByRole('button', { name: 'Turn email back on' });
+    this.dismissBar = this.undoBar.getByRole('button', { name: 'Dismiss' });
   }
 
   /** A group by its name: "When something changes", "Reminders" or "Your account". */

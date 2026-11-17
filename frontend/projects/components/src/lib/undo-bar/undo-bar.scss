@@ -1,0 +1,63 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+}
+
+@media (min-width: 40rem) {
+  :host {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.undo-bar__text {
+  flex: 1;
+  min-width: 0;
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-snug)
+    var(--font-family-sans);
+}
+
+.undo-bar__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.undo-bar__action {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-family-sans);
+}
+
+.undo-bar__action:hover {
+  background: var(--color-bg-subtle);
+}
+
+/* "Dismiss": a round target on the ink, as the mock's icon button there. */
+.undo-bar__dismiss {
+  display: inline-grid;
+  place-items: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: inherit;
+}
+
+.undo-bar__dismiss:hover {
+  background: var(--color-bg-inverse-hover);
+}

@@ -1,4 +1,6 @@
 import {
+  emailCanBeTurnedBackOn,
+  savingFails,
   settingsWithoutAnEmailAddress,
   theMockNotificationSettings,
   theNotificationSettingsFailing,
@@ -8,6 +10,7 @@ import {
 import { expect, test } from '../fixtures/pk-test';
 import { AccountPage } from '../pages/account.page';
 import { NotificationSettingsPage } from '../pages/notification-settings.page';
+import { Toasts } from '../pages/toasts';
 
 test.describe('the Notifications screen', () => {
   // L2-048 AC6
@@ -131,5 +134,108 @@ test.describe('the Notifications screen', () => {
     await pk.open('notificationSettings');
 
     await expect(new NotificationSettingsPage(page).error).toBeVisible();
+  });
+});
+
+test.describe('changing what you hear about', () => {
+  // L2-155 AC5, L2-157 AC3
+  test('a switch is saved as it changes, with no Save button', async ({ page, pk }) => {
+    await theMockNotificationSettings(page);
+    await pk.open('notificationSettings');
+    const notifications = new NotificationSettingsPage(page);
+    const saved = page.waitForRequest(
+      (request) =>
+        request.method() === 'PUT' &&
+        request.url().endsWith('/api/me/notifications/kinds/GroupChat'),
+    );
+
+    await notifications.kindSwitch('Group chat', 'email').click();
+
+    expect((await saved).postDataJSON()).toEqual({ email: true });
+    await expect(notifications.kindSwitch('Group chat', 'email')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(page.getByRole('button', { name: 'Save' })).toHaveCount(0);
+  });
+
+  // L2-155 AC5
+  test('a save that fails puts the switch back and says so', async ({ page, pk }) => {
+    await theMockNotificationSettings(page);
+    await savingFails(page);
+    await pk.open('notificationSettings');
+    const notifications = new NotificationSettingsPage(page);
+
+    await notifications.kindSwitch('Group chat', 'email').click();
+
+    await expect(new Toasts(page).headed('We couldn’t save that. Try again.')).toBeVisible();
+    await expect(notifications.kindSwitch('Group chat', 'email')).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
+  });
+
+  // L2-156 AC1, AC2
+  test('a frequency is chosen by touch or by the arrow keys', async ({ page, pk }) => {
+    await theMockNotificationSettings(page);
+    await pk.open('notificationSettings');
+    const notifications = new NotificationSettingsPage(page);
+
+    await notifications.frequencyOption('Daily digest').click();
+    await expect(notifications.frequencyOption('Daily digest')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+
+    await page.keyboard.press('ArrowRight');
+    await expect(notifications.frequencyOption('Weekly digest')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(notifications.frequencyOption('Weekly digest')).toBeFocused();
+  });
+
+  // L2-156 AC3, AC4
+  test('email off disables every email switch and says so; Turn email back on restores them', async ({
+    page,
+    pk,
+  }) => {
+    await theMockNotificationSettings(page);
+    await pk.open('notificationSettings');
+    const notifications = new NotificationSettingsPage(page);
+
+    await notifications.emailSwitch.click();
+
+    await expect(notifications.undoBar).toHaveText(
+      /You’re unsubscribed from all Popkin email\. Sign-in codes still arrive, and your phone alerts are unchanged\./,
+    );
+    await expect(notifications.undoBar).toHaveAttribute('role', 'status');
+    await expect(notifications.kindSwitch('Mentions and replies', 'email')).toBeDisabled();
+    await expect(notifications.kindSwitch('Mentions and replies', 'email')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(notifications.kindSwitch('Mentions and replies', 'phone')).toBeEnabled();
+    await expect(notifications.frequencyOption('As it happens')).toBeDisabled();
+
+    await emailCanBeTurnedBackOn(page);
+    await notifications.turnEmailBackOn.click();
+
+    await expect(notifications.undoBar).toHaveCount(0);
+    await expect(notifications.emailSwitch).toHaveAttribute('aria-checked', 'true');
+    await expect(notifications.kindSwitch('Mentions and replies', 'email')).toBeEnabled();
+  });
+
+  // L2-156 AC3
+  test('the banner can be dismissed and email stays off', async ({ page, pk }) => {
+    await theMockNotificationSettings(page);
+    await pk.open('notificationSettings');
+    const notifications = new NotificationSettingsPage(page);
+    await notifications.emailSwitch.click();
+
+    await notifications.dismissBar.click();
+
+    await expect(notifications.undoBar).toHaveCount(0);
+    await expect(notifications.emailSwitch).toHaveAttribute('aria-checked', 'false');
   });
 });

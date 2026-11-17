@@ -38,6 +38,7 @@ export * from './lib/choice-card/choice-card';
 export * from './lib/notif-group/notif-group';
 export * from './lib/notif-matrix/notif-matrix';
 export * from './lib/settings-section/settings-section';
+export * from './lib/undo-bar/undo-bar';
 export * from './lib/date-button/date-button';
 export * from './lib/dialog/dialog';
 export * from './lib/pop/pop';

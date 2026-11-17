@@ -331,6 +331,14 @@ export const routes = {
     app: '/account/notifications',
     mock: 'pages/notification-settings/default.html',
   },
+  notificationSettingsDaily: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/daily.html',
+  },
+  notificationSettingsUnsubscribed: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/unsubscribed.html',
+  },
   notificationSettingsLoading: {
     app: '/account/notifications',
     mock: 'pages/notification-settings/loading.html',

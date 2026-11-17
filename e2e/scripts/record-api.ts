@@ -522,6 +522,10 @@ await call('PATCH', '/api/account', { name: 'Mara Okafor' });
 await call('GET', '/api/account');
 // Her notification settings, as she has never changed them (L2-154 AC1).
 await call('GET', '/api/me/notifications');
+// Then she changes them: group chat by email, the daily digest, and email off (L2-156, L2-157).
+await call('PUT', '/api/me/notifications/kinds/GroupChat', { email: true });
+await call('PUT', '/api/me/notifications/frequency', { frequency: 'DailyDigest' });
+await call('PUT', '/api/me/notifications/email', { on: false });
 const portrait = new FormData();
 portrait.append(
   'photo',
