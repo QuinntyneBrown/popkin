@@ -56,6 +56,9 @@ public sealed class KeyDate : IClientWrite
 
     public ReminderLead Lead { get; private set; }
 
+    /// <summary>Whether the date reminds at all; off, it stays in Contacts and nothing reminds of it (L2-159 AC4).</summary>
+    public bool RemindersOn { get; private set; } = true;
+
     public DateTimeOffset CreatedAt { get; private set; }
 
     public static KeyDate Create(
@@ -132,6 +135,9 @@ public sealed class KeyDate : IClientWrite
 
     public void ChangeLead(ReminderLead lead) => Lead = lead;
 
+    /// <summary>Turns the reminder on or off; the lead is kept, so turning it on brings it back.</summary>
+    public void TurnReminders(bool on) => RemindersOn = on;
+
     /// <summary>The day in `year`; 29 February falls on 28 February in a year without it.</summary>
     private DateOnly On(int year) =>
         new(year, Month, Math.Min(Day, DateTime.DaysInMonth(year, Month)));
@@ -155,24 +161,13 @@ public sealed class ReminderPreferences : IOwnedByPerson
 
     public ReminderLead MilestoneLead { get; private set; }
 
-    public bool PhoneNotifications { get; private set; }
-
-    public bool MondayEmail { get; private set; }
-
-    /// <summary>The IANA zone of the device that last opened Contacts; reminders come at 9 am there.</summary>
-    public string? TimeZone { get; private set; }
-
-    public void ChangeTimeZone(string zone) => TimeZone = zone;
-
-    /// <summary>1 week before, 3 days before and on the day; both ways on (L2-139 AC1, L2-140 AC4).</summary>
+    /// <summary>1 week before, 3 days before and on the day (L2-139 AC1).</summary>
     public static ReminderPreferences Defaults(Guid ownerId) => new()
     {
         OwnerId = ownerId,
         BirthdayLead = ReminderLead.OneWeekBefore,
         AnniversaryLead = ReminderLead.ThreeDaysBefore,
         MilestoneLead = ReminderLead.OnTheDay,
-        PhoneNotifications = true,
-        MondayEmail = true,
     };
 
     /// <summary>A new date's lead time; Something else starts at 1 week before (gap 113).</summary>
@@ -184,12 +179,10 @@ public sealed class ReminderPreferences : IOwnedByPerson
         _ => ReminderLead.OneWeekBefore,
     };
 
-    public void Change(ReminderLead birthday, ReminderLead anniversary, ReminderLead milestone, bool phone, bool email)
+    public void Change(ReminderLead birthday, ReminderLead anniversary, ReminderLead milestone)
     {
         BirthdayLead = birthday;
         AnniversaryLead = anniversary;
         MilestoneLead = milestone;
-        PhoneNotifications = phone;
-        MondayEmail = email;
     }
 }

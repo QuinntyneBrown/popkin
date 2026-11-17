@@ -11,6 +11,7 @@
     [disabled]="disabled()"
     [attr.aria-disabled]="disabledReason() ? 'true' : null"
     [attr.title]="disabledReason()"
+    [attr.data-level]="levels() ? option.value.toLowerCase() : null"
     [attr.aria-label]="option.count === undefined ? null : option.label + ' ' + option.count"
     (click)="choose(option.value)"
     (keydown)="move($event, i)"

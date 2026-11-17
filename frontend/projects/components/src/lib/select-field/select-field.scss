@@ -42,6 +42,24 @@
   font-weight: var(--font-weight-semibold);
 }
 
+:host(.select-field--row) {
+  display: inline-block;
+}
+
+:host(.select-field--row) .select-field__select {
+  width: auto;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-8) 0 var(--space-3);
+  border-width: var(--border-width-hairline);
+  border-color: var(--color-border-default);
+  border-radius: var(--radius-full);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+}
+
+.select-field__select:disabled {
+  opacity: var(--opacity-disabled);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .select-field__select {
     transition: none;

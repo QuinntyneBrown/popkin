@@ -28,18 +28,20 @@ public sealed record ContactKeyDateDto(
     bool EveryYear,
     ReminderLead Reminder,
     DateOnly? NextOn,
-    int? DaysLeft);
+    int? DaysLeft,
+    bool RemindersOn);
 
-/// <summary>The owner's default lead time per kind and how reminders reach them (L2-139, L2-140).</summary>
+/// <summary>
+/// The owner's default lead time per kind (L2-139). How reminders reach them is the "Birthdays"
+/// kind of Notifications (L2-140, as changed 17 November 2026).
+/// </summary>
 public sealed record ReminderPreferencesDto(
     ReminderLead BirthdayLead,
     ReminderLead AnniversaryLead,
-    ReminderLead MilestoneLead,
-    bool PhoneNotifications,
-    bool MondayEmail)
+    ReminderLead MilestoneLead)
 {
     public static ReminderPreferencesDto Of(ReminderPreferences p) =>
-        new(p.BirthdayLead, p.AnniversaryLead, p.MilestoneLead, p.PhoneNotifications, p.MondayEmail);
+        new(p.BirthdayLead, p.AnniversaryLead, p.MilestoneLead);
 }
 
 public sealed record ContactDatesDto(IReadOnlyList<KeyDateRowDto> Dates, ReminderPreferencesDto Preferences);
@@ -55,11 +57,9 @@ public sealed record AddKeyDateRequest(
     bool EveryYear,
     string? Lead);
 
-public sealed record ChangeReminderRequest(string? Lead);
+public sealed record ChangeReminderRequest(string? Lead, bool? On);
 
 public sealed record SaveReminderPreferencesRequest(
     string? BirthdayLead,
     string? AnniversaryLead,
-    string? MilestoneLead,
-    bool PhoneNotifications,
-    bool MondayEmail);
+    string? MilestoneLead);

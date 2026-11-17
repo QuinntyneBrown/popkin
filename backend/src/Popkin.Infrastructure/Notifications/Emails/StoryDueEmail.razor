@@ -1,0 +1,20 @@
+@* The story-due reminder (L2-167 AC1, AC3): the story, its day, "Yours", its points and its tag, named
+   as well as coloured so colour is not the only carrier. *@
+<EmailShell Shell="Model.Shell">
+<h1 class="email__headline" style="margin:0 0 6px;font-size:22px;line-height:1.3;color:@EmailStyles.Ink;">@Model.Title</h1>
+<p class="email__sub" style="margin:0 0 16px;font-size:15px;color:@EmailStyles.InkSoft;">@Model.DueLine</p>
+<table role="presentation" class="email-story" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid @EmailStyles.Line;border-radius:12px;">
+<tr><td style="padding:12px;">
+<span class="avatar" aria-hidden="true" style="display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;border-radius:999px;background:@EmailStyles.Accent;font-size:12px;font-weight:700;color:@EmailStyles.Ink;vertical-align:middle;">@Model.OwnerInitials</span>
+<span class="email-story__badge" style="margin-left:6px;font-size:14px;font-weight:600;color:@EmailStyles.Ink;vertical-align:middle;">Yours</span>
+<span style="margin-left:10px;font-size:14px;color:@EmailStyles.InkSoft;vertical-align:middle;">@(Model.Points == 1 ? "1 point" : $"{Model.Points} points")</span>
+<span class="tag" style="margin-left:10px;display:inline-block;padding:2px 10px;border-radius:999px;background:@EmailStyles.Of(Model.TagColour);font-size:13px;font-weight:600;color:@EmailStyles.Ink;vertical-align:middle;">@Model.Tag</span>
+</td></tr>
+</table>
+<EmailButton Link="Model.Button" />
+</EmailShell>
+
+@code {
+    [Parameter, EditorRequired]
+    public StoryDueEmailModel Model { get; set; } = default!;
+}

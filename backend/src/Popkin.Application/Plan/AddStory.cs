@@ -41,6 +41,7 @@ public sealed class AddStoryCommandHandler(
         var story = Story.Add(popkin.Id, title, column, points, tag, owner, membership.Id, now);
         db.Stories.Add(story);
         PlanStories.Record(db, story, 0, now);
+        await PlanNotifications.RecordAsync(db, story, membership, now, ownerFrom: null, facts: null, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         await notifier.PlanChanged(popkin.Id, sprint.Version);
 

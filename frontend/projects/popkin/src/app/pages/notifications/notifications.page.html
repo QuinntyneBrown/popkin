@@ -1,0 +1,237 @@
+<div pk-screen layout="column" width="settings">
+  <header pk-top-bar slot="header" [line]="true" back="/account" backLabel="Your account"></header>
+  <div
+    pk-page-head
+    heading="Notifications"
+    sub="What reaches you by email and on your phone, Popkin by Popkin."
+  ></div>
+  <div aria-live="polite">
+    @if (store.banner() === 'unsubscribed') {
+      <div
+        pk-undo-bar
+        [text]="unsubscribedText"
+        action="Turn email back on"
+        (acted)="store.setEmail(true)"
+        (dismissed)="store.dismissBanner()"
+      ></div>
+    }
+    @if (store.banner() === 'birthdayOff') {
+      <div
+        pk-undo-bar
+        [text]="store.birthdayOffText()"
+        action="Undo"
+        (acted)="store.undo()"
+        (dismissed)="store.dismissBanner()"
+      ></div>
+    }
+    @if (store.banner() === 'popkinMuted') {
+      <div
+        pk-undo-bar
+        [text]="store.mutedText()"
+        action="Undo"
+        (acted)="store.undo()"
+        (dismissed)="store.dismissBanner()"
+      ></div>
+    }
+  </div>
+  @switch (store.state()) {
+    @case ('loading') {
+      <p class="visually-hidden" role="status">Loading your notification settings…</p>
+      <div class="stack" aria-hidden="true">
+        <span pk-skeleton shape="title" [width]="40"></span>
+        <span pk-skeleton shape="text" [width]="60"></span>
+        <span pk-skeleton shape="card" width="full"></span>
+        <span pk-skeleton shape="pill" width="full"></span>
+        <span pk-skeleton shape="card" width="full"></span>
+      </div>
+    }
+    @case ('error') {
+      <div
+        pk-empty-state
+        icon="offline"
+        heading="We couldn’t load your notification settings"
+        text="Nothing has changed, and your email and phone alerts keep arriving as before."
+        [alert]="true"
+      >
+        <button pk-button variant="primary" size="md" type="button" (click)="store.open()">
+          <svg pk-icon name="retry" size="md"></svg>Try again
+        </button>
+        <a pk-button variant="secondary" size="md" routerLink="/account">Your account</a>
+      </div>
+    }
+    @case ('ready') {
+      @if (email(); as email) {
+        <section
+          pk-settings-section
+          heading="Email me about activity"
+          text="Reminders and sign-in codes always arrive on time."
+          toggle="Email"
+          toggleName="Email notifications"
+          [checked]="email.on"
+          [toggleDisabled]="!email.available"
+          (checkedChange)="store.setEmail($event)"
+        >
+          @if (email.available) {
+            <div
+              pk-choice-card
+              label="Email me about activity"
+              [grid]="true"
+              [options]="frequencies"
+              [value]="email.frequency"
+              [disabled]="!email.on"
+              (valueChange)="chooseFrequency($event)"
+            ></div>
+          } @else {
+            <p class="text-muted">Add an email to your account to get Popkin email.</p>
+          }
+        </section>
+      }
+      <nav pk-view-nav label="Notification settings" [views]="views()"></nav>
+      @if (tab() === 'popkins') {
+        <section class="stack" aria-label="Popkins">
+          <p class="text-muted text-sm">
+            <strong>Just for me</strong> keeps mentions, direct messages, stories given to you and
+            reminders. <strong>Muted</strong> stops everything but reminders.
+          </p>
+          <ul pk-setting-list>
+            @for (popkin of popkins(); track popkin.popkinId) {
+              <li
+                pk-setting-list-item
+                [name]="popkin.name"
+                [sub]="line(popkin)"
+                [stack]="true"
+                [display]="true"
+              >
+                <span
+                  pk-popkin-tile
+                  slot="lead"
+                  size="sm"
+                  [emoji]="popkin.emoji"
+                  [muted]="popkin.level === 'Muted'"
+                  [attr.data-accent]="accent(popkin.colour)"
+                ></span>
+                <div
+                  pk-segmented-control
+                  kind="radio"
+                  [levels]="true"
+                  [label]="'How much you hear from ' + popkin.name"
+                  [options]="levels"
+                  [value]="popkin.level"
+                  (valueChange)="chooseLevel(popkin.popkinId, $event)"
+                ></div>
+              </li>
+            }
+          </ul>
+          <p class="text-muted text-sm">
+            Wrapped-up Popkins never email you. New Popkins you join start on Everything.
+          </p>
+        </section>
+      } @else if (tab() === 'people') {
+        <section
+          pk-settings-section
+          heading="Birthday reminders"
+          text="From the birthdays in your contacts. Pick how early, person by person."
+          [small]="true"
+        >
+          @if (birthdays().length) {
+            <ul pk-setting-list>
+              @for (birthday of shownBirthdays(); track birthday.keyDateId) {
+                <li pk-setting-list-item [name]="birthday.name" [sub]="birthdayLine(birthday)">
+                  <span
+                    pk-avatar
+                    slot="lead"
+                    [name]="birthday.name"
+                    [initials]="birthday.initials"
+                    [photo]="birthday.photoUrl"
+                    [attr.data-accent]="accent(birthday.accent)"
+                  ></span>
+                  <div
+                    pk-select-field
+                    variant="row"
+                    [fieldId]="'lead-' + birthday.keyDateId"
+                    [label]="'When to remind you about ' + birthday.name"
+                    [options]="leadsFor(birthday)"
+                    [value]="birthday.lead"
+                    [disabled]="!birthday.remindersOn"
+                    (valueChange)="chooseLead(birthday.keyDateId, $event)"
+                  ></div>
+                  <button
+                    pk-switch
+                    [attr.aria-label]="'Birthday reminders for ' + birthday.name"
+                    [checked]="birthday.remindersOn"
+                    (checkedChange)="store.setBirthdayReminder(birthday.keyDateId, { on: $event })"
+                  ></button>
+                </li>
+              }
+            </ul>
+            @if (shownBirthdays().length < birthdays().length) {
+              <div pk-setting-list-more>
+                <button pk-link variant="accent" type="button" (click)="showAllBirthdays()">
+                  Show all {{ birthdays().length }} contacts with birthdays
+                </button>
+              </div>
+            }
+          } @else {
+            <p pk-setting-list-empty>No birthdays yet. Add one to a contact and it shows here.</p>
+          }
+        </section>
+        <section
+          pk-settings-section
+          heading="Muted people"
+          text="No email or phone alerts about what they post, in any Popkin. They aren’t told."
+          [small]="true"
+        >
+          <div
+            pk-popover
+            slot="action"
+            label="Mute someone"
+            [add]="true"
+            [open]="picking()"
+            (openChange)="pick($event)"
+          >
+            <div
+              pk-search-field
+              variant="popover"
+              label="Search people in your Popkins"
+              (valueChange)="store.searchMuteCandidates($event)"
+            ></div>
+            <ul
+              pk-pick-list
+              label="People in your Popkins"
+              [options]="candidates()"
+              [notes]="store.noOneMatches() ? ['No one in your Popkins matches that.'] : []"
+              (valueChange)="mute($event)"
+            ></ul>
+          </div>
+          @if (muted().length) {
+            <ul pk-setting-list>
+              @for (person of muted(); track person.muteId) {
+                <li pk-setting-list-item [name]="person.name" [sub]="shared(person.sharedPopkins)">
+                  <span
+                    pk-avatar
+                    slot="lead"
+                    [name]="person.name"
+                    [initials]="person.avatar.initials"
+                    [photo]="person.avatar.photoUrl"
+                    [attr.data-accent]="accent(person.avatar.accent)"
+                  ></span>
+                  <button pk-button size="sm" type="button" (click)="store.unmute(person.muteId)">
+                    Unmute<span class="visually-hidden"> {{ person.name }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p pk-setting-list-empty>No one’s muted. You hear about everyone in your Popkins.</p>
+          }
+        </section>
+      } @else {
+        @for (group of groups(); track group.group) {
+          <section pk-notif-group [heading]="group.name" [about]="group.about">
+            <ul pk-notif-matrix [rows]="rows(group)" (switched)="switched($event)"></ul>
+          </section>
+        }
+      }
+    }
+  }
+</div>

@@ -549,22 +549,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("ContactReminders", (string)null);
                 });
 
-            modelBuilder.Entity("Popkin.Domain.ContactWeeklyEmail", b =>
-                {
-                    b.Property<Guid>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly>("WeekOf")
-                        .HasColumnType("date");
-
-                    b.Property<DateTimeOffset>("SentAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("OwnerId", "WeekOf");
-
-                    b.ToTable("ContactWeeklyEmails", (string)null);
-                });
-
             modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
                 {
                     b.Property<Guid>("Id")
@@ -925,6 +909,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("RemindersOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Title")
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
@@ -961,6 +950,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset?>("LeftAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NotificationLevel")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uniqueidentifier");
@@ -1134,6 +1128,250 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("MessageReactions", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.NotificationDelivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("NextAttemptAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("OutgoingEmailId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Rule")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("SendAfter")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Channel", "Status", "SendAfter");
+
+                    b.HasIndex("EventId", "PersonId", "Channel")
+                        .IsUnique();
+
+                    b.ToTable("NotificationDeliveries", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ActorPersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Audience")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("DedupKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset?>("DispatchedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Facts")
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("RecipientPersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DedupKey")
+                        .IsUnique()
+                        .HasFilter("[DedupKey] IS NOT NULL");
+
+                    b.HasIndex("OccurredAt")
+                        .HasFilter("[DispatchedAt] IS NULL");
+
+                    b.ToTable("NotificationEvents", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationKindChoice", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Kind")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<bool?>("Email")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("Phone")
+                        .HasColumnType("bit");
+
+                    b.HasKey("PersonId", "Kind");
+
+                    b.ToTable("NotificationKindChoices", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationPlatform", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BundlingMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DailyMost")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("EmailPausedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("PauseReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("PausedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("QuietFrom")
+                        .HasColumnType("time");
+
+                    b.Property<TimeOnly>("QuietUntil")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NotificationPlatform", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationPreferences", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("EmailOn")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Frequency")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("TimeZone")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("PersonId");
+
+                    b.ToTable("NotificationPreferences", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.OutgoingEmail", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DedupKey")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTimeOffset?>("NextAttemptAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("OpenedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProviderMessageId")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<DateTimeOffset>("SendAfter")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<string>("SuppressedBy")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DedupKey")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "SendAfter");
+
+                    b.HasIndex("PersonId", "PopkinId", "Status");
+
+                    b.ToTable("OutgoingEmails", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Person", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1177,6 +1415,31 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasFilter("[Phone] IS NOT NULL AND [DeletedAt] IS NULL");
 
                     b.ToTable("People", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PersonMute", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("MutedPersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MutedPersonId");
+
+                    b.HasIndex("PersonId", "MutedPersonId")
+                        .IsUnique();
+
+                    b.ToTable("PersonMutes", (string)null);
                 });
 
             modelBuilder.Entity("Popkin.Domain.Photo", b =>
@@ -1476,16 +1739,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("nvarchar(16)");
-
-                    b.Property<bool>("MondayEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("PhoneNotifications")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TimeZone")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
 
                     b.HasKey("OwnerId");
 
@@ -1886,15 +2139,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Popkin.Domain.ContactWeeklyEmail", b =>
-                {
-                    b.HasOne("Popkin.Domain.Person", null)
-                        .WithMany()
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
                 {
                     b.HasOne("Popkin.Domain.Person", null)
@@ -2081,6 +2325,57 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasOne("Popkin.Domain.Message", null)
                         .WithMany()
                         .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationDelivery", b =>
+                {
+                    b.HasOne("Popkin.Domain.NotificationEvent", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationKindChoice", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationPreferences", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.OutgoingEmail", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PersonMute", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("MutedPersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

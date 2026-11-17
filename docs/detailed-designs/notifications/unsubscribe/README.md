@@ -33,16 +33,16 @@ does (L2-156 AC3). Sign-in codes still arrive and phone alerts are unchanged.
   the screen opened from "Notification settings". The screen itself is designed in
   [Notification settings](../notification-settings/README.md).
 - `docs/mocks/notifications/email-*/` — each email's footer with its links (L2-163 AC5).
-- **No mock draws the unsubscribe page** that a one-click link opens without a session: "You're
-  unsubscribed from all Popkin email.", "Sign-in codes still arrive.", "Turn email back on", and
-  the expired page "This link has expired. Sign in to change your email settings." (L2-168 AC3,
-  AC5). Its layout, its working and failed states, and its wide layout are `<TO SUPPLY>`. A mock
-  shall be drawn before it is built.
+- `docs/mocks/pages/unsubscribe/` — the page a one-click link opens without a session: `default`
+  ("You're unsubscribed from all Popkin email.", "Sign-in codes still arrive.", "Turn email back
+  on"), `working` while its one request is out, `expired` ("This link has expired." "Sign in to
+  change your email settings.", "Sign in") and `error` ("We couldn't unsubscribe you." "Nothing
+  has changed. Check your connection and try again.", "Try again") (L2-168 AC3, AC5).
 
 ### Footer links
 
-`NotificationLinks` (Application) builds each footer link with `PopkinUrlBuilder` on the apex
-host. Each opens `/account/notifications` with a query that states the link intent:
+`NotificationLinks` (Application) builds each footer link with `PopkinUrlBuilder` on the app's
+origin (`App:Origin`, `https://app.popkin.community`). Each opens `/account/notifications` with a query that states the link intent:
 
 | Footer link | URL | Lands on |
 |---|---|---|
@@ -66,23 +66,25 @@ host. Each opens `/account/notifications` with a query that states the link inte
 
 ### One-click unsubscribe
 
-- **The link and the headers.** `UnsubscribeLinks` (Infrastructure) issues one token per email
-  and builds two URLs from it:
-  - `https://popkin.community/unsubscribe?t={token}` — the footer link; a page in the web app.
-  - `https://popkin.community/api/notifications/unsubscribe?t={token}` — the `List-Unsubscribe`
+- **The link and the headers.** `NotificationLinks` issues a token for each email and builds two
+  URLs from it on the app's origin:
+  - `https://app.popkin.community/unsubscribe?t={token}` — the footer link; a page in the web app.
+  - `https://app.popkin.community/api/notifications/unsubscribe?t={token}` — the `List-Unsubscribe`
     URL. `AcsNotificationEmailSender` adds the headers
     `List-Unsubscribe: <{that URL}>` and `List-Unsubscribe-Post: List-Unsubscribe=One-Click` to
     every activity and reminder email (L2-168 AC4). Azure Communication Services shall sign both
-    headers with DKIM, as mailbox providers require. Whether its DKIM signature covers custom
-    headers is `<TO SUPPLY>`.
+    headers with DKIM, as mailbox providers require. Both headers go on every email either way: a
+    provider that does not trust them offers no one-click button, and the footer's "Unsubscribe
+    from all email" link works the same (L2-168 AC1).
 - **The page.** `UnsubscribePage` (`frontend/projects/popkin/src/app/pages/unsubscribe/`) is
   served at `/unsubscribe`, with route data `{ shell: 'bare', page: 'unsubscribe' }` and no
   guard. It reads `t` and posts it once with `NOTIFICATIONS_API.unsubscribe(token)`. It then
   shows "You're unsubscribed from all Popkin email." with "Sign-in codes still arrive." and the
   link "Turn email back on" to `/account/notifications?tab=types`, which signs the person in
-  first (L2-168 AC3). An expired or refused token shows "This link has expired. Sign in to change
-  your email settings." with a link to `/account/notifications`. A request that fails for another
-  reason shows a general failure with "Try again"; its words are `<TO SUPPLY>`. The page acts on
+  first (L2-168 AC3). An expired or refused token shows "This link has expired." "Sign in to
+  change your email settings." with "Sign in" to `/account/notifications`. A request that fails
+  for another reason shows "We couldn't unsubscribe you." "Nothing has changed. Check your
+  connection and try again." with "Try again", which posts again. The page acts on
   a person's click, not on a link scanner's `GET`: the `GET` of the page changes nothing, and the
   change is a `POST` the page sends once it runs.
 - **The endpoint.** `POST /api/notifications/unsubscribe?t={token}`, `[AllowAnonymous]`:
@@ -92,9 +94,9 @@ host. Each opens `/account/notifications` with a query that states the link inte
   - A token that fails any check of the next section answers `410` `unsubscribe_link_expired`.
     The answer is the same whatever failed, so nothing is learned about the recipient
     (L2-168 AC5).
-  - `GET` answers `405`; a `GET` never unsubscribes.
-  - It runs under the rate-limiter policy `RateLimitPolicyNames.Unsubscribe`, per client
-    address. The numbers are `<TO SUPPLY>`.
+  - `GET` answers `405` with `Allow: POST`; a `GET` never unsubscribes.
+  - It runs under the rate-limiter policy `RateLimitPolicyNames.Unsubscribe`: 30 requests per
+    client address per 10 minutes, the shape of the other per-address limits.
   - `SameSiteRequestMiddleware` accepts this one path from any site, because a mail provider
     posts from its own servers and the token, not the cookie, is the proof. Every other change
     keeps its same-site check (L2-050 AC2).
@@ -104,22 +106,22 @@ host. Each opens `/account/notifications` with a query that states the link inte
 
 ### Token rules
 
-- **Shape.** `UnsubscribeToken` holds `PersonId`, `Purpose` = `UnsubscribeAllEmail` and
-  `IssuedAt`. It is protected with ASP.NET Core Data Protection under the purpose
+- **Shape.** The token holds the person's id and its expiry, 90 days after it was issued. It is
+  protected with ASP.NET Core Data Protection's time-limited protector under the purpose
   `Popkin.Notifications.Unsubscribe` and written base64url. It is opaque and authenticated
   encryption, so a changed token cannot be read (L2-168 AC5).
 - **One purpose.** The protector's purpose string isolates it: a token from any other protector,
   or this token presented anywhere else, fails to unprotect. The only endpoint that reads it is
   the unsubscribe endpoint, and the only change it makes is "Email" off.
-- **90 days.** The handler compares `IssuedAt` with `TimeProvider`, not with the system clock, so
-  tests advance a `FakeTimeProvider`. A token issued more than 90 days ago is refused.
+- **90 days.** `UnsubscribeTokens` compares the expiry with `TimeProvider`, not with the system
+  clock, so tests advance a `FakeTimeProvider`. A token issued more than 90 days ago is refused.
 - **Deleted account.** A token whose person has `DeletedAt` set, or does not exist, is refused.
 - **Keys.** The Worker issues tokens and the API reads them, so both shall share one Data
-  Protection key ring with the application name `Popkin`. The ring is persisted to Azure Blob
-  Storage and its keys are wrapped by Azure Key Vault. Keys roll every 90 days by default; a
-  retired key still unprotects until it is removed, so a token outlives a key roll. The storage
-  account, container and key are `<TO SUPPLY>`; the choice should be recorded in an ADR, as no
-  Data Protection key ring is configured yet.
+  Protection key ring with the application name `Popkin`
+  ([ADR 0032](../../../adr/0032-one-data-protection-key-ring-in-blob-storage.md)): the blob
+  `dataprotection/keys.xml` in `stpopkin{suffix}`, its keys wrapped by the key `dataprotection`
+  in `kvpopkin{suffix}`. Keys roll every 90 days by default; a retired key still unprotects until
+  it is removed, so a token outlives a key roll.
 - **Nothing logged.** No log, metric or span carries the token, the URL with its query string,
   or the person (L2-174 AC3). A refusal is counted by reason in `popkin.notifications.unsubscribes`
   with `outcome` (`unsubscribed`, `already`, `expired`).
@@ -137,16 +139,13 @@ The mute links use the settings endpoints of [Notification settings](../notifica
 
 ### Backend
 
-- **`UnsubscribeToken`** (Application, record) — `PersonId`, `Purpose`, `IssuedAt`.
-- **`IUnsubscribeTokens`** (Application) — `Issue(personId, now): string`, and
-  `TryRead(token, out UnsubscribeToken)`, which returns false for anything it cannot unprotect.
-  `DataProtectionUnsubscribeTokens` (Infrastructure) implements it with
-  `IDataProtectionProvider.CreateProtector("Popkin.Notifications.Unsubscribe")`.
-- **`UnsubscribeLinks`** (Infrastructure) — the page URL and the header URL of one token, from
-  `PopkinUrlBuilder`'s apex.
+- **`IUnsubscribeTokens`** (Application) — `Issue(personId): string`, and `Read(token): Guid?`,
+  null for anything forged, altered or past its 90 days. `UnsubscribeTokens` (Infrastructure)
+  implements it with `IDataProtectionProvider.CreateProtector("Popkin.Notifications.Unsubscribe")`
+  made time-limited.
 - **`UnsubscribeFromAllEmailCommand(token)`** / **`UnsubscribeFromAllEmailCommandHandler`**
   (`Popkin.Application/Notifications/`) — reads the token, checks purpose, age (90 days by
-  `TimeProvider`) and the person. It then calls `NotificationPreferences.TurnEmailOff(now)`,
+  `TimeProvider`) and the person. It then calls `NotificationPreferences.TurnEmail(false, now)`,
   which the "Email" switch also calls (L2-156 AC3), and saves. It returns `Unsubscribed`,
   `AlreadyOff` or `Expired`. Queued and bundled emails for the person are stopped by the
   send-time recheck ([Deliver notifications](../deliver-notifications/README.md)).
@@ -161,12 +160,14 @@ The mute links use the settings endpoints of [Notification settings](../notifica
 
 - **`UnsubscribePage`** — as above; route `/unsubscribe` added to `app.routes.ts` beside the
   other public routes, title "Unsubscribe · Popkin".
-- **`NOTIFICATIONS_API`** — `unsubscribe(token): Observable<void>`, which maps `410` to an
-  `expired` result.
+- **`NOTIFICATIONS_API`** — `unsubscribe(token): Observable<void>`.
+- **`UnsubscribeLink`** (`api`) — the page's outcome: `working`, `unsubscribed`, `expired` (a
+  `410`, or no token at all) or `failed` (anything else), with `retry()`; unit tested.
 - **`parseNotificationLink`** (`api`) — the link intent, with its unit specs: each row of the
   footer links table, an unknown tab, a malformed id and no query.
-- **`NotificationSettingsStore`** — `applyLinkIntent(intent)` mutes, shows the banner, and
-  clears the query.
+- **`NotificationSettingsStore`** — `open(intent)` reads the settings, then
+  `applyLinkIntent(intent)` mutes and shows the banner; the page clears the query with
+  `replaceUrl`.
 
 ### Tests
 

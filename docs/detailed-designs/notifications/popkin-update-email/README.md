@@ -87,8 +87,8 @@ The requirements stand and the mocks change (L1, "Source and assumptions"):
   same links. The HTML sets `lang="en"`, every image has `alt` text (empty for a decorative
   avatar beside a name already written), no word is only in an image, and text colours meet
   WCAG 2.2 AA on their backgrounds (AC4). The colours are the light theme's tokens. Emails take
-  no dark theme of their own, since mail clients recolour them unpredictably (`<TO SUPPLY>`:
-  whether to add `color-scheme` meta tags once the mocks' dark toggle is ruled on).
+  no dark theme of their own, since mail clients recolour them unpredictably, and carry no
+  `color-scheme` meta tag, so a client that recolours does so from the light design.
 - **Footer.** The reason, then the narrowest mute, "Notification settings" and "Unsubscribe from
   all email", then Popkin's postal address from `Email:PostalAddress` (AC5). The links are built
   by [Unsubscribe](../unsubscribe/README.md).
@@ -104,7 +104,7 @@ The requirements stand and the mocks change (L1, "Source and assumptions"):
   with a `Content-ID`, a 320 px thumbnail at most, and the HTML refers to it as `cid:`. Inline
   attachments keep every picture private to its recipient. Azure Communication Services email
   supports them. Their total size per email is kept under 1 MB, and photos past the fifth are
-  counted in the "+{n}" tile, not attached (`<TO SUPPLY>`: confirmed with gap 128's ADR).
+  counted in the "+{n}" tile, not attached ([ADR 0031](../../../adr/0031-notification-emails-by-razor-components.md)).
 
 ### The four changes (L2-164)
 
@@ -124,8 +124,8 @@ The changes come from the `NotificationEvent` rows a bundle holds
 | Experiences | `Experiences`, the experience | the experience, its new rating or comment | "{first name} added {experience}" | "Open Experiences" |
 
 Popkin chat has no mention yet: `Message` has `ReplyToMessageId` but no mentioned members.
-"Mentioned you" is drawn only for when a message can name members (`<TO SUPPLY>`: the
-requirement for @mentions, named in L2-154 but specified nowhere else).
+"Mentioned you" is drawn only for when a message can name members, which an @mention feature in
+Chat will bring ([Deliver notifications](../deliver-notifications/README.md)).
 
 A change read at send time that no longer stands is left out: a deleted message, a removed
 photo, a story deleted, a member who left before the window closed. A bundle that has nothing
@@ -153,10 +153,9 @@ exist today.
 - **`NotificationEmailKind`** (Domain enum) — `Update`, `DailyDigest`, `WeeklyDigest`,
   `KeyDateReminder`, `StoryDue`, `WrapUp`.
 - **`OutgoingEmail`** (Domain, table `OutgoingEmails`) — one email to one person:
-  - Fields: `Id`, `PersonId`, `EmailKind`, `PopkinId?`, `DedupKey` (unique), `OpenedAt` (when
-    the window opened), `DueAt` (when it is to be sent), `Status` (`Open`, `Sending`, `Sent`,
-    `Suppressed`, `Failed`, `Dropped`), `SuppressedBy?` (the rule), `Attempts`, `SentAt?` and
-    `ProviderMessageId?`.
+  - Fields: as in [Deliver notifications](../deliver-notifications/README.md), the one shape
+    every email design uses (`Kind` is the `NotificationEmailKind`; `SendAfter` is when it is
+    due; the window opened at `OpenedAt`).
   - A Popkin update's `DedupKey` is `update:{bundleId}`, where the bundle id is the
     `OutgoingEmail.Id` chosen when the window opens.
   - `NotificationDelivery.OutgoingEmailId` ties each change to its email.
@@ -187,8 +186,8 @@ exist today.
 - **`INotificationEmailRenderer`** (Application port) — `Render(EmailModel) → RenderedEmail`
   (`Subject`, `Html`, `Text`, `InlineImages[]` of `ContentId`, `BlobKey` and `MediaType`).
   `NotificationEmailRenderer` (Infrastructure) renders HTML and text from templates and encodes
-  all text. The template technology is gap 128 (`<TO SUPPLY>`: Razor components through
-  `HtmlRenderer` is the candidate the ADR weighs).
+  all text. The templates are Razor components rendered with `HtmlRenderer`
+  ([ADR 0031](../../../adr/0031-notification-emails-by-razor-components.md)).
 - **`INotificationEmailSender`** (Application port) — `SendAsync(OutgoingMessage,
   CancellationToken) → SendResult` (`Accepted(providerMessageId)`, `Transient(reason)` or
   `Permanent(reason)`). `OutgoingMessage` holds `To`, `FromDisplayName`, `RenderedEmail`,
@@ -206,14 +205,15 @@ exist today.
   per email. Because the `DedupKey` is unique and a row moves to `Sending` once, a second tick
   never sends it again (L2-175 AC3).
 - **Telemetry.** `popkin.notifications.deliveries` (`kind`, `channel=email`, `outcome`) and
-  `popkin.notifications.email_latency`, from `DueAt` to the provider accepting, in seconds. No
+  `popkin.notifications.email_latency`, from `SendAfter` to the provider accepting, in seconds. No
   dimension, log or span holds an address, a name, text or a link (L2-174 AC3).
 - **Settings** (ADR 0013, `docs/deployment.md`):
   - `Notifications:EmailSender` (API and Worker): the sender address on `popkin.community`
-    (`<TO SUPPLY>`: its local part, `notify` in the designs).
+    `DoNotReply@` the verified domain, as `infra/communication.bicep` provisions it.
   - `Email:PostalAddress` (Worker): the footer's address. Without it no notification email is
-    sent, since a commercial email without a postal address breaks anti-spam law (`<TO SUPPLY>`:
-    the address, gap 127).
+    sent, since a commercial email without a postal address breaks anti-spam law. It is the
+    legal address of whoever runs Popkin, set once as `postalAddress` in `infra/main.bicep`:
+    2091 Hurontario Street, Mississauga, Ontario L5A 4E6 (gap 127).
 
 ### Frontend
 

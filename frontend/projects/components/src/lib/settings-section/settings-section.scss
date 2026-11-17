@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+:host + :host {
+  margin-top: var(--space-10);
+}
+
+.settings-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.settings-section__title {
+  font: var(--text-h2);
+}
+
+.settings-section__title--sm {
+  font: var(--text-title);
+}
+
+.settings-section__sub {
+  margin-top: var(--space-0-5);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+/* The mock's `switch-label`: the visible word, then the switch. */
+.settings-section__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans);
+}
+
+.settings-section__body:not(:empty) {
+  margin-top: var(--space-4);
+}

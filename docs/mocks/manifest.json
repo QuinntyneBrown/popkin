@@ -838,14 +838,37 @@
         "birthday-off",
         "unsubscribed",
         "mute-search",
+        "mute-no-match",
         "no-one-muted",
+        "no-birthdays",
         "loading",
         "error"
       ],
       "not_applicable": {
-        "empty": "Every member has the same kinds of notification, so the list is never empty. An empty muted list is no-one-muted."
+        "empty": "Every member has the same kinds of notification, so the list is never empty. An empty muted list is no-one-muted; no birthdays in Contacts is no-birthdays."
       },
       "notes": "From the Magic Patterns Popkin App › Notifications design. Every email's footer links land here: mute → muted or birthday-off, settings → default, unsubscribe → unsubscribed. No requirement covers it yet."
+    },
+    {
+      "id": "unsubscribe",
+      "kind": "page",
+      "title": "Unsubscribe",
+      "route": "/unsubscribe",
+      "opens_from": "an email's footer link",
+      "requirements": [
+        "L2-168"
+      ],
+      "states": [
+        "default",
+        "working",
+        "expired",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The screen reads nothing before it shows; the wait for its one request is working.",
+        "empty": "The screen lists nothing; it has no collection that can be empty."
+      },
+      "notes": "Opened without a session from \"Unsubscribe from all email\". The GET of the page changes nothing; the page posts the token once it runs. Expired says the same whatever failed (L2-168 AC5)."
     },
     {
       "id": "email-popkin-update",
@@ -905,7 +928,7 @@
         "warning": "An email has no severity variant; its states are what it carries.",
         "danger": "An email has no severity variant; its states are what it carries."
       },
-      "notes": "Sent at 8 am local, as early as the member chose for that contact. L2-140 AC3 specifies a weekly Monday email instead; see Open questions."
+      "notes": "Sent at 8 am local, as early as the member chose for that contact (L2-140, as changed 17 November 2026: no Monday email)."
     },
     {
       "id": "email-plan-reminder",

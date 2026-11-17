@@ -109,8 +109,10 @@ browser profile, join, and each side sees the other's messages in the Everyone t
 are sent.
 
 4. To see what the Worker does (a Popkin wrapping up when its time is up, "Save the album"
-   becoming a zip to download), start it in a third terminal. It uses the database and the photo
-   folder of the API started in step 2.
+   becoming a zip to download, notifications reaching a phone or an inbox, reminders and
+   digests), start it in a third terminal. It uses the database and the photo folder of the API
+   started in step 2. Without `Notifications:EmailSender` it sends no notification email; phone
+   alerts still go.
 
    ```shell
    pwsh eng/Start-E2eWorker.ps1

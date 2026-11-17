@@ -1,0 +1,103 @@
+@* The Popkin update (L2-164): the lead change, its button, and "Also new" (AC6). *@
+<EmailShell Shell="Model.Shell">
+<h1 class="email__headline" style="margin:0 0 16px;font-size:22px;line-height:1.3;color:@EmailStyles.Ink;">@Model.Lead.Headline</h1>
+@switch (Model.Lead)
+{
+    case MessageLead message:
+        <div class="email-thread">
+        @if (message.Answers is { } own)
+        {
+            <div class="email-thread__msg email-thread__msg--before" style="opacity:.75;margin-bottom:12px;">
+            <p class="email-thread__who" style="margin:0 0 4px;font-size:13px;color:@EmailStyles.InkFaint;">You · @own.At</p>
+            <p class="email-thread__text" style="margin:0;font-size:15px;line-height:1.5;color:@EmailStyles.InkSoft;white-space:pre-line;">@own.Text</p>
+            </div>
+        }
+        <div class="email-thread__msg" style="border-left:3px solid @EmailStyles.Of(Model.Shell.Popkin?.Colour ?? ""); padding-left:12px;">
+        <p class="email-thread__who" style="margin:0 0 4px;font-size:13px;color:@EmailStyles.InkFaint;">@message.AuthorName · @message.At</p>
+        <p class="email-thread__quote" style="margin:0;font-size:16px;line-height:1.5;color:@EmailStyles.Ink;white-space:pre-line;">@message.Text</p>
+        </div>
+        </div>
+        break;
+    case PhotosLead photos:
+        @if (photos.Caption is { } caption)
+        {
+        <p class="email__caption" style="margin:0 0 12px;font-size:16px;line-height:1.5;color:@EmailStyles.Ink;white-space:pre-line;">@caption</p>
+        }
+        <table role="presentation" class="email-photos" width="100%" cellpadding="0" cellspacing="4">
+        @foreach (var row in photos.Photos.Select(p => (EmailPicture?)p).Concat(photos.More > 0 ? [null] : []).Chunk(3))
+        {
+            <tr>
+            @foreach (var photo in row)
+            {
+                @if (photo is not null)
+                {
+                    <td width="33%"><img src="cid:@photo.ContentId" alt="@photo.Alt" width="176" style="display:block;width:100%;height:auto;border-radius:8px;"></td>
+                }
+                else
+                {
+                    <td width="33%" class="email-photos__more" align="center" style="background:@EmailStyles.Of(Model.Shell.Popkin?.Colour ?? "");border-radius:8px;font-weight:700;font-size:20px;color:@EmailStyles.Ink;">+@photos.More</td>
+                }
+            }
+            </tr>
+        }
+        </table>
+        break;
+    case PlanLead plan:
+        <table role="presentation" class="email-stories" width="100%" cellpadding="0" cellspacing="0">
+        @foreach (var story in plan.Stories)
+        {
+            <tr><td class="email-story" style="padding:10px 12px;border:1px solid @EmailStyles.Line;border-radius:12px;">
+            <p class="email-story__title" style="margin:0;font-size:16px;font-weight:600;color:@EmailStyles.Ink;">@story.Title
+            @if (story.YoursNow)
+            {
+                <span class="email-story__badge" style="margin-left:6px;font-size:12px;font-weight:600;color:@EmailStyles.Link;">Yours now</span>
+            }
+            </p>
+            @if (story.Note is { } note)
+            {
+                <p class="email-story__note" style="margin:4px 0 0;font-size:14px;color:@EmailStyles.InkSoft;">@note</p>
+            }
+            @if (story.DueAfter is { } after)
+            {
+                <p class="email-story__due" style="margin:4px 0 0;font-size:14px;color:@EmailStyles.InkSoft;">
+                @if (story.DueBefore is { } before)
+                {
+                    <s style="color:@EmailStyles.InkFaint;">@before</s>@(" ")
+                }
+                @after</p>
+            }
+            </td></tr>
+            <tr><td style="height:8px;line-height:8px;">&nbsp;</td></tr>
+        }
+        </table>
+        break;
+    case NoteLead note:
+        @if (note.Picture is { } picture)
+        {
+            <img src="cid:@picture.ContentId" alt="@picture.Alt" width="72" height="72" style="display:block;width:72px;height:72px;border-radius:999px;margin-bottom:12px;">
+        }
+        @foreach (var line in note.Lines)
+        {
+            <p class="email__line" style="margin:0 0 4px;font-size:15px;color:@EmailStyles.InkSoft;">@line</p>
+        }
+        break;
+}
+<EmailButton Link="Model.Lead.Button" />
+@if (Model.AlsoNew.Count > 0)
+{
+<div class="email__rule" style="border-top:1px solid @EmailStyles.Line;margin-top:20px;padding-top:16px;">
+<h2 class="email__section-title" style="margin:0 0 8px;font-size:14px;color:@EmailStyles.InkSoft;">Also new in the last @Model.WindowMinutes minutes</h2>
+<table role="presentation" class="email-also" width="100%" cellpadding="0" cellspacing="0">
+@foreach (var row in Model.AlsoNew)
+{
+<tr class="email-also__item"><td class="email-also__text" style="padding:6px 0;font-size:14px;color:@EmailStyles.Ink;">@row.Line</td><td class="email-also__at" align="right" style="padding:6px 0;font-size:13px;color:@EmailStyles.InkFaint;white-space:nowrap;">@row.At</td></tr>
+}
+</table>
+</div>
+}
+</EmailShell>
+
+@code {
+    [Parameter, EditorRequired]
+    public PopkinUpdateEmailModel Model { get; set; } = default!;
+}

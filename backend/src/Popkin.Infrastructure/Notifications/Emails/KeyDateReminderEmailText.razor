@@ -1,0 +1,27 @@
+@* The plain-text part of the key date reminder. *@
+<EmailShellText Shell="Model.Shell">
+@Model.Headline@("\n")
+@Model.Details@("\n\n")
+@if (Model.OnYourList is { } list)
+{
+@("On your list\n")@list.Text@("\n")@list.Planned@("\n\n")
+}
+@if (Model.Loves.Count > 0)
+{
+@Model.LovesTitle@("\n")@string.Join(", ", Model.Loves)@("\n\n")
+}
+@if (Model.LastTalk is { } talk)
+{
+@talk.Heading@("\n")@(talk.Title is { } title ? title + "\n" : "")@talk.Text@("\n\n")
+}
+@Model.Button.Label@(": ")@Model.Button.Url@("\n")
+@if (Model.SecondButton is { } second)
+{
+@second.Label@(": ")@second.Url@("\n")
+}
+</EmailShellText>
+
+@code {
+    [Parameter, EditorRequired]
+    public KeyDateReminderEmailModel Model { get; set; } = default!;
+}

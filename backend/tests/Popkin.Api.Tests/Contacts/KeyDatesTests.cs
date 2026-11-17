@@ -157,7 +157,6 @@ public sealed class KeyDatesTests
         (await mara.PutAsJsonAsync("/api/contacts/reminder-preferences", new
         {
             birthdayLead = "TwoWeeksBefore", anniversaryLead = "ThreeDaysBefore", milestoneLead = "OnTheDay",
-            phoneNotifications = true, mondayEmail = false,
         })).EnsureSuccessStatusCode();
         (await mara.PostAsJsonAsync($"/api/contacts/people/{ruth}/key-dates", Birthday(10, 24))).EnsureSuccessStatusCode();
         var changed = await mara.PutAsJsonAsync($"/api/contacts/key-dates/{graces.GetProperty("id").GetGuid()}/reminder", new { lead = "OnTheDay" });
@@ -167,7 +166,7 @@ public sealed class KeyDatesTests
         Assert.Equal(["OnTheDay", "TwoWeeksBefore"], dates.GetProperty("dates").EnumerateArray().Select(r => r.GetProperty("lead").GetString()));
         var preferences = await mara.GetFromJsonAsync<JsonElement>("/api/contacts/reminder-preferences");
         Assert.Equal("TwoWeeksBefore", preferences.GetProperty("birthdayLead").GetString());
-        Assert.False(preferences.GetProperty("mondayEmail").GetBoolean());
+        Assert.False(preferences.TryGetProperty("mondayEmail", out _));
     }
 
     // Given a key date, when it is removed, or its contact is deleted, then it is gone (L2-132).

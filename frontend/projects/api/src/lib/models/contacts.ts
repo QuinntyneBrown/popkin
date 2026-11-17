@@ -173,15 +173,15 @@ export interface ContactKeyDateView extends KeyDateFields {
   reminder: ReminderLead;
   nextOn: string | null;
   daysLeft: number | null;
+  /** Off, the date stays and reminds of nothing (L2-159 AC4). */
+  remindersOn: boolean;
 }
 
-/** My default lead time per kind and how reminders reach me (L2-139, L2-140). */
+/** My default lead time per kind (L2-139); how reminders reach me is set in Notifications. */
 export interface ReminderPreferencesView {
   birthdayLead: ReminderLead;
   anniversaryLead: ReminderLead;
   milestoneLead: ReminderLead;
-  phoneNotifications: boolean;
-  mondayEmail: boolean;
 }
 
 export interface ContactDatesView {

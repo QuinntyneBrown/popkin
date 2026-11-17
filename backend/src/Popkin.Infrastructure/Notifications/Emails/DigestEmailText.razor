@@ -1,0 +1,33 @@
+@* The plain-text part of the digest. *@
+<EmailShellText Shell="Model.Shell">
+@Model.Greeting@("\n")
+@Model.PeriodLine@("\n\n")
+@if (Model.NeedsYouTitle is { } title)
+{
+@title@("\n")
+@foreach (var need in Model.NeedsYou)
+{
+@("- ")@need.Line@(" · ")@need.From@("\n")
+}
+@("\n")
+}
+@foreach (var section in Model.Sections)
+{
+@section.Popkin.Name@(" · ")@section.NewCount@(" new: ")@section.Url@("\n")
+@foreach (var line in section.Lines)
+{
+@("- ")@line@("\n")
+}
+@if (section.MoreMessages is { } more)
+{
+@more@("\n")
+}
+@("\n")
+}
+@Model.Open.Label@(": ")@Model.Open.Url@("\n")
+</EmailShellText>
+
+@code {
+    [Parameter, EditorRequired]
+    public DigestEmailModel Model { get; set; } = default!;
+}

@@ -84,9 +84,22 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<ContactReminder> ContactReminders => inner.ContactReminders;
 
-    public DbSet<ContactWeeklyEmail> ContactWeeklyEmails => inner.ContactWeeklyEmails;
 
     public DbSet<PushSubscription> PushSubscriptions => inner.PushSubscriptions;
+
+    public DbSet<NotificationPreferences> NotificationPreferences => inner.NotificationPreferences;
+
+    public DbSet<NotificationKindChoice> NotificationKindChoices => inner.NotificationKindChoices;
+
+    public DbSet<PersonMute> PersonMutes => inner.PersonMutes;
+
+    public DbSet<NotificationEvent> NotificationEvents => inner.NotificationEvents;
+
+    public DbSet<NotificationDelivery> NotificationDeliveries => inner.NotificationDeliveries;
+
+    public DbSet<NotificationPlatform> NotificationPlatforms => inner.NotificationPlatforms;
+
+    public DbSet<OutgoingEmail> OutgoingEmails => inner.OutgoingEmails;
 
     public DbSet<ContactGroupMember> ContactGroupMembers => inner.ContactGroupMembers;
 

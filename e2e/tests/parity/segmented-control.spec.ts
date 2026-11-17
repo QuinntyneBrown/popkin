@@ -2,7 +2,9 @@ import { signedInAs, theMockAdmins, theMockFeatures } from '../../fixtures/admin
 import { FeaturesPage } from '../../pages/admin/features.page';
 import { AdminsPage } from '../../pages/admin/admins.page';
 import { accountStates } from '../../fixtures/account-states';
+import { theMockPopkinLevels } from '../../fixtures/notifications';
 import { parity } from '../../fixtures/parity';
+import { NotificationSettingsPage } from '../../pages/notification-settings.page';
 import { AccountPage } from '../../pages/account.page';
 import { SignUpPage } from '../../pages/sign-up.page';
 
@@ -43,5 +45,13 @@ parity('segmented-control', [
       await theMockFeatures(page);
       await signedInAs(page, 'Support');
     },
+  },
+  // A Popkin's level: the choice raised on the surface (L2-158 AC1).
+  {
+    key: 'notificationSettingsPopkins',
+    name: 'levels',
+    region: (page) => new NotificationSettingsPage(page).firstLevels,
+    snap: true,
+    before: theMockPopkinLevels,
   },
 ]);

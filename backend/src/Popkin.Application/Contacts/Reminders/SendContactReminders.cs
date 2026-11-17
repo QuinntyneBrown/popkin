@@ -11,17 +11,16 @@ namespace Popkin.Application.Contacts.Reminders;
 public sealed record SendContactRemindersCommand : IRequest<int>;
 
 /// <summary>
-/// For each owner, from 9 am where they are: adds the day's in-app reminders once (a key date from
-/// its reminder day, a follow-up on its due day, a habit on its due day and the day after), sends
-/// each new one to the phone when that is on, and on Monday sends the week ahead once. Saves after
-/// each owner, so one failure stops that owner only. Answers the reminders added.
+/// For each owner, from 8 am where they are: adds the day's in-app reminders once (a key date from
+/// its reminder day, a follow-up on its due day, a habit on its due day and the day after), each
+/// with its "Birthdays" event, which the dispatcher sends by email and phone as the person's
+/// settings allow (send-reminders, L2-140, L2-162). Saves after each owner, so one failure stops
+/// that owner only. Answers the reminders added.
 /// </summary>
 public sealed class SendContactRemindersCommandHandler(
     IAppDbContext db,
     TimeProvider clock,
     ContactsSwitch contacts,
-    IPhoneNotificationSender phone,
-    IContactsEmailSender email,
     PopkinMetrics metrics,
     ILogger<SendContactRemindersCommandHandler> logger)
     : IRequestHandler<SendContactRemindersCommand, int>
@@ -57,19 +56,14 @@ public sealed class SendContactRemindersCommandHandler(
 
     private async Task<int> RemindAsync(Guid owner, CancellationToken cancellationToken)
     {
-        var person = await db.People
-            .Where(p => p.Id == owner && p.DeletedAt == null)
-            .Select(p => new { p.Email })
-            .SingleOrDefaultAsync(cancellationToken);
-        if (person is null)
+        if (!await db.People.AnyAsync(p => p.Id == owner && p.DeletedAt == null, cancellationToken))
         {
             return 0;
         }
 
-        var preferences = await db.ReminderPreferences.SingleOrDefaultAsync(p => p.OwnerId == owner, cancellationToken)
-            ?? ReminderPreferences.Defaults(owner);
         var now = clock.GetUtcNow();
-        var local = ReminderRules.LocalNow(preferences.TimeZone, now);
+        var zone = await db.NotificationPreferences.Where(p => p.PersonId == owner).Select(p => p.TimeZone).SingleOrDefaultAsync(cancellationToken);
+        var local = ReminderRules.LocalNow(zone, now);
         if (!ReminderRules.IsTime(local))
         {
             return 0;
@@ -79,7 +73,8 @@ public sealed class SendContactRemindersCommandHandler(
         var people = await db.Contacts.OwnedBy(owner)
             .Select(c => new { c.Id, c.Name })
             .ToDictionaryAsync(c => c.Id, c => PersonName.FirstName(c.Name), cancellationToken);
-        var dates = (await db.KeyDates.OwnedBy(owner).ToListAsync(cancellationToken))
+        // A date switched off reminds of nothing (L2-159 AC4).
+        var dates = (await db.KeyDates.OwnedBy(owner).Where(d => d.RemindersOn).ToListAsync(cancellationToken))
             .Where(d => people.ContainsKey(d.ContactId))
             .Select(d => (Date: d, On: d.NextOccurrence(today)))
             .Where(o => o.On is not null)
@@ -122,65 +117,25 @@ public sealed class SendContactRemindersCommandHandler(
             .ToHashSet();
         var fresh = due.Where(r => !existing.Contains((r.Kind, r.SubjectId, r.DueOn))).ToList();
         db.ContactReminders.AddRange(fresh);
+        // Each reaches the inbox and the phone through the dispatcher, as "Birthdays" allows
+        // (send-reminders): recorded in the same save, once, by its key.
+        foreach (var reminder in fresh)
+        {
+            db.NotificationEvents.Add(NotificationEvent.Record(
+                NotificationKind.Birthdays,
+                NotificationAudience.Recipient,
+                popkinId: null,
+                actorPersonId: null,
+                reminder.Id,
+                owner,
+                now,
+                dedupKey: $"reminder:birthdays:{reminder.Id}",
+                facts: $$"""{"reminder":"{{reminder.Kind}}"}"""));
+        }
+
         await db.SaveChangesAsync(cancellationToken);
         metrics.RemindersSent("in_app", fresh.Count);
-
-        var unsent = await db.ContactReminders.OwnedBy(owner)
-            .Where(r => r.NotifiedAt == null)
-            .OrderBy(r => r.CreatedAt)
-            .ToListAsync(cancellationToken);
-        try
-        {
-            foreach (var reminder in unsent)
-            {
-                if (preferences.PhoneNotifications)
-                {
-                    await SendAsync("phone", () => phone.SendAsync(owner, new PhoneReminder(reminder.Words, reminder.ContactId), cancellationToken));
-                }
-
-                reminder.MarkNotified(now);
-                await db.SaveChangesAsync(cancellationToken);
-            }
-        }
-        catch (Exception exception) when (exception is not OperationCanceledException)
-        {
-            // The rest wait for the next tick; the in-app reminders stand.
-            logger.LogWarning(exception, "The phone reminders of one owner could not be sent");
-        }
-
-        var weekOf = ReminderRules.WeekOf(today);
-        if (local.DayOfWeek == DayOfWeek.Monday
-            && preferences.MondayEmail
-            && person.Email is { Length: > 0 } address
-            && !await db.ContactWeeklyEmails.AnyAsync(e => e.OwnerId == owner && e.WeekOf == weekOf, cancellationToken))
-        {
-            var week = dates
-                .Where(o => o.On.DayNumber - today.DayNumber <= 6)
-                .OrderBy(o => o.On)
-                .Select(o => ReminderRules.DateWords(o.Date, people[o.Date.ContactId], o.On, today))
-                .ToList();
-            if (week.Count > 0)
-            {
-                await SendAsync("email", () => email.SendWeekAheadAsync(address, new WeekAheadEmail(week), cancellationToken));
-                db.ContactWeeklyEmails.Add(ContactWeeklyEmail.Sent(owner, weekOf, now));
-                await db.SaveChangesAsync(cancellationToken);
-            }
-        }
-
         return fresh.Count;
     }
 
-    private async Task SendAsync(string channel, Func<Task> send)
-    {
-        try
-        {
-            await send();
-            metrics.RemindersSent(channel, 1);
-        }
-        catch (Exception exception) when (exception is not OperationCanceledException)
-        {
-            metrics.ReminderSendFailed(channel);
-            throw;
-        }
-    }
 }

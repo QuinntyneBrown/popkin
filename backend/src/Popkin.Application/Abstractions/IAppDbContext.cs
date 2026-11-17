@@ -70,9 +70,22 @@ public interface IAppDbContext
 
     DbSet<ContactReminder> ContactReminders { get; }
 
-    DbSet<ContactWeeklyEmail> ContactWeeklyEmails { get; }
 
     DbSet<PushSubscription> PushSubscriptions { get; }
+
+    DbSet<NotificationPreferences> NotificationPreferences { get; }
+
+    DbSet<NotificationKindChoice> NotificationKindChoices { get; }
+
+    DbSet<PersonMute> PersonMutes { get; }
+
+    DbSet<NotificationEvent> NotificationEvents { get; }
+
+    DbSet<NotificationDelivery> NotificationDeliveries { get; }
+
+    DbSet<NotificationPlatform> NotificationPlatforms { get; }
+
+    DbSet<OutgoingEmail> OutgoingEmails { get; }
 
     DbSet<ContactGroupMember> ContactGroupMembers { get; }
 

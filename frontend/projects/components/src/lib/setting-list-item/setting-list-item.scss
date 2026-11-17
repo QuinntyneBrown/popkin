@@ -1,0 +1,64 @@
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding-block: var(--space-3);
+}
+
+:host(:not(:first-child)) {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+/* A level picker sits under the name on a phone, and at the row's end from 640 px (L2-155 AC4). */
+:host(.setting-list__item--stack) {
+  flex-direction: column;
+  align-items: stretch;
+  padding-block: var(--space-4);
+}
+
+:host(.setting-list__item--stack) > .setting-list__main {
+  flex-basis: auto;
+}
+
+@media (min-width: 40rem) {
+  :host(.setting-list__item--stack) {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  :host(.setting-list__item--stack) > .setting-list__main {
+    flex-basis: 14rem;
+  }
+}
+
+.setting-list__main {
+  display: flex;
+  flex: 1 1 14rem;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.setting-list__text {
+  min-width: 0;
+}
+
+.setting-list__name {
+  display: block;
+  overflow: hidden;
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug)
+    var(--font-family-sans);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.setting-list__name--display {
+  font: var(--text-h3);
+}
+
+.setting-list__sub {
+  display: block;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}

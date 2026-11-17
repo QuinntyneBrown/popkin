@@ -7,6 +7,7 @@ import {
   AddFollowUpRequest,
   AddKeyDateRequest,
   ContactDatesView,
+  ContactKeyDateView,
   ContactProfileView,
   ContactsSummaryView,
   DatesFilter,
@@ -22,6 +23,7 @@ import {
   NoteMemoryView,
   PeopleView,
   PhotoMemoryView,
+  ReminderLead,
   ReminderPreferencesView,
   SaveContactRequest,
   StartHabitRequest,
@@ -30,7 +32,7 @@ import {
   TimelineView,
 } from '../../models/contacts';
 import { ImportCandidatesView, ImportContactsRequest, ImportResultView } from '../../models/import';
-import { ContactReminderView, PushSubscriptionRequest } from '../../models/reminders';
+import { ContactReminderView } from '../../models/reminders';
 import { TodayView } from '../../models/today';
 
 /**
@@ -62,6 +64,14 @@ export interface ContactsApi {
   dates(on: string, kind: DatesFilter): Observable<ContactDatesView>;
   /** Add a date for a contact of mine (L2-138). */
   addKeyDate(contactId: string, request: AddKeyDateRequest): Observable<KeyDateRowView>;
+  /**
+   * One date's own reminder: how early, whether at all, or both (L2-139 AC3, L2-159). 404
+   * `key_date_not_found`, 400 `lead_not_allowed`.
+   */
+  changeKeyDateReminder(
+    keyDateId: string,
+    change: { lead?: ReminderLead; on?: boolean },
+  ): Observable<ContactKeyDateView>;
   /** My default lead times and reminder ways; the defaults until I change them (L2-139 AC1). */
   reminderPreferences(): Observable<ReminderPreferencesView>;
   /** Saves my default lead times and reminder ways (L2-139). */
@@ -102,12 +112,6 @@ export interface ContactsApi {
   /** The undismissed reminders, oldest first (L2-140 AC1). */
   reminders(): Observable<ContactReminderView[]>;
   dismissReminder(id: string): Observable<void>;
-  /** The device's IANA zone: reminders come at 9 am there. */
-  saveTimeZone(zone: string): Observable<void>;
-  /** Web Push's public key, empty while none is configured (ADR 0028). */
-  pushKey(): Observable<{ publicKey: string }>;
-  savePushSubscription(request: PushSubscriptionRequest): Observable<void>;
-  removePushSubscription(endpoint: string): Observable<void>;
   /** Connections: the faces and the lines (L2-149). */
   connectionMap(): Observable<ConnectionsView>;
   /** Connect (L2-150); a resend keeps it once. */
@@ -200,6 +204,16 @@ export class HttpContactsApi implements ContactsApi {
     return this.http.post<KeyDateRowView>(`/api/contacts/people/${contactId}/key-dates`, request);
   }
 
+  changeKeyDateReminder(
+    keyDateId: string,
+    change: { lead?: ReminderLead; on?: boolean },
+  ): Observable<ContactKeyDateView> {
+    return this.http.put<ContactKeyDateView>(
+      `/api/contacts/key-dates/${keyDateId}/reminder`,
+      change,
+    );
+  }
+
   reminderPreferences(): Observable<ReminderPreferencesView> {
     return this.http.get<ReminderPreferencesView>('/api/contacts/reminder-preferences');
   }
@@ -283,22 +297,6 @@ export class HttpContactsApi implements ContactsApi {
 
   dismissReminder(id: string): Observable<void> {
     return this.http.post<void>(`/api/contacts/reminders/${id}/dismissal`, null);
-  }
-
-  saveTimeZone(zone: string): Observable<void> {
-    return this.http.put<void>('/api/contacts/time-zone', { zone });
-  }
-
-  pushKey(): Observable<{ publicKey: string }> {
-    return this.http.get<{ publicKey: string }>('/api/contacts/push-key');
-  }
-
-  savePushSubscription(request: PushSubscriptionRequest): Observable<void> {
-    return this.http.post<void>('/api/contacts/push-subscriptions', request);
-  }
-
-  removePushSubscription(endpoint: string): Observable<void> {
-    return this.http.delete<void>('/api/contacts/push-subscriptions', { params: { endpoint } });
   }
 
   connectionMap(): Observable<ConnectionsView> {

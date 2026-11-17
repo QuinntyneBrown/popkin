@@ -14,8 +14,6 @@ export class ContactsDatesPage {
   readonly months: Locator;
   readonly rows: Locator;
   readonly reminders: Locator;
-  readonly phone: Locator;
-  readonly email: Locator;
   readonly loading: Locator;
   /** The empty and failed states. */
   readonly state: Locator;
@@ -44,8 +42,6 @@ export class ContactsDatesPage {
     // The mock draws it as an info card; the app as its own block.
     this.remindersCard = page.locator('aside.info-card, aside.reminder-defaults');
     this.reminders = page.getByRole('complementary', { name: 'Reminders' });
-    this.phone = page.getByRole('switch', { name: 'Phone notifications' });
-    this.email = page.getByRole('switch', { name: 'Monday email' });
     this.loading = page.getByRole('status').filter({ hasText: 'Loading your dates…' });
     this.state = page.locator('.empty');
     this.stateHeading = this.state.getByRole('heading');

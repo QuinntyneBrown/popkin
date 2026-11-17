@@ -50,24 +50,20 @@ public sealed class ReminderRulesTests
         Assert.Equal("Lunch with Chidi is overdue", ReminderRules.HabitWords("Lunch", "Chidi", overdue: true));
     }
 
-    // Zone | UTC now | Local day | From 9 am
+    // Zone | UTC now | Local day | From 8 am (L2-162 AC1)
     [Theory]
-    [InlineData(null, "2026-09-15T08:59:00Z", "2026-09-15", false)]
-    [InlineData(null, "2026-09-15T09:00:00Z", "2026-09-15", true)]
-    [InlineData("Europe/London", "2026-09-15T08:00:00Z", "2026-09-15", true)]
+    [InlineData(null, "2026-09-15T07:59:00Z", "2026-09-15", false)]
+    [InlineData(null, "2026-09-15T08:00:00Z", "2026-09-15", true)]
+    [InlineData("Europe/London", "2026-09-15T07:00:00Z", "2026-09-15", true)]
     [InlineData("America/Los_Angeles", "2026-09-15T08:00:00Z", "2026-09-15", false)]
-    [InlineData("America/Los_Angeles", "2026-09-15T16:00:00Z", "2026-09-15", true)]
-    [InlineData("Asia/Tokyo", "2026-09-15T23:00:00Z", "2026-09-16", false)]
-    [InlineData("Not/AZone", "2026-09-15T09:00:00Z", "2026-09-15", true)]
-    public void Nine_am_is_where_the_person_is(string? zone, string utc, string day, bool due)
+    [InlineData("America/Los_Angeles", "2026-09-15T15:00:00Z", "2026-09-15", true)]
+    [InlineData("Asia/Tokyo", "2026-09-15T22:59:00Z", "2026-09-16", false)]
+    [InlineData("Not/AZone", "2026-09-15T08:00:00Z", "2026-09-15", true)]
+    public void Eight_am_is_where_the_person_is(string? zone, string utc, string day, bool due)
     {
         var local = ReminderRules.LocalNow(zone, DateTimeOffset.Parse(utc, System.Globalization.CultureInfo.InvariantCulture));
 
         Assert.Equal(D(day), DateOnly.FromDateTime(local.DateTime));
         Assert.Equal(due, ReminderRules.IsTime(local));
     }
-
-    [Fact]
-    public void The_week_ahead_starts_on_its_Monday() =>
-        Assert.Equal(D("2026-09-14"), ReminderRules.WeekOf(D("2026-09-17")));
 }

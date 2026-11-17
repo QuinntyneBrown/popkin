@@ -24,9 +24,12 @@ public sealed class MoveStoryCommandHandler(
         var sprint = await db.Sprints.SingleAsync(s => s.PopkinId == popkin.Id, cancellationToken);
 
         var before = story.PointsLeft;
+        var columnFrom = story.Column;
         var now = clock.GetUtcNow();
         story.MoveTo(column, now);
         PlanStories.Record(db, story, before, now);
+        await PlanNotifications.RecordAsync(
+            db, story, membership, now, story.OwnerMembershipId, new { columnFrom = columnFrom.ToString(), columnTo = story.Column.ToString() }, cancellationToken);
         sprint.Changed();
         await db.SaveChangesAsync(cancellationToken);
         await notifier.PlanChanged(popkin.Id, sprint.Version);

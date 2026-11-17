@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  margin-top: var(--space-6);
+}
+
+/* The same columns as the rows of the matrix under it. */
+.notif-group__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--space-14) var(--space-14);
+  align-items: end;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+@media (min-width: 40rem) {
+  .notif-group__head {
+    grid-template-columns: minmax(0, 1fr) var(--space-18) var(--space-18);
+  }
+}
+
+.notif-group__title {
+  font: var(--text-h3);
+}
+
+.notif-group__about {
+  font: var(--text-body-sm);
+  color: var(--color-fg-subtle);
+}
+
+.notif-group__col {
+  text-align: center;
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-family-sans);
+  color: var(--color-fg-subtle);
+}

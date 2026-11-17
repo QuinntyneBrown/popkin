@@ -1,3 +1,5 @@
+using Popkin.Application.Notifications;
+using Popkin.Domain;
 using MediatR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
@@ -21,7 +23,9 @@ public sealed class CommentOnExperienceCommandHandler(IAppDbContext db, IMembers
         var rating = (experience.IsRateable ? await MyRatings.FindAsync(db, experience.Id, membership.Id, cancellationToken) : null)
             ?? throw new ProblemException(409, "rating_required", "Rate it first, then add a comment.");
 
-        rating.SetComment(text, clock.GetUtcNow());
+        var now = clock.GetUtcNow();
+        rating.SetComment(text, now);
+        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, now, facts: new { change = "commented" });
         await db.SaveChangesAsync(cancellationToken);
 
         return ExperienceCommentDto.Of(rating, membership, store);

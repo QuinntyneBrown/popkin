@@ -37,6 +37,7 @@ public sealed class MembershipConfiguration : IEntityTypeConfiguration<Membershi
         builder.ToTable("Memberships");
         builder.HasKey(m => m.Id);
         builder.Property(m => m.Role).HasConversion<string>().HasMaxLength(10);
+        builder.Property(m => m.NotificationLevel).HasConversion<string>().HasMaxLength(12);
         builder.Property(m => m.DisplayName).HasMaxLength(Person.MaxNameLength).IsRequired();
         builder.Property(m => m.PhotoKey).HasMaxLength(200);
         builder.HasIndex(m => new { m.PopkinId, m.PersonId }).IsUnique();

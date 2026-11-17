@@ -327,6 +327,71 @@ export const routes = {
   deleteAccount: { app: '/account', mock: 'dialogs/delete-account/default.html' },
   deleteAccountConfirm: { app: '/account', mock: 'dialogs/delete-account/confirm.html' },
   deleteAccountBusy: { app: '/account', mock: 'dialogs/delete-account/busy.html' },
+  notificationSettings: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/default.html',
+  },
+  notificationSettingsDaily: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/daily.html',
+  },
+  notificationSettingsUnsubscribed: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/unsubscribed.html',
+  },
+  notificationSettingsPopkins: {
+    app: '/account/notifications?tab=popkins',
+    mock: 'pages/notification-settings/popkins.html',
+  },
+  notificationSettingsMuted: {
+    app: '/account/notifications?tab=popkins',
+    mock: 'pages/notification-settings/muted.html',
+  },
+  notificationSettingsPeople: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/people.html',
+  },
+  notificationSettingsMuteSearch: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/mute-search.html',
+  },
+  // The picker finding nobody, and Joel no longer in any Popkin with Mara.
+  notificationSettingsMuteNoMatch: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/mute-no-match.html',
+  },
+  notificationSettingsNoOneMuted: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/no-one-muted.html',
+  },
+  // Birthday reminders by person (L2-159): one switched off, and none in Contacts.
+  notificationSettingsBirthdayOff: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/birthday-off.html',
+  },
+  notificationSettingsNoBirthdays: {
+    app: '/account/notifications?tab=people',
+    mock: 'pages/notification-settings/no-birthdays.html',
+  },
+  notificationSettingsLoading: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/loading.html',
+  },
+  notificationSettingsError: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/error.html',
+  },
+  // The page "Unsubscribe from all email" opens (L2-168 AC3, AC5).
+  unsubscribe: { app: '/unsubscribe?t=a-working-link', mock: 'pages/unsubscribe/default.html' },
+  unsubscribeWorking: {
+    app: '/unsubscribe?t=a-working-link',
+    mock: 'pages/unsubscribe/working.html',
+  },
+  unsubscribeExpired: {
+    app: '/unsubscribe?t=an-expired-link',
+    mock: 'pages/unsubscribe/expired.html',
+  },
+  unsubscribeError: { app: '/unsubscribe?t=a-working-link', mock: 'pages/unsubscribe/error.html' },
   landing: { app: '/', mock: 'pages/landing/default.html' },
   // The marketing site (ADR 0017), a second application served on :4201.
   marketingHome: { app: `${MARKETING}/`, mock: 'pages/marketing-home/default.html' },
@@ -350,12 +415,8 @@ export const routes = {
   contactsTodayDone: { app: '/contacts', mock: 'pages/contacts-today/done.html' },
   contactsTodayLoading: { app: '/contacts', mock: 'pages/contacts-today/loading.html' },
   contactsTodayError: { app: '/contacts', mock: 'pages/contacts-today/error.html' },
-  // Reminders (L2-140): a reminder over Today, and a browser that blocks notifications on Dates.
+  // Reminders (L2-140): a reminder over Today.
   contactsReminder: { app: '/contacts', mock: 'notifications/contacts-toast/info.html' },
-  contactsNotificationsBlocked: {
-    app: '/contacts/dates',
-    mock: 'notifications/contacts-toast/blocked.html',
-  },
   // Import from your Popkins (L2-151), opened from People with nobody in it.
   importContacts: { app: '/contacts/people', mock: 'dialogs/import-contacts/default.html' },
   importContactsBusy: { app: '/contacts/people', mock: 'dialogs/import-contacts/busy.html' },

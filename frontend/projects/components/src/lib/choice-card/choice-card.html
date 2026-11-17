@@ -9,6 +9,7 @@
     role="radio"
     [attr.aria-checked]="option.value === value()"
     [tabIndex]="option.value === value() ? 0 : -1"
+    [disabled]="disabled()"
     (click)="value.set(option.value)"
     (keydown)="move($event, i)"
   >
@@ -17,7 +18,7 @@
     } @else {
       <span class="option-card__radio" aria-hidden="true"></span>
     }
-    <span class="option-card__text" [class.option-card__text--plain]="!option.icon">
+    <span class="option-card__text" [class.option-card__text--plain]="!option.icon && !grid()">
       <span class="option-card__title">{{ option.title }}</span>
       <span class="option-card__sub">{{ option.sub }}</span>
     </span>

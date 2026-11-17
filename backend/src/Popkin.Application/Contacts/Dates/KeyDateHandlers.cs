@@ -80,8 +80,11 @@ public sealed class AddKeyDateCommandHandler(
     }
 }
 
-/// <summary>One date's own reminder (L2-139 AC3); no other date changes.</summary>
-public sealed record ChangeKeyDateReminderCommand(Guid KeyDateId, string? Lead) : IRequest<ContactKeyDateDto>;
+/// <summary>
+/// One date's own reminder: its lead (L2-139 AC3) and whether it reminds at all (L2-159 AC4). No
+/// other date changes. Dates, the profile and Notifications › People all change it here.
+/// </summary>
+public sealed record ChangeKeyDateReminderCommand(Guid KeyDateId, string? Lead, bool? On = null) : IRequest<ContactKeyDateDto>;
 
 public sealed class ChangeKeyDateReminderCommandHandler(IAppDbContext db, ICurrentPerson current, ContactsSwitch contacts, TimeProvider clock)
     : IRequestHandler<ChangeKeyDateReminderCommand, ContactKeyDateDto>
@@ -89,8 +92,23 @@ public sealed class ChangeKeyDateReminderCommandHandler(IAppDbContext db, ICurre
     public async Task<ContactKeyDateDto> Handle(ChangeKeyDateReminderCommand request, CancellationToken cancellationToken)
     {
         contacts.Require();
+        if (request.Lead is null && request.On is null)
+        {
+            throw new ProblemException(400, "nothing_to_change", "Say how early to remind, or whether to.");
+        }
+
+        var lead = request.Lead is null ? (ReminderLead?)null : KeyDateRules.Lead(request.Lead);
         var date = await KeyDateRules.RequireOwnedAsync(db, current.PersonId, request.KeyDateId, cancellationToken);
-        date.ChangeLead(KeyDateRules.Lead(request.Lead));
+        if (lead is { } chosen)
+        {
+            date.ChangeLead(chosen);
+        }
+
+        if (request.On is { } on)
+        {
+            date.TurnReminders(on);
+        }
+
         await db.SaveChangesAsync(cancellationToken);
         return KeyDateRules.ForProfile([date], DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime))[0];
     }
@@ -123,7 +141,7 @@ public sealed class GetReminderPreferencesQueryHandler(IAppDbContext db, ICurren
     }
 }
 
-/// <summary>Saves the caller's defaults (L2-139 AC2) and ways (L2-140); no kept date changes.</summary>
+/// <summary>Saves the caller's defaults (L2-139 AC2); no kept date changes.</summary>
 public sealed record SaveReminderPreferencesCommand(SaveReminderPreferencesRequest Preferences) : IRequest<ReminderPreferencesDto>;
 
 public sealed class SaveReminderPreferencesCommandHandler(IAppDbContext db, ICurrentPerson current, ContactsSwitch contacts)
@@ -144,7 +162,7 @@ public sealed class SaveReminderPreferencesCommandHandler(IAppDbContext db, ICur
             db.ReminderPreferences.Add(row);
         }
 
-        row.Change(birthday, anniversary, milestone, p.PhoneNotifications, p.MondayEmail);
+        row.Change(birthday, anniversary, milestone);
         await db.SaveChangesAsync(cancellationToken);
         return ReminderPreferencesDto.Of(row);
     }

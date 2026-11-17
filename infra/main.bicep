@@ -50,12 +50,16 @@ param contacts bool = true
 @description('The staff email of the admin app\'s first Owner (L2-078 AC1, ADR 0024); empty adds nobody, so nobody can sign in to the admin app.')
 param adminFirstOwner string = 'quinntynebrown@gmail.com'
 
+@description('Email:PostalAddress, the postal address every notification email\'s footer carries (L2-163 AC5). Empty: no notification email is sent.')
+param postalAddress string = '2091 Hurontario Street, Mississauga, Ontario L5A 4E6'
+
 @description('Azure SQL takes no new servers in some regions (East US 2 among them); the nearest that does.')
 param sqlLocation string = 'centralus'
 
 var suffix = uniqueString(resourceGroup().id)
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var blobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+var keyVaultCryptoUserRoleId = '12338af0-0e69-4776-bea7-57ae8d297424'
 
 resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
   name: 'popkin${suffix}'
@@ -148,6 +152,44 @@ resource photosContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   properties: { publicAccess: 'None' }
 }
 
+// ADR 0032: the one Data Protection key ring of the API and the Worker, beside the photos.
+resource dataProtectionContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  parent: blobService
+  name: 'dataprotection'
+  properties: { publicAccess: 'None' }
+}
+
+// ADR 0032: the key that wraps the ring's keys at rest. Soft delete and purge protection stay on:
+// losing the key would break every unsubscribe link and protected cookie at once.
+resource vault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: 'kvpopkin${suffix}'
+  location: location
+  properties: {
+    tenantId: subscription().tenantId
+    sku: { family: 'A', name: 'standard' }
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 90
+    enablePurgeProtection: true
+  }
+}
+
+resource dataProtectionKey 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
+  parent: vault
+  name: 'dataprotection'
+  properties: { kty: 'RSA', keySize: 2048 }
+}
+
+resource dataProtectionKeyAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(vault.id, identity.id, keyVaultCryptoUserRoleId)
+  scope: vault
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', keyVaultCryptoUserRoleId)
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 resource photosAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(storage.id, identity.id, blobDataContributorRoleId)
   scope: storage
@@ -211,6 +253,18 @@ var photosEnv = [
   { name: 'Photos__Container', value: photosContainer.name }
   { name: 'Photos__ClientId', value: identity.properties.clientId }
 ]
+// ADR 0032: the API reads the unsubscribe links the Worker writes.
+var dataProtectionEnv = [
+  { name: 'DataProtection__BlobUri', value: '${storage.properties.primaryEndpoints.blob}${dataProtectionContainer.name}/keys.xml' }
+  { name: 'DataProtection__KeyId', value: dataProtectionKey.properties.keyUri }
+  { name: 'DataProtection__ClientId', value: identity.properties.clientId }
+]
+// Notification email (L2-163, L2-168): sent from the codes' address, and only with a postal
+// address for the footer.
+var notificationEmailEnv = empty(postalAddress) ? [] : [
+  { name: 'Notifications__EmailSender', value: communication.outputs.emailSender }
+  { name: 'Email__PostalAddress', value: postalAddress }
+]
 var secrets = concat([
   { name: 'auth-code-hash-key', value: authCodeHashKey }
   { name: 'photos-signing-key', value: photosSigningKey }
@@ -266,7 +320,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
         {
           name: 'api'
           image: '${registry.properties.loginServer}/popkin-api:${imageTag}'
-          env: concat(databaseEnv, keyEnv, photosEnv, communicationEnv, pushEnv, [
+          env: concat(databaseEnv, keyEnv, photosEnv, dataProtectionEnv, communicationEnv, pushEnv, [
             { name: 'App__Origin', value: appOrigin }
             { name: 'Invites__BaseUrl', value: '${appOrigin}/i' }
             { name: 'Features__PhoneSignIn', value: string(phoneSignIn) }
@@ -315,7 +369,7 @@ resource worker 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'worker'
           image: '${registry.properties.loginServer}/popkin-worker:${imageTag}'
           // Contacts reminders (L2-140): the switch, the Monday email and the phone (ADR 0028).
-          env: concat(databaseEnv, keyEnv, photosEnv, communicationEnv, pushEnv, [
+          env: concat(databaseEnv, keyEnv, photosEnv, dataProtectionEnv, communicationEnv, pushEnv, notificationEmailEnv, [
             { name: 'Features__Contacts', value: string(contacts) }
             { name: 'App__Origin', value: appOrigin }
           ])

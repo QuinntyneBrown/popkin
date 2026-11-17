@@ -2138,6 +2138,7 @@ a.segmented__option { display: inline-flex; align-items: center; text-decoration
 .popover .search .input { height: var(--control-height-sm); border: 0; border-radius: var(--radius-md); background: var(--color-bg-subtle); font-size: var(--font-size-sm); }
 .pick-list__detail { font: var(--text-code); color: var(--color-fg-subtle); }
 .pick-list__meta { flex: none; overflow: hidden; font: var(--text-caption); color: var(--color-fg-subtle); text-overflow: ellipsis; white-space: nowrap; }
+.pick-list__note { margin: 0; padding: var(--space-2); font: var(--text-body-sm); color: var(--color-fg-muted); }
 .add-btn { display: inline-flex; align-items: center; gap: var(--space-1-5); height: var(--control-height-sm); padding: 0 var(--space-4); border: var(--border-width-thick) dashed var(--color-border-strong); border-radius: var(--radius-full); background: none; color: var(--color-fg-muted); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); text-decoration: none; }
 .add-btn:hover, .add-btn[data-state="hover"], .add-btn[aria-expanded="true"] { border-color: var(--color-fg-subtle); color: var(--color-fg-default); }
 .add-btn:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }

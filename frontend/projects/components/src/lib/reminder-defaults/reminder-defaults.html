@@ -16,31 +16,3 @@
     ></div>
   </div>
 }
-<div class="reminder-defaults__ways">
-  <div class="reminder-defaults__way">
-    <svg pk-icon name="phone" size="md"></svg>
-    <span class="reminder-defaults__words">
-      <span class="reminder-defaults__title">Phone notifications</span>
-      <span class="reminder-defaults__sub" id="way-phone-sub">At 9 am on reminder days</span>
-    </span>
-    <button
-      pk-switch
-      aria-label="Phone notifications"
-      aria-describedby="way-phone-sub"
-      [(checked)]="phone"
-    ></button>
-  </div>
-  <div class="reminder-defaults__way">
-    <svg pk-icon name="mail" size="md"></svg>
-    <span class="reminder-defaults__words">
-      <span class="reminder-defaults__title">Monday email</span>
-      <span class="reminder-defaults__sub" id="way-email-sub">The week ahead, every Monday</span>
-    </span>
-    <button
-      pk-switch
-      aria-label="Monday email"
-      aria-describedby="way-email-sub"
-      [(checked)]="email"
-    ></button>
-  </div>
-</div>

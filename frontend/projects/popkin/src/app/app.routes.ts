@@ -386,7 +386,23 @@ export const routes: Routes = [
     data: data({ shell: 'bare', page: 'account' }),
     title: 'Your account · Popkin',
   },
+  {
+    path: 'account/notifications',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/notifications/notifications.page').then((m) => m.NotificationsPage),
+    data: data({ shell: 'bare', page: 'notification-settings' }),
+    title: 'Notifications · Popkin',
+  },
   // Open to anyone, signed in or not (L2-082, L2-083).
+  {
+    // "Unsubscribe from all email" (L2-168 AC3): no guard, the link's token is the proof.
+    path: 'unsubscribe',
+    loadComponent: () =>
+      import('./pages/unsubscribe/unsubscribe.page').then((m) => m.UnsubscribePage),
+    data: data({ shell: 'bare', page: 'unsubscribe' }),
+    title: 'Unsubscribe · Popkin',
+  },
   {
     path: 'privacy',
     loadComponent: () => import('./pages/privacy/privacy.page').then((m) => m.PrivacyPage),

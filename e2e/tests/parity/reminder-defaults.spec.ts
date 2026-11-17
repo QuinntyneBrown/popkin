@@ -9,7 +9,7 @@ const mara = async (page: Page) => {
 };
 
 parity('reminder-defaults', [
-  // The three defaults, then phone notifications and the Monday email, both on.
+  // The three default lead times (L2-139); how reminders arrive is set in Notifications.
   {
     key: 'contactsDates',
     name: 'defaults',

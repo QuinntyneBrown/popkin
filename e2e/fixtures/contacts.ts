@@ -371,8 +371,6 @@ export async function marasDates(page: Page, kind: 'all' | 'birthdays' = 'all'):
         birthdayLead: 'OneWeekBefore',
         anniversaryLead: 'ThreeDaysBefore',
         milestoneLead: 'OnTheDay',
-        phoneNotifications: true,
-        mondayEmail: true,
       },
     },
   });

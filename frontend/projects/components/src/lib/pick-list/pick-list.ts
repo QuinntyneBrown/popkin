@@ -6,16 +6,20 @@ import {
   model,
   viewChildren,
 } from '@angular/core';
+import { Avatar } from '../avatar/avatar';
 import { PopkinTile } from '../popkin-tile/popkin-tile';
 
 export interface PickListOption {
   id: string;
   name: string;
-  emoji: string;
-  /** The Popkin's accent, for its tile: "teal". */
+  /** A Popkin's emoji, for its tile; a person shows `person` instead. */
+  emoji?: string;
+  /** The Popkin's accent, for its tile, or the person's: "teal". */
   accent: string;
   /** Said after the name in a quieter mono face: an invite code. */
-  detail: string;
+  detail?: string;
+  /** A person: their face, and a quieter line after the name ("Lakeside Weekend"). */
+  person?: { initials: string; photo: string | null; meta: string };
 }
 
 /**
@@ -26,7 +30,7 @@ export interface PickListOption {
  */
 @Component({
   selector: 'ul[pk-pick-list]',
-  imports: [PopkinTile],
+  imports: [Avatar, PopkinTile],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './pick-list.html',
   styleUrl: './pick-list.scss',

@@ -30,6 +30,7 @@ export interface SegmentedOption<T extends string = string> {
     '[attr.aria-label]': 'label()',
     '[class.segmented--stretch]': 'stretch()',
     '[class.segmented--scroll]': 'scroll()',
+    '[class.segmented--levels]': 'levels()',
   },
 })
 export class SegmentedControl {
@@ -50,6 +51,11 @@ export class SegmentedControl {
   readonly scroll = input(false);
   /** Gives each option the id `{idPrefix}-{value}`, for a tab panel to be labelled by. */
   readonly idPrefix = input<string>();
+  /**
+   * A Popkin's level (setting-list.html): the choice raised on the surface, and "Muted" in ink,
+   * at the start of its row on a phone.
+   */
+  readonly levels = input(false);
 
   private readonly buttons = viewChildren<ElementRef<HTMLButtonElement>>('option');
 

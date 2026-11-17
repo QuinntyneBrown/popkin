@@ -1,0 +1,13 @@
+<p class="undo-bar__text">{{ text() }}</p>
+<div class="undo-bar__actions">
+  <button class="undo-bar__action" type="button" (click)="acted.emit()">{{ action() }}</button>
+  <button
+    class="undo-bar__dismiss"
+    type="button"
+    aria-label="Dismiss"
+    title="Dismiss"
+    (click)="dismissed.emit()"
+  >
+    <svg pk-icon name="close" size="md"></svg>
+  </button>
+</div>

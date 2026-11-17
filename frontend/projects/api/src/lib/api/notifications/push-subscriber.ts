@@ -1,11 +1,11 @@
 import { DOCUMENT, InjectionToken, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { CONTACTS_API, ContactsApi } from './contacts-api';
+import { NOTIFICATIONS_API, NotificationsApi } from './notifications-api';
 
 /** What subscribing this device came to: on, refused by the person, or not possible here. */
 export type PushOutcome = 'on' | 'blocked' | 'unsupported';
 
-/** This device's phone reminders by Web Push (ADR 0028). */
+/** This device's phone alerts by Web Push (ADR 0028), for every kind of notification. */
 export interface PushSubscriber {
   subscribe(): Promise<PushOutcome>;
   unsubscribe(): Promise<void>;
@@ -26,12 +26,11 @@ export function keyBytes(base64: string): Uint8Array<ArrayBuffer> {
 
 /**
  * Asks the browser's permission, registers the push worker and saves the subscription; turning
- * off removes it. Anything the browser cannot do answers "unsupported", and the in-app reminder
- * stands alone.
+ * off removes it. Anything the browser cannot do answers "unsupported".
  */
 export class BrowserPushSubscriber implements PushSubscriber {
   constructor(
-    private readonly api: ContactsApi,
+    private readonly api: NotificationsApi,
     private readonly window: (Window & typeof globalThis) | null,
   ) {}
 
@@ -87,7 +86,7 @@ export const PUSH_SUBSCRIBER = new InjectionToken<PushSubscriber>('PUSH_SUBSCRIB
   providedIn: 'root',
   factory: () =>
     new BrowserPushSubscriber(
-      inject(CONTACTS_API),
+      inject(NOTIFICATIONS_API),
       inject(DOCUMENT).defaultView as (Window & typeof globalThis) | null,
     ),
 });

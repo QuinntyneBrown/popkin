@@ -40,6 +40,7 @@ public sealed class KeyDateConfiguration : IEntityTypeConfiguration<KeyDate>
         builder.Property(d => d.Title).HasMaxLength(KeyDate.MaxTitleLength);
         builder.Property(d => d.Kind).HasConversion<string>().HasMaxLength(12);
         builder.Property(d => d.Lead).HasConversion<string>().HasMaxLength(16);
+        builder.Property(d => d.RemindersOn).HasDefaultValue(true);
         // A date goes with its contact (L2-132); ContactRemoval removes it in the same save.
         builder.HasOne<Contact>().WithMany().HasForeignKey(d => d.ContactId).OnDelete(DeleteBehavior.Cascade);
     }
@@ -54,7 +55,6 @@ public sealed class ReminderPreferencesConfiguration : IEntityTypeConfiguration<
         builder.Property(p => p.BirthdayLead).HasConversion<string>().HasMaxLength(16);
         builder.Property(p => p.AnniversaryLead).HasConversion<string>().HasMaxLength(16);
         builder.Property(p => p.MilestoneLead).HasConversion<string>().HasMaxLength(16);
-        builder.Property(p => p.TimeZone).HasMaxLength(64);
         builder.HasOne<Person>().WithMany().HasForeignKey(p => p.OwnerId).OnDelete(DeleteBehavior.Cascade);
     }
 }
@@ -225,16 +225,6 @@ public sealed class ContactReminderConfiguration : IEntityTypeConfiguration<Cont
         builder.HasIndex(r => new { r.OwnerId, r.DismissedAt });
         builder.HasIndex(r => r.ContactId);
         builder.HasOne<Person>().WithMany().HasForeignKey(r => r.OwnerId).OnDelete(DeleteBehavior.Cascade);
-    }
-}
-
-public sealed class ContactWeeklyEmailConfiguration : IEntityTypeConfiguration<ContactWeeklyEmail>
-{
-    public void Configure(EntityTypeBuilder<ContactWeeklyEmail> builder)
-    {
-        builder.ToTable("ContactWeeklyEmails");
-        builder.HasKey(e => new { e.OwnerId, e.WeekOf });
-        builder.HasOne<Person>().WithMany().HasForeignKey(e => e.OwnerId).OnDelete(DeleteBehavior.Cascade);
     }
 }
 

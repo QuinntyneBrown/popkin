@@ -30,7 +30,8 @@ reach a phone:
   endpoint; turning the switch off on a device removes that device's subscription.
 - **The Worker signs with VAPID.** `WebPushPhoneNotificationSender` implements
   `IPhoneNotificationSender` with the `WebPush` library. The public key is configuration
-  (`Push:PublicKey`) that the web app reads from `GET /api/contacts/push-key`; the private key is a
+  (`Push:PublicKey`) that the web app reads from `GET /api/me/push-key` (moved from `/api/contacts` when phone alerts
+  came to serve every notification kind); the private key is a
   secret (`Push:PrivateKey`), passed to Bicep as a `@secure()` parameter from the GitHub secret
   `PUSH_PRIVATE_KEY`, as `Auth:CodeHashKey` is. `Push:Subject` is the `mailto:` of the sender.
 - **Without a key nothing is sent.** With no private key the sender sends nothing and the job

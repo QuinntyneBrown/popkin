@@ -67,14 +67,22 @@ The emails are in `docs/mocks/notifications/email-birthday/` (manifest id `email
    {Popkin} is due tomorrow" (L2-167 AC3). The body's extra sentence "It's the last open Stay
    to-do on the plan." is not in L2-167 and is not built.
 3. **"Mark it done"** (`task.html`). No email acts on Popkin (gap 124). The one button is "Open
-   the story", which opens the story on the plan board (L2-167 AC1).
+   the plan", which opens the plan board (L2-167 AC1). The mock now shows this.
 4. **Comments on a story.** "9 comments" and "Latest from Ellie" need comments on stories, which
    Popkin does not have. L2-167 AC1 was changed on 2026-11-17 to leave them out, and the button
-   reads "Open the plan"; the mock changes.
+   reads "Open the plan". The mock now shows the story's points in their place.
 5. **A pronoun.** `ahead.html`'s preview "Here's what you know she likes" gives a contact a
    pronoun, which Contacts never does (L2-122 AC4). The preheader is "Turns {age}. Here's what
    you keep about {name}." or, with no age, "On {weekday}. Here's what you keep about {name}."
 6. **The event** (`event.html`) is gap 123 and is not built.
+7. **The headline's day.** `ahead.html` reads "Grace turns 33 on Saturday" a week before. The
+   email, the phone alert and the in-app message share the words of `ReminderRules`, which give a
+   weekday within six days and the date after ("Grace turns 33 on 19 September"; gaps 104 and
+   114). The subject names both, so the day is never ambiguous.
+8. **"On your list".** Any open follow-up of the contact due on or before the day counts: a
+   follow-up's text is the person's own words, and Popkin does not guess which ones are about
+   the birthday.
+9. **The relation line.** `ahead.html`'s "Best friend from uni" is the contact's "How we met".
 
 ### What is due and when (L2-162)
 
@@ -123,8 +131,8 @@ Rules that apply to all three:
   its window, and the one already sent stands.
 - **A short Popkin.** A Popkin created less than 24 hours before its end ("Just today", a weekend
   started on Saturday) sends no wrap-up reminder. Its members have only just joined, and the
-  email would arrive as they start (`<TO SUPPLY>`: confirmation of this reading of "24 hours
-  before").
+  email would arrive as they start. "24 hours before" is read as a moment the Popkin lived
+  through.
 - **Late start.** The jobs tick every 5 minutes. A reminder due while the Worker was down is
   sent at the next tick, as long as its moment has not passed: the key date's day, the story's
   due date, the Popkin's end.
@@ -141,8 +149,11 @@ Rules that apply to all three:
   - a key date: "Grace turns 33 on Saturday", which opens the contact's profile;
   - a follow-up: "{text} is due today", which opens Follow-ups;
   - a habit: the words of `ReminderRules`, which open the contact's profile;
-  - a story: "Due tomorrow: {story}", which opens the story;
-  - a wrap-up: "{Popkin} wraps up tomorrow at {time}", which opens Photos.
+  - a story: "Due tomorrow: {story}", which opens the plan board (`/p/{id}/plan`);
+  - a wrap-up: "{Popkin} wraps up tomorrow at {time}", which opens Photos (`/p/{id}/photos`).
+- **A reminder that no longer stands** (a story done, given away or redated; a Popkin wrapped up
+  or given another end) gives no email and no alert: the delivery is suppressed as
+  `NothingNew` when it is sent. Reminders are never held back into a "{n} new" alert.
 
 ### What each email says
 
@@ -157,8 +168,8 @@ Rules that apply to all three:
   - The badge shows the age from `KeyDate.YearsOn` when the year is known, and nothing without
     it.
   - "On your list" appears only ahead of the day. It shows the contact's earliest open follow-up
-    due on or before the occurrence, with "You planned it for {day}" (AC3). `<TO SUPPLY>`: whether
-    only a follow-up whose text names the birthday counts.
+    due on or before the occurrence, with "You planned it for {day}" (AC3), whatever its text
+    says (difference 8).
   - "Things {name} loves, from your notes" lists the `Loves`, and "Last time you talked · {date}"
     shows the latest conversation's title and text cut at 300. Each is left out when empty (AC4).
   - Buttons: "Open {name}'s page" ahead; on the day, "Say happy birthday" and "{name}'s page".
@@ -208,16 +219,18 @@ Rules that apply to all three:
     and adds the event when due.
   - **Popkins:** it reads the live Popkins whose `EndsAt` falls within 24 hours and that were
     created at least 24 hours before it, and adds the event.
-  - It saves in batches of 100 events.
-  - It sends nothing itself.
-- **`PopkinReminderRules`** (Application, pure) — `StoryDueAt(dueOn, zone)` gives 18:00 the day
-  before, local. `WrapUpWindow(endsAt, createdAt)` gives the window, or none. Both are tested one
-  case per row.
+  - It reads the keys already recorded and adds only the new ones, in one save.
+  - It sends nothing itself, and answers the events it recorded.
+- **`PopkinReminderRules`** (Application, pure) — `StoryDueWindow(dueOn, zone)` gives 18:00 the
+  day before, local, until the due day begins there (a time skipped by a clock change reads as
+  the hour after). `WrapUpWindow(endsAt, createdAt)` gives the last 24 hours, or none when there
+  is no end or the Popkin was created inside them. Both are tested one case per row.
+  `WrapUpEmailComposer.Time` writes the end as "6 pm" or "6:30 pm" where the person is.
 - **`NotificationEvent.DedupKey`** (nullable, unique where set) and **`Facts`** — added by
   [Deliver notifications](../deliver-notifications/README.md). The catalogue
   (`NotificationCatalogue`) gives "Birthdays" with `Facts.reminder` of `FollowUp` or `Habit` the
   phone channel alone.
-- **Composers** (Application, `INotificationEmailComposer`):
+- **Composers** (Application, chosen by the email's kind in `UpdateEmails`):
   - `KeyDateReminderEmailComposer` (`KeyDateReminder`);
   - `StoryDueEmailComposer` (`StoryDue`);
   - `WrapUpEmailComposer` (`WrapUp`).
@@ -226,14 +239,17 @@ Rules that apply to all three:
   date, story or Popkin deleted; a story done or given away; a Popkin wrapped up. They share
   `EmailShellModel`, `EmailText` and `NotificationLinks` with
   [Popkin update email](../popkin-update-email/README.md).
-- **`PhoneAlerts`** (Application) — builds the `PhoneAlert` of each reminder for the dispatcher.
+- **Phone alerts** — the dispatcher builds each reminder's `PhoneAlert`, reading the story or the
+  Popkin through the composers' `StandingAsync`, so the email and the alert agree on whether the
+  reminder still stands.
 - **`IPhoneNotificationSender`** (changed) — `SendAsync(personId, PhoneAlert, ct)` replaces
   `PhoneReminder`, and `WebPushPhoneNotificationSender` sends the alert's URL in its payload. A
   subscription answered `404` or `410` is still removed (ADR 0028).
 - **Telemetry:**
   - `popkin.notifications.events` by `kind` (`birthdays`, `stories_due`, `popkin_wrapping_up`);
   - `popkin.notifications.deliveries` by `kind`, `channel` and `outcome`;
-  - `popkin.notifications.reminders.last_tick` per job.
+  - `popkin.notifications.reminders.last_tick`, tagged `job` (`contacts`, `popkins`), recorded
+    by each job after its tick, as `popkin.wrap_up.last_tick` is.
 
   `popkin.contacts.reminders.sent` keeps the `in_app` channel only.
 - **Settings.** No new setting. `App:Origin` (Worker), used only by the Monday email's link, is

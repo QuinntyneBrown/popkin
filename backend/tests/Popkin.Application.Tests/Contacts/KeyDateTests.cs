@@ -71,7 +71,7 @@ public sealed class KeyDateTests
     }
 
     [Fact]
-    public void Preferences_start_at_the_defaults_with_both_ways_on()
+    public void Preferences_start_at_the_defaults()
     {
         var defaults = ReminderPreferences.Defaults(Guid.NewGuid());
 
@@ -79,7 +79,5 @@ public sealed class KeyDateTests
         Assert.Equal(ReminderLead.ThreeDaysBefore, defaults.DefaultFor(KeyDateKind.Anniversary));
         Assert.Equal(ReminderLead.OnTheDay, defaults.DefaultFor(KeyDateKind.Milestone));
         Assert.Equal(ReminderLead.OneWeekBefore, defaults.DefaultFor(KeyDateKind.Other));
-        Assert.True(defaults.PhoneNotifications);
-        Assert.True(defaults.MondayEmail);
     }
 }

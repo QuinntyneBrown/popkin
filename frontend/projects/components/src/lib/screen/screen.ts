@@ -25,6 +25,7 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
     '[class.screen--column]': "layout() === 'column'",
     '[class.screen--arrival]': "layout() === 'arrival'",
     '[class.screen--middle]': 'middle()',
+    '[class.screen--settings]': "width() === 'settings'",
     '[attr.data-accent]': 'accent()',
   },
 })
@@ -58,4 +59,9 @@ export class Screen {
   readonly loneAction = input(false);
   /** Renders the sticky footer around the `[slot=footer]` content. */
   readonly footer = input(false);
+  /**
+   * `settings` widens a `column` screen for a page of settings, a kind and its two switches in a
+   * row: centred, at most 56 rem from 768 px (L2-155 AC4).
+   */
+  readonly width = input<'form' | 'settings'>('form');
 }

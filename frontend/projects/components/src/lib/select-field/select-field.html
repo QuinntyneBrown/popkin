@@ -1,11 +1,12 @@
 <label
-  [class]="variant() === 'toolbar' || hideLabel() ? 'visually-hidden' : 'select-field__label'"
+  [class]="variant() !== 'default' || hideLabel() ? 'visually-hidden' : 'select-field__label'"
   [for]="fieldId()"
   >{{ label() }}</label
 >
 <select
   class="select-field__select"
   [id]="fieldId()"
+  [disabled]="disabled()"
   [attr.aria-invalid]="error() ? 'true' : null"
   [attr.aria-describedby]="error() ? fieldId() + '-err' : null"
   (change)="chose($event)"

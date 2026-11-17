@@ -337,8 +337,6 @@ await call('PUT', '/api/contacts/reminder-preferences', {
   birthdayLead: 'TwoWeeksBefore',
   anniversaryLead: 'ThreeDaysBefore',
   milestoneLead: 'OnTheDay',
-  phoneNotifications: true,
-  mondayEmail: true,
 });
 await call('GET', '/api/contacts/reminder-preferences');
 // She adds a follow-up for Chidi, due the Sunday after the mocks' Tuesday, reads Follow-ups,
@@ -499,6 +497,13 @@ await call('GET', `${experiences}?filter=did`);
 // account would wrap up (journey 19).
 await call('GET', '/api/account/deletion-impact');
 
+// Mara mutes Lakeside Weekend before it wraps up; no Worker runs, so nothing else changes (L2-158).
+await call('PUT', `/api/me/notifications/popkins/${created.id}`, { level: 'Muted' });
+// She looks for someone to mute, mutes Walt, then unmutes him (L2-160).
+await call('GET', '/api/me/notifications/mute-candidates?q=');
+const mute = await call('POST', '/api/me/notifications/mutes', { membershipId: waltsId });
+await call('DELETE', `/api/me/notifications/mutes/${mute.muteId}`);
+
 // Wrap up: Mara reads what the wrap-up screen says, wraps Lakeside Weekend up keeping its album,
 // reads the recap and asks for the album as a zip (journey 9). It comes last: every answer
 // above is of a Popkin that is still open. No Worker runs beside the recording, so the zip is
@@ -520,6 +525,15 @@ await call('DELETE', `/api/popkins/${created.id}/members/me`);
 person = mara;
 await call('PATCH', '/api/account', { name: 'Mara Okafor' });
 await call('GET', '/api/account');
+// Her notification settings, as she has never changed them (L2-154 AC1).
+await call('GET', '/api/me/notifications');
+// Then she changes them: group chat by email, the daily digest, and email off (L2-156, L2-157).
+await call('PUT', '/api/me/notifications/kinds/GroupChat', { email: true });
+await call('PUT', '/api/me/notifications/frequency', { frequency: 'DailyDigest' });
+await call('PUT', '/api/me/notifications/email', { on: false });
+// A link the API cannot read: the unsubscribe page's expired state (L2-168 AC5). A working
+// token cannot be recorded, since only the Worker issues one; the specs stub it.
+await call('POST', '/api/notifications/unsubscribe?t=an-expired-link').catch(() => undefined);
 const portrait = new FormData();
 portrait.append(
   'photo',
@@ -533,7 +547,7 @@ await call('GET', '/api/contacts/today?on=2026-09-15');
 // Reminders (L2-140, known gaps 104 and 114 ruled): every Contacts page reads them, none yet as
 // the Worker has not run, and saves the device's zone.
 await call('GET', '/api/contacts/reminders');
-await call('PUT', '/api/contacts/time-zone', { zone: 'Europe/London' });
+await call('PUT', '/api/me/time-zone', { zone: 'Europe/London' });
 // Import (L2-151, known gaps 110 and 117 ruled): who she shares a Popkin with and does not keep
 // yet; she imports Walt, once, and a resend imports no one more.
 const candidates = await call('GET', '/api/contacts/import');

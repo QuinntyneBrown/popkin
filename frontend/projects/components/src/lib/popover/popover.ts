@@ -9,17 +9,21 @@ import {
   input,
   model,
 } from '@angular/core';
+import { Icon } from '../icon/icon';
 
 /**
- * Popover (docs/design-system/assets/components.css, `popover`): a small panel anchored under the
- * button that opens it, as "Hold a Popkin" with its search and its matches. The button is the
- * `[slot=trigger]` and sets `open`; the rest is the panel's content. It traps nothing: focus moves
- * to the panel's first field when it opens, Escape closes it and gives focus back to the button,
- * a press outside closes it, and ArrowDown from the field moves to the first option. `end` lines
- * it up with the button's end from 640 px.
+ * Popover (docs/design-system/components/popover.html): a small panel anchored under the button
+ * that opens it, holding a search and a short list to pick from, as "Hold a Popkin" or "Mute
+ * someone". The button is either the `[slot=trigger]` (which sets `open`), or, with `add`, the
+ * dashed pill with a plus that the popover draws itself. It traps nothing: focus moves to the
+ * panel's first field when it opens, Escape closes it and gives focus back to the button, a press
+ * outside closes it, and ArrowDown from the field moves to the first option. `end` lines it up
+ * with the button's end from 640 px. More than one field, or a consequence to confirm, is a
+ * dialog instead.
  */
 @Component({
   selector: 'div[pk-popover]',
+  imports: [Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './popover.html',
   styleUrl: './popover.scss',
@@ -30,10 +34,12 @@ import {
   },
 })
 export class Popover {
-  /** The panel's accessible name: "Hold a Popkin". */
+  /** The panel's accessible name, and with `add` the button's words: "Mute someone". */
   readonly label = input.required<string>();
   readonly open = model(false);
   readonly end = input(false);
+  /** Draws the dashed "+ {label}" button that opens the panel (the mocks' add button). */
+  readonly add = input(false);
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
@@ -48,11 +54,21 @@ export class Popover {
     });
   }
 
+  protected toggle(): void {
+    this.open.update((open) => !open);
+  }
+
+  /** Closes the panel and gives focus back to the button that opened it. */
+  close(): void {
+    if (!this.open()) return;
+    this.open.set(false);
+    this.host.querySelector<HTMLElement>('.popover__trigger, [slot=trigger]')?.focus();
+  }
+
   protected escape(event: Event): void {
     if (!this.open()) return;
     event.stopPropagation();
-    this.open.set(false);
-    this.host.querySelector<HTMLElement>('[slot=trigger]')?.focus();
+    this.close();
   }
 
   protected outside(event: Event): void {

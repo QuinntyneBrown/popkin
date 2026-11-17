@@ -19,7 +19,9 @@ adopted:
 - the "Phone notifications" and "Monday email" switches leave Dates;
 - email and phone pass to the notifications subsystem as the "Birthdays" kind (gap 126).
 
-The parts of this design that the change removes are listed under "To be removed".
+The parts of this design that the change removed are listed under "Removed". The handler now
+records a "Birthdays" event per reminder, and the dispatcher sends it
+([Send reminders](../../notifications/send-reminders/README.md)).
 
 The Popkin Worker adds reminders. `SendContactRemindersJob` is a `PeriodicJob`: on each tick it
 sends one command, and the handler decides what is due. The Worker holds no hub connection and
@@ -140,9 +142,10 @@ same day supersedes a ruling, the ruling is marked.
 
   No dimension or log carries an owner, a contact, the words or an address.
 
-### To be removed
+### Removed
 
-The change to L2-140 removes code that is built today:
+The change to L2-140 removed, on 17 November 2026 (migration `RemoveMondayEmail`, which carries
+"Phone notifications" off into the "Birthdays" phone choice of Notifications):
 
 - **Domain:**
   - `ReminderPreferences.PhoneNotifications`, `ReminderPreferences.MondayEmail` and
