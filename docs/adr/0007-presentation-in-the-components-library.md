@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted, 12 November 2026.
+Accepted, 12 November 2026. Amended by [ADR 0029](0029-one-library-no-unused-components.md).
 
 ## Context
 
