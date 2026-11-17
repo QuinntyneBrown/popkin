@@ -192,8 +192,8 @@ This feature adds no endpoint of its own. It sets the rules every notification e
   with no session, `401` (L2-174 AC4). The one anonymous endpoint is the one-click unsubscribe
   ([Unsubscribe](../unsubscribe/README.md)).
 - A value outside the catalogue (an unknown kind, level, frequency or lead time) answers `400`
-  ProblemDetails with `code` `notification_kind_unknown`, `notification_level_unknown`,
-  `notification_frequency_unknown` or `reminder_lead_unknown`, and nothing changes (L2-174 AC5).
+  ProblemDetails with `code` `invalid_kind`, `invalid_level`, `invalid_frequency` or
+  `invalid_lead`, and nothing changes (L2-174 AC5).
   Switching off a required kind answers `400` `notification_required` (L2-154 AC2).
 
 ### Backend
@@ -213,11 +213,15 @@ This feature adds no endpoint of its own. It sets the rules every notification e
   `Status` (`Bundled`, `AwaitingDigest`, `Due`, `Sent`, `Suppressed`, `Retrying`, `Dropped`,
   `Failed`), `Rule?` (`SuppressionRule`), `OutgoingEmailId?`, `SendAfter`, `Attempts`,
   `NextAttemptAt?`, `SentAt?`. Unique (`EventId`, `PersonId`, `Channel`).
-- **`OutgoingEmail`** (Domain, new table) — `Id`, `PersonId`, `Kind` (`Update`, `DailyDigest`,
-  `WeeklyDigest`, `KeyDateReminder`, `StoryDue`, `WrapUp`), `Status` (`Open`, `Queued`,
-  `Sending`, `Sent`, `Empty`, `Retrying`, `Dropped`, `Failed`), `DedupKey` (unique), `OpenedAt`,
-  `SendAfter`, `Attempts`, `NextAttemptAt?`, `SentAt?`; `Close(now)`, `MarkSending()`,
-  `MarkSent(now)`, `Retry(now, backoff)`, `Drop(now)`.
+- **`OutgoingEmail`** (Domain, new table `OutgoingEmails`) — the one shape every email design
+  uses: `Id`, `PersonId`, `Kind` (`NotificationEmailKind`: `Update`, `DailyDigest`,
+  `WeeklyDigest`, `KeyDateReminder`, `StoryDue`, `WrapUp`), `PopkinId?`, `DedupKey` (unique),
+  `Status` (`Open`, `Queued`, `Sending`, `Sent`, `Suppressed`, `Retrying`, `Dropped`, `Failed`),
+  `SuppressedBy?` (`SuppressionRule`, set with `Suppressed`, e.g. `nothing_new` for an email left
+  with nothing to say), `OpenedAt`, `SendAfter` (when it is due), `Attempts`, `NextAttemptAt?`,
+  `SentAt?` and `ProviderMessageId?`; `Close(now)`, `Queue()`, `MarkSending()`,
+  `MarkSent(now, providerMessageId)`, `Suppress(rule)`, `Retry(now, backoff)`, `Drop(now)`. An
+  email that is due while member email is paused is `Queued`.
 - **`NotificationRules`**, **`NotificationQuestion`**, **`NotificationDecision`**,
   **`SuppressionRule`** (Application) — the table above.
 - **`QuietHours`** (Application, pure) — `Contains(localTime)`, `EndAfter(localNow)`; a window
@@ -233,8 +237,10 @@ This feature adds no endpoint of its own. It sets the rules every notification e
   returns `Accepted`, `Transient` or `Permanent`. `AcsNotificationEmailSender` (Infrastructure)
   sends HTML and plain text with the `List-Unsubscribe` headers of [Unsubscribe](../unsubscribe/README.md),
   from `Notifications:EmailSender`, through the `EmailClient` the codes use. `NoNotificationEmailSender`
-  sends nothing when no endpoint is configured; the email is still marked sent, as reminders do
-  without a push key.
+  sends nothing when `Communication:Endpoint` or `Notifications:EmailSender` is missing and answers
+  `Permanent("not_configured")`, so the email is marked `Failed` and never retried. Without
+  `Email:PostalAddress` the same sender is used: no notification email goes out without the
+  footer's postal address (L2-163 AC5).
 - **`IPhoneNotificationSender`** (Application) — widened from `PhoneReminder` to
   `PhoneAlert(Title, Body, Url)`; `WebPushPhoneNotificationSender` keeps its removal of gone
   subscriptions and returns how many devices took the alert.
@@ -253,7 +259,7 @@ This feature adds no endpoint of its own. It sets the rules every notification e
 | Setting | Container | When missing |
 |---|---|---|
 | `Notifications:EmailSender` | Worker | No notification email is sent; deliveries are marked sent. The address on `popkin.community`, `<TO SUPPLY>` (for example `notify@popkin.community`) |
-| `Email:PostalAddress` | Worker | The email footer has no postal address; production shall set it (L2-163 AC5) |
+| `Email:PostalAddress` | Worker | No notification email is sent, since the footer must carry a postal address (L2-163 AC5) |
 | `Communication:Endpoint`, `Communication:ClientId` | Worker | As for codes: no email is sent |
 | `Push:PublicKey`, `Push:PrivateKey`, `Push:Subject` | API, Worker | No phone alert is sent (ADR 0028) |
 | `Addresses:BaseDomain` | Worker | Links in emails cannot be built; the Worker shall not start |

@@ -1,7 +1,7 @@
 # Estimates
 
-- Overall effort: 339 days
-- Complete: 86%
+- Overall effort: 378 days
+- Complete: 77%
 
 | Subsystem | Effort | Complete |
 |---|---|---|
@@ -22,6 +22,7 @@
 | [plan](plan.md) | 17 days | 100% |
 | [admin-platform](admin-platform.md) | 16 days | 30% |
 | [contacts](contacts.md) | 67 days | 100% |
+| [notifications](notifications.md) | 39 days | 0% |
 
 ## Roadmap
 
@@ -30,3 +31,4 @@
 3. The SMS and email providers, which the crew invites need too.
 4. Reliability: a saved answer for every screen and an app that opens without a connection.
 5. Contacts, built in full and switched on (`Features:Contacts`) when its last pull request merges; it went in this order: add (with privacy's guard), profile (with privacy's not-found screen), people, the rest of open, delete, dates, follow-ups, log, memories, habits, connections, groups, import, Today and reminders. A log entry keeps its promises as follow-ups and its yearly milestone as a key date, so log comes after follow-ups and dates.
+6. Notifications, app side, in this order: the settings screen (read, then each change), the time zone under `/api/me`, the delivery pipeline (a reply reaching a phone first, then the rules, every recording handler, the Popkin update email, retries and telemetry), Popkin levels, mutes, unsubscribe, then birthdays, Popkin reminders and digests. No notification email is sent until unsubscribe ships. The admin controls follow.

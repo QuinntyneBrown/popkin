@@ -104,7 +104,7 @@ The requirements stand and the mocks change (L1, "Source and assumptions"):
   with a `Content-ID`, a 320 px thumbnail at most, and the HTML refers to it as `cid:`. Inline
   attachments keep every picture private to its recipient. Azure Communication Services email
   supports them. Their total size per email is kept under 1 MB, and photos past the fifth are
-  counted in the "+{n}" tile, not attached (`<TO SUPPLY>`: confirmed with gap 128's ADR).
+  counted in the "+{n}" tile, not attached ([ADR 0030](../../../adr/0030-notification-emails-by-razor-components.md)).
 
 ### The four changes (L2-164)
 
@@ -153,10 +153,9 @@ exist today.
 - **`NotificationEmailKind`** (Domain enum) — `Update`, `DailyDigest`, `WeeklyDigest`,
   `KeyDateReminder`, `StoryDue`, `WrapUp`.
 - **`OutgoingEmail`** (Domain, table `OutgoingEmails`) — one email to one person:
-  - Fields: `Id`, `PersonId`, `EmailKind`, `PopkinId?`, `DedupKey` (unique), `OpenedAt` (when
-    the window opened), `DueAt` (when it is to be sent), `Status` (`Open`, `Sending`, `Sent`,
-    `Suppressed`, `Failed`, `Dropped`), `SuppressedBy?` (the rule), `Attempts`, `SentAt?` and
-    `ProviderMessageId?`.
+  - Fields: as in [Deliver notifications](../deliver-notifications/README.md), the one shape
+    every email design uses (`Kind` is the `NotificationEmailKind`; `SendAfter` is when it is
+    due; the window opened at `OpenedAt`).
   - A Popkin update's `DedupKey` is `update:{bundleId}`, where the bundle id is the
     `OutgoingEmail.Id` chosen when the window opens.
   - `NotificationDelivery.OutgoingEmailId` ties each change to its email.
@@ -187,8 +186,8 @@ exist today.
 - **`INotificationEmailRenderer`** (Application port) — `Render(EmailModel) → RenderedEmail`
   (`Subject`, `Html`, `Text`, `InlineImages[]` of `ContentId`, `BlobKey` and `MediaType`).
   `NotificationEmailRenderer` (Infrastructure) renders HTML and text from templates and encodes
-  all text. The template technology is gap 128 (`<TO SUPPLY>`: Razor components through
-  `HtmlRenderer` is the candidate the ADR weighs).
+  all text. The templates are Razor components rendered with `HtmlRenderer`
+  ([ADR 0030](../../../adr/0030-notification-emails-by-razor-components.md)).
 - **`INotificationEmailSender`** (Application port) — `SendAsync(OutgoingMessage,
   CancellationToken) → SendResult` (`Accepted(providerMessageId)`, `Transient(reason)` or
   `Permanent(reason)`). `OutgoingMessage` holds `To`, `FromDisplayName`, `RenderedEmail`,
@@ -206,7 +205,7 @@ exist today.
   per email. Because the `DedupKey` is unique and a row moves to `Sending` once, a second tick
   never sends it again (L2-175 AC3).
 - **Telemetry.** `popkin.notifications.deliveries` (`kind`, `channel=email`, `outcome`) and
-  `popkin.notifications.email_latency`, from `DueAt` to the provider accepting, in seconds. No
+  `popkin.notifications.email_latency`, from `SendAfter` to the provider accepting, in seconds. No
   dimension, log or span holds an address, a name, text or a link (L2-174 AC3).
 - **Settings** (ADR 0013, `docs/deployment.md`):
   - `Notifications:EmailSender` (API and Worker): the sender address on `popkin.community`

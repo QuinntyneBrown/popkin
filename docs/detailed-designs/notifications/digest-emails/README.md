@@ -131,7 +131,7 @@ All new.
     - calls `DigestEmailComposer`, the renderer and the sender, then sets the outcome;
     - marks the held deliveries it used with the email's id.
   - It saves after each person, so one failure stops one person only.
-  - When the platform is paused, it adds the row and leaves it `Open`. The dispatcher of
+  - When the platform is paused, it adds the row as `Queued`. The dispatcher of
     [Deliver notifications](../deliver-notifications/README.md) sends it on resume, or drops it
     after 6 hours (L2-170 AC3).
 - **`DigestEmailComposer`** (Application, `INotificationEmailComposer` for `DailyDigest` and
