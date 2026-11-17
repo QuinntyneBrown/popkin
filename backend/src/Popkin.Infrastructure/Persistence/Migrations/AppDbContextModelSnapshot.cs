@@ -1134,6 +1134,46 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("MessageReactions", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.NotificationKindChoice", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Kind")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<bool?>("Email")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("Phone")
+                        .HasColumnType("bit");
+
+                    b.HasKey("PersonId", "Kind");
+
+                    b.ToTable("NotificationKindChoices", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationPreferences", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("EmailOn")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Frequency")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("PersonId");
+
+                    b.ToTable("NotificationPreferences", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Person", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2081,6 +2121,24 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasOne("Popkin.Domain.Message", null)
                         .WithMany()
                         .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationKindChoice", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.NotificationPreferences", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

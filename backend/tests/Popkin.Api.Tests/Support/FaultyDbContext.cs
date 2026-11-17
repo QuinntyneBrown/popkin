@@ -88,6 +88,10 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<PushSubscription> PushSubscriptions => inner.PushSubscriptions;
 
+    public DbSet<NotificationPreferences> NotificationPreferences => inner.NotificationPreferences;
+
+    public DbSet<NotificationKindChoice> NotificationKindChoices => inner.NotificationKindChoices;
+
     public DbSet<ContactGroupMember> ContactGroupMembers => inner.ContactGroupMembers;
 
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;

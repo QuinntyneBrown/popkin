@@ -74,6 +74,10 @@ public interface IAppDbContext
 
     DbSet<PushSubscription> PushSubscriptions { get; }
 
+    DbSet<NotificationPreferences> NotificationPreferences { get; }
+
+    DbSet<NotificationKindChoice> NotificationKindChoices { get; }
+
     DbSet<ContactGroupMember> ContactGroupMembers { get; }
 
     DbSet<WorkingStretch> WorkingStretches { get; }
