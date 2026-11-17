@@ -50,7 +50,9 @@ public sealed class DispatchNotificationsCommandHandler(
         var people = notification.Audience == NotificationAudience.Recipient
             ? notification.RecipientPersonId is { } recipient ? [recipient] : []
             : await db.Memberships
-                .Where(m => m.PopkinId == notification.PopkinId && m.LeftAt == null && m.PersonId != notification.ActorPersonId)
+                // Only those who were members when it happened: one who joined since hears nothing of it.
+                .Where(m => m.PopkinId == notification.PopkinId && m.LeftAt == null && m.JoinedAt <= notification.OccurredAt
+                    && m.PersonId != notification.ActorPersonId)
                 .Select(m => m.PersonId)
                 .ToListAsync(cancellationToken);
         // A reply's author hears of the reply, not of the same message in Everyone too, so one

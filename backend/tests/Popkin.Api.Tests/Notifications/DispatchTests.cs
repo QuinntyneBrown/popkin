@@ -120,4 +120,28 @@ public sealed class DispatchTests
 
         Assert.Empty(api.PhoneAlerts.Sent);
     }
+
+    // Given Mara's message in Everyone, when Ruth joins before the dispatcher ticks, then the
+    // message reaches Joel, who was a member when it was sent, and not Ruth, who was not.
+    [Fact]
+    public async Task A_change_from_before_someone_joined_does_not_reach_them()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        var everyone = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
+        var joel = await api.JoinedAsync(lakeside.Code, "Joel Brennan", "(415) 555-0123");
+        await joel.AllowsAlertsAsync();
+        await api.DispatchAsync();
+        api.Clock.Advance(TimeSpan.FromSeconds(1));
+        await lakeside.Host.SentMessageAsync(lakeside.Id, everyone, "Who has the paddles?");
+        api.Clock.Advance(TimeSpan.FromSeconds(5));
+        var ruth = await api.JoinedAsync(lakeside.Code, "Ruth Lindqvist", "(415) 555-0190");
+        await ruth.AllowsAlertsAsync();
+
+        await api.DispatchAsync();
+
+        var joelId = await joel.PersonIdAsync();
+        var (to, alert) = Assert.Single(api.PhoneAlerts.Sent, a => a.Alert.Body.Contains("Mara", StringComparison.Ordinal));
+        Assert.Equal(joelId, to);
+    }
 }
