@@ -28,6 +28,7 @@
     size="md"
     cdkFocusInitial
     [block]="true"
+    [disabled]="busy()"
     (click)="keep()"
   >
     Keep {{ data.firstName }}

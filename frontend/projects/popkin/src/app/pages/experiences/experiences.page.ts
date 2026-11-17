@@ -19,6 +19,7 @@ import {
   PopkinFrame,
   UnreadTracker,
   filterOf,
+  dialogConfig,
 } from 'api';
 import {
   AppScreen,
@@ -125,14 +126,10 @@ export class ExperiencesPage {
   protected share(): void {
     const opened = this.dialog.open<ExperienceCardView, ShareExperienceData>(
       ShareExperienceDialog,
-      {
+      dialogConfig({
         data: { popkinId: this.popkinId(), accent: this.frame.accent() },
-        ariaLabelledBy: 'dlg-title',
         autoFocus: '#etitle',
-        // pk-dialog draws its own backdrop, as the mocks do.
-        hasBackdrop: false,
-        ariaModal: true,
-      },
+      }),
     );
     opened.closed.subscribe((card) => {
       if (card) this.shared(card);

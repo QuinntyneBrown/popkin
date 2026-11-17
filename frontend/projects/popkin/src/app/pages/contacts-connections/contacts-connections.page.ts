@@ -7,6 +7,7 @@ import {
   ConnectionFilter,
   ConnectionsStore,
   ContactsFrame,
+  dialogConfig,
 } from 'api';
 import {
   AppScreen,
@@ -106,12 +107,12 @@ export class ContactsConnectionsPage {
   protected connect(): void {
     const person = this.store.chosen();
     this.dialog
-      .open<ConnectPersonResult, ConnectPersonData>(ConnectPersonDialog, {
-        data: person ? { contact: { id: person.contactId, firstName: person.firstName } } : {},
-        ariaLabelledBy: 'dlg-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+      .open<ConnectPersonResult, ConnectPersonData>(
+        ConnectPersonDialog,
+        dialogConfig({
+          data: person ? { contact: { id: person.contactId, firstName: person.firstName } } : {},
+        }),
+      )
       .closed.subscribe((result) => {
         if (result?.connection) this.store.connected();
       });

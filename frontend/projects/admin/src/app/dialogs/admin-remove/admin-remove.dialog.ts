@@ -25,19 +25,17 @@ export class RemoveAdminDialog {
   private readonly ref = inject<DialogRef<boolean>>(DialogRef);
   private readonly api = inject(ADMIN_ACCESS_API);
 
-  protected readonly state = new ActionDialogState('Optional');
+  protected readonly state = new ActionDialogState('Optional', this.ref);
   protected readonly reason = signal('');
   protected readonly maxLength = REASON_MAX_LENGTH;
   protected readonly description = removeSentence(this.admin.role);
-  protected readonly busy = computed(() => this.state.status() === 'busy');
+  protected readonly busy = this.state.busy;
   protected readonly lastOwner = computed(() => this.state.failure()?.code === 'last_owner');
 
   protected async confirm(): Promise<void> {
-    this.ref.disableClose = true;
     const removed = await this.state.confirm(this.reason(), (reason) =>
       this.api.removeAdmin(this.admin.id, reason).pipe(map(() => true)),
     );
-    this.ref.disableClose = false;
     if (removed) this.ref.close(true);
   }
 

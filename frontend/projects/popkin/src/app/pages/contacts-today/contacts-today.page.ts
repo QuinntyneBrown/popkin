@@ -35,8 +35,8 @@ import {
   ContactsPage,
   ContactsStart,
   DateList,
-  DriftChip,
   Drift,
+  DriftChip,
   DriftChips,
   EmptyState,
   Icon,
@@ -49,6 +49,7 @@ import {
   Skeleton,
   Spotlight,
   SpotlightFact,
+  Stack,
   Task,
   TodayDateItem,
   TodayDates,
@@ -84,6 +85,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
     RouterLink,
     Skeleton,
     Spotlight,
+    Stack,
     Task,
     TodayDates,
   ],
@@ -204,6 +206,8 @@ export class ContactsTodayPage implements OnInit {
   /** "Import from your Popkins" (L2-151): once some are imported, People shows them. */
   protected importPeople(): void {
     this.dialog
+      // Not dialogConfig(): Import keeps the CDK's own backdrop and is not aria-modal, unlike the
+      // other dialogs. Kept as it shipped until known gap 120 settles it.
       .open<number>(ImportContactsDialog, { ariaLabelledBy: 'dlg-title' })
       .closed.subscribe((imported) => {
         if (!imported) return;

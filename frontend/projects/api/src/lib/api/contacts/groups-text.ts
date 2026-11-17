@@ -1,5 +1,6 @@
 import { GroupKindName, GroupMemberView } from '../../models/groups';
 import { lastTalked } from './people-text';
+import { counted } from '../text/counts';
 
 /** The list's headings (L2-146 AC1). */
 export const GROUP_KIND_HEADINGS: Record<GroupKindName, string> = {
@@ -26,7 +27,7 @@ export const GROUP_NOTE_TOO_LONG = 'Keep the note to 500 characters.';
 
 /** "4 people", "1 person". */
 export function groupPeople(n: number): string {
-  return n === 1 ? '1 person' : `${n} people`;
+  return counted(n, 'person', 'people');
 }
 
 /** "Open “Thursday Night Group”" (L2-148 AC1). */

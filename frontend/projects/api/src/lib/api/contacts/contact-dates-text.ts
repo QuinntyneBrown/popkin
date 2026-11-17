@@ -7,6 +7,8 @@ import {
   ReminderLead,
 } from '../../models/contacts';
 import { possessive } from './contacts-text';
+import { LONG_MONTHS as MONTHS } from '../text/calendar';
+import { daysAway } from '../text/relative-day';
 
 /** The six lead times, in the order every "Remind me" offers them (L2-138 AC1). */
 export const REMINDER_LEADS: readonly { value: ReminderLead; label: string }[] = [
@@ -39,30 +41,13 @@ export const SOON_DAYS = 14;
 /** A profile shows the days left at 30 or fewer (known gap 101, ruled). */
 export const PROFILE_NEAR_DAYS = 30;
 
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
 export function leadLabel(lead: ReminderLead): string {
   return REMINDER_LEADS.find((l) => l.value === lead)?.label ?? '';
 }
 
 /** "today", "tomorrow" or "in {n} days". */
 export function dateWhen(days: number): string {
-  if (days === 0) return 'today';
-  if (days === 1) return 'tomorrow';
-  return `in ${days} days`;
+  return daysAway(days);
 }
 
 /** "Grace’s birthday", "Grace’s anniversary", or the date's own title. */

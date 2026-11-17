@@ -1,4 +1,4 @@
-import type { ContactCircle, KeyDateRowView } from './contacts';
+import type { ContactSummaryView, KeyDateRowView } from './contacts';
 
 /** A group's kind, in the order Groups lists them (L2-146 AC1). */
 export type GroupKindName = 'Household' | 'SmallGroup' | 'Team' | 'Club';
@@ -6,15 +6,7 @@ export type GroupKindName = 'Household' | 'SmallGroup' | 'Team' | 'Club';
 export const GROUP_KINDS: readonly GroupKindName[] = ['Household', 'SmallGroup', 'Team', 'Club'];
 
 /** A member of a group (L2-146 AC2, AC5). */
-export interface GroupMemberView {
-  contactId: string;
-  firstName: string;
-  fullName: string;
-  initials: string;
-  accent: string;
-  photoUrl: string | null;
-  knownAs: string | null;
-  circle: ContactCircle | null;
+export interface GroupMemberView extends ContactSummaryView {
   /** yyyy-MM-dd of the latest conversation, or null. */
   lastTalkedOn: string | null;
   lastTalkedDays: number | null;

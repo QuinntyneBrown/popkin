@@ -4,13 +4,12 @@ import { AvatarView } from '../../models/invite';
 import { PhotoCommentView } from '../../models/photos';
 import { messageTime } from '../chat/thread-text';
 import { PHOTOS_API } from './photos-api';
+import { SHORT_MONTHS as MONTHS, SHORT_WEEKDAYS as WEEKDAYS } from '../text/calendar';
 
 /** The most a comment holds, and where the count starts to show (L2-035 AC3). */
 export const PHOTO_COMMENT_MAX = 500;
 const COUNT_FROM = 450;
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAY = 24 * 60 * 60 * 1000;
 
 /** When a comment was added: "Sat 7:40" within the past week, then the date ("1 Sep"). */

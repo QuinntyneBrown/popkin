@@ -15,6 +15,7 @@ import {
 } from 'api';
 import {
   Button,
+  Cluster,
   EmptyState,
   Icon,
   InvitePreview,
@@ -37,6 +38,7 @@ type Problem = { kind: 'not-found' } | { kind: 'failed' } | { kind: 'limited'; t
   selector: 'pk-join-invite-page',
   imports: [
     Button,
+    Cluster,
     EmptyState,
     Icon,
     InvitePreview,

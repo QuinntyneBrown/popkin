@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
-import { Avatar } from '../avatar/avatar';
+import { FieldLabel } from '../field-label/field-label';
+import { WhoChip } from '../who-chip/who-chip';
 
 /** A member as "Who’s on it?" offers them: their first name and avatar. */
-export interface WhoChip {
+export interface WhoChipMember {
   id: string;
   name: string;
   initials: string;
@@ -18,7 +19,7 @@ export interface WhoChip {
  */
 @Component({
   selector: 'div[pk-who-chips]',
-  imports: [Avatar],
+  imports: [FieldLabel, WhoChip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './who-chips.html',
   styleUrl: './who-chips.scss',
@@ -26,7 +27,7 @@ export interface WhoChip {
 export class WhoChips {
   readonly fieldId = input.required<string>();
   readonly label = input.required<string>();
-  readonly members = input.required<readonly WhoChip[]>();
+  readonly members = input.required<readonly WhoChipMember[]>();
   /** The member on it, or null for nobody. */
   readonly value = model.required<string | null>();
   /** What shows while nobody is chosen. */

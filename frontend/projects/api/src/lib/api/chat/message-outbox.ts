@@ -1,7 +1,8 @@
-import { Injectable, InjectionToken, inject, signal } from '@angular/core';
+import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable, Subject, map, of, switchMap, tap, timeout } from 'rxjs';
 import { MessageView } from '../../models/chat';
 import { toApiProblem } from '../problem';
+import { OutboxQueue } from '../storage/outbox-queue';
 import { CHAT_API } from './chat-api';
 import { NETWORK_STATUS } from './network-status';
 import type { ReplyQuote } from './thread-rows';
@@ -51,17 +52,19 @@ export class MessageOutbox {
   private readonly storage = inject(OUTBOX_STORAGE);
 
   /** What a reload finds was never confirmed; it waits until the thread asks to send it. */
-  private readonly held = signal<OutboxEntry[]>(
-    this.storage.load().map((entry) => (entry.state === 'Sending' ? waiting(entry) : entry)),
-  );
+  private readonly queue = new OutboxQueue<OutboxEntry>({
+    storage: this.storage,
+    id: (entry) => entry.clientMessageId,
+    waiting: (entry) => ({ ...entry, state: 'Waiting', failure: undefined }),
+    // An address made on this device means nothing after a reload.
+    written: (entry) => (entry.photo ? { ...entry, photo: { id: entry.photo.id } } : entry),
+  });
   private readonly inFlight = new Set<string>();
-  /** The photos not yet uploaded, by the name of their message. */
-  private readonly files = new Map<string, File>();
   private readonly sent = new Subject<MessageView>();
   private readonly limited = new Subject<number | undefined>();
   private readonly wrapped = new Subject<string>();
 
-  readonly entries = this.held.asReadonly();
+  readonly entries = this.queue.entries;
   /** Each message the server has stored. */
   readonly sent$: Observable<MessageView> = this.sent.asObservable();
   /** A send refused for sending too fast, with the seconds to wait when the API gave them. */
@@ -70,7 +73,7 @@ export class MessageOutbox {
   readonly wrappedUp$: Observable<string> = this.wrapped.asObservable();
 
   forThread(threadId: string): OutboxEntry[] {
-    return this.held().filter((entry) => entry.threadId === threadId);
+    return this.queue.entries().filter((entry) => entry.threadId === threadId);
   }
 
   enqueue(
@@ -90,23 +93,22 @@ export class MessageOutbox {
       ...(replyTo ? { replyTo } : {}),
       ...(photo ? { photo: { id: null, preview: URL.createObjectURL(photo) } } : {}),
     };
-    if (photo) this.files.set(entry.clientMessageId, photo);
-    this.update((entries) => [...entries, entry]);
+    this.queue.add(entry, photo);
     this.pump(threadId);
     return entry;
   }
 
   retry(clientMessageId: string): void {
-    const entry = this.find(clientMessageId);
+    const entry = this.queue.find(clientMessageId);
     if (!entry || entry.state !== 'Failed') return;
-    this.change(clientMessageId, { state: 'Sending', failure: undefined });
+    this.queue.change(clientMessageId, { state: 'Sending', failure: undefined });
     this.pump(entry.threadId);
   }
 
   discard(clientMessageId: string): void {
-    const entry = this.find(clientMessageId);
+    const entry = this.queue.find(clientMessageId);
     if (!entry) return;
-    this.update((entries) => entries.filter((kept) => kept !== entry));
+    this.queue.update((entries) => entries.filter((kept) => kept !== entry));
     this.forget(entry);
     // The server may hold it with its answer lost; asking is safe whatever it holds.
     if (entry.failure === 'network') {
@@ -119,9 +121,9 @@ export class MessageOutbox {
 
   /** Sends everything that waited for a connection, each thread in order; answers how many. */
   sendWaiting(): number {
-    const waitingNow = this.held().filter((entry) => entry.state === 'Waiting');
+    const waitingNow = this.queue.entries().filter((entry) => entry.state === 'Waiting');
     if (waitingNow.length === 0 || !this.network.online()) return 0;
-    this.update((entries) =>
+    this.queue.update((entries) =>
       entries.map((entry) => (entry.state === 'Waiting' ? { ...entry, state: 'Sending' } : entry)),
     );
     for (const threadId of new Set(waitingNow.map((entry) => entry.threadId))) this.pump(threadId);
@@ -135,9 +137,9 @@ export class MessageOutbox {
     if (!next || next.state !== 'Sending') return;
 
     // A photo whose file a reload lost cannot be sent; it stays to be deleted.
-    const file = this.files.get(next.clientMessageId);
+    const file = this.queue.file(next.clientMessageId);
     if (next.photo && !next.photo.id && !file) {
-      this.change(next.clientMessageId, { state: 'Failed', failure: 'rejected' });
+      this.queue.change(next.clientMessageId, { state: 'Failed', failure: 'rejected' });
       this.pump(threadId);
       return;
     }
@@ -161,7 +163,7 @@ export class MessageOutbox {
       .subscribe({
         next: (message) => {
           this.inFlight.delete(threadId);
-          this.update((entries) =>
+          this.queue.update((entries) =>
             entries.filter((entry) => entry.clientMessageId !== next.clientMessageId),
           );
           this.forget(next);
@@ -183,7 +185,7 @@ export class MessageOutbox {
     return this.chat.uploadPhoto(entry.popkinId, entry.threadId, file).pipe(
       timeout(SEND_TIMEOUT_MS),
       tap((photo) =>
-        this.change(entry.clientMessageId, {
+        this.queue.change(entry.clientMessageId, {
           photo: { id: photo.id, preview: entry.photo?.preview },
         }),
       ),
@@ -193,53 +195,27 @@ export class MessageOutbox {
 
   /** A message that is sent or deleted needs its photo no more. */
   private forget(entry: OutboxEntry): void {
-    this.files.delete(entry.clientMessageId);
+    this.queue.forgetFile(entry.clientMessageId);
     if (entry.photo?.preview) URL.revokeObjectURL(entry.photo.preview);
   }
 
   private failed(entry: OutboxEntry, error: unknown): void {
     const problem = toApiProblem(error);
     if (problem.status === 409 && problem.code === 'popkin_wrapped_up') {
-      this.update((entries) => entries.filter((kept) => kept.popkinId !== entry.popkinId));
+      this.queue.update((entries) => entries.filter((kept) => kept.popkinId !== entry.popkinId));
       this.wrapped.next(entry.popkinId);
       return;
     }
     if (problem.status === 429) {
-      this.change(entry.clientMessageId, { state: 'Failed', failure: 'rate_limited' });
+      this.queue.change(entry.clientMessageId, { state: 'Failed', failure: 'rate_limited' });
       this.limited.next(problem.retryAfterSeconds);
       return;
     }
     if (problem.status >= 400 && problem.status < 500) {
-      this.change(entry.clientMessageId, { state: 'Failed', failure: 'rejected' });
+      this.queue.change(entry.clientMessageId, { state: 'Failed', failure: 'rejected' });
       this.pump(entry.threadId);
       return;
     }
-    this.change(entry.clientMessageId, { state: 'Failed', failure: 'network' });
+    this.queue.change(entry.clientMessageId, { state: 'Failed', failure: 'network' });
   }
-
-  private find(clientMessageId: string): OutboxEntry | undefined {
-    return this.held().find((entry) => entry.clientMessageId === clientMessageId);
-  }
-
-  private change(clientMessageId: string, change: Partial<OutboxEntry>): void {
-    this.update((entries) =>
-      entries.map((entry) =>
-        entry.clientMessageId === clientMessageId ? { ...entry, ...change } : entry,
-      ),
-    );
-  }
-
-  private update(change: (entries: OutboxEntry[]) => OutboxEntry[]): void {
-    this.held.update(change);
-    // An address made on this device means nothing after a reload.
-    this.storage.save(
-      this.held().map((entry) =>
-        entry.photo ? { ...entry, photo: { id: entry.photo.id } } : entry,
-      ),
-    );
-  }
-}
-
-function waiting(entry: OutboxEntry): OutboxEntry {
-  return { ...entry, state: 'Waiting', failure: undefined };
 }

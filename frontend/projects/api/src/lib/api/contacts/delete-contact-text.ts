@@ -1,3 +1,4 @@
+import { counted } from '../text/counts';
 /** The words of Delete a contact (docs/detailed-designs/contacts/delete-contact). */
 
 /** What goes with a contact, as their profile counts it; zero until each feature keeps some. */
@@ -9,9 +10,8 @@ export interface ContactCounts {
 
 export const NO_COUNTS: ContactCounts = { timelineEntries: 0, followUps: 0, memories: 0 };
 
-function counted(n: number, one: string, many: string): string | null {
-  if (n === 0) return null;
-  return `${n} ${n === 1 ? one : many}`;
+function countedOrNone(n: number, one: string, many: string): string | null {
+  return n === 0 ? null : counted(n, one, many);
 }
 
 /** "a, b and c" */
@@ -28,9 +28,9 @@ function listed(parts: string[]): string {
 export function deleteContactSentence(firstName: string, counts: ContactCounts): string {
   const parts = [
     `${firstName}’s profile`,
-    counted(counts.timelineEntries, 'timeline entry', 'timeline entries'),
-    counted(counts.followUps, 'follow-up', 'follow-ups'),
-    counted(counts.memories, 'memory or file', 'memories and files'),
+    countedOrNone(counts.timelineEntries, 'timeline entry', 'timeline entries'),
+    countedOrNone(counts.followUps, 'follow-up', 'follow-ups'),
+    countedOrNone(counts.memories, 'memory or file', 'memories and files'),
   ].filter((part): part is string => part !== null);
   const goes = parts.length === 1 ? 'goes' : 'go';
   return `${listed(parts)} ${goes} for good. Your Popkins don’t change, and ${firstName} isn’t told.`;

@@ -14,7 +14,7 @@
     text="One link, one QR code, and your whole group is in."
   ></aside>
   <header pk-top-bar slot="header" back="/welcome"></header>
-  <form id="join-code" class="stack stack--lg" novalidate (submit)="find($event)">
+  <form id="join-code" pk-stack gap="lg" novalidate (submit)="find($event)">
     @if (join.state() === 'limited') {
       <div pk-alert heading="That’s a lot of tries.">{{ join.tryAgain() }}</div>
     } @else if (join.state() === 'failed') {

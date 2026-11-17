@@ -1,10 +1,9 @@
 import type { EventView } from '../../models/schedule';
 import { dateOf, isWithinAYear } from './schedule-weeks';
+import { SHORT_MONTHS as months } from '../text/calendar';
 
 /** The longest label an event may have (L2-085 AC2). */
 export const EVENT_LABEL_MAX = 40;
-
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** "Sep 25 – 27", "Feb 27 – Mar 2", "Dec 30 2026 – Jan 2 2027", or "Sep 25" for one day. */
 export function eventDays(firstDay: string, lastDay: string): string {

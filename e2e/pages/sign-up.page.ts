@@ -28,6 +28,8 @@ export class SignUpPage {
 
   /** The picture half of the split screen, from 768 px (L2-058 AC10). */
   readonly picture: Locator;
+  /** The form, its fields 24px apart (`pk-stack gap="lg"`). */
+  readonly form: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="sign-up"]');
@@ -40,6 +42,7 @@ export class SignUpPage {
     this.emailTab = page.getByRole('tab', { name: 'Email' });
     this.continue = page.getByRole('button', { name: /Continue|Sending your code/ });
     this.summary = page.locator('.form-summary');
+    this.form = page.getByRole('main').locator('form');
     this.nameError = page.locator('#name-err');
     this.contactError = page.locator('#contact-err');
     this.alert = page.locator('.alert');

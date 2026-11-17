@@ -1,11 +1,10 @@
 import { dateOf, weekLabel } from './schedule-weeks';
+import { SHORT_WEEKDAYS as weekdays } from '../text/calendar';
 
 /*
  * What time off says (docs/detailed-designs/schedules/time-off): the count of each day and
  * whether it stands out.
  */
-
-const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 /** "5 of 6 off" (L2-072 AC4). */
 export function offCount(off: number, members: number): string {

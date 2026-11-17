@@ -22,6 +22,7 @@ import {
   GroupKindName,
   GroupView,
   takeOutLabel,
+  dialogConfig,
 } from 'api';
 import {
   Alert,
@@ -118,12 +119,13 @@ export class NewGroupDialog {
   /** "Add people": picks without saving; those ticked join "Who's in" (L2-147 AC4). */
   protected addPeople(): void {
     this.dialog
-      .open<ContactRowView[], GroupAddPeopleData>(GroupAddPeopleDialog, {
-        data: { name: this.name.value, members: this.people().map((p) => p.id) },
-        ariaLabelledBy: 'add-people-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+      .open<ContactRowView[], GroupAddPeopleData>(
+        GroupAddPeopleDialog,
+        dialogConfig({
+          data: { name: this.name.value, members: this.people().map((p) => p.id) },
+          ariaLabelledBy: 'add-people-title',
+        }),
+      )
       .closed.subscribe((picked) => {
         if (picked?.length) this.people.update((people) => [...people, ...picked]);
       });

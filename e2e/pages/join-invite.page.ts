@@ -30,6 +30,8 @@ export class JoinInvitePage {
   readonly picture: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly wordmark: Locator;
+  /** The wordmark, centred over the invite (`pk-cluster justify="center"`). */
+  readonly brand: Locator;
   readonly preview: Locator;
   readonly avatarStack: Locator;
   readonly skeletons: Locator;
@@ -71,6 +73,7 @@ export class JoinInvitePage {
     this.screen = page.locator('.screen');
     this.picture = page.getByRole('complementary', { name: 'Popkin' });
     this.wordmark = page.getByRole('main').locator('.wordmark');
+    this.brand = page.getByRole('main').locator('.cluster--center').first();
     // The pill's parent is the block that holds the whole preview, in the mock and in the app.
     this.preview = this.invitedBy.locator('..');
     this.skeletons = page.locator('.skeleton');

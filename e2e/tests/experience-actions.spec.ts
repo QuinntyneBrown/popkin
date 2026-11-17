@@ -185,4 +185,27 @@ test.describe('The actions of an experience', () => {
     await expect(confirm.delete).toHaveText('Delete');
     await expect(confirm.delete).toBeEnabled();
   });
+
+  // L2-056 AC8
+  test('cannot be closed while it deletes: Escape, Close and Keep it wait for the answer', async ({
+    page,
+  }) => {
+    await theMockExperienceScreens(page);
+    const release = experiencesOf(page).holdChange('delete');
+    await page.goto(canoe);
+    await new ExperienceDetailPage(page).actions.click();
+    await new ExperienceActionsDialog(page).delete.click();
+    const confirm = new DeleteExperienceDialog(page);
+
+    await confirm.delete.click();
+    await expect(confirm.delete).toHaveText('Deleting…');
+    await page.keyboard.press('Escape');
+    await confirm.close.click();
+
+    await expect(confirm.root).toHaveCount(1);
+    await expect(confirm.keep).toBeDisabled();
+    release();
+    await expect(confirm.root).toHaveCount(0);
+    expect(experiencesOf(page).deleted).toEqual([canoeId]);
+  });
 });

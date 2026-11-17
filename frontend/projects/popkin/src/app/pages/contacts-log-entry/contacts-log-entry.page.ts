@@ -25,6 +25,7 @@ import {
   logHeading,
   loggedAtLabel,
   promiseWhen,
+  dialogConfig,
 } from 'api';
 import {
   Alert,
@@ -53,8 +54,6 @@ import {
 } from 'components';
 import { AddDateData, AddDateDialog } from '../../dialogs/add-date/add-date.dialog';
 import { AddPromiseDialog } from '../../dialogs/add-promise/add-promise.dialog';
-
-const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true } as const;
 
 const CHANNEL_ICONS: Record<TalkChannel, IconName> = {
   InPerson: 'users',
@@ -194,10 +193,12 @@ export class ContactsLogEntryPage {
   /** "Add a promise or follow-up": the dialog Add a promise (known gap 106, ruled). */
   protected addPromise(): void {
     this.dialog
-      .open<PromiseDraft, { firstName: string }>(AddPromiseDialog, {
-        data: { firstName: this.firstName() },
-        ...MODAL,
-      })
+      .open<PromiseDraft, { firstName: string }>(
+        AddPromiseDialog,
+        dialogConfig({
+          data: { firstName: this.firstName() },
+        }),
+      )
       .closed.subscribe((promise) => {
         if (promise) this.store.addPromise(promise);
       });
@@ -205,10 +206,12 @@ export class ContactsLogEntryPage {
 
   /** "Add a date" opens Add a date for this contact (L2-133 AC3). */
   protected addDate(): void {
-    this.dialog.open<unknown, AddDateData>(AddDateDialog, {
-      data: { contactId: this.contactId() },
-      ...MODAL,
-    });
+    this.dialog.open<unknown, AddDateData>(
+      AddDateDialog,
+      dialogConfig({
+        data: { contactId: this.contactId() },
+      }),
+    );
   }
 
   protected save(event: Event): void {

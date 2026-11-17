@@ -17,6 +17,7 @@ import {
   ExperienceStore,
   PopkinFrame,
   UnreadTracker,
+  dialogConfig,
 } from 'api';
 import {
   AppScreen,
@@ -134,19 +135,18 @@ export class ExperienceDetailPage {
   protected comment(): void {
     const draft = this.store.commentDraft();
     if (!draft) return;
-    const opened = this.dialog.open<ExperienceCommentView, AddCommentData>(AddCommentDialog, {
-      data: {
-        popkinId: this.popkinId(),
-        experienceId: this.experienceId(),
-        accent: this.frame.accent(),
-        ...draft,
-      },
-      ariaLabelledBy: 'dlg-title',
-      autoFocus: 'textarea',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<ExperienceCommentView, AddCommentData>(
+      AddCommentDialog,
+      dialogConfig({
+        data: {
+          popkinId: this.popkinId(),
+          experienceId: this.experienceId(),
+          accent: this.frame.accent(),
+          ...draft,
+        },
+        autoFocus: 'textarea',
+      }),
+    );
     opened.closed.subscribe((comment) => {
       if (comment) this.store.commented(comment);
     });
@@ -158,15 +158,14 @@ export class ExperienceDetailPage {
     if (!experience) return;
     const opened = this.dialog.open<ExperienceAction, ExperienceActionsData>(
       ExperienceActionsDialog,
-      {
+      dialogConfig({
         data: {
           accent: this.frame.accent(),
           title: experience.title,
           canEdit: experience.canEdit,
           canDelete: experience.canDelete,
         },
-        ...MODAL,
-      },
+      }),
     );
     opened.closed.subscribe((action) => {
       if (action === 'edit') this.edit();
@@ -179,11 +178,10 @@ export class ExperienceDetailPage {
     if (!experience) return;
     const opened = this.dialog.open<ExperienceCardView, ShareExperienceData>(
       ShareExperienceDialog,
-      {
+      dialogConfig({
         data: { popkinId: this.popkinId(), accent: this.frame.accent(), editing: experience },
         autoFocus: '#etitle',
-        ...MODAL,
-      },
+      }),
     );
     opened.closed.subscribe((changed) => {
       if (changed) this.store.refresh();
@@ -192,15 +190,17 @@ export class ExperienceDetailPage {
 
   private delete(): void {
     const title = this.store.source()?.title ?? '';
-    const opened = this.dialog.open<boolean, DeleteExperienceData>(DeleteExperienceDialog, {
-      data: {
-        popkinId: this.popkinId(),
-        experienceId: this.experienceId(),
-        accent: this.frame.accent(),
-      },
-      ariaDescribedBy: 'dlg-desc',
-      ...MODAL,
-    });
+    const opened = this.dialog.open<boolean, DeleteExperienceData>(
+      DeleteExperienceDialog,
+      dialogConfig({
+        data: {
+          popkinId: this.popkinId(),
+          experienceId: this.experienceId(),
+          accent: this.frame.accent(),
+        },
+        ariaDescribedBy: 'dlg-desc',
+      }),
+    );
     opened.closed.subscribe((deleted) => {
       if (!deleted) return;
       this.toaster.show('success', 'Experience deleted', `${title} is gone from the list.`);
@@ -208,6 +208,3 @@ export class ExperienceDetailPage {
     });
   }
 }
-
-/** pk-dialog draws its own backdrop, as the mocks do. */
-const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true } as const;

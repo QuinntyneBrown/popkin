@@ -11,8 +11,8 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { JoinCode } from 'api';
-import { Alert, Button, Screen, SplitAside, TextField, TopBar } from 'components';
+import { JoinCode, dialogConfig } from 'api';
+import { Alert, Button, Screen, SplitAside, Stack, TextField, TopBar } from 'components';
 import { ScanToJoinDialog } from '../../dialogs/scan-to-join/scan-to-join.dialog';
 
 /**
@@ -21,7 +21,7 @@ import { ScanToJoinDialog } from '../../dialogs/scan-to-join/scan-to-join.dialog
  */
 @Component({
   selector: 'pk-join-code-page',
-  imports: [Alert, Button, ReactiveFormsModule, Screen, SplitAside, TextField, TopBar],
+  imports: [Alert, Button, ReactiveFormsModule, Screen, SplitAside, Stack, TextField, TopBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './join-code.page.html',
   providers: [JoinCode],
@@ -59,12 +59,11 @@ export class JoinCodePage {
 
   /** "Scan a QR code instead": the same dialog as My Popkins'. */
   protected scan(): void {
-    this.dialog.open(ScanToJoinDialog, {
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    this.dialog.open(
+      ScanToJoinDialog,
+      dialogConfig({
+        ariaDescribedBy: 'dlg-desc',
+      }),
+    );
   }
 }

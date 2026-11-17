@@ -102,6 +102,8 @@ export class ContactsPeoplePage {
   /** "Import from your Popkins" (L2-151): those imported show at once. */
   protected importPeople(): void {
     this.dialog
+      // Not dialogConfig(): Import keeps the CDK's own backdrop and is not aria-modal, unlike the
+      // other dialogs. Kept as it shipped until known gap 120 settles it.
       .open<number>(ImportContactsDialog, { ariaLabelledBy: 'dlg-title' })
       .closed.subscribe((imported) => {
         if (!imported) return;

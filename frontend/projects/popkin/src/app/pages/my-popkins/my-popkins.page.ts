@@ -2,7 +2,14 @@ import { Dialog } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { CONTACTS_API, MyPopkinsStore, SessionStore, accentOf, accountLabel } from 'api';
+import {
+  CONTACTS_API,
+  MyPopkinsStore,
+  SessionStore,
+  accentOf,
+  accountLabel,
+  dialogConfig,
+} from 'api';
 import { catchError, map, of } from 'rxjs';
 import {
   Avatar,
@@ -111,12 +118,11 @@ export class MyPopkinsPage {
 
   /** Opens "Scan to join" (L2-015 AC1). */
   protected scan(): void {
-    this.dialog.open(ScanToJoinDialog, {
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    this.dialog.open(
+      ScanToJoinDialog,
+      dialogConfig({
+        ariaDescribedBy: 'dlg-desc',
+      }),
+    );
   }
 }

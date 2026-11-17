@@ -17,6 +17,7 @@ import {
   UnreadTracker,
   biggestEmpty,
   featureOffText,
+  dialogConfig,
 } from 'api';
 import {
   AppScreen,
@@ -83,14 +84,13 @@ export class BurnDownPage {
 
   /** "New story" from the empty burn-down (L2-071 AC8); the burn-down follows the change. */
   protected newStory(): void {
-    this.dialog.open<StoryView, NewStoryData>(NewStoryDialog, {
-      data: { popkinId: this.popkinId(), accent: this.frame.accent() },
-      ariaLabelledBy: 'dlg-title',
-      autoFocus: '#stitle',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    this.dialog.open<StoryView, NewStoryData>(
+      NewStoryDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.frame.accent() },
+        autoFocus: '#stitle',
+      }),
+    );
   }
 
   constructor() {

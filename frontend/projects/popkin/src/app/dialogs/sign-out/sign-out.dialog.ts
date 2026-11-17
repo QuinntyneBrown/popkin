@@ -1,8 +1,6 @@
-import { ViewportScroller } from '@angular/common';
 import { DialogRef } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { AUTH_API, POPKIN_REALTIME, POPKINS_SNAPSHOT, SessionStore, toApiProblem } from 'api';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { AUTH_API, ConfirmDialogState, SessionTeardown } from 'api';
 import { Alert, Button, DialogFrame } from 'components';
 
 /**
@@ -19,34 +17,19 @@ import { Alert, Button, DialogFrame } from 'components';
 export class SignOutDialog {
   private readonly ref = inject<DialogRef<void>>(DialogRef);
   private readonly auth = inject(AUTH_API);
-  private readonly realtime = inject(POPKIN_REALTIME);
-  private readonly sessions = inject(SessionStore);
-  private readonly snapshot = inject(POPKINS_SNAPSHOT);
-  private readonly router = inject(Router);
-  private readonly scroller = inject(ViewportScroller);
+  private readonly teardown = inject(SessionTeardown);
 
-  protected readonly busy = signal(false);
-  protected readonly failed = signal(false);
+  private readonly state = new ConfirmDialogState(this.ref);
+  protected readonly busy = this.state.busy;
+  protected readonly failed = this.state.failed;
 
-  protected signOut(): void {
-    if (this.busy()) return;
-    this.busy.set(true);
-    this.failed.set(false);
-    // Escape does not close it while the request is under way.
-    this.ref.disableClose = true;
-    this.auth.signOut().subscribe({
-      next: () => this.signedOut(),
-      error: (error: unknown) => {
-        // A session that had already ended is signed out all the same.
-        if (toApiProblem(error).status === 401) {
-          this.signedOut();
-          return;
-        }
-        this.ref.disableClose = false;
-        this.busy.set(false);
-        this.failed.set(true);
-      },
-    });
+  protected async signOut(): Promise<void> {
+    // A session that had already ended is signed out all the same.
+    const sent = await this.state.send(
+      () => this.auth.signOut(),
+      (problem) => (problem.status === 401 ? 'done' : 'failed'),
+    );
+    if (sent) this.signedOut();
   }
 
   protected stay(): void {
@@ -54,12 +37,7 @@ export class SignOutDialog {
   }
 
   private signedOut(): void {
-    this.realtime.stop();
-    this.sessions.clear();
-    // Nothing of the person stays on a device they are signed out of (L2-054).
-    this.snapshot.clear();
     this.ref.close();
-    // The welcome screen opens at its top, not where the account was scrolled to.
-    void this.router.navigateByUrl('/welcome').then(() => this.scroller.scrollToPosition([0, 0]));
+    void this.teardown.end('/welcome');
   }
 }

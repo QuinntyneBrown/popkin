@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted, 15 November 2026. Amends [ADR 0008](0008-component-parity-specs.md) for components
+Accepted, 15 November 2026; amended by [ADR 0029](0029-one-library-no-unused-components.md), which withdraws building ahead of a screen. Amends [ADR 0008](0008-component-parity-specs.md) for components
 built before any screen uses them.
 
 ## Context

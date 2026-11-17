@@ -167,7 +167,8 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
   keeps the last answer. Unit tested.
 - **`ContactsOutbox`** (`contacts/contacts-outbox.ts`) — modelled on `MessageOutbox`: entries
   `{ clientId, kind, body, state: 'Waiting' | 'Sending' | 'Failed' }`, kept in local storage
-  through `CONTACTS_OUTBOX_STORAGE` so a reload loses nothing. `enqueue(kind, body)` sends at once
+  through `CONTACTS_OUTBOX_STORAGE` (`LocalContactsOutboxStorage`, a JSON list under
+  `popkin.contacts-outbox` through the `api` library's `JsonListStorage`) so a reload loses nothing. `enqueue(kind, body)` sends at once
   when `NETWORK_STATUS.online()` is true; offline it keeps the entry and shows the offline toast
   once. On `backOnline$` it sends the waiting entries one at a time, in order. Deleting and
   importing do not pass through it. A refused entry

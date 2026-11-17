@@ -1,6 +1,6 @@
 @if (problem(); as problem) {
   <div pk-screen>
-    <div class="cluster cluster--center"><span pk-wordmark tone="coral"></span></div>
+    <div pk-cluster justify="center"><span pk-wordmark tone="coral"></span></div>
     @switch (problem.kind) {
       @case ('not-found') {
         <div
@@ -58,7 +58,7 @@
       photo="/images/lake.jpg"
       [muted]="wrappedUp()"
     ></aside>
-    <div class="cluster cluster--center"><span pk-wordmark tone="coral"></span></div>
+    <div pk-cluster justify="center"><span pk-wordmark tone="coral"></span></div>
     @if (preview(); as preview) {
       <div
         pk-invite-preview

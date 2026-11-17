@@ -63,6 +63,11 @@ export class ContactsConnectionsPage {
     return this.map.getByRole('button', { name, exact: true });
   }
 
+  /** The key of a kind of link before its word in Show ("Family"), `pk-link-key`. */
+  linkKey(kind: 'family' | 'partner' | 'friend' | 'work'): Locator {
+    return this.filters.locator(`.link-key--${kind}`);
+  }
+
   filter(name: string): Locator {
     return this.filters.getByRole('button', { name, exact: true });
   }

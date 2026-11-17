@@ -13,6 +13,7 @@ import {
   memberLastTalked,
   memberNames,
   openPopkin,
+  dialogConfig,
 } from 'api';
 import {
   AppScreen,
@@ -146,32 +147,27 @@ export class ContactsGroupsPage {
 
   /** "New group" (L2-147 AC1): once made, it opens. */
   protected newGroup(): void {
-    this.dialog
-      .open<GroupView>(NewGroupDialog, {
-        ariaLabelledBy: 'dlg-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
-      .closed.subscribe((group) => {
-        if (!group) return;
-        this.store.saved(group);
-        void this.router.navigate(['/contacts/groups', group.id]);
-      });
+    this.dialog.open<GroupView>(NewGroupDialog, dialogConfig()).closed.subscribe((group) => {
+      if (!group) return;
+      this.store.saved(group);
+      void this.router.navigate(['/contacts/groups', group.id]);
+    });
   }
 
   /** "Add people" (L2-147 AC3). */
   protected addPeople(group: GroupView): void {
     this.dialog
-      .open<ContactRowView[], GroupAddPeopleData>(GroupAddPeopleDialog, {
-        data: {
-          groupId: group.id,
-          name: group.name,
-          members: group.members.map((m) => m.contactId),
-        },
-        ariaLabelledBy: 'add-people-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+      .open<ContactRowView[], GroupAddPeopleData>(
+        GroupAddPeopleDialog,
+        dialogConfig({
+          data: {
+            groupId: group.id,
+            name: group.name,
+            members: group.members.map((m) => m.contactId),
+          },
+          ariaLabelledBy: 'add-people-title',
+        }),
+      )
       .closed.subscribe((added) => {
         if (added?.length) this.store.load();
       });

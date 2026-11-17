@@ -9,6 +9,16 @@ export interface AvatarView {
 }
 
 /**
+ * A member as a message's author, a story's owner, a sharer or an uploader shows them: their
+ * membership, first name and avatar. One view for all of them (ADR 0029).
+ */
+export interface MemberBriefView {
+  membershipId: string;
+  firstName: string;
+  avatar: AvatarView;
+}
+
+/**
  * What an invite link shows before joining (L2-012). It is all someone who is not a member
  * learns of a Popkin: no member name but the inviter's first name.
  */
