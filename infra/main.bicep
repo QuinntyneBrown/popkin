@@ -59,6 +59,7 @@ param sqlLocation string = 'centralus'
 var suffix = uniqueString(resourceGroup().id)
 var acrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var blobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+#disable-next-line no-unused-vars // Kept for dataProtectionKeyAccess, commented out below.
 var keyVaultCryptoUserRoleId = '12338af0-0e69-4776-bea7-57ae8d297424'
 
 resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' existing = {
@@ -180,15 +181,18 @@ resource dataProtectionKey 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
   properties: { kty: 'RSA', keySize: 2048 }
 }
 
-resource dataProtectionKeyAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(vault.id, identity.id, keyVaultCryptoUserRoleId)
-  scope: vault
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', keyVaultCryptoUserRoleId)
-    principalId: identity.properties.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
+// Not yet: the deploy identity may not grant Key Vault Crypto User (eng/Initialize-Azure.ps1), so
+// the apps get no access to the vault and no DataProtection__KeyId. The ring rests unwrapped in its
+// private blob until the role is added there and this assignment comes back (ADR 0032).
+// resource dataProtectionKeyAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: guid(vault.id, identity.id, keyVaultCryptoUserRoleId)
+//   scope: vault
+//   properties: {
+//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', keyVaultCryptoUserRoleId)
+//     principalId: identity.properties.principalId
+//     principalType: 'ServicePrincipal'
+//   }
+// }
 
 resource photosAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(storage.id, identity.id, blobDataContributorRoleId)
@@ -256,7 +260,7 @@ var photosEnv = [
 // ADR 0032: the API reads the unsubscribe links the Worker writes.
 var dataProtectionEnv = [
   { name: 'DataProtection__BlobUri', value: '${storage.properties.primaryEndpoints.blob}${dataProtectionContainer.name}/keys.xml' }
-  { name: 'DataProtection__KeyId', value: dataProtectionKey.properties.keyUri }
+  // { name: 'DataProtection__KeyId', value: dataProtectionKey.properties.keyUri }, with the assignment above.
   { name: 'DataProtection__ClientId', value: identity.properties.clientId }
 ]
 // Notification email (L2-163, L2-168): sent from the codes' address, and only with a postal
