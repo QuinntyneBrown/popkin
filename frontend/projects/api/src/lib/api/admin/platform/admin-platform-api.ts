@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   AdminFeature,
   AdminFeatures,
+  AdminNotificationDefaults,
   AdminNotificationHold,
   AdminNotificationHolds,
   AdminNotificationKind,
@@ -12,6 +13,7 @@ import {
   FeatureMode,
   FeaturePopkinMatch,
   HoldPopkinMatch,
+  NotificationDefaultsChange,
   NotificationKindId,
 } from '../../../models/admin';
 import { PopkinFeature } from '../../../models/home';
@@ -54,6 +56,12 @@ export interface AdminPlatformApi {
   holdPopkin(popkinId: string, reason: string | null): Observable<AdminNotificationHold>;
   /** 403 for a Viewer; 404 `hold_not_found`. */
   releaseHold(holdId: string, reason: string | null): Observable<void>;
+  notificationDefaults(): Observable<AdminNotificationDefaults>;
+  /** 400 `default_not_allowed`, `no_change`; 403 for Support and Viewer. */
+  changeNotificationDefaults(
+    defaults: NotificationDefaultsChange,
+    reason: string | null,
+  ): Observable<AdminNotificationDefaults>;
 }
 
 export const ADMIN_PLATFORM_API = new InjectionToken<AdminPlatformApi>('AdminPlatformApi');
@@ -137,5 +145,19 @@ export class HttpAdminPlatformApi implements AdminPlatformApi {
 
   releaseHold(holdId: string, reason: string | null): Observable<void> {
     return this.http.post<void>(`/api/admin/notifications/holds/${holdId}/release`, { reason });
+  }
+
+  notificationDefaults(): Observable<AdminNotificationDefaults> {
+    return this.http.get<AdminNotificationDefaults>('/api/admin/notifications/defaults');
+  }
+
+  changeNotificationDefaults(
+    defaults: NotificationDefaultsChange,
+    reason: string | null,
+  ): Observable<AdminNotificationDefaults> {
+    return this.http.put<AdminNotificationDefaults>('/api/admin/notifications/defaults', {
+      ...defaults,
+      reason,
+    });
   }
 }

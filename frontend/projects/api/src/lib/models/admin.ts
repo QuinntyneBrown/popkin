@@ -254,3 +254,27 @@ export interface HoldPopkinMatch {
   colour: string;
   inviteCode: string;
 }
+
+/** How often a member's activity email comes until they choose (L2-173). */
+export type DefaultActivityEmail = 'AsItHappens' | 'DailyDigest' | 'WeeklyDigest';
+
+/** How early a new birthday reminds until the person chooses (L2-173 AC2, L2-139 AC4). */
+export type DefaultBirthdayLead =
+  'Off' | 'OnTheDay' | 'OneDayBefore' | 'ThreeDaysBefore' | 'OneWeekBefore';
+
+/** The five defaults, as `PUT /api/admin/notifications/defaults` takes them with a reason. */
+export interface NotificationDefaultsChange {
+  activityEmail: DefaultActivityEmail;
+  bundleMinutes: number;
+  mostEmailsPerDay: number;
+  /** "HH:mm". */
+  quietFrom: string;
+  quietTo: string;
+  birthdayLead: DefaultBirthdayLead;
+}
+
+/** `GET /api/admin/notifications/defaults` (docs/detailed-designs/admin-platform/notification-defaults). */
+export interface AdminNotificationDefaults extends NotificationDefaultsChange {
+  changedAt: string | null;
+  changedByName: string | null;
+}

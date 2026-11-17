@@ -137,6 +137,67 @@ describe('FakeNotificationsBackend (ADR 0030)', () => {
   });
 });
 
+describe('FakeNotificationsBackend defaults (L2-173)', () => {
+  const put = (fake: FakeNotificationsBackend, body: object, admin: FakeRequest['admin'] = owner) =>
+    fake.handle(request('PUT', '/api/admin/notifications/defaults', body, admin))!;
+  const code = (answer: { body: unknown }) => (answer.body as { code: string }).code;
+
+  it('reads the first values', () => {
+    expect(backend().handle(request('GET', '/api/admin/notifications/defaults'))!.body).toEqual({
+      activityEmail: 'AsItHappens',
+      bundleMinutes: 10,
+      mostEmailsPerDay: 12,
+      quietFrom: '21:00',
+      quietTo: '08:00',
+      birthdayLead: 'OneWeekBefore',
+      changedAt: null,
+      changedByName: null,
+    });
+  });
+
+  it('saves new defaults with who changed them', () => {
+    const fake = backend();
+    const answer = put(fake, { activityEmail: 'DailyDigest', bundleMinutes: 20, reason: 'Fewer' });
+    expect(answer.status).toBe(200);
+    expect(answer.body).toMatchObject({
+      activityEmail: 'DailyDigest',
+      bundleMinutes: 20,
+      changedByName: 'Lena Fischer',
+      changedAt: now.toISOString(),
+    });
+  });
+
+  // One case per refusal.
+  it.each([
+    [{ bundleMinutes: 0, reason: 'x' }, 400, 'default_not_allowed'],
+    [{ mostEmailsPerDay: 101, reason: 'x' }, 400, 'default_not_allowed'],
+    [{ quietFrom: '21:15', reason: 'x' }, 400, 'default_not_allowed'],
+    [{ birthdayLead: 'TwoWeeksBefore', reason: 'x' }, 400, 'default_not_allowed'],
+    [{ bundleMinutes: 10, reason: 'x' }, 400, 'no_change'],
+    [{ bundleMinutes: 20, reason: ' ' }, 400, 'reason_required'],
+  ])('refuses %o with %i %s', (body, status, refusal) => {
+    const answer = put(backend(), body);
+    expect(answer.status).toBe(status);
+    expect(code(answer)).toBe(refusal);
+  });
+
+  it('names the field a value is wrong for', () => {
+    const answer = put(backend(), { bundleMinutes: 61, reason: 'x' });
+    expect((answer.body as { title: string }).title).toBe(
+      'bundleMinutes: Enter a whole number from 1 to 60.',
+    );
+  });
+
+  it.each([
+    ['Support', { name: 'Aiko Tanaka', role: 'Support' as const }],
+    ['Viewer', { name: 'Sam Ortiz', role: 'Viewer' as const }],
+  ])('refuses %s (L2-173 AC5)', (_, admin) => {
+    expect(code(put(backend(), { bundleMinutes: 20, reason: 'x' }, admin))).toBe(
+      'role_not_allowed',
+    );
+  });
+});
+
 describe('FakeNotificationsBackend holds (L2-172)', () => {
   const support = { name: 'Aiko Tanaka', role: 'Support' as const };
   const viewer = { name: 'Sam Ortiz', role: 'Viewer' as const };
