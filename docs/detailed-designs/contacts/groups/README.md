@@ -20,8 +20,8 @@ The entities are `ContactGroup` and `ContactGroupMember` of the shared Contacts 
 ([Contacts](../../README.md#contacts)). Making a Popkin is [Start a Popkin](../../popkins/start-popkin/README.md);
 the invite follows the crew invite of [Recap](../../wrap-up/recap/README.md) (L2-046 AC5), which
 sends a new Popkin's invite link to people over SMS or email through `ICrewInviteSender`. A
-profile's group chip lists the contact's groups ([A contact's profile](../contact-profile/README.md));
-what it opens is gap 108.
+profile's group chip lists the contact's groups ([A contact's profile](../contact-profile/README.md))
+and opens that group (L2-146 AC4).
 
 ## Description
 
@@ -57,55 +57,67 @@ Dialogs, `docs/mocks/dialogs/`:
 - "Start a Popkin with them" opens Name your Popkin with the group's name, and invites Grace and
   Ben once the Popkin is made (mock note, L2-148 AC3).
 
-### Conflicts and gaps
+### Rulings (known gaps 108 and 116, settled 2026-11-16)
 
-- **How a group is linked to a Popkin (gap 108).** The design gives `ContactGroup` an optional
-  `PopkinId`. "Start a Popkin with them" sets it to the Popkin it makes. Any other way to set or
-  clear it, and how the mocks' Thursday Night Group of 4 maps to a Popkin of 9, are open:
-  `<TO SUPPLY>`.
-- **A linked Popkin the person has left or that has wrapped up.** "Open" shows only while the
-  person is a member (`Membership.LeftAt` is null). For a Popkin they left, the design treats the
-  group as linked to no Popkin; for a wrapped-up one, "Open" leads to its recap. Both are
-  `<TO SUPPLY>` under gap 108.
-- **Telling a contact.** L2-122 AC3 tells a contact nothing about being added to Contacts or a
-  group. The group invite of L2-148 AC3 is a Popkin invite the person chose to send; it names the
-  Popkin and its Host and says nothing of Contacts or the group.
-- **Who is invited.** A member with a phone gets an SMS and one with only an email gets an email,
-  as the crew invite does. A member with neither is skipped. What the person is told of a skipped
-  member, the toasts after the invites, and whether an imported contact's account channel wins
-  over the contact's own details are `<TO SUPPLY>`.
-- **The emoji.** The list shows each group's emoji, and New group offers no emoji field. How a
-  group gets its emoji is `<TO SUPPLY>` (proposed new gap).
-- **New group's defaults.** The mock draws "Club" chosen; the default kind is `<TO SUPPLY>`.
-  "Add people" in New group opens a dialog titled "Add people to {group}" before the group has a
-  name; its title there is `<TO SUPPLY>`.
-- **The name's length.** A Popkin's name is at most 40 characters (L2-008); a group's limit and
-  what Name your Popkin does with a longer name are `<TO SUPPLY>`.
-- **Coming up** — how far ahead and how many key dates are `<TO SUPPLY>` (gaps 99 and 103).
-- **Renaming, deleting a group and taking people out** after it is made are gap 108. Deleting a
-  contact removes their group memberships through `ContactRemoval`, and the group stays
-  ([Delete a contact](../delete-contact/README.md)).
+- **The link.** Only "Start a Popkin with them" links a group, through `ContactGroup.PopkinId`
+  (L2-148 AC4). The Popkin keeps its own members: the mock's Thursday Night Group of 4 and its
+  Popkin of 9, and "Tigers U9" against "Tigers U9 Parents", are as they should be. "Open" shows
+  while the person's membership has `LeftAt` null, a wrapped-up Popkin included (its address shows
+  the recap). Once they leave, the group counts as linked to none and "Start a Popkin with them"
+  shows again; a new start replaces the old link. A group linked to a Popkin the person is still in
+  refuses another (`409` `group_linked_elsewhere`).
+- **Who is invited** (L2-148 AC5). The contact's own phone gets a text, else their own email an
+  email, as the crew invite's message says; a member with neither, or whose send fails, is
+  skipped; the toast says the invites are on their way, and the created screen offers the
+  Popkin's link for anyone skipped. The invite
+  goes once: asking again for the Popkin the group is already linked to sends nothing. Import's
+  account details never replace the contact's own.
+- **Emoji and colour** (gap 116, L2-146 AC6). The emoji follows the kind: 🏡 Household,
+  🕯️ Small group, 🤝 Team, ⭐ Club; New group has no emoji field. The colour comes from the
+  group's id through `AvatarAccent.For`, as a person's does. The mocks are redrawn to these emoji.
+- **New group** (L2-147 AC4, AC5). "What kind" starts on "Household". "Add people" there reads
+  "Add people to {name}", or "Add people to the group" with no name yet; it picks without saving,
+  and those ticked join "Who's in", each with "Take {first name} out". Name is at most 40
+  characters ("Keep it to 40 characters.", `name_too_long`), note at most 500 ("Keep the note to
+  500 characters.", `note_too_long`); names may repeat.
+- **Kept as made** (L2-147 AC7). A group is not renamed or deleted. People leave a group through
+  the "Groups" toggles of their own Edit (L2-147 AC6), which `SaveContactRequest.groupIds` sets in
+  full; deleting a contact removes their memberships through `ContactRemoval`, and the group
+  stays, empty or not.
+- **The open group's address.** `/contacts/groups/{groupId}`, so a profile's chip (L2-146 AC4),
+  the phone's back link and the browser's Back all work; an unknown id shows the list.
+- **Members and Coming up** (L2-146 AC5). How the person knows each member is their Known as,
+  else their circle. When they last talked reads as on People ("Thu", "Aug 13"). "Coming up" is
+  the members' next key dates within a year, at most three, soonest first, each read as on Dates
+  ("Ruth’s birthday", "Oct 24"). Members list in the order they joined, those who joined together
+  A to Z. Add people lists the group's own first, then everyone else A to Z.
 
 ### API
 
 Every endpoint is on `GroupsController` (`Popkin.Api/Controllers/Contacts/`); each sends one
 MediatR request. Another person's group answers `404` `group_not_found` (L2-122 AC1).
 
-- `GET /api/contacts/groups` — `200` `GroupDto[]`: `id`, `name`, `kind`, `emoji`, `note`,
-  `members` (`GroupMemberDto[]`: `contactId`, `firstName`, `fullName`, `photoUrl`, `howKnown`,
-  `lastTalkedOn`), `comingUp` (`KeyDateSoonDto[]`), and `popkin` (`{ id, name, address }`, or
-  null when there is none or the person is not a member).
+- `GET /api/contacts/groups?on={yyyy-MM-dd}` — `200` `GroupDto[]`, by kind then name: `id`,
+  `name`, `kind`, `emoji`, `accent`, `note`, `members` (`GroupMemberDto[]`: `contactId`,
+  `firstName`, `fullName`, `initials`, `accent`, `photoUrl`, `knownAs`, `circle`, `lastTalkedOn`,
+  `lastTalkedDays`), `comingUp` (`KeyDateRowDto[]`, read for `on`), and `popkin` (`{ id, name }`,
+  or null when there is none or the person is no longer in it). Without `on`, as the contact form
+  reads it for the names only, the API's own day stands in.
 - `POST /api/contacts/groups` — body `{ clientId, name, kind, note?, contactIds[] }`. `201`
   `GroupDto`. Refusals: `400` `name_required`, `name_too_long`, `kind_not_allowed`,
-  `note_too_long` (limits `<TO SUPPLY>`); `404` `contact_not_found`.
+  `note_too_long` (40 and 500 characters); `404` `contact_not_found`. A resend with the same
+  `clientId` answers the group made.
 - `POST /api/contacts/groups/{groupId}/members` — body `{ contactIds[] }`. `200` `GroupDto`. A
   contact already in the group is left as it is. Refusals: `404` `group_not_found`,
   `contact_not_found`.
 - `POST /api/contacts/groups/{groupId}/popkin` — body `{ popkinId }`. `202 Accepted`. Links the
   group to the Popkin and sends the group invite. Refusals: `404` `group_not_found`,
   `popkin_not_found`; `403` `host_only`; `409` `popkin_wrapped_up`; `409`
-  `group_linked_elsewhere` when the group is linked to another Popkin. Asking again for the same
-  Popkin sends nothing more.
+  `group_linked_elsewhere` when the group is linked to another Popkin the person is still in.
+  Asking again for the same Popkin sends nothing more.
+- The profile (`GET /api/contacts/people/{id}`) gains `groups` (`{ id, name, emoji, accent }[]`),
+  and `SaveContactRequest` gains `groupIds` (Add someone and Edit set the contact's groups in full;
+  without it Edit leaves them alone); a group that is not the person's is `404` `group_not_found`.
 
 ### Backend
 
@@ -129,51 +141,60 @@ MediatR request. Another person's group answers `404` `group_not_found` (L2-122 
 
 ### Frontend (Popkin web app)
 
-- **`ContactsGroupsPage`** (`pages/contacts-groups/contacts-groups.page.ts`, route
-  `/contacts/groups`, `shell: 'app'`, `page: 'contacts-groups'`) — composes `pk-contacts-page`,
-  `pk-page-head`, `pk-group-browser`, `pk-contact-list` for each member, `pk-info-card` for the
-  note, `pk-empty-state` and `pk-skeleton`. The open group is the query parameter `?group={id}`,
-  so the phone's back link and the browser's Back close it (proposal, `<TO SUPPLY>`).
+- **`ContactsGroupsPage`** (`pages/contacts-groups/contacts-groups.page.ts`, routes
+  `/contacts/groups` and `/contacts/groups/:groupId`, `shell: 'app'`, `page: 'contacts-groups'`)
+  — composes `pk-contacts-page`, `pk-page-head` ("Connections", "New group"), `pk-group-browser`
+  with the open group's actions ("Open “{Popkin}”" or "Start a Popkin with them", "Add people")
+  and parts: `pk-list-head` "{n} people" over `pk-group-members`, the note as `pk-info-card` with
+  `pk-info-line`, and "Coming up" as `pk-coming-up`; `pk-empty-state` and `pk-skeleton`.
 - **`NewGroupDialog`** (`dialogs/new-group/new-group.dialog.ts`) — `pk-dialog`, `pk-text-field`
-  "Name", `pk-choice-chips` "What kind", the "Who’s in" list with `pk-icon-button` "Take {first
-  name} out", "Add people", `pk-textarea` "Note", `pk-form-summary` and "Make the group" /
-  "Making it…".
+  "Name", `pk-choice-chips` "What kind" (on "Household"), "Who’s in" as `pk-person-pick` with
+  "Take {first name} out", "Add people", `pk-textarea` "Note", `pk-form-summary` and "Make the
+  group" / "Making it…". Name and note are checked before anything is sent; it closes with the
+  group, which then opens.
 - **`GroupAddPeopleDialog`** (`dialogs/group-add-people/group-add-people.dialog.ts`) —
-  `pk-search-field` "Search your people" over the person's contacts (matching is gap 101), a tick
-  list of `pk-contact-list` where members are ticked, disabled and "In the group", and "Add {n}
-  people" / "Adding…", off with nobody new ticked. New group uses it to pick, without a save.
-- **"Start a Popkin with them"** links to `/new?group={groupId}`. `NameYourPopkinPage` reads it
-  into `NewPopkinDraft.groupOf` and fills the name with the group's name. `HowLongPage`, which
-  makes the Popkin, then calls `ContactsApi.invitePopkinGroup(groupId, popkinId)` and opens the
-  created screen without waiting, as it does with `crewOf`.
-- **"Open “{Popkin}”"** opens the Popkin's address ([Open a Popkin by its address](../../popkins/open-by-address/README.md)).
-- **`GroupsStore`** (`frontend/projects/api/src/lib/api/contacts/groups-store.ts`) — `loading |
-  ready | failed`, `byKind` (kinds in order, empty kinds left out), `open`, `make(request)`,
-  `addPeople(groupId, contactIds)`. Writes go through `ContactsOutbox`.
+  `pk-search-field` "Search your people" (`matchesName`, as People) and `pk-tick-list`: the
+  group's own first, ticked, disabled and "In the group", then everyone else A to Z. "Add {n}
+  people" / "Adding…", off with nobody new ticked. From New group (no `groupId`) it only closes
+  with those ticked.
+- **"Start a Popkin with them"** links to `/new?group={groupId}&name={name}`. `NameYourPopkinPage`
+  reads both into `NewPopkinDraft` (`groupOf`, the name); `NewPopkinCreator`, once the Popkin is
+  made, calls `ContactsApi.invitePopkinGroup(popkinId, groupId)` without waiting and says
+  "Invites are on their way" (or "We couldn’t invite the group"), as it does with `crewOf`.
+- **"Open “{Popkin}”"** opens `/p/{popkinId}`.
+- **`GroupsStore`** (`api/contacts/groups-store.ts`) — `loading | ready | failed`, `byKind`
+  (kinds in order, empty kinds left out), `openId` and `open`, `saved(group)`.
 - **`groups-text.ts`** — kind headings and labels, "{n} people", "Open “{Popkin}”", "Add {n}
-  people", "Add people to {group}" and "Take {first name} out".
-- **`CONTACTS_API`** — `groups()`, `makeGroup(request)`, `addGroupPeople(groupId, contactIds)`,
-  `invitePopkinGroup(groupId, popkinId)`.
-- **`pk-group-browser`** (components, backlog row 20) — the kinds as headings, each group a link
-  with `aria-current` when open, and the detail beside or below.
+  people", "Add people to {group}" (or "the group"), "Take {first name} out", member names, how
+  known and last talked, and the name and note errors.
+- **`CONTACTS_API`** — `groups(on)`, `makeGroup(request)`, `addGroupPeople(groupId, contactIds)`,
+  `invitePopkinGroup(popkinId, groupId)`.
+- **Profile** — "People around {first name}" ends with the contact's group chips, each a link to
+  `/contacts/groups/{groupId}` (`ContactProfileView.groups`).
+- **Add someone and Edit** — "Groups" lists `groups()` as `pk-chip` toggles, the contact's own
+  pressed, and `ContactFormStore` sends `groupIds`; with no group the part is left out.
+- **Components** — `pk-group-browser` (backlog row 20); new `pk-group-members`, `pk-coming-up`
+  and `pk-tick-list` (row 34; Import uses the tick list too).
 
 ### Tests
 
-- API acceptance tests (InMemory, `Popkin.Api.Tests/Contacts/GroupsTests`): a group made with two
-  contacts is listed under its kind; adding people leaves existing members alone; an empty name is
-  `400` `name_required`; another person's group is `404` `group_not_found`; the Host of a new
-  Popkin links a group and each member with a phone or email is sent one invite through a fake
-  `ICrewInviteSender`; asking twice sends once; a non-Host is `403` `host_only`; "Open" is absent
-  after the person leaves the Popkin.
-- Direct tests of `ContactGroup.LinkTo` (none, same, other) and `GroupRules`.
-- Unit tests (api library): `GroupsStore.byKind` leaves out an empty kind and keeps the order of
-  L2-146 AC1; `NewPopkinDraft.groupOf`; `groups-text`.
-- Playwright (`e2e/tests/contacts/groups.spec.ts`) through `ContactsGroupsPage`, `NewGroupDialog`
-  and `GroupAddPeopleDialog` with recorded responses: the list and an open group as drawn,
-  "Open", the empty and error states, New group invalid and busy, Add people with the button off,
-  and "Start a Popkin with them" reaching Name your Popkin with the name filled and the invite
-  request sent after the Popkin is made. `routes.ts` gains every state of the three screens.
-- Parity: `pk-group-browser`, `pk-contact-list` in its tick form, `pk-info-card`.
+- API acceptance tests (InMemory, `Popkin.Api.Tests/Contacts/GroupsTests`, 12): a group made is
+  listed with its emoji, members and note, and a resend saves once; the name, note and kind
+  refusals; another person's contact or group; adding people leaves members alone; "Coming up"
+  holds the next three within a year; the contact form sets a contact's groups; starting a Popkin
+  invites the members by phone or email, once; "Open" only while the person is in the Popkin, and
+  a Popkin they are still in refuses another; a deleted contact leaves the group.
+  `PurgeDeletedAccountsTests` checks erasure.
+- Direct tests (`Popkin.Application.Tests/Contacts/ContactGroupTests`): the emoji per kind,
+  joining once, linking, and the name, note and kind rules, one case per row.
+- Unit tests (api library, `groups-store.spec.ts`): `byKind`, the open group, a group saved, the
+  empty and failed states, and the words.
+- Playwright (`tests/contacts-groups.spec.ts`) through `ContactsGroupsPage`, `NewGroupDialog` and
+  `GroupAddPeopleDialog`: the list and an open group as drawn, "Open", "Start a Popkin with them"
+  through to the invite, the phone's back link, a profile chip, empty, failed and loading; New
+  group refused, too long, made with people picked, busy and failed; Add people; the form's
+  toggles. `routes.ts` keys every state.
+- Parity: `pk-group-members`, `pk-coming-up` and `pk-tick-list`.
 
 ## Requirements
 
