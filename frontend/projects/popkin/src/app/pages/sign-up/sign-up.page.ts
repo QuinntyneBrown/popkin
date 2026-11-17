@@ -29,6 +29,7 @@ import {
   SegmentedControl,
   SegmentedOption,
   SplitAside,
+  Stack,
   TextField,
   TopBar,
 } from 'components';
@@ -45,6 +46,7 @@ import {
     Screen,
     SegmentedControl,
     SplitAside,
+    Stack,
     TextField,
     TopBar,
   ],

@@ -12,13 +12,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminSignInStore, safeReturnUrl } from 'api';
-import { AdminEntry, Alert, Button, Icon, Link, TextField } from 'components';
+import { AdminEntry, Alert, Button, Icon, Link, Stack, TextField } from 'components';
 import { filter } from 'rxjs';
 
 /** Admin sign in (L2-088): a staff email, then the six-digit code sent to it. */
 @Component({
   selector: 'pk-sign-in-page',
-  imports: [AdminEntry, Alert, Button, Icon, Link, ReactiveFormsModule, TextField],
+  imports: [AdminEntry, Alert, Button, Icon, Link, ReactiveFormsModule, Stack, TextField],
   providers: [AdminSignInStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sign-in.page.html',

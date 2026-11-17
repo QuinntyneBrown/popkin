@@ -57,7 +57,7 @@
       </div>
     } @else if (ready()) {
       <div pk-contacts-grid layout="lead">
-        <div class="stack stack--lg">
+        <div pk-stack gap="lg">
           @if (spotlight(); as next) {
             <section
               pk-spotlight
@@ -102,11 +102,11 @@
             </section>
           }
         </div>
-        <div class="stack stack--lg">
+        <div pk-stack gap="lg">
           @if (toDo()) {
             <section aria-labelledby="todo">
               <div pk-list-head headingId="todo" heading="To do today"></div>
-              <ul class="stack stack--sm">
+              <ul pk-stack gap="sm">
                 @for (item of followUps(); track item.followUp.id) {
                   <li
                     pk-task

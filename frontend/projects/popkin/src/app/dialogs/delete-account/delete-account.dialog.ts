@@ -12,8 +12,14 @@ import {
   SessionStore,
   hostedLine,
 } from 'api';
-import { Alert, Button, DialogFrame, TextField } from 'components';
+import { Alert, Button, DialogFrame, Term, TermList, TextField } from 'components';
 import { Toaster } from 'api';
+
+/** What is removed and what stays without the person's name (L2-049 AC1). */
+const OUTCOMES: readonly Term[] = [
+  { term: 'Removed:', text: 'your name, photo, phone number and direct messages.' },
+  { term: 'Kept, without your name:', text: 'your messages and photos in Popkins.' },
+];
 
 /** The word typed to confirm (L2-049 AC2). */
 const CONFIRMATION = 'delete';
@@ -25,7 +31,7 @@ const CONFIRMATION = 'delete';
  */
 @Component({
   selector: 'pk-delete-account-dialog',
-  imports: [Alert, Button, DialogFrame, ReactiveFormsModule, TextField],
+  imports: [Alert, Button, DialogFrame, ReactiveFormsModule, TermList, TextField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './delete-account.dialog.html',
 })
@@ -40,6 +46,7 @@ export class DeleteAccountDialog {
   private readonly router = inject(Router);
   private readonly scroller = inject(ViewportScroller);
 
+  protected readonly outcomes = OUTCOMES;
   protected readonly hosted = hostedLine(this.impact.hostedActivePopkins.map((p) => p.name));
   protected readonly confirmation = new FormControl('', { nonNullable: true });
   private readonly typed = toSignal(this.confirmation.valueChanges, { initialValue: '' });

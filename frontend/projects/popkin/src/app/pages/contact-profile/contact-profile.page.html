@@ -1,6 +1,6 @@
 <div pk-app-screen accent="coral" layout="tab" body="fill">
   <div pk-contacts-page>
-    <div slot="head" class="cluster cluster--between">
+    <div slot="head" pk-cluster justify="between">
       <a pk-back-link routerLink="/contacts/people">People</a>
       @if (store.state() !== 'notFound' && firstName()) {
         <div class="cluster">
@@ -19,7 +19,7 @@
       @case ('loading') {
         <h1 class="visually-hidden">{{ firstName() ?? 'Contact' }}</h1>
         <p class="visually-hidden" role="status">{{ loading() }}</p>
-        <div class="stack stack--lg" aria-hidden="true">
+        <div pk-stack gap="lg" aria-hidden="true">
           <span pk-skeleton shape="title" [width]="50"></span>
           <span pk-skeleton shape="text" [width]="40"></span>
           <span pk-skeleton shape="text" [width]="70"></span>
@@ -53,7 +53,7 @@
       }
       @case ('ready') {
         @if (profile(); as profile) {
-          <div class="stack stack--lg">
+          <div pk-stack gap="lg">
             <section
               pk-contact-id
               [name]="profile.name"
@@ -75,7 +75,7 @@
               ></span>
             </section>
             <div pk-contacts-grid layout="about">
-              <div class="stack stack--lg">
+              <div pk-stack gap="lg">
                 <section aria-labelledby="dates">
                   <div pk-list-head headingId="dates" heading="Key dates"></div>
                   @if (keyDates().length) {
@@ -143,7 +143,7 @@
               <section [attr.aria-label]="historyLabel()">
                 <nav pk-view-nav [label]="historyLabel()" [views]="views()"></nav>
                 @if (current() === 'timeline' && !timeline.empty()) {
-                  <div class="cluster cluster--between">
+                  <div pk-cluster justify="between">
                     <div
                       pk-filter-chips
                       label="Show"
@@ -216,7 +216,7 @@
                     >
                   </div>
                 } @else if (current() === 'memories') {
-                  <div class="cluster cluster--between">
+                  <div pk-cluster justify="between">
                     <p class="text-muted">
                       Photos, files and notes you’ve kept about {{ profile.firstName }}. Private to
                       you.

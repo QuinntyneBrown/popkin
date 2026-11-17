@@ -11,7 +11,7 @@
   [links]="store.step() === 'code'"
 >
   @if (store.step() === 'email') {
-    <form class="stack stack--lg" novalidate (submit)="send($event)">
+    <form pk-stack gap="lg" novalidate (submit)="send($event)">
       @if (store.emailProblem(); as problem) {
         <div pk-alert heading="Check your email address">
           <a pk-link href="#email" (click)="goToEmail($event)">{{ problem.summary }}</a>
@@ -42,7 +42,7 @@
       </button>
     </form>
   } @else {
-    <form class="stack stack--lg" novalidate (submit)="submitCode($event)">
+    <form pk-stack gap="lg" novalidate (submit)="submitCode($event)">
       <div
         #codeField
         pk-text-field

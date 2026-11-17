@@ -12,6 +12,8 @@ export class DeleteAccountDialog {
   /** "Removed: …" and "Kept, without your name: …" (L2-049 AC1). */
   readonly removed: Locator;
   readonly kept: Locator;
+  /** What is removed and what is kept, as a list (`pk-term-list`). */
+  readonly terms: Locator;
   readonly confirm: Locator;
   /** "Delete my account", which reads "Deleting…" while it is sent. */
   readonly delete: Locator;
@@ -33,6 +35,7 @@ export class DeleteAccountDialog {
     this.hosted = this.body.locator('.alert--warning');
     this.removed = this.body.getByRole('listitem').filter({ hasText: /^Removed:/ });
     this.kept = this.body.getByRole('listitem').filter({ hasText: /^Kept, without your name:/ });
+    this.terms = this.body.getByRole('list');
     this.confirm = this.root.getByRole('textbox', { name: 'Type delete to confirm' });
     // A link in the confirm mock, which goes on to the landing page; a button in the app.
     this.delete = this.footer.locator('.btn--danger');

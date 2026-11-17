@@ -8,7 +8,7 @@ import {
   PopkinFeature,
   accentOf,
 } from 'api';
-import { Alert, Button, Screen, SettingRow, SplitAside, TopBar } from 'components';
+import { Alert, Button, Screen, SettingRow, SplitAside, Stack, TopBar } from 'components';
 
 /**
  * The last step of starting a Popkin while a feature is offered: whether it has Plan and
@@ -16,7 +16,7 @@ import { Alert, Button, Screen, SettingRow, SplitAside, TopBar } from 'component
  */
 @Component({
   selector: 'pk-what-it-has-page',
-  imports: [Alert, Button, Screen, SettingRow, SplitAside, TopBar],
+  imports: [Alert, Button, Screen, SettingRow, SplitAside, Stack, TopBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './what-it-has.page.html',
 })

@@ -29,6 +29,7 @@ import {
   PermissionTableRow,
   SegmentedControl,
   SegmentedOption,
+  Stack,
   Toolbar,
 } from 'components';
 import { map } from 'rxjs';
@@ -55,6 +56,7 @@ const ACCENTS = ['plum', 'teal', 'coral', 'amber', 'sky', 'berry'];
     PermissionTable,
     RouterLink,
     SegmentedControl,
+    Stack,
     Toolbar,
   ],
   providers: [AdminsStore],
