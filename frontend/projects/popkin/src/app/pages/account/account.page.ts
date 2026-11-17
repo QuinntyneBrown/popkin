@@ -26,6 +26,7 @@ import {
   initialsOf,
   photoProblem,
   photoProblemText,
+  dialogConfig,
 } from 'api';
 import {
   Alert,
@@ -171,12 +172,7 @@ export class AccountPage {
 
   /** "Sign out" asks first (L2-048 AC5); focus comes back here when it closes (L2-057 AC2). */
   protected signOut(): void {
-    this.dialog.open(SignOutDialog, {
-      ariaLabelledBy: 'dlg-title',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    this.dialog.open(SignOutDialog, dialogConfig());
   }
 
   /**
@@ -186,13 +182,13 @@ export class AccountPage {
   protected deleteAccount(): void {
     this.accounts.getDeletionImpact().subscribe({
       next: (impact) =>
-        this.dialog.open<void, DeletionImpactView>(DeleteAccountDialog, {
-          data: impact,
-          ariaLabelledBy: 'dlg-title',
-          autoFocus: '#confirm',
-          hasBackdrop: false,
-          ariaModal: true,
-        }),
+        this.dialog.open<void, DeletionImpactView>(
+          DeleteAccountDialog,
+          dialogConfig({
+            data: impact,
+            autoFocus: '#confirm',
+          }),
+        ),
       // A failure stays until it is dismissed (L2-056 AC7).
       error: () =>
         this.toaster.show(
