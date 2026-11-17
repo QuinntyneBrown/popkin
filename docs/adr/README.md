@@ -33,13 +33,14 @@ shares. Records 0009 to 0013 come from the audit
 | [0020](0020-popkin-community-on-front-door.md) | popkin.community: an Azure DNS zone and Azure Front Door with managed certificates; the app at `app` and `*`, the marketing site at the apex and `www` | Accepted |
 | [0021](0021-codes-and-invites-by-azure-communication-services.md) | Codes and crew invites are sent by Azure Communication Services: SMS from a toll-free number, email from `popkin.community`, signed in with the managed identity | Accepted |
 | [0022](0022-photos-in-azure-blob-storage.md) | Photo files are kept in a private Azure Blob Storage container, signed in with the managed identity; the API still signs and serves every address | Accepted |
-| [0023](0023-features-switched-on-by-a-setting.md) | A feature that is not ready is switched on by an API setting under `Features:`, which the API enforces and the app asks for before a screen opens | Accepted |
+| [0023](0023-features-switched-on-by-a-setting.md) | A feature that is not ready is switched on by an API setting under `Features:`, which the API enforces and the app asks for before a screen opens | Accepted, amended by 0030 |
 | [0024](0024-admins-moderation-and-switches-in-the-database.md) | Admins, moderation and feature switches are kept in the database: admin roles and sessions, an audit log in the same transaction, moderation only through reports and a recorded view, switches Off, chosen or everyone | Accepted, amended by 0026 |
 | [0025](0025-library-components-ahead-of-their-screens.md) | Library components may be built ahead of their screens: their parity spec and acceptance test come with the first screen that uses them | Accepted, amended by 0029 |
 | [0026](0026-the-host-chooses-a-popkins-features.md) | The Host chooses a Popkin's features within what the admin app offers: on only while offered and switched on, a row only for a feature switched off | Accepted |
 | [0027](0027-parity-specs-run-by-hand.md) | The component parity specs run by hand with `npm run parity`; CI runs the behaviour specs only | Accepted |
 | [0028](0028-phone-reminders-by-web-push.md) | Phone reminders are sent by Web Push, signed with VAPID by the Worker | Accepted |
 | [0029](0029-one-library-no-unused-components.md) | One component library: a component exists only while a screen uses it, look-alikes merge only where the mocks draw one block, and logic the apps share lives once in `api` | Accepted |
+| [0030](0030-admin-notifications-on-a-fake-backend.md) | The admin app's Notifications page runs on a fake backend, an interceptor switched on by one build-time setting and off in e2e, until the API serves it | Accepted |
 
 ## Format
 

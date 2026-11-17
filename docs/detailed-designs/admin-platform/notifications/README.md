@@ -32,6 +32,11 @@ and honoured within a minute, as feature switches are
 ([Feature switches](../feature-switches/README.md)). A member's own choices are never changed by
 either lever. They come back as they were when the lever is released.
 
+> **Built against a fake backend.** The admin app's side is built first, on the fake of
+> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md); the API, Domain and Worker
+> parts below are not built yet. The dialogs take the reason with `pk-textarea` and
+> `ActionDialogState`, as Features does; `pk-reason-field` is not built.
+
 ## Description
 
 ### Screens and states

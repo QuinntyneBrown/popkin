@@ -26,6 +26,11 @@ An admin holds a Popkin. The designs also list holds on one person added by hand
 to stop all mail while travelling"), but draw no way to add one. That is gap 125; the table can
 hold such a row, and no endpoint adds one.
 
+> **Built against a fake backend.** The admin app's side is built first, on the fake of
+> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md); the API, Domain and Worker
+> parts below are not built yet. The dialogs take the reason with `pk-textarea` and
+> `ActionDialogState`, as Features does; `pk-reason-field` is not built.
+
 ## Description
 
 ### Screens and states
