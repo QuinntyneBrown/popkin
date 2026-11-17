@@ -1,0 +1,21 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Popkin has a console for the people who run it. This is how they get in."] },
+    { "id": "signin", "bars": 5, "lines": ["Lena opens the audit log, and the console asks who she is: her staff email first."] },
+    { "id": "code", "bars": 5, "lines": ["A code goes to that address, and it works for ten minutes."] },
+    { "id": "audit", "bars": 7, "lines": ["Then the page she asked for opens. The audit log lists every action taken in the console, newest first, with who did it.", "It is kept for two years, and nobody can edit it."] },
+    { "id": "admins", "bars": 5, "lines": ["Admins and roles lists everyone who can sign in, with their role and when they were last active."] },
+    { "id": "add", "bars": 6, "lines": ["An Owner adds an admin with their popkin dot app address. They are invited until they first sign in with a code."] },
+    { "id": "role", "bars": 6, "lines": ["Changing a role says what changes, and asks for a reason, which goes into the audit log."] },
+    { "id": "roles", "bars": 5, "lines": ["What each role can do sets Owner, Support and Viewer side by side."] },
+    { "id": "grow", "bars": 4, "lines": ["On a phone it is one column. On a desktop, a sidebar names the pages."] },
+    { "id": "proof", "bars": 6, "lines": ["What the tests prove: a right code that is not an admin's is turned away, and the console always keeps one Owner."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey twenty-four. Popkin is a free platform for pop-up communities."] }
+  ]
+}
