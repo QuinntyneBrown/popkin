@@ -1,3 +1,4 @@
+import type { UploadEvent } from './photos';
 import type { AroundView, ConnectionDraft } from './connections';
 import type { GroupChipView } from './groups';
 /** How many contacts I keep: the count line of every Contacts screen (L2-121, L2-126 AC1). */
@@ -39,15 +40,19 @@ export interface SaveContactRequest {
   groupIds?: string[];
 }
 
-/** A key date held by the contact form until "Save": `id` for one kept (L2-129 AC2). */
-export interface KeyDateDraft {
-  id?: string;
+/** What a key date is, however it is held: its kind, title and day (ADR 0029). */
+export interface KeyDateFields {
   kind: KeyDateKind;
   title: string | null;
   month: number;
   day: number;
   year: number | null;
   everyYear: boolean;
+}
+
+/** A key date held by the contact form until "Save": `id` for one kept (L2-129 AC2). */
+export interface KeyDateDraft extends KeyDateFields {
+  id?: string;
   reminder: ReminderLead;
 }
 
@@ -163,14 +168,8 @@ export interface KeyDateRowView {
 }
 
 /** A key date as a profile shows it; `nextOn` is null once a one-off date has passed. */
-export interface ContactKeyDateView {
+export interface ContactKeyDateView extends KeyDateFields {
   id: string;
-  kind: KeyDateKind;
-  title: string | null;
-  month: number;
-  day: number;
-  year: number | null;
-  everyYear: boolean;
   reminder: ReminderLead;
   nextOn: string | null;
   daysLeft: number | null;
@@ -191,14 +190,8 @@ export interface ContactDatesView {
 }
 
 /** Add a date (L2-138); with no `lead` the date takes my default for its kind. */
-export interface AddKeyDateRequest {
+export interface AddKeyDateRequest extends KeyDateFields {
   clientId: string;
-  kind: KeyDateKind;
-  title: string | null;
-  month: number;
-  day: number;
-  year: number | null;
-  everyYear: boolean;
   lead: ReminderLead;
 }
 
@@ -335,8 +328,7 @@ export interface MemoriesView {
 export type MemoryKind = 'photo' | 'file' | 'note';
 
 /** A photo or file on its way: how much is sent, then what was kept. */
-export type MemoryUploadEvent<T> =
-  { kind: 'progress'; sent: number; total: number } | { kind: 'done'; memory: T };
+export type MemoryUploadEvent<T> = UploadEvent<{ sent: number; total: number }, { memory: T }>;
 
 /** How often a habit comes round (L2-145). */
 export type HabitRhythm = 'Weekly' | 'EveryTwoWeeks' | 'Monthly';
@@ -380,4 +372,20 @@ export interface StartHabitRequest {
   contactId: string;
   what: string;
   rhythm: HabitRhythm;
+}
+
+/**
+ * A contact as a short row shows them: names, face, how they are known and their circle. The
+ * connection map's people and a group's members share it (ADR 0029).
+ */
+export interface ContactSummaryView {
+  contactId: string;
+  firstName: string;
+  fullName: string;
+  initials: string;
+  /** The contact's colour as the API names it: "Sky". */
+  accent: string;
+  photoUrl: string | null;
+  knownAs: string | null;
+  circle: ContactCircle | null;
 }

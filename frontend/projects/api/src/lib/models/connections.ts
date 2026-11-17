@@ -1,4 +1,4 @@
-import { ContactCircle } from './contacts';
+import { ContactSummaryView } from './contacts';
 
 /** How two contacts know each other, as the API names it (L2-150). */
 export type ConnectionKindName = 'Family' | 'Partner' | 'Friend' | 'Work';
@@ -12,17 +12,7 @@ export const CONNECTION_KINDS: readonly ConnectionKindName[] = [
 ];
 
 /** A face on the map (L2-149 AC1, AC6). */
-export interface MapPersonView {
-  contactId: string;
-  firstName: string;
-  fullName: string;
-  initials: string;
-  /** The contact's colour as the API names it: "Sky". */
-  accent: string;
-  photoUrl: string | null;
-  knownAs: string | null;
-  circle: ContactCircle | null;
-}
+export type MapPersonView = ContactSummaryView;
 
 /** A line between two faces, the pair smaller id first. */
 export interface ConnectionView {

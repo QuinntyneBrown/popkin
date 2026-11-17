@@ -1,19 +1,20 @@
-import { AdminFeature, Feature, FeatureMode } from '../../../models/admin';
+import { AdminFeature, FeatureMode } from '../../../models/admin';
+import { PopkinFeature } from '../../../models/home';
 
 /** What each feature is, on its panel (L2-076 AC1). */
-export const FEATURE_ABOUT: Record<Feature, string> = {
+export const FEATURE_ABOUT: Record<PopkinFeature, string> = {
   Plan: 'The shared board and burn-down for a Popkin’s to-dos.',
   Schedules: 'Time off and a week view of when members are free.',
 };
 
 /** The name of the feature's tab in a Popkin: Schedules shows as "Schedule". */
-export const FEATURE_TAB: Record<Feature, string> = {
+export const FEATURE_TAB: Record<PopkinFeature, string> = {
   Plan: 'Plan',
   Schedules: 'Schedule',
 };
 
 /** What turning a feature off keeps, said in its dialog (L2-076 AC2, L2-077 AC5). */
-const KEPT: Record<Feature, string> = {
+const KEPT: Record<PopkinFeature, string> = {
   Plan: 'every story and the burn-down come back as they were when you turn it on again.',
   Schedules: 'everyone’s time off and hours come back as they were when you turn it on again.',
 };
@@ -68,7 +69,7 @@ function names(list: readonly string[]): string {
 
 /** The heading and sentence of the dialog for choosing `mode` (L2-076 AC2–AC4). */
 export function modeDialogText(
-  feature: Feature,
+  feature: PopkinFeature,
   mode: FeatureMode,
   chosen: readonly string[],
 ): { heading: string; description: string } {
@@ -101,7 +102,7 @@ export function modeDialogText(
 }
 
 /** The message that confirms a change (L2-076 AC7). */
-export function modeSavedToast(feature: Feature, mode: FeatureMode): [string, string] {
+export function modeSavedToast(feature: PopkinFeature, mode: FeatureMode): [string, string] {
   const tab = FEATURE_TAB[feature];
   switch (mode) {
     case 'Off':
@@ -123,13 +124,13 @@ export function modeSavedToast(feature: Feature, mode: FeatureMode): [string, st
 }
 
 /** The add dialog's sentence (L2-076 AC6). */
-export function addPopkinText(feature: Feature): string {
+export function addPopkinText(feature: PopkinFeature): string {
   return `Only live Popkins can be added. It gets the ${FEATURE_TAB[feature]} tab within a minute.`;
 }
 
 /** What the add dialog says under its search: who already has it, or that nothing matched. */
 export function addPopkinNotes(
-  feature: Feature,
+  feature: PopkinFeature,
   text: string,
   matches: readonly { name: string; alreadyOn: boolean }[],
 ): string[] {
