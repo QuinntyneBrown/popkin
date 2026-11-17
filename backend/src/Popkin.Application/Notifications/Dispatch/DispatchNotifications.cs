@@ -137,7 +137,9 @@ public sealed class DispatchNotificationsCommandHandler(
     private async Task<int> SendPhoneAlertsAsync(NotificationPlatform platform, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var due = await db.NotificationDeliveries
-            .Where(d => d.Channel == NotificationChannel.Phone && d.Status == NotificationDeliveryStatus.Due && d.SendAfter <= now)
+            .Where(d => d.Channel == NotificationChannel.Phone
+                && (d.Status == NotificationDeliveryStatus.Due && d.SendAfter <= now
+                    || d.Status == NotificationDeliveryStatus.Retrying && d.NextAttemptAt <= now))
             .Join(db.NotificationEvents, d => d.EventId, e => e.Id, (d, e) => new { Delivery = d, Event = e })
             .OrderBy(x => x.Event.OccurredAt)
             .ToListAsync(cancellationToken);
@@ -176,13 +178,31 @@ public sealed class DispatchNotificationsCommandHandler(
                     }
                 }
 
-                foreach (var alert in alerts)
+                try
                 {
-                    await phone.SendAsync(group.Key.PersonId, alert, cancellationToken);
-                    sent++;
-                }
+                    foreach (var alert in alerts)
+                    {
+                        await phone.SendAsync(group.Key.PersonId, alert, cancellationToken);
+                        sent++;
+                    }
 
-                passing.ForEach(p => p.Delivery.MarkSent(now));
+                    passing.ForEach(p => p.Delivery.MarkSent(now));
+                }
+                catch (Exception) when (!cancellationToken.IsCancellationRequested)
+                {
+                    // No device took it: tried again on the backoff, and given up at six hours.
+                    foreach (var (delivery, _) in passing)
+                    {
+                        if (RetryBackoff.GivenUp(delivery.SendAfter, now))
+                        {
+                            delivery.Drop();
+                        }
+                        else
+                        {
+                            delivery.Retry(now + RetryBackoff.After(delivery.Attempts + 1));
+                        }
+                    }
+                }
             }
 
             await db.SaveChangesAsync(cancellationToken);

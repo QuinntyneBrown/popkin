@@ -52,7 +52,7 @@ public sealed class SetWorkingHoursCommandHandler(
             }
         }
 
-        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, membership.PersonId, membership.Id, clock.GetUtcNow());
+        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, membership.PersonId, membership.Id, clock.GetUtcNow(), facts: new { change = "hours" });
         await db.SaveChangesAsync(cancellationToken);
         // The members with the view open read their week again.
         await notifier.ScheduleChanged(popkin.Id);

@@ -8,10 +8,13 @@ namespace Popkin.Infrastructure.Notifications;
 /// <summary>
 /// Sends a notification email through Azure Communication Services (ADR 0021): HTML and plain
 /// text from `Notifications:EmailSender`, with the one-click unsubscribe headers (L2-168 AC4) and
-/// no `Reply-To`, since replies are not read. Nothing it is given is logged.
+/// no `Reply-To`, since replies are not read. Pictures travel inline, read from the private photo
+/// store, under 1 MB in all (ADR 0030). Nothing it is given is logged.
 /// </summary>
-public sealed class AcsNotificationEmailSender(EmailClient client, string senderAddress) : INotificationEmailSender
+public sealed class AcsNotificationEmailSender(EmailClient client, string senderAddress, IPhotoStore photos) : INotificationEmailSender
 {
+    private const long MostInline = 1024 * 1024;
+
     public async Task<EmailSendResult> SendAsync(OutgoingEmailMessage message, CancellationToken cancellationToken)
     {
         var email = new EmailMessage(
@@ -22,6 +25,25 @@ public sealed class AcsNotificationEmailSender(EmailClient client, string sender
         email.Headers.Add("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
         try
         {
+            long total = 0;
+            foreach (var image in message.Email.InlineImages)
+            {
+                if (await photos.OpenAsync(image.BlobKey, cancellationToken) is not { } stored)
+                {
+                    continue;
+                }
+
+                await using var content = stored.Content;
+                var data = await BinaryData.FromStreamAsync(content, cancellationToken);
+                if (total + data.ToMemory().Length > MostInline)
+                {
+                    break;
+                }
+
+                total += data.ToMemory().Length;
+                email.Attachments.Add(new EmailAttachment(image.ContentId, stored.ContentType, data) { ContentId = image.ContentId });
+            }
+
             var operation = await client.SendAsync(WaitUntil.Started, email, cancellationToken);
             return new EmailSendResult.Accepted(operation.Id);
         }

@@ -99,6 +99,25 @@ public sealed partial class NotificationEmailRendererTests
         Assert.Contains("- Dev added 6 photos · 10:38", bundle.Text);
     }
 
+    // Each picture is carried inline under the id the HTML refers to, with alt text, and the
+    // photos past the fifth are counted in a "+{n}" tile (L2-164 AC2).
+    [Fact]
+    public async Task The_inline_images_match_the_cid_references()
+    {
+        var photos = Enumerable.Range(1, 5).Select(i => new EmailPicture($"photo-{i}", $"key-{i}", $"Photo {i}")).ToList();
+        var model = Reply("x") with
+        {
+            Lead = new PhotosLead("Dev added 6 photos to the album", new EmailLink("See the album", "https://app.popkin.community/p/1/photos"), "Dock at dawn", photos, 1),
+        };
+
+        var email = await RenderAsync(model);
+
+        Assert.Equal(photos.Select(p => p.ContentId), email.InlineImages.Select(i => i.ContentId));
+        Assert.All(email.InlineImages, image => Assert.Contains($"src=\"cid:{image.ContentId}\"", email.Html));
+        Assert.Matches("email-photos__more[^>]*>(\\+|&#x2B;)1<", email.Html);
+        Assert.All(ImageTags().Matches(email.Html), img => Assert.Contains("alt=\"Photo", img.Value));
+    }
+
     [GeneratedRegex("<img[^>]*>")]
     private static partial Regex ImageTags();
 

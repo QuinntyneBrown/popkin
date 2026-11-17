@@ -33,7 +33,7 @@ public sealed class AcsNotificationEmailSenderTests
     {
         var client = new FakeEmailClient(self => new EmailSendOperation("op-1", self));
 
-        var result = await new AcsNotificationEmailSender(client, "notify@popkin.community").SendAsync(Message, CancellationToken.None);
+        var result = await new AcsNotificationEmailSender(client, "notify@popkin.community", new NoPhotos()).SendAsync(Message, CancellationToken.None);
 
         Assert.IsType<EmailSendResult.Accepted>(result);
         var sent = client.Sent!;
@@ -53,8 +53,23 @@ public sealed class AcsNotificationEmailSenderTests
     {
         var client = new FakeEmailClient(_ => throw new RequestFailedException(status, "refused"));
 
-        var result = await new AcsNotificationEmailSender(client, "notify@popkin.community").SendAsync(Message, CancellationToken.None);
+        var result = await new AcsNotificationEmailSender(client, "notify@popkin.community", new NoPhotos()).SendAsync(Message, CancellationToken.None);
 
         Assert.IsType(expected, result);
+    }
+
+    private sealed class NoPhotos : IPhotoStore
+    {
+        public Task SaveAsync(string key, ReadOnlyMemory<byte> content, string contentType, CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public Task SaveAsync(string key, Stream content, string contentType, CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public Task<StoredPhoto?> OpenAsync(string key, CancellationToken cancellationToken) => Task.FromResult<StoredPhoto?>(null);
+
+        public Task DeleteAsync(string key, CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public string GetReadUrl(string key) => throw new NotSupportedException();
+
+        public string GetDownloadUrl(string key, string fileName) => throw new NotSupportedException();
     }
 }

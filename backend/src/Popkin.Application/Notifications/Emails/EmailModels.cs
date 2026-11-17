@@ -33,6 +33,32 @@ public sealed record QuotedMessage(string Text, string At);
 public sealed record MessageLead(string Headline, EmailLink Button, string AuthorName, string Text, string At, QuotedMessage? Answers)
     : UpdateLead(Headline, Button);
 
+/// <summary>A picture in the email, carried inline as `cid:{ContentId}` (popkin-update-email, "Pictures").</summary>
+public sealed record EmailPicture(string ContentId, string BlobKey, string Alt);
+
+/// <summary>"{first name} added {n} photos to the album": the newest five and a "+{n}" tile (L2-164 AC2).</summary>
+public sealed record PhotosLead(string Headline, EmailLink Button, string? Caption, IReadOnlyList<EmailPicture> Photos, int More)
+    : UpdateLead(Headline, Button);
+
+/// <summary>A story of a plan change: "Yours now", its note, and a due date before and after (L2-164 AC3).</summary>
+public sealed record PlanStoryLine(string Title, bool YoursNow, string? Note, string? DueBefore, string? DueAfter);
+
+public sealed record PlanLead(string Headline, EmailLink Button, IReadOnlyList<PlanStoryLine> Stories)
+    : UpdateLead(Headline, Button);
+
+/// <summary>A change told in a few lines: someone joining, a schedule change, an experience (L2-164 AC4).</summary>
+public sealed record NoteLead(string Headline, EmailLink Button, IReadOnlyList<string> Lines, EmailPicture? Picture)
+    : UpdateLead(Headline, Button);
+
 /// <summary>The Popkin update email (L2-164).</summary>
 public sealed record PopkinUpdateEmailModel(EmailShellModel Shell, UpdateLead Lead, IReadOnlyList<AlsoNewRow> AlsoNew, int WindowMinutes)
-    : EmailModel(Shell);
+    : EmailModel(Shell)
+{
+    /// <summary>The pictures the email carries inline.</summary>
+    public IReadOnlyList<EmailPicture> Pictures => Lead switch
+    {
+        PhotosLead photos => photos.Photos,
+        NoteLead { Picture: { } picture } => [picture],
+        _ => [],
+    };
+}

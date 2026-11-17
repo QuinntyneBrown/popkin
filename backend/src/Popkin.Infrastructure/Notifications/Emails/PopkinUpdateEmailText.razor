@@ -10,6 +10,33 @@
         }
 @message.AuthorName@(" · ")@message.At@("\n")@message.Text@("\n")
         break;
+    case PhotosLead photos:
+        if (photos.Caption is { } caption)
+        {
+@caption@("\n")
+        }
+@(photos.Photos.Count + photos.More)@(" in the album\n")
+        break;
+    case PlanLead plan:
+        foreach (var story in plan.Stories)
+        {
+@("- ")@story.Title@(story.YoursNow ? " · Yours now" : "")@("\n")
+            if (story.Note is { } note)
+            {
+@("  ")@note@("\n")
+            }
+            if (story.DueAfter is { } after)
+            {
+@("  ")@(story.DueBefore is { } before ? $"{before} → " : "")@after@("\n")
+            }
+        }
+        break;
+    case NoteLead note:
+        foreach (var line in note.Lines)
+        {
+@line@("\n")
+        }
+        break;
 }
 @("\n")@Model.Lead.Button.Label@(": ")@Model.Lead.Button.Url@("\n")
 @if (Model.AlsoNew.Count > 0)

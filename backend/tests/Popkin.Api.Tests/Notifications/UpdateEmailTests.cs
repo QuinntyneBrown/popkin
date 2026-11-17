@@ -20,7 +20,8 @@ public sealed class UpdateEmailTests
         var ruth = await api.JoinedByEmailAsync(lakeside.Code, "Ruth Lindqvist", "ruth@example.com");
         var joel = await api.JoinedAsync(lakeside.Code, "Joel Brennan", "(415) 555-0123");
         var asked = (await ruth.SentMessageAsync(lakeside.Id, everyone, "Can someone grab the paddles?")).Id();
-        api.Clock.Advance(TimeSpan.FromMinutes(11));
+        await api.DispatchAsync();
+        api.Clock.Advance(TimeSpan.FromMinutes(10));
         await api.DispatchAsync();
         api.NotificationEmails.Clear();
         return new Lakeside(api, lakeside, everyone, ruth, joel, asked);

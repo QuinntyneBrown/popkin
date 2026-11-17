@@ -31,7 +31,10 @@ public sealed partial class NotificationEmailRenderer(IServiceProvider services,
             var t = await renderer.RenderComponentAsync(text, parameters);
             return (h.ToHtmlString(), t.ToHtmlString());
         });
-        return new RenderedEmail(model.Shell.Subject, "<!DOCTYPE html>\n" + htmlPart, Text(textPart), []);
+        var pictures = model is PopkinUpdateEmailModel withPictures
+            ? withPictures.Pictures.Select(p => new InlineImage(p.ContentId, p.BlobKey, "image/jpeg")).ToList()
+            : [];
+        return new RenderedEmail(model.Shell.Subject, "<!DOCTYPE html>\n" + htmlPart, Text(textPart), pictures);
     }
 
     /// <summary>The text part as written: Razor's encoding undone, the blank lines kept to one.</summary>

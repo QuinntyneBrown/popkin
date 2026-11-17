@@ -182,8 +182,9 @@ public static class DependencyInjection
             && configuration["Notifications:EmailSender"] is { Length: > 0 } notificationSender
             && configuration["Email:PostalAddress"] is { Length: > 0 })
         {
+            var notificationClient = new EmailClient(new Uri(communicationEndpoint!), communicationCredential);
             services.AddSingleton<INotificationEmailSender>(
-                new Notifications.AcsNotificationEmailSender(new EmailClient(new Uri(communicationEndpoint!), communicationCredential), notificationSender));
+                sp => new Notifications.AcsNotificationEmailSender(notificationClient, notificationSender, sp.GetRequiredService<IPhotoStore>()));
         }
         else
         {

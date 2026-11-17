@@ -18,6 +18,69 @@
         </div>
         </div>
         break;
+    case PhotosLead photos:
+        @if (photos.Caption is { } caption)
+        {
+        <p class="email__caption" style="margin:0 0 12px;font-size:16px;line-height:1.5;color:@EmailStyles.Ink;white-space:pre-line;">@caption</p>
+        }
+        <table role="presentation" class="email-photos" width="100%" cellpadding="0" cellspacing="4">
+        @foreach (var row in photos.Photos.Select(p => (EmailPicture?)p).Concat(photos.More > 0 ? [null] : []).Chunk(3))
+        {
+            <tr>
+            @foreach (var photo in row)
+            {
+                @if (photo is not null)
+                {
+                    <td width="33%"><img src="cid:@photo.ContentId" alt="@photo.Alt" width="176" style="display:block;width:100%;height:auto;border-radius:8px;"></td>
+                }
+                else
+                {
+                    <td width="33%" class="email-photos__more" align="center" style="background:@EmailStyles.Of(Model.Shell.Popkin?.Colour ?? "");border-radius:8px;font-weight:700;font-size:20px;color:@EmailStyles.Ink;">+@photos.More</td>
+                }
+            }
+            </tr>
+        }
+        </table>
+        break;
+    case PlanLead plan:
+        <table role="presentation" class="email-stories" width="100%" cellpadding="0" cellspacing="0">
+        @foreach (var story in plan.Stories)
+        {
+            <tr><td class="email-story" style="padding:10px 12px;border:1px solid @EmailStyles.Line;border-radius:12px;">
+            <p class="email-story__title" style="margin:0;font-size:16px;font-weight:600;color:@EmailStyles.Ink;">@story.Title
+            @if (story.YoursNow)
+            {
+                <span class="email-story__badge" style="margin-left:6px;font-size:12px;font-weight:600;color:@EmailStyles.Link;">Yours now</span>
+            }
+            </p>
+            @if (story.Note is { } note)
+            {
+                <p class="email-story__note" style="margin:4px 0 0;font-size:14px;color:@EmailStyles.InkSoft;">@note</p>
+            }
+            @if (story.DueAfter is { } after)
+            {
+                <p class="email-story__due" style="margin:4px 0 0;font-size:14px;color:@EmailStyles.InkSoft;">
+                @if (story.DueBefore is { } before)
+                {
+                    <s style="color:@EmailStyles.InkFaint;">@before</s>@(" ")
+                }
+                @after</p>
+            }
+            </td></tr>
+            <tr><td style="height:8px;line-height:8px;">&nbsp;</td></tr>
+        }
+        </table>
+        break;
+    case NoteLead note:
+        @if (note.Picture is { } picture)
+        {
+            <img src="cid:@picture.ContentId" alt="@picture.Alt" width="72" height="72" style="display:block;width:72px;height:72px;border-radius:999px;margin-bottom:12px;">
+        }
+        @foreach (var line in note.Lines)
+        {
+            <p class="email__line" style="margin:0 0 4px;font-size:15px;color:@EmailStyles.InkSoft;">@line</p>
+        }
+        break;
 }
 <EmailButton Link="Model.Lead.Button" />
 @if (Model.AlsoNew.Count > 0)

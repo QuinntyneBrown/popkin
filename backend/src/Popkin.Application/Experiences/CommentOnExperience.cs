@@ -25,7 +25,7 @@ public sealed class CommentOnExperienceCommandHandler(IAppDbContext db, IMembers
 
         var now = clock.GetUtcNow();
         rating.SetComment(text, now);
-        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, now);
+        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, now, facts: new { change = "commented" });
         await db.SaveChangesAsync(cancellationToken);
 
         return ExperienceCommentDto.Of(rating, membership, store);

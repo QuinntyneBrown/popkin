@@ -39,7 +39,7 @@ public sealed class SetEventCommandHandler(
         }
 
         popkin.SetEvent(label, request.FirstDay, request.LastDay);
-        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, host.PersonId, popkin.Id, clock.GetUtcNow());
+        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, host.PersonId, popkin.Id, clock.GetUtcNow(), facts: new { change = "event" });
         await db.SaveChangesAsync(cancellationToken);
         await notifier.ScheduleChanged(popkin.Id);
         return EventDto.Of(popkin)!;
@@ -58,7 +58,7 @@ public sealed class RemoveEventCommandHandler(
         features.Require(Feature.Schedules, request.PopkinId);
         var (popkin, host) = await guard.RequireHostAsync(request.PopkinId, cancellationToken);
         popkin.RemoveEvent();
-        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, host.PersonId, popkin.Id, clock.GetUtcNow());
+        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, host.PersonId, popkin.Id, clock.GetUtcNow(), facts: new { change = "eventRemoved" });
         await db.SaveChangesAsync(cancellationToken);
         await notifier.ScheduleChanged(popkin.Id);
     }

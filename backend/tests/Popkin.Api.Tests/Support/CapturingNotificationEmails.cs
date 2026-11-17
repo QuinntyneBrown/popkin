@@ -10,20 +10,26 @@ public sealed class CapturingNotificationEmails : INotificationEmailSender
     /// <summary>What the next sends answer instead of accepting, in order; empty accepts.</summary>
     public Queue<EmailSendResult> Answers { get; } = new();
 
-    /// <summary>Throws on the next send, as a sender that breaks would.</summary>
-    public bool Throw { get; set; }
+    /// <summary>Throws on the next send only, as a sender that breaks once would.</summary>
+    public bool ThrowOnce { get; set; }
 
     public int Attempts { get; private set; }
 
     public IReadOnlyList<OutgoingEmailMessage> Sent => _sent;
 
-    public void Clear() => _sent.Clear();
+    /// <summary>Forgets what was sent and tried so far, so a test sees only what follows.</summary>
+    public void Clear()
+    {
+        _sent.Clear();
+        Attempts = 0;
+    }
 
     public Task<EmailSendResult> SendAsync(OutgoingEmailMessage message, CancellationToken cancellationToken)
     {
         Attempts++;
-        if (Throw)
+        if (ThrowOnce)
         {
+            ThrowOnce = false;
             throw new InvalidOperationException("The sender broke.");
         }
 

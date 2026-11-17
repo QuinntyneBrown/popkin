@@ -183,6 +183,21 @@ public sealed class NotificationDelivery
         NextAttemptAt = null;
     }
 
+    /// <summary>A passing failure: tried again at `next` (L2-175 AC2).</summary>
+    public void Retry(DateTimeOffset next)
+    {
+        Status = NotificationDeliveryStatus.Retrying;
+        Attempts++;
+        NextAttemptAt = next;
+    }
+
+    /// <summary>Given up six hours after it fell due (L2-175 AC2).</summary>
+    public void Drop()
+    {
+        Status = NotificationDeliveryStatus.Dropped;
+        NextAttemptAt = null;
+    }
+
     /// <summary>Stopped at the send-time recheck (L2-174 AC1).</summary>
     public void Suppress(SuppressionRule rule)
     {

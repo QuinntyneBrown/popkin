@@ -78,13 +78,27 @@ public sealed class UpdateEmails(
             {
                 // Held, in the order they were due, until member email resumes (L2-170 AC2).
                 email.Queue();
-                await db.SaveChangesAsync(cancellationToken);
-                continue;
             }
-
-            if (await SendAsync(email, ask, platform, now, cancellationToken))
+            else if (RetryBackoff.GivenUp(email.SendAfter, now))
             {
-                sent++;
+                // Too late to be worth sending: after a long pause or six hours of failures
+                // (L2-170 AC3, L2-175 AC2).
+                email.Drop();
+            }
+            else
+            {
+                try
+                {
+                    if (await SendAsync(email, ask, platform, now, cancellationToken))
+                    {
+                        sent++;
+                    }
+                }
+                catch (Exception) when (!cancellationToken.IsCancellationRequested)
+                {
+                    // One failure stops one email; it is tried again on the backoff.
+                    email.Retry(now + RetryBackoff.After(email.Attempts + 1));
+                }
             }
 
             await db.SaveChangesAsync(cancellationToken);
@@ -154,7 +168,7 @@ public sealed class UpdateEmails(
                 passing.ForEach(p => p.Delivery.MarkSent(now));
                 return true;
             case EmailSendResult.Transient:
-                email.Retry(now.AddSeconds(30));
+                email.Retry(now + RetryBackoff.After(email.Attempts + 1));
                 return false;
             default:
                 email.Fail();

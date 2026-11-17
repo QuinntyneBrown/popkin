@@ -55,7 +55,7 @@ public sealed class SetTimeOffCommandHandler(
             }
         }
 
-        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, membership.PersonId, membership.Id, clock.GetUtcNow());
+        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, membership.PersonId, membership.Id, clock.GetUtcNow(), facts: new { change = "timeOff" });
         await db.SaveChangesAsync(cancellationToken);
         // The members with the view open read their week again (L2-072 AC11).
         await notifier.ScheduleChanged(popkin.Id);

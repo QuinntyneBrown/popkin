@@ -36,7 +36,7 @@ public sealed class RateExperienceCommandHandler(IAppDbContext db, IMembershipGu
         }
 
         var now = clock.GetUtcNow();
-        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, now);
+        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, now, facts: new { change = "rated", stars });
         if (await MyRatings.FindAsync(db, experience.Id, membership.Id, cancellationToken) is { } rating)
         {
             // The member has rated: their rating changes and the count stays the same (L2-039 AC3).

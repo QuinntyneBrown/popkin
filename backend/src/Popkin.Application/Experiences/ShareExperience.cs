@@ -30,7 +30,7 @@ public sealed class ShareExperienceCommandHandler(
 
         var experience = Experience.Share(popkin.Id, membership.Id, kind, title, when, place, picture, clock.GetUtcNow());
         db.Experiences.Add(experience);
-        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, experience.SharedAt);
+        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, experience.SharedAt, facts: new { change = "shared" });
         try
         {
             await db.SaveChangesAsync(cancellationToken);
