@@ -15,6 +15,7 @@ import {
   dateWhen,
   kindIcon,
   leadLabel,
+  dialogConfig,
 } from 'api';
 import {
   AppScreen,
@@ -95,12 +96,12 @@ export class ContactsDatesPage {
   /** Add a date, for anyone of mine; Dates reads again once it is kept (L2-138 AC4). */
   protected addDate(): void {
     this.dialog
-      .open<KeyDateRowView, AddDateData>(AddDateDialog, {
-        data: { preferences: this.store.preferences() },
-        ariaLabelledBy: 'dlg-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+      .open<KeyDateRowView, AddDateData>(
+        AddDateDialog,
+        dialogConfig({
+          data: { preferences: this.store.preferences() },
+        }),
+      )
       .closed.subscribe((saved) => {
         if (saved) this.store.retry();
       });

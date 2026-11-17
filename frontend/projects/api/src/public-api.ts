@@ -17,6 +17,7 @@ export * from './lib/api/popkins/popkin-length';
 export * from './lib/api/popkins/popkins-api';
 export * from './lib/api/popkins/qr-encoder';
 export * from './lib/api/error-screens';
+export * from './lib/api/dialogs/dialog-config';
 export * from './lib/models/invite';
 export * from './lib/api/invites/invite-text';
 export * from './lib/api/invites/invites-api';

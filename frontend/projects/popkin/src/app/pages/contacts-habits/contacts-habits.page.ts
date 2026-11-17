@@ -13,6 +13,7 @@ import {
   habitRun,
   habitSub,
   habitTitle,
+  dialogConfig,
 } from 'api';
 import {
   AppScreen,
@@ -96,12 +97,12 @@ export class ContactsHabitsPage {
   /** New habit, with anyone of mine who has none; Habits reads again once one starts (L2-145 AC3). */
   protected newHabit(): void {
     this.dialog
-      .open<HabitView, NewHabitData>(NewHabitDialog, {
-        data: {},
-        ariaLabelledBy: 'dlg-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+      .open<HabitView, NewHabitData>(
+        NewHabitDialog,
+        dialogConfig({
+          data: {},
+        }),
+      )
       .closed.subscribe((started) => {
         if (started) this.store.open();
       });

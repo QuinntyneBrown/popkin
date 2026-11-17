@@ -3,12 +3,13 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { PLAN_API } from 'api';
 import { Alert, Button, DialogFrame } from 'components';
 
-/** Opened over the Story dialog, so it is named by a title id of its own. */
+/**
+ * Opened over the Story dialog, so it is named and described by ids of its own; passed to
+ * `dialogConfig`, which keeps it modal with no CDK backdrop.
+ */
 export const DELETE_STORY = {
   ariaLabelledBy: 'delete-story-title',
   ariaDescribedBy: 'delete-story-desc',
-  hasBackdrop: false,
-  ariaModal: true,
 } as const;
 
 export interface DeleteStoryData {

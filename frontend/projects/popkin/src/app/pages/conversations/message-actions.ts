@@ -1,7 +1,7 @@
 import { Dialog } from '@angular/cdk/dialog';
 import { Injectable, computed, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MessageRow, ThreadStore } from 'api';
+import { MessageRow, ThreadStore, dialogConfig } from 'api';
 import {
   DeleteMessageData,
   DeleteMessageDialog,
@@ -12,9 +12,6 @@ import {
   ReactionsDialog,
 } from '../../dialogs/reactions/reactions.dialog';
 import { Toaster } from 'api';
-
-/** pk-dialog draws its own backdrop, as the mocks do. */
-const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true } as const;
 
 /**
  * What a member does with a message in a thread, the Everyone thread or a direct message
@@ -50,23 +47,25 @@ export class MessageActions {
   open(row: MessageRow, accent: string): void {
     const id = row.id;
     if (!id || !this.actionable(row)) return;
-    const opened = this.dialog.open<MessageAction, ReactionsData>(ReactionsDialog, {
-      data: {
-        accent,
-        name: row.name,
-        // A photo alone is quoted as "Photo", and has no text to copy (L2-026).
-        text: row.text || (row.photo ? 'Photo' : ''),
-        canCopy: !!row.text,
-        pressed: computed(() => {
-          const shown = this.store.rows().find((r) => r.kind === 'message' && r.id === id);
-          return shown?.kind === 'message'
-            ? shown.reactions.filter((chip) => chip.mine).map((chip) => chip.emoji)
-            : [];
-        }),
-        mine: row.mine,
-      },
-      ...MODAL,
-    });
+    const opened = this.dialog.open<MessageAction, ReactionsData>(
+      ReactionsDialog,
+      dialogConfig({
+        data: {
+          accent,
+          name: row.name,
+          // A photo alone is quoted as "Photo", and has no text to copy (L2-026).
+          text: row.text || (row.photo ? 'Photo' : ''),
+          canCopy: !!row.text,
+          pressed: computed(() => {
+            const shown = this.store.rows().find((r) => r.kind === 'message' && r.id === id);
+            return shown?.kind === 'message'
+              ? shown.reactions.filter((chip) => chip.mine).map((chip) => chip.emoji)
+              : [];
+          }),
+          mine: row.mine,
+        },
+      }),
+    );
     opened.closed.subscribe((action) => {
       switch (action?.kind) {
         case 'react':
@@ -93,11 +92,13 @@ export class MessageActions {
   }
 
   private confirmDelete(messageId: string, accent: string): void {
-    const opened = this.dialog.open<boolean, DeleteMessageData>(DeleteMessageDialog, {
-      data: { accent },
-      ariaDescribedBy: 'dlg-desc',
-      ...MODAL,
-    });
+    const opened = this.dialog.open<boolean, DeleteMessageData>(
+      DeleteMessageDialog,
+      dialogConfig({
+        data: { accent },
+        ariaDescribedBy: 'dlg-desc',
+      }),
+    );
     opened.closed.subscribe((deleting) => {
       if (deleting) this.store.deleteMessage(messageId);
     });

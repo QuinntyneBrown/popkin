@@ -16,6 +16,7 @@ import {
   StoryView,
   UnreadTracker,
   featureOffText,
+  dialogConfig,
 } from 'api';
 import { NewStoryData, NewStoryDialog } from '../../dialogs/new-story/new-story.dialog';
 import { StoryClosed, StoryData, StoryDialog } from '../../dialogs/story/story.dialog';
@@ -104,14 +105,13 @@ export class PlanBoardPage {
 
   /** "New story", from the header, the floating action or a starter with its title (L2-069). */
   protected newStory(title?: string): void {
-    const opened = this.dialog.open<StoryView, NewStoryData>(NewStoryDialog, {
-      data: { popkinId: this.popkinId(), accent: this.frame.accent(), title },
-      ariaLabelledBy: 'dlg-title',
-      autoFocus: '#stitle',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<StoryView, NewStoryData>(
+      NewStoryDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.frame.accent(), title },
+        autoFocus: '#stitle',
+      }),
+    );
     opened.closed.subscribe((story) => {
       if (story) this.store.added(story);
     });
@@ -121,14 +121,14 @@ export class PlanBoardPage {
   protected openStory(id: string): void {
     const story = this.store.view()?.stories.find((s) => s.id === id);
     if (!story) return;
-    const opened = this.dialog.open<StoryClosed, StoryData>(StoryDialog, {
-      data: { popkinId: this.popkinId(), accent: this.frame.accent(), story },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      autoFocus: '#stitle',
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<StoryClosed, StoryData>(
+      StoryDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.frame.accent(), story },
+        ariaDescribedBy: 'dlg-desc',
+        autoFocus: '#stitle',
+      }),
+    );
     opened.closed.subscribe((closed) => {
       if (closed === 'deleted') this.store.removed(id);
       else if (closed) this.store.moved(closed);

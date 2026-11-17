@@ -2,12 +2,13 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Button, DialogFrame } from 'components';
 
-/** Opened over the Photo comments dialog, so it is named by a title id of its own. */
+/**
+ * Opened over the Photo comments dialog, so it is named and described by ids of its own; passed
+ * to `dialogConfig`, which keeps it modal with no CDK backdrop.
+ */
 export const DELETE_COMMENT = {
   ariaLabelledBy: 'delete-comment-title',
   ariaDescribedBy: 'delete-comment-desc',
-  hasBackdrop: false,
-  ariaModal: true,
 } as const;
 
 export interface DeleteCommentData {

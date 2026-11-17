@@ -9,7 +9,7 @@ import {
   untracked,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { CallSession, accentOf } from 'api';
+import { CallSession, accentOf, dialogConfig } from 'api';
 import {
   Button,
   CallAside,
@@ -114,13 +114,12 @@ export class VideoCallPage {
 
   /** "Invite to call": the Popkin's invite; whoever joins sees the call's banner. */
   protected invite(): void {
-    this.dialog.open<void, InviteData>(InviteDialog, {
-      data: { popkinId: this.popkinId(), accent: this.popkin()?.accent ?? '' },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    this.dialog.open<void, InviteData>(
+      InviteDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.popkin()?.accent ?? '' },
+        ariaDescribedBy: 'dlg-desc',
+      }),
+    );
   }
 }
