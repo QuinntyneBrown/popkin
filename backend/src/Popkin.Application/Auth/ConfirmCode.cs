@@ -20,7 +20,7 @@ public sealed record ConfirmCodeResult(ConfirmOutcome Outcome, SessionDto? Sessi
 /// <summary>Checks six digits against a code and signs the person in (L2-004, L2-005 AC3, AC5).</summary>
 public sealed record ConfirmCodeCommand(Guid VerificationId, string? Code, string? Name) : IRequest<ConfirmCodeResult>;
 
-public sealed class ConfirmCodeCommandHandler(IAppDbContext db, TimeProvider clock, ICodeHasher hasher)
+public sealed class ConfirmCodeCommandHandler(IAppDbContext db, TimeProvider clock, ICodeHasher hasher, ILimits limits)
     : IRequestHandler<ConfirmCodeCommand, ConfirmCodeResult>
 {
     public async Task<ConfirmCodeResult> Handle(ConfirmCodeCommand request, CancellationToken cancellationToken)
@@ -73,7 +73,7 @@ public sealed class ConfirmCodeCommandHandler(IAppDbContext db, TimeProvider clo
         }
 
         code.Consume(now);
-        var session = Session.Start(person.Id, now);
+        var session = Session.Start(person.Id, now, limits.SessionLength);
         db.Sessions.Add(session);
         try
         {

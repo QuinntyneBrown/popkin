@@ -46,7 +46,7 @@ public sealed class ConfirmCodeTests
         Assert.Contains("path=/", attributes, StringComparer.OrdinalIgnoreCase);
         Assert.DoesNotContain(attributes, a => a.StartsWith("domain", StringComparison.OrdinalIgnoreCase));
         var expires = DateTimeOffset.Parse(attributes.Single(a => a.StartsWith("expires=", StringComparison.OrdinalIgnoreCase))[8..]);
-        Assert.Equal(api.Clock.GetUtcNow().AddDays(30), expires);
+        Assert.Equal(api.Clock.GetUtcNow().AddDays(365), expires);
     }
 
     [Fact]

@@ -6,20 +6,37 @@ namespace Popkin.Application.Auth;
 
 public sealed record SessionDto(Guid PersonId, string Name, string? PhotoUrl);
 
-/// <summary>Whether a session is live: not revoked, not expired, its person not deleted (L2-050 AC3).</summary>
-public sealed record ValidateSessionQuery(Guid SessionId, Guid PersonId) : IRequest<bool>;
-
-public sealed class ValidateSessionQueryHandler(IAppDbContext db, TimeProvider clock) : IRequestHandler<ValidateSessionQuery, bool>
+/// <summary>What a use of a session found: whether it is live, and the new expiry when it was renewed.</summary>
+public sealed record SessionUse(bool Live, DateTimeOffset? RenewedUntil)
 {
-    public async Task<bool> Handle(ValidateSessionQuery request, CancellationToken cancellationToken)
+    public static readonly SessionUse Ended = new(false, null);
+}
+
+/// <summary>
+/// A request on a session: live when not revoked, not expired and its person not deleted
+/// (L2-050 AC3); a live session lasts the sign-in length from this use (L2-176 AC2).
+/// </summary>
+public sealed record UseSessionCommand(Guid SessionId, Guid PersonId) : IRequest<SessionUse>;
+
+public sealed class UseSessionCommandHandler(IAppDbContext db, TimeProvider clock, ILimits limits) : IRequestHandler<UseSessionCommand, SessionUse>
+{
+    public async Task<SessionUse> Handle(UseSessionCommand request, CancellationToken cancellationToken)
     {
-        var session = await db.Sessions.AsNoTracking().FirstOrDefaultAsync(s => s.Id == request.SessionId, cancellationToken);
-        if (session is null || session.PersonId != request.PersonId || !session.IsLive(clock.GetUtcNow()))
+        var now = clock.GetUtcNow();
+        var session = await db.Sessions.FirstOrDefaultAsync(s => s.Id == request.SessionId, cancellationToken);
+        if (session is null || session.PersonId != request.PersonId || !session.IsLive(now)
+            || !await db.People.AnyAsync(p => p.Id == request.PersonId && p.DeletedAt == null, cancellationToken))
         {
-            return false;
+            return SessionUse.Ended;
         }
 
-        return await db.People.AnyAsync(p => p.Id == request.PersonId && p.DeletedAt == null, cancellationToken);
+        if (!session.Renew(now, limits.SessionLength))
+        {
+            return new SessionUse(true, null);
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+        return new SessionUse(true, session.ExpiresAt);
     }
 }
 
