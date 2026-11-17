@@ -51,7 +51,7 @@ param contacts bool = true
 param adminFirstOwner string = 'quinntynebrown@gmail.com'
 
 @description('Email:PostalAddress, the postal address every notification email\'s footer carries (L2-163 AC5). Empty: no notification email is sent.')
-param postalAddress string = ''
+param postalAddress string = '2091 Hurontario Street, Mississauga, Ontario L5A 4E6'
 
 @description('Azure SQL takes no new servers in some regions (East US 2 among them); the nearest that does.')
 param sqlLocation string = 'centralus'

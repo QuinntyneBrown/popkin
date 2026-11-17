@@ -212,8 +212,8 @@ exist today.
     `DoNotReply@` the verified domain, as `infra/communication.bicep` provisions it.
   - `Email:PostalAddress` (Worker): the footer's address. Without it no notification email is
     sent, since a commercial email without a postal address breaks anti-spam law. It is the
-    legal address of whoever runs Popkin (gap 127, with gap 78's legal name), set once as
-    `postalAddress` in `infra/main.bicep`.
+    legal address of whoever runs Popkin, set once as `postalAddress` in `infra/main.bicep`:
+    2091 Hurontario Street, Mississauga, Ontario L5A 4E6 (gap 127).
 
 ### Frontend
 
