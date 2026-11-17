@@ -80,6 +80,14 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<ContactGroup> ContactGroups => inner.ContactGroups;
 
+    public DbSet<ImportBatch> ImportBatches => inner.ImportBatches;
+
+    public DbSet<ContactReminder> ContactReminders => inner.ContactReminders;
+
+    public DbSet<ContactWeeklyEmail> ContactWeeklyEmails => inner.ContactWeeklyEmails;
+
+    public DbSet<PushSubscription> PushSubscriptions => inner.PushSubscriptions;
+
     public DbSet<ContactGroupMember> ContactGroupMembers => inner.ContactGroupMembers;
 
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;

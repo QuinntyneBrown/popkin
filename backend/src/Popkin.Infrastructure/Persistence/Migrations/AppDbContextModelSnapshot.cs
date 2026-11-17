@@ -421,6 +421,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
@@ -433,6 +436,8 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("OwnerId", "ClientId")
                         .IsUnique();
+
+                    b.HasIndex("OwnerId", "PersonId");
 
                     b.ToTable("Contacts", (string)null);
                 });
@@ -493,6 +498,71 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasIndex("ContactId");
 
                     b.ToTable("ContactGroupMembers", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ContactReminder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ContactId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DismissedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("DueOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTimeOffset?>("NotifiedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Words")
+                        .IsRequired()
+                        .HasMaxLength(240)
+                        .HasColumnType("nvarchar(240)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("OwnerId", "DismissedAt");
+
+                    b.HasIndex("Kind", "SubjectId", "DueOn")
+                        .IsUnique();
+
+                    b.ToTable("ContactReminders", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ContactWeeklyEmail", b =>
+                {
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("WeekOf")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("OwnerId", "WeekOf");
+
+                    b.ToTable("ContactWeeklyEmails", (string)null);
                 });
 
             modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
@@ -790,6 +860,32 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("HabitKept", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ImportBatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("At")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Imported")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId", "ClientId")
+                        .IsUnique();
+
+                    b.ToTable("ImportBatches", (string)null);
                 });
 
             modelBuilder.Entity("Popkin.Domain.KeyDate", b =>
@@ -1324,6 +1420,43 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("Popkins", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.PushSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Auth")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("P256dh")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Endpoint")
+                        .IsUnique();
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("PushSubscriptions", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.ReminderPreferences", b =>
                 {
                     b.Property<Guid>("OwnerId")
@@ -1349,6 +1482,10 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("PhoneNotifications")
                         .HasColumnType("bit");
+
+                    b.Property<string>("TimeZone")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.HasKey("OwnerId");
 
@@ -1740,6 +1877,24 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Popkin.Domain.ContactReminder", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ContactWeeklyEmail", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Popkin.Domain.CrewInvite", b =>
                 {
                     b.HasOne("Popkin.Domain.Person", null)
@@ -1843,6 +1998,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.HasOne("Popkin.Domain.Habit", null)
                         .WithMany("Kept")
                         .HasForeignKey("HabitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.ImportBatch", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1990,6 +2154,15 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("HostPersonId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.PushSubscription", b =>
+                {
+                    b.HasOne("Popkin.Domain.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
