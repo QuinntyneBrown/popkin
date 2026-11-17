@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Birthday reminders by person
+
+Person(owner, "Person", "Keeps contacts with birthdays; the only one who sees them")
+System(popkin, "Popkin", "Platform for pop-up communities, with Contacts")
+System_Ext(acs, "Azure Communication Services", "Delivers the reminder email (ADR 0021)")
+System_Ext(push, "Browser push service", "Delivers the phone alert (ADR 0028)")
+Rel(owner, popkin, "Chooses, contact by contact, when to be reminded in", "HTTPS")
+Rel(popkin, acs, "Sends a birthday's reminder email via", "HTTPS")
+Rel(popkin, push, "Sends a birthday's phone alert via", "Web Push")
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Notification holds
+
+Person(admin, "Owner or Support admin", "Admin")
+System_Boundary(popkin, "Popkin") {
+  Container(console, "Popkin admin app", "Angular SPA, admin.popkin.community", "Holds tab, Hold a Popkin, Release")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/notifications/holds")
+  Container(worker, "Popkin Worker", ".NET worker service", "DispatchNotificationsJob, PlatformSnapshot")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "NotificationHold, Person, PopkinSpace, AuditEntry")
+}
+Rel(admin, console, "Holds, releases", "HTTPS")
+Rel(console, api, "GET, POST /api/admin/notifications/holds", "JSON/HTTPS, admin cookie")
+Rel(api, db, "Writes holds with audit entries; reads holds and automatic ones", "EF Core")
+Rel(worker, db, "Reloads holds into its snapshot; reads the recipient", "EF Core")
+@enduml

@@ -1,0 +1,71 @@
+@startuml
+title UML sequence behaviour — Mute someone and unmute them
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "NotificationsPage (People)" as page
+  participant "NotificationSettingsStore" as store
+  participant "HttpNotificationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "NotificationSettingsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SearchMuteCandidatesQueryHandler" as search
+  participant "MutePersonCommandHandler" as mute
+  participant "UnmutePersonCommandHandler" as unmute
+  participant "SharedPopkins" as shared
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Mute someone"
+page --> actor : Popover with "Search people in your Popkins", focus in the field
+actor -> page : Type "jo"
+page -> store : searchMuteCandidates("jo") after 250 ms
+store -> client : muteCandidates("jo")
+client -> ctrl : GET /api/me/notifications/mute-candidates?q=jo
+ctrl -> search : Send SearchMuteCandidatesQuery
+search -> shared : PeopleSharingWith(caller): active Popkins, not left, not the caller
+search -> db : Leave out the caller's PersonMute rows; match any part of the name; take 5
+db --> search : Memberships
+search --> ctrl : MuteCandidateDto[] (membershipId, name, avatar, shared Popkins)
+ctrl --> client : 200
+page --> actor : Up to five people (L2-160 AC2)
+actor -> page : Choose Joel Kim
+page -> store : mute(membershipId); popover closes, focus returns to "Mute someone"
+store -> client : mute(membershipId)
+client -> ctrl : POST /api/me/notifications/mutes { membershipId }
+ctrl -> mute : Send MutePersonCommand
+mute -> db : Membership by id; its PersonId
+mute -> shared : ActiveBetween(caller, that person)
+alt No shared active Popkin, or the caller
+  mute --> ctrl : 404 person_not_found, nothing changes (L2-160 AC7)
+else Shared
+  mute -> db : PersonMute(caller, person) unless one exists; save
+  mute --> ctrl : MutedPersonDto
+  ctrl --> client : 200
+  store --> page : Joel Kim joins the list with "Unmute" (L2-160 AC1)
+end
+actor -> page : "Unmute" on Joel Kim
+page -> store : unmute(muteId)
+store -> client : unmute(muteId)
+client -> ctrl : DELETE /api/me/notifications/mutes/{muteId}
+ctrl -> unmute : Send UnmutePersonCommand
+unmute -> db : Caller's row by id; remove; save
+ctrl --> client : 204, or 404 mute_not_found for another's row
+store --> page : Leaves the list; empty state when none is left (L2-160 AC5, AC6)
+@enduml

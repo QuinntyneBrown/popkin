@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Popkin update email
+
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "DispatchNotificationsJob", "PeriodicJob, 15 s", "Sends DispatchNotificationsCommand")
+}
+Container_Boundary(app, "Popkin Application") {
+  Component(dispatch, "DispatchNotificationsCommandHandler", "MediatR handler", "Closes due bundles; sends each OutgoingEmail once (Deliver notifications)")
+  Component(composer, "PopkinUpdateEmailComposer", "INotificationEmailComposer", "Reads the changes as they are now; picks the lead; builds the model")
+  Component(text, "EmailText", "Pure helper", "Cut at 300, preheader, first name")
+  Component(links, "NotificationLinks", "Application service", "Builds every URL with PopkinUrlBuilder")
+  Component(rendererPort, "INotificationEmailRenderer", "Port", "Model to HTML and text")
+  Component(senderPort, "INotificationEmailSender", "Port", "Sends one message")
+  Component(metrics, "PopkinMetrics", "Meter Popkin", "Deliveries, email latency")
+}
+Container_Boundary(infra, "Popkin Infrastructure") {
+  Component(renderer, "NotificationEmailRenderer", "Templates (gap 128)", "Encodes all text; inline images by cid")
+  Component(sender, "AcsNotificationEmailSender", "Azure Communication Services", "From Notifications:EmailSender; List-Unsubscribe headers")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "OutgoingEmail, NotificationDelivery, content")
+Rel(job, dispatch, "Sends DispatchNotificationsCommand")
+Rel(dispatch, composer, "Compose(outgoingEmail)")
+Rel(composer, db, "Reads events and content", "EF Core")
+Rel(composer, text, "Uses")
+Rel(composer, links, "Uses")
+Rel(dispatch, rendererPort, "Render(model)")
+Rel(rendererPort, renderer, "Implemented by")
+Rel(dispatch, senderPort, "SendAsync(message)")
+Rel(senderPort, sender, "Implemented by")
+Rel(dispatch, db, "Marks Sent, Suppressed, Failed or Dropped", "EF Core")
+Rel(dispatch, metrics, "Records")
+@enduml

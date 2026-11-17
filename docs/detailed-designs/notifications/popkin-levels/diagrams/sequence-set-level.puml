@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Set a Popkin's level, and undo a mute
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "NotificationsPage (Popkins)" as page
+  participant "NotificationSettingsStore" as store
+  participant "HttpNotificationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "NotificationSettingsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SetPopkinNotificationLevelCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "Membership" as membership
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Muted" for Lakeside Weekend (radio group)
+page -> store : setLevel(popkinId, Muted)
+store --> page : Line "Muted. Nothing but reminders", tile dimmed (L2-158 AC3)
+store --> page : Undo bar "Lakeside Weekend is muted. You'll still get its reminders." with "Undo"
+store -> client : setPopkinLevel(popkinId, "Muted")
+client -> ctrl : PUT /api/me/notifications/popkins/{popkinId} { level }
+ctrl -> handler : Send SetPopkinNotificationLevelCommand
+handler -> guard : RequireActiveMemberAsync(popkinId)
+alt Not a member, or left
+  guard --> handler : 404 popkin_not_found (L2-158 AC7)
+else Wrapped up
+  guard --> handler : 409 popkin_wrapped_up
+else Member of an active Popkin
+  guard --> handler : (PopkinSpace, Membership)
+  handler -> membership : SetNotificationLevel(Muted)
+  handler -> db : Save
+  db --> handler : Committed
+  handler --> ctrl : Done
+  ctrl --> client : 204
+end
+opt "Undo"
+  actor -> page : Undo
+  page -> store : setLevel(popkinId, Everything); close bar (L2-158 AC4)
+  store -> client : setPopkinLevel(popkinId, "Everything")
+  client -> ctrl : PUT /api/me/notifications/popkins/{popkinId}
+  ctrl --> client : 204
+end
+opt Save fails
+  store --> page : Level goes back; toast "We couldn't save that. Try again."
+end
+@enduml

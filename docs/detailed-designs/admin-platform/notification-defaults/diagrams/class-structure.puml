@@ -1,0 +1,95 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Notification defaults
+
+package "Popkin.Domain" {
+  enum NotificationFrequency {
+    AsItHappens
+    DailyDigest
+    WeeklyDigest
+  }
+  enum ReminderLead {
+    OnTheDay
+    OneDayBefore
+    ThreeDaysBefore
+    OneWeekBefore
+    TwoWeeksBefore
+    OneMonthBefore
+  }
+  class NotificationDefaults <<record>> {
+    +NotificationFrequency DefaultFrequency
+    +int BundleMinutes
+    +int MostEmailsPerDay
+    +TimeOnly QuietFrom
+    +TimeOnly QuietTo
+    +ReminderLead? BirthdayLead
+    +First: NotificationDefaults
+  }
+  class NotificationDefaultsRules <<static>> {
+    +Check(defaults: NotificationDefaults): void
+  }
+  class NotificationPlatform {
+    +NotificationFrequency DefaultFrequency
+    +int BundleMinutes
+    +int MostEmailsPerDay
+    +TimeOnly QuietFrom
+    +TimeOnly QuietTo
+    +ReminderLead? BirthdayLead
+    +DateTimeOffset? DefaultsChangedAt
+    +string? DefaultsChangedByName
+    +ChangeDefaults(defaults, admin, now): DefaultChange[]
+  }
+  class NotificationPreferences {
+    +Guid PersonId
+    +bool EmailOn
+    +NotificationFrequency? Frequency
+    +string? TimeZone
+  }
+  class ReminderPreferences {
+    +Guid OwnerId
+    +ReminderLead? BirthdayLead
+    +ReminderLead AnniversaryLead
+    +ReminderLead MilestoneLead
+  }
+}
+package "Popkin.Application" {
+  interface INotificationPlatform {
+    +Defaults: NotificationDefaults
+  }
+  class ChangeNotificationDefaultsCommand {
+    +string ActivityEmail
+    +int BundleMinutes
+    +int MostEmailsPerDay
+    +string QuietFrom
+    +string QuietTo
+    +string BirthdayLead
+    +string? Reason
+  }
+  class ChangeNotificationDefaultsCommandHandler {
+    +Handle(command): Task<AdminNotificationDefaultsDto>
+  }
+}
+package "Popkin.Infrastructure" {
+  class PlatformSnapshot
+}
+NotificationPlatform ..> NotificationDefaults : holds
+NotificationDefaults --> NotificationFrequency
+NotificationDefaults --> ReminderLead
+NotificationDefaultsRules ..> NotificationDefaults : checks
+ChangeNotificationDefaultsCommandHandler ..> ChangeNotificationDefaultsCommand : handles
+ChangeNotificationDefaultsCommandHandler ..> NotificationDefaultsRules
+ChangeNotificationDefaultsCommandHandler --> NotificationPlatform : ChangeDefaults
+INotificationPlatform <|.. PlatformSnapshot
+PlatformSnapshot ..> NotificationPlatform : reloads
+NotificationPreferences ..> INotificationPlatform : null Frequency follows Defaults
+ReminderPreferences ..> INotificationPlatform : null BirthdayLead follows Defaults
+@enduml

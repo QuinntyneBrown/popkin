@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Each Popkin's level
+
+package "Popkin.Domain" {
+  enum PopkinNotificationLevel {
+    Everything
+    JustForMe
+    Muted
+  }
+  class Membership {
+    +Guid Id
+    +Guid PopkinId
+    +Guid PersonId
+    +DateTimeOffset? LeftAt
+    +PopkinNotificationLevel NotificationLevel
+    +SetNotificationLevel(level: PopkinNotificationLevel): void
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +DateTimeOffset? EndsAt
+    +PopkinStatus Status
+  }
+}
+package "Popkin.Application" {
+  class PopkinLevelDto <<record>> {
+    +Guid PopkinId
+    +string Name
+    +string Emoji
+    +string Colour
+    +int People
+    +DateTimeOffset? EndsAt
+    +string Level
+  }
+  class PopkinLevelsReader {
+    +ReadAsync(personId: Guid): Task<PopkinLevelDto[]>
+  }
+  class SetPopkinNotificationLevelCommand <<record>> {
+    +Guid PopkinId
+    +string Level
+  }
+  class SetPopkinNotificationLevelCommandHandler {
+    +Handle(c: SetPopkinNotificationLevelCommand): Task
+  }
+  interface IMembershipGuard {
+    +RequireActiveMemberAsync(popkinId, ct): Task<(PopkinSpace, Membership)>
+  }
+  class NotificationRules <<static>> {
+    +LevelAllows(level, kind, isForThePerson): bool
+  }
+}
+Membership --> PopkinNotificationLevel
+Membership "*" --> "1" PopkinSpace
+PopkinLevelsReader ..> Membership : active, not left
+PopkinLevelsReader ..> PopkinLevelDto : returns
+SetPopkinNotificationLevelCommandHandler ..> SetPopkinNotificationLevelCommand : handles
+SetPopkinNotificationLevelCommandHandler ..> IMembershipGuard
+SetPopkinNotificationLevelCommandHandler --> Membership : changes level
+NotificationRules ..> PopkinNotificationLevel : reads
+@enduml

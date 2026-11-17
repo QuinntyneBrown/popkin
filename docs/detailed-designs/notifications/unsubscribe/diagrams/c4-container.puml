@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Unsubscribe
+
+Person(person, "Person", "Gets Popkin email")
+System_Ext(client, "Mail client", "One-click unsubscribe")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "UnsubscribePage at /unsubscribe; Notifications at /account/notifications")
+  Container(api, "Popkin API", "ASP.NET Core", "POST /api/notifications/unsubscribe, anonymous")
+  Container(worker, "Popkin Worker", ".NET worker", "Issues a token per email; adds the headers")
+  ContainerDb(db, "Popkin database", "SQL Server", "NotificationPreferences")
+  ContainerDb(keys, "Data Protection key ring", "Azure Blob Storage + Key Vault", "Keys shared by API and Worker")
+}
+Rel(person, web, "Opens footer links", "HTTPS")
+Rel(web, api, "Posts the token; mutes with a session", "JSON/HTTPS")
+Rel(client, api, "POST List-Unsubscribe=One-Click", "HTTPS")
+Rel(api, db, "Turns Email off", "EF Core")
+Rel(api, keys, "Unprotects tokens")
+Rel(worker, keys, "Protects tokens")
+@enduml

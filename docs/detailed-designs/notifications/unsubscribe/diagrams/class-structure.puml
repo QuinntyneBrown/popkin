@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Unsubscribe
+
+enum UnsubscribePurpose {
+  UnsubscribeAllEmail
+}
+enum UnsubscribeOutcome {
+  Unsubscribed
+  AlreadyOff
+  Expired
+}
+class UnsubscribeToken <<record>> {
+  +Guid PersonId
+  +UnsubscribePurpose Purpose
+  +DateTimeOffset IssuedAt
+}
+interface IUnsubscribeTokens {
+  +Issue(personId: Guid, now: DateTimeOffset): string
+  +TryRead(token: string, out read: UnsubscribeToken): bool
+}
+class DataProtectionUnsubscribeTokens {
+  -IDataProtector protector
+}
+class UnsubscribeLinks {
+  +PageUrl(token): string
+  +HeaderUrl(token): string
+}
+class NotificationLinks {
+  +For(email): FooterLinks
+}
+class FooterLinks <<record>> {
+  +string? Mute
+  +string MuteLabel
+  +string Settings
+  +string Unsubscribe
+  +string ListUnsubscribeHeader
+}
+class UnsubscribeFromAllEmailCommand <<record>> {
+  +string Token
+}
+class UnsubscribeFromAllEmailCommandHandler {
+  +{static} TimeSpan Lifetime = 90 days
+  +Handle(cmd): Task<UnsubscribeOutcome>
+}
+class NotificationPreferences {
+  +Guid PersonId
+  +bool EmailOn
+  +NotificationFrequency? Frequency
+  +string? TimeZone
+  +TurnEmailOff(now): bool
+  +TurnEmailOn(now): void
+}
+class Person {
+  +Guid Id
+  +string? Email
+  +DateTimeOffset? DeletedAt
+}
+
+IUnsubscribeTokens <|.. DataProtectionUnsubscribeTokens
+IUnsubscribeTokens ..> UnsubscribeToken : issues / reads
+UnsubscribeToken --> UnsubscribePurpose
+UnsubscribeLinks ..> IUnsubscribeTokens : issues with
+NotificationLinks ..> UnsubscribeLinks
+NotificationLinks ..> FooterLinks : builds
+UnsubscribeFromAllEmailCommandHandler ..> UnsubscribeFromAllEmailCommand : handles
+UnsubscribeFromAllEmailCommandHandler ..> IUnsubscribeTokens : reads with
+UnsubscribeFromAllEmailCommandHandler --> NotificationPreferences : turns Email off
+UnsubscribeFromAllEmailCommandHandler ..> Person : checks DeletedAt
+UnsubscribeFromAllEmailCommandHandler ..> UnsubscribeOutcome : returns
+Person "1" -- "1" NotificationPreferences
+@enduml

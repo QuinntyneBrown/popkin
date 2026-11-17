@@ -1,0 +1,57 @@
+@startuml
+title UML sequence behaviour — The Notifications page opens
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "NotificationsPage" as page
+  participant "AdminNotificationsStore" as store
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminNotificationsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminNotificationsQueryHandler" as handler
+  participant "NotificationCatalogue" as catalogue
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "NotificationStats" as stats
+  database "Popkin database" as db
+end box
+actor -> page : Opens /notifications?tab=kinds
+page -> store : open(tab)
+store -> client : notifications()
+client -> controller : GET /api/admin/notifications (admin cookie)
+controller -> handler : Send GetAdminNotificationsQuery
+handler -> db : NotificationPlatform, NotificationKindSwitch
+handler -> catalogue : Twelve kinds in three groups (L2-154)
+handler -> stats : ReadAsync(now)
+stats -> db : Deliveries sent in 24 h per kind; OutgoingEmail today; NotificationKindDay
+db --> stats : Totals per kind, never per person (L2-169 AC6)
+stats --> handler : NotificationTotals
+handler --> controller : AdminNotificationsDto
+controller --> client : 200
+client --> store : Status, groups, holdCount
+alt Paused
+  store --> page : "All member email is paused", queued, who, reason (L2-169 AC3)
+else Sending
+  store --> page : "Email is sending", sent today, bounced, median (L2-169 AC2)
+end
+store --> page : Kinds table; "Required" for sign-in; "Off for everyone" with its note (L2-169 AC4, L2-171 AC2)
+loop Every 60 seconds while open
+  store -> client : notifications()
+end
+@enduml

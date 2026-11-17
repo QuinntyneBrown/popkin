@@ -823,6 +823,110 @@
       }
     },
     {
+      "id": "notification-settings",
+      "kind": "page",
+      "title": "Notifications",
+      "route": "/account/notifications",
+      "opens_from": "account",
+      "requirements": [],
+      "states": [
+        "default",
+        "daily",
+        "popkins",
+        "people",
+        "muted",
+        "birthday-off",
+        "unsubscribed",
+        "mute-search",
+        "no-one-muted",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "Every member has the same kinds of notification, so the list is never empty. An empty muted list is no-one-muted."
+      },
+      "notes": "From the Magic Patterns Popkin App › Notifications design. Every email's footer links land here: mute → muted or birthday-off, settings → default, unsubscribe → unsubscribed. No requirement covers it yet."
+    },
+    {
+      "id": "email-popkin-update",
+      "kind": "notification",
+      "title": "Email · Popkin update",
+      "opens_from": "notification-settings",
+      "requirements": [],
+      "states": [
+        "message",
+        "photos",
+        "plan",
+        "member",
+        "single"
+      ],
+      "not_applicable": {
+        "info": "An email has no severity variant; its states are what it carries.",
+        "success": "An email has no severity variant; its states are what it carries.",
+        "warning": "An email has no severity variant; its states are what it carries.",
+        "danger": "An email has no severity variant; its states are what it carries."
+      },
+      "notes": "Sent as it happens when a kind the member has on by email changes in one of their Popkins; changes within 10 minutes ride in one email. No requirement covers it yet."
+    },
+    {
+      "id": "email-daily-digest",
+      "kind": "notification",
+      "title": "Email · Daily digest",
+      "opens_from": "notification-settings",
+      "requirements": [],
+      "states": [
+        "needs-you",
+        "quiet"
+      ],
+      "not_applicable": {
+        "info": "An email has no severity variant; its states are what it carries.",
+        "success": "An email has no severity variant; its states are what it carries.",
+        "warning": "An email has no severity variant; its states are what it carries.",
+        "danger": "An email has no severity variant; its states are what it carries."
+      },
+      "notes": "Sent at 6 pm local to members on Daily digest, only on a day something happened. No requirement covers it yet."
+    },
+    {
+      "id": "email-birthday",
+      "kind": "notification",
+      "title": "Email · Birthday reminder",
+      "opens_from": "notification-settings",
+      "requirements": [
+        "L1-033",
+        "L2-140"
+      ],
+      "states": [
+        "ahead",
+        "today"
+      ],
+      "not_applicable": {
+        "info": "An email has no severity variant; its states are what it carries.",
+        "success": "An email has no severity variant; its states are what it carries.",
+        "warning": "An email has no severity variant; its states are what it carries.",
+        "danger": "An email has no severity variant; its states are what it carries."
+      },
+      "notes": "Sent at 8 am local, as early as the member chose for that contact. L2-140 AC3 specifies a weekly Monday email instead; see Open questions."
+    },
+    {
+      "id": "email-plan-reminder",
+      "kind": "notification",
+      "title": "Email · Plan reminder",
+      "opens_from": "notification-settings",
+      "requirements": [],
+      "states": [
+        "event",
+        "task",
+        "wrap-up"
+      ],
+      "not_applicable": {
+        "info": "An email has no severity variant; its states are what it carries.",
+        "success": "An email has no severity variant; its states are what it carries.",
+        "warning": "An email has no severity variant; its states are what it carries.",
+        "danger": "An email has no severity variant; its states are what it carries."
+      },
+      "notes": "Sent at 6 pm the evening before a plan the member is in, a to-do of theirs falls due, or the Popkin wraps up. No requirement covers it yet."
+    },
+    {
       "id": "terms",
       "kind": "page",
       "title": "Terms",
@@ -1740,7 +1844,8 @@
         "info",
         "success",
         "warning",
-        "danger", "blocked"
+        "danger",
+        "blocked"
       ]
     }
   ]

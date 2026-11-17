@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Notification defaults
+
+Person(owner, "Owner", "Admin")
+Person(member, "Member", "Person")
+System_Boundary(popkin, "Popkin") {
+  Container(console, "Popkin admin app", "Angular SPA, admin.popkin.community", "Defaults tab, Save new defaults dialog")
+  Container(web, "Popkin web app", "Angular SPA", "Notification settings, Contacts dates")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/notifications/defaults, PlatformSnapshot")
+  Container(worker, "Popkin Worker", ".NET worker service", "DispatchNotificationsJob, PlatformSnapshot")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "NotificationPlatform, NotificationPreferences, ReminderPreferences, AuditEntry")
+}
+Rel(owner, console, "Edits and saves", "HTTPS")
+Rel(console, api, "GET, PUT /api/admin/notifications/defaults", "JSON/HTTPS, admin cookie")
+Rel(member, web, "Reads own settings, adds birthdays", "HTTPS")
+Rel(web, api, "Settings with defaults filled in", "JSON/HTTPS")
+Rel(api, db, "Writes defaults with an audit entry; reloads its snapshot", "EF Core")
+Rel(worker, db, "Reloads its snapshot; reads members' choices", "EF Core")
+@enduml

@@ -1,0 +1,53 @@
+@startuml
+title UML sequence behaviour — Remind of a Popkin wrapping up
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "SendPopkinRemindersJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendPopkinRemindersCommandHandler" as handler
+  participant "PopkinReminderRules" as rules
+  participant "DispatchNotificationsCommandHandler" as dispatch
+  participant "WrapUpEmailComposer" as composer
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "Email and push senders" as senders
+end box
+time -> job : 5 min elapse
+job -> handler : Send SendPopkinRemindersCommand
+handler -> db : Live Popkins with EndsAt within 24 h
+db --> handler : Popkins (Keep it going has no EndsAt)
+loop Each Popkin
+  handler -> rules : WrapUpWindow(endsAt, createdAt) (L2-162 AC3)
+  alt Created inside its window
+    rules --> handler : None
+  else Window open
+    rules --> handler : From EndsAt - 24 h
+    handler -> db : Add event PopkinWrappingUp, DedupKey reminder:wrap_up:{popkin}:{endsAt} (once; more time gives a new key)
+  end
+end
+handler -> db : Save
+dispatch -> db : Fan out to each member (Muted keeps reminders, L2-158 AC3)
+loop Each member allowed
+  dispatch -> composer : ComposeAsync
+  composer -> db : Photos: count, people, own count, four newest
+  composer --> dispatch : "{Popkin} wraps up tomorrow at {time}", "Add your photos" (L2-167 AC2)
+  dispatch -> senders : Email and phone alert
+  dispatch -> db : Sent
+end
+@enduml

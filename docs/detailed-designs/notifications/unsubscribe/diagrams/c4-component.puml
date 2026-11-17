@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Unsubscribe
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "UnsubscribePage", "Angular page, bare shell", "Posts the token once; shows unsubscribed or expired")
+  Component(settings, "NotificationSettingsStore", "api library", "applyLinkIntent: tab, mute, banner, Undo")
+  Component(parse, "parseNotificationLink", "api library, pure", "Link intent from the query")
+  Component(client, "NOTIFICATIONS_API", "Injection token", "unsubscribe(token)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "NotificationLinksController", "ASP.NET Core, AllowAnonymous", "POST /api/notifications/unsubscribe")
+  Component(handler, "UnsubscribeFromAllEmailCommandHandler", "MediatR handler", "Checks token, purpose, 90 days, person")
+  Component(tokens, "IUnsubscribeTokens", "DataProtectionUnsubscribeTokens", "Purpose Popkin.Notifications.Unsubscribe")
+  Component(prefs, "NotificationPreferences", "Domain entity", "TurnEmailOff(now)")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(links, "NotificationLinks / UnsubscribeLinks", "Application / Infrastructure", "Footer links and header URLs")
+  Component(sender, "AcsNotificationEmailSender", "Infrastructure", "Adds List-Unsubscribe and List-Unsubscribe-Post")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "NotificationPreferences")
+
+Rel(page, client, "unsubscribe(token)")
+Rel(client, ctrl, "POST", "JSON/HTTPS")
+Rel(settings, parse, "Reads intent")
+Rel(ctrl, handler, "Sends UnsubscribeFromAllEmailCommand")
+Rel(handler, tokens, "TryRead(token)")
+Rel(handler, prefs, "TurnEmailOff(now)")
+Rel(handler, db, "Saves", "EF Core")
+Rel(links, tokens, "Issue(personId, now)")
+Rel(sender, links, "Header URL")
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Each Popkin's level
+
+Person(person, "Member", "Belongs to one or more active Popkins")
+System(popkin, "Popkin", "Platform for pop-up communities")
+System_Ext(acs, "Azure Communication Services", "Delivers Popkin's email (ADR 0021)")
+System_Ext(push, "Browser push service", "Delivers phone alerts (ADR 0028)")
+Rel(person, popkin, "Sets how much each Popkin tells them in", "HTTPS")
+Rel(popkin, acs, "Sends only what the level lets through via", "HTTPS")
+Rel(popkin, push, "Sends only what the level lets through via", "Web Push")
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Notification defaults
+
+Person(owner, "Owner", "Admin who may change the defaults")
+Person(staff, "Support or Viewer admin", "Reads the defaults")
+Person(member, "Member", "Starts with the defaults until choosing their own")
+System(popkin, "Popkin", "Pop-up communities, with notifications")
+
+Rel(owner, popkin, "Sets activity email, bundling, daily most, quiet hours and birthday lead, with a reason, in", "Popkin admin app")
+Rel(staff, popkin, "Reads Defaults in", "Popkin admin app")
+Rel(popkin, member, "Notifies by the member's choices or, where none, the defaults")
+@enduml

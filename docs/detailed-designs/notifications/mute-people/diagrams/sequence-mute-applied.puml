@@ -1,0 +1,43 @@
+@startuml
+title UML sequence behaviour — A muted member's post sends nothing to the member who muted them
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Muted member" as other
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Chat" as chat
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "MessagesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendMessageCommandHandler" as send
+  participant "DispatchNotificationsCommandHandler" as dispatch
+  participant "NotificationRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+other -> chat : Post a message
+chat -> ctrl : POST message
+ctrl -> send : Send the command
+send -> db : Message and NotificationEvent(Kind, PopkinId, ActorPersonId) in one save
+ctrl --> chat : 201; hub event to open screens as before (the app still shows it)
+dispatch -> db : New event; recipients and their PersonMute rows
+db --> dispatch : Rows
+dispatch -> rules : ActorMuted(recipient's mutes, ActorPersonId)
+rules --> dispatch : true for the member who muted them
+dispatch -> db : NotificationDelivery Suppressed(rule = muted_person), email and phone (L2-160 AC3)
+note over other, db : Nothing tells the muted member; no read names a mute (L2-160 AC4).
+@enduml

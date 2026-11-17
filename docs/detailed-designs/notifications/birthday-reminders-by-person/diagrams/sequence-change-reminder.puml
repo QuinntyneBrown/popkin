@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Change a birthday's reminder from Notifications
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "NotificationsPage (People)" as page
+  participant "NotificationSettingsStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "KeyDatesController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangeKeyDateReminderCommandHandler" as handler
+  participant "KeyDate" as date
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "3 days before" in "When to remind you about Grace Adeyemi"
+page -> store : setBirthdayReminder(keyDateId, { lead: ThreeDaysBefore })
+store -> client : changeReminder(keyDateId, { lead })
+client -> ctrl : PUT /api/contacts/key-dates/{keyDateId}/reminder
+ctrl -> handler : Send ChangeKeyDateReminderCommand
+handler -> db : KeyDateRules.RequireOwnedAsync(owner, keyDateId)
+alt Not the caller's
+  db --> handler : none
+  handler --> ctrl : 404 key_date_not_found
+else Owned
+  handler -> date : ChangeLead(ThreeDaysBefore)
+  handler -> db : Save
+  handler --> ctrl : ContactKeyDateDto
+  ctrl --> client : 200
+end
+note over page, db : The profile and Dates read the same KeyDate.Lead,\nso they show "3 days before" too (L2-159 AC3, L2-139 AC5).
+actor -> page : Turn "Birthday reminders for Grace Adeyemi" off
+page -> store : setBirthdayReminder(keyDateId, { on: false })
+store --> page : Lead choice disabled; undo bar "Birthday reminders for Grace Adeyemi are off.\nThe birthday stays in your contacts." with "Undo"
+store -> client : changeReminder(keyDateId, { on: false })
+client -> ctrl : PUT /api/contacts/key-dates/{keyDateId}/reminder
+ctrl -> handler : Send ChangeKeyDateReminderCommand
+handler -> date : TurnReminders(false)
+handler -> db : Save
+ctrl --> client : 200
+opt Undo
+  actor -> page : Undo
+  page -> store : setBirthdayReminder(keyDateId, { on: true }); close bar
+end
+@enduml

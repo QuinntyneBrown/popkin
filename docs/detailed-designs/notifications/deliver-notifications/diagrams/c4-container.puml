@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Deliver notifications
+
+Person(actor, "Member", "Changes something in a Popkin")
+System_Ext(acs, "Azure Communication Services", "Email")
+System_Ext(push, "Browser push services", "Web Push")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Chat, photos, plan, schedules, experiences")
+  Container(api, "Popkin API", "ASP.NET Core", "Saves each change with its NotificationEvent; hub events as before")
+  Container(worker, "Popkin Worker", ".NET worker", "DispatchNotificationsJob every 15 s; no hub connection")
+  ContainerDb(db, "Popkin database", "SQL Server", "NotificationEvent, NotificationDelivery, OutgoingEmail, settings")
+}
+Rel(actor, web, "Uses", "HTTPS")
+Rel(web, api, "Sends changes", "JSON/HTTPS")
+Rel(api, db, "Saves change and event in one unit of work", "EF Core")
+Rel(worker, db, "Reads outbox, writes deliveries and emails", "EF Core")
+Rel(worker, acs, "Sends emails", "HTTPS")
+Rel(worker, push, "Sends phone alerts", "Web Push")
+@enduml

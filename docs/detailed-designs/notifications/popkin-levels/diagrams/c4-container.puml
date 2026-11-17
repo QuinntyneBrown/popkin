@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Each Popkin's level
+
+Person(person, "Member", "Owner of the levels")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Popkins tab of the Notifications screen")
+  Container(api, "Popkin API", "ASP.NET Core", "Lists active memberships, saves a level")
+  Container(worker, "Popkin Worker", ".NET worker", "Applies the level at fan-out and at send")
+  ContainerDb(db, "Popkin database", "SQL Server", "Membership.NotificationLevel")
+}
+Rel(person, web, "Uses", "HTTPS")
+Rel(web, api, "GET /api/me/notifications, PUT /api/me/notifications/popkins/{popkinId}", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(worker, db, "Reads the level", "EF Core")
+@enduml

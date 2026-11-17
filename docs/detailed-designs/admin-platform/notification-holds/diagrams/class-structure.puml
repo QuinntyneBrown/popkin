@@ -1,0 +1,95 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Notification holds
+
+package "Popkin.Domain" {
+  enum NotificationHoldTarget {
+    Popkin
+    Person
+  }
+  enum HoldUntil {
+    UntilReleased
+    WhileSuspended
+    UntilDeleted
+  }
+  class NotificationHold {
+    +Guid Id
+    +NotificationHoldTarget Target
+    +Guid? PopkinId
+    +Guid? PersonId
+    +string Reason
+    +Guid HeldByAdminId
+    +string HeldByName
+    +DateTimeOffset HeldAt
+    +DateTimeOffset? ReleasedAt
+    +Guid? ReleasedByAdminId
+    +string? ReleaseReason
+    +Release(admin: Admin, reason: string, now): void
+  }
+  class NotificationHoldRules <<static>> {
+    +IsHeldAutomatically(person: Person): bool
+    +Until(person: Person): HoldUntil?
+  }
+  class Person {
+    +DateTimeOffset? SuspendedAt
+    +DateTimeOffset? DeletedAt
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string InviteCode
+    +PopkinStatus Status
+  }
+}
+package "Popkin.Application" {
+  interface INotificationPlatform {
+    +IsPopkinHeld(popkinId: Guid): bool
+    +IsPersonHeld(personId: Guid): bool
+  }
+  class HoldPopkinNotificationsCommand {
+    +Guid PopkinId
+    +string? Reason
+  }
+  class HoldPopkinNotificationsCommandHandler {
+    +Handle(command): Task<AdminNotificationHoldDto>
+  }
+  class ReleaseNotificationHoldCommand {
+    +Guid HoldId
+    +string? Reason
+  }
+  class ReleaseNotificationHoldCommandHandler {
+    +Handle(command): Task
+  }
+  class GetNotificationHoldsQueryHandler {
+    +Handle(query): Task<AdminNotificationHoldsDto>
+  }
+  class SearchHoldPopkinsQueryHandler {
+    +MaxMatches: int = 20
+    +Handle(query): Task<HoldPopkinMatchDto[]>
+  }
+}
+package "Popkin.Infrastructure" {
+  class PlatformSnapshot
+}
+NotificationHold --> NotificationHoldTarget
+NotificationHold "0..1" --> "1" PopkinSpace : holds
+NotificationHoldRules ..> Person : reads
+NotificationHoldRules ..> HoldUntil
+INotificationPlatform <|.. PlatformSnapshot
+PlatformSnapshot ..> NotificationHold : reloads active
+HoldPopkinNotificationsCommandHandler ..> HoldPopkinNotificationsCommand : handles
+HoldPopkinNotificationsCommandHandler --> NotificationHold : adds
+ReleaseNotificationHoldCommandHandler ..> ReleaseNotificationHoldCommand : handles
+ReleaseNotificationHoldCommandHandler --> NotificationHold : Release
+GetNotificationHoldsQueryHandler ..> NotificationHoldRules
+SearchHoldPopkinsQueryHandler ..> PopkinSpace
+@enduml

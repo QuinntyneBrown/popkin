@@ -1,0 +1,37 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Notification holds
+
+Container_Boundary(console, "Popkin admin app") {
+  Component(tab, "NotificationsPage (Holds tab)", "Angular page", "pk-data-table, pk-who, pk-popover")
+  Component(dialogs, "HoldPopkinDialog, ReleaseHoldDialog", "CDK dialogs", "Required reason")
+  Component(store, "AdminNotificationsStore", "api library", "Holds, search, hold, release")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminNotificationsController", "ASP.NET Core controller", "Admin scheme only")
+  Component(list, "GetNotificationHoldsQueryHandler", "MediatR handler", "Manual rows and automatic by rule")
+  Component(search, "SearchHoldPopkinsQueryHandler", "MediatR handler", "Name or invite code, not held")
+  Component(hold, "HoldPopkinNotificationsCommandHandler", "MediatR handler", "HoldNotifications, reason, audit, Invalidate")
+  Component(release, "ReleaseNotificationHoldCommandHandler", "MediatR handler", "HoldNotifications, reason, audit, Invalidate")
+  Component(rules, "NotificationHoldRules", "Domain", "IsHeldAutomatically(Person)")
+  ComponentDb(db, "Popkin database", "SQL Server", "NotificationHold, AuditEntry")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(snap, "PlatformSnapshot", "Infrastructure singleton", "INotificationPlatform.IsPopkinHeld, IsPersonHeld")
+  Component(dispatch, "DispatchNotificationsCommandHandler", "MediatR handler", "Suppresses with rule Held")
+}
+Rel(tab, store, "Reads and acts through")
+Rel(tab, dialogs, "Opens")
+Rel(store, ctrl, "/api/admin/notifications/holds", "JSON/HTTPS")
+Rel(ctrl, list, "Sends GetNotificationHoldsQuery")
+Rel(ctrl, search, "Sends SearchHoldPopkinsQuery")
+Rel(ctrl, hold, "Sends HoldPopkinNotificationsCommand")
+Rel(ctrl, release, "Sends ReleaseNotificationHoldCommand")
+Rel(list, rules, "Finds automatic holds")
+Rel(hold, db, "Adds the hold and its audit entry in one save", "EF Core")
+Rel(release, db, "Releases with its audit entry in one save", "EF Core")
+Rel(snap, db, "Reloads active holds", "EF Core")
+Rel(dispatch, snap, "IsPopkinHeld, IsPersonHeld")
+Rel(dispatch, rules, "IsHeldAutomatically(recipient)")
+@enduml

@@ -34,7 +34,8 @@ names the admin is in [Admin sign in](../admin-sign-in/README.md).
   each action is disabled with "Viewer admins can’t do this" as its tooltip and description
   (L2-086 AC2). "Export CSV" on the audit log stays enabled: every role may export it.
 - **A Support admin's page** — an Owner-only action ("Add admin", a feature's choices, "Save" on
-  Limits, "Publish" on Announcements, "Start deletion", "Cancel deletion") is disabled with "Only
+  Limits, "Publish" on Announcements, "Pause all email", a notification kind's switch and "Save
+  defaults" on Notifications, "Start deletion", "Cancel deletion") is disabled with "Only
   Owners can do this"; every other action is enabled (L2-086 AC3). No mock draws a Support
   admin's page; the copy is the brief's and the Viewer's state is the model. The design expects
   `docs/mocks/admin/pages/limits/support.html` as the example.
@@ -60,13 +61,15 @@ values, each with the `AdminAction` values it covers:
 | `Calls` | `EndCall` | Yes | Yes | No |
 | `Operations` | `RunJob`, `RetryExport` | Yes | Yes | No |
 | `Platform` | `ChangeFeature`, `ChangeLimits`, `PublishAnnouncement` (and ending one) | Yes | No | No |
+| `Notifications` | `ManageNotifications` (pause and resume member email, switch a notification kind for everyone, change notification defaults) | Yes | No | No |
+| `NotificationHolds` | `HoldNotifications` (hold and release notifications to a Popkin) | Yes | Yes | No |
 | `Admins` | `ManageAdmins` (add, remove, change a role) | Yes | No | No |
 | `AuditExport` | `ExportAuditLog` | Yes | Yes | Yes |
 
 - **`AdminPermissions.Allows(AdminRole role, AdminAction action)`** — the one answer every
   check uses. `AllowedFor(role)` gives the set, and `Rows` the table for the roles view.
 - A direct test in `Popkin.Application.Tests` (or a `Popkin.Domain` test project when one is
-  added) takes one case per cell: 21 actions by 3 roles.
+  added) takes one case per cell: 23 actions by 3 roles.
 - Opening a report or a moderation view's content is reached through `ReviewReports` and
   `OpenModerationView`; reading a report in the queue is viewing. The designs of the other admin
   subsystems name the action each endpoint requires from this enum.
@@ -92,7 +95,11 @@ values, each with the `AdminAction` values it covers:
   [Admin sign in](../admin-sign-in/README.md). `IAppDbContext` gains `Admins`, `AdminSessions`,
   `AdminSignInLocks` and `AuditEntries`.
 - **`AdminRole`** (Domain, new) — `Owner`, `Support`, `Viewer`, stored as text.
-- **`AdminAction`** (Domain, new) — the 21 values of the table above.
+- **`AdminAction`** (Domain, new) — the 23 values of the table above. `ManageNotifications` and
+  `HoldNotifications` join the 21 built in journey 24 for the two rows L2-086 gained on
+  17 November 2026 ([Member email and notification kinds](../../admin-platform/notifications/README.md),
+  [Notification holds](../../admin-platform/notification-holds/README.md),
+  [Notification defaults](../../admin-platform/notification-defaults/README.md)).
 - **`ICurrentAdmin`** (Application, new) — `AdminId` and `SessionId` of the admin session;
   `HttpCurrentAdmin` (Api) reads them from the admin principal.
 - **`IAdminGuard`** (Application, new) — `Task<Admin> CurrentAdminAsync(CancellationToken)` loads
@@ -153,7 +160,7 @@ values, each with the `AdminAction` values it covers:
   and restore", "Start account deletion", "Switch and roll out features") and leaves out logging a
   data request, cancelling a deletion, opening a moderation view, the view rows of reports, calls,
   jobs, exports, features, limits, settings and admins, and exporting the audit log. L2-086 AC4
-  shows "the table above", so the view has the requirement's ten rows and the mock changes.
+  shows "the table above", so the view has the requirement's rows (twelve since 17 November 2026) and the mock changes.
 
 ### Tests
 

@@ -1,0 +1,68 @@
+@startuml
+title UML sequence behaviour — An Owner switches a kind off for everyone
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+actor "Member" as member
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "NotificationsPage" as page
+  participant "NotificationKindDialog" as dialog
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Notifications screen" as web
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminNotificationsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SwitchNotificationKindCommandHandler" as handler
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure and Worker" #FFF4E5
+  participant "PlatformSnapshot" as snap
+  participant "DispatchNotificationsCommandHandler" as dispatch
+  database "Popkin database" as db
+end box
+actor -> page : Turns "New photos for everyone" off
+page -> page : Switch put back until confirmed
+page -> dialog : "Turn new photos off for everyone?" (L2-171 AC1)
+actor -> dialog : Reason, "Turn off for everyone"
+dialog -> client : switchKind(NewPhotos, false, reason)
+client -> controller : PUT /api/admin/notifications/kinds/NewPhotos
+controller -> handler : Send SwitchNotificationKindCommand
+handler -> handler : RequireAsync(ManageNotifications); kind known; not required; ReasonRules.Required
+alt Sign-in codes and security
+  handler --> controller : 400 notification_required (L2-154 AC2)
+else Any other kind
+  handler -> db : Add NotificationKindSwitch(kind, now, admin, reason)
+  handler -> audit : Record(TurnedNotificationKindOff, NotificationKind, reason)
+  handler -> db : SaveChangesAsync, one transaction
+  handler -> snap : Invalidate()
+  controller --> client : 200 AdminNotificationKindDto
+  client --> page : "Off for everyone", "—", "Off since {date} by {admin}: “{reason}”" (L2-171 AC2)
+end
+== Within a minute ==
+dispatch -> snap : IsKindOff(NewPhotos)
+snap --> dispatch : true
+dispatch -> db : Delivery Suppressed, rule KindOffForEveryone, on email and phone; never sent later
+member -> web : Opens Notifications
+web -> controller : Member settings (NotificationKindChoice unchanged)
+web --> member : The member's own choice, disabled, "Switched off by Popkin for now" (L2-171 AC4)
+== Turned back on ==
+actor -> dialog : "Turn new photos back on?", reason
+handler -> db : Remove the switch; audit TurnedNotificationKindOn; Invalidate()
+dispatch -> dispatch : Sends from the next change to members who have it on (L2-171 AC3)
+@enduml

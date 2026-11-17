@@ -4,27 +4,25 @@ LAYOUT_WITH_LEGEND()
 title Components — Reminders
 
 Container_Boundary(worker, "Popkin Worker") {
-  Component(job, "SendContactRemindersJob", "PeriodicJob", "Sends one command per tick")
+  Component(job, "SendContactRemindersJob", "PeriodicJob, 5 min", "Sends one command per tick")
 }
 Container_Boundary(app, "Popkin Application") {
-  Component(handler, "SendContactRemindersCommandHandler", "MediatR handler", "Decides what is due; adds reminders once; sends")
-  Component(clock, "IOwnerClock", "Application service", "The owner's 9 am and Monday")
-  Component(pushSender, "IPhoneNotificationSender", "Port", "<TO SUPPLY> implementation")
-  Component(mail, "IContactsEmailSender", "Port", "Week-ahead email by Azure Communication Services")
-  Component(metrics, "PopkinMetrics", "Meter Popkin", "Sent, failures, lateness, last tick")
+  Component(handler, "SendContactRemindersCommandHandler", "MediatR handler", "From 8 am local: adds reminders and Birthdays events once")
+  Component(rules, "ReminderRules", "Pure type", "Hour 8; words; what is due")
+  Component(metrics, "PopkinMetrics", "Meter Popkin", "In-app reminders added")
+  Component(dispatch, "DispatchNotificationsCommandHandler", "MediatR handler", "Sends the event (Deliver notifications)")
 }
 Container_Boundary(api, "Popkin API") {
   Component(ctrl, "ContactRemindersController", "ASP.NET Core controller", "GET reminders, POST dismissal")
   Component(read, "GetContactRemindersQueryHandler", "MediatR handler", "Owner's undismissed reminders")
   Component(dismiss, "DismissContactReminderCommandHandler", "MediatR handler", "Dismisses one")
 }
-ComponentDb(db, "Popkin database", "SQL Server", "ContactReminder, ContactWeeklyEmail")
+ComponentDb(db, "Popkin database", "SQL Server", "ContactReminder, NotificationEvent")
 Rel(job, handler, "Sends SendContactRemindersCommand")
-Rel(handler, clock, "LocalNow(ownerId)")
-Rel(handler, db, "Reads due dates, writes reminders", "EF Core")
-Rel(handler, pushSender, "SendAsync")
-Rel(handler, mail, "SendWeekAheadAsync")
+Rel(handler, rules, "Uses")
+Rel(handler, db, "Reads due dates; writes reminders and events in one save", "EF Core")
 Rel(handler, metrics, "Records")
+Rel(dispatch, db, "Reads the Birthdays events", "EF Core")
 Rel(ctrl, read, "Sends GetContactRemindersQuery")
 Rel(ctrl, dismiss, "Sends DismissContactReminderCommand")
 Rel(read, db, "Reads", "EF Core")

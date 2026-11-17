@@ -1,0 +1,112 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Member email and notification kinds
+
+package "Popkin.Domain" {
+  enum NotificationKind {
+    MentionsAndReplies
+    DirectMessages
+    GroupChat
+    NewPhotos
+    PlanChanges
+    ScheduleChanges
+    PeopleJoining
+    Experiences
+    Birthdays
+    StoriesDue
+    PopkinWrappingUp
+    SignInAndSecurity
+  }
+  class NotificationCatalogue <<static>> {
+    +Group(kind): NotificationGroup
+    +IsRequired(kind): bool
+    +Name(kind): string
+    +About(kind): string
+  }
+  class NotificationPlatform {
+    +DateTimeOffset? EmailPausedAt
+    +Guid? PausedByAdminId
+    +string? PausedByName
+    +string? PauseReason
+    +bool IsPaused
+    +Pause(admin: Admin, reason: string, now): void
+    +Resume(): void
+  }
+  class NotificationKindSwitch {
+    +NotificationKind Kind
+    +DateTimeOffset OffSince
+    +Guid OffByAdminId
+    +string OffByName
+    +string Reason
+  }
+  enum AdminAction {
+    ManageNotifications
+    HoldNotifications
+  }
+}
+package "Popkin.Application" {
+  interface INotificationPlatform {
+    +IsKindOff(kind: NotificationKind): bool
+  }
+  interface INotificationStats {
+    +ReadAsync(now, ct): Task<NotificationTotals>
+  }
+  class PauseMemberEmailCommandHandler {
+    +Handle(command): Task<AdminSendStatusDto>
+  }
+  class ResumeMemberEmailCommandHandler {
+    +Handle(command): Task<AdminSendStatusDto>
+  }
+  class SwitchNotificationKindCommand {
+    +string Kind
+    +bool On
+    +string? Reason
+  }
+  class SwitchNotificationKindCommandHandler {
+    +Handle(command): Task<AdminNotificationKindDto>
+  }
+  class GetAdminNotificationsQueryHandler {
+    +Handle(query): Task<AdminNotificationsDto>
+  }
+  interface IAdminGuard {
+    +RequireAsync(action: AdminAction, ct): Task<Admin>
+  }
+  interface IAuditLog {
+    +RecordAsync(record: AuditRecord, ct): Task
+  }
+}
+package "Popkin.Infrastructure" {
+  class PlatformSnapshot {
+    +IsKindOff(kind): bool
+    +Invalidate(): void
+  }
+  class NotificationStats
+}
+INotificationPlatform <|.. PlatformSnapshot
+INotificationStats <|.. NotificationStats
+PlatformSnapshot ..> NotificationKindSwitch : reloads
+NotificationKindSwitch --> NotificationKind
+NotificationCatalogue ..> NotificationKind : describes
+PauseMemberEmailCommandHandler --> NotificationPlatform : Pause
+ResumeMemberEmailCommandHandler --> NotificationPlatform : Resume
+SwitchNotificationKindCommandHandler ..> SwitchNotificationKindCommand : handles
+SwitchNotificationKindCommandHandler --> NotificationKindSwitch : adds / removes
+SwitchNotificationKindCommandHandler ..> NotificationCatalogue : refuses required
+SwitchNotificationKindCommandHandler ..> PlatformSnapshot : Invalidate
+PauseMemberEmailCommandHandler ..> IAdminGuard
+SwitchNotificationKindCommandHandler ..> IAdminGuard
+PauseMemberEmailCommandHandler ..> IAuditLog
+SwitchNotificationKindCommandHandler ..> IAuditLog
+GetAdminNotificationsQueryHandler ..> INotificationStats
+GetAdminNotificationsQueryHandler ..> NotificationCatalogue
+IAdminGuard ..> AdminAction
+@enduml

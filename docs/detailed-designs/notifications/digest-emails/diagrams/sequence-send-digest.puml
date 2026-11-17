@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — Send a digest
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "SendDigestsJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendDigestsCommandHandler" as handler
+  participant "NotificationRules" as rules
+  participant "DigestEmailComposer" as composer
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "NotificationEmailRenderer" as renderer
+  participant "AcsNotificationEmailSender" as sender
+  database "Popkin database" as db
+end box
+time -> job : 5 min elapse
+job -> handler : Send SendDigestsCommand
+handler -> db : People past 18:00 local with no digest for that date (L2-161 AC5)
+db --> handler : Daily; weekly on Sunday; as-it-happens with held changes (AC4)
+loop Each person
+  handler -> db : Add OutgoingEmail digest:{personId}:{date} (unique, L2-175 AC3)
+  handler -> rules : Allowed now? (L2-174 AC1)
+  alt Paused
+    handler -> db : Leave Open; sent on resume or dropped after 6 h (L2-170)
+  else Unsubscribed or held
+    handler -> db : Suppressed with the rule
+  else Allowed
+    handler -> composer : ComposeAsync(email)
+    composer --> handler : DigestEmailModel, or Nothing
+    alt Nothing (L2-165 AC5)
+      handler -> db : Suppressed nothing_new
+    else Model
+      handler -> renderer : Render(model)
+      renderer --> handler : HTML, text, inline photos
+      handler -> sender : SendAsync(message)
+      sender --> handler : Accepted, or failure
+      handler -> db : Sent and held deliveries marked; or Failed for retry
+    end
+  end
+  handler -> db : Save this person
+end
+handler --> job : Count; last tick recorded; no hub event (ADR 0015)
+@enduml

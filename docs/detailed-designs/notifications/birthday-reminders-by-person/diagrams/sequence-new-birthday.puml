@@ -1,0 +1,58 @@
+@startuml
+title UML sequence behaviour — A new birthday starts from the default
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Add a date dialog" as dialog
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "KeyDatesController" as prefsCtrl
+  participant "ContactsPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetReminderPreferencesQueryHandler" as prefs
+  participant "ReminderDefaults" as defaults
+  participant "AddKeyDateCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> dialog : Open "Add a date", kind Birthday
+dialog -> client : reminderPreferences()
+client -> prefsCtrl : GET /api/contacts/reminder-preferences
+prefsCtrl -> prefs : Send GetReminderPreferencesQuery
+prefs -> defaults : ForNewBirthday(ownerId)
+defaults -> db : ReminderPreferences.BirthdayLead; NotificationPlatform.DefaultBirthdayLead
+db --> defaults : Values
+alt The person changed "Birthdays: remind me"
+  defaults --> prefs : (their lead, on)
+else An Owner set the default for new members (L2-173)
+  defaults --> prefs : (platform lead, on); "Off" gives (1 week before, off)
+else Neither
+  defaults --> prefs : (1 week before, on) (L2-139 AC4)
+end
+prefs --> prefsCtrl : ReminderPreferencesDto with the effective birthday lead
+prefsCtrl --> client : 200
+dialog --> actor : "Remind me" starts at that lead (L2-138 AC3)
+actor -> dialog : "Save the date"
+dialog -> client : addKeyDate(contactId, { kind: Birthday, lead })
+client -> ctrl : POST /api/contacts/people/{contactId}/key-dates
+ctrl -> handler : Send AddKeyDateCommand
+handler -> defaults : RemindersOn for a new birthday
+handler -> db : KeyDate.Create(..., lead, remindersOn); save
+ctrl --> client : 201
+@enduml

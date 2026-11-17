@@ -175,6 +175,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .segmented { display: inline-flex; padding: var(--space-1); border-radius: var(--radius-full); background: var(--color-bg-subtle); }
 .segmented__option { height: var(--space-9); min-width: var(--target-comfortable); padding: 0 var(--space-4); border: 0; border-radius: var(--radius-full); background: transparent; color: var(--color-fg-muted); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); }
 .segmented__option[aria-selected="true"] { background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: var(--shadow-1); }
+.segmented__option:hover, .segmented__option[data-state="hover"] { color: var(--color-fg-default); }
 .switch { position: relative; flex: none; width: var(--space-13); height: var(--space-8); border: 0; border-radius: var(--radius-full); background: var(--color-border-strong); transition: background-color var(--duration-fast) var(--ease-pop); }
 .switch::after { content: ""; position: absolute; top: var(--space-1); left: var(--space-1); width: var(--space-6); height: var(--space-6); border-radius: var(--radius-full); background: var(--color-constant-light); box-shadow: var(--shadow-1); transition: translate var(--duration-base) var(--ease-pop); }
 .switch[aria-checked="true"] { background: var(--accent-line); }
@@ -575,6 +576,7 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
 .toast__action { margin-top: var(--space-1); min-height: var(--space-8); padding: 0; border: 0; background: none; color: inherit; font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-family-sans); text-decoration: underline; text-underline-offset: 0.2em; }
 .toast .icon-btn { width: var(--space-8); height: var(--space-8); color: inherit; }
 .toast .icon-btn:hover { background: var(--color-bg-inverse-hover); }
+.toast, .undo-bar { --color-focus-ring: var(--color-fg-inverse); } /* the page ring matches the inverse surface in dark; on ink or cream the ring takes the text colour */
 .banner { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2-5) var(--space-4); background: var(--color-info-bg); color: var(--color-info-fg); font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans); border-bottom: var(--border-width-hairline) solid var(--color-info-border); }
 .banner > .icon { color: var(--color-info-icon); }
 .banner--popkin { background: var(--accent); color: var(--color-fg-on-popkin); border-color: transparent; }
@@ -2045,3 +2047,222 @@ a.who-chip, a.who-chip:hover { color: var(--color-fg-default); text-decoration: 
 .memory-upload__main { flex: 1; min-width: 0; }
 .memory-upload__name { overflow: hidden; font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal) var(--font-family-sans); text-overflow: ellipsis; white-space: nowrap; }
 .memory-upload__status { font: var(--text-body-sm); color: var(--color-fg-muted); }
+
+/* ---- Notifications: the member's settings, the emails and the admin console, added with their mocks on 17 November 2026 ---- */
+/* Notification settings: a wider column than a form, for the kinds and their two switches. */
+.screen--settings > .screen__body { width: 100%; max-width: var(--layout-container-narrow); margin-inline: auto; padding-bottom: var(--space-20); }
+@media (min-width: 48rem) { .screen--settings > .screen__body { padding-inline: var(--space-8); } }
+.settings-section + .settings-section { margin-top: var(--space-10); }
+.settings-section__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3); }
+.settings-section__title { font: var(--text-h2); }
+.settings-section__title--sm { font: var(--text-title); }
+.settings-section__sub { margin-top: var(--space-0-5); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); color: var(--color-fg-muted); }
+.settings-section__note { margin-top: var(--space-4); font: var(--text-body-sm); color: var(--color-fg-subtle); }
+.settings-section__note strong { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
+.switch-label { display: inline-flex; align-items: center; gap: var(--space-3); font: var(--font-weight-semibold) var(--font-size-md-minus) / 1 var(--font-family-sans); }
+.switch:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+a.switch { display: inline-block; } /* a switch that opens a confirmation first: the admin kinds */
+
+/* Choices side by side from S: how often activity email arrives. */
+.option-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2-5); margin-top: var(--space-4); }
+@media (min-width: 40rem) { .option-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.option-grid .option-card { align-items: flex-start; min-height: 0; padding: var(--space-4); }
+.option-card:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+
+/* Tabs inside a page: an underline in the accent under the chosen one. */
+.tabs { display: flex; gap: var(--space-1); margin-top: var(--space-10); overflow-x: auto; border-bottom: var(--border-width-hairline) solid var(--color-border-default); scrollbar-width: none; }
+.tabs__tab { display: inline-flex; align-items: center; flex: none; height: var(--control-height-md); margin-bottom: calc(-1 * var(--border-width-hairline)); padding: 0 var(--space-3); border-bottom: var(--border-width-ring) solid transparent; color: var(--color-fg-subtle); font: var(--font-weight-extrabold) var(--font-size-md) / 1 var(--font-family-display); text-decoration: none; white-space: nowrap; }
+.tabs__tab:hover, .tabs__tab[data-state="hover"] { color: var(--color-fg-default); }
+.tabs__tab:focus-visible, .tabs__tab[data-state="focus"] { outline-offset: calc(-1 * var(--focus-ring-width)); border-radius: var(--radius-sm); } /* inset: the scrolling list would clip an outside ring */
+@media (max-width: 39.99rem) { .tabs { gap: 0; } .tabs__tab { padding: 0 var(--space-2); font-size: var(--font-size-md-minus); } }
+.tabs + [role="tabpanel"] { margin-top: var(--space-6); }
+.tabs + [role="tabpanel"] > .notif-group:first-child { margin-top: 0; }
+.tabs__tab[aria-selected="true"] { border-bottom-color: var(--color-accent); color: var(--color-fg-default); }
+.segmented__count { margin-left: var(--space-1-5); color: var(--color-fg-subtle); font-variant-numeric: tabular-nums; }
+a.segmented__option { display: inline-flex; align-items: center; text-decoration: none; }
+
+/* The kinds of notification: what triggers each, with an Email and a Phone switch, or "Always on". */
+.notif-group { margin-top: var(--space-6); }
+.notif-group__head, .notif-matrix__row { display: grid; grid-template-columns: minmax(0, 1fr) var(--space-14) var(--space-14); align-items: center; gap: var(--space-2); }
+@media (min-width: 40rem) { .notif-group__head, .notif-matrix__row { grid-template-columns: minmax(0, 1fr) var(--space-18) var(--space-18); } }
+.notif-group__head { align-items: end; padding-bottom: var(--space-2); }
+.notif-group__title { font: var(--text-h3); }
+.notif-group__about { font: var(--text-body-sm); color: var(--color-fg-subtle); }
+.notif-group__col { text-align: center; font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-family-sans); color: var(--color-fg-subtle); }
+.notif-matrix { border-block: var(--border-width-hairline) solid var(--color-border-default); }
+.notif-matrix__row { min-height: var(--space-16); padding-block: var(--space-3); }
+.notif-matrix__row + .notif-matrix__row { border-top: var(--border-width-hairline) solid var(--color-border-default); }
+.notif-matrix__name { display: block; font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug) var(--font-family-sans); }
+.notif-matrix__about { display: block; font: var(--text-body-sm); color: var(--color-fg-muted); }
+.notif-matrix__cell { display: grid; place-items: center; }
+.notif-matrix__lock { grid-column: span 2; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1-5); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-subtle); }
+
+/* A settings list: a Popkin and how much you hear from it, a birthday and how early, a muted person. */
+.setting-list { margin-top: var(--space-4); border-block: var(--border-width-hairline) solid var(--color-border-default); }
+.setting-list__item { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); padding-block: var(--space-3); }
+.setting-list__item + .setting-list__item { border-top: var(--border-width-hairline) solid var(--color-border-default); }
+.setting-list__item--stack { flex-direction: column; align-items: stretch; padding-block: var(--space-4); }
+.setting-list__item--stack > .setting-list__main { flex-basis: auto; }
+@media (min-width: 40rem) { .setting-list__item--stack { flex-direction: row; align-items: center; } .setting-list__item--stack > .setting-list__main { flex-basis: 14rem; } }
+.setting-list__main { display: flex; flex: 1 1 14rem; align-items: center; gap: var(--space-3); min-width: 0; }
+.setting-list__text { min-width: 0; }
+.setting-list__name { display: block; overflow: hidden; font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug) var(--font-family-sans); text-overflow: ellipsis; white-space: nowrap; }
+.setting-list__name--display { font: var(--text-h3); }
+.setting-list__sub { display: block; font: var(--text-body-sm); color: var(--color-fg-muted); }
+.setting-list .select { width: auto; height: var(--control-height-sm); padding: 0 var(--space-8) 0 var(--space-3); border-width: var(--border-width-hairline); border-color: var(--color-border-default); border-radius: var(--radius-full); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); }
+.setting-list .select:disabled { opacity: var(--opacity-disabled); }
+.setting-list__more { margin-top: var(--space-2); }
+.setting-list__empty { margin-top: var(--space-4); padding: var(--space-5) var(--space-4); border-radius: var(--radius-lg); background: var(--color-bg-subtle); font: var(--text-body); color: var(--color-fg-muted); }
+
+/* How much you hear from one Popkin: Everything, Just for me, Muted. Muted is the one in ink. */
+.segmented--levels { flex: none; align-self: flex-start; }
+@media (min-width: 40rem) { .segmented--levels { align-self: auto; } }
+.segmented--levels .segmented__option[aria-checked="true"] { background: var(--color-bg-surface); color: var(--color-fg-default); box-shadow: var(--shadow-1); }
+.segmented--levels .segmented__option[data-level="muted"][aria-checked="true"] { background: var(--color-bg-inverse); color: var(--color-fg-inverse); box-shadow: none; }
+
+/* A change you can take back, in ink above the settings it changed: "Lakeside Weekend is muted. Undo". */
+.undo-bar { display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-6); padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); background: var(--color-bg-inverse); color: var(--color-fg-inverse); }
+@media (min-width: 40rem) { .undo-bar { flex-direction: row; align-items: center; } }
+.undo-bar__text { flex: 1; min-width: 0; font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-snug) var(--font-family-sans); }
+.undo-bar__actions { display: flex; flex: none; align-items: center; gap: var(--space-2); }
+.undo-bar__action { display: inline-flex; align-items: center; height: var(--control-height-sm); padding: 0 var(--space-4); border: 0; border-radius: var(--radius-full); background: var(--color-bg-surface); color: var(--color-fg-default); font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-family-sans); text-decoration: none; }
+.undo-bar__action:hover, .undo-bar__action[data-state="hover"] { background: var(--color-bg-subtle); }
+.undo-bar .icon-btn { width: var(--control-height-sm); height: var(--control-height-sm); color: inherit; }
+.undo-bar .icon-btn:hover { background: var(--color-bg-inverse-hover); }
+
+/* A picker that opens under its button, with a search on top: Mute someone, Hold a Popkin. */
+.popover-anchor { position: relative; }
+.popover { position: absolute; left: 0; top: calc(100% + var(--space-2)); z-index: var(--z-overlay); width: min(var(--layout-popover-max), 85vw); padding: var(--space-2); border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface-raised); box-shadow: var(--shadow-2); animation: pop-in var(--duration-base) var(--ease-pop); }
+@media (min-width: 40rem) { .popover--end { left: auto; right: 0; } }
+.popover .search { margin-bottom: var(--space-1); }
+.popover .search .input { height: var(--control-height-sm); border: 0; border-radius: var(--radius-md); background: var(--color-bg-subtle); font-size: var(--font-size-sm); }
+.pick-list__meta { flex: none; overflow: hidden; font: var(--text-caption); color: var(--color-fg-subtle); text-overflow: ellipsis; white-space: nowrap; }
+.add-btn { display: inline-flex; align-items: center; gap: var(--space-1-5); height: var(--control-height-sm); padding: 0 var(--space-4); border: var(--border-width-thick) dashed var(--color-border-strong); border-radius: var(--radius-full); background: none; color: var(--color-fg-muted); font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); text-decoration: none; }
+.add-btn:hover, .add-btn[data-state="hover"], .add-btn[aria-expanded="true"] { border-color: var(--color-fg-subtle); color: var(--color-fg-default); }
+.add-btn:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+
+/* admin: is member email going out at all. Paused is the incident state, in the danger colours with its words. */
+.send-status { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-5); border: var(--border-width-hairline) solid var(--color-border-default); border-radius: var(--radius-lg); background: var(--color-bg-surface); }
+@media (min-width: 48rem) { .send-status { flex-direction: row; align-items: center; justify-content: space-between; padding: var(--space-6); } }
+.send-status--paused { border-color: var(--color-danger-border); background: var(--color-danger-bg); }
+.send-status__title { display: flex; align-items: center; gap: var(--space-2-5); font: var(--text-h2); }
+@media (min-width: 48rem) { .send-status__title { font-size: var(--font-size-3xl); } }
+.send-status__title::before { content: ""; flex: none; width: var(--space-3); height: var(--space-3); border-radius: var(--radius-full); background: var(--color-success-solid); }
+.send-status--paused .send-status__title::before { background: var(--color-danger-solid); }
+.send-status__text { margin-top: var(--space-1-5); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal) var(--font-family-sans); color: var(--color-fg-muted); }
+.send-status--paused .send-status__text { color: var(--color-fg-default); }
+.page-tabs { margin: var(--space-8) 0 var(--space-4); }
+.page-tabs .segmented { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.page-tabs .segmented__option { flex: none; white-space: nowrap; }
+.kind-name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-weight: var(--font-weight-semibold); }
+.kind-name--off { color: var(--color-fg-subtle); }
+.kind-about { display: block; font: var(--text-caption); color: var(--color-fg-subtle); }
+.lock-note { display: inline-flex; align-items: center; gap: var(--space-1-5); white-space: nowrap; font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-subtle); }
+.panel__aside-note { margin-top: var(--space-4); padding-inline: var(--space-1); font: var(--text-body-sm); color: var(--color-fg-muted); }
+
+/* ---------- Email ------------------------------------------------------------------
+   How every Popkin email is drawn: the envelope a mail client shows (subject, sender, preview),
+   then one 600px column that survives Gmail, Outlook and Apple Mail. The footer says why it came
+   and offers the narrowest way to stop it first (this Popkin, this person), then settings, then all. */
+.email { min-height: 100dvh; padding: var(--space-6) var(--space-3) var(--space-14); background: var(--color-bg-subtle); }
+@media (min-width: 40rem) { .email { padding-top: var(--space-10); } }
+.email__col { width: 100%; max-width: var(--layout-email-max); margin-inline: auto; }
+.email__envelope { padding-inline: var(--space-3); }
+@media (min-width: 40rem) { .email__envelope { padding-inline: 0; } }
+.email__subject { font: var(--font-weight-semibold) var(--font-size-xl) / var(--line-height-snug) var(--font-family-sans); }
+.email__from { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-3); font: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans); }
+.email__sender { display: grid; place-items: center; flex: none; width: var(--space-10); height: var(--space-10); border-radius: var(--radius-full); background: var(--color-accent); color: var(--color-constant-dark); }
+.email__sender .mark { width: var(--space-6); height: var(--space-6); color: var(--color-constant-dark); }
+.email__meta { flex: 1; min-width: 0; }
+.email__line { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.email__who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.email__who strong { font-weight: var(--font-weight-semibold); }
+.email__who span, .email__time, .email__preview { color: var(--color-fg-subtle); }
+.email__time { flex: none; font-size: var(--font-size-xs); }
+.email__preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.email__card { margin-top: var(--space-5); overflow: hidden; border-radius: var(--radius-xl); background: var(--color-bg-surface); box-shadow: var(--shadow-1); }
+.email__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-6) var(--space-6) var(--space-2); }
+.email__popkin { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 0; font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans); color: var(--color-fg-muted); }
+.email__body { padding: var(--space-5) var(--space-6) var(--space-8); }
+@media (min-width: 40rem) { .email__head { padding: var(--space-8) var(--space-9) var(--space-2); } .email__body { padding: var(--space-5) var(--space-9) var(--space-10); } }
+.email__headline { font: var(--font-weight-black) var(--font-size-3xl) / var(--line-height-snug) var(--font-family-display); letter-spacing: var(--letter-spacing-tight); }
+.email__sub { margin-top: var(--space-2); font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
+.email__text { margin-top: var(--space-4); font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
+.email__text strong { color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
+.email__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-5); margin-top: var(--space-8); }
+.email__hint { font: var(--text-body-sm); color: var(--color-fg-subtle); }
+.email__actions + .email__hint { margin-top: var(--space-3); }
+.email__section { margin-top: var(--space-7); }
+.email__section-title { font: var(--font-weight-extrabold) var(--font-size-md-minus) / var(--line-height-snug) var(--font-family-display); color: var(--color-fg-muted); }
+.email__rule { margin-top: var(--space-9); padding-top: var(--space-2); border-top: var(--border-width-hairline) solid var(--color-border-default); }
+.email__footer { padding: var(--space-7) var(--space-4) 0; text-align: center; font: var(--font-weight-regular) var(--font-size-sm) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-subtle); }
+@media (min-width: 40rem) { .email__footer { padding-inline: var(--space-10); } }
+.email__footer strong { color: var(--color-fg-muted); font-weight: var(--font-weight-semibold); }
+.email__links { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-1) var(--space-1); margin-top: var(--space-3); }
+.email__links a { color: var(--color-fg-muted); font-weight: var(--font-weight-semibold); white-space: nowrap; text-decoration: underline; text-decoration-color: var(--color-border-strong); text-underline-offset: 0.2em; }
+.email__links a:hover, .email__links a[data-state="hover"] { color: var(--color-fg-default); }
+.email__address { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-top: var(--space-5); font-size: var(--font-size-xs); }
+.email__address .mark { width: var(--space-4); height: var(--space-4); color: inherit; }
+
+/* What an email carries. */
+.email-thread { display: flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-6); }
+.email-thread__msg { display: flex; gap: var(--space-3); }
+.email-thread__msg--before { opacity: 0.7; }
+.email-thread__who { display: flex; align-items: center; gap: var(--space-1-5); font: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans); }
+.email-thread__msg--before .email-thread__who { color: var(--color-fg-muted); }
+.email-thread__text { margin-top: var(--space-1); font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-relaxed) var(--font-family-sans); color: var(--color-fg-muted); }
+.email-thread__quote { margin-top: var(--space-1-5); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-xs); background: var(--accent-tint); font: var(--font-weight-regular) var(--font-size-md-plus) / var(--line-height-relaxed) var(--font-family-sans); }
+.email-photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-1-5); margin-top: var(--space-6); overflow: hidden; border-radius: var(--radius-lg); }
+.email-photos img { width: 100%; height: 100%; aspect-ratio: 1; object-fit: cover; }
+.email-photos__lead { grid-column: span 2; grid-row: span 2; }
+.email-photos__more { display: grid; place-items: center; aspect-ratio: 1; background: var(--accent); color: var(--color-fg-on-popkin); font: var(--font-weight-black) var(--font-size-2xl) / 1 var(--font-family-display); }
+.email-strip { display: flex; gap: var(--space-1-5); margin-top: var(--space-4); overflow: hidden; border-radius: var(--radius-md); }
+.email-strip img { flex: 1; min-width: 0; aspect-ratio: 1; object-fit: cover; }
+.email-strip--tall img { aspect-ratio: 4 / 5; }
+.email-changes { margin-top: var(--space-6); border-block: var(--border-width-hairline) solid var(--color-border-default); }
+.email-changes__item { padding-block: var(--space-4); }
+.email-changes__item + .email-changes__item { border-top: var(--border-width-hairline) solid var(--color-border-default); }
+.email-changes__name { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug) var(--font-family-sans); }
+.email-changes__note { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-1-5); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.email-changes__was { color: var(--color-fg-subtle); text-decoration: line-through; }
+.email-changes__now { padding: 0 var(--space-1-5); border-radius: var(--radius-xs); background: var(--color-warning-bg); color: var(--color-fg-default); font-weight: var(--font-weight-semibold); }
+.email-also { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-3); }
+.email-also__item { display: flex; align-items: center; gap: var(--space-3); font: var(--text-body); }
+.email-also__text { flex: 1; min-width: 0; }
+.email-also__at { flex: none; font: var(--text-caption); color: var(--color-fg-subtle); }
+.email-needs { margin-top: var(--space-7); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--color-accent-subtle); }
+.email-needs__title { font: var(--font-weight-black) var(--font-size-lg) / var(--line-height-snug) var(--font-family-display); }
+.email-needs__list { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-3); }
+.email-needs__item { display: flex; gap: var(--space-3); }
+.email-needs__icon { display: grid; place-items: center; flex: none; width: var(--space-8); height: var(--space-8); margin-top: var(--space-0-5); border-radius: var(--radius-full); background: var(--color-bg-surface); color: var(--color-fg-accent); }
+.email-needs__text { display: block; font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug) var(--font-family-sans); }
+.email-needs__sub { display: block; font: var(--text-body-sm); color: var(--color-fg-muted); }
+.email-day { display: flex; flex-direction: column; gap: var(--space-9); margin-top: var(--space-8); }
+.email-day__head { display: flex; align-items: center; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: var(--border-width-hairline) solid var(--color-border-default); }
+.email-day__name { flex: 1; min-width: 0; font: var(--text-title); }
+.email-day__count { flex: none; font: var(--text-caption); color: var(--color-fg-subtle); }
+.email-day__items { display: flex; flex-direction: column; margin-top: var(--space-3); }
+.email-day__item { display: flex; align-items: flex-start; gap: var(--space-3); padding-block: var(--space-2); font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-snug) var(--font-family-sans); }
+.email-day__item > span:last-child { padding-top: var(--space-0-5); }
+.email-day__more { margin-top: var(--space-1); padding-left: var(--space-10); font: var(--text-body-sm); color: var(--color-fg-subtle); }
+.email-hero { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.email-hero__face { position: relative; }
+.email-hero__face .avatar { width: var(--space-28); height: var(--space-28); }
+.email-hero__age { position: absolute; right: calc(-1 * var(--space-1)); bottom: calc(-1 * var(--space-1)); display: grid; place-items: center; min-width: var(--space-11); height: var(--space-11); padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--color-warning-loud); color: var(--color-constant-dark); font: var(--font-weight-black) var(--font-size-lg) / 1 var(--font-family-display); box-shadow: 0 0 0 var(--space-1) var(--color-bg-surface); }
+.email-hero .email__headline { margin-top: var(--space-6); }
+.email-hero .email__sub { margin-top: var(--space-2); }
+.email-facts { display: flex; flex-direction: column; gap: var(--space-7); margin-top: var(--space-9); padding-top: var(--space-7); border-top: var(--border-width-hairline) solid var(--color-border-default); }
+.email-facts__lead { margin-top: var(--space-1-5); font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-relaxed) var(--font-family-sans); }
+.email-facts__lead strong { font-weight: var(--font-weight-semibold); }
+.email-event { display: flex; align-items: flex-start; gap: var(--space-4); }
+.email-event .date-tile { display: flex; flex-direction: column; width: var(--space-18); height: auto; padding-bottom: var(--space-1-5); overflow: hidden; background: var(--color-bg-surface); box-shadow: inset 0 0 0 var(--border-width-thick) var(--color-border-default); }
+.email-event .date-tile__top { padding: var(--space-1) 0; background: var(--accent); color: var(--color-fg-on-popkin); font-size: var(--font-size-sm); text-transform: none; }
+.email-event .date-tile__day { margin-top: var(--space-1-5); font-size: var(--font-size-3xl); }
+.email-going { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-6); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--color-bg-subtle); font: var(--text-body); }
+.email-going strong { font-weight: var(--font-weight-semibold); }
+.email-bring { display: flex; flex-direction: column; gap: var(--space-1-5); margin-top: var(--space-2); font: var(--text-body); }
+.email-task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-5); margin-top: var(--space-6); font: var(--text-body-sm); color: var(--color-fg-muted); }
+.email-task-meta > span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.email-latest { display: flex; gap: var(--space-3); margin-top: var(--space-6); padding-left: var(--space-4); border-left: var(--border-width-ring) solid var(--accent-line); }
+.email-latest__who { font: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-normal) var(--font-family-sans); color: var(--color-fg-muted); }
+.email-latest__text { margin-top: var(--space-0-5); font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-relaxed) var(--font-family-sans); }

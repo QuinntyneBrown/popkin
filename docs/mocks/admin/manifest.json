@@ -772,6 +772,28 @@
       ]
     },
     {
+      "id": "notifications",
+      "kind": "page",
+      "title": "Notifications",
+      "route": "admin.popkin.community/notifications",
+      "requirements": [],
+      "states": [
+        "default",
+        "paused",
+        "holds",
+        "hold-adding",
+        "defaults",
+        "support",
+        "viewer",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "Every kind of notification always exists, and the Holds list always has the automatic holds."
+      },
+      "notes": "From the Magic Patterns Popkin Admin › Notifications design. No requirement covers it yet."
+    },
+    {
       "id": "announcement-publish",
       "kind": "dialog",
       "title": "Publish a banner",
@@ -806,6 +828,67 @@
         "invalid": "The dialog has no field to fill in."
       },
       "close": "../../pages/announcements/default.html"
+    },
+    {
+      "id": "notifications-pause",
+      "kind": "dialog",
+      "title": "Pause all member email",
+      "opens_from": "notifications",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional; nothing can be invalid."
+      }
+    },
+    {
+      "id": "notifications-resume",
+      "kind": "dialog",
+      "title": "Resume sending",
+      "opens_from": "notifications",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional; nothing can be invalid."
+      }
+    },
+    {
+      "id": "notification-kind-switch",
+      "kind": "dialog",
+      "title": "Switch a kind for everyone",
+      "opens_from": "notifications",
+      "requirements": [],
+      "states": [
+        "default",
+        "turn-on",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional; nothing can be invalid."
+      }
+    },
+    {
+      "id": "notification-hold-release",
+      "kind": "dialog",
+      "title": "Release a hold",
+      "opens_from": "notifications",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "The only field, the reason, is optional; nothing can be invalid."
+      }
     },
     {
       "id": "limits",

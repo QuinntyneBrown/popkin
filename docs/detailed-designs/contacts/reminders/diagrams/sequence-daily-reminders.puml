@@ -20,34 +20,32 @@ box "Backend — Popkin Worker" #D1FADF
 end box
 box "Backend — Popkin Application and Domain" #ECFDF3
   participant "SendContactRemindersCommandHandler" as handler
-  participant "IOwnerClock" as clock
+  participant "ReminderRules" as rules
   participant "KeyDate" as entity
-  participant "IPhoneNotificationSender" as push
 end box
 box "Backend — Popkin Infrastructure" #FFF4E5
   database "Popkin database" as db
 end box
 time -> job : Period elapses
 job -> handler : Send SendContactRemindersCommand
-handler -> db : Owners with key dates
+handler -> db : Owners with contacts
 db --> handler : Owners
 loop Each owner
-  handler -> clock : LocalNow(ownerId)
-  clock --> handler : Local time (zone <TO SUPPLY>, gap 104)
-  opt From 9 am
-    handler -> db : Key dates and existing reminders
+  handler -> db : NotificationPreferences.TimeZone
+  handler -> rules : LocalNow(zone), IsTime (8 am, UTC before a zone)
+  rules --> handler : Local time
+  opt From 8 am (L2-140 AC1)
+    handler -> db : Key dates with RemindersOn; open follow-ups due today; habits; existing reminders
     db --> handler : Rows
     handler -> entity : NextOccurrence(today), ReminderDay(occurrence)
     entity --> handler : Due when reminder day <= today <= occurrence
-    handler -> db : Add ContactReminder once per (KeyDateId, OccursOn) (L2-140 AC1)
-    opt PhoneNotifications on (L2-140 AC2)
-      handler -> push : SendAsync(ownerId, reminder)
-      push --> handler : Sent, or failure counted
-    end
-    handler -> db : MarkNotified; save this owner
+    handler -> db : Add ContactReminder once per (Kind, SubjectId, DueOn)
+    handler -> db : Add Birthdays NotificationEvent per new reminder, DedupKey reminder:birthdays:{id} (L2-140 AC2, AC3)
+    handler -> db : Save this owner
     db --> handler : Committed
   end
 end
-handler --> job : ContactRemindersResult
-job -> job : Ticked(); no hub event (ADR 0015)
+handler --> job : Count added
+job -> job : Ticked(); no hub event (ADR 0015); no email, no Monday (L2-140 AC4)
+note over handler, db : Deliver notifications sends each event by email and phone, as "Birthdays" allows
 @enduml

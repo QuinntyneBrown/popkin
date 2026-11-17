@@ -343,6 +343,8 @@
   --layout-measure-sm: 20rem;      /* empty-state text */
   --layout-measure-xs: 18rem;      /* footer blurb, short centred lines */
   --layout-toast-max: 26rem;
+  --layout-email-max: 37.5rem;     /* an email's one column, the 600px every mail client renders */
+  --layout-popover-max: 19rem;     /* a picker that opens under its button: Mute someone, Hold a Popkin */
   --layout-call-min-height: 24rem;
   --layout-bubble-max: 78%;
   --layout-qr-card-max: 20rem;

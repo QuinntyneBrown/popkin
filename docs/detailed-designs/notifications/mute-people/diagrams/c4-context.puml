@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Mute people
+
+Person(person, "Member", "Mutes another member's posts")
+Person(other, "Muted member", "Shares a Popkin with the member; never told")
+System(popkin, "Popkin", "Platform for pop-up communities")
+System_Ext(acs, "Azure Communication Services", "Delivers Popkin's email (ADR 0021)")
+System_Ext(push, "Browser push service", "Delivers phone alerts (ADR 0028)")
+Rel(person, popkin, "Mutes and unmutes people in", "HTTPS")
+Rel(other, popkin, "Posts in, as before", "HTTPS")
+Rel(popkin, acs, "Sends no email about a muted member's posts to the member", "HTTPS")
+Rel(popkin, push, "Sends no phone alert about them either", "Web Push")
+@enduml

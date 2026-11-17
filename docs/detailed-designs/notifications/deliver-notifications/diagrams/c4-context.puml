@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Deliver notifications
+
+Person(actor, "Member", "Changes something in a Popkin")
+Person(member, "Other member", "Hears about it by email or phone alert")
+System(popkin, "Popkin", "Pop-up communities: chat, photos, plan, schedules, experiences")
+System_Ext(acs, "Azure Communication Services", "Sends email (ADR 0021)")
+System_Ext(push, "Browser push services", "Deliver Web Push alerts (ADR 0028)")
+
+Rel(actor, popkin, "Sends a message, adds photos, changes the plan using")
+Rel(popkin, acs, "Hands notification emails to", "HTTPS")
+Rel(popkin, push, "Sends phone alerts through", "Web Push")
+Rel(acs, member, "Delivers email to")
+Rel(push, member, "Shows alert on device of")
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Each Popkin's level
+
+Container_Boundary(web, "Popkin web app") {
+  Component(view, "NotificationsPage, Popkins view", "Angular page", "One row per active Popkin")
+  Component(store, "NotificationSettingsStore", "api library", "setLevel(), undo bar, undo")
+  Component(client, "HttpNotificationsApi", "NOTIFICATIONS_API", "setPopkinLevel()")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "NotificationSettingsController", "ASP.NET Core controller", "PUT popkins/{popkinId}")
+  Component(reader, "PopkinLevelsReader", "Application", "Active memberships with tile, size and end")
+  Component(handler, "SetPopkinNotificationLevelCommandHandler", "MediatR handler", "Saves the level")
+  Component(guard, "IMembershipGuard", "Application", "RequireActiveMemberAsync")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(rules, "NotificationRules", "Application, pure", "Applies the level of L2-158 AC2, AC3, AC5")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "Membership, PopkinSpace")
+Rel(view, store, "Reads signals, calls setLevel")
+Rel(store, client, "JSON/HTTPS")
+Rel(client, ctrl, "PUT")
+Rel(ctrl, handler, "Sends SetPopkinNotificationLevelCommand")
+Rel(handler, guard, "Member of an active Popkin, else 404 or 409")
+Rel(handler, db, "Membership.SetNotificationLevel; save", "EF Core")
+Rel(reader, db, "Reads", "EF Core")
+Rel(rules, db, "Level read at fan-out and send", "EF Core")
+@enduml

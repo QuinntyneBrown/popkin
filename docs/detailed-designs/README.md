@@ -317,6 +317,18 @@ Each design follows the source named below and marks the conflict in its own REA
 | Contacts | [Groups](contacts/groups/README.md) | L2-146, L2-147, L2-148 |
 | Contacts | [Connections](contacts/connections/README.md) | L2-149, L2-150 |
 | Contacts | [Import from your Popkins](contacts/import-from-popkins/README.md) | L2-151 |
+| Notifications | [Notification settings](notifications/notification-settings/README.md) | L2-154, L2-155, L2-156, L2-157, L2-048 |
+| Notifications | [Each Popkin's level](notifications/popkin-levels/README.md) | L2-158 |
+| Notifications | [Birthday reminders by person](notifications/birthday-reminders-by-person/README.md) | L2-159, L2-139 |
+| Notifications | [Mute people](notifications/mute-people/README.md) | L2-160 |
+| Notifications | [Deliver notifications](notifications/deliver-notifications/README.md) | L2-161, L2-174, L2-175 |
+| Notifications | [Popkin update email](notifications/popkin-update-email/README.md) | L2-163, L2-164 |
+| Notifications | [Digest emails](notifications/digest-emails/README.md) | L2-165 |
+| Notifications | [Send reminders](notifications/send-reminders/README.md) | L2-162, L2-166, L2-167, L2-140 |
+| Notifications | [Unsubscribe](notifications/unsubscribe/README.md) | L2-168 |
+| Admin platform | [Member email and notification kinds](admin-platform/notifications/README.md) | L2-169, L2-170, L2-171 |
+| Admin platform | [Notification holds](admin-platform/notification-holds/README.md) | L2-172 |
+| Admin platform | [Notification defaults](admin-platform/notification-defaults/README.md) | L2-173 |
 
 Every L2 requirement from L2-001 to L2-067 is realised by at least one feature above, and so is
 every admin requirement, L2-076 to L2-078 and L2-086 to L2-120, and every Contacts requirement,
@@ -432,6 +444,84 @@ person's own address book inside the Popkin web app; it adds no container.
 - **Deleting** a contact and deleting an account remove the same rows through `ContactRemoval`
   ([Delete a contact](contacts/delete-contact/README.md)); an account takes its Contacts with it
   (L2-049).
+
+## Notifications
+
+The notification designs (`notifications/`, L1-040 to L1-042, and three admin features in
+`admin-platform/`) share one architecture. Notifications add no container: the Popkin API
+records what happened and saves each person's settings, and the Popkin Worker decides who hears
+of it, when and how, and sends it. The Worker still sends no hub events
+([ADR 0015](../adr/0015-the-worker-sends-no-hub-events.md)).
+
+- **One catalogue.** `NotificationKind` (Domain) holds the twelve kinds of L2-154.
+  `NotificationCatalogue` gives each kind its `NotificationGroup` (`Activity`, `Reminders`,
+  `Account`), its default email and phone setting, whether it is required, and the feature it
+  belongs to (`Plan` for "Plan changes" and "Stories due", `Schedules` for "Schedule changes").
+  The API, the Worker and both web apps read the same list; the web apps get it with the
+  settings, never from a copy of their own.
+- **An outbox, written with the change.** A handler whose change notifies adds one
+  `NotificationEvent` row in its own unit of work: `Kind`, `PopkinId?`, `ActorPersonId?`,
+  `SubjectId` (the message, photo batch, story or membership), `RecipientPersonId?` (set for a
+  direct message, a reply or a story given to someone) and `OccurredAt`. The row holds ids only;
+  no message text, caption or name. The Worker reads what to say when it sends, so an edit or a
+  deletion made in the meantime is honoured. A change and its event are saved together or not at
+  all. `IPopkinNotifier` keeps sending the live hub events as before; the two do not depend on
+  each other.
+- **Fan-out and rules in one place.** `DispatchNotificationsJob` (Worker, `PeriodicJob` every
+  15 seconds) sends `DispatchNotificationsCommand`. Its handler expands each new event into one
+  `NotificationDelivery` per recipient and channel, decides each through `NotificationRules`
+  (the order of L2-161 AC1, the levels of L2-158, quiet hours, the daily most), and either holds
+  it in an email bundle, schedules it for later, or marks it `Suppressed` with the rule that
+  stopped it. `NotificationRules` is a pure type, tested one case per row
+  ([Deliver notifications](notifications/deliver-notifications/README.md)).
+- **Read again at send time.** Membership, the Popkin's features, mutes, holds, the platform
+  pause and the person's settings are read at the moment of sending as well as at fan-out
+  (L2-174 AC1). A delivery that no longer passes is suppressed, not sent.
+- **Once only.** `NotificationDelivery` has a unique key (`EventId`, `PersonId`, `Channel`);
+  an `OutgoingEmail` has a unique `DedupKey` (`update:{bundleId}`, `digest:{personId}:{date}`,
+  `reminder:{kind}:{subjectId}:{dueOn}:{personId}`). A retried tick or a second run finds the row
+  and sends nothing more (L2-175 AC3).
+- **Settings.** `NotificationPreferences` (one per `Person`): `EmailOn`, a nullable
+  `Frequency`, and the time zone. `NotificationKindChoice` rows (`PersonId`, `Kind`, nullable
+  `Email`, nullable `Phone`) exist only for what the person changed; a null follows the
+  catalogue default. A null `Frequency` (and a null birthday lead) follows the Owner's default for
+  new members, so a new default reaches everyone who has not chosen (L2-173 AC4). A Popkin's level is
+  `Membership.NotificationLevel` (`Everything`, `JustForMe`, `Muted`). A muted person is a
+  `PersonMute` row (`PersonId`, `MutedPersonId`). A birthday's switch is `KeyDate.RemindersOn`
+  beside its existing `ReminderLead`.
+- **Time zone.** `ReminderPreferences.TimeZone` moves to `NotificationPreferences.TimeZone`, saved
+  by the web app with `PUT /api/me/time-zone` when it starts, not only when Contacts opens. Every
+  "where the person is" rule reads it, and UTC before one is saved (L2-161 AC7).
+- **Platform controls.** `NotificationPlatform` (one row): `EmailPausedAt?`, `PausedByAdminId?`,
+  `PauseReason?` and the defaults of L2-173. `NotificationKindSwitch` rows hold a kind off for
+  everyone, with who, when and why. `NotificationHold` rows hold a Popkin or a person by hand.
+  Suspended and deleting accounts are held by rule from `Person`, not by a row. They are read
+  through the cached `PlatformSnapshot` and honoured within a minute, as feature switches are,
+  except a pause, which the dispatcher reads from the database on each tick (L2-170 AC2).
+- **Channels.** Email goes through `INotificationEmailSender`, implemented with Azure
+  Communication Services email as the codes are ([ADR 0021](../adr/0021-codes-and-invites-by-azure-communication-services.md)),
+  from `Notifications:EmailSender` on `popkin.community` with the display name "{first name} via
+  Popkin" or "Popkin". Phone alerts go through `IPhoneNotificationSender`, widened from Contacts'
+  reminder to a `PhoneAlert` (`Title`, `Body`, `Url`), by Web Push
+  ([ADR 0028](../adr/0028-phone-reminders-by-web-push.md)). Sign-in codes keep their own path
+  (`ICodeSender`) and never pass through notifications, so nothing here can stop them.
+- **Emails are built from templates.** `INotificationEmailRenderer` (Infrastructure) turns a
+  typed model into an HTML part and a plain-text part, escaping every member's text. The template
+  technology needs its own ADR (gap 128).
+- **Links.** Every link in an email is built by `PopkinUrlBuilder` and opens a screen that asks
+  for a session (L2-163 AC6). The one link that works without a session is the unsubscribe link,
+  which carries an `UnsubscribeToken` protected by ASP.NET Core Data Protection with the purpose
+  `Popkin.Notifications.Unsubscribe` and a lifetime of 90 days
+  ([Unsubscribe](notifications/unsubscribe/README.md)).
+- **Telemetry** (`PopkinMetrics`, meter `Popkin`): `popkin.notifications.events`,
+  `popkin.notifications.deliveries` by `kind`, `channel` and `outcome` (`sent`, `suppressed`,
+  `failed`, `dropped`), `popkin.notifications.suppressed` by `rule`, and the histogram
+  `popkin.notifications.email_latency` (from the window closing to the provider accepting). No
+  dimension, log or span carries a person, an address, a name, text or a token (L2-174 AC3).
+- **Contacts' reminders join this path.** `SendContactRemindersJob` keeps adding the in-app
+  reminder and hands email and phone to notifications as the "Birthdays" kind. The Monday email,
+  `ContactWeeklyEmail`, `IContactsEmailSender` and the two switches on Dates are removed (L2-140,
+  gap 126) ([Send reminders](notifications/send-reminders/README.md)).
 
 ## Known gaps
 
@@ -565,6 +655,21 @@ or design that settled it.
 | 121 | `DialogOpener`, which [WCAG 2.2 AA](accessibility/wcag-2-2-aa/README.md) and [Responsive layout](accessibility/responsive-layout/README.md) design as the components library's one way to open a dialog, is not built. Dialogs open through the CDK `Dialog` with `dialogConfig` (`api` library): `ariaLabelledBy: 'dlg-title'`, `hasBackdrop: false` because `pk-dialog` draws its own backdrop, `ariaModal: true`, and each dialog's own options at the call. The CDK's defaults give the designed `autoFocus: 'first-tabbable'`, `restoreFocus: true` and `closeOnNavigation: true`; no dialog sets the designed `role: 'alertdialog'` for a destructive confirmation | Accessibility of dialogs | |
 | 120 | Why the code screen went back to sign in about 5 seconds after "Send my code" on desktop (issue #74). The app has no timer, request or guard that leaves the screen, so it is not reproduced; it needs the reporter's recording and the API log of that minute ([Confirm the code](accounts/confirm-code/README.md)) | The cause of #74 | |
 | 122 | On a contact's profile at 360 px, Edit profile and More sit about 4 px further apart than the mock draws them (the head's actions, `contact-profile/default.html`); at 1280 px they match. The parity spec of `pk-cluster` compares the head at 1280 px only ([ADR 0029](../adr/0029-one-library-no-unused-components.md)) | None; found when `pk-cluster` was built | |
+| 123 | "Plans coming up": the notification designs draw an event with a time, a place and members going, maybe or not, answered from the email ("I'm going", "Can't make it"). Popkin has no such thing; the kind is left out of L2-154 until an event has its own requirement and mocks (owner, 2026-11-17) | Notifications; Plan | |
+| 124 | Acting from an email: replying by email into a chat ("or just reply to this email") and one-tap actions ("Mark it done", "I'm going") need inbound mail or signed action links. Ruled out for now: every button opens Popkin (L2-163 AC6; owner, 2026-11-17) | Notification emails | |
+| 125 | Holding one person's notifications by hand: the admin designs list such a hold ("Asked support to stop all mail while travelling", until a date) but draw no way to add one; only a Popkin is held by hand (L2-172) | Admin Notifications | |
+| 126 | The Monday email is withdrawn (L2-140, changed 2026-11-17), which reverses part of gap 104's ruling: `ReminderPreferences.PhoneNotifications` and `MondayEmail`, the Dates switches, the Monday job and their tests are to be removed, and phone alerts move under the "Birthdays" kind (L2-154, L2-157). Reminders now go at 8 am, not 9 am | Contacts reminders; Notifications | |
+| 127 | The notification designs' sender `notify@popk.in` and the footer's postal address: the requirement keeps the sender on `popkin.community` (ADR 0021) and reads the address from configuration (`Email:PostalAddress`, L2-163 AC5); the address itself is not supplied | Notification emails; first deployment of them | |
+| 128 | How notification emails are built: the template technology (Razor components rendered with `HtmlRenderer`, or another), and email-safe markup (tables and inline styles) from the email mocks (L2-163) | Notification emails | |
+| 129 | How "Opened" and "bounced" are counted (L2-169): Azure Communication Services engagement tracking and delivery reports reach Popkin through Event Grid, which adds an endpoint and a subscription; opens are kept per kind and day only (L2-174 AC6) | Admin Notifications | |
+| 130 | "Seen before it is sent" (L2-161 AC9): only chat has a read state (`ThreadReadState`); a photo, a story change or a member joining has none, so those are always sent | Deliver notifications | |
+| 131 | @mentions: chat has no mention (no requirement or mock defines one), so "Mentions and replies" (L2-154) comes from replies alone until a mention is specified ([Deliver notifications](notifications/deliver-notifications/README.md)) | Notifications; Chat | |
+| 132 | The unsubscribe page (L2-168 AC3, AC5): no mock draws `/unsubscribe` unsubscribed or expired; a mock comes before it is built ([Unsubscribe](notifications/unsubscribe/README.md)) | Unsubscribe | |
+| 133 | A Data Protection key ring shared by the API and the Worker, so a token the Worker puts in an email is read by the API (proposed: Blob Storage with Key Vault, `DataProtection:*` settings); needs its own ADR | Unsubscribe; first deployment of notifications | |
+| 134 | The phone alert's 10-second median (L2-175 AC1) against a 15-second dispatcher tick, which spends about 7.5 seconds of it on average: a shorter tick for phone alerts, or a dispatch started by the API's commit | Deliver notifications | |
+| 135 | Lead times: Notifications › People offers five (L2-159 AC1) while Dates offers six, with "1 month before" (L2-139 AC1); the design shows the sixth only on a birthday that already has it ([Birthday reminders by person](notifications/birthday-reminders-by-person/README.md)) | Birthday reminders by person | |
+| 136 | Notifications screen states no mock draws: a member of no active Popkin on "Popkins"; "Mute someone" finding nobody; a muted person who no longer shares a Popkin; the account with no email address (L2-156 AC5); whether a banner closes by itself after 8 seconds, as the mock's note says ([Notification settings](notifications/notification-settings/README.md)) | Notification settings | |
+| 137 | Admin notification mocks still to draw: the dialog that holds a Popkin with a reason (`notification-hold-add`), the dialog that saves the defaults with a reason (`notification-defaults-save`), and the Defaults tab's invalid, saved, loading and error states; the drawn dialogs mark the reason optional where L2-087 AC1 now asks for one ([Notification holds](admin-platform/notification-holds/README.md), [Notification defaults](admin-platform/notification-defaults/README.md)) | Admin Notifications | |
 
 Settled so far:
 

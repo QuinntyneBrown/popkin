@@ -1,0 +1,80 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Mute people
+
+package "Popkin.Domain" {
+  class PersonMute {
+    +Guid Id
+    +Guid PersonId
+    +Guid MutedPersonId
+    +DateTimeOffset CreatedAt
+    +{static} Create(personId, mutedPersonId, now): PersonMute
+  }
+  class Membership {
+    +Guid Id
+    +Guid PopkinId
+    +Guid PersonId
+    +string DisplayName
+    +string? PhotoKey
+    +DateTimeOffset? LeftAt
+  }
+  class Person {
+    +Guid Id
+    +DateTimeOffset? DeletedAt
+  }
+}
+package "Popkin.Application" {
+  class SharedPopkins {
+    +ActiveBetween(a: Guid, b: Guid): IQueryable<Guid>
+    +PeopleSharingWith(personId: Guid): IQueryable<Membership>
+  }
+  class MuteCandidateDto <<record>> {
+    +Guid MembershipId
+    +string Name
+    +AvatarDto Avatar
+    +string[] SharedPopkins
+  }
+  class MutedPersonDto <<record>> {
+    +Guid MuteId
+    +string Name
+    +AvatarDto Avatar
+    +string[] SharedPopkins
+  }
+  class SearchMuteCandidatesQueryHandler {
+    +Handle(q: SearchMuteCandidatesQuery): Task<MuteCandidateDto[]>
+  }
+  class MutePersonCommand <<record>> {
+    +Guid MembershipId
+  }
+  class MutePersonCommandHandler {
+    +Handle(c: MutePersonCommand): Task<MutedPersonDto>
+  }
+  class UnmutePersonCommandHandler {
+    +Handle(c: UnmutePersonCommand): Task
+  }
+  class NotificationRules <<static>> {
+    +ActorMuted(recipientMutes, actorPersonId): bool
+  }
+}
+PersonMute "*" --> "1" Person : PersonId
+PersonMute "*" --> "1" Person : MutedPersonId
+Membership "*" --> "1" Person
+SharedPopkins ..> Membership
+SearchMuteCandidatesQueryHandler ..> SharedPopkins
+SearchMuteCandidatesQueryHandler ..> PersonMute : leaves out muted
+SearchMuteCandidatesQueryHandler ..> MuteCandidateDto : returns
+MutePersonCommandHandler ..> MutePersonCommand : handles
+MutePersonCommandHandler ..> SharedPopkins : guards
+MutePersonCommandHandler --> PersonMute : adds once
+UnmutePersonCommandHandler --> PersonMute : removes
+NotificationRules ..> PersonMute
+@enduml

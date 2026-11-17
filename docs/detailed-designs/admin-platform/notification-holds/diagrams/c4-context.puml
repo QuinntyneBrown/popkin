@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Notification holds
+
+Person(admin, "Owner or Support admin", "Holds and releases a Popkin's notifications")
+Person(viewer, "Viewer admin", "Reads the holds")
+Person(member, "Member of a held Popkin", "Is not told of the hold")
+System(popkin, "Popkin", "Pop-up communities, with notifications")
+System_Ext(acs, "Azure Communication Services", "Email provider; suppresses hard bounces")
+
+Rel(admin, popkin, "Holds a Popkin and releases a hold, with a reason, in", "Popkin admin app")
+Rel(viewer, popkin, "Reads Holds in", "Popkin admin app")
+Rel(popkin, member, "Sends nothing about the held Popkin to")
+Rel(popkin, acs, "Hands other member email to", "HTTPS")
+@enduml

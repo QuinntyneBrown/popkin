@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Digest emails
+
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "SendDigestsJob", "PeriodicJob, 5 min", "Sends SendDigestsCommand")
+}
+Container_Boundary(app, "Popkin Application") {
+  Component(handler, "SendDigestsCommandHandler", "MediatR handler", "Who is due at 18:00 local; one OutgoingEmail per person and date")
+  Component(rules, "NotificationRules", "Pure type", "Pause, hold, unsubscribed, level, mute, switches")
+  Component(composer, "DigestEmailComposer", "INotificationEmailComposer", "Card, sections, chat counts")
+  Component(digestRules, "DigestRules", "Pure type", "Order, limits, subject words, period")
+  Component(rendererPort, "INotificationEmailRenderer", "Port", "HTML and text")
+  Component(senderPort, "INotificationEmailSender", "Port", "Sends")
+  Component(metrics, "PopkinMetrics", "Meter Popkin", "Deliveries, last tick")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "OutgoingEmail, NotificationDelivery, Story, KeyDate, ThreadReadState")
+Rel(job, handler, "Sends SendDigestsCommand")
+Rel(handler, db, "People due; adds OutgoingEmail digest:{personId}:{date}", "EF Core")
+Rel(handler, rules, "Allowed now?")
+Rel(handler, composer, "ComposeAsync")
+Rel(composer, digestRules, "Uses")
+Rel(composer, db, "Held changes, due stories, near dates, unread counts", "EF Core")
+Rel(handler, rendererPort, "Render")
+Rel(handler, senderPort, "SendAsync")
+Rel(handler, metrics, "Records")
+@enduml

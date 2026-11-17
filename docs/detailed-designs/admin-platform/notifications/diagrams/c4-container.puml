@@ -1,0 +1,22 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Member email and notification kinds
+
+Person(owner, "Owner", "Admin")
+System_Boundary(popkin, "Popkin") {
+  Container(admin, "Popkin admin app", "Angular SPA, admin.popkin.community", "Notifications page and its dialogs")
+  Container(web, "Popkin web app", "Angular SPA", "Shows a kind switched off by Popkin")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/notifications, PlatformSnapshot")
+  Container(worker, "Popkin Worker", ".NET worker service", "DispatchNotificationsJob")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "NotificationPlatform, NotificationKindSwitch, OutgoingEmail, NotificationDelivery, AuditEntry")
+}
+System_Ext(acs, "Azure Communication Services", "Email provider")
+
+Rel(owner, admin, "Pauses, resumes, switches", "HTTPS")
+Rel(admin, api, "GET, POST, PUT /api/admin/notifications", "JSON/HTTPS, admin cookie")
+Rel(web, api, "Reads the member's settings", "JSON/HTTPS")
+Rel(api, db, "Writes the pause and switches with audit entries; reads counts", "EF Core")
+Rel(worker, db, "Reads the pause every tick; queues, sends, drops", "EF Core")
+Rel(worker, acs, "Sends member email when not paused", "HTTPS")
+@enduml

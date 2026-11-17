@@ -1,0 +1,39 @@
+@startuml
+title UML sequence behaviour — A Popkin's level decides what is sent
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "DispatchNotificationsJob" as job
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DispatchNotificationsCommandHandler" as handler
+  participant "NotificationRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+job -> handler : Send DispatchNotificationsCommand (every 15 s)
+handler -> db : New NotificationEvent rows; each recipient's Membership.NotificationLevel
+db --> handler : Event (Kind, PopkinId, RecipientPersonId?) and levels
+handler -> rules : LevelAllows(level, kind, isForThePerson)
+note right of rules
+  Everything: every kind.
+  JustForMe: MentionsAndReplies, DirectMessages,
+  PlanChanges that give the person a story,
+  and the Reminders kinds (L2-158 AC2).
+  Muted: StoriesDue and PopkinWrappingUp only (L2-158 AC3).
+  A wrapped-up Popkin: nothing but its recap (L2-158 AC5).
+end note
+rules --> handler : Allowed, or Suppressed(PopkinMuted or JustForMe)
+handler -> db : NotificationDelivery Pending or Suppressed
+@enduml

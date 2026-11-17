@@ -1,15 +1,15 @@
 @startuml
-!include <C4/C4_Component>
+!include <C4/C4_Context>
 LAYOUT_WITH_LEGEND()
 title System Context — Reminders
 
 Person(owner, "Person", "Keeps their own Contacts; the only one who sees them")
-System(popkin, "Popkin", "Platform for pop-up communities, with Contacts")
+System(popkin, "Popkin", "Platform for pop-up communities, with Contacts and notifications")
 System_Ext(acs, "Azure Communication Services", "Sends Popkin's email (ADR 0021)")
-System_Ext(push, "Phone notification service", "<TO SUPPLY>: the channel needs its own ADR")
-Rel(owner, popkin, "Uses Contacts in", "HTTPS")
-Rel(popkin, acs, "Sends the Monday email via", "HTTPS")
-Rel(popkin, push, "Sends phone notifications via", "<TO SUPPLY>")
-Rel(acs, owner, "Delivers the email to")
-Rel(push, owner, "Notifies at 9 am")
+System_Ext(push, "Browser push service", "Web Push (ADR 0028)")
+Rel(owner, popkin, "Sees and dismisses reminders in Contacts", "HTTPS")
+Rel(popkin, acs, "Sends the key date's email via (Send reminders)", "HTTPS")
+Rel(popkin, push, "Sends the phone alert via (Send reminders)", "Web Push")
+Rel(acs, owner, "Delivers the email at 8 am")
+Rel(push, owner, "Alerts at 8 am")
 @enduml

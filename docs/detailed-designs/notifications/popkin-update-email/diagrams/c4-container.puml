@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Popkin update email
+
+Person(member, "Member", "Recipient of the email")
+System_Ext(acs, "Azure Communication Services", "Email")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Screens the email's links open")
+  Container(api, "Popkin API", "ASP.NET Core", "Saves each change with its NotificationEvent")
+  Container(worker, "Popkin Worker", ".NET worker", "DispatchNotificationsJob: bundles, composes, renders, sends")
+  ContainerDb(db, "Popkin database", "SQL Server", "NotificationEvent, NotificationDelivery, OutgoingEmail, content")
+  Container(blobs, "Photo store", "Azure Blob Storage", "Photos and avatars, private")
+}
+Rel(member, web, "Opens a link in", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Writes the change and its event in one transaction", "EF Core")
+Rel(worker, db, "Reads events and content at send time; records the send", "EF Core")
+Rel(worker, blobs, "Reads thumbnails for inline images", "HTTPS")
+Rel(worker, acs, "Sends HTML and text parts with unsubscribe headers", "HTTPS")
+@enduml

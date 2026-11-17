@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Footer mute link
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "signedInGuard" as guard
+  participant "NotificationSettingsPage" as page
+  participant "parseNotificationLink" as parse
+  participant "NotificationSettingsStore" as store
+  participant "NOTIFICATIONS_API" as client
+end box
+box "Backend — Popkin API application" #D1FADF
+  participant "NotificationsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SetPopkinNotificationLevelCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> guard : Open /account/notifications?tab=popkins&mute={popkinId}
+alt No session (L2-007 AC2)
+  guard --> actor : Sign in, returnUrl = the whole link
+  actor -> guard : Signs in; safeReturnUrl brings the link back
+end
+guard -> page : Activate
+page -> parse : parseNotificationLink(query)
+parse --> page : { tab: popkins, mute: popkinId }
+page -> store : applyLinkIntent(intent)
+store -> client : setLevel(popkinId, Muted)
+client -> controller : PUT level, with session
+controller -> handler : Send command
+handler -> db : Guard membership; set Membership.NotificationLevel
+alt Not a member
+  handler --> controller : 404 popkin_not_found
+  controller --> client : 404
+  store --> page : Open the tab, no banner, no change
+else Member
+  handler --> controller : Saved
+  controller --> client : 204
+  store --> page : Muted; banner "{Popkin} is muted…" with Undo (L2-158 AC4, L2-168 AC1)
+end
+page -> page : Remove the query with replaceUrl
+page --> actor : "Popkins" tab
+opt Undo
+  actor -> store : Undo
+  store -> client : setLevel(popkinId, Everything)
+end
+@enduml

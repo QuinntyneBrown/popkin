@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — Send a phone alert
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DispatchNotificationsCommandHandler" as handler
+  participant "NotificationRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "WebPushPhoneNotificationSender" as sender
+  database "Popkin database" as db
+end box
+participant "Browser push service" as push
+handler -> db : Phone deliveries Due with SendAfter passed
+db --> handler : Deliveries (quiet-hours ones grouped per person and Popkin)
+loop Each delivery
+  handler -> db : Re-read the context (L2-174 AC1)
+  db --> handler : Current context
+  handler -> rules : Decide again
+  rules --> handler : Send, or Suppress(rule)
+  opt Still Send
+    handler -> sender : SendAsync(personId, PhoneAlert(title, body, url))
+    sender -> db : Push subscriptions of the person
+    db --> sender : Devices
+    loop Each device
+      sender -> push : Send encrypted payload (VAPID)
+      alt Accepted
+        push --> sender : 201
+      else 404 or 410
+        push --> sender : Gone
+        sender -> db : Remove the subscription (L2-175 AC2)
+      else Other failure
+        push --> sender : Error
+      end
+    end
+    sender --> handler : Devices that took it
+    alt At least one took it
+      handler -> db : Delivery Sent; record phone_latency (L2-175 AC1)
+    else None took it, passing failure
+      handler -> db : Retrying with backoff; Dropped after 6 h
+    end
+  end
+end
+@enduml

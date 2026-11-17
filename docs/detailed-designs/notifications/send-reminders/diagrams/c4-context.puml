@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Send reminders
+
+Person(person, "Person", "Owns stories, keeps contacts' dates, belongs to Popkins")
+System(popkin, "Popkin", "Platform for pop-up communities, with Contacts")
+System_Ext(acs, "Azure Communication Services", "Sends Popkin's email (ADR 0021)")
+System_Ext(push, "Browser push service", "Web Push (ADR 0028)")
+Rel(popkin, acs, "Sends reminder emails via", "HTTPS")
+Rel(popkin, push, "Sends phone alerts via", "Web Push")
+Rel(acs, person, "Delivers the email to")
+Rel(push, person, "Shows the alert on each allowed device")
+Rel(person, popkin, "Opens the profile, story or album from", "HTTPS")
+@enduml

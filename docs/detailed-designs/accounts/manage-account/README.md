@@ -45,6 +45,7 @@ The specs list account settings and signing out as assumptions the designs do no
   - A save failure keeps the typed name and the picked photo and enables the button again. Its copy is `<TO SUPPLY>`; no mock draws it. A refused photo shows its reason; the copy is `<TO SUPPLY>`.
   - The theme switch is `pk-segmented-control` in its radio form (`role="radio"`, `aria-checked`). Choosing an option calls `ThemePreferences.set` at once, independent of "Save changes" (L2-048 AC4).
   - "Sign out" opens `SignOutDialog`; "Delete my account" opens `DeleteAccountDialog` (delete-account design). Both use the CDK `Dialog`.
+  - "Notifications" (`pk-menu-item` with the bell icon, above "Sign out", as `docs/mocks/pages/account/default.html` draws it) routes to `/account/notifications`, whose "Back" returns to `/account` (L2-048 AC6, [Notification settings](../../notifications/notification-settings/README.md)).
 - **`SignOutDialog`** — `dialogs/sign-out/sign-out.dialog.ts` and `.html`, selector `pk-sign-out-dialog`, composed in `pk-dialog`. Focus starts on "Stay signed in", as in the mock. "Sign out" reads "Signing out…" while busy. On 204, or on 401 because the session had already ended, it stops the real-time connection (`PopkinRealtime.disconnect()`), clears `SessionStore` and navigates to `/welcome` (L2-048 AC5). Any other failure keeps the dialog open; its copy is `<TO SUPPLY>`.
 - **`AccountApi` / `ACCOUNT_API` / `HttpAccountApi`** — `api` library (`lib/api/account/`): `getAccount()`, `updateName(name)`, `changePhoto(file)`. View model `AccountView` in `lib/models/`.
 - **`AuthApi`** — this slice adds `signOut()`.
@@ -116,7 +117,7 @@ the question so its history reads.
 
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
-| `L2-048` | `L1-002` | Account: A person manages how they appear and their session. |
+| `L2-048` | `L1-002` | Account: A person manages how they appear and their session. (AC1–AC6; AC6, the "Notifications" entry, is realised with [Notification settings](../../notifications/notification-settings/README.md)) |
 | `L2-050` | `L1-012` | Every request is authenticated: Nothing private is served without a session. |
 
 ## Diagrams
@@ -137,7 +138,7 @@ Photo store, and pushes `MemberUpdated` to open screens over SignalR.
 
 ### Components
 
-`AccountPage` uses `AccountApi` and `ThemePreferences` and opens `SignOutDialog`. In the API,
+`AccountPage` uses `AccountApi` and `ThemePreferences`, opens `SignOutDialog`, and links to the Notifications screen. In the API,
 `AccountController` and `AuthController` dispatch to one handler per action.
 
 ![C4 component view for managing the account](diagrams/c4-component.png)
