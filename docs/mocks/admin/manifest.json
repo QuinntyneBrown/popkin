@@ -466,6 +466,21 @@
       "close": "../../pages/popkin/default.html"
     },
     {
+      "id": "popkin-remove-day",
+      "kind": "dialog",
+      "title": "Remove a day",
+      "opens_from": "popkin",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/popkin/default.html",
+      "notes": "From the Magic Patterns Popkin Admin › Popkin Detail design (remove-day)."
+    },
+    {
       "id": "moderation-view-open",
       "kind": "dialog",
       "title": "Open a moderation view",
@@ -939,6 +954,40 @@
         "failed"
       ],
       "close": "../../pages/notifications/defaults-edited.html"
+    },
+    {
+      "id": "holidays",
+      "kind": "page",
+      "title": "Holiday calendars",
+      "route": "admin.popkin.community/holidays",
+      "requirements": [],
+      "states": [
+        "default",
+        "changing",
+        "published",
+        "rule",
+        "viewer",
+        "loading",
+        "error"
+      ],
+      "not_applicable": {
+        "empty": "The built-in calendars always exist, so the list is never empty."
+      },
+      "notes": "From the Magic Patterns Popkin Admin › Holiday Calendars design, its years moved on one to fit July 2026."
+    },
+    {
+      "id": "holidays-publish",
+      "kind": "dialog",
+      "title": "Publish a holiday calendar",
+      "opens_from": "holidays",
+      "requirements": [],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/holidays/default.html"
     },
     {
       "id": "limits",

@@ -305,12 +305,49 @@
       ],
       "states": [
         "default",
+        "coming-up",
         "loading",
         "empty",
         "error",
         "active-only",
         "offline"
       ]
+    },
+    {
+      "id": "important-days",
+      "kind": "page",
+      "title": "Important days",
+      "route": "/days",
+      "requirements": [],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "mine",
+        "popkin"
+      ],
+      "notes": "From the Magic Patterns “Important Days” design, moved on a year so its holidays fall on their 2026 dates (today Tuesday 1 December 2026)."
+    },
+    {
+      "id": "add-day",
+      "kind": "page",
+      "title": "Add a day",
+      "route": "/days/new",
+      "requirements": [],
+      "states": [
+        "default",
+        "popkin",
+        "several",
+        "invalid",
+        "submitting",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The form needs nothing loaded before it shows: it starts blank or from the Popkin it opened from.",
+        "empty": "The screen is a form; it has no collection that can be empty."
+      },
+      "notes": "From the Magic Patterns “Add a Day” design, moved on a year so its holidays fall on their 2026 dates (today Tuesday 1 December 2026)."
     },
     {
       "id": "contacts-today",
@@ -1148,6 +1185,24 @@
         "done",
         "off"
       ]
+    },
+    {
+      "id": "popkin-days",
+      "kind": "page",
+      "title": "Days",
+      "route": "/p/holiday-crew/schedule/days",
+      "requirements": [],
+      "states": [
+        "default",
+        "vegas",
+        "closed",
+        "mine",
+        "holidays-off",
+        "loading",
+        "empty",
+        "error"
+      ],
+      "notes": "From the Magic Patterns “Popkin Days” design, moved on a year so its holidays fall on their 2026 dates (today Tuesday 1 December 2026). Drawn on Holiday Crew 🎄 (Leaf, 6 members, 34 days left)."
     },
     {
       "id": "time-off",
