@@ -12,7 +12,9 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import {
+  ACTIVITY_EMAILS,
   ADMIN_PLATFORM_API,
+  BIRTHDAY_LEADS,
   AdminNotificationHold,
   AdminNotificationKind,
   AdminNotificationsStore,
@@ -23,6 +25,8 @@ import {
   PAUSED_TOAST,
   PopkinColour,
   accentOf,
+  activityEmailHelp,
+  NotificationDefaultField,
   heldNote,
   RELEASED_TOAST,
   heldToast,
@@ -58,6 +62,9 @@ import {
   DataTableSwitch,
   EmptyState,
   Icon,
+  LimitField,
+  LimitFieldChange,
+  LimitRow,
   PageHead,
   PageTabs,
   Panel,
@@ -68,6 +75,7 @@ import {
   SegmentedControl,
   SegmentedOption,
   SendStatus,
+  Skeleton,
 } from 'components';
 import {
   NotificationActionData,
@@ -107,6 +115,7 @@ const PERSON_ACCENTS = ['coral', 'teal', 'plum', 'amber', 'sky', 'berry'];
     DataTable,
     EmptyState,
     Icon,
+    LimitRow,
     PageHead,
     PageTabs,
     Panel,
@@ -116,6 +125,7 @@ const PERSON_ACCENTS = ['coral', 'teal', 'plum', 'amber', 'sky', 'berry'];
     SearchField,
     SegmentedControl,
     SendStatus,
+    Skeleton,
   ],
   providers: [AdminNotificationsStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -137,6 +147,37 @@ export class NotificationsPage {
   protected readonly kindColumns = KIND_COLUMNS;
   protected readonly holdColumns = HOLD_COLUMNS;
   protected readonly heldSub = HELD_SUB;
+  protected readonly defaultsSub =
+    'What a member starts with. Anyone who has changed a setting keeps theirs.';
+  protected readonly activityEmails: SegmentedOption[] = ACTIVITY_EMAILS.map((o) => ({ ...o }));
+
+  /** The Defaults tab's rows from the draft: each field, its error and the foot (L2-173). */
+  protected readonly defaultFields = computed(() => {
+    const draft = this.store.defaults();
+    if (!draft) return null;
+    const v = draft.values;
+    const bundle = draft.error('bundleMinutes')
+      ? draft.saved.bundleMinutes
+      : Number(v.bundleMinutes);
+    const quiet = (key: 'quietFrom' | 'quietTo', label: string): LimitField => ({
+      key,
+      label,
+      value: v[key],
+      invalid: !!draft.error(key),
+    });
+    return {
+      draft,
+      activityHelp: activityEmailHelp(v.activityEmail, bundle),
+      bundle: [{ key: 'bundleMinutes', value: v.bundleMinutes, numeric: true }] as LimitField[],
+      most: [{ key: 'mostEmailsPerDay', value: v.mostEmailsPerDay, numeric: true }] as LimitField[],
+      quiet: [quiet('quietFrom', 'Quiet hours start'), quiet('quietTo', 'Quiet hours end')],
+      quietError: draft.error('quietFrom') ?? draft.error('quietTo'),
+      lead: [
+        { key: 'birthdayLead', value: v.birthdayLead, options: BIRTHDAY_LEADS },
+      ] as LimitField[],
+      foot: 'Nothing changed yet.',
+    };
+  });
 
   /** Why the signed-in admin cannot hold or release (L2-172 AC7). */
   protected readonly holdBlocked = computed(() => this.session.blockedReason('HoldNotifications'));
@@ -228,6 +269,17 @@ export class NotificationsPage {
         untracked(() => this.store.loadHolds());
       }
     });
+    // Defaults are read when their tab first shows.
+    effect(() => {
+      if (this.current() === 'defaults' && untracked(this.store.defaultsStatus) === 'idle') {
+        untracked(() => this.store.loadDefaults());
+      }
+    });
+  }
+
+  /** A default typed or chosen (L2-173 AC3). */
+  protected editDefault(change: LimitFieldChange): void {
+    this.store.editDefault(change.key as NotificationDefaultField, change.value);
   }
 
   /** Opens "Hold a Popkin" with every Popkin that can be held, or closes it. */

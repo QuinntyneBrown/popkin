@@ -164,6 +164,132 @@
           }
         </div>
       }
+      @case ('defaults') {
+        <div role="tabpanel" aria-labelledby="tab-defaults">
+          @switch (store.defaultsStatus()) {
+            @case ('failed') {
+              <section pk-panel>
+                <div
+                  pk-empty-state
+                  icon="alert"
+                  heading="Couldn’t load the defaults"
+                  text="The admin API didn’t answer. Nothing has changed; try again, or check Health if it keeps happening."
+                  [compact]="true"
+                  [panel]="true"
+                >
+                  <button
+                    pk-button
+                    type="button"
+                    variant="primary"
+                    size="md"
+                    (click)="store.loadDefaults()"
+                  >
+                    <svg pk-icon name="retry" size="sm"></svg>Try again
+                  </button>
+                  <a pk-button variant="secondary" size="md" routerLink="/health">Open Health</a>
+                </div>
+              </section>
+            }
+            @case ('ready') {
+              @if (defaultFields(); as fields) {
+                <section
+                  pk-panel
+                  heading="For new members"
+                  [sub]="defaultsSub"
+                  [foot]="fields.draft.unsaved === 0"
+                >
+                  <div>
+                    <div
+                      pk-limit-row
+                      fieldId="d-freq"
+                      name="Activity email"
+                      [help]="fields.activityHelp"
+                    >
+                      <div
+                        pk-segmented-control
+                        kind="radio"
+                        label="Activity email"
+                        [options]="activityEmails"
+                        [value]="fields.draft.values.activityEmail"
+                        [disabledReason]="manageBlocked()"
+                        (valueChange)="store.editDefault('activityEmail', $event)"
+                      ></div>
+                    </div>
+                    <div
+                      pk-limit-row
+                      fieldId="d-bundle"
+                      name="Bundle changes within"
+                      help="Changes inside this window ride in one email."
+                      unit="minutes"
+                      [fields]="fields.bundle"
+                      [error]="fields.draft.error('bundleMinutes')"
+                      [readonly]="!!manageBlocked()"
+                      (changed)="editDefault($event)"
+                    ></div>
+                    <div
+                      pk-limit-row
+                      fieldId="d-max"
+                      name="Most emails per person per day"
+                      help="After this, the rest wait for the 6 pm digest. Reminders don’t count."
+                      unit="emails"
+                      [fields]="fields.most"
+                      [error]="fields.draft.error('mostEmailsPerDay')"
+                      [readonly]="!!manageBlocked()"
+                      (changed)="editDefault($event)"
+                    ></div>
+                    <div
+                      pk-limit-row
+                      fieldId="d-quiet"
+                      name="Quiet hours"
+                      help="In each member’s own time zone. Nothing sends; it waits until morning."
+                      [fields]="fields.quiet"
+                      [error]="fields.quietError"
+                      [readonly]="!!manageBlocked()"
+                      (changed)="editDefault($event)"
+                    ></div>
+                    <div
+                      pk-limit-row
+                      fieldId="d-bday"
+                      name="Birthday reminders"
+                      help="New contacts with a birthday get a reminder this early."
+                      [fields]="fields.lead"
+                      [readonly]="!!manageBlocked()"
+                      (changed)="editDefault($event)"
+                    ></div>
+                  </div>
+                  <span slot="foot">{{ fields.foot }}</span>
+                  <button
+                    pk-button
+                    slot="foot"
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    [disabled]="true"
+                  >
+                    Save defaults
+                  </button>
+                </section>
+              }
+            }
+            @default {
+              <section pk-panel [body]="true">
+                <p class="visually-hidden" role="status">Loading the defaults…</p>
+                <div class="stack" aria-hidden="true">
+                  @for (row of [1, 2, 3, 4, 5]; track row) {
+                    <div class="split">
+                      <span class="stack">
+                        <span pk-skeleton shape="text" [width]="30"></span>
+                        <span pk-skeleton shape="text" [width]="50"></span>
+                      </span>
+                      <span pk-skeleton shape="pill"></span>
+                    </div>
+                  }
+                </div>
+              </section>
+            }
+          }
+        </div>
+      }
     }
   }
 }

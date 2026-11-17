@@ -451,3 +451,69 @@ export async function savesHolds(
   });
   return writes;
 }
+
+export interface MockDefaults {
+  activityEmail: 'AsItHappens' | 'DailyDigest' | 'WeeklyDigest';
+  bundleMinutes: number;
+  mostEmailsPerDay: number;
+  quietFrom: string;
+  quietTo: string;
+  birthdayLead: 'Off' | 'OnTheDay' | 'OneDayBefore' | 'ThreeDaysBefore' | 'OneWeekBefore';
+  changedAt: string | null;
+  changedByName: string | null;
+}
+
+/** The first values of L2-161 and L2-173 AC2, as `defaults.html` draws them. */
+export const mockDefaults = (): MockDefaults => ({
+  activityEmail: 'AsItHappens',
+  bundleMinutes: 10,
+  mostEmailsPerDay: 12,
+  quietFrom: '21:00',
+  quietTo: '08:00',
+  birthdayLead: 'OneWeekBefore',
+  changedAt: null,
+  changedByName: null,
+});
+
+/** The Notifications page's Defaults tab: the page of `theMockNotifications` and the defaults. */
+export async function theMockDefaults(
+  page: Page,
+  change?: (defaults: MockDefaults) => void,
+): Promise<{ notifications: MockNotifications; defaults: MockDefaults }> {
+  const notifications = await theMockNotifications(page);
+  const defaults = mockDefaults();
+  change?.(defaults);
+  await page.route('**/api/admin/notifications/defaults', (route) =>
+    route.request().method() === 'GET' ? route.fulfill({ json: defaults }) : route.fallback(),
+  );
+  return { notifications, defaults };
+}
+
+/**
+ * Answers saving the defaults as the API would, changing `defaults` so the page's next read
+ * agrees, and records each body. Lena Fischer saves now.
+ */
+export async function savesDefaults(
+  page: Page,
+  { defaults }: { defaults: MockDefaults },
+): Promise<NotificationWrite[]> {
+  const writes: NotificationWrite[] = [];
+  await page.route('**/api/admin/notifications/defaults', (route) => {
+    const request = route.request();
+    if (request.method() !== 'PUT') return route.fallback();
+    const body = request.postDataJSON() as MockDefaults & { reason: string };
+    writes.push({ method: 'PUT', path: new URL(request.url()).pathname, body: { ...body } });
+    Object.assign(defaults, {
+      activityEmail: body.activityEmail,
+      bundleMinutes: body.bundleMinutes,
+      mostEmailsPerDay: body.mostEmailsPerDay,
+      quietFrom: body.quietFrom,
+      quietTo: body.quietTo,
+      birthdayLead: body.birthdayLead,
+      changedAt: new Date().toISOString(),
+      changedByName: 'Lena Fischer',
+    });
+    return route.fulfill({ json: defaults });
+  });
+  return writes;
+}
