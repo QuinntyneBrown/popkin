@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { Router, RouterLink } from '@angular/router';
 import {
   ADMIN_PLATFORM_API,
+  AdminNotificationKind,
   AdminNotificationsStore,
   AdminSendStatus,
   AdminSessionStore,
@@ -12,9 +13,12 @@ import {
   RESUMED_TOAST,
   Toaster,
   resumeDialog,
+  NotificationKindId,
   kindAbout,
+  kindDialog,
   kindOpened,
   kindSent,
+  kindToast,
   kindTotals,
   statusText,
   statusTitle,
@@ -24,6 +28,7 @@ import {
   DataTable,
   DataTableColumn,
   DataTableGroup,
+  DataTableSwitch,
   EmptyState,
   Icon,
   PageHead,
@@ -168,6 +173,27 @@ export class NotificationsPage {
       if (!saved) return;
       this.store.statusSaved(saved);
       this.toaster.show('success', ...RESUMED_TOAST);
+    });
+  }
+
+  /**
+   * A kind's switch turned: "Turn {kind} off for everyone?" or "Turn {kind} back on?" (L2-171
+   * AC1, AC3). The switch goes back unless the dialog saves.
+   */
+  protected switchKind(event: DataTableSwitch): void {
+    const kind = this.store
+      .groups()
+      .flatMap((g) => g.kinds)
+      .find((k) => k.kind === event.rowId);
+    if (!kind) return event.revert();
+    this.ask<AdminNotificationKind>({
+      text: kindDialog(kind.name, event.on),
+      danger: !event.on,
+      send: (reason) => this.api.switchKind(kind.kind as NotificationKindId, event.on, reason),
+    }).subscribe((saved) => {
+      if (!saved) return event.revert();
+      this.store.kindSaved(saved);
+      this.toaster.show('success', ...kindToast(kind.name, event.on));
     });
   }
 

@@ -120,13 +120,7 @@
                       [checked]="cell.on ?? false"
                       [attr.aria-label]="cell.label"
                       [disabledReason]="cell.disabledReason ?? null"
-                      (checkedChange)="
-                        switched.emit({
-                          rowId: row.id,
-                          on: $event,
-                          revert: () => toggle.checked.set(!$event),
-                        })
-                      "
+                      (checkedChange)="turned(toggle, row.id, $event)"
                     ></button>
                   }
                   @case ('lock') {

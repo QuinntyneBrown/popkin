@@ -105,6 +105,25 @@ export class DataTable {
   readonly acted = output<DataTableAction>();
   readonly switched = output<DataTableSwitch>();
 
+  private reverting = false;
+
+  /**
+   * Tells the consumer a switch turned, with how to turn it back. Setting the switch's model
+   * emits its change too, so the change a revert makes is not passed on as a new turn.
+   */
+  protected turned(toggle: Switch, rowId: string | number, on: boolean): void {
+    if (this.reverting) return;
+    this.switched.emit({
+      rowId,
+      on,
+      revert: () => {
+        this.reverting = true;
+        toggle.checked.set(!on);
+        this.reverting = false;
+      },
+    });
+  }
+
   protected readonly skeletonRows = [0, 1, 2, 3, 4];
 
   protected columnAt(index: number): DataTableColumn {

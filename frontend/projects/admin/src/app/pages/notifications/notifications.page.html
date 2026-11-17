@@ -81,6 +81,7 @@
             label="Every kind of notification, how many went out in the last 24 hours, and whether it is on for everyone"
             [columns]="kindColumns"
             [groups]="kindGroups()"
+            (switched)="switchKind($event)"
           ></div>
         </section>
       }
