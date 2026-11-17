@@ -22,6 +22,7 @@ export * from './lib/send-status/send-status';
 export * from './lib/page-tabs/page-tabs';
 export * from './lib/aside-note/aside-note';
 export * from './lib/limit-row/limit-row';
+export * from './lib/save-bar/save-bar';
 export * from './lib/popover/popover';
 export * from './lib/status/status';
 export * from './lib/text-field/text-field';

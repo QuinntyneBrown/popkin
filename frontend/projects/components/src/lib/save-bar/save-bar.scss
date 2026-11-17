@@ -1,0 +1,44 @@
+:host {
+  --pk-link-color: var(--color-fg-inverse);
+  --pk-link-height: var(--space-9);
+
+  position: sticky;
+  bottom: var(--space-4);
+  z-index: var(--z-sticky);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-inverse);
+  color: var(--color-fg-inverse);
+  box-shadow: var(--shadow-3);
+  animation: save-bar-rise var(--duration-base) var(--ease-standard);
+}
+
+.save-bar__text {
+  flex: 1;
+  min-width: 0;
+  font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+/* The actions wrap with the text, as the mocks draw them. */
+.save-bar__actions {
+  display: contents;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host {
+    animation: none;
+  }
+}
+
+@keyframes save-bar-rise {
+  from {
+    opacity: 0;
+    translate: 0 var(--space-4);
+  }
+}

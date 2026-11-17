@@ -74,6 +74,7 @@ import {
   SearchField,
   SegmentedControl,
   SegmentedOption,
+  SaveBar,
   SendStatus,
   Skeleton,
 } from 'components';
@@ -124,6 +125,7 @@ const PERSON_ACCENTS = ['coral', 'teal', 'plum', 'amber', 'sky', 'berry'];
     RouterLink,
     SearchField,
     SegmentedControl,
+    SaveBar,
     SendStatus,
     Skeleton,
   ],
