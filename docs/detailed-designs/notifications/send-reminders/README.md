@@ -75,6 +75,13 @@ The emails are in `docs/mocks/notifications/email-birthday/` (manifest id `email
    pronoun, which Contacts never does (L2-122 AC4). The preheader is "Turns {age}. Here's what
    you keep about {name}." or, with no age, "On {weekday}. Here's what you keep about {name}."
 6. **The event** (`event.html`) is gap 123 and is not built.
+7. **The headline's day.** `ahead.html` reads "Grace turns 33 on Saturday" a week before. The
+   email, the phone alert and the in-app message share the words of `ReminderRules`, which give a
+   weekday within six days and the date after ("Grace turns 33 on 19 September"; gaps 104 and
+   114). The subject names both, so the day is never ambiguous.
+8. **"On your list".** Until the `<TO SUPPLY>` below is answered, any open follow-up of the
+   contact due on or before the day counts.
+9. **The relation line.** `ahead.html`'s "Best friend from uni" is the contact's "How we met".
 
 ### What is due and when (L2-162)
 

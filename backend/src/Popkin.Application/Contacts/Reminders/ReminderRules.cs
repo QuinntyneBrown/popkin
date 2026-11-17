@@ -5,12 +5,12 @@ namespace Popkin.Application.Contacts.Reminders;
 
 /// <summary>
 /// What a reminder says and when it is due (docs/detailed-designs/contacts/reminders, known gaps
-/// 104 and 114 ruled): 9 am where the person is, a weekday within the next 6 days and a date after.
+/// 104 and 114 ruled): 8 am where the person is (L2-162 AC1), a weekday within the next 6 days and a date after.
 /// </summary>
 public static class ReminderRules
 {
     /// <summary>The hour, where the person is, from which the day's reminders go.</summary>
-    public const int Hour = 9;
+    public const int Hour = 8;
 
     private static readonly CultureInfo English = CultureInfo.GetCultureInfo("en-GB");
 

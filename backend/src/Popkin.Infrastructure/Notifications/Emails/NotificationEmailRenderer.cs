@@ -20,7 +20,8 @@ public sealed partial class NotificationEmailRenderer(IServiceProvider services,
     {
         var (html, text) = model switch
         {
-            PopkinUpdateEmailModel update => (typeof(PopkinUpdateEmail), typeof(PopkinUpdateEmailText)),
+            PopkinUpdateEmailModel => (typeof(PopkinUpdateEmail), typeof(PopkinUpdateEmailText)),
+            KeyDateReminderEmailModel => (typeof(KeyDateReminderEmail), typeof(KeyDateReminderEmailText)),
             _ => throw new ArgumentOutOfRangeException(nameof(model), model.GetType().Name, "No template for this email."),
         };
         var parameters = ParameterView.FromDictionary(new Dictionary<string, object?> { ["Model"] = model });
@@ -31,9 +32,7 @@ public sealed partial class NotificationEmailRenderer(IServiceProvider services,
             var t = await renderer.RenderComponentAsync(text, parameters);
             return (h.ToHtmlString(), t.ToHtmlString());
         });
-        var pictures = model is PopkinUpdateEmailModel withPictures
-            ? withPictures.Pictures.Select(p => new InlineImage(p.ContentId, p.BlobKey, "image/jpeg")).ToList()
-            : [];
+        var pictures = model.Pictures.Select(p => new InlineImage(p.ContentId, p.BlobKey, "image/jpeg")).ToList();
         return new RenderedEmail(model.Shell.Subject, "<!DOCTYPE html>\n" + htmlPart, Text(textPart), pictures);
     }
 

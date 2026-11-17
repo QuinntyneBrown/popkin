@@ -28,6 +28,9 @@ public sealed class NotificationLinks(PopkinUrlBuilder urls, IUnsubscribeTokens 
 
     public string Popkin(Guid popkinId) => urls.To($"/p/{popkinId}");
 
+    /// <summary>The contact's profile in Contacts (L2-166 AC1).</summary>
+    public string Contact(Guid contactId) => urls.To($"/contacts/people/{contactId}");
+
     /// <summary>"Notification settings": What you hear about (L2-168 AC2).</summary>
     public string Settings() => urls.To("/account/notifications?tab=types");
 

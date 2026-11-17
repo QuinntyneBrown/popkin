@@ -12,7 +12,10 @@ namespace Popkin.Application.Notifications.Dispatch;
 /// bundles whose window has ended, each read again first (L2-161 AC3, AC4, AC9; L2-174 AC1).
 /// </summary>
 public sealed class UpdateEmails(
-    IAppDbContext db, PopkinUpdateEmailComposer composer, INotificationEmailRenderer renderer, INotificationEmailSender sender, NotificationLinks links, PopkinMetrics metrics)
+    IAppDbContext db,
+    PopkinUpdateEmailComposer composer,
+    KeyDateReminderEmailComposer keyDates,
+    INotificationEmailRenderer renderer, INotificationEmailSender sender, NotificationLinks links, PopkinMetrics metrics)
 {
     /// <summary>The delivery for an email change the rules let through (or held, while email is paused).</summary>
     public async Task<NotificationDelivery> PlaceAsync(
@@ -25,6 +28,15 @@ public sealed class UpdateEmails(
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
+        if (ReminderEvents.IsReminder(notification.Kind))
+        {
+            // A reminder goes on its own, at once: no bundle, no digest, no daily most (send-reminders).
+            var key = $"{notification.DedupKey ?? $"reminder:{notification.Kind}:{notification.SubjectId}"}:{person}";
+            var reminder = OutgoingEmail.Due(person, ReminderEvents.EmailKindOf(notification.Kind), notification.PopkinId, key, now, decision.At);
+            db.OutgoingEmails.Add(reminder);
+            return NotificationDelivery.Bundled(notification.Id, person, reminder.Id, reminder.SendAfter);
+        }
+
         if (frequency != NotificationFrequency.AsItHappens || notification.PopkinId is not { } popkinId
             || await SentTodayAsync(person, question.Zone, now, cancellationToken) >= platform.DailyMost)
         {
@@ -66,7 +78,8 @@ public sealed class UpdateEmails(
         CancellationToken cancellationToken)
     {
         var due = await db.OutgoingEmails
-            .Where(e => e.Kind == NotificationEmailKind.Update
+            .Where(e => (e.Kind == NotificationEmailKind.Update || e.Kind == NotificationEmailKind.KeyDateReminder
+                    || e.Kind == NotificationEmailKind.StoryDue || e.Kind == NotificationEmailKind.WrapUp)
                 && ((e.Status == OutgoingEmailStatus.Open || e.Status == OutgoingEmailStatus.Queued) && e.SendAfter <= now
                     || e.Status == OutgoingEmailStatus.Retrying && e.NextAttemptAt <= now))
             .OrderBy(e => e.SendAfter)
@@ -127,7 +140,7 @@ public sealed class UpdateEmails(
         {
             var question = await ask(x.Event, email.PersonId, NotificationChannel.Email, cancellationToken);
             zone = question.Zone;
-            if (question.QuietHours.Contains(LocalClock.TimeAt(now, zone)))
+            if (email.Kind == NotificationEmailKind.Update && question.QuietHours.Contains(LocalClock.TimeAt(now, zone)))
             {
                 // A window that ends inside quiet hours waits for their end (L2-161 AC6).
                 email.Defer(question.QuietHours.EndAfter(now, zone));
@@ -148,8 +161,8 @@ public sealed class UpdateEmails(
             }
         }
 
-        var model = passing.Count == 0
-            ? null
+        EmailModel? model = passing.Count == 0 ? null
+            : email.Kind == NotificationEmailKind.KeyDateReminder ? await keyDates.ComposeAsync(email, passing[0].Event, cancellationToken)
             : await composer.ComposeAsync(email, passing.Select(p => p.Event).ToList(), zone, platform.BundlingMinutes, cancellationToken);
         var address = await db.People.Where(p => p.Id == email.PersonId).Select(p => p.Email).SingleOrDefaultAsync(cancellationToken);
         if (model is null || address is not { Length: > 0 })

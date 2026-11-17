@@ -70,7 +70,7 @@ public sealed class DispatchNotificationsCommandHandler(
             .ToListAsync(cancellationToken);
         foreach (var person in people.Distinct())
         {
-            foreach (var channel in (NotificationChannel[])[NotificationChannel.Phone, NotificationChannel.Email])
+            foreach (var channel in ReminderEvents.ChannelsOf(notification))
             {
                 if (already.Any(d => d.PersonId == person && d.Channel == channel))
                 {
@@ -177,7 +177,8 @@ public sealed class DispatchNotificationsCommandHandler(
 
             if (passing.Count > 0)
             {
-                var heldBack = passing.Count > 1 && passing.All(p => p.Delivery.SendAfter > p.Event.OccurredAt.AddMinutes(1));
+                var heldBack = group.Key.PopkinId is not null && passing.Count > 1
+                    && passing.All(p => p.Delivery.SendAfter > p.Event.OccurredAt.AddMinutes(1));
                 var alerts = new List<PhoneAlert>();
                 if (heldBack)
                 {
@@ -239,6 +240,11 @@ public sealed class DispatchNotificationsCommandHandler(
 
     private async Task<PhoneAlert> AlertAsync(NotificationEvent notification, CancellationToken cancellationToken)
     {
+        if (notification.Kind == NotificationKind.Birthdays)
+        {
+            return await ContactReminderAlertAsync(notification, cancellationToken);
+        }
+
         var popkin = await db.Popkins.AsNoTracking().SingleAsync(p => p.Id == notification.PopkinId, cancellationToken);
         var actor = await db.Memberships.AsNoTracking()
             .Where(m => m.PopkinId == popkin.Id && m.PersonId == notification.ActorPersonId)
@@ -246,6 +252,19 @@ public sealed class DispatchNotificationsCommandHandler(
             .FirstOrDefaultAsync(cancellationToken);
         var actorName = actor is null ? "Someone" : PersonName.FirstName(actor.DisplayName);
         return PhoneAlerts.For(notification.Kind, popkin.Name, actorName, await UrlAsync(notification, popkin.Id, actor, cancellationToken));
+    }
+
+    /// <summary>
+    /// A contact's reminder in its own words: a key date or a habit opens the contact's profile,
+    /// a follow-up opens Follow-ups (send-reminders, "Phone alerts").
+    /// </summary>
+    private async Task<PhoneAlert> ContactReminderAlertAsync(NotificationEvent notification, CancellationToken cancellationToken)
+    {
+        var reminder = await db.ContactReminders.AsNoTracking().SingleAsync(r => r.Id == notification.SubjectId, cancellationToken);
+        var url = reminder.Kind == ReminderKind.FollowUp ? "/contacts/follow-ups"
+            : reminder.ContactId is { } contact ? $"/contacts/people/{contact}"
+            : "/contacts";
+        return new PhoneAlert(reminder.Words, "", url);
     }
 
     /// <summary>The app path the alert opens: the conversation for a message, the Popkin otherwise.</summary>

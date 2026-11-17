@@ -18,7 +18,11 @@ public sealed record EmailShellModel(
     string PostalAddress);
 
 /// <summary>A notification email's model, rendered by its template (ADR 0031).</summary>
-public abstract record EmailModel(EmailShellModel Shell);
+public abstract record EmailModel(EmailShellModel Shell)
+{
+    /// <summary>The pictures the email carries inline.</summary>
+    public virtual IReadOnlyList<EmailPicture> Pictures => [];
+}
 
 /// <summary>A line under "Also new in the last {n} minutes" (L2-164 AC6).</summary>
 public sealed record AlsoNewRow(string Line, string At);
@@ -54,11 +58,35 @@ public sealed record NoteLead(string Headline, EmailLink Button, IReadOnlyList<s
 public sealed record PopkinUpdateEmailModel(EmailShellModel Shell, UpdateLead Lead, IReadOnlyList<AlsoNewRow> AlsoNew, int WindowMinutes)
     : EmailModel(Shell)
 {
-    /// <summary>The pictures the email carries inline.</summary>
-    public IReadOnlyList<EmailPicture> Pictures => Lead switch
+    public override IReadOnlyList<EmailPicture> Pictures => Lead switch
     {
         PhotosLead photos => photos.Photos,
         NoteLead { Picture: { } picture } => [picture],
         _ => [],
     };
+}
+
+/// <summary>"Last time you talked · {day}": the latest conversation's title and text (L2-166 AC4).</summary>
+public sealed record LastTalk(string Heading, string? Title, string? Text);
+
+/// <summary>"On your list": the contact's earliest open follow-up before the day (L2-166 AC3).</summary>
+public sealed record OnYourList(string Text, string Planned);
+
+/// <summary>The key date reminder email, ahead of the day or on it (L2-166).</summary>
+public sealed record KeyDateReminderEmailModel(
+    EmailShellModel Shell,
+    string Headline,
+    string Details,
+    int? Age,
+    string Initials,
+    EmailPicture? Photo,
+    string LovesTitle,
+    IReadOnlyList<string> Loves,
+    LastTalk? LastTalk,
+    OnYourList? OnYourList,
+    EmailLink Button,
+    EmailLink? SecondButton)
+    : EmailModel(Shell)
+{
+    public override IReadOnlyList<EmailPicture> Pictures => Photo is { } photo ? [photo] : [];
 }

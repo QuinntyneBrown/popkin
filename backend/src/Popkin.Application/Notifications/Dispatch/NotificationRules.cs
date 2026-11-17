@@ -134,7 +134,8 @@ public static class NotificationRules
             return NotificationDecision.Suppress(late, q.Now);
         }
 
-        return q.QuietHours.Contains(LocalClock.TimeAt(q.Now, q.Zone))
+        // A reminder keeps its own time: quiet hours do not hold it (L2-161 AC6, L2-162).
+        return entry.Group != NotificationGroup.Reminders && q.QuietHours.Contains(LocalClock.TimeAt(q.Now, q.Zone))
             ? NotificationDecision.SendAt(q.QuietHours.EndAfter(q.Now, q.Zone))
             : NotificationDecision.SendAt(q.Now);
     }

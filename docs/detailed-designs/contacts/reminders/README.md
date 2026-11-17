@@ -19,7 +19,9 @@ adopted:
 - the "Phone notifications" and "Monday email" switches leave Dates;
 - email and phone pass to the notifications subsystem as the "Birthdays" kind (gap 126).
 
-The parts of this design that the change removes are listed under "To be removed".
+The parts of this design that the change removed are listed under "Removed". The handler now
+records a "Birthdays" event per reminder, and the dispatcher sends it
+([Send reminders](../../notifications/send-reminders/README.md)).
 
 The Popkin Worker adds reminders. `SendContactRemindersJob` is a `PeriodicJob`: on each tick it
 sends one command, and the handler decides what is due. The Worker holds no hub connection and

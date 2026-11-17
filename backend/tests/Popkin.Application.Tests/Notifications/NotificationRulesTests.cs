@@ -85,6 +85,21 @@ public sealed class NotificationRulesTests
         Assert.Equal(EightNextMorning, decision.At);
     }
 
+    // A reminder keeps its own time: quiet hours do not hold it, on either channel, and a muted
+    // Popkin or "Just for me" keeps it (send-reminders; L2-158 AC2, AC3; L2-161 AC6).
+    [Theory]
+    [InlineData(NotificationKind.Birthdays, NotificationChannel.Phone, PopkinNotificationLevel.Everything)]
+    [InlineData(NotificationKind.Birthdays, NotificationChannel.Email, PopkinNotificationLevel.Everything)]
+    [InlineData(NotificationKind.StoriesDue, NotificationChannel.Email, PopkinNotificationLevel.Muted)]
+    [InlineData(NotificationKind.PopkinWrappingUp, NotificationChannel.Phone, PopkinNotificationLevel.JustForMe)]
+    public void A_reminder_is_sent_now_even_in_quiet_hours(NotificationKind kind, NotificationChannel channel, PopkinNotificationLevel level)
+    {
+        var decision = NotificationRules.Decide(Ask(channel, kind, TenAtNight) with { Level = level });
+
+        Assert.Equal(NotificationOutcome.Send, decision.Outcome);
+        Assert.Equal(TenAtNight, decision.At);
+    }
+
     // Row 17.
     [Fact]
     public void Otherwise_it_is_sent_now()
