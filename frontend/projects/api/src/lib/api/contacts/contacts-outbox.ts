@@ -1,8 +1,9 @@
-import { Injectable, InjectionToken, inject, signal } from '@angular/core';
+import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { SaveContactRequest } from '../../models/contacts';
 import { NETWORK_STATUS } from '../chat/network-status';
 import { toApiProblem } from '../problem';
+import { OutboxQueue } from '../storage/outbox-queue';
 import { Toaster } from '../toasts/toaster';
 import { saveFailedHeading } from './contact-form-text';
 import { CONTACTS_API } from './contacts-api';
@@ -46,17 +47,16 @@ export class ContactsOutbox {
   private readonly toaster = inject(Toaster);
   private readonly frame = inject(ContactsFrame);
 
-  private readonly held = signal<ContactsOutboxEntry[]>(
-    this.storage
-      .load()
-      .map((entry) => (entry.state === 'Sending' ? { ...entry, state: 'Waiting' } : entry)),
-  );
-  private readonly photos = new Map<string, File>();
+  private readonly queue = new OutboxQueue<ContactsOutboxEntry>({
+    storage: this.storage,
+    id: (entry) => entry.clientId,
+    waiting: (entry) => ({ ...entry, state: 'Waiting' }),
+  });
   private readonly sent = new Subject<void>();
   private sending = false;
   private warned = false;
 
-  readonly entries = this.held.asReadonly();
+  readonly entries = this.queue.entries;
   /** Each write the API has kept, so an open page reads again. */
   readonly sent$: Observable<void> = this.sent.asObservable();
 
@@ -75,11 +75,10 @@ export class ContactsOutbox {
 
   /** Keeps an Add someone made offline and says so once until the connection returns. */
   keepAdd(request: SaveContactRequest, photo: File | null): void {
-    if (photo) this.photos.set(request.clientId, photo);
-    this.update((entries) => [
-      ...entries,
+    this.queue.add(
       { clientId: request.clientId, kind: 'add-contact', request, state: 'Waiting' },
-    ]);
+      photo,
+    );
     if (!this.warned) {
       this.warned = true;
       this.toaster.show('warning', OFFLINE_HEADING, OFFLINE_TEXT);
@@ -89,15 +88,14 @@ export class ContactsOutbox {
   /** Sends what waited, oldest first, one at a time. */
   sendWaiting(): void {
     if (this.sending || !this.network.online()) return;
-    const next = this.held().find((entry) => entry.state === 'Waiting');
+    const next = this.queue.entries().find((entry) => entry.state === 'Waiting');
     if (!next) return;
     this.sending = true;
-    this.change(next.clientId, 'Sending');
-    this.api.addContact(next.request, this.photos.get(next.clientId) ?? null).subscribe({
+    this.queue.change(next.clientId, { state: 'Sending' });
+    this.api.addContact(next.request, this.queue.file(next.clientId) ?? null).subscribe({
       next: () => {
         this.sending = false;
-        this.photos.delete(next.clientId);
-        this.update((entries) => entries.filter((entry) => entry.clientId !== next.clientId));
+        this.queue.remove((entry) => entry.clientId === next.clientId);
         this.frame.refresh();
         this.sent.next();
         this.sendWaiting();
@@ -106,24 +104,13 @@ export class ContactsOutbox {
         this.sending = false;
         const status = toApiProblem(error).status;
         if (status >= 400 && status < 500) {
-          this.change(next.clientId, 'Failed');
+          this.queue.change(next.clientId, { state: 'Failed' });
           this.toaster.show('danger', saveFailedHeading(next.request.name), REFUSED_TEXT);
           this.sendWaiting();
         } else {
-          this.change(next.clientId, 'Waiting');
+          this.queue.change(next.clientId, { state: 'Waiting' });
         }
       },
     });
-  }
-
-  private change(clientId: string, state: ContactsOutboxEntry['state']): void {
-    this.update((entries) =>
-      entries.map((entry) => (entry.clientId === clientId ? { ...entry, state } : entry)),
-    );
-  }
-
-  private update(change: (entries: ContactsOutboxEntry[]) => ContactsOutboxEntry[]): void {
-    this.held.update(change);
-    this.storage.save(this.held());
   }
 }
