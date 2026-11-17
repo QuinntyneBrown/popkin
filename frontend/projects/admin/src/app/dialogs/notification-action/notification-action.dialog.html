@@ -2,6 +2,9 @@
   @if (state.status() === 'failed') {
     <div pk-alert [heading]="failed.heading">{{ failed.text }}</div>
   }
+  @if (data.changes; as changes) {
+    <ul pk-change-list [changes]="changes"></ul>
+  }
   <div
     pk-textarea
     fieldId="reason"

@@ -1,0 +1,54 @@
+<div class="limit__label">
+  <span class="limit__name" [id]="nameId()">{{ name() }}</span>
+  @if (help()) {
+    <span class="limit__help" [id]="fieldId() + '-help'">{{ help() }}</span>
+  }
+</div>
+<div class="limit__value">
+  @for (field of fields(); track field.key; let i = $index) {
+    @if (i > 0) {
+      <span class="limit__unit limit__unit--joiner">{{ joiner() }}</span>
+    }
+    @if (field.options) {
+      <select
+        class="limit__select"
+        [id]="idOf(i)"
+        [attr.aria-label]="field.label ?? null"
+        [attr.aria-labelledby]="field.label ? null : nameId()"
+        [attr.aria-describedby]="describedBy()"
+        [attr.aria-invalid]="invalid(field) ? 'true' : null"
+        [disabled]="readonly()"
+        (change)="input(field.key, $event)"
+      >
+        @for (option of field.options; track option.value) {
+          <option [value]="option.value" [selected]="option.value === field.value">
+            {{ option.label }}
+          </option>
+        }
+      </select>
+    } @else {
+      <input
+        class="input"
+        type="text"
+        [id]="idOf(i)"
+        [value]="field.value"
+        [attr.inputmode]="field.numeric ? 'numeric' : null"
+        [attr.aria-label]="field.label ?? null"
+        [attr.aria-labelledby]="field.label ? null : nameId()"
+        [attr.aria-describedby]="describedBy()"
+        [attr.aria-invalid]="invalid(field) ? 'true' : null"
+        [readOnly]="readonly()"
+        (input)="input(field.key, $event)"
+      />
+    }
+  }
+  <ng-content />
+  @if (unit()) {
+    <span class="limit__unit">{{ unit() }}</span>
+  }
+</div>
+@if (error()) {
+  <p class="field__error" [id]="fieldId() + '-err'">
+    <svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span>
+  </p>
+}

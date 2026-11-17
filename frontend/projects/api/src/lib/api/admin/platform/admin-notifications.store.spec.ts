@@ -74,6 +74,7 @@ describe('AdminNotificationsStore', () => {
   const notifications = vi.fn();
   const notificationHolds = vi.fn();
   const searchHoldPopkins = vi.fn();
+  const notificationDefaults = vi.fn();
   let store: AdminNotificationsStore;
 
   beforeEach(() => {
@@ -87,7 +88,7 @@ describe('AdminNotificationsStore', () => {
         AdminNotificationsStore,
         {
           provide: ADMIN_PLATFORM_API,
-          useValue: { notifications, notificationHolds, searchHoldPopkins },
+          useValue: { notifications, notificationHolds, searchHoldPopkins, notificationDefaults },
         },
       ],
     });
@@ -100,6 +101,7 @@ describe('AdminNotificationsStore', () => {
     notifications.mockReset();
     notificationHolds.mockReset();
     searchHoldPopkins.mockReset();
+    notificationDefaults.mockReset();
   });
 
   it('reads the page and counts the kinds and holds, and fails when it cannot (L2-169 AC1)', () => {
@@ -211,5 +213,37 @@ describe('AdminNotificationsStore', () => {
     expect(store.holdNotes()).toEqual([
       'No active Popkin matches “zzz”. Wrapped-up and held Popkins aren’t listed.',
     ]);
+  });
+
+  const saved = {
+    activityEmail: 'AsItHappens' as const,
+    bundleMinutes: 10,
+    mostEmailsPerDay: 12,
+    quietFrom: '21:00',
+    quietTo: '08:00',
+    birthdayLead: 'OneWeekBefore' as const,
+    changedAt: null,
+    changedByName: null,
+  };
+
+  it('reads the defaults, edits, discards and takes the saved ones (L2-173)', () => {
+    notificationDefaults.mockReturnValue(of(saved));
+    expect(store.defaultsStatus()).toBe('idle');
+    store.loadDefaults();
+    expect(store.defaultsStatus()).toBe('ready');
+
+    store.editDefault('bundleMinutes', '20');
+    expect(store.defaults()?.unsaved).toBe(1);
+    store.discardDefaults();
+    expect(store.defaults()?.unsaved).toBe(0);
+
+    store.editDefault('bundleMinutes', '20');
+    store.defaultsSaved({ ...saved, bundleMinutes: 20 });
+    expect(store.defaults()?.unsaved).toBe(0);
+    expect(store.defaults()?.values.bundleMinutes).toBe('20');
+
+    notificationDefaults.mockReturnValue(throwError(() => new Error('down')));
+    store.loadDefaults();
+    expect(store.defaultsStatus()).toBe('failed');
   });
 });

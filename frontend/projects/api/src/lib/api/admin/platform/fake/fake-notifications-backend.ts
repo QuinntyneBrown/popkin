@@ -2,6 +2,7 @@ import {
   AdminAction,
   AdminHoldPopkin,
   AdminMe,
+  AdminNotificationDefaults,
   AdminNotificationGroup,
   AdminNotificationHold,
   AdminNotificationHolds,
@@ -9,9 +10,24 @@ import {
   AdminNotifications,
   AdminSendStatus,
   HoldPopkinMatch,
+  NotificationDefaultsChange,
   NotificationKindId,
 } from '../../../../models/admin';
 import { REASON_MAX_LENGTH } from '../../dialogs/action-dialog-state';
+import {
+  NotificationDefaultField,
+  NotificationDefaultsDraft,
+} from '../notification-defaults-draft';
+
+/** The defaults the PUT takes, in the order the API checks them. */
+const DEFAULT_FIELDS: Record<NotificationDefaultField, true> = {
+  activityEmail: true,
+  bundleMinutes: true,
+  mostEmailsPerDay: true,
+  quietFrom: true,
+  quietTo: true,
+  birthdayLead: true,
+};
 
 /** An answer the fake gives: a status and a body, a ProblemDetails for a refusal. */
 export interface FakeAnswer {
@@ -230,6 +246,17 @@ export class FakeNotificationsBackend {
   private readonly popkins = seedPopkins();
   private holds: AdminNotificationHold[];
   private nextHold = 1;
+  /** The first values of L2-161 and L2-173 AC2. */
+  private defaults: AdminNotificationDefaults = {
+    activityEmail: 'AsItHappens',
+    bundleMinutes: 10,
+    mostEmailsPerDay: 12,
+    quietFrom: '21:00',
+    quietTo: '08:00',
+    birthdayLead: 'OneWeekBefore',
+    changedAt: null,
+    changedByName: null,
+  };
 
   constructor(private readonly clock: () => Date = () => new Date()) {
     this.status = {
@@ -283,6 +310,14 @@ export class FakeNotificationsBackend {
       const popkinId = String((request.body as { popkinId?: unknown } | null)?.popkinId ?? '');
       return this.guarded(request, 'HoldNotifications', (reason, admin) =>
         this.hold(popkinId, reason, admin),
+      );
+    }
+    if (path === '/api/admin/notifications/defaults' && method === 'GET') {
+      return ok(structuredClone(this.defaults));
+    }
+    if (path === '/api/admin/notifications/defaults' && method === 'PUT') {
+      return this.guarded(request, 'ManageNotifications', (_, admin) =>
+        this.changeDefaults(request.body as Partial<NotificationDefaultsChange> | null, admin),
       );
     }
     const release = /^\/api\/admin\/notifications\/holds\/([^/]+)\/release$/.exec(path);
@@ -350,6 +385,29 @@ export class FakeNotificationsBackend {
     };
     this.holds.push(hold);
     return ok(structuredClone(hold), 201);
+  }
+
+  /** Each value against the table of the design, then whether anything changes (L2-173 AC3). */
+  private changeDefaults(
+    body: Partial<NotificationDefaultsChange> | null,
+    admin: string,
+  ): FakeAnswer {
+    const next = { ...this.defaults, ...(body ?? {}) };
+    const typed = (Object.keys(DEFAULT_FIELDS) as NotificationDefaultField[]).reduce(
+      (d, field) => d.with(field, String(next[field])),
+      new NotificationDefaultsDraft(this.defaults),
+    );
+    const wrong = (Object.keys(DEFAULT_FIELDS) as NotificationDefaultField[]).find((f) =>
+      typed.error(f),
+    );
+    if (wrong) return problem(400, 'default_not_allowed', `${wrong}: ${typed.error(wrong)}`);
+    if (typed.unsaved === 0) return problem(400, 'no_change');
+    this.defaults = {
+      ...typed.request(),
+      changedAt: this.clock().toISOString(),
+      changedByName: admin,
+    };
+    return ok(structuredClone(this.defaults));
   }
 
   private release(holdId: string): FakeAnswer {

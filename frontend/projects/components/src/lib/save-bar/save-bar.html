@@ -1,0 +1,15 @@
+<span class="save-bar__text" aria-live="polite">{{ text() }}</span>
+<span class="save-bar__actions">
+  <button pk-link variant="text" type="button" (click)="discard.emit()">Discard</button>
+  <button
+    pk-button
+    variant="primary"
+    size="sm"
+    type="button"
+    [busy]="busy()"
+    [disabled]="!!blocked()"
+    (click)="save.emit()"
+  >
+    {{ saveLabel() }}
+  </button>
+</span>

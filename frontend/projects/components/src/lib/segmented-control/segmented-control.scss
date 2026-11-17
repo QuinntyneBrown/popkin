@@ -26,7 +26,6 @@
 .segmented__count {
   margin-left: var(--space-1-5);
   color: var(--color-fg-subtle);
-  font-variant-numeric: tabular-nums;
 }
 
 /* The radio form (a setting, such as the theme) shows its choice inverted, as the mocks draw it. */
@@ -67,6 +66,10 @@
   max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
+}
+
+:host(.segmented--scroll) .segmented__count {
+  font-variant-numeric: tabular-nums;
 }
 
 :host(.segmented--scroll) .segmented__option {

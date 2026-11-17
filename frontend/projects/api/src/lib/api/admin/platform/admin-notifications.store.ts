@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, catchError, debounceTime, map, of, switchMap } from 'rxjs';
 import {
+  AdminNotificationDefaults,
   AdminNotificationHold,
   AdminNotificationHolds,
   AdminNotificationKind,
@@ -11,6 +12,7 @@ import {
 } from '../../../models/admin';
 import { ADMIN_PLATFORM_API } from './admin-platform-api';
 import { holdSearchNotes } from './holds-text';
+import { NotificationDefaultField, NotificationDefaultsDraft } from './notification-defaults-draft';
 
 /** How often the page reads the status and the counts again (the admin app polls; ADR 0015). */
 export const NOTIFICATIONS_POLL_MS = 60_000;
@@ -47,6 +49,10 @@ export class AdminNotificationsStore {
     holdSearchNotes(this.holdAnswered(), this.holdMatches().length),
   );
   private readonly searches = new Subject<string>();
+
+  /** The Defaults tab: read when it first opens, then edited as a draft (L2-173). */
+  readonly defaultsStatus = signal<'idle' | 'loading' | 'ready' | 'failed'>('idle');
+  readonly defaults = signal<NotificationDefaultsDraft | null>(null);
 
   constructor() {
     const poll = setInterval(() => this.refresh(), NOTIFICATIONS_POLL_MS);
@@ -148,5 +154,32 @@ export class AdminNotificationsStore {
           }
         : n,
     );
+  }
+
+  /** Reads the defaults, showing them loading; "Try again" calls it too. */
+  loadDefaults(): void {
+    this.defaultsStatus.set('loading');
+    this.api.notificationDefaults().subscribe({
+      next: (saved) => {
+        this.defaults.set(new NotificationDefaultsDraft(saved));
+        this.defaultsStatus.set('ready');
+      },
+      error: () => this.defaultsStatus.set('failed'),
+    });
+  }
+
+  /** A value typed or chosen (L2-173 AC3). */
+  editDefault(field: NotificationDefaultField, value: string): void {
+    this.defaults.update((d) => d?.with(field, value) ?? d);
+  }
+
+  /** Back to the saved defaults. */
+  discardDefaults(): void {
+    this.defaults.update((d) => d?.discarded() ?? d);
+  }
+
+  /** The defaults as saved: the new start, nothing unsaved (L2-173 AC4). */
+  defaultsSaved(saved: AdminNotificationDefaults): void {
+    this.defaults.set(new NotificationDefaultsDraft(saved));
   }
 }
