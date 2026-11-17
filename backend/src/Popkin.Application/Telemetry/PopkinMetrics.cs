@@ -24,6 +24,7 @@ public sealed class PopkinMetrics
     private readonly Histogram<double> _phoneLatency;
     private readonly Counter<long> _settingsChanged;
     private readonly Counter<long> _mutes;
+    private readonly Counter<long> _unsubscribes;
 
     public PopkinMetrics(IMeterFactory meters)
     {
@@ -56,10 +57,15 @@ public sealed class PopkinMetrics
             "popkin.notifications.settings_changed", description: "Notification settings saved, by setting (email, frequency, kind) and channel.");
         _mutes = meter.CreateCounter<long>(
             "popkin.notifications.mutes", description: "People muted and unmuted, by action (L2-160).");
+        _unsubscribes = meter.CreateCounter<long>(
+            "popkin.notifications.unsubscribes", description: "Unsubscribe links used, by outcome (L2-168).");
     }
 
     /// <summary>`action` is mute or unmute; neither person is a dimension.</summary>
     public void PersonMuted(string action) => _mutes.Add(1, new KeyValuePair<string, object?>("action", action));
+
+    /// <summary>`outcome` is unsubscribed, already or expired; never the person or the token (L2-174 AC3).</summary>
+    public void Unsubscribe(string outcome) => _unsubscribes.Add(1, new KeyValuePair<string, object?>("outcome", outcome));
 
     public void NotificationEvent(string kind) => _notificationEvents.Add(1, new KeyValuePair<string, object?>("kind", kind));
 

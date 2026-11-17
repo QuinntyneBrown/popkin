@@ -848,6 +848,27 @@
       "notes": "From the Magic Patterns Popkin App › Notifications design. Every email's footer links land here: mute → muted or birthday-off, settings → default, unsubscribe → unsubscribed. No requirement covers it yet."
     },
     {
+      "id": "unsubscribe",
+      "kind": "page",
+      "title": "Unsubscribe",
+      "route": "/unsubscribe",
+      "opens_from": "an email's footer link",
+      "requirements": [
+        "L2-168"
+      ],
+      "states": [
+        "default",
+        "working",
+        "expired",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The screen reads nothing before it shows; the wait for its one request is working.",
+        "empty": "The screen lists nothing; it has no collection that can be empty."
+      },
+      "notes": "Opened without a session from \"Unsubscribe from all email\". The GET of the page changes nothing; the page posts the token once it runs. Expired says the same whatever failed (L2-168 AC5)."
+    },
+    {
       "id": "email-popkin-update",
       "kind": "notification",
       "title": "Email · Popkin update",

@@ -10,6 +10,8 @@ namespace Popkin.Api.Auth;
 /// Otherwise 403 `cross_site_request`. With the Strict cookie it closes cross-site request
 /// forgery. The hub is checked whatever the method, because a WebSocket opens with a GET and a
 /// browser sends its `Origin` with it: the hub accepts a connection from the app's own origin only.
+/// One path is open to any site: the one-click unsubscribe, which a mail provider posts from its
+/// own servers and whose token, not a cookie, is the proof (L2-168 AC4).
 /// </summary>
 public sealed class SameSiteRequestMiddleware(RequestDelegate next, IConfiguration configuration)
 {
@@ -18,7 +20,7 @@ public sealed class SameSiteRequestMiddleware(RequestDelegate next, IConfigurati
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (IsChange(context.Request) && !IsSameSite(context.Request))
+        if (IsChange(context.Request) && !IsSameSite(context.Request) && !IsUnsubscribe(context.Request))
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             var details = new ProblemDetails { Status = 403, Title = "This request came from another site." };
@@ -35,6 +37,9 @@ public sealed class SameSiteRequestMiddleware(RequestDelegate next, IConfigurati
         request.Path.StartsWithSegments("/hubs")
         || ((HttpMethods.IsPost(request.Method) || HttpMethods.IsPut(request.Method) || HttpMethods.IsPatch(request.Method) || HttpMethods.IsDelete(request.Method))
             && request.Path.StartsWithSegments("/api"));
+
+    private static bool IsUnsubscribe(HttpRequest request) =>
+        HttpMethods.IsPost(request.Method) && request.Path.Equals("/api/notifications/unsubscribe", StringComparison.OrdinalIgnoreCase);
 
     private bool IsSameSite(HttpRequest request)
     {

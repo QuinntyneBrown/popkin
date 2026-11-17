@@ -175,12 +175,29 @@ public static class DependencyInjection
         // Notification emails (ADR 0030): rendered from Razor components, and sent only when the
         // service, the sender address and the footer's postal address are all configured
         // (L2-163 AC5); otherwise each is marked failed and nothing is sent.
-        services.AddDataProtection();
+        // ADR 0031: one key ring for the API and the Worker, so the API reads the unsubscribe
+        // links the Worker writes, kept in Blob Storage and wrapped by Key Vault. Without it,
+        // outside Development, no notification email is sent.
+        var dataProtection = services.AddDataProtection().SetApplicationName("Popkin");
+        var keyRing = configuration["DataProtection:BlobUri"] is { Length: > 0 } keyRingUri;
+        if (keyRing)
+        {
+            TokenCredential keyCredential = configuration["DataProtection:ClientId"] is { Length: > 0 } keyClientId
+                ? new ManagedIdentityCredential(ManagedIdentityId.FromUserAssignedClientId(keyClientId))
+                : new DefaultAzureCredential();
+            dataProtection.PersistKeysToAzureBlobStorage(new Uri(configuration["DataProtection:BlobUri"]!), keyCredential);
+            if (configuration["DataProtection:KeyId"] is { Length: > 0 } keyId)
+            {
+                dataProtection.ProtectKeysWithAzureKeyVault(new Uri(keyId), keyCredential);
+            }
+        }
+
         services.AddSingleton<IUnsubscribeTokens, Notifications.UnsubscribeTokens>();
         services.AddSingleton<INotificationEmailRenderer, Notifications.Emails.NotificationEmailRenderer>();
         if (communicationCredential is not null
             && configuration["Notifications:EmailSender"] is { Length: > 0 } notificationSender
-            && configuration["Email:PostalAddress"] is { Length: > 0 })
+            && configuration["Email:PostalAddress"] is { Length: > 0 }
+            && (keyRing || development))
         {
             var notificationClient = new EmailClient(new Uri(communicationEndpoint!), communicationCredential);
             services.AddSingleton<INotificationEmailSender>(

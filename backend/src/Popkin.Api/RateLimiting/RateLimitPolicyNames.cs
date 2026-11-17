@@ -20,6 +20,9 @@ public static class RateLimitPolicyNames
     /// <summary>60 photos added per person per minute: three full selections of 20 (L2-031 AC1); an experience shared or edited, which may carry a picture, counts with them.</summary>
     public const string Photos = "photos";
 
+    /// <summary>30 unsubscribe links used per address per 10 minutes: no session names a person (L2-168).</summary>
+    public const string Unsubscribe = "unsubscribe";
+
     public static IServiceCollection AddPopkinRateLimits(this IServiceCollection services)
     {
         services.AddRateLimiter(options =>
@@ -28,6 +31,7 @@ public static class RateLimitPolicyNames
             options.AddPolicy(InviteCodes, context => PerAddress(context, permits: 20));
             options.AddPolicy(Messages, PerPerson);
             options.AddPolicy(Photos, PerPerson);
+            options.AddPolicy(Unsubscribe, context => PerAddress(context, permits: 30));
 
             options.OnRejected = async (context, cancellationToken) =>
             {
