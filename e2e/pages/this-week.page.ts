@@ -46,6 +46,8 @@ export class ThisWeekPage {
   readonly nav: Locator;
   readonly currentTab: Locator;
   readonly body: Locator;
+  /** The skeleton the body draws while the view loads (`pk-schedule`). */
+  readonly skeleton: Locator;
 
   constructor(private readonly page: Page) {
     this.root = page.locator('body[data-page="this-week"]');
@@ -87,6 +89,7 @@ export class ThisWeekPage {
     this.offText = this.off.locator('p');
     this.backToPopkin = this.off.getByRole('link', { name: /^Back to / });
     this.body = page.locator('.schedule');
+    this.skeleton = this.body.locator('[aria-hidden="true"]').first();
   }
 
   /** A day button by its weekday and date: "Wed 16". */

@@ -35,7 +35,7 @@ test.describe('The marketing home page', () => {
     const site = new MarketingHomePage(page);
 
     await expect(site.heroLead).toHaveText(
-      'Popkin is a little home for any small group: chat, photos, plans and video, joined with one scan. Keep it for a weekend or for years.',
+      'Popkin is a little home for any small group. Chat, share photos, make plans or share schedules. Join with one scan and keep it for a weekend or for years.',
     );
     await expect(site.heroStart).toHaveText('Start a Popkin');
     await expect(site.heroFilm).toHaveText('Watch the film');

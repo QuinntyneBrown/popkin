@@ -79,4 +79,27 @@ test.describe('deleting a story', () => {
     await expect(story.save).toBeVisible();
     await expect(story.delete).toHaveCount(0);
   });
+
+  // L2-056 AC8
+  test('cannot be closed while it deletes: Escape, Close and Keep it wait for the answer', async ({
+    page,
+  }) => {
+    const plan = await maraWithAPlan(page);
+    await page.goto(planUrl);
+    const story = await openStory(page, 'Rent a 7-seat van');
+    const release = plan.holdWrites();
+    await story.delete.click();
+    const confirm = new DeleteStoryDialog(page);
+
+    await confirm.delete.click();
+    await expect(confirm.delete).toHaveText('Deleting…');
+    await page.keyboard.press('Escape');
+    await confirm.close.click();
+
+    await expect(confirm.root).toHaveCount(1);
+    await expect(confirm.keep).toBeDisabled();
+    release();
+    await expect(confirm.root).toHaveCount(0);
+    expect(plan.deletes).toEqual(['Rent a 7-seat van']);
+  });
 });

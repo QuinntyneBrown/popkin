@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
+import { JsonListStorage } from '../storage/json-list-storage';
 import { OutboxEntry, OutboxStorage } from './message-outbox';
 
 const KEY = 'popkin.outbox';
@@ -7,31 +8,13 @@ const KEY = 'popkin.outbox';
 /** The outbox in the browser's local storage: text messages survive a reload (L2-028 AC2). */
 @Injectable()
 export class LocalOutboxStorage implements OutboxStorage {
-  private readonly document = inject(DOCUMENT);
+  private readonly list = new JsonListStorage<OutboxEntry>(inject(DOCUMENT), KEY);
 
   load(): OutboxEntry[] {
-    try {
-      const entries: unknown = JSON.parse(this.storage()?.getItem(KEY) ?? '[]');
-      return Array.isArray(entries) ? (entries as OutboxEntry[]) : [];
-    } catch {
-      return [];
-    }
+    return this.list.load();
   }
 
   save(entries: OutboxEntry[]): void {
-    try {
-      if (entries.length === 0) this.storage()?.removeItem(KEY);
-      else this.storage()?.setItem(KEY, JSON.stringify(entries));
-    } catch {
-      // A full or closed store keeps the outbox in memory only.
-    }
-  }
-
-  private storage(): Storage | null {
-    try {
-      return this.document.defaultView?.localStorage ?? null;
-    } catch {
-      return null;
-    }
+    this.list.save(entries);
   }
 }

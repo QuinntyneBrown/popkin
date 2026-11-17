@@ -1,0 +1,20 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["Plan and Schedules can be switched, for every Popkin at once."] },
+    { "id": "page", "bars": 6, "lines": ["Features shows each one, how far it reaches and since when: Plan on in every live Popkin, Schedules in three chosen ones."] },
+    { "id": "off", "bars": 6, "lines": ["An Owner chooses Off. The dialog says what happens: the tab disappears within a minute, and nothing is deleted.", "A reason goes to the audit log."] },
+    { "id": "done", "bars": 5, "lines": ["Schedules is off: hidden in every Popkin, with who did it and when."] },
+    { "id": "everyone", "bars": 5, "lines": ["Everyone turns it on for all of them, again with a reason."] },
+    { "id": "chosen", "bars": 6, "lines": ["Or keep it to chosen Popkins. Add one by searching the live Popkins, and remove one with its cross."] },
+    { "id": "support", "bars": 5, "lines": ["A Support admin sees every switch, switched off: only Owners can do this."] },
+    { "id": "grow", "bars": 4, "lines": ["On a phone the panels stack. On a desktop, the sidebar sits beside them."] },
+    { "id": "proof", "bars": 6, "lines": ["What the tests prove: when a change fails, nothing changes and the reason is kept to try again."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey twenty-three. Popkin is a free platform for pop-up communities."] }
+  ]
+}

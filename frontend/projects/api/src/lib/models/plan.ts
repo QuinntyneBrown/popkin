@@ -1,4 +1,4 @@
-import { AvatarView } from './invite';
+import { MemberBriefView } from './invite';
 
 /** The four columns of the plan board, in order (L2-068 AC3). */
 export type StoryColumn = 'Backlog' | 'ToDo' | 'Doing' | 'Done';
@@ -16,11 +16,7 @@ export interface SprintView {
 }
 
 /** A member who owns a story. */
-export interface StoryOwnerView {
-  membershipId: string;
-  firstName: string;
-  avatar: AvatarView;
-}
+export type StoryOwnerView = MemberBriefView;
 
 /** A story on the board (L2-068 AC4). */
 export interface StoryView {

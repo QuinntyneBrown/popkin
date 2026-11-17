@@ -248,3 +248,37 @@ test.describe('confirming the code on a wider screen', () => {
     await expect(verify.picture).toHaveCount(0);
   });
 });
+
+test.describe('the code screen stays open', () => {
+  // L2-004 AC7, L2-006 AC1
+  test('after a sign-in code is sent it waits for the code, however long that takes', async ({
+    page,
+  }) => {
+    await page.clock.install({ time: sentAt });
+    const verify = new VerifyCodePage(page);
+    await verify.reachBySignIn();
+
+    await page.clock.runFor(60_000);
+
+    await expect(verify.root).toBeVisible();
+    await expect(page).toHaveURL(/\/verify$/);
+    await verify.type('4829');
+    await expect(verify.code).toHaveValue('4829');
+  });
+
+  // L2-004 AC7, L2-005 AC2
+  test('after a new code is sent it waits for the code too', async ({ page }) => {
+    await page.clock.install({ time: sentAt });
+    const verify = new VerifyCodePage(page);
+    await verify.reachBySignIn();
+    await page.clock.runFor(30_000);
+    await verify.resend.click();
+    await expect(verify.toast).toBeVisible();
+
+    await page.clock.runFor(60_000);
+
+    await expect(verify.root).toBeVisible();
+    await expect(page).toHaveURL(/\/verify$/);
+    await expect(verify.code).toBeEnabled();
+  });
+});

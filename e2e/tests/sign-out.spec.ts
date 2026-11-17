@@ -90,4 +90,25 @@ test.describe('signing out', () => {
     await expect(dialog.signOut).toBeEnabled();
     await expect(page).toHaveURL('/account');
   });
+
+  // L2-056 AC8
+  test('cannot be closed while it signs out: Escape and Close wait for the answer', async ({
+    page,
+    pk,
+  }) => {
+    const release = await hold(page, 'POST /api/auth/sign-out');
+    await pk.open('account');
+    await new AccountPage(page).signOut.click();
+    const dialog = new SignOutDialog(page);
+
+    await dialog.signOut.click();
+    await expect(dialog.signOut).toHaveText('Signing out…');
+    await page.keyboard.press('Escape');
+    await dialog.close.click();
+
+    await expect(dialog.root).toHaveCount(1);
+    await expect(dialog.stay).toBeDisabled();
+    release();
+    await expect(page).toHaveURL('/welcome');
+  });
 });

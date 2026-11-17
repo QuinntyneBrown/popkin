@@ -1,14 +1,15 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { PLAN_API } from 'api';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ConfirmDialogState, PLAN_API } from 'api';
 import { Alert, Button, DialogFrame } from 'components';
 
-/** Opened over the Story dialog, so it is named by a title id of its own. */
+/**
+ * Opened over the Story dialog, so it is named and described by ids of its own; passed to
+ * `dialogConfig`, which keeps it modal with no CDK backdrop.
+ */
 export const DELETE_STORY = {
   ariaLabelledBy: 'delete-story-title',
   ariaDescribedBy: 'delete-story-desc',
-  hasBackdrop: false,
-  ariaModal: true,
 } as const;
 
 export interface DeleteStoryData {
@@ -33,20 +34,15 @@ export class DeleteStoryDialog {
   private readonly ref = inject<DialogRef<boolean>>(DialogRef);
   private readonly api = inject(PLAN_API);
 
-  protected readonly busy = signal(false);
-  protected readonly failed = signal(false);
+  private readonly state = new ConfirmDialogState(this.ref);
+  protected readonly busy = this.state.busy;
+  protected readonly failed = this.state.failed;
 
-  protected delete(): void {
-    if (this.busy()) return;
-    this.busy.set(true);
-    this.failed.set(false);
-    this.api.deleteStory(this.data.popkinId, this.data.storyId).subscribe({
-      next: () => this.ref.close(true),
-      error: () => {
-        this.busy.set(false);
-        this.failed.set(true);
-      },
-    });
+  protected async delete(): Promise<void> {
+    const sent = await this.state.send(() =>
+      this.api.deleteStory(this.data.popkinId, this.data.storyId),
+    );
+    if (sent) this.ref.close(true);
   }
 
   protected keep(): void {

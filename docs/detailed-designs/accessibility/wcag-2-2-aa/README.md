@@ -79,7 +79,8 @@ All parts below are introduced by this design unless marked existing.
   `ariaLabelledBy` set to the `pk-dialog` title's id, and `role: 'alertdialog'` for destructive
   confirmations. The CDK focus trap keeps focus inside; Escape and a press on the backdrop close
   it unless the dialog is busy; focus returns to the control that opened it. While a dialog is
-  open the page behind is `inert`. No other element traps focus.
+  open the page behind is `inert`. No other element traps focus. `DialogOpener` is not built yet:
+  dialogs open through `dialogConfig` in the `api` library (known gap 121).
 - **Focus ring** — every focusable component styles `:focus-visible` with
   `--focus-ring-width`, `--focus-ring-offset` and `--color-focus-ring`; none removes the outline
   without that replacement. Sticky headers and footers leave `scroll-padding` so a focused

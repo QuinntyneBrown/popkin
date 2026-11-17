@@ -37,7 +37,7 @@ AC3), so the two read the same.
 ### Behaviour rules
 
 - **Order** — the navigation, the hero, "See Popkin in action.", the steps, the ideas, the comparison, the closing band and the footer (L2-079 AC1).
-- **Same words as the landing page** — the hero, the steps, the ideas, the comparison and the closing band are the landing page's, so L2-001 AC2–AC4 and L2-061 AC3 hold here too (L2-079 AC2, AC3). The hero adds "Watch the film" beside "Start a Popkin".
+- **Same words as the landing page** — the hero (its paragraph too, which is also the page description in `index.html`), the steps, the ideas, the comparison and the closing band are the landing page's, so L2-001 AC2–AC4 and L2-061 AC3 hold here too (L2-079 AC2, AC3). The hero adds "Watch the film" beside "Start a Popkin".
 - **Nothing before play** — the film has `preload="none"`; the still is an `img`. No request for the film is made until play or a chapter is pressed (L2-080 AC1).
 - **Captions** — the narration is in the picture; the player adds no `track` (L2-080 AC5).
 - **Links to the app** — absolute addresses from `APP_URL`, never relative ones; no link to the app is built anywhere else (L2-081 AC1, AC2).

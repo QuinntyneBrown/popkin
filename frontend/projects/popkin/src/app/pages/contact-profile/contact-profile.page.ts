@@ -43,14 +43,17 @@ import {
   timelineDay,
   timelineTag,
   timelineVia,
+  dialogConfig,
 } from 'api';
 import {
   AddCard,
   AddField,
   AppScreen,
+  AroundItem,
   Avatar,
   BackLink,
   Button,
+  Cluster,
   ContactFact,
   ContactFacts,
   ContactId,
@@ -62,14 +65,12 @@ import {
   EmptyState,
   FilterChipOption,
   FilterChips,
+  GroupChipItem,
+  GroupChips,
   Icon,
   IconButton,
   InfoCard,
   KeepStrip,
-  PeopleAround,
-  AroundItem,
-  GroupChips,
-  GroupChipItem,
   KeyDateItem,
   KeyDates,
   Likes,
@@ -79,8 +80,10 @@ import {
   MemoryGrid,
   MemoryList,
   MemoryRow,
+  PeopleAround,
   PopkinNav,
   Skeleton,
+  Stack,
   TaskList,
   TaskListItem,
   ViewLink,
@@ -101,8 +104,6 @@ import { NewHabitData, NewHabitDialog } from '../../dialogs/new-habit/new-habit.
 
 type HistoryView = 'timeline' | 'follow-ups' | 'memories';
 
-const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true } as const;
-
 /**
  * A contact's profile (L2-128): who they are, how to reach them, what I know about them and
  * their history, with "More for {first name}" (L2-131). A contact not mine, or an address that
@@ -117,6 +118,7 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     Avatar,
     BackLink,
     Button,
+    Cluster,
     ContactFacts,
     ContactId,
     ContactTimeline,
@@ -125,21 +127,22 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     ContactsPage,
     EmptyState,
     FilterChips,
+    GroupChips,
     Icon,
     IconButton,
     InfoCard,
     KeepStrip,
-    PeopleAround,
-    GroupChips,
     KeyDates,
     Likes,
     Link,
     ListHead,
-    PopkinNav,
-    RouterLink,
     MemoryGrid,
     MemoryList,
+    PeopleAround,
+    PopkinNav,
+    RouterLink,
     Skeleton,
+    Stack,
     TaskList,
     ViewNav,
   ],
@@ -305,10 +308,12 @@ export class ContactProfilePage {
     const profile = this.profile();
     if (!profile) return;
     this.dialog
-      .open<AddedMemory, AddMemoryData>(AddMemoryDialog, {
-        data: { contactId: profile.id, firstName: profile.firstName },
-        ...MODAL,
-      })
+      .open<AddedMemory, AddMemoryData>(
+        AddMemoryDialog,
+        dialogConfig({
+          data: { contactId: profile.id, firstName: profile.firstName },
+        }),
+      )
       .closed.subscribe((added) => {
         if (!added) return;
         if (added.kind === 'photo') this.memories.added('photo', added.memory);
@@ -375,19 +380,21 @@ export class ContactProfilePage {
     const profile = this.profile();
     if (!profile) return;
     this.dialog
-      .open<HabitView, NewHabitData>(NewHabitDialog, {
-        data: {
-          contact: {
-            id: profile.id,
-            name: profile.name,
-            text: profile.knownAs ?? profile.circle ?? undefined,
-            initials: profile.initials,
-            accent: profile.accent.toLowerCase(),
-            photoUrl: profile.photoUrl,
+      .open<HabitView, NewHabitData>(
+        NewHabitDialog,
+        dialogConfig({
+          data: {
+            contact: {
+              id: profile.id,
+              name: profile.name,
+              text: profile.knownAs ?? profile.circle ?? undefined,
+              initials: profile.initials,
+              accent: profile.accent.toLowerCase(),
+              photoUrl: profile.photoUrl,
+            },
           },
-        },
-        ...MODAL,
-      })
+        }),
+      )
       .closed.subscribe((started) => {
         if (started) this.store.habitStarted(started);
       });
@@ -396,10 +403,12 @@ export class ContactProfilePage {
   /** Add a date for this contact; the profile reads again once it is kept (L2-138 AC4). */
   protected addDate(): void {
     this.dialog
-      .open<unknown, AddDateData>(AddDateDialog, {
-        data: { contactId: this.contactId() },
-        ...MODAL,
-      })
+      .open<unknown, AddDateData>(
+        AddDateDialog,
+        dialogConfig({
+          data: { contactId: this.contactId() },
+        }),
+      )
       .closed.subscribe((saved) => {
         if (saved) this.store.retry();
       });
@@ -410,19 +419,21 @@ export class ContactProfilePage {
     const profile = this.profile();
     if (!profile) return;
     this.dialog
-      .open<boolean, DeleteContactData>(DeleteContactDialog, {
-        data: {
-          accent: 'coral',
-          contactId: profile.id,
-          firstName: profile.firstName,
-          counts: {
-            ...NO_COUNTS,
-            ...profile.kept,
-            followUps: this.followUpsStore.countFor(profile.id),
+      .open<boolean, DeleteContactData>(
+        DeleteContactDialog,
+        dialogConfig({
+          data: {
+            accent: 'coral',
+            contactId: profile.id,
+            firstName: profile.firstName,
+            counts: {
+              ...NO_COUNTS,
+              ...profile.kept,
+              followUps: this.followUpsStore.countFor(profile.id),
+            },
           },
-        },
-        ...MODAL,
-      })
+        }),
+      )
       .closed.subscribe((deleted) => {
         if (deleted) void this.router.navigateByUrl('/contacts/people');
       });
@@ -432,15 +443,17 @@ export class ContactProfilePage {
   protected more(): void {
     const profile = this.profile();
     if (!profile) return;
-    const opened = this.dialog.open<ContactAction, ContactActionsData>(ContactActionsDialog, {
-      data: {
-        accent: 'coral',
-        name: profile.name,
-        firstName: profile.firstName,
-        closest: closestItem(profile),
-      },
-      ...MODAL,
-    });
+    const opened = this.dialog.open<ContactAction, ContactActionsData>(
+      ContactActionsDialog,
+      dialogConfig({
+        data: {
+          accent: 'coral',
+          name: profile.name,
+          firstName: profile.firstName,
+          closest: closestItem(profile),
+        },
+      }),
+    );
     opened.closed.subscribe((action) => {
       if (action === 'closest') {
         if (profile.isClosest) this.store.takeOutOfClosest();

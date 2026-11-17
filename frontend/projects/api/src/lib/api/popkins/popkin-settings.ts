@@ -1,9 +1,8 @@
 import { PopkinHomeView } from '../../models/home';
 import { PopkinSettingsView } from '../../models/popkin';
 import { clock, wrapsUp } from './home-text';
+import { LONG_WEEKDAYS as DAYS, SHORT_MONTHS as MONTHS } from '../text/calendar';
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const WEEK_MS = 7 * 24 * 60 * 60_000;
 
 /**

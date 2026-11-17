@@ -1,11 +1,10 @@
 import { messageTime } from './thread-text';
+import { SHORT_MONTHS as MONTHS, SHORT_WEEKDAYS as WEEKDAYS } from '../text/calendar';
 
 /**
  * The words of the Chat tab's list (L2-022), built from what the API answers. Times are read
  * on the device, as the member lives them.
  */
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAY = 24 * 60 * 60 * 1000;
 
 function startOfDay(date: Date): number {

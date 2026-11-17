@@ -7,6 +7,8 @@ export class PhotoAlbumPage {
   readonly root: Locator;
   readonly screen: Locator;
   readonly header: Locator;
+  /** The album's main region, which holds the hidden picker (`pk-files-input`). */
+  readonly main: Locator;
   readonly heading: Locator;
   readonly summary: Locator;
   readonly filters: Locator;
@@ -49,6 +51,7 @@ export class PhotoAlbumPage {
     this.root = page.locator('body[data-page="photo-album"]');
     this.screen = page.locator('.screen');
     this.header = page.locator('.tab-header');
+    this.main = page.getByRole('main');
     this.heading = this.header.getByRole('heading', { level: 1 });
     this.summary = this.header.locator('.tab-header__summary');
     this.filters = page.getByRole('group', { name: 'Filter' });

@@ -1,6 +1,6 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { PhotoViewStore } from 'api';
+import { ConfirmDialogState, PhotoViewStore } from 'api';
 import { Alert, Button, DialogFrame } from 'components';
 
 export interface DeletePhotoData {
@@ -23,12 +23,12 @@ export interface DeletePhotoData {
 export class DeletePhotoDialog {
   protected readonly data = inject<DeletePhotoData>(DIALOG_DATA);
   private readonly ref = inject<DialogRef<boolean>>(DialogRef);
-  protected readonly busy = this.data.store.deleting;
-  protected readonly failed = this.data.store.deleteFailed;
+  private readonly state = new ConfirmDialogState(this.ref);
+  protected readonly busy = this.state.busy;
+  protected readonly failed = this.state.failed;
 
   protected async delete(): Promise<void> {
-    if (this.busy()) return;
-    if (await this.data.store.remove()) this.ref.close(true);
+    if (await this.state.send(() => this.data.store.remove())) this.ref.close(true);
   }
 
   protected keep(): void {

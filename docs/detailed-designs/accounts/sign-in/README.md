@@ -19,7 +19,7 @@ name after confirming, and an account is made (L2-006 AC2).
 ## Description
 
 - **Screens and states**
-  - `docs/mocks/pages/sign-in/default.html` — "Welcome back", "Tell us where to send your code. Still no passwords.", the "Phone number or email" field with the hint "The one you signed up with.", "Send my code" and "New here? Start a Popkin".
+  - `docs/mocks/pages/sign-in/default.html` — "Welcome back", "Tell us where to send your code.", the "Phone number or email" field with the hint "The one you signed up with.", "Send my code" and "New here? Start a Popkin".
   - `docs/mocks/pages/sign-in/invalid.html` — "That email doesn't look quite right." under the field.
   - `docs/mocks/pages/sign-in/submitting.html` — "Send my code" busy and disabled.
   - `docs/mocks/pages/sign-up/error.html` — the failed-send alert; the manifest states sign in shows the same message.

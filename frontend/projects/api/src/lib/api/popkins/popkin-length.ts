@@ -1,4 +1,5 @@
 import { PopkinLength } from '../../models/popkin';
+import { SHORT_MONTHS as MONTHS, SHORT_WEEKDAYS as DAYS } from '../text/calendar';
 
 const HOUR = 60 * 60 * 1000;
 
@@ -42,9 +43,6 @@ export function resolveEndsAt(
       return null;
   }
 }
-
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** "Sun, 13 Sep · 6:00 pm", the way the end date control reads. */
 export function formatEnd(end: Date): string {

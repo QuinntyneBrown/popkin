@@ -1,9 +1,7 @@
 import { NextDateView } from '../../models/contacts';
+import { SHORT_MONTHS as MONTHS, SHORT_WEEKDAYS as WEEKDAYS } from '../text/calendar';
 
 /** The words of People (docs/detailed-designs/contacts/people). */
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 /** After this many days without a conversation, someone is drifting (known gap 99, ruled). */
 export const DRIFTING_AFTER_DAYS = 30;

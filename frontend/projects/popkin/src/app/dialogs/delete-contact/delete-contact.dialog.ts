@@ -1,7 +1,8 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
   CONTACTS_API,
+  ConfirmDialogState,
   ContactCounts,
   ContactsFrame,
   deleteContactSentence,
@@ -34,23 +35,14 @@ export class DeleteContactDialog {
 
   protected readonly sentence = deleteContactSentence(this.data.firstName, this.data.counts);
   protected readonly failure = deleteFailed(this.data.firstName);
-  protected readonly busy = signal(false);
-  protected readonly failed = signal(false);
+  private readonly state = new ConfirmDialogState(this.ref);
+  protected readonly busy = this.state.busy;
+  protected readonly failed = this.state.failed;
 
-  protected delete(): void {
-    if (this.busy()) return;
-    this.busy.set(true);
-    this.failed.set(false);
-    this.api.deleteContact(this.data.contactId).subscribe({
-      next: () => {
-        this.frame.refresh();
-        this.ref.close(true);
-      },
-      error: () => {
-        this.busy.set(false);
-        this.failed.set(true);
-      },
-    });
+  protected async delete(): Promise<void> {
+    if (!(await this.state.send(() => this.api.deleteContact(this.data.contactId)))) return;
+    this.frame.refresh();
+    this.ref.close(true);
   }
 
   protected keep(): void {

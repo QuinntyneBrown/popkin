@@ -29,5 +29,13 @@ export class DialogFrame {
   /** A panel on the right of the screen from 768 px, as "New story" is beside the board (L2-069 AC7). */
   readonly panel = input(false);
 
-  protected readonly ref = inject(DialogRef);
+  private readonly ref = inject(DialogRef);
+
+  /**
+   * The backdrop and Close close it, unless it is held open while its action is sent, as Escape
+   * is (L2-056 AC8).
+   */
+  protected dismiss(): void {
+    if (!this.ref.disableClose) this.ref.close();
+  }
 }

@@ -5,13 +5,14 @@
 import { ExperienceFilter, ExperienceKind } from '../../models/experiences';
 import { AvatarView } from '../../models/invite';
 import { accentOf } from '../../models/popkin';
+import { SHORT_MONTHS as MONTHS } from '../text/calendar';
+import { counted } from '../text/counts';
 
 const KINDS: Record<ExperienceKind, string> = {
   Did: 'Something we did',
   Restaurant: 'Restaurant',
   Want: 'Want to do',
 };
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** The kinds in the order the Share an experience dialog offers them. */
 export const EXPERIENCE_KINDS: readonly ExperienceKind[] = ['Did', 'Restaurant', 'Want'];
@@ -52,7 +53,7 @@ export function averageText(average: number | null): string {
 /** "11 ratings" under the score. */
 export function ratingsText(count: number): string {
   if (count <= 0) return 'No ratings yet';
-  return `${count} ${count === 1 ? 'rating' : 'ratings'}`;
+  return counted(count, 'rating');
 }
 
 /** What assistive technology reads for a row of stars: "4.8 out of 5" (L2-038 AC3). */
@@ -62,7 +63,7 @@ export function starsLabel(value: number | null): string {
 
 /** The name of a star button: "1 star" to "5 stars" (L2-039 AC1). */
 export function starName(stars: number): string {
-  return `${stars} ${stars === 1 ? 'star' : 'stars'}`;
+  return counted(stars, 'star');
 }
 
 /** One bar of the score card. */

@@ -17,17 +17,19 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
   CallBannerStore,
+  ConversationList,
   ConversationsStore,
   DraftStore,
   ErrorScreens,
+  MessageActions,
   MessageRow,
   NETWORK_STATUS,
+  PopkinFrame,
   ThreadStore,
   UnreadTracker,
   WrapUpWatch,
   accentOf,
   timeLeft,
-  PopkinFrame,
 } from 'api';
 import {
   AppScreen,
@@ -50,8 +52,6 @@ import {
   Thread,
   TopBar,
 } from 'components';
-import { ConversationList } from '../conversations/conversation-list';
-import { MessageActions } from '../conversations/message-actions';
 
 /**
  * A direct message between the member and one other member of a Popkin (L2-023), which only

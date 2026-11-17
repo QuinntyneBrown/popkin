@@ -11,15 +11,16 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
+  ConversationList,
   ConversationsStore,
   ErrorScreens,
   MessageRow,
+  PopkinFrame,
   ThreadStore,
   UnreadTracker,
   accentOf,
   threadSub,
   timeLeft,
-  PopkinFrame,
 } from 'api';
 import {
   AppScreen,
@@ -35,7 +36,6 @@ import {
   ThreadPane,
   TopBar,
 } from 'components';
-import { ConversationList } from './conversation-list';
 
 /**
  * The Chat tab of a Popkin (L2-022): the Everyone thread first, then the member's direct

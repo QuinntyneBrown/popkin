@@ -17,7 +17,7 @@ import {
   toApiProblem,
   tryAgainIn,
 } from 'api';
-import { Button, Link, Screen, SplitAside, TextField, TopBar } from 'components';
+import { Button, Cluster, Link, Screen, SplitAside, Stack, TextField, TopBar } from 'components';
 import { Toaster } from 'api';
 
 const CODE_LENGTH = 6;
@@ -25,7 +25,18 @@ const CODE_LENGTH = 6;
 /** Confirm the six-digit code (L2-004) and send a new one (L2-005). */
 @Component({
   selector: 'pk-verify-code-page',
-  imports: [Button, Link, ReactiveFormsModule, RouterLink, Screen, SplitAside, TextField, TopBar],
+  imports: [
+    Button,
+    Cluster,
+    Link,
+    ReactiveFormsModule,
+    RouterLink,
+    Screen,
+    SplitAside,
+    Stack,
+    TextField,
+    TopBar,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './verify-code.page.html',
 })

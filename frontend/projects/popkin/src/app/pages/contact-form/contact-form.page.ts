@@ -32,6 +32,7 @@ import {
   editHeading,
   failedText,
   saveFailedHeading,
+  dialogConfig,
 } from 'api';
 import {
   Banner,
@@ -214,12 +215,12 @@ export class ContactFormPage implements OnInit {
   /** "Another date": Add a date for the contact on the form, saved with them (L2-129 AC2). */
   protected addDate(): void {
     this.dialog
-      .open<KeyDateDraft, AddDateData>(AddDateDialog, {
-        data: { draft: true },
-        ariaLabelledBy: 'dlg-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+      .open<KeyDateDraft, AddDateData>(
+        AddDateDialog,
+        dialogConfig({
+          data: { draft: true },
+        }),
+      )
       .closed.subscribe((draft) => {
         if (draft) this.store.addDate(draft);
       });
@@ -235,16 +236,16 @@ export class ContactFormPage implements OnInit {
     const editing = this.store.editing();
     const first = this.form.controls.name.value.trim().split(/\s+/)[0] || 'them';
     this.dialog
-      .open<ConnectPersonResult, ConnectPersonData>(ConnectPersonDialog, {
-        data: {
-          contact: { id: editing?.id ?? '', firstName: editing?.firstName ?? first },
-          mode: 'draft',
-          exclude: this.store.connections().map((c) => c.otherContactId),
-        },
-        ariaLabelledBy: 'dlg-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+      .open<ConnectPersonResult, ConnectPersonData>(
+        ConnectPersonDialog,
+        dialogConfig({
+          data: {
+            contact: { id: editing?.id ?? '', firstName: editing?.firstName ?? first },
+            mode: 'draft',
+            exclude: this.store.connections().map((c) => c.otherContactId),
+          },
+        }),
+      )
       .closed.subscribe((result) => {
         if (!result?.draft) return;
         this.store.addConnection({
@@ -266,21 +267,21 @@ export class ContactFormPage implements OnInit {
     const editing = this.store.editing();
     if (!editing) return;
     this.dialog
-      .open<boolean, DeleteContactData>(DeleteContactDialog, {
-        data: {
-          accent: 'coral',
-          contactId: editing.id,
-          firstName: editing.firstName,
-          counts: {
-            ...NO_COUNTS,
-            ...editing.kept,
-            followUps: this.followUps.countFor(editing.id),
+      .open<boolean, DeleteContactData>(
+        DeleteContactDialog,
+        dialogConfig({
+          data: {
+            accent: 'coral',
+            contactId: editing.id,
+            firstName: editing.firstName,
+            counts: {
+              ...NO_COUNTS,
+              ...editing.kept,
+              followUps: this.followUps.countFor(editing.id),
+            },
           },
-        },
-        ariaLabelledBy: 'dlg-title',
-        hasBackdrop: false,
-        ariaModal: true,
-      })
+        }),
+      )
       .closed.subscribe((deleted) => {
         if (deleted) void this.router.navigateByUrl('/contacts/people');
       });

@@ -8,6 +8,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { Chip } from '../chip/chip';
+import { FieldLabel } from '../field-label/field-label';
 import { Icon } from '../icon/icon';
 import { IconName } from '../icon/icons';
 
@@ -29,7 +30,7 @@ export interface ChipOption<T extends string = string> {
  */
 @Component({
   selector: 'div[pk-choice-chips]',
-  imports: [Chip, Icon],
+  imports: [Chip, FieldLabel, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './choice-chips.html',
   styleUrl: './choice-chips.scss',

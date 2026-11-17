@@ -259,20 +259,18 @@ describe('PhotoViewStore', () => {
   describe('Delete photo (L2-036 AC2)', () => {
     beforeEach(() => store.open('p', 'a'));
 
-    it('is busy while it deletes, then says it is done', async () => {
-      const done = store.remove();
-      expect(store.deleting()).toBe(true);
+    it('deletes the photo it shows', () => {
+      const answered = vi.fn();
+      store.remove().subscribe({ complete: answered });
+      expect(deletions).toHaveLength(1);
       deletions[0].next();
       deletions[0].complete();
-      await expect(done).resolves.toBe(true);
+      expect(answered).toHaveBeenCalled();
     });
 
-    it('says so when it cannot delete, and keeps the photo', async () => {
-      const done = store.remove();
+    it('keeps the photo when it cannot delete', () => {
+      store.remove().subscribe({ error: () => undefined });
       deletions[0].error(new HttpErrorResponse({ status: 500 }));
-      await expect(done).resolves.toBe(false);
-      expect(store.deleting()).toBe(false);
-      expect(store.deleteFailed()).toBe(true);
       expect(store.state()).toBe('ready');
     });
   });

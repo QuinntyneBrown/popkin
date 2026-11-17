@@ -9,7 +9,7 @@ import {
   PopkinFeature,
   PopkinFeaturesView,
 } from 'api';
-import { Alert, Button, DialogFrame, SettingRow } from 'components';
+import { Alert, Button, DialogFrame, SettingRow, Stack } from 'components';
 
 export interface PopkinFeaturesData {
   popkinId: string;
@@ -24,7 +24,7 @@ export interface PopkinFeaturesData {
  */
 @Component({
   selector: 'pk-popkin-features-dialog',
-  imports: [Alert, Button, DialogFrame, SettingRow],
+  imports: [Alert, Button, DialogFrame, SettingRow, Stack],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './popkin-features.dialog.html',
 })

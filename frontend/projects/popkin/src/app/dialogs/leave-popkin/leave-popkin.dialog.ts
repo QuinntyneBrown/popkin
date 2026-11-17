@@ -1,6 +1,6 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { POPKINS_API } from 'api';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ConfirmDialogState, POPKINS_API } from 'api';
 import { Alert, Button, DialogFrame } from 'components';
 
 export interface LeavePopkinData {
@@ -25,21 +25,13 @@ export class LeavePopkinDialog {
   private readonly ref = inject<DialogRef<boolean>>(DialogRef);
   private readonly api = inject(POPKINS_API);
 
-  protected readonly busy = signal(false);
-  protected readonly failed = signal(false);
+  private readonly state = new ConfirmDialogState(this.ref);
+  protected readonly busy = this.state.busy;
+  protected readonly failed = this.state.failed;
 
   /** "Leave" is sent once; while it goes, it reads "Leaving…" (L2-056 AC3). */
-  protected leave(): void {
-    if (this.busy()) return;
-    this.busy.set(true);
-    this.failed.set(false);
-    this.api.leave(this.data.popkinId).subscribe({
-      next: () => this.ref.close(true),
-      error: () => {
-        this.busy.set(false);
-        this.failed.set(true);
-      },
-    });
+  protected async leave(): Promise<void> {
+    if (await this.state.send(() => this.api.leave(this.data.popkinId))) this.ref.close(true);
   }
 
   protected stay(): void {

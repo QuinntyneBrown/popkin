@@ -52,6 +52,8 @@ export class TimeOffPage {
   readonly currentTab: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly body: Locator;
+  /** The skeleton the body draws while the view loads (`pk-schedule`). */
+  readonly skeleton: Locator;
 
   constructor(readonly page: Page) {
     this.root = page.locator('body[data-page="time-off"]');
@@ -98,6 +100,7 @@ export class TimeOffPage {
     this.offText = this.off.locator('p');
     this.backToPopkin = this.off.getByRole('link', { name: /^Back to / });
     this.body = page.locator('.schedule');
+    this.skeleton = this.body.locator('[aria-hidden="true"]').first();
   }
 
   /** The cells of one member's row, Monday to Sunday, as assistive technology names them. */

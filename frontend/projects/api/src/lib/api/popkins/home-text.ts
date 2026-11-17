@@ -1,7 +1,6 @@
 import { timeLeft } from './time-left';
+import { SHORT_MONTHS as MONTHS, SHORT_WEEKDAYS as DAYS } from '../text/calendar';
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const WEEK_MS = 7 * 24 * 60 * 60_000;
 
 /** The time of day as the device reads it: "6 pm", "6:30 pm". */

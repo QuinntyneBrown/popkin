@@ -17,6 +17,7 @@ import {
   UnreadTracker,
   isoDate,
   featureOffText,
+  dialogConfig,
 } from 'api';
 import {
   Alert,
@@ -112,15 +113,14 @@ export class TimeOffPage {
   protected addMyTimeOff(event: Event): void {
     const mine = this.store.mine();
     if (!mine) return;
-    const opened = this.dialog.open<TimeOffWeekView, AddTimeOffData>(AddTimeOffDialog, {
-      data: { popkinId: this.popkinId(), accent: this.frame.accent(), mine },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      restoreFocus: event.currentTarget as HTMLElement,
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<TimeOffWeekView, AddTimeOffData>(
+      AddTimeOffDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.frame.accent(), mine },
+        ariaDescribedBy: 'dlg-desc',
+        restoreFocus: event.currentTarget as HTMLElement,
+      }),
+    );
     opened.closed.subscribe((saved) => {
       if (saved) this.store.saved(saved);
     });

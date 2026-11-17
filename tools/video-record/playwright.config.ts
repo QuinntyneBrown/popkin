@@ -45,5 +45,12 @@ export default defineConfig({
       reuseExistingServer: true,
       timeout: 240_000,
     },
+    // The admin app (ADR 0016, ADR 0024), for the films of the admin journeys.
+    {
+      command: `npm run start:admin --prefix "${path.resolve(root, 'frontend')}"`,
+      url: 'http://localhost:4202',
+      reuseExistingServer: true,
+      timeout: 240_000,
+    },
   ],
 });

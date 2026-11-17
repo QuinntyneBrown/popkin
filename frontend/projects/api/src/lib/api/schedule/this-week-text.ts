@@ -1,4 +1,5 @@
 import { addDays, dateOf, weekLabel } from './schedule-weeks';
+import { LONG_WEEKDAYS as weekdays } from '../text/calendar';
 
 /*
  * What this week says (docs/detailed-designs/schedules/this-week): the headline of the chosen
@@ -208,8 +209,6 @@ function timeOf(minutes: number): string {
 function percentOf(minutes: number): number {
   return ((minutes - noon) / (midnight - noon)) * 100;
 }
-
-const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
  * The home's Schedule line (L2-075 AC2): "Everyone’s free Wednesday from 7:30 pm", or "No

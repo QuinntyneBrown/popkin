@@ -1,24 +1,8 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal, inject, signal } from '@angular/core';
-import { MORE_REACTIONS, QUICK_REACTIONS } from 'api';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { MORE_REACTIONS, MessageAction, MessageActionsData, QUICK_REACTIONS } from 'api';
 import { DialogFrame, MenuItem, MenuList, Quote, ReactionGrid } from 'components';
-
-export interface ReactionsData {
-  accent: string;
-  /** Who wrote the message, and what it says, for the quote at the top. */
-  name: string;
-  text: string;
-  /** The emoji the member has reacted with, as they stand: choosing one again takes it away. */
-  pressed: Signal<readonly string[]>;
-  /** The member's own message may be deleted. */
-  mine: boolean;
-  /** Copy is offered when there is text to copy. */
-  canCopy: boolean;
-}
-
-export type MessageAction =
-  { kind: 'react'; emoji: string } | { kind: 'reply' } | { kind: 'copy' } | { kind: 'delete' };
 
 /**
  * "Message actions" (L2-024 AC1): the five quick reactions, More reactions, Reply, Copy and,
@@ -31,7 +15,7 @@ export type MessageAction =
   templateUrl: './reactions.dialog.html',
 })
 export class ReactionsDialog {
-  protected readonly data = inject<ReactionsData>(DIALOG_DATA);
+  protected readonly data = inject<MessageActionsData>(DIALOG_DATA);
   private readonly ref = inject<DialogRef<MessageAction>>(DialogRef);
 
   protected readonly quick = QUICK_REACTIONS;

@@ -11,6 +11,7 @@ import {
   moveOf,
   storyLine,
   whoChipsOf,
+  dialogConfig,
 } from 'api';
 import {
   Alert,
@@ -130,10 +131,13 @@ export class StoryDialog {
   /** "Delete": "Delete this story?" first; once it is gone, so is this dialog (L2-070 AC4). */
   protected remove(): void {
     if (this.busy()) return;
-    const confirm = this.dialog.open<boolean, DeleteStoryData>(DeleteStoryDialog, {
-      data: { popkinId: this.data.popkinId, storyId: this.story.id, accent: this.data.accent },
-      ...DELETE_STORY,
-    });
+    const confirm = this.dialog.open<boolean, DeleteStoryData>(
+      DeleteStoryDialog,
+      dialogConfig({
+        data: { popkinId: this.data.popkinId, storyId: this.story.id, accent: this.data.accent },
+        ...DELETE_STORY,
+      }),
+    );
     confirm.closed.subscribe((deleted) => {
       if (deleted) this.ref.close('deleted');
     });

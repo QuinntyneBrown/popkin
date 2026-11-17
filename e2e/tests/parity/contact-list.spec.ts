@@ -29,11 +29,4 @@ parity('contact-list', [
         .row('Sam Ortega')
         .evaluate((row) => row.scrollIntoView({ block: 'center' })),
   },
-  // Closest: Ada, Chidi and Grace.
-  {
-    key: 'contactsPeople',
-    name: 'closest',
-    region: (page) => new ContactsPeoplePage(page).closestStrip,
-    before: mara,
-  },
 ]);

@@ -89,8 +89,8 @@ journey 14).
   serves the dialog and the panel, so both show the same list.
 - **`pk-comment`** — each comment: avatar, first name, time and text; the member's own comment has
   an icon button "Delete comment" (`comment__delete`). It asks "Delete this comment?" in a CDK
-  dialog, `DeleteCommentDialog`, before the delete is sent.
-- **`DeleteCommentDialog`** — introduced, `dialogs/delete-comment/`. Title "Delete this
+  dialog, `ConfirmDeleteDialog`, before the delete is sent.
+- **`ConfirmDeleteDialog`** with `deleteComment(accent)` — `dialogs/confirm-delete/`, the one confirmation that only asks ([ADR 0029](../../../adr/0029-one-library-no-unused-components.md)). Title "Delete this
   comment?", text "It will be removed for everyone.", buttons "Delete" (danger) and "Cancel";
   focus starts on "Cancel". It closes on "Delete"; the comment leaves the list when the server
   answers, and the count goes down by one.
@@ -133,7 +133,7 @@ journey 14).
   of each comment (`commentTime`).
 - **Below 1024 px**, "Comment" opens `PhotoCommentsDialog`; **from 1024 px** the comments and
   their field are beside the photo. `pk-comment` gained its time and "Delete comment", which asks
-  `DeleteCommentDialog` ("Delete this comment?"); `pk-comments` is a bare list, and
+  `ConfirmDeleteDialog` ("Delete this comment?"); `pk-comments` is a bare list, and
   `pk-composer` can be the field alone. A wrapped-up Popkin shows the comments with no field and
   no "Delete comment".
 
@@ -208,5 +208,8 @@ count (L2-035 AC1 to AC4).
 
 "Delete comment" is offered only on the member's own comment and asks "Delete this comment?"
 first. The server refuses another member's comment with `403 comment_not_yours` (L2-035 AC5).
+The diagram names the dialog `DeleteCommentDialog`, its name before it became
+`ConfirmDeleteDialog` ([ADR 0029](../../../adr/0029-one-library-no-unused-components.md)); it was
+not redrawn.
 
 ![Sequence diagram for deleting a comment](diagrams/sequence-delete-comment.png)

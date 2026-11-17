@@ -46,7 +46,7 @@ export interface PopkinFeaturesView {
   choices: FeatureChoiceView[];
 }
 
-/** A feature a Popkin may have, as the API names it (L2-152, L2-153). */
+/** A feature a Popkin may have, as the API names it, and an Owner switches (L2-076, L2-152, L2-153). */
 export type PopkinFeature = 'Plan' | 'Schedules';
 
 export interface FeatureChoiceView {

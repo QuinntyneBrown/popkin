@@ -1,4 +1,4 @@
-import { AvatarView } from './invite';
+import { AvatarView, MemberBriefView } from './invite';
 import { PopkinColour } from './popkin';
 
 /** The Everyone thread as its screen opens it (L2-021 AC1). */
@@ -53,11 +53,7 @@ export interface DirectSummaryView {
   unreadCount: number;
 }
 
-export interface MessageAuthorView {
-  membershipId: string;
-  firstName: string;
-  avatar: AvatarView;
-}
+export type MessageAuthorView = MemberBriefView;
 
 /** A message, the same for everyone who receives it: whose it is, is read from its author. */
 export interface MessageView {
@@ -127,8 +123,4 @@ export interface PresenceView {
   members: { membershipId: string; displayName: string; avatar: AvatarView }[];
 }
 
-export interface MemberJoinedView {
-  membershipId: string;
-  firstName: string;
-  avatar: AvatarView;
-}
+export type MemberJoinedView = MemberBriefView;

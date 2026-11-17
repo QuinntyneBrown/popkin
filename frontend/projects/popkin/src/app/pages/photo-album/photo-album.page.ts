@@ -13,7 +13,15 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AlbumStore, ErrorScreens, PHOTO_ACCEPT, PopkinFrame, UnreadTracker, accentOf } from 'api';
+import {
+  AlbumStore,
+  ErrorScreens,
+  PHOTO_ACCEPT,
+  PopkinFrame,
+  UnreadTracker,
+  accentOf,
+  dialogConfig,
+} from 'api';
 import {
   Album,
   Banner,
@@ -136,14 +144,13 @@ export class PhotoAlbumPage {
 
   /** Opens "Add photos" with what the member chose (L2-031 AC1). */
   protected chosen(files: File[]): void {
-    const opened = this.dialog.open<void, AddPhotosData>(AddPhotosDialog, {
-      data: { popkinId: this.popkinId(), accent: this.frame.accent(), files },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<void, AddPhotosData>(
+      AddPhotosDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.frame.accent(), files },
+        ariaDescribedBy: 'dlg-desc',
+      }),
+    );
     opened.closed.subscribe(() => this.store.refresh());
   }
 

@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { DOCUMENT, Injectable, computed, inject, signal } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { PhotoDetailView } from '../../models/photos';
 import { photoName, photoTime } from './album-days';
 import { PhotoReaction, applyReactionToggle } from './photo-reactions';
@@ -60,8 +60,6 @@ export class PhotoViewStore {
   readonly saving = signal(false);
   readonly saveFailed = signal(false);
   /** Deleting the photo, and whether it failed (L2-036 AC2). */
-  readonly deleting = signal(false);
-  readonly deleteFailed = signal(false);
 
   open(popkinId: string, photoId: string): void {
     this.popkinId = popkinId;
@@ -116,21 +114,12 @@ export class PhotoViewStore {
     this.saveFailed.set(false);
   }
 
-  /** Deletes the photo, once confirmed; true when it is gone (L2-036 AC2). */
-  async remove(): Promise<boolean> {
-    this.deleting.set(true);
-    this.deleteFailed.set(false);
-    try {
-      await firstValueFrom(this.api.deletePhoto(this.popkinId, this.photoId), {
-        defaultValue: undefined,
-      });
-      return true;
-    } catch {
-      this.deleteFailed.set(true);
-      return false;
-    } finally {
-      this.deleting.set(false);
-    }
+  /**
+   * Deletes the photo, once confirmed (L2-036 AC2). The Delete this photo dialog sends it and says
+   * whether it is busy or failed (ConfirmDialogState).
+   */
+  remove(): Observable<void> {
+    return this.api.deletePhoto(this.popkinId, this.photoId);
   }
 
   /** A photo was deleted by someone: the one open reads as removed (L2-036 AC3). */
