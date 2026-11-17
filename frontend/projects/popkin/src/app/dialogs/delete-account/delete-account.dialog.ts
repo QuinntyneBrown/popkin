@@ -1,20 +1,16 @@
-import { ViewportScroller } from '@angular/common';
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import {
   ACCOUNT_API,
-  DeletionImpactView,
   ConfirmDialogState,
-  POPKIN_REALTIME,
-  POPKINS_SNAPSHOT,
-  SessionStore,
+  DeletionImpactView,
+  SessionTeardown,
+  Toaster,
   hostedLine,
 } from 'api';
 import { Alert, Button, DialogFrame, Term, TermList, TextField } from 'components';
-import { Toaster } from 'api';
 
 /** What is removed and what stays without the person's name (L2-049 AC1). */
 const OUTCOMES: readonly Term[] = [
@@ -40,12 +36,8 @@ export class DeleteAccountDialog {
   private readonly impact = inject<DeletionImpactView>(DIALOG_DATA);
   private readonly ref = inject<DialogRef<void>>(DialogRef);
   private readonly api = inject(ACCOUNT_API);
-  private readonly realtime = inject(POPKIN_REALTIME);
-  private readonly sessions = inject(SessionStore);
-  private readonly snapshot = inject(POPKINS_SNAPSHOT);
+  private readonly teardown = inject(SessionTeardown);
   private readonly toaster = inject(Toaster);
-  private readonly router = inject(Router);
-  private readonly scroller = inject(ViewportScroller);
 
   protected readonly outcomes = OUTCOMES;
   protected readonly hosted = hostedLine(this.impact.hostedActivePopkins.map((p) => p.name));
@@ -59,20 +51,13 @@ export class DeleteAccountDialog {
   protected async delete(): Promise<void> {
     if (!this.canDelete()) return;
     if (!(await this.state.send(() => this.api.deleteAccount()))) return;
-    this.realtime.stop();
-    this.sessions.clear();
-    // Nothing of the person stays on the device (L2-054).
-    this.snapshot.clear();
     this.ref.close();
-    void this.router.navigateByUrl('/').then(() => {
-      // The landing page opens at its top, not where the account was scrolled to.
-      this.scroller.scrollToPosition([0, 0]);
-      this.toaster.show(
-        'success',
-        'Your account is deleted',
-        'Your personal data is erased within 30 days.',
-      );
-    });
+    await this.teardown.end('/');
+    this.toaster.show(
+      'success',
+      'Your account is deleted',
+      'Your personal data is erased within 30 days.',
+    );
   }
 
   protected keep(): void {

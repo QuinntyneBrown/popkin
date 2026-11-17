@@ -1,8 +1,6 @@
-import { ViewportScroller } from '@angular/common';
 import { DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AUTH_API, ConfirmDialogState, POPKIN_REALTIME, POPKINS_SNAPSHOT, SessionStore } from 'api';
+import { AUTH_API, ConfirmDialogState, SessionTeardown } from 'api';
 import { Alert, Button, DialogFrame } from 'components';
 
 /**
@@ -19,11 +17,7 @@ import { Alert, Button, DialogFrame } from 'components';
 export class SignOutDialog {
   private readonly ref = inject<DialogRef<void>>(DialogRef);
   private readonly auth = inject(AUTH_API);
-  private readonly realtime = inject(POPKIN_REALTIME);
-  private readonly sessions = inject(SessionStore);
-  private readonly snapshot = inject(POPKINS_SNAPSHOT);
-  private readonly router = inject(Router);
-  private readonly scroller = inject(ViewportScroller);
+  private readonly teardown = inject(SessionTeardown);
 
   private readonly state = new ConfirmDialogState(this.ref);
   protected readonly busy = this.state.busy;
@@ -43,12 +37,7 @@ export class SignOutDialog {
   }
 
   private signedOut(): void {
-    this.realtime.stop();
-    this.sessions.clear();
-    // Nothing of the person stays on a device they are signed out of (L2-054).
-    this.snapshot.clear();
     this.ref.close();
-    // The welcome screen opens at its top, not where the account was scrolled to.
-    void this.router.navigateByUrl('/welcome').then(() => this.scroller.scrollToPosition([0, 0]));
+    void this.teardown.end('/welcome');
   }
 }

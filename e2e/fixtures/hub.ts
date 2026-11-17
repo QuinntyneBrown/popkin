@@ -41,6 +41,8 @@ export class Hub {
   readonly invoked: { target: string; arguments: unknown[] }[] = [];
   /** How many connections the app has opened so far. */
   connections = 0;
+  /** How many of them the app has closed itself, as when a session ends. */
+  closed = 0;
 
   private readonly handlers = new Map<string, (args: unknown[]) => void>();
   private socket?: WebSocketRoute;
@@ -81,6 +83,7 @@ export class Hub {
       }
       this.connections++;
       this.socket = socket;
+      socket.onClose(() => this.closed++);
       socket.onMessage((data) => {
         for (const text of String(data).split(END).filter(Boolean)) {
           const frame = parsed(text);
