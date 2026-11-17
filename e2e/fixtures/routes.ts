@@ -14,6 +14,9 @@ const created = responses['POST /api/popkins'].body;
 const invite = `/i/${created.inviteCode}`;
 const chat = `/p/${created.id}/chat/everyone`;
 const home = `/p/${created.id}`;
+/** Thursday Night Group and Sheffield lot, as e2e/fixtures/groups.ts numbers them. */
+const thursdayGroup = '00000000-0000-4000-e000-000000000003';
+const sheffieldGroup = '00000000-0000-4000-e000-000000000004';
 const call = `${home}/call`;
 const photos = `${home}/photos`;
 // The photo the mocks open: the first of the album fixture.
@@ -256,6 +259,33 @@ export const routes = {
   contactsConnectionsError: {
     app: '/contacts/connections',
     mock: 'pages/contacts-connections/error.html',
+  },
+  // The default mock opens Thursday Night Group beside the list, as a wide screen does.
+  contactsGroups: {
+    app: `/contacts/groups/${thursdayGroup}`,
+    mock: 'pages/contacts-groups/default.html',
+  },
+  contactsGroupsDetail: {
+    app: `/contacts/groups/${thursdayGroup}`,
+    mock: 'pages/contacts-groups/detail.html',
+  },
+  contactsGroupsStart: {
+    app: `/contacts/groups/${sheffieldGroup}`,
+    mock: 'pages/contacts-groups/start.html',
+  },
+  contactsGroupsEmpty: { app: '/contacts/groups', mock: 'pages/contacts-groups/empty.html' },
+  contactsGroupsLoading: { app: '/contacts/groups', mock: 'pages/contacts-groups/loading.html' },
+  contactsGroupsError: { app: '/contacts/groups', mock: 'pages/contacts-groups/error.html' },
+  newGroup: { app: '/contacts/groups', mock: 'dialogs/new-group/default.html' },
+  newGroupInvalid: { app: '/contacts/groups', mock: 'dialogs/new-group/invalid.html' },
+  newGroupBusy: { app: '/contacts/groups', mock: 'dialogs/new-group/busy.html' },
+  groupAddPeople: {
+    app: `/contacts/groups/${thursdayGroup}`,
+    mock: 'dialogs/group-add-people/default.html',
+  },
+  groupAddPeopleBusy: {
+    app: `/contacts/groups/${thursdayGroup}`,
+    mock: 'dialogs/group-add-people/busy.html',
   },
   connectPerson: { app: '/contacts/connections', mock: 'dialogs/connect-person/default.html' },
   connectPersonChoose: {

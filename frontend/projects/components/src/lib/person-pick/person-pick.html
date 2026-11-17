@@ -21,7 +21,7 @@
     type="button"
     icon="close"
     size="md"
-    [label]="'Remove the connection to ' + firstName()"
+    [label]="removeLabel() ?? 'Remove the connection to ' + firstName()"
     (click)="removed.emit()"
   ></button>
 }

@@ -1,0 +1,30 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Whose, what and when, on one line. */
+.coming-up__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.coming-up__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.coming-up__day {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}

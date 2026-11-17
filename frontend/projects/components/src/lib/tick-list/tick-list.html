@@ -1,0 +1,25 @@
+@for (item of items(); track item.id) {
+  <li>
+    <label class="row row--short">
+      <input
+        class="row__tick"
+        type="checkbox"
+        [checked]="!!item.locked || ticked(item.id)"
+        [disabled]="!!item.locked || disabled()"
+        (change)="toggle(item.id, $any($event.target).checked)"
+      />
+      <span
+        pk-avatar
+        size="36"
+        [name]="item.name"
+        [initials]="item.initials"
+        [photo]="item.photo"
+        [attr.data-accent]="item.accent"
+      ></span>
+      <span class="row__main row__title">{{ item.name }}</span>
+      @if (item.locked) {
+        <span class="row__meta">{{ item.locked }}</span>
+      }
+    </label>
+  </li>
+}

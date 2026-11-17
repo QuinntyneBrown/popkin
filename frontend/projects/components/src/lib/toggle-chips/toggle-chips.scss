@@ -1,0 +1,10 @@
+:host {
+  display: block;
+}
+
+/* The chips wrap under their label. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

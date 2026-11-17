@@ -122,14 +122,19 @@
                     <ul pk-likes data-accent="amber" [items]="profile.loves"></ul>
                   }
                 </section>
-                @if (around().length) {
+                @if (around().length || groupChips().length) {
                   <section aria-labelledby="around">
                     <div
                       pk-list-head
                       headingId="around"
                       [heading]="'People around ' + profile.firstName"
                     ></div>
-                    <ul pk-people-around [people]="around()"></ul>
+                    @if (around().length) {
+                      <ul pk-people-around [people]="around()"></ul>
+                    }
+                    @if (groupChips().length) {
+                      <div pk-group-chips [groups]="groupChips()"></div>
+                    }
                   </section>
                 }
               </div>

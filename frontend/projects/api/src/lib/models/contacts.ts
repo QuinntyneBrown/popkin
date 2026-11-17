@@ -1,4 +1,5 @@
 import type { AroundView, ConnectionDraft } from './connections';
+import type { GroupChipView } from './groups';
 /** How many contacts I keep: the count line of every Contacts screen (L2-121, L2-126 AC1). */
 export interface ContactsSummaryView {
   people: number;
@@ -34,6 +35,8 @@ export interface SaveContactRequest {
   connect?: ConnectionDraft[];
   /** Edit: the kept connections removed in the form. */
   disconnect?: string[];
+  /** "Groups": every group the contact is in, set in full (L2-147 AC6). */
+  groupIds?: string[];
 }
 
 /** A key date held by the contact form until "Save": `id` for one kept (L2-129 AC2). */
@@ -80,6 +83,8 @@ export interface ContactProfileView {
   habit?: HabitView | null;
   /** "People around {first name}": their connections (L2-150 AC4). */
   around?: AroundView[];
+  /** Their groups, as chips on the profile (L2-146 AC4). */
+  groups?: GroupChipView[];
 }
 
 /** A contact's timeline entries and memories, counted for Delete (L2-132 AC1). */

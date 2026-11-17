@@ -7,6 +7,7 @@ import {
   SaveContactRequest,
 } from '../../models/contacts';
 import { ConnectionKindName } from '../../models/connections';
+import { GroupView } from '../../models/groups';
 import { toApiProblem } from '../problem';
 import { CONTACTS_API } from './contacts-api';
 import { ContactsOutbox } from './contacts-outbox';
@@ -92,6 +93,17 @@ export class ContactFormStore {
   /** "How they connect": the kept connections, then those added, until "Save" (L2-150 AC9). */
   readonly connections = signal<FormConnection[]>([]);
   private disconnected: string[] = [];
+  /** "Groups": the person's groups, left out with none, and those the contact is in (L2-147 AC6). */
+  readonly groups = signal<GroupView[]>([]);
+  readonly groupIds = signal<readonly string[]>([]);
+
+  /** Reads the person's groups for the "Groups" toggles; without them the part is left out. */
+  loadGroups(): void {
+    this.api.groups().subscribe({
+      next: (groups) => this.groups.set(groups),
+      error: () => this.groups.set([]),
+    });
+  }
 
   /**
    * Reading the contact to edit: `notFound` for one that is not mine, or an address that cannot
@@ -136,6 +148,7 @@ export class ContactFormStore {
           })),
         );
         this.disconnected = [];
+        this.groupIds.set((contact.groups ?? []).map((g) => g.id));
         this.editing.set(contact);
       },
       error: (error: unknown) =>
@@ -190,6 +203,7 @@ export class ContactFormStore {
           promised: c.promised,
         })),
       disconnect: this.disconnected,
+      groupIds: [...this.groupIds()],
     };
     if (request.name.length === 0) {
       this.state.set('invalid');

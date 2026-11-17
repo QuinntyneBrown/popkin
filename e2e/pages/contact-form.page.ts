@@ -10,6 +10,8 @@ export class ContactFormPage {
   readonly save: Locator;
   /** "How they connect" (L2-150 AC9). */
   readonly connections: Locator;
+  /** "Groups": a toggle chip per group (L2-147 AC6). */
+  readonly groups: Locator;
   readonly connectTo: Locator;
   readonly saving: Locator;
   readonly who: Locator;
@@ -50,6 +52,7 @@ export class ContactFormPage {
       .getByRole('region', { name: 'How they connect' })
       .or(page.locator('section').filter({ hasText: 'How they connect' }))
       .locator('.person-pick');
+    this.groups = page.getByRole('group', { name: 'Groups' });
     this.connectTo = page
       .getByRole('button', { name: 'Connect to someone' })
       .or(page.getByRole('link', { name: 'Connect to someone' }));
@@ -91,5 +94,9 @@ export class ContactFormPage {
   /** "Remove the birthday". */
   removeDate(kind: string): Locator {
     return this.dates.getByRole('button', { name: `Remove the ${kind}` });
+  }
+
+  group(name: string): Locator {
+    return this.groups.getByRole('button', { name });
   }
 }

@@ -380,6 +380,20 @@ const oldFriends = await call('POST', '/api/contacts/connections', {
 });
 await call('GET', '/api/contacts/connections');
 await call('DELETE', `/api/contacts/connections/${oldFriends.id}`);
+// Groups (L2-146 to L2-148, known gaps 108 and 116 ruled): none yet; she makes a household with
+// Chidi, adds Femi, reads Groups and the form's list of them, and starts the Popkin with them.
+await call('GET', '/api/contacts/groups?on=2026-09-15', undefined, false);
+const sundays = await call('POST', '/api/contacts/groups', {
+  clientId: '00000000-0000-4000-c000-000000000070',
+  name: 'Sunday lunch',
+  kind: 'Household',
+  note: 'First Sunday of the month, at Mum’s.',
+  contactIds: [chidiKept.id],
+});
+await call('POST', `/api/contacts/groups/${sundays.id}/members`, { contactIds: [femiKept.id] });
+await call('GET', '/api/contacts/groups?on=2026-09-15');
+await call('GET', '/api/contacts/groups');
+await call('POST', `/api/contacts/groups/${sundays.id}/popkin`, { popkinId: created.id });
 // Nothing is logged with Femi (L2-135 AC2). She logs Chidi's new job, every year, and a phone
 // call with a promise, as his profile draws them, then reads his timeline: all, milestones,
 // conversations (L2-133 to L2-135).

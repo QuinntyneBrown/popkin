@@ -30,6 +30,8 @@ export class ContactProfilePage {
   readonly endHabit: Locator;
   /** "People around {first name}" (L2-150 AC4). */
   readonly around: Locator;
+  /** The contact's groups, as chips at the end of People around (L2-146 AC4). */
+  readonly groupChips: Locator;
   readonly keyDates: Locator;
   readonly keyDateRows: Locator;
   readonly addDate: Locator;
@@ -92,6 +94,7 @@ export class ContactProfilePage {
     this.habitFoot = this.habit.locator('.info-card__foot');
     this.endHabit = page.getByRole('button', { name: 'End this habit' });
     this.around = page.getByRole('region', { name: /^People around / });
+    this.groupChips = this.around.locator('.chips');
     this.history = page.getByRole('navigation', { name: /’s history$/ });
     this.historyNav = page.locator('nav.view-nav');
     this.addField = page.locator('.add-field');

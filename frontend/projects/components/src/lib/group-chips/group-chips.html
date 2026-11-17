@@ -1,0 +1,6 @@
+@for (group of groups(); track $index) {
+  <a pk-chip [outline]="true" [routerLink]="group.link"
+    ><span aria-hidden="true">{{ group.emoji }}</span
+    >&nbsp;{{ group.name }}</a
+  >
+}

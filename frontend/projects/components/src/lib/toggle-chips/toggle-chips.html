@@ -1,0 +1,18 @@
+<span pk-field-label [id]="fieldId() + '-label'">{{ label() }}</span>
+<div class="chips" role="group" [attr.aria-labelledby]="fieldId() + '-label'">
+  @for (option of options(); track option.value) {
+    <button
+      pk-chip
+      type="button"
+      [outline]="true"
+      [attr.aria-pressed]="pressed(option.value)"
+      [disabled]="disabled()"
+      (click)="toggle(option.value)"
+    >
+      @if (option.emoji) {
+        <span aria-hidden="true">{{ option.emoji }}</span>&nbsp;
+      }
+      {{ option.label }}
+    </button>
+  }
+</div>
