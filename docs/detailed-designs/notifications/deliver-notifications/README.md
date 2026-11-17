@@ -150,7 +150,15 @@ On each tick, after fan-out, the handler sends what is due.
 - **Phone.** For each `NotificationDelivery` on `Phone` that is `Due` with `SendAfter` passed, it
   runs the recheck and calls `IPhoneNotificationSender.SendAsync(personId, PhoneAlert)`.
   Deliveries deferred by quiet hours for one person and one Popkin are sent as one alert at the
-  end of quiet hours. The words of that alert are `<TO SUPPLY>`.
+  end of quiet hours.
+
+  An alert's title is the Popkin's name and its line says who did what, never what they wrote
+  (it shows on a locked phone, L2-174 AC3): "Joel replied to you", "Joel sent you a message",
+  "Joel wrote in Everyone", "Joel added photos", "Joel changed the plan", "Joel changed the
+  schedule", "Joel joined", "Joel added to Experiences" (`PhoneAlerts`). It opens the
+  conversation for a message (`/p/{popkinId}/chat/everyone`, or `/p/{popkinId}/chat/{memberId}`
+  for a direct message) and the Popkin's home otherwise. The alerts deferred by quiet hours for
+  one Popkin go as one, whose line is "{n} new things while you were away".
 
 The `DedupKey` of an update email is `update:{OutgoingEmail.Id}`. The email is marked `Sending`
 and saved before the provider is called. Its id is passed to Azure Communication Services as the

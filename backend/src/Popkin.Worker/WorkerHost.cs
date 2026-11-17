@@ -26,6 +26,7 @@ public static class WorkerHost
         services.AddHostedService<PurgeDeletedAccountsJob>();
         services.AddHostedService<PurgeOldAuditEntriesJob>();
         services.AddHostedService<SendContactRemindersJob>();
+        services.AddHostedService<DispatchNotificationsJob>();
         return services;
     }
 }

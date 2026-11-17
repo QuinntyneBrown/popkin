@@ -1,5 +1,6 @@
 using Popkin.Application.Administration;
 using Popkin.Application.Contacts.Reminders;
+using Popkin.Application.Notifications.Dispatch;
 using System.Diagnostics.Metrics;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,6 +47,7 @@ public sealed class JobTests : IDisposable
         { nameof(PurgeDeletedAccountsJob), 86400, typeof(PurgeDeletedAccountsCommand) },
         { nameof(PurgeOldAuditEntriesJob), 86400, typeof(PurgeOldAuditEntriesCommand) },
         { nameof(SendContactRemindersJob), 300, typeof(SendContactRemindersCommand) },
+        { nameof(DispatchNotificationsJob), 15, typeof(DispatchNotificationsCommand) },
     };
 
     private BackgroundService Job(string name)
@@ -61,6 +63,7 @@ public sealed class JobTests : IDisposable
             nameof(PurgeDeletedAccountsJob) => new PurgeDeletedAccountsJob(scopes, _clock, NullLogger<PurgeDeletedAccountsJob>.Instance),
             nameof(PurgeOldAuditEntriesJob) => new PurgeOldAuditEntriesJob(scopes, _clock, NullLogger<PurgeOldAuditEntriesJob>.Instance),
             nameof(SendContactRemindersJob) => new SendContactRemindersJob(scopes, _clock, NullLogger<SendContactRemindersJob>.Instance),
+            nameof(DispatchNotificationsJob) => new DispatchNotificationsJob(scopes, _clock, NullLogger<DispatchNotificationsJob>.Instance),
             _ => throw new ArgumentOutOfRangeException(nameof(name)),
         };
     }

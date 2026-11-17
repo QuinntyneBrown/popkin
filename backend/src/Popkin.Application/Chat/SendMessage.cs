@@ -82,6 +82,8 @@ public sealed class SendMessageCommandHandler(
             photo!.JoinAlbum(now);
         }
 
+        await RecordNotificationAsync(popkin.Id, membership, message, replyTo, now, cancellationToken);
+
         try
         {
             await db.SaveChangesAsync(cancellationToken);
@@ -125,6 +127,29 @@ public sealed class SendMessageCommandHandler(
             await Reactions.OfAsync(db, stored.Id, cancellationToken),
             await Quotes.OfAsync(db, stored, cancellationToken),
             await ChatPhotos.OfAsync(db, photos, stored, cancellationToken));
+
+    /// <summary>
+    /// The notification the message adds, in the same save (deliver-notifications): a reply tells
+    /// the author of the message replied to (L2-154 "Mentions and replies").
+    /// </summary>
+    private async Task RecordNotificationAsync(
+        Guid popkinId, Membership author, Message message, Message? replyTo, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        if (replyTo is null || replyTo.AuthorMembershipId == author.Id)
+        {
+            return;
+        }
+
+        var repliedTo = await db.Memberships.AsNoTracking()
+            .Where(m => m.Id == replyTo.AuthorMembershipId)
+            .Select(m => (Guid?)m.PersonId)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (repliedTo is { } recipient)
+        {
+            db.NotificationEvents.Add(NotificationEvent.Record(
+                NotificationKind.MentionsAndReplies, NotificationAudience.Recipient, popkinId, author.PersonId, message.Id, recipient, now));
+        }
+    }
 
     private Task<Message?> StoredAsync(Guid authorMembershipId, Guid clientMessageId, CancellationToken cancellationToken) =>
         db.Messages.AsNoTracking().FirstOrDefaultAsync(
