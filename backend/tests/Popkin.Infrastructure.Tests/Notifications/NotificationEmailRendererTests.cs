@@ -99,6 +99,33 @@ public sealed partial class NotificationEmailRendererTests
         Assert.Contains("Yours · 3 points · Stay", story.Text);
     }
 
+    // A digest encodes members' words, keeps every link in its text and gives each photo its alt (L2-163, L2-165).
+    [Fact]
+    public async Task A_digest_encodes_its_lines_and_keeps_its_links()
+    {
+        var email = await RenderAsync(new DigestEmailModel(
+            Shell with { Popkin = null },
+            "Evening, Ruth",
+            "Everything since 6 pm yesterday",
+            "1 thing needs you",
+            [new DigestNeed("Book the cabin", "Yours in Lakeside Weekend · due Fri 18 Sep")],
+            [new DigestSection(
+                new PopkinHeader("Lakeside Weekend", "🏕️", "Teal"),
+                3,
+                [new EmailPicture("photo-1", "thumbs/1.jpg", "The dock at dawn")],
+                ["Joel: “<b>paddles</b> & oars”"],
+                "and 2 messages in the chat",
+                "https://app.popkin.community/p/1")],
+            new EmailLink("Open Popkin", "https://app.popkin.community/popkins")));
+
+        Assert.Contains("&lt;b&gt;paddles&lt;/b&gt; &amp; oars", email.Html);
+        Assert.Contains("Joel: “<b>paddles</b> & oars”", email.Text);
+        var links = Hrefs().Matches(email.Html).Select(m => System.Net.WebUtility.HtmlDecode(m.Groups[1].Value)).ToList();
+        Assert.All(links, link => Assert.Contains(link, email.Text));
+        Assert.All(ImageTags().Matches(email.Html), img => Assert.Contains("alt=", img.Value));
+        Assert.Contains("Lakeside Weekend · 3 new", email.Text);
+    }
+
     // The footer has the narrowest mute, settings and unsubscribe, in order, then the postal address (L2-163 AC5).
     [Fact]
     public async Task The_footer_has_its_three_links_in_order_and_the_address()

@@ -28,6 +28,7 @@ public static class WorkerHost
         services.AddHostedService<SendContactRemindersJob>();
         services.AddHostedService<DispatchNotificationsJob>();
         services.AddHostedService<SendPopkinRemindersJob>();
+        services.AddHostedService<SendDigestsJob>();
         return services;
     }
 }

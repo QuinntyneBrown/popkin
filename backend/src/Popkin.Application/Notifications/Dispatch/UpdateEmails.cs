@@ -17,6 +17,7 @@ public sealed class UpdateEmails(
     KeyDateReminderEmailComposer keyDates,
     StoryDueEmailComposer stories,
     WrapUpEmailComposer wrapUps,
+    DigestEmailComposer digests,
     INotificationEmailRenderer renderer, INotificationEmailSender sender, NotificationLinks links, PopkinMetrics metrics)
 {
     /// <summary>The delivery for an email change the rules let through (or held, while email is paused).</summary>
@@ -80,9 +81,7 @@ public sealed class UpdateEmails(
         CancellationToken cancellationToken)
     {
         var due = await db.OutgoingEmails
-            .Where(e => (e.Kind == NotificationEmailKind.Update || e.Kind == NotificationEmailKind.KeyDateReminder
-                    || e.Kind == NotificationEmailKind.StoryDue || e.Kind == NotificationEmailKind.WrapUp)
-                && ((e.Status == OutgoingEmailStatus.Open || e.Status == OutgoingEmailStatus.Queued) && e.SendAfter <= now
+            .Where(e => ((e.Status == OutgoingEmailStatus.Open || e.Status == OutgoingEmailStatus.Queued) && e.SendAfter <= now
                     || e.Status == OutgoingEmailStatus.Retrying && e.NextAttemptAt <= now))
             .OrderBy(e => e.SendAfter)
             .ToListAsync(cancellationToken);
@@ -142,9 +141,10 @@ public sealed class UpdateEmails(
         {
             var question = await ask(x.Event, email.PersonId, NotificationChannel.Email, cancellationToken);
             zone = question.Zone;
-            if (email.Kind == NotificationEmailKind.Update && question.QuietHours.Contains(LocalClock.TimeAt(now, zone)))
+            if (email.Kind is NotificationEmailKind.Update or NotificationEmailKind.DailyDigest or NotificationEmailKind.WeeklyDigest
+                && question.QuietHours.Contains(LocalClock.TimeAt(now, zone)))
             {
-                // A window that ends inside quiet hours waits for their end (L2-161 AC6).
+                // A window, or a digest, that falls inside quiet hours waits for their end (L2-161 AC6).
                 email.Defer(question.QuietHours.EndAfter(now, zone));
                 email.Reopen();
                 return false;
@@ -168,6 +168,8 @@ public sealed class UpdateEmails(
             NotificationEmailKind.KeyDateReminder => await keyDates.ComposeAsync(email, passing[0].Event, cancellationToken),
             NotificationEmailKind.StoryDue => await stories.ComposeAsync(email, passing[0].Event, cancellationToken),
             NotificationEmailKind.WrapUp => await wrapUps.ComposeAsync(email, passing[0].Event, zone, cancellationToken),
+            NotificationEmailKind.DailyDigest or NotificationEmailKind.WeeklyDigest =>
+                await digests.ComposeAsync(email, passing.Select(p => p.Event).ToList(), zone, cancellationToken),
             _ => await composer.ComposeAsync(email, passing.Select(p => p.Event).ToList(), zone, platform.BundlingMinutes, cancellationToken),
         };
         var address = await db.People.Where(p => p.Id == email.PersonId).Select(p => p.Email).SingleOrDefaultAsync(cancellationToken);

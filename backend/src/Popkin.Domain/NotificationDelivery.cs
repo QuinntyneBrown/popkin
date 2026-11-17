@@ -191,6 +191,14 @@ public sealed class NotificationDelivery
         NextAttemptAt = next;
     }
 
+    /// <summary>A held change gathered into the person's digest, sent with it (L2-165).</summary>
+    public void Gather(Guid outgoingEmailId, DateTimeOffset now)
+    {
+        Status = NotificationDeliveryStatus.Bundled;
+        OutgoingEmailId = outgoingEmailId;
+        SendAfter = now;
+    }
+
     /// <summary>Given up six hours after it fell due (L2-175 AC2).</summary>
     public void Drop()
     {

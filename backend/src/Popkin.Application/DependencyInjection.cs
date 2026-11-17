@@ -43,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<Notifications.Emails.KeyDateReminderEmailComposer>();
         services.AddScoped<Notifications.Emails.StoryDueEmailComposer>();
         services.AddScoped<Notifications.Emails.WrapUpEmailComposer>();
+        services.AddScoped<Notifications.Emails.DigestEmailComposer>();
         services.AddScoped<Notifications.Dispatch.UpdateEmails>();
         return services;
     }

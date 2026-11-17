@@ -116,3 +116,29 @@ public sealed record WrapUpEmailModel(
 {
     public override IReadOnlyList<EmailPicture> Pictures => Photos;
 }
+
+/// <summary>A row of "{n} things need you": a story due soon or a key date (L2-165 AC2).</summary>
+public sealed record DigestNeed(string Line, string From);
+
+/// <summary>One Popkin's part of a digest (L2-165 AC3, AC4).</summary>
+public sealed record DigestSection(
+    PopkinHeader Popkin,
+    int NewCount,
+    IReadOnlyList<EmailPicture> Photos,
+    IReadOnlyList<string> Lines,
+    string? MoreMessages,
+    string Url);
+
+/// <summary>The daily or weekly digest (L2-165).</summary>
+public sealed record DigestEmailModel(
+    EmailShellModel Shell,
+    string Greeting,
+    string PeriodLine,
+    string? NeedsYouTitle,
+    IReadOnlyList<DigestNeed> NeedsYou,
+    IReadOnlyList<DigestSection> Sections,
+    EmailLink Open)
+    : EmailModel(Shell)
+{
+    public override IReadOnlyList<EmailPicture> Pictures => Sections.SelectMany(s => s.Photos).ToList();
+}

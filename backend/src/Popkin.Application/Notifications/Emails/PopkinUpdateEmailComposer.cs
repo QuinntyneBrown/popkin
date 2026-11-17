@@ -28,7 +28,13 @@ public sealed class PopkinUpdateEmailComposer(IAppDbContext db, NotificationLink
     private sealed record Change(
         NotificationKind Kind, DateTimeOffset At, string FromName, UpdateLead Lead, string Row, string Subject, string Preheader);
 
-    private sealed record Context(PopkinSpace Popkin, Guid Recipient, TimeZoneInfo Zone);
+    private sealed record Context(PopkinSpace Popkin, Guid Recipient, TimeZoneInfo Zone, int MessageRow = RowText);
+
+    /// <summary>A message's words in a digest line (digest-emails).</summary>
+    private const int DigestRowText = 80;
+
+    /// <summary>One change as a digest line: its kind, when, its row, whether it is the person's own, its photos.</summary>
+    public sealed record DigestChange(NotificationKind Kind, DateTimeOffset At, string Row, bool ForThePerson, IReadOnlyList<EmailPicture> Photos);
 
     public async Task<PopkinUpdateEmailModel?> ComposeAsync(
         OutgoingEmail email, IReadOnlyList<NotificationEvent> events, TimeZoneInfo zone, int windowMinutes, CancellationToken cancellationToken)
@@ -39,19 +45,7 @@ public sealed class PopkinUpdateEmailComposer(IAppDbContext db, NotificationLink
             return null;
         }
 
-        var context = new Context(popkin, email.PersonId, zone);
-        var changes = new List<Change>();
-        // Photos and plan changes by one member are one change each, however many events made them.
-        foreach (var group in events
-            .GroupBy(e => e.Kind is NotificationKind.NewPhotos or NotificationKind.PlanChanges ? $"{e.Kind}:{e.ActorPersonId}" : e.Id.ToString())
-            .OrderByDescending(g => g.Max(e => e.OccurredAt)))
-        {
-            if (await ReadAsync(group.OrderByDescending(e => e.OccurredAt).ToList(), context, cancellationToken) is { } change)
-            {
-                changes.Add(change);
-            }
-        }
-
+        var changes = (await ChangesOfAsync(events, new Context(popkin, email.PersonId, zone), cancellationToken)).Select(c => c.Change).ToList();
         if (changes.Count == 0)
         {
             return null;
@@ -72,6 +66,41 @@ public sealed class PopkinUpdateEmailComposer(IAppDbContext db, NotificationLink
         return new PopkinUpdateEmailModel(shell, lead.Lead, also, windowMinutes);
     }
 
+    /// <summary>
+    /// The changes of one Popkin still standing, newest first, as digest lines (digest-emails,
+    /// L2-165 AC3): the same reading as an update, with a message cut at 80.
+    /// </summary>
+    public async Task<IReadOnlyList<DigestChange>> DigestChangesAsync(
+        PopkinSpace popkin, Guid recipient, IReadOnlyList<NotificationEvent> events, TimeZoneInfo zone, CancellationToken cancellationToken) =>
+        (await ChangesOfAsync(events, new Context(popkin, recipient, zone, DigestRowText), cancellationToken))
+            .Select(x => new DigestChange(
+                x.Change.Kind,
+                x.Change.At,
+                x.Change.Row,
+                x.Change.Kind is NotificationKind.MentionsAndReplies or NotificationKind.DirectMessages
+                    || x.Change.Kind == NotificationKind.PlanChanges && x.Events.Any(e => e.RecipientPersonId == recipient),
+                x.Change.Lead is PhotosLead photos ? photos.Photos : []))
+            .ToList();
+
+    /// <summary>Photos and plan changes by one member are one change each, however many events made them.</summary>
+    private async Task<List<(Change Change, IReadOnlyList<NotificationEvent> Events)>> ChangesOfAsync(
+        IReadOnlyList<NotificationEvent> events, Context context, CancellationToken cancellationToken)
+    {
+        var changes = new List<(Change, IReadOnlyList<NotificationEvent>)>();
+        foreach (var group in events
+            .GroupBy(e => e.Kind is NotificationKind.NewPhotos or NotificationKind.PlanChanges ? $"{e.Kind}:{e.ActorPersonId}" : e.Id.ToString())
+            .OrderByDescending(g => g.Max(e => e.OccurredAt)))
+        {
+            var ordered = group.OrderByDescending(e => e.OccurredAt).ToList();
+            if (await ReadAsync(ordered, context, cancellationToken) is { } change)
+            {
+                changes.Add((change, ordered));
+            }
+        }
+
+        return changes;
+    }
+
     private Task<Change?> ReadAsync(IReadOnlyList<NotificationEvent> events, Context context, CancellationToken cancellationToken) =>
         events[0].Kind switch
         {
@@ -88,7 +117,7 @@ public sealed class PopkinUpdateEmailComposer(IAppDbContext db, NotificationLink
     /// <summary>A message still standing: its author, its words and, for a reply, the recipient's own message.</summary>
     private async Task<Change?> MessageAsync(NotificationEvent notification, Context context, CancellationToken cancellationToken)
     {
-        var (popkin, recipient, zone) = context;
+        var (popkin, recipient, zone, _) = context;
         var message = await db.Messages.AsNoTracking()
             .SingleOrDefaultAsync(m => m.Id == notification.SubjectId && m.DeletedAt == null, cancellationToken);
         if (message is null)
@@ -126,7 +155,7 @@ public sealed class PopkinUpdateEmailComposer(IAppDbContext db, NotificationLink
         };
         var lead = new MessageLead(headline, button, author.DisplayName, EmailText.Cut(text, EmailText.MaxText), Time(message.SentAt, zone), answers);
         return new Change(
-            notification.Kind, notification.OccurredAt, $"{first} via Popkin", lead, $"{first}: “{EmailText.Cut(text, RowText)}”", subject, EmailText.Preheader(text));
+            notification.Kind, notification.OccurredAt, $"{first} via Popkin", lead, $"{first}: “{EmailText.Cut(text, context.MessageRow)}”", subject, EmailText.Preheader(text));
     }
 
     /// <summary>The photos one member added in the window and still in the album, newest first (L2-164 AC2).</summary>
@@ -164,7 +193,7 @@ public sealed class PopkinUpdateEmailComposer(IAppDbContext db, NotificationLink
     /// <summary>The stories one member changed in the window and still on the board (L2-164 AC3).</summary>
     private async Task<Change?> PlanAsync(IReadOnlyList<NotificationEvent> events, Context context, CancellationToken cancellationToken)
     {
-        var (popkin, recipient, _) = context;
+        var (popkin, recipient, _, _) = context;
         var ids = events.Select(e => e.SubjectId).Distinct().ToList();
         var stories = await db.Stories.AsNoTracking().Where(s => ids.Contains(s.Id)).ToListAsync(cancellationToken);
         if (stories.Count == 0)

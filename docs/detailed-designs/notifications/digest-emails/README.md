@@ -122,37 +122,41 @@ it is now, and sends one email, once.
 All new.
 
 - **`SendDigestsJob`** (`Popkin.Worker/Jobs/`) — a `PeriodicJob` every 5 minutes whose command is
-  `SendDigestsCommand`. It is registered in `Program.cs` beside the other jobs. A digest leaves
-  within 5 minutes of 18:00, plus its sending time.
-- **`SendDigestsCommandHandler`** (`Popkin.Application/Notifications/Digests/`):
-  - It finds the people due (above) in batches of 200, ordered by `PersonId`, and for each one:
-    - reads the rules (`NotificationRules`);
-    - adds the `OutgoingEmail` (`DailyDigest` or `WeeklyDigest`) and moves it to `Sending`;
-    - calls `DigestEmailComposer`, the renderer and the sender, then sets the outcome;
-    - marks the held deliveries it used with the email's id.
-  - It saves after each person, so one failure stops one person only.
-  - When the platform is paused, it adds the row as `Queued`. The dispatcher of
-    [Deliver notifications](../deliver-notifications/README.md) sends it on resume, or drops it
-    after 6 hours (L2-170 AC3).
-- **`DigestEmailComposer`** (Application, `INotificationEmailComposer` for `DailyDigest` and
-  `WeeklyDigest`):
-  - It reads the held changes and each change as it is now, the Everyone threads' unread counts,
+  `SendDigestsCommand`, registered in `WorkerHost` beside the other jobs. A digest leaves
+  within 5 minutes of 18:00, plus the dispatcher's 15-second tick.
+- **`SendDigestsCommandHandler`** (`Popkin.Application/Notifications/Digests/`) gathers; it does
+  not send:
+  - It takes the people with held changes (`AwaitingDigest` on the email channel). A person on
+    "Daily digest" with none has nothing to send, so no row is made for them.
+  - For each one due (`DigestRules.IsDue`) with no row for the day's key, it adds the
+    `OutgoingEmail` (`DailyDigest` or `WeeklyDigest`) as `Queued`, due now, and gathers the held
+    changes of the period into it (`NotificationDelivery.Gather`). A held change older than the
+    period (a frequency changed since) is dropped.
+  - It saves after each person.
+  - The dispatcher of [Deliver notifications](../deliver-notifications/README.md) sends it like
+    any other email: the rules read again, quiet hours (a digest inside them waits for their
+    end), a pause (queued, dropped after 6 hours, L2-170 AC3), retries and `nothing_new`.
+- **`DigestEmailComposer`** (Application, chosen for `DailyDigest` and `WeeklyDigest` by
+  `UpdateEmails`):
+  - It reads each Popkin's changes as they are now through
+    `PopkinUpdateEmailComposer.DigestChangesAsync`, the same reading as an update with a message
+    cut at 80. The Everyone count takes only messages members wrote, not system lines. It reads
     the person's due stories and the near key dates.
   - It builds a `DigestEmailModel` (`Shell`, `Greeting`, `PeriodLine`, `NeedsYou[]`,
     `Sections[]` of `DigestSection` with `Popkin`, `NewCount`, `Photos[]`, `Lines[]` and
     `MoreMessages`, and `OpenUrl`).
-  - It answers `ComposedEmail.Nothing` when no change is left.
+  - It answers nothing when no change is left, and the email is suppressed as `nothing_new`.
 - **`DigestRules`** (Application, pure) — section order, line order and limits, the card's
   window and order, the subject's words and plurals, and the digest period. It is tested one case
   per row.
-- **`NotificationDelivery.Status`** gains `AwaitingDigest`, set by the dispatcher, and the email
-  it rode in (`OutgoingEmailId`).
+- **`NotificationDelivery.Status`** has `AwaitingDigest`, set by the dispatcher; `Gather` moves a
+  held change into its digest (`OutgoingEmailId`).
 - **Shared parts** from [Popkin update email](../popkin-update-email/README.md): `EmailShellModel`,
   `EmailText`, `NotificationLinks`, `INotificationEmailRenderer`, `INotificationEmailSender`,
   `OutgoingEmail`.
 - **Telemetry:**
-  - `popkin.notifications.deliveries` (`kind=digest_daily` or `digest_weekly`, `channel=email`,
-    `outcome`);
+  - `popkin.notifications.deliveries` by each change's `kind`, `channel=email` and `outcome`, and
+    by the email's kind (`DailyDigest`, `WeeklyDigest`) when a digest is dropped;
   - `popkin.notifications.digests.last_tick`, the job's last tick, as `popkin.wrap_up.last_tick`
     is, so a stopped job is seen (ADR 0012).
 

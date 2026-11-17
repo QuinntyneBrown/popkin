@@ -1,0 +1,49 @@
+@* The daily or weekly digest (L2-165): the greeting, the card of what needs the person, one
+   section per Popkin with its photos, lines and chat count, and "Open Popkin". *@
+<EmailShell Shell="Model.Shell">
+<h1 class="email__headline" style="margin:0 0 4px;font-size:22px;line-height:1.3;color:@EmailStyles.Ink;">@Model.Greeting</h1>
+<p class="email__sub" style="margin:0 0 16px;font-size:15px;color:@EmailStyles.InkSoft;">@Model.PeriodLine</p>
+@if (Model.NeedsYouTitle is { } title)
+{
+<table role="presentation" class="email-needs" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border-radius:12px;background:@EmailStyles.Accent;">
+<tr><td style="padding:14px 16px;">
+<h2 class="email-needs__title" style="margin:0 0 8px;font-size:16px;color:@EmailStyles.Ink;">@title</h2>
+@foreach (var need in Model.NeedsYou)
+{
+<p class="email-needs__item" style="margin:0 0 8px;font-size:15px;color:@EmailStyles.Ink;"><strong class="email-needs__text">@need.Line</strong><br><span class="email-needs__sub" style="font-size:13px;">@need.From</span></p>
+}
+</td></tr>
+</table>
+}
+@foreach (var section in Model.Sections)
+{
+<table role="presentation" class="email-day" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;border-top:1px solid @EmailStyles.Line;">
+<tr><td style="padding:14px 0 0;">
+<h2 class="email-day__head" style="margin:0 0 8px;font-size:16px;color:@EmailStyles.Ink;"><span class="popkin-tile" aria-hidden="true" style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:8px;background:@EmailStyles.Of(section.Popkin.Colour);">@section.Popkin.Emoji</span> <a class="email-day__name" href="@section.Url" style="color:@EmailStyles.Ink;text-decoration:none;">@section.Popkin.Name</a> <span class="email-day__count" style="font-weight:400;font-size:14px;color:@EmailStyles.InkSoft;">@section.NewCount new</span></h2>
+@if (section.Photos.Count > 0)
+{
+<table role="presentation" class="email-strip" width="100%" cellpadding="0" cellspacing="4"><tr>
+@foreach (var photo in section.Photos)
+{
+<td width="25%"><img src="cid:@photo.ContentId" alt="@photo.Alt" width="132" style="display:block;width:100%;height:auto;border-radius:8px;"></td>
+}
+</tr></table>
+}
+@foreach (var line in section.Lines)
+{
+<p class="email-day__item" style="margin:6px 0 0;font-size:15px;color:@EmailStyles.Ink;">@line</p>
+}
+@if (section.MoreMessages is { } more)
+{
+<p class="email-day__more" style="margin:6px 0 0;font-size:14px;color:@EmailStyles.InkSoft;">@more</p>
+}
+</td></tr>
+</table>
+}
+<EmailButton Link="Model.Open" />
+</EmailShell>
+
+@code {
+    [Parameter, EditorRequired]
+    public DigestEmailModel Model { get; set; } = default!;
+}
