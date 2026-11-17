@@ -149,6 +149,20 @@ Contacts is a member's own address book beside Your Popkins, in the Popkin app, 
 | [Connection map](components/connection-map.html) | Content | Who knows whom: faces on a board joined by lines, with the links in words beside it. | pages/contacts-connections/default |
 | [Form sections](components/form-sections.html) | Inputs | Add someone's sections, with a date entry, a person pick and the kind grid. | pages/add-contact/default, pages/log-entry/milestone |
 
+### Notifications
+
+The member's notification settings, the four emails and the admin's Notifications page, extracted on 17 November 2026. Its pattern is the [Notifications](patterns/notifications.html) page's second half.
+
+| Component | Group | Variants | States | Source mocks |
+|---|---|---|---|---|
+| [Tabs](components/tabs.html) | Navigation | Underlined, segmented with counts | Chosen, Not chosen, Hover, Focus | pages/notification-settings/default, admin/pages/notifications/holds |
+| [Notification kinds](components/notification-matrix.html) | Inputs | Switches, always on, email off | On, Off, Focus, Disabled | pages/notification-settings/default, pages/notification-settings/unsubscribed |
+| [Setting list](components/setting-list.html) | Inputs | Levels, lead time and switch, action, empty | Everything, Just for me, Muted, Focus, On, Off | pages/notification-settings/popkins, pages/notification-settings/people |
+| [Undo bar](components/undo-bar.html) | Feedback | Undo, named way back | Default, Hover, Focus | pages/notification-settings/muted, pages/notification-settings/unsubscribed |
+| [Picker popover](components/popover.html) | Overlays | Start, end | Closed, Hover, Focus, Open, Disabled | pages/notification-settings/mute-search, admin/pages/notifications/hold-adding |
+| [Sending status](components/send-status.html) | Admin app | Sending, paused | Owner, Support or Viewer | admin/pages/notifications/default, admin/pages/notifications/paused |
+| [Email](components/email.html) | Messages | Reply, photos, plan changes, digest, birthday, plan | Default, Hover, Focus (links and button) | notifications/email-popkin-update/message, notifications/email-daily-digest/needs-you, notifications/email-birthday/ahead |
+
 ### In the components library
 
 The `pk-*` components in `frontend/projects/components` carry these blocks, one stylesheet each
@@ -187,8 +201,8 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 ## Tokens
 
 - `tokens/tokens.css`: the source of truth. Primitives (`--palette-*`), roles (`--color-*`, `--text-*`, `--space-*`, `--radius-*`, `--shadow-*`, `--duration-*`, `--layout-*` …) with light and dark values, and the Popkin colour (`--accent*`, set with `data-accent`).
-- `tokens/tokens.json`: the DTCG export, generated from `tokens.css` (378 tokens).
-- `tokens/contrast-pairs.json`: the 78 foreground and background pairs the components rely on, checked in both themes.
+- `tokens/tokens.json`: the DTCG export, generated from `tokens.css` (387 tokens).
+- `tokens/contrast-pairs.json`: the 89 foreground and background pairs the components rely on, checked in both themes.
 - `assets/components.css`: every component class, tokens only. `assets/fonts/`: Nunito, Inter and Rubik (SIL Open Font License).
 - `assets/ds.css`, `assets/ds.js`: the documentation chrome; not product UI.
 
@@ -217,6 +231,11 @@ gained a part, as journey 1 built them; `assets/components.css` records the addi
 | `contacts-habits`, `contact-profile` | Kept and missed periods of a habit were two fills a colour apart (2.98:1): colour alone | Missed is an empty outline in `--color-border-strong`; kept stays filled green |
 | `contacts-follow-ups/done`, `contacts-today/done` | The done tick was constant white, 2.12:1 on the dark theme's green | New token `--color-fg-on-success`: white in light, black in dark |
 | `log-entry/milestone` | The kind grid of milestones is toggle buttons where one choice is made | Kept as drawn; the Form sections page recommends `role="radiogroup"` with arrow keys for the kind grid when it is built |
+| `notification-settings/unsubscribed` | Email off greyed the switch grid with opacity on a wrapper and blocked the pointer; keyboards could still reach it | The switches are `disabled` and keep their values |
+| `notification-settings/mute-search`, `admin notifications/hold-adding` | Both pickers opened from the button's right edge and left a 360px screen | `.popover` opens from the start edge; `popover--end` only from 640px |
+| `notification-settings/people` | Reminder rows crushed the name to a word per line at 360px | `setting-list__main` keeps 14rem before the controls wrap |
+| Email designs | The quote and the needs-you box mixed brand colours into white, invisible in dark; the sender mark was literal black | `--accent-tint`, `--color-accent-subtle`, `--color-fg-accent`, `--color-constant-dark` |
+| Admin Notifications design | Paused and sending panels in brand coral and teal | `--color-danger-*` and `--color-success-solid` |
 
 ## Popkin colour contrast
 
@@ -245,6 +264,15 @@ same sRGB mixing the browser uses. Minimums: 4.5:1 for text, 3:1 for lines. All 
 | Amber (sun) | dark | 12.28 | 7.62 | 12.79 | 11.13 | 8.75 | 11.45 | 9.96 |
 
 ## Verification
+
+Run on 17 November 2026, after extracting Notifications:
+
+- `check_contrast.py` on `tokens/tokens.css`: 170 passed, 0 failed, 0 unresolved (light and dark), with five new pairs for the emails and the paused panel.
+- `check_design_system.py docs/design-system`: 122 pages (98 components, 11 patterns), 0 errors, 0 warnings.
+- `check_mocks.py docs/mocks`: 95 screens, 424 mocks; `docs/mocks/admin`: 55 screens, 260 mocks. No new errors (the 3 errors and 25 warnings in the app set and the 1 error in the admin set are on main unchanged).
+- The seven new pages, the Notifications pattern, the index and the Layout foundation loaded at 360 and 1280 px in both themes: no horizontal scroll. The
+  states and variants of every new page reviewed by eye. Fixed from that review: the tab focus ring clipped by its scrolling list, stacked setting rows
+  224px tall on a phone, the invisible focus ring on the undo bar and toast in dark, and the "Yours now" badge over a to-do's name.
 
 Run on 15 November 2026, after extracting Contacts:
 
@@ -288,6 +316,7 @@ Run on 12 November 2026:
 
 ## Changelog
 
+- **17 November 2026**: Notifications. 7 component pages (a "Notifications" group in the nav and the index): Tabs, Notification kinds, Setting list, Undo bar, Picker popover, Sending status and Email, from the member's notification settings, the four emails and the admin's Notifications page. The Notifications pattern gains the emails and the settings. New tokens `--layout-email-max` and `--layout-popover-max` (the Layout foundation lists them); five new contrast pairs. Fixed: disabled email switches instead of an opacity veil, pickers that left a phone screen, crushed reminder rows, brand colours mixed into white in the emails. The segmented control gains a hover (ink text), which it lacked. The focus ring on a toast and the undo bar takes the inverse text colour: the page ring was cream on the cream toast in dark, invisible. Tabs draw their ring inside, since the scrolling list clipped it.
 - **15 November 2026**: Contacts. 11 component pages (a "Contacts" group in the nav and the index) and the Contacts pattern, from the
   Contacts mocks; new token `--color-fg-on-success`; the Contacts classes in `components.css` gain `data-state` hover and focus hooks;
   the Color foundation lists the new token. Fixed: `.timeline` renamed `.contact-timeline`, a habit's missed periods drawn as an outline,

@@ -528,6 +528,36 @@
       "bg": "--color-bg-subtle",
       "min": 4.5,
       "note": "contacts: \"2 days late\" on a sand to-do card"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-danger-bg",
+      "min": 4.5,
+      "note": "admin: the paused sending panel's title and text"
+    },
+    {
+      "fg": "--color-danger-solid",
+      "bg": "--color-danger-bg",
+      "min": 3,
+      "note": "admin: the paused dot on the paused panel"
+    },
+    {
+      "fg": "--color-fg-default",
+      "bg": "--color-warning-bg",
+      "min": 4.5,
+      "note": "email: the new time in a plan change"
+    },
+    {
+      "fg": "--color-fg-muted",
+      "bg": "--color-accent-subtle",
+      "min": 4.5,
+      "note": "email: the line under a 'needs you' item"
+    },
+    {
+      "fg": "--color-constant-dark",
+      "bg": "--color-accent",
+      "min": 3,
+      "note": "email: the mark in the sender circle"
     }
   ]
 }
