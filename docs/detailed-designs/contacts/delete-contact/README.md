@@ -34,8 +34,11 @@ Popkin web app, `docs/mocks/dialogs/delete-contact/`, over the profile:
 - **What else goes.** What deleting a contact does to their key dates, habit, connections and
   groups is known gap 110. The dialog names only what L2-132 names. A row that names the
   contact cannot outlive it, so until gap 110 is settled the handler also deletes the rows that
-  name the contact; each group, and every other contact, stays. When gap 110 is settled the
-  dialog's sentence may need those rows too.
+  name the contact; each group, and every other contact, stays. Ruled (2026-11-17), with gap 110
+  settled: the dialog's sentence stays as L2-132 words it. Key dates, the habit, the people
+  around them and the group chips are all shown on the contact's profile, so "Chidi’s profile …
+  go for good" already names them; counting each would lengthen the one sentence the person must
+  read before a lasting choice.
 - **Counts of zero and one.** The mock shows "5 timeline entries", "1 follow-up" and "7 memories
   and files". The plural forms come from the counts ("1 timeline entry", "2 follow-ups"); a count of zero is left out of the sentence, so with nothing logged it reads "Femi’s profile
   goes for good. Your Popkins don’t change, and Femi isn’t told." (ruled 2026-11-16).
