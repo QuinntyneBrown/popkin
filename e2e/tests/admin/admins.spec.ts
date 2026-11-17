@@ -197,8 +197,8 @@ test.describe('Admins & roles (L2-119)', () => {
     await expect(admins.addAdmin).toHaveAttribute('title', 'Only Owners can do this');
   });
 
-  // Given any admin, "What each role can do" shows each role's actions, a word in every cell
-  // as well as the mark (L2-086 AC4).
+  // Given any admin, "What each role can do" shows each role's actions, the notification rows
+  // among them, a word in every cell as well as the mark (L2-086 AC4).
   test('shows what each role can do', async ({ page, pk }) => {
     const admins = new AdminsPage(page);
     await pk.open('adminAdmins');
@@ -211,6 +211,16 @@ test.describe('Admins & roles (L2-119)', () => {
     await expect(admins.permissions.locator('thead')).toContainText('Support2 admins');
     const deletion = admins.permissions.getByRole('row', { name: /Start account deletion/ });
     await expect(deletion.getByRole('cell')).toHaveText([
+      /^Allowed$/,
+      /Not allowed$/,
+      /Not allowed$/,
+    ]);
+    const holds = admins.permissions.getByRole('row', { name: /Hold and release notifications/ });
+    await expect(holds.getByRole('cell')).toHaveText([/^Allowed$/, /^Allowed$/, /Not allowed$/]);
+    const notifications = admins.permissions.getByRole('row', {
+      name: /Pause email, switch kinds and change defaults/,
+    });
+    await expect(notifications.getByRole('cell')).toHaveText([
       /^Allowed$/,
       /Not allowed$/,
       /Not allowed$/,
