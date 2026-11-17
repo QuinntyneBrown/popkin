@@ -63,4 +63,9 @@ export class ContactsPeoplePage {
   stateAction(name: string): Locator {
     return this.state.getByRole('link', { name });
   }
+
+  /** "Import from your Popkins", which opens its dialog (L2-151). */
+  get importPeople(): Locator {
+    return this.state.getByRole('button', { name: 'Import from your Popkins' });
+  }
 }

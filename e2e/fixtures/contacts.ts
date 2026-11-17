@@ -49,8 +49,8 @@ export function recordedContactId(name: string): string {
 export const contactPhoto = '/api/files/contacts/contact-chidi.jpg';
 
 /** Serves `contactPhoto` from the mocks, so a profile draws the picture the mock does. */
-export function serveContactPhoto(page: Page): Promise<void> {
-  return page.route(`**${contactPhoto}`, (route) =>
+export async function serveContactPhoto(page: Page): Promise<void> {
+  await page.route(`**${contactPhoto}`, (route) =>
     route.fulfill({ path: join(MOCK_IMAGES, 'contact-chidi.jpg'), contentType: 'image/jpeg' }),
   );
 }
@@ -82,8 +82,8 @@ export function femiProfile(page: Page, change: object = {}): Promise<void> {
 }
 
 /** Serves a picture from the mocks at `/api/files/contacts/{file}`, as a contact's photo. */
-export function servePhotos(page: Page): Promise<void> {
-  return page.route('**/api/files/contacts/*.jpg', (route) =>
+export async function servePhotos(page: Page): Promise<void> {
+  await page.route('**/api/files/contacts/*.jpg', (route) =>
     route.fulfill({
       path: join(MOCK_IMAGES, new URL(route.request().url()).pathname.split('/').pop() ?? ''),
       contentType: 'image/jpeg',
@@ -270,8 +270,8 @@ export async function marasPeople(page: Page): Promise<void> {
 }
 
 /** The photos the recording made: each is the mocks' picture of Chidi. */
-export function serveRecordedPhotos(page: Page): Promise<void> {
-  return page.route('**/api/files/contacts/*.jpg?*', (route) =>
+export async function serveRecordedPhotos(page: Page): Promise<void> {
+  await page.route('**/api/files/contacts/*.jpg?*', (route) =>
     route.fulfill({ path: join(MOCK_IMAGES, 'contact-chidi.jpg'), contentType: 'image/jpeg' }),
   );
 }
@@ -545,8 +545,8 @@ export async function answerTicks(page: Page): Promise<void> {
 }
 
 /** Serves every photo the recording kept as a memory: each is the mocks' hot sauce night. */
-export function serveMemoryPhotos(page: Page): Promise<void> {
-  return page.route('**/api/files/memories/**', (route) =>
+export async function serveMemoryPhotos(page: Page): Promise<void> {
+  await page.route('**/api/files/memories/**', (route) =>
     route.fulfill({ path: join(MOCK_IMAGES, 'tacos.jpg'), contentType: 'image/jpeg' }),
   );
 }

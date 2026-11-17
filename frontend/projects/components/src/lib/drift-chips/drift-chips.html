@@ -1,0 +1,12 @@
+@for (person of people(); track $index) {
+  <a class="who-chip" [routerLink]="person.link"
+    ><span
+      pk-avatar
+      size="sm"
+      [initials]="person.face.initials"
+      [photo]="person.face.photoUrl"
+      [attr.data-accent]="person.face.accent"
+    ></span
+    >{{ person.label }}</a
+  >
+}

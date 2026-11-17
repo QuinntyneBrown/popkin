@@ -14,6 +14,22 @@ export class ContactsTodayPage {
   readonly addSomeone: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly pageHead: Locator;
+  /** The day (L2-125 AC2 to AC7). */
+  readonly spotlight: Locator;
+  readonly spotlightHeading: Locator;
+  readonly comingUp: Locator;
+  readonly comingUpRows: Locator;
+  readonly comingUpList: Locator;
+  readonly recentList: Locator;
+  readonly driftChips: Locator;
+  readonly toDo: Locator;
+  readonly recent: Locator;
+  readonly recentRows: Locator;
+  readonly drift: Locator;
+  readonly status: Locator;
+  readonly failed: Locator;
+  readonly toast: Locator;
+  readonly importPeople: Locator;
 
   constructor(page: Page) {
     this.root = page.locator('body[data-page="contacts-today"]');
@@ -25,5 +41,28 @@ export class ContactsTodayPage {
     this.startHeading = this.start.getByRole('heading', { level: 2 });
     this.startLead = this.start.locator('p').first();
     this.addSomeone = this.start.getByRole('link', { name: 'Add someone' });
+    this.importPeople = this.start.getByRole('button', { name: 'Import from your Popkins' });
+    this.spotlight = page.locator('section.spotlight');
+    this.spotlightHeading = this.spotlight.getByRole('heading', { level: 2 });
+    this.comingUp = page.getByRole('region', { name: 'Coming up' });
+    this.comingUpList = this.comingUp.locator('ul');
+    this.comingUpRows = this.comingUpList.locator('> li');
+    this.toDo = page.getByRole('region', { name: 'To do today' });
+    this.recent = page.getByRole('region', { name: 'Recently' });
+    this.recentList = this.recent.locator('ul');
+    this.recentRows = this.recentList.locator('> li');
+    this.drift = page.getByRole('region', { name: 'It’s been a while' });
+    this.driftChips = this.drift.locator('.cluster, .drift-chips');
+    this.status = page.getByRole('status').filter({ hasText: 'Loading your day' });
+    this.failed = page.locator('.empty');
+    this.toast = page.locator('.toast').last();
+  }
+
+  markDone(text: string): Locator {
+    return this.toDo.getByRole('button', { name: `Mark done: ${text}` });
+  }
+
+  markNotDone(text: string): Locator {
+    return this.toDo.getByRole('button', { name: `Mark not done: ${text}` });
   }
 }
