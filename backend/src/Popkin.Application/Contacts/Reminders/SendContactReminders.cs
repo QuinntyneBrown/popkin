@@ -69,7 +69,8 @@ public sealed class SendContactRemindersCommandHandler(
         var preferences = await db.ReminderPreferences.SingleOrDefaultAsync(p => p.OwnerId == owner, cancellationToken)
             ?? ReminderPreferences.Defaults(owner);
         var now = clock.GetUtcNow();
-        var local = ReminderRules.LocalNow(preferences.TimeZone, now);
+        var zone = await db.NotificationPreferences.Where(p => p.PersonId == owner).Select(p => p.TimeZone).SingleOrDefaultAsync(cancellationToken);
+        var local = ReminderRules.LocalNow(zone, now);
         if (!ReminderRules.IsTime(local))
         {
             return 0;

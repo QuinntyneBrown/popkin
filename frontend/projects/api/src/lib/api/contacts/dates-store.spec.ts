@@ -10,7 +10,7 @@ import {
   NOTIFICATIONS_BLOCKED_HEADING,
   PREFERENCES_FAILED_HEADING,
 } from './dates-store';
-import { PUSH_SUBSCRIBER } from './push-subscriber';
+import { PUSH_SUBSCRIBER } from '../notifications/push-subscriber';
 
 const date = (id: string, occursOn: string) => ({ id, occursOn }) as KeyDateRowView;
 const view = (dates: KeyDateRowView[]): ContactDatesView => ({

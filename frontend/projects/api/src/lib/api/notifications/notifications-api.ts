@@ -6,6 +6,7 @@ import {
   NotificationKind,
   NotificationSettingsView,
 } from '../../models/notifications';
+import { PushSubscriptionRequest } from '../../models/reminders';
 
 /** A change of one kind on one or both channels. */
 export interface NotificationKindChange {
@@ -22,6 +23,12 @@ export interface NotificationsApi {
   setEmail(on: boolean): Observable<void>;
   /** 400 `invalid_frequency`. */
   setFrequency(frequency: NotificationFrequency): Observable<void>;
+  /** The device's IANA zone, sent once when the app starts (L2-161 AC7); 400 `invalid_time_zone`. */
+  saveTimeZone(zone: string): Observable<void>;
+  /** Web Push's public key, empty while none is configured (ADR 0028). */
+  pushKey(): Observable<{ publicKey: string }>;
+  savePushSubscription(request: PushSubscriptionRequest): Observable<void>;
+  removePushSubscription(endpoint: string): Observable<void>;
 }
 
 export const NOTIFICATIONS_API = new InjectionToken<NotificationsApi>('NotificationsApi');
@@ -44,5 +51,21 @@ export class HttpNotificationsApi implements NotificationsApi {
 
   setFrequency(frequency: NotificationFrequency): Observable<void> {
     return this.http.put<void>('/api/me/notifications/frequency', { frequency });
+  }
+
+  saveTimeZone(zone: string): Observable<void> {
+    return this.http.put<void>('/api/me/time-zone', { zone });
+  }
+
+  pushKey(): Observable<{ publicKey: string }> {
+    return this.http.get<{ publicKey: string }>('/api/me/push-key');
+  }
+
+  savePushSubscription(request: PushSubscriptionRequest): Observable<void> {
+    return this.http.post<void>('/api/me/push-subscriptions', request);
+  }
+
+  removePushSubscription(endpoint: string): Observable<void> {
+    return this.http.delete<void>('/api/me/push-subscriptions', { params: { endpoint } });
   }
 }

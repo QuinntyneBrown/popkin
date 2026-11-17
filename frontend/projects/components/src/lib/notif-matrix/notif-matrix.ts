@@ -13,6 +13,8 @@ export interface NotifRow {
   required: boolean;
   emailDisabled?: boolean;
   phoneDisabled?: boolean;
+  /** A line under what sends it: "This device hasn’t allowed alerts." (L2-157 AC5). */
+  note?: string;
 }
 
 export interface NotifSwitch {

@@ -4,6 +4,7 @@ import { NotificationSettingsView } from '../../models/notifications';
 import { Toaster } from '../toasts/toaster';
 import { NOTIFICATIONS_API, NotificationsApi } from './notifications-api';
 import { NotificationSettingsStore, SAVE_FAILED } from './notification-settings-store';
+import { PUSH_SUBSCRIBER, PushOutcome } from './push-subscriber';
 
 const settings: NotificationSettingsView = {
   email: { on: true, available: true, frequency: 'AsItHappens' },
@@ -30,14 +31,19 @@ const settings: NotificationSettingsView = {
 const saved = (): Observable<void> => of(undefined);
 const failed = (): Observable<void> => throwError(() => new Error('down'));
 
+const device = { outcome: 'on' as PushOutcome, subscribe: vi.fn(), unsubscribe: vi.fn() };
+
 function storeWith(api: Partial<NotificationsApi>): {
   store: NotificationSettingsStore;
   toaster: Toaster;
 } {
+  device.subscribe.mockImplementation(() => Promise.resolve(device.outcome));
+  device.subscribe.mockClear();
   TestBed.configureTestingModule({
     providers: [
       NotificationSettingsStore,
       { provide: NOTIFICATIONS_API, useValue: { settings: () => of(settings), ...api } },
+      { provide: PUSH_SUBSCRIBER, useValue: device },
     ],
   });
   return { store: TestBed.inject(NotificationSettingsStore), toaster: TestBed.inject(Toaster) };
@@ -149,5 +155,39 @@ describe('NotificationSettingsStore', () => {
     store.dismissBanner();
 
     expect(store.banner()).toBeNull();
+  });
+
+  it('asks this device to allow alerts when a phone switch is turned on', async () => {
+    device.outcome = 'on';
+    const { store } = storeWith({ setKind: saved });
+    store.open();
+
+    store.setKind('GroupChat', 'phone', true);
+    await Promise.resolve();
+
+    expect(device.subscribe).toHaveBeenCalledOnce();
+    expect(store.refusedOnThisDevice().size).toBe(0);
+  });
+
+  it('keeps the switch on and notes a device that refused alerts', async () => {
+    device.outcome = 'blocked';
+    const { store } = storeWith({ setKind: saved });
+    store.open();
+
+    store.setKind('GroupChat', 'phone', true);
+    await vi.waitFor(() => expect(store.refusedOnThisDevice().has('GroupChat')).toBe(true));
+
+    expect(groupChat(store).phone).toBe(true);
+    store.setKind('GroupChat', 'phone', false);
+    await vi.waitFor(() => expect(store.refusedOnThisDevice().has('GroupChat')).toBe(false));
+  });
+
+  it('does not ask the device when an email switch changes', () => {
+    const { store } = storeWith({ setKind: saved });
+    store.open();
+
+    store.setKind('GroupChat', 'email', true);
+
+    expect(device.subscribe).not.toHaveBeenCalled();
   });
 });

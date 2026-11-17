@@ -11,6 +11,7 @@ public sealed class NotificationPreferencesConfiguration : IEntityTypeConfigurat
         builder.ToTable("NotificationPreferences");
         builder.HasKey(p => p.PersonId);
         builder.Property(p => p.Frequency).HasConversion<string>().HasMaxLength(16);
+        builder.Property(p => p.TimeZone).HasMaxLength(64);
         builder.HasOne<Person>().WithMany().HasForeignKey(p => p.PersonId).OnDelete(DeleteBehavior.Cascade);
     }
 }

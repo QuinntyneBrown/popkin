@@ -104,7 +104,15 @@ public sealed class NotificationPreferences
 
     public NotificationFrequency? Frequency { get; private set; }
 
+    /// <summary>
+    /// The IANA zone of the device the person last opened Popkin on: every "where the person is"
+    /// rule reads it, and UTC before one is saved (L2-161 AC7).
+    /// </summary>
+    public string? TimeZone { get; private set; }
+
     public DateTimeOffset? UpdatedAt { get; private set; }
+
+    public void ChangeTimeZone(string zone) => TimeZone = zone;
 
     public static NotificationPreferences For(Guid personId) => new() { PersonId = personId };
 

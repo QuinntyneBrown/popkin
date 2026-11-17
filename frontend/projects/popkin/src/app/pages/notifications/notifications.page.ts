@@ -7,6 +7,7 @@ import {
   NotificationKind,
   NotificationSettingsStore,
   UNSUBSCRIBED_TEXT,
+  DEVICE_REFUSED,
 } from 'api';
 import {
   Button,
@@ -73,6 +74,7 @@ export class NotificationsPage implements OnInit {
 
   protected rows(group: NotificationGroupView): NotifRow[] {
     const emailBlocked = this.store.emailBlocked();
+    const refused = this.store.refusedOnThisDevice();
     return group.kinds.map((kind) => ({
       key: kind.kind,
       name: kind.name,
@@ -82,6 +84,7 @@ export class NotificationsPage implements OnInit {
       required: kind.required,
       emailDisabled: emailBlocked || kind.offForEveryone,
       phoneDisabled: kind.offForEveryone,
+      note: kind.phone && refused.has(kind.kind) ? DEVICE_REFUSED : undefined,
     }));
   }
 }

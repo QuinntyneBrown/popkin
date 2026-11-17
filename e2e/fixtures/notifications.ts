@@ -59,3 +59,8 @@ export async function theDailyDigestChosen(page: Page): Promise<void> {
 export async function emailCanBeTurnedBackOn(page: Page): Promise<void> {
   await answer(page, 'PUT /api/me/notifications/email', { status: 204 });
 }
+
+/** Saving `kind` is answered as the API does; the recording holds Group chat's only. */
+export async function savingTheKind(page: Page, kind: string): Promise<void> {
+  await answer(page, `PUT /api/me/notifications/kinds/${kind}`, { status: 204 });
+}

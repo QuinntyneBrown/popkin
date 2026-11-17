@@ -539,7 +539,7 @@ await call('GET', '/api/contacts/today?on=2026-09-15');
 // Reminders (L2-140, known gaps 104 and 114 ruled): every Contacts page reads them, none yet as
 // the Worker has not run, and saves the device's zone.
 await call('GET', '/api/contacts/reminders');
-await call('PUT', '/api/contacts/time-zone', { zone: 'Europe/London' });
+await call('PUT', '/api/me/time-zone', { zone: 'Europe/London' });
 // Import (L2-151, known gaps 110 and 117 ruled): who she shares a Popkin with and does not keep
 // yet; she imports Walt, once, and a resend imports no one more.
 const candidates = await call('GET', '/api/contacts/import');

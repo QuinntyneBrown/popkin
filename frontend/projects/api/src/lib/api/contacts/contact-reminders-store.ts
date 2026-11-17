@@ -13,7 +13,7 @@ export function reminderAction(firstName: string | null): string {
  * The owner's reminders (docs/detailed-designs/contacts/reminders): read when a Contacts page
  * opens and when the window regains focus in Contacts, each shown once as an info toast that
  * stays until dismissed (L2-140 AC1). Dismissing one is saved, and a failed save puts it back.
- * The first open saves the device's zone, so 9 am is 9 am where the person is.
+ * The device's zone is saved when the app starts (AppTimeZone).
  */
 @Injectable({ providedIn: 'root' })
 export class ContactRemindersStore {
@@ -27,9 +27,6 @@ export class ContactRemindersStore {
   open(): void {
     if (!this.started) {
       this.started = true;
-      this.api.saveTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone).subscribe({
-        error: () => undefined,
-      });
       this.window?.addEventListener('focus', () => {
         if (this.router.url.startsWith('/contacts')) this.read();
       });

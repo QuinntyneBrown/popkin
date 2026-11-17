@@ -32,7 +32,6 @@ describe('ContactRemindersStore (L2-140 AC1)', () => {
   const api = {
     reminders: vi.fn(),
     dismissReminder: vi.fn(),
-    saveTimeZone: vi.fn(),
   };
   const shown = () => toaster.toasts().map((t) => [t.heading, t.action?.label ?? null]);
 
@@ -40,7 +39,6 @@ describe('ContactRemindersStore (L2-140 AC1)', () => {
     vi.useFakeTimers();
     api.reminders.mockReturnValue(of([grace, ladder]));
     api.dismissReminder.mockReturnValue(of(undefined));
-    api.saveTimeZone.mockReturnValue(of(undefined));
     TestBed.configureTestingModule({
       providers: [
         { provide: CONTACTS_API, useValue: api },
@@ -65,14 +63,6 @@ describe('ContactRemindersStore (L2-140 AC1)', () => {
       ['Grace turns 33 on Saturday', 'Open Grace’s profile'],
       ['Return Ruth’s ladder is due today', null],
     ]);
-  });
-
-  it('saves the device’s zone once, however often Contacts opens', () => {
-    store.open();
-    store.open();
-
-    expect(api.saveTimeZone).toHaveBeenCalledOnce();
-    expect(api.saveTimeZone).toHaveBeenCalledWith(Intl.DateTimeFormat().resolvedOptions().timeZone);
   });
 
   it('shows a reminder once when Contacts opens again', () => {

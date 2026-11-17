@@ -1166,6 +1166,10 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("nvarchar(16)");
 
+                    b.Property<string>("TimeZone")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -1522,10 +1526,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("PhoneNotifications")
                         .HasColumnType("bit");
-
-                    b.Property<string>("TimeZone")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
 
                     b.HasKey("OwnerId");
 

@@ -48,3 +48,11 @@
   font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
   color: var(--color-fg-subtle);
 }
+
+.notif-matrix__note {
+  display: block;
+  margin-top: var(--space-1);
+  font: var(--font-weight-semibold) var(--font-size-sm) / var(--line-height-snug)
+    var(--font-family-sans);
+  color: var(--color-fg-subtle);
+}

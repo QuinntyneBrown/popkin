@@ -53,18 +53,6 @@ test.describe('Reminders in Contacts', () => {
     await expect(toasts.headed('Chidi’s anniversary on 26 September')).toHaveCount(0);
   });
 
-  // Known gap 104 (ruled): 9 am is 9 am where the person is
-  test('saves the device’s time zone when Contacts opens', async ({ page, pk }) => {
-    await marasToday(page);
-    const saved = page.waitForRequest(
-      (r) => r.method() === 'PUT' && r.url().endsWith('/api/contacts/time-zone'),
-    );
-
-    await pk.open('contactsToday');
-
-    expect((await saved).postDataJSON()).toEqual({ zone: 'Europe/London' });
-  });
-
   // L2-140 AC2, ADR 0028
   test('says when the browser blocks notifications as Phone notifications is turned on', async ({
     page,

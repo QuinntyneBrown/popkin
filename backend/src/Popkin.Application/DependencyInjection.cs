@@ -34,7 +34,7 @@ public static class DependencyInjection
         services.AddSingleton(new SignInChannels(bool.TryParse(configuration?["Features:PhoneSignIn"], out var phone) && phone));
         services.AddSingleton(new Contacts.ContactsSwitch(bool.TryParse(configuration?["Features:Contacts"], out var contacts) && contacts));
         // ADR 0028: empty while no Web Push key is configured.
-        services.AddSingleton(new Contacts.Reminders.PushPublicKey(configuration?["Push:PublicKey"] ?? ""));
+        services.AddSingleton(new Notifications.Devices.PushPublicKey(configuration?["Push:PublicKey"] ?? ""));
         return services;
     }
 }

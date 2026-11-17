@@ -54,7 +54,6 @@ public sealed class ReminderPreferencesConfiguration : IEntityTypeConfiguration<
         builder.Property(p => p.BirthdayLead).HasConversion<string>().HasMaxLength(16);
         builder.Property(p => p.AnniversaryLead).HasConversion<string>().HasMaxLength(16);
         builder.Property(p => p.MilestoneLead).HasConversion<string>().HasMaxLength(16);
-        builder.Property(p => p.TimeZone).HasMaxLength(64);
         builder.HasOne<Person>().WithMany().HasForeignKey(p => p.OwnerId).OnDelete(DeleteBehavior.Cascade);
     }
 }

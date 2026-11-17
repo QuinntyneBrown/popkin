@@ -30,7 +30,7 @@ import {
   TimelineView,
 } from '../../models/contacts';
 import { ImportCandidatesView, ImportContactsRequest, ImportResultView } from '../../models/import';
-import { ContactReminderView, PushSubscriptionRequest } from '../../models/reminders';
+import { ContactReminderView } from '../../models/reminders';
 import { TodayView } from '../../models/today';
 
 /**
@@ -102,12 +102,6 @@ export interface ContactsApi {
   /** The undismissed reminders, oldest first (L2-140 AC1). */
   reminders(): Observable<ContactReminderView[]>;
   dismissReminder(id: string): Observable<void>;
-  /** The device's IANA zone: reminders come at 9 am there. */
-  saveTimeZone(zone: string): Observable<void>;
-  /** Web Push's public key, empty while none is configured (ADR 0028). */
-  pushKey(): Observable<{ publicKey: string }>;
-  savePushSubscription(request: PushSubscriptionRequest): Observable<void>;
-  removePushSubscription(endpoint: string): Observable<void>;
   /** Connections: the faces and the lines (L2-149). */
   connectionMap(): Observable<ConnectionsView>;
   /** Connect (L2-150); a resend keeps it once. */
@@ -283,22 +277,6 @@ export class HttpContactsApi implements ContactsApi {
 
   dismissReminder(id: string): Observable<void> {
     return this.http.post<void>(`/api/contacts/reminders/${id}/dismissal`, null);
-  }
-
-  saveTimeZone(zone: string): Observable<void> {
-    return this.http.put<void>('/api/contacts/time-zone', { zone });
-  }
-
-  pushKey(): Observable<{ publicKey: string }> {
-    return this.http.get<{ publicKey: string }>('/api/contacts/push-key');
-  }
-
-  savePushSubscription(request: PushSubscriptionRequest): Observable<void> {
-    return this.http.post<void>('/api/contacts/push-subscriptions', request);
-  }
-
-  removePushSubscription(endpoint: string): Observable<void> {
-    return this.http.delete<void>('/api/contacts/push-subscriptions', { params: { endpoint } });
   }
 
   connectionMap(): Observable<ConnectionsView> {

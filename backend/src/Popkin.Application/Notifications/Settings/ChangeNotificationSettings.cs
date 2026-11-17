@@ -25,7 +25,7 @@ public static class NotificationNames
     }
 }
 
-internal static class PreferencesRows
+public static class PreferencesRows
 {
     public static async Task<NotificationPreferences> PreferencesOfAsync(this IAppDbContext db, Guid personId, CancellationToken ct)
     {

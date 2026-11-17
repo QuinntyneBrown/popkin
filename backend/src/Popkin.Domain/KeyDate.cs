@@ -159,11 +159,6 @@ public sealed class ReminderPreferences : IOwnedByPerson
 
     public bool MondayEmail { get; private set; }
 
-    /// <summary>The IANA zone of the device that last opened Contacts; reminders come at 9 am there.</summary>
-    public string? TimeZone { get; private set; }
-
-    public void ChangeTimeZone(string zone) => TimeZone = zone;
-
     /// <summary>1 week before, 3 days before and on the day; both ways on (L2-139 AC1, L2-140 AC4).</summary>
     public static ReminderPreferences Defaults(Guid ownerId) => new()
     {

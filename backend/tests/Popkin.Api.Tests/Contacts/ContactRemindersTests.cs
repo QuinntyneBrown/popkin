@@ -106,8 +106,8 @@ public sealed class ContactRemindersTests
         var monday = NextMonday(api, 9);
         var saturday = DateOnly.FromDateTime(monday.UtcDateTime).AddDays(5);
         await BirthdayAsync(mara, "Grace Lin", saturday, saturday.Year - 33);
-        var zone = await mara.PutAsJsonAsync("/api/contacts/time-zone", new { zone = "America/Los_Angeles" });
-        var wrong = await mara.PutAsJsonAsync("/api/contacts/time-zone", new { zone = "Lakeside/Weekend" });
+        var zone = await mara.PutAsJsonAsync("/api/me/time-zone", new { zone = "America/Los_Angeles" });
+        var wrong = await mara.PutAsJsonAsync("/api/me/time-zone", new { zone = "Lakeside/Weekend" });
         (await mara.PutAsJsonAsync("/api/contacts/reminder-preferences", new
         {
             birthdayLead = "OneWeekBefore", anniversaryLead = "ThreeDaysBefore", milestoneLead = "OnTheDay",
@@ -182,28 +182,5 @@ public sealed class ContactRemindersTests
         Assert.Single(await RemindersAsync(mara));
         Assert.Single(await RemindersAsync(lena));
         Assert.Equal(["Bea turns 40 on Saturday", "Grace turns 33 on Saturday"], api.PhoneReminders.Sent.Select(s => s.Reminder.Words).Order(StringComparer.Ordinal));
-    }
-
-    // Given no Web Push key, when Mara's device subscribes, subscribes again and unsubscribes, then
-    // the key reads empty, each answers 204, and an endpoint that is not https is refused (ADR 0028).
-    [Fact]
-    public async Task A_device_subscribes_once_and_unsubscribes()
-    {
-        using var api = new ApiFactory();
-        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
-        var device = new { endpoint = "https://push.example.com/send/abc", p256dh = "BNcRd", auth = "tBHI" };
-
-        var key = await mara.GetFromJsonAsync<JsonElement>("/api/contacts/push-key");
-        var first = await mara.PostAsJsonAsync("/api/contacts/push-subscriptions", device);
-        var again = await mara.PostAsJsonAsync("/api/contacts/push-subscriptions", device);
-        var plain = await mara.PostAsJsonAsync("/api/contacts/push-subscriptions", device with { endpoint = "http://push.example.com/send/abc" });
-        var removed = await mara.DeleteAsync($"/api/contacts/push-subscriptions?endpoint={Uri.EscapeDataString(device.endpoint)}");
-
-        Assert.Equal("", key.GetProperty("publicKey").GetString());
-        Assert.Equal(HttpStatusCode.NoContent, first.StatusCode);
-        Assert.Equal(HttpStatusCode.NoContent, again.StatusCode);
-        Assert.Equal(HttpStatusCode.BadRequest, plain.StatusCode);
-        Assert.Equal("invalid_push_subscription", (await plain.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString());
-        Assert.Equal(HttpStatusCode.NoContent, removed.StatusCode);
     }
 }

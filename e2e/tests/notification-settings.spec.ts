@@ -1,6 +1,7 @@
 import {
   emailCanBeTurnedBackOn,
   savingFails,
+  savingTheKind,
   settingsWithoutAnEmailAddress,
   theMockNotificationSettings,
   theNotificationSettingsFailing,
@@ -237,5 +238,41 @@ test.describe('changing what you hear about', () => {
 
     await expect(notifications.undoBar).toHaveCount(0);
     await expect(notifications.emailSwitch).toHaveAttribute('aria-checked', 'false');
+  });
+});
+
+test.describe('this device', () => {
+  // L2-161 AC7: where the person is, saved once the app knows who they are
+  test('the app saves the device’s time zone when it starts', async ({ page, pk }) => {
+    await theMockNotificationSettings(page);
+    const saved = page.waitForRequest(
+      (r) => r.method() === 'PUT' && r.url().endsWith('/api/me/time-zone'),
+    );
+
+    await pk.open('notificationSettings');
+
+    const zone = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
+    expect((await saved).postDataJSON()).toEqual({ zone });
+  });
+
+  // L2-157 AC5, ADR 0028
+  test('a phone switch turned on where alerts are refused stays on and says so', async ({
+    page,
+    pk,
+  }) => {
+    await theMockNotificationSettings(page);
+    await savingTheKind(page, 'NewPhotos');
+    await pk.open('notificationSettings');
+    const notifications = new NotificationSettingsPage(page);
+
+    await notifications.kindSwitch('New photos', 'phone').click();
+
+    await expect(notifications.kindSwitch('New photos', 'phone')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(notifications.group('When something changes')).toContainText(
+      'This device hasn’t allowed alerts.',
+    );
   });
 });

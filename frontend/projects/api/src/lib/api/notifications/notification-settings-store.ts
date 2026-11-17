@@ -8,6 +8,7 @@ import {
 import { DelayedLoading } from '../loading/delayed-loading';
 import { Toaster } from '../toasts/toaster';
 import { NOTIFICATIONS_API } from './notifications-api';
+import { PUSH_SUBSCRIBER } from './push-subscriber';
 
 /** The three ways activity email can come, in the words of L2-156 AC1. */
 export const FREQUENCY_CHOICES = [
@@ -27,6 +28,9 @@ export const FREQUENCY_CHOICES = [
 /** What a failed save says, as the control goes back (L2-155 AC5). */
 export const SAVE_FAILED = 'We couldn’t save that. Try again.';
 
+/** A phone switch turned on where the browser refused alerts (L2-157 AC5). */
+export const DEVICE_REFUSED = 'This device hasn’t allowed alerts.';
+
 /** The banner after email is switched off (L2-156 AC3). */
 export const UNSUBSCRIBED_TEXT =
   'You’re unsubscribed from all Popkin email. Sign-in codes still arrive, and your phone alerts are unchanged.';
@@ -43,6 +47,7 @@ export type NotificationChannel = 'email' | 'phone';
 export class NotificationSettingsStore {
   private readonly api = inject(NOTIFICATIONS_API);
   private readonly toaster = inject(Toaster);
+  private readonly devices = inject(PUSH_SUBSCRIBER);
   private readonly loading = new DelayedLoading();
 
   /** `pending` shows nothing yet; `loading` once 300 ms pass without an answer. */
@@ -50,6 +55,8 @@ export class NotificationSettingsStore {
   readonly settings = signal<NotificationSettingsView | null>(null);
   /** The banner the last change raised: email switched off (L2-156 AC3). */
   readonly banner = signal<'unsubscribed' | null>(null);
+  /** The kinds whose phone switch was turned on here while this device refused alerts. */
+  readonly refusedOnThisDevice = signal<ReadonlySet<NotificationKind>>(new Set());
 
   open(): void {
     this.loading.begin();
@@ -79,6 +86,21 @@ export class NotificationSettingsStore {
       }),
       this.api.setKind(kind, { [channel]: on }),
     );
+    if (channel === 'phone') void this.checkDevice(kind, on);
+  }
+
+  /**
+   * A phone switch turned on asks this browser to allow alerts (ADR 0028). If it refuses, the
+   * switch stays on for the person's other devices and its row says so (L2-157 AC5).
+   */
+  private async checkDevice(kind: NotificationKind, on: boolean): Promise<void> {
+    const refused = on && (await this.devices.subscribe()) === 'blocked';
+    this.refusedOnThisDevice.update((kinds) => {
+      const next = new Set(kinds);
+      if (refused) next.add(kind);
+      else next.delete(kind);
+      return next;
+    });
   }
 
   setEmail(on: boolean): void {

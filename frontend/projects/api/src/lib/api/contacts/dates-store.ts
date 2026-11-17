@@ -10,7 +10,7 @@ import { CONTACTS_API } from './contacts-api';
 import { dayParam } from './contacts-text';
 import { monthGroups } from './contact-dates-text';
 import { ContactsPageState } from './people-store';
-import { PUSH_SUBSCRIBER } from './push-subscriber';
+import { PUSH_SUBSCRIBER } from '../notifications/push-subscriber';
 
 /** The defaults Dates shows until it has read mine (L2-139 AC1). */
 export const DEFAULT_REMINDERS: ReminderPreferencesView = {

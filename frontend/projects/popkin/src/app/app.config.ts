@@ -13,6 +13,7 @@ import {
 import {
   ACCOUNT_API,
   NOTIFICATIONS_API,
+  AppTimeZone,
   HttpNotificationsApi,
   AUTH_API,
   HttpAccountApi,
@@ -81,6 +82,8 @@ export const appConfig: ApplicationConfig = {
     { provide: THEME_PREFERENCES, useClass: LocalStorageThemePreferences },
     // The theme chosen on this device is drawn before the first screen (L2-048 AC4).
     provideAppInitializer(() => inject(THEME_PREFERENCES).apply()),
+    // Where the person is, once they are signed in (L2-161 AC7).
+    provideAppInitializer(() => inject(AppTimeZone).start()),
     // Contacts writes kept offline are sent when the app opens online (L2-123 AC4).
     provideAppInitializer(() => void inject(ContactsOutbox)),
     { provide: POPKINS_API, useClass: HttpPopkinsApi },

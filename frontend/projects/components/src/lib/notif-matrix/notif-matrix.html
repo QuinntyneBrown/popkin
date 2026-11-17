@@ -3,6 +3,9 @@
     <span>
       <span class="notif-matrix__name">{{ row.name }}</span>
       <span class="notif-matrix__about">{{ row.about }}</span>
+      @if (row.note) {
+        <span class="notif-matrix__note">{{ row.note }}</span>
+      }
     </span>
     @if (row.required) {
       <span class="notif-matrix__lock"><svg pk-icon name="lock" size="sm"></svg> Always on</span>
