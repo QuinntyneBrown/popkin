@@ -1,0 +1,52 @@
+WEBVTT
+
+00:00:02.000 --> 00:00:06.260
+Popkin has a console for the people who run it. This is how they get in.
+
+00:00:08.000 --> 00:00:13.561
+Lena opens the audit log, and the console asks who she is: her staff email first.
+
+00:00:18.000 --> 00:00:21.305
+A code goes to that address, and it works for ten minutes.
+
+00:00:28.000 --> 00:00:32.737
+Then the page she asked for opens. The audit log lists every action taken in the
+
+00:00:32.737 --> 00:00:35.346
+console, newest first, with who did it.
+
+00:00:35.546 --> 00:00:38.544
+It is kept for two years, and nobody can edit it.
+
+00:00:42.000 --> 00:00:46.684
+Admins and roles lists everyone who can sign in, with their role and when they were
+
+00:00:46.684 --> 00:00:47.661
+last active.
+
+00:00:52.000 --> 00:00:56.609
+An Owner adds an admin with their popkin dot app address. They are invited until
+
+00:00:56.609 --> 00:00:58.695
+they first sign in with a code.
+
+00:01:04.000 --> 00:01:08.958
+Changing a role says what changes, and asks for a reason, which goes into the audit
+
+00:01:08.958 --> 00:01:09.497
+log.
+
+00:01:16.000 --> 00:01:20.092
+What each role can do sets Owner, Support and Viewer side by side.
+
+00:01:26.000 --> 00:01:30.918
+On a phone it is one column. On a desktop, a sidebar names the pages.
+
+00:01:34.000 --> 00:01:38.682
+What the tests prove: a right code that is not an admin's is turned away, and the
+
+00:01:38.682 --> 00:01:40.774
+console always keeps one Owner.
+
+00:01:46.000 --> 00:01:51.017
+That is journey twenty-four. Popkin is a free platform for pop-up communities.
