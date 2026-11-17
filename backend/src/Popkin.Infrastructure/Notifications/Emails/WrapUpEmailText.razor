@@ -1,0 +1,15 @@
+@* The plain-text part of the wrap-up reminder. *@
+<EmailShellText Shell="Model.Shell">
+@Model.Headline@("\n\n")
+@Model.Body@("\n\n")
+@if (Model.SoFar is { } soFar)
+{
+@soFar@(Model.Yours is { } yours ? " " + yours : "")@("\n\n")
+}
+@Model.Button.Label@(": ")@Model.Button.Url@("\n")
+</EmailShellText>
+
+@code {
+    [Parameter, EditorRequired]
+    public WrapUpEmailModel Model { get; set; } = default!;
+}

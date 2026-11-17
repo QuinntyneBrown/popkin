@@ -14,6 +14,7 @@ public sealed class PopkinMetrics
     private readonly Counter<long> _hubSendFailures;
     private readonly Histogram<double> _wrapUpLateness;
     private readonly Gauge<double> _wrapUpLastTick;
+    private readonly Gauge<double> _remindersLastTick;
     private readonly Counter<long> _auditEntriesPurged;
     private readonly Counter<long> _remindersSent;
     private readonly Counter<long> _reminderSendFailures;
@@ -37,6 +38,8 @@ public sealed class PopkinMetrics
             "popkin.wrap_up.lateness", unit: "s", description: "How long after its end date a Popkin was wrapped up.");
         _wrapUpLastTick = meter.CreateGauge<double>(
             "popkin.wrap_up.last_tick", unit: "s", description: "When the Worker last finished a wrap-up tick, in seconds since the Unix epoch.");
+        _remindersLastTick = meter.CreateGauge<double>(
+            "popkin.notifications.reminders.last_tick", unit: "s", description: "When a reminder job last finished a tick, by job, in seconds since the Unix epoch.");
         _auditEntriesPurged = meter.CreateCounter<long>(
             "popkin.audit.entries_purged", description: "Audit entries deleted at two years old (L2-120 AC6).");
         _remindersSent = meter.CreateCounter<long>(
@@ -101,6 +104,10 @@ public sealed class PopkinMetrics
 
     /// <summary>The Worker's heartbeat: it has no HTTP surface to probe, so a tick that stops shows here.</summary>
     public void WrapUpTicked(DateTimeOffset finishedAt) => _wrapUpLastTick.Record(finishedAt.ToUnixTimeMilliseconds() / 1000d);
+
+    /// <summary>A reminder job's tick finished: `contacts` or `popkins`.</summary>
+    public void RemindersTicked(string job, DateTimeOffset finishedAt) =>
+        _remindersLastTick.Record(finishedAt.ToUnixTimeMilliseconds() / 1000d, new KeyValuePair<string, object?>("job", job));
 
     /// <summary>L2-027 AC1: a message arrives within 1 second.</summary>
     public void HubSent(string eventName, TimeSpan duration) =>

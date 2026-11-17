@@ -90,3 +90,29 @@ public sealed record KeyDateReminderEmailModel(
 {
     public override IReadOnlyList<EmailPicture> Pictures => Photo is { } photo ? [photo] : [];
 }
+
+/// <summary>The story-due reminder (L2-167 AC1, AC3): the story, its day, "Yours", its points and tag.</summary>
+public sealed record StoryDueEmailModel(
+    EmailShellModel Shell,
+    string Title,
+    string DueLine,
+    string OwnerInitials,
+    int Points,
+    string Tag,
+    string TagColour,
+    EmailLink Button)
+    : EmailModel(Shell);
+
+/// <summary>The wrap-up reminder (L2-167 AC2, AC4): when it ends, the album so far, and "Add your photos".</summary>
+public sealed record WrapUpEmailModel(
+    EmailShellModel Shell,
+    string Headline,
+    string Body,
+    IReadOnlyList<EmailPicture> Photos,
+    string? SoFar,
+    string? Yours,
+    EmailLink Button)
+    : EmailModel(Shell)
+{
+    public override IReadOnlyList<EmailPicture> Pictures => Photos;
+}

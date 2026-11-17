@@ -73,6 +73,32 @@ public sealed partial class NotificationEmailRendererTests
         Assert.All(links, link => Assert.Contains(link, email.Text));
     }
 
+    // The two Popkin reminders keep every link in their text part and give every photo its alt (L2-163 AC4, L2-167).
+    [Fact]
+    public async Task The_Popkin_reminders_keep_their_links_in_the_text()
+    {
+        var button = new EmailLink("Open the plan", "https://app.popkin.community/p/1/plan");
+        var story = await RenderAsync(new StoryDueEmailModel(Shell, "Book the cabin", "Due tomorrow, Friday.", "GA", 3, "Stay", "Plum", button));
+        var wrapUp = await RenderAsync(new WrapUpEmailModel(
+            Shell,
+            "Lakeside Weekend wraps up tomorrow at 6 pm",
+            "After that the chat closes and the album becomes a keepsake. Photos you add now make the recap.",
+            [new EmailPicture("photo-1", "thumbs/1.jpg", "The dock at dawn")],
+            "48 photos so far from 11 people.",
+            "You’ve added 14.",
+            new EmailLink("Add your photos", "https://app.popkin.community/p/1/photos")));
+
+        foreach (var email in new[] { story, wrapUp })
+        {
+            var links = Hrefs().Matches(email.Html).Select(m => System.Net.WebUtility.HtmlDecode(m.Groups[1].Value)).ToList();
+            Assert.All(links, link => Assert.Contains(link, email.Text));
+            Assert.All(ImageTags().Matches(email.Html), img => Assert.Contains("alt=", img.Value));
+        }
+
+        Assert.Contains("<strong>48 photos</strong> so far from 11 people. You’ve added 14.", wrapUp.Html.Replace("&#x2019;", "’"));
+        Assert.Contains("Yours · 3 points · Stay", story.Text);
+    }
+
     // The footer has the narrowest mute, settings and unsubscribe, in order, then the postal address (L2-163 AC5).
     [Fact]
     public async Task The_footer_has_its_three_links_in_order_and_the_address()

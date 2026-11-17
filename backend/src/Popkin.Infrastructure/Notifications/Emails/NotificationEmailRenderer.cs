@@ -22,6 +22,8 @@ public sealed partial class NotificationEmailRenderer(IServiceProvider services,
         {
             PopkinUpdateEmailModel => (typeof(PopkinUpdateEmail), typeof(PopkinUpdateEmailText)),
             KeyDateReminderEmailModel => (typeof(KeyDateReminderEmail), typeof(KeyDateReminderEmailText)),
+            StoryDueEmailModel => (typeof(StoryDueEmail), typeof(StoryDueEmailText)),
+            WrapUpEmailModel => (typeof(WrapUpEmail), typeof(WrapUpEmailText)),
             _ => throw new ArgumentOutOfRangeException(nameof(model), model.GetType().Name, "No template for this email."),
         };
         var parameters = ParameterView.FromDictionary(new Dictionary<string, object?> { ["Model"] = model });

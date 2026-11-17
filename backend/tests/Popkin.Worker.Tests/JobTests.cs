@@ -1,6 +1,7 @@
 using Popkin.Application.Administration;
 using Popkin.Application.Contacts.Reminders;
 using Popkin.Application.Notifications.Dispatch;
+using Popkin.Application.Notifications.Reminders;
 using System.Diagnostics.Metrics;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +49,7 @@ public sealed class JobTests : IDisposable
         { nameof(PurgeOldAuditEntriesJob), 86400, typeof(PurgeOldAuditEntriesCommand) },
         { nameof(SendContactRemindersJob), 300, typeof(SendContactRemindersCommand) },
         { nameof(DispatchNotificationsJob), 15, typeof(DispatchNotificationsCommand) },
+        { nameof(SendPopkinRemindersJob), 300, typeof(SendPopkinRemindersCommand) },
     };
 
     private BackgroundService Job(string name)
@@ -62,8 +64,11 @@ public sealed class JobTests : IDisposable
             nameof(PrepareAlbumExportsJob) => new PrepareAlbumExportsJob(scopes, _clock, NullLogger<PrepareAlbumExportsJob>.Instance),
             nameof(PurgeDeletedAccountsJob) => new PurgeDeletedAccountsJob(scopes, _clock, NullLogger<PurgeDeletedAccountsJob>.Instance),
             nameof(PurgeOldAuditEntriesJob) => new PurgeOldAuditEntriesJob(scopes, _clock, NullLogger<PurgeOldAuditEntriesJob>.Instance),
-            nameof(SendContactRemindersJob) => new SendContactRemindersJob(scopes, _clock, NullLogger<SendContactRemindersJob>.Instance),
+            nameof(SendContactRemindersJob) => new SendContactRemindersJob(
+                scopes, _clock, _services.GetRequiredService<PopkinMetrics>(), NullLogger<SendContactRemindersJob>.Instance),
             nameof(DispatchNotificationsJob) => new DispatchNotificationsJob(scopes, _clock, NullLogger<DispatchNotificationsJob>.Instance),
+            nameof(SendPopkinRemindersJob) => new SendPopkinRemindersJob(
+                scopes, _clock, _services.GetRequiredService<PopkinMetrics>(), NullLogger<SendPopkinRemindersJob>.Instance),
             _ => throw new ArgumentOutOfRangeException(nameof(name)),
         };
     }
@@ -150,6 +155,43 @@ public sealed class JobTests : IDisposable
         var lastTick = await recorded.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
         Assert.Equal(Start.AddSeconds(30).ToUnixTimeSeconds(), lastTick);
+        await job.StopAsync(CancellationToken.None);
+    }
+
+    // Given a reminder job, when a tick finishes, then `popkin.notifications.reminders.last_tick`
+    // holds the time it finished, tagged with the job, so a stalled one is seen (send-reminders).
+    [Theory]
+    [InlineData(nameof(SendContactRemindersJob), 300, "contacts")]
+    [InlineData(nameof(SendPopkinRemindersJob), 300, "popkins")]
+    public async Task A_reminder_job_records_when_its_tick_finished(string name, int periodSeconds, string tag)
+    {
+        var recorded = new TaskCompletionSource<(double At, string? Job)>(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var listener = new MeterListener();
+        listener.InstrumentPublished = (instrument, l) =>
+        {
+            if (instrument.Meter.Name == PopkinMetrics.MeterName && instrument.Name == "popkin.notifications.reminders.last_tick")
+            {
+                l.EnableMeasurementEvents(instrument);
+            }
+        };
+        listener.SetMeasurementEventCallback<double>((_, measurement, tags, _) =>
+        {
+            foreach (var t in tags)
+            {
+                if (t.Key == "job")
+                {
+                    recorded.TrySetResult((measurement, t.Value as string));
+                }
+            }
+        });
+        listener.Start();
+        using var job = Job(name);
+        await job.StartAsync(CancellationToken.None);
+
+        _clock.Advance(TimeSpan.FromSeconds(periodSeconds));
+        var tick = await recorded.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.Equal((Start.AddSeconds(periodSeconds).ToUnixTimeSeconds(), tag), (tick.At, tick.Job));
         await job.StopAsync(CancellationToken.None);
     }
 }

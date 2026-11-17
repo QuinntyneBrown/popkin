@@ -159,6 +159,7 @@ public sealed class DispatchNotificationsCommandHandler(
         foreach (var group in due.GroupBy(x => (x.Delivery.PersonId, x.Event.PopkinId)))
         {
             var passing = new List<(NotificationDelivery Delivery, NotificationEvent Event)>();
+            var zones = new Dictionary<Guid, TimeZoneInfo>();
             foreach (var (delivery, notification) in group.Select(x => (x.Delivery, x.Event)))
             {
                 // A delivery held for the end of quiet hours is not held again by them now.
@@ -167,6 +168,7 @@ public sealed class DispatchNotificationsCommandHandler(
                 if (decision.Sends)
                 {
                     passing.Add((delivery, notification));
+                    zones[delivery.Id] = question.Zone;
                 }
                 else
                 {
@@ -178,7 +180,7 @@ public sealed class DispatchNotificationsCommandHandler(
             if (passing.Count > 0)
             {
                 var heldBack = group.Key.PopkinId is not null && passing.Count > 1
-                    && passing.All(p => p.Delivery.SendAfter > p.Event.OccurredAt.AddMinutes(1));
+                    && passing.All(p => !ReminderEvents.IsReminder(p.Event.Kind) && p.Delivery.SendAfter > p.Event.OccurredAt.AddMinutes(1));
                 var alerts = new List<PhoneAlert>();
                 if (heldBack)
                 {
@@ -186,9 +188,19 @@ public sealed class DispatchNotificationsCommandHandler(
                 }
                 else
                 {
-                    foreach (var (_, notification) in passing)
+                    foreach (var (delivery, notification) in passing.ToList())
                     {
-                        alerts.Add(await AlertAsync(notification, cancellationToken));
+                        if (await AlertAsync(notification, delivery.PersonId, zones[delivery.Id], cancellationToken) is { } alert)
+                        {
+                            alerts.Add(alert);
+                        }
+                        else
+                        {
+                            // A reminder whose story or end no longer stands (L2-162 AC2, L2-174 AC1).
+                            delivery.Suppress(SuppressionRule.NothingNew);
+                            metrics.Suppressed(notification.Kind, delivery.Channel, SuppressionRule.NothingNew);
+                            passing.Remove((delivery, notification));
+                        }
                     }
                 }
 
@@ -238,11 +250,20 @@ public sealed class DispatchNotificationsCommandHandler(
         return new PhoneAlert(popkin.Name, PhoneAlerts.HeldBack(count), $"/p/{popkin.Id}");
     }
 
-    private async Task<PhoneAlert> AlertAsync(NotificationEvent notification, CancellationToken cancellationToken)
+    private async Task<PhoneAlert?> AlertAsync(NotificationEvent notification, Guid person, TimeZoneInfo zone, CancellationToken cancellationToken)
     {
-        if (notification.Kind == NotificationKind.Birthdays)
+        switch (notification.Kind)
         {
-            return await ContactReminderAlertAsync(notification, cancellationToken);
+            case NotificationKind.Birthdays:
+                return await ContactReminderAlertAsync(notification, cancellationToken);
+            case NotificationKind.StoriesDue:
+                return await Emails.StoryDueEmailComposer.StandingAsync(db, notification, person, cancellationToken) is var (story, popkinOf, _)
+                    ? new PhoneAlert($"Due tomorrow: {story.Title}", "", $"/p/{popkinOf.Id}/plan")
+                    : null;
+            case NotificationKind.PopkinWrappingUp:
+                return await Emails.WrapUpEmailComposer.StandingAsync(db, notification, cancellationToken) is { } ending
+                    ? new PhoneAlert($"{ending.Name} wraps up tomorrow at {Emails.WrapUpEmailComposer.Time(ending.EndsAt!.Value, zone)}", "", $"/p/{ending.Id}/photos")
+                    : null;
         }
 
         var popkin = await db.Popkins.AsNoTracking().SingleAsync(p => p.Id == notification.PopkinId, cancellationToken);

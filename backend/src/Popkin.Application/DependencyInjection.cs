@@ -41,6 +41,8 @@ public static class DependencyInjection
         services.AddSingleton(new Notifications.Emails.NotificationEmailSettings(configuration?["Email:PostalAddress"] ?? ""));
         services.AddScoped<Notifications.Emails.PopkinUpdateEmailComposer>();
         services.AddScoped<Notifications.Emails.KeyDateReminderEmailComposer>();
+        services.AddScoped<Notifications.Emails.StoryDueEmailComposer>();
+        services.AddScoped<Notifications.Emails.WrapUpEmailComposer>();
         services.AddScoped<Notifications.Dispatch.UpdateEmails>();
         return services;
     }

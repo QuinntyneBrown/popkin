@@ -27,6 +27,7 @@ public static class WorkerHost
         services.AddHostedService<PurgeOldAuditEntriesJob>();
         services.AddHostedService<SendContactRemindersJob>();
         services.AddHostedService<DispatchNotificationsJob>();
+        services.AddHostedService<SendPopkinRemindersJob>();
         return services;
     }
 }

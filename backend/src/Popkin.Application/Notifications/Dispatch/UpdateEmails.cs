@@ -15,6 +15,8 @@ public sealed class UpdateEmails(
     IAppDbContext db,
     PopkinUpdateEmailComposer composer,
     KeyDateReminderEmailComposer keyDates,
+    StoryDueEmailComposer stories,
+    WrapUpEmailComposer wrapUps,
     INotificationEmailRenderer renderer, INotificationEmailSender sender, NotificationLinks links, PopkinMetrics metrics)
 {
     /// <summary>The delivery for an email change the rules let through (or held, while email is paused).</summary>
@@ -161,9 +163,13 @@ public sealed class UpdateEmails(
             }
         }
 
-        EmailModel? model = passing.Count == 0 ? null
-            : email.Kind == NotificationEmailKind.KeyDateReminder ? await keyDates.ComposeAsync(email, passing[0].Event, cancellationToken)
-            : await composer.ComposeAsync(email, passing.Select(p => p.Event).ToList(), zone, platform.BundlingMinutes, cancellationToken);
+        EmailModel? model = passing.Count == 0 ? null : email.Kind switch
+        {
+            NotificationEmailKind.KeyDateReminder => await keyDates.ComposeAsync(email, passing[0].Event, cancellationToken),
+            NotificationEmailKind.StoryDue => await stories.ComposeAsync(email, passing[0].Event, cancellationToken),
+            NotificationEmailKind.WrapUp => await wrapUps.ComposeAsync(email, passing[0].Event, zone, cancellationToken),
+            _ => await composer.ComposeAsync(email, passing.Select(p => p.Event).ToList(), zone, platform.BundlingMinutes, cancellationToken),
+        };
         var address = await db.People.Where(p => p.Id == email.PersonId).Select(p => p.Email).SingleOrDefaultAsync(cancellationToken);
         if (model is null || address is not { Length: > 0 })
         {

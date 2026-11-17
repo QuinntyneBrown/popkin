@@ -1,0 +1,12 @@
+@* The plain-text part of the story-due reminder. *@
+<EmailShellText Shell="Model.Shell">
+@Model.Title@("\n")
+@Model.DueLine@("\n\n")
+@("Yours · ")@(Model.Points == 1 ? "1 point" : $"{Model.Points} points")@(" · ")@Model.Tag@("\n\n")
+@Model.Button.Label@(": ")@Model.Button.Url@("\n")
+</EmailShellText>
+
+@code {
+    [Parameter, EditorRequired]
+    public StoryDueEmailModel Model { get; set; } = default!;
+}
