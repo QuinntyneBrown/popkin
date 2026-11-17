@@ -5,6 +5,11 @@
   align-items: start;
 }
 
+/* Set apart from the chips above it. */
+:host(.contacts-grid--spaced) {
+  margin-top: var(--space-4);
+}
+
 /* One column at the narrow container's width, for lists read top to bottom (Follow-ups, Habits). */
 :host(.contacts-grid--narrow) {
   gap: var(--space-6);

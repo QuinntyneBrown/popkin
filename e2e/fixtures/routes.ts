@@ -233,6 +233,44 @@ export const routes = {
   contactsHabitsEmpty: { app: '/contacts/habits', mock: 'pages/contacts-habits/empty.html' },
   contactsHabitsLoading: { app: '/contacts/habits', mock: 'pages/contacts-habits/loading.html' },
   contactsHabitsError: { app: '/contacts/habits', mock: 'pages/contacts-habits/error.html' },
+  contactsConnections: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/none.html',
+  },
+  contactsConnectionsChidi: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/default.html',
+  },
+  contactsConnectionsFamily: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/family.html',
+  },
+  contactsConnectionsEmpty: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/empty.html',
+  },
+  contactsConnectionsLoading: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/loading.html',
+  },
+  contactsConnectionsError: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/error.html',
+  },
+  connectPerson: { app: '/contacts/connections', mock: 'dialogs/connect-person/default.html' },
+  connectPersonChoose: {
+    app: '/contacts/connections',
+    mock: 'dialogs/connect-person/choose.html',
+  },
+  connectPersonInvalid: {
+    app: '/contacts/connections',
+    mock: 'dialogs/connect-person/invalid.html',
+  },
+  connectPersonNoResults: {
+    app: '/contacts/connections',
+    mock: 'dialogs/connect-person/no-results.html',
+  },
+  connectPersonBusy: { app: '/contacts/connections', mock: 'dialogs/connect-person/busy.html' },
   newHabit: { app: `${chidi}`, mock: 'dialogs/new-habit/default.html' },
   newHabitChoose: { app: '/contacts/habits', mock: 'dialogs/new-habit/choose.html' },
   newHabitInvalid: { app: `${chidi}`, mock: 'dialogs/new-habit/invalid.html' },

@@ -38,6 +38,7 @@ import {
   Button,
   ChipOption,
   DateEntry,
+  PersonPick,
   Link,
   EmptyState,
   ChoiceChips,
@@ -55,6 +56,11 @@ import {
 } from 'components';
 import { AddDateData, AddDateDialog } from '../../dialogs/add-date/add-date.dialog';
 import {
+  ConnectPersonData,
+  ConnectPersonDialog,
+  ConnectPersonResult,
+} from '../../dialogs/connect-person/connect-person.dialog';
+import {
   DeleteContactData,
   DeleteContactDialog,
 } from '../../dialogs/delete-contact/delete-contact.dialog';
@@ -71,6 +77,7 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
     Banner,
     Button,
     DateEntry,
+    PersonPick,
     Link,
     ChoiceChips,
     EmptyState,
@@ -211,6 +218,37 @@ export class ContactFormPage implements OnInit {
       })
       .closed.subscribe((draft) => {
         if (draft) this.store.addDate(draft);
+      });
+  }
+
+  /** "Connect to someone": Connect in draft mode, saved with the contact (L2-150 AC9). */
+  protected connectTo(): void {
+    const editing = this.store.editing();
+    const first = this.form.controls.name.value.trim().split(/\s+/)[0] || 'them';
+    this.dialog
+      .open<ConnectPersonResult, ConnectPersonData>(ConnectPersonDialog, {
+        data: {
+          contact: { id: editing?.id ?? '', firstName: editing?.firstName ?? first },
+          mode: 'draft',
+          exclude: this.store.connections().map((c) => c.otherContactId),
+        },
+        ariaLabelledBy: 'dlg-title',
+        hasBackdrop: false,
+        ariaModal: true,
+      })
+      .closed.subscribe((result) => {
+        if (!result?.draft) return;
+        this.store.addConnection({
+          id: null,
+          otherContactId: result.draft.otherContactId,
+          name: result.person.name,
+          initials: result.person.initials ?? '',
+          accent: result.person.accent,
+          photoUrl: result.person.photo ?? null,
+          kind: result.draft.kind,
+          words: result.draft.words,
+          promised: result.draft.promised,
+        });
       });
   }
 

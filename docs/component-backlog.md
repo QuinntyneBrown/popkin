@@ -30,7 +30,7 @@ Popkin uses no custom tooltips.
 | 18 | Keep strip and habit row | A habit's rhythm with someone, showing which times were kept; `pk-habit-list` lists them. | 1 day | Built, with parity (first and last row) |
 | 19 | Spotlight and date tile | The one most important thing on a screen, tinted, with a date tile. | 0.5 days || Built; spotlight parity done (row), date tile pending |
 | 20 | Group browser | Navigation list of households, small groups and teams, with each group's detail. | 1 day | Built, parity pending |
-| 21 | Connection map | Draws who knows whom: your people as faces linked by relationship. | 2 days || Built, parity pending |
+| 21 | Connection map | Draws who knows whom: your people as faces linked by relationship; `pk-connection-panel` beside it. | 2 days || Built, with parity (none, focus, family; the panel's hint and chosen) |
 | 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell; `narrow` is one column at the narrow container (Follow-ups, Habits). | 0.5 days | Built; list head with parity |
 | 23 | Filter chips | Pressed-button filters with counts, such as the circles on People; `pk-choice-chips` is a radio group. | 0.25 days | Built, with parity |
 | 24 | List row | The design system's `list-row`, not built yet, for rows on Today and in groups. | To estimate | |
@@ -42,6 +42,7 @@ Popkin uses no custom tooltips.
 | 30 | Reminder defaults | Dates' aside: the default lead per kind, and phone and Monday email. | 0.5 days | Built, with parity |
 | 31 | Log form, section and when | Log's one column, its parts named like fields, and when a conversation is logged. | 0.5 days | Built, with parity (form, promises, divided) |
 | 32 | Memory list, chooser and upload | Memories' files and notes, Add's "Choose a photo", and the chosen photo or file with its progress. | 0.5 days | Built, with parity (list, chooser ×4, chosen) |
+| 33 | People around and person choice | A contact's people as short linked rows, keyed on Connections; Connect's "Who" as a radio list. | 0.5 days | Built, with parity (panel; chosen, invalid) |
 
 Total: 31 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
 26 came from the Contacts designs and are not estimated yet.

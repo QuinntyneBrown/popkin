@@ -1,0 +1,42 @@
+<ul
+  class="person-choice__list"
+  role="radiogroup"
+  [id]="fieldId()"
+  [attr.aria-label]="label()"
+  [attr.aria-invalid]="error() ? true : null"
+  [attr.aria-describedby]="error() ? fieldId() + '-err' : null"
+>
+  @for (option of options(); track option.id; let i = $index) {
+    <li>
+      <button
+        #option
+        class="row row--short"
+        type="button"
+        role="radio"
+        [attr.aria-checked]="option.id === value()"
+        [tabIndex]="tabbable(option.id, i) ? 0 : -1"
+        [disabled]="disabled()"
+        (click)="value.set(option.id)"
+        (keydown)="move($event, i)"
+      >
+        <span
+          pk-avatar
+          size="36"
+          [name]="option.name"
+          [initials]="option.initials"
+          [photo]="option.photo"
+          [attr.data-accent]="option.accent"
+        ></span>
+        <span class="row__main row__title">{{ option.name }}</span>
+        @if (option.id === value()) {
+          <span class="row__check"><svg pk-icon name="check" size="md"></svg></span>
+        }
+      </button>
+    </li>
+  }
+</ul>
+@if (error()) {
+  <p class="field__error" [id]="fieldId() + '-err'">
+    <svg pk-icon name="alert" size="sm"></svg><span>{{ error() }}</span>
+  </p>
+}

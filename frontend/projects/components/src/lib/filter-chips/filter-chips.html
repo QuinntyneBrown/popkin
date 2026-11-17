@@ -6,6 +6,9 @@
     [attr.aria-pressed]="option.value === value()"
     (click)="value.set(option.value)"
   >
+    @if (option.key) {
+      <span pk-link-key [kind]="option.key"></span>
+    }
     {{ option.label }}
   </button>
 }

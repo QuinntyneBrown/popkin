@@ -1,0 +1,19 @@
+@for (person of people(); track $index) {
+  <li>
+    <a class="row row--short" [routerLink]="person.link">
+      @if (person.kind) {
+        <span pk-link-key [kind]="person.kind"></span>
+      }
+      <span
+        pk-avatar
+        size="36"
+        [name]="person.name"
+        [initials]="person.initials"
+        [photo]="person.photo"
+        [attr.data-accent]="person.accent"
+      ></span>
+      <span class="row__main row__title truncate">{{ person.name }}</span>
+      <span class="row__meta">{{ person.meta }}</span>
+    </a>
+  </li>
+}

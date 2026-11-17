@@ -6,12 +6,26 @@ import {
   ReminderLead,
   SaveContactRequest,
 } from '../../models/contacts';
+import { ConnectionKindName } from '../../models/connections';
 import { toApiProblem } from '../problem';
 import { CONTACTS_API } from './contacts-api';
 import { ContactsOutbox } from './contacts-outbox';
 import { isContactId } from './contacts-text';
 
 /** What the contact form holds as typed: "Things they love" is one field (known gap 102). */
+/** A connection in "How they connect": kept (`id`), or chosen in Connect and not saved yet. */
+export interface FormConnection {
+  id: string | null;
+  otherContactId: string;
+  name: string;
+  initials: string;
+  accent: string;
+  photoUrl: string | null;
+  kind: ConnectionKindName;
+  words: string | null;
+  promised: boolean;
+}
+
 export interface ContactFormValues {
   name: string;
   knownAs: string;
@@ -75,6 +89,9 @@ export class ContactFormStore {
   readonly editing = signal<ContactProfileView | null>(null);
   /** "Dates to remember": the kept dates, then those added, until "Save" (L2-129 AC2). */
   readonly dates = signal<KeyDateDraft[]>([]);
+  /** "How they connect": the kept connections, then those added, until "Save" (L2-150 AC9). */
+  readonly connections = signal<FormConnection[]>([]);
+  private disconnected: string[] = [];
 
   /**
    * Reading the contact to edit: `notFound` for one that is not mine, or an address that cannot
@@ -105,6 +122,20 @@ export class ContactFormStore {
             reminder: d.reminder,
           })),
         );
+        this.connections.set(
+          (contact.around ?? []).map((a) => ({
+            id: a.id,
+            otherContactId: a.contactId,
+            name: a.name,
+            initials: a.initials,
+            accent: a.accent.toLowerCase(),
+            photoUrl: a.photoUrl,
+            kind: a.kind,
+            words: a.words,
+            promised: a.promised,
+          })),
+        );
+        this.disconnected = [];
         this.editing.set(contact);
       },
       error: (error: unknown) =>
@@ -132,10 +163,34 @@ export class ContactFormStore {
     this.dates.update((dates) => dates.map((d, i) => (i === index ? { ...d, reminder } : d)));
   }
 
+  /** "Connect to someone": a connection chosen in Connect, saved with the contact. */
+  addConnection(connection: FormConnection): void {
+    this.connections.update((connections) => [...connections, connection]);
+  }
+
+  /** "Remove the connection to {first name}": a kept one is removed on "Save". */
+  removeConnection(index: number): void {
+    const removed = this.connections()[index];
+    if (removed?.id) this.disconnected = [...this.disconnected, removed.id];
+    this.connections.update((connections) => connections.filter((_, i) => i !== index));
+  }
+
   /** With no name, nothing is sent and the form is invalid (L2-129 AC4). */
   save(values: ContactFormValues, photo: File | null): void {
     if (this.state() === 'saving') return;
-    const request = { ...contactRequestOf(values, this.clientId), keyDates: this.dates() };
+    const request = {
+      ...contactRequestOf(values, this.clientId),
+      keyDates: this.dates(),
+      connect: this.connections()
+        .filter((c) => c.id === null)
+        .map((c) => ({
+          otherContactId: c.otherContactId,
+          kind: c.kind,
+          words: c.words,
+          promised: c.promised,
+        })),
+      disconnect: this.disconnected,
+    };
     if (request.name.length === 0) {
       this.state.set('invalid');
       return;

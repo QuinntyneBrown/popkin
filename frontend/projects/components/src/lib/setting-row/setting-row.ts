@@ -20,7 +20,8 @@ let rows = 0;
   host: { class: 'setting-row' },
 })
 export class SettingRow {
-  readonly icon = input.required<IconName>();
+  /** Its icon; a row in a dialog's form may have none, as Connect's "Not introduced yet". */
+  readonly icon = input<IconName>();
   /** What the setting is: "Keep the photo album". */
   readonly heading = input.required<string>();
   /** What it does as it stands: "Members can keep browsing and saving". */

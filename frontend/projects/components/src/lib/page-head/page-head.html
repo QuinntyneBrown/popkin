@@ -1,3 +1,12 @@
+@if (back()) {
+  <a
+    pk-back-link
+    class="page-head__back"
+    [class.only-below-m]="backBelowM()"
+    [routerLink]="backLink()"
+    >{{ back() }}</a
+  >
+}
 <div class="page-head__id">
   <div class="page-head__text">
     <h1 class="page-head__title">{{ heading() }}</h1>

@@ -15,6 +15,7 @@ import {
 } from '../fixtures/contacts';
 import { expect, test } from '../fixtures/pk-test';
 import { failNetwork, hold, answer, problem } from '../fixtures/stubs';
+import responses from '../fixtures/api/responses.json';
 import { AddMemoryDialog } from '../pages/add-memory.dialog';
 import { ContactProfilePage } from '../pages/contact-profile.page';
 import { LogEntryPage } from '../pages/log-entry.page';
@@ -27,6 +28,17 @@ const lake = readFileSync(join(__dirname, '../../docs/mocks/assets/images/lake.j
 test.beforeEach(async ({ page }) => {
   await page.clock.install({ time: contactsMorning });
 });
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** The note "Add to memories" saved when the answers were recorded. */
+function recordedNote(): { updatedOn: string } {
+  const all = responses as Record<string, { body?: unknown }>;
+  const key = Object.keys(all).find((k) =>
+    /^POST \/api\/contacts\/people\/[^/]+\/memories\/notes$/.test(k),
+  );
+  return all[key!].body as { updatedOn: string };
+}
 
 test.describe('Memories & files', () => {
   // L2-136 AC1
@@ -276,7 +288,11 @@ test.describe('Add to memories', () => {
 
     await expect(dialog.root).toHaveCount(0);
     await expect(profile.memoryRows).toHaveCount(4);
-    await expect(profile.memoryRows.nth(2).locator('.row__text')).toHaveText('Updated Nov 16');
+    // The note is dated by the API's day when it was recorded.
+    const [, month, day] = recordedNote().updatedOn.split('-').map(Number);
+    await expect(profile.memoryRows.nth(2).locator('.row__text')).toHaveText(
+      `Updated ${MONTHS[month - 1]} ${day}`,
+    );
   });
 
   test('a failure keeps the note, and says so', async ({ page, pk }) => {

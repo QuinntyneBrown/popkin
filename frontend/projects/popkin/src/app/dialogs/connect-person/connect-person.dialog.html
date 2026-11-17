@@ -1,0 +1,93 @@
+<div pk-dialog [heading]="title" accent="coral">
+  <div class="stack">
+    @if (problems().length) {
+      <div pk-form-summary [problems]="problems()"></div>
+    }
+    @if (failed()) {
+      <div pk-alert heading="We couldn’t connect them.">
+        Everything you chose is still here. Check your connection and try again.
+      </div>
+    }
+    @if (!fixed) {
+      <div
+        pk-select-field
+        fieldId="first"
+        label="Connect"
+        [options]="firsts()"
+        [error]="error('first')"
+        [(value)]="first"
+      ></div>
+    }
+    <div pk-search-field label="Search your people" [(value)]="search"></div>
+    @if (noResults(); as none) {
+      <div
+        pk-empty-state
+        [status]="true"
+        [compact]="true"
+        [level]="3"
+        [heading]="none.heading"
+        [text]="none.text"
+      >
+        <a
+          pk-button
+          variant="secondary"
+          size="md"
+          routerLink="/contacts/people/new"
+          [queryParams]="{ name: search().trim() }"
+          (click)="adding()"
+          ><svg pk-icon name="user-plus" size="md"></svg>{{ none.add }}</a
+        >
+      </div>
+    } @else {
+      <div
+        pk-person-choice
+        fieldId="people-list"
+        label="Who"
+        [options]="options()"
+        [disabled]="busy()"
+        [error]="error('people-list')"
+        [(value)]="who"
+      ></div>
+      <div
+        pk-choice-chips
+        fieldId="how"
+        label="How they know each other"
+        [outline]="true"
+        [options]="kinds"
+        [disabled]="busy()"
+        [value]="kind()"
+        (valueChange)="kind.set($any($event))"
+      ></div>
+      <div
+        pk-text-field
+        fieldId="label"
+        label="In your words"
+        placeholder="Mum, old friends, worked together…"
+        [error]="error('label')"
+        [readonly]="busy()"
+        [formControl]="words"
+      ></div>
+      <div
+        pk-setting-row
+        heading="Not introduced yet"
+        text="A dotted line, until you’ve introduced them."
+        [disabled]="busy()"
+        [(checked)]="promised"
+      ></div>
+    }
+  </div>
+  @if (!noResults()) {
+    <button
+      pk-button
+      slot="footer"
+      type="button"
+      variant="primary"
+      [block]="true"
+      [busy]="busy()"
+      [disabled]="busy()"
+      (click)="connect()"
+    >
+      {{ busy() ? 'Connecting…' : 'Connect' }}
+    </button>
+  }
+</div>

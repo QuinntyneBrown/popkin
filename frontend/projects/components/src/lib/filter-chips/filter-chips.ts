@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { Chip } from '../chip/chip';
+import { LinkKey } from '../link-key/link-key';
 
 export interface FilterChipOption<T extends string = string> {
   value: T;
   label: string;
   /** How many the filter would show: "Family 4". */
   count?: number;
+  /** The kind of line the chip shows, keyed before its word on Connections. */
+  key?: 'family' | 'partner' | 'friend' | 'work';
 }
 
 /**
@@ -16,7 +19,7 @@ export interface FilterChipOption<T extends string = string> {
  */
 @Component({
   selector: 'div[pk-filter-chips]',
-  imports: [Chip],
+  imports: [Chip, LinkKey],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './filter-chips.html',
   styleUrl: './filter-chips.scss',

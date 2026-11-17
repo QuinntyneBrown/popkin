@@ -1,6 +1,7 @@
 import { HttpClient, HttpEvent, HttpEventType } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable, filter, map } from 'rxjs';
+import { ConnectRequest, ConnectionView, ConnectionsView } from '../../models/connections';
 import {
   AddFollowUpRequest,
   AddKeyDateRequest,
@@ -81,6 +82,12 @@ export interface ContactsApi {
   endHabit(id: string): Observable<void>;
   /** Its Undo. */
   resumeHabit(id: string): Observable<HabitView>;
+  /** Connections: the faces and the lines (L2-149). */
+  connectionMap(): Observable<ConnectionsView>;
+  /** Connect (L2-150); a resend keeps it once. */
+  connect(request: ConnectRequest): Observable<ConnectionView>;
+  /** Removes a connection (L2-150 AC9). */
+  disconnect(id: string): Observable<void>;
   /** A contact's timeline, newest first, filtered by kind (L2-135 AC1). */
   timeline(contactId: string, show: TimelineShow): Observable<TimelineView>;
   /** Log a conversation and its promises (L2-133); a resend keeps it once. */
@@ -214,6 +221,18 @@ export class HttpContactsApi implements ContactsApi {
 
   resumeHabit(id: string): Observable<HabitView> {
     return this.http.delete<HabitView>(`/api/contacts/habits/${id}/end`);
+  }
+
+  connectionMap(): Observable<ConnectionsView> {
+    return this.http.get<ConnectionsView>('/api/contacts/connections');
+  }
+
+  connect(request: ConnectRequest): Observable<ConnectionView> {
+    return this.http.post<ConnectionView>('/api/contacts/connections', request);
+  }
+
+  disconnect(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/contacts/connections/${id}`);
   }
 
   timeline(contactId: string, show: TimelineShow): Observable<TimelineView> {
