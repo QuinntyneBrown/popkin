@@ -23,6 +23,13 @@ param authCodeHashKey string
 @description('Photos:SigningKey, shared by the API and the Worker.')
 param photosSigningKey string
 
+@secure()
+@description('Push:PrivateKey, the VAPID private key the Worker signs phone reminders with (ADR 0028); empty sends none.')
+param pushPrivateKey string = ''
+
+@description('Push:PublicKey, the VAPID public key a browser subscribes with (ADR 0028).')
+param pushPublicKey string = 'BLa8UOBxQghVjCKHFFVJyYlM36r16cYnQf-CEWjXZd7GeSKAV_KEp-B6nzm3poLtKeUefEp0IyDCInDtU6Eq6NA'
+
 param location string = resourceGroup().location
 
 @description('The registered domain: the app at app.<domain> and *.<domain>, the marketing site at <domain> and www.<domain>.')
@@ -38,7 +45,7 @@ param smsSender string = ''
 param phoneSignIn bool = false
 
 @description('Contacts (L1-029, ADR 0023): true once every Contacts design is built; until then My Popkins offers no Contacts and /api/contacts answers 404 feature_off.')
-param contacts bool = false
+param contacts bool = true
 
 @description('The staff email of the admin app\'s first Owner (L2-078 AC1, ADR 0024); empty adds nobody, so nobody can sign in to the admin app.')
 param adminFirstOwner string = 'quinntynebrown@gmail.com'
@@ -204,9 +211,15 @@ var photosEnv = [
   { name: 'Photos__Container', value: photosContainer.name }
   { name: 'Photos__ClientId', value: identity.properties.clientId }
 ]
-var secrets = [
+var secrets = concat([
   { name: 'auth-code-hash-key', value: authCodeHashKey }
   { name: 'photos-signing-key', value: photosSigningKey }
+], empty(pushPrivateKey) ? [] : [{ name: 'push-private-key', value: pushPrivateKey }])
+// ADR 0028: phone reminders by Web Push. Without the private key the Worker sends none.
+var pushEnv = empty(pushPrivateKey) ? [] : [
+  { name: 'Push__PublicKey', value: pushPublicKey }
+  { name: 'Push__PrivateKey', secretRef: 'push-private-key' }
+  { name: 'Push__Subject', value: 'mailto:hello@${domain}' }
 ]
 var userIdentity = {
   type: 'UserAssigned'
@@ -253,7 +266,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
         {
           name: 'api'
           image: '${registry.properties.loginServer}/popkin-api:${imageTag}'
-          env: concat(databaseEnv, keyEnv, photosEnv, communicationEnv, [
+          env: concat(databaseEnv, keyEnv, photosEnv, communicationEnv, pushEnv, [
             { name: 'App__Origin', value: appOrigin }
             { name: 'Invites__BaseUrl', value: '${appOrigin}/i' }
             { name: 'Features__PhoneSignIn', value: string(phoneSignIn) }
@@ -301,7 +314,11 @@ resource worker 'Microsoft.App/containerApps@2024-03-01' = {
         {
           name: 'worker'
           image: '${registry.properties.loginServer}/popkin-worker:${imageTag}'
-          env: concat(databaseEnv, keyEnv, photosEnv)
+          // Contacts reminders (L2-140): the switch, the Monday email and the phone (ADR 0028).
+          env: concat(databaseEnv, keyEnv, photosEnv, communicationEnv, pushEnv, [
+            { name: 'Features__Contacts', value: string(contacts) }
+            { name: 'App__Origin', value: appOrigin }
+          ])
           resources: { cpu: json('0.25'), memory: '0.5Gi' }
         }
       ]
