@@ -186,3 +186,59 @@ export async function theMockNotifications(
 export const theMockNotificationsPaused = async (page: Page): Promise<void> => {
   await theMockNotifications(page, (n) => (n.status = pausedStatus()));
 };
+
+/** A write the notification stubs answered: its method, its path and its body. */
+export interface NotificationWrite {
+  method: string;
+  path: string;
+  body: Record<string, unknown>;
+}
+
+/**
+ * Answers the pause, the resume and a kind's switch as the API would, changing `notifications`
+ * so the page's next read agrees, and records each body. Lena Fischer makes every change at noon.
+ */
+export async function savesNotifications(
+  page: Page,
+  notifications: MockNotifications,
+): Promise<NotificationWrite[]> {
+  const writes: NotificationWrite[] = [];
+  const at = new Date(2026, 6, 14, 12, 0).toISOString();
+  await page.route('**/api/admin/notifications/**', (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    const body = (request.postDataJSON() ?? {}) as Record<string, unknown>;
+    const reason = (body['reason'] as string | null) ?? null;
+    if (request.method() === 'POST' && path.endsWith('/pause')) {
+      writes.push({ method: 'POST', path, body });
+      Object.assign(notifications.status, {
+        paused: true,
+        pausedAt: at,
+        pausedByName: 'Lena Fischer',
+        pauseReason: reason,
+        queued: 0,
+        resumeMinutes: 1,
+      });
+      return route.fulfill({ json: notifications.status });
+    }
+    if (request.method() === 'POST' && path.endsWith('/resume')) {
+      writes.push({ method: 'POST', path, body });
+      notifications.status = sendingStatus();
+      return route.fulfill({ json: notifications.status });
+    }
+    const kind = /\/kinds\/(\w+)$/.exec(path)?.[1];
+    if (request.method() === 'PUT' && kind) {
+      writes.push({ method: 'PUT', path, body });
+      const found = notifications.groups.flatMap((g) => g.kinds).find((k) => k.kind === kind)!;
+      Object.assign(
+        found,
+        body['on']
+          ? { offForEveryone: false, offSince: null, offByName: null, offReason: null }
+          : { offForEveryone: true, offSince: at, offByName: 'Lena Fischer', offReason: reason },
+      );
+      return route.fulfill({ json: found });
+    }
+    return route.fallback();
+  });
+  return writes;
+}

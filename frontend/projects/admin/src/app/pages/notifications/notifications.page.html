@@ -30,12 +30,38 @@
     </section>
   }
   @default {
-    <section
-      pk-send-status
-      [state]="store.sending()?.paused ? 'paused' : 'sending'"
-      [heading]="title()"
-      [text]="text()"
-    ></section>
+    @if (store.sending(); as sending) {
+      <section
+        pk-send-status
+        [state]="sending.paused ? 'paused' : 'sending'"
+        [heading]="title()"
+        [text]="text()"
+      >
+        @if (sending.paused) {
+          <button
+            pk-button
+            type="button"
+            variant="primary"
+            size="sm"
+            [disabledReason]="manageBlocked()"
+            (click)="resume(sending)"
+          >
+            Resume sending
+          </button>
+        } @else {
+          <button
+            pk-button
+            type="button"
+            variant="secondary"
+            size="sm"
+            [disabledReason]="manageBlocked()"
+            (click)="pause()"
+          >
+            Pause all email
+          </button>
+        }
+      </section>
+    }
     <div pk-page-tabs>
       <div
         pk-segmented-control

@@ -1,9 +1,17 @@
+import { Dialog } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
+  ADMIN_PLATFORM_API,
   AdminNotificationsStore,
+  AdminSendStatus,
   AdminSessionStore,
   NOTIFICATIONS_SUB,
+  PAUSED_TOAST,
+  PAUSE_DIALOG,
+  RESUMED_TOAST,
+  Toaster,
+  resumeDialog,
   kindAbout,
   kindOpened,
   kindSent,
@@ -25,6 +33,10 @@ import {
   SegmentedOption,
   SendStatus,
 } from 'components';
+import {
+  NotificationActionData,
+  NotificationActionDialog,
+} from '../../dialogs/notification-action/notification-action.dialog';
 
 /** The page's tabs, kept in `?tab=` (docs/detailed-designs/admin-platform/notifications). */
 export type NotificationsTab = 'kinds' | 'holds' | 'defaults';
@@ -64,7 +76,10 @@ export class NotificationsPage {
   readonly tab = input<string>();
 
   protected readonly store = inject(AdminNotificationsStore);
+  private readonly api = inject(ADMIN_PLATFORM_API);
   private readonly session = inject(AdminSessionStore);
+  private readonly dialog = inject(Dialog);
+  private readonly toaster = inject(Toaster);
   private readonly router = inject(Router);
   private readonly timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -128,6 +143,46 @@ export class NotificationsPage {
 
   constructor() {
     this.store.load();
+  }
+
+  /** "Pause all member email?" (L2-170 AC1). */
+  protected pause(): void {
+    this.ask<AdminSendStatus>({
+      text: PAUSE_DIALOG,
+      danger: true,
+      send: (reason) => this.api.pauseEmail(reason),
+    }).subscribe((status) => {
+      if (!status) return;
+      this.store.statusSaved(status);
+      this.toaster.show('success', ...PAUSED_TOAST);
+    });
+  }
+
+  /** "Resume sending?" (L2-170 AC3). */
+  protected resume(status: AdminSendStatus): void {
+    this.ask<AdminSendStatus>({
+      text: resumeDialog(status),
+      danger: false,
+      send: (reason) => this.api.resumeEmail(reason),
+    }).subscribe((saved) => {
+      if (!saved) return;
+      this.store.statusSaved(saved);
+      this.toaster.show('success', ...RESUMED_TOAST);
+    });
+  }
+
+  /** Opens the reason dialog; it closes with the saved answer, or nothing when cancelled. */
+  private ask<T>(data: NotificationActionData<T>) {
+    return this.dialog.open<T, NotificationActionData<T>>(NotificationActionDialog<T>, {
+      data,
+      ariaLabelledBy: 'dlg-title',
+      ariaDescribedBy: 'dlg-desc',
+      // Focus starts in the reason (L2-087 AC1).
+      autoFocus: 'textarea',
+      // pk-dialog draws its own backdrop, as the mocks do.
+      hasBackdrop: false,
+      ariaModal: true,
+    }).closed;
   }
 
   protected choose(tab: string): void {
