@@ -46,12 +46,13 @@ public sealed class GetAdminNotificationsQueryHandler(IAppDbContext db, IAdminGu
         await guard.CurrentAdminAsync(cancellationToken);
         var traffic = await stats.ReadAsync(clock.GetUtcNow(), cancellationToken);
         var platform = await AdminNotificationPlatform.ReadAsync(db, cancellationToken);
+        var off = await db.NotificationKindSwitches.AsNoTracking().ToDictionaryAsync(s => s.Kind, cancellationToken);
         var groups = NotificationCatalogue.Groups
             .Select(g => new AdminNotificationGroupDto(
                 g.Group,
                 g.Name,
                 NotificationCatalogue.All.Where(k => k.Group == g.Group)
-                    .Select(k => AdminNotificationPlatform.KindOf(k, traffic))
+                    .Select(k => AdminNotificationPlatform.KindOf(k, off.GetValueOrDefault(k.Kind), traffic))
                     .ToList()))
             .ToList();
         return new AdminNotificationsDto(AdminNotificationPlatform.StatusOf(platform, traffic), groups, 0);
@@ -105,6 +106,61 @@ public sealed class ResumeMemberEmailCommandHandler(IAppDbContext db, IAdminGuar
     }
 }
 
+/// <summary>
+/// An Owner switches one kind off for every member, or back on, with a reason (L2-171). Members'
+/// own choices are not touched; nothing missed while it was off is sent later.
+/// </summary>
+public sealed record SwitchNotificationKindCommand(string Kind, bool On, string? Reason) : IRequest<AdminNotificationKindDto>;
+
+public sealed class SwitchNotificationKindCommandHandler(
+    IAppDbContext db, IAdminGuard guard, IAuditLog audit, IPlatformSnapshot snapshot, INotificationStats stats, TimeProvider clock)
+    : IRequestHandler<SwitchNotificationKindCommand, AdminNotificationKindDto>
+{
+    public async Task<AdminNotificationKindDto> Handle(SwitchNotificationKindCommand request, CancellationToken cancellationToken)
+    {
+        var me = await guard.RequireAsync(AdminAction.ManageNotifications, cancellationToken);
+        var entry = NotificationCatalogue.All.FirstOrDefault(k => k.Kind.ToString() == request.Kind)
+            ?? throw new ProblemException(404, "notification_kind_not_found", "There is no such kind of notification.");
+        if (entry.Required)
+        {
+            throw ProblemException.Invalid("notification_required", $"{entry.Name} always goes out.", "kind");
+        }
+
+        var reason = ReasonRules.Required(request.Reason);
+        var now = clock.GetUtcNow();
+        var off = await db.NotificationKindSwitches.FirstOrDefaultAsync(s => s.Kind == entry.Kind, cancellationToken);
+        if (off is null == request.On)
+        {
+            // The state it already has changes nothing and records nothing.
+            return AdminNotificationPlatform.KindOf(entry, off, await stats.ReadAsync(now, cancellationToken));
+        }
+
+        if (request.On)
+        {
+            db.NotificationKindSwitches.Remove(off!);
+            off = null;
+        }
+        else
+        {
+            off = NotificationKindSwitch.Off(entry.Kind, me.Id, me.Name, reason, now);
+            db.NotificationKindSwitches.Add(off);
+        }
+
+        await audit.RecordAsync(
+            new AuditRecord(
+                request.On ? AuditAction.TurnedNotificationKindOn : AuditAction.TurnedNotificationKindOff,
+                AuditTargetKind.NotificationKind,
+                entry.Kind.ToString(),
+                entry.Name,
+                reason,
+                null),
+            cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+        snapshot.Invalidate();
+        return AdminNotificationPlatform.KindOf(entry, off, await stats.ReadAsync(now, cancellationToken));
+    }
+}
+
 internal static class AdminNotificationPlatform
 {
     /// <summary>
@@ -142,15 +198,15 @@ internal static class AdminNotificationPlatform
         null,
         traffic.MedianSecondsToInbox);
 
-    public static AdminNotificationKindDto KindOf(NotificationCatalogueEntry entry, NotificationTraffic traffic) => new(
+    public static AdminNotificationKindDto KindOf(NotificationCatalogueEntry entry, NotificationKindSwitch? off, NotificationTraffic traffic) => new(
         entry.Kind,
         entry.Name,
         entry.About,
         entry.Required,
-        false,
-        null,
-        null,
-        null,
+        off is not null,
+        off?.OffSince,
+        off?.OffByName,
+        off?.Reason,
         traffic.Sent24h.GetValueOrDefault(entry.Kind),
         null);
 

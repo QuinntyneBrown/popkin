@@ -99,6 +99,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<NotificationPlatform> NotificationPlatforms => inner.NotificationPlatforms;
 
+    public DbSet<NotificationKindSwitch> NotificationKindSwitches => inner.NotificationKindSwitches;
+
     public DbSet<OutgoingEmail> OutgoingEmails => inner.OutgoingEmails;
 
     public DbSet<ContactGroupMember> ContactGroupMembers => inner.ContactGroupMembers;

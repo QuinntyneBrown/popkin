@@ -1253,6 +1253,33 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("NotificationKindChoices", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.NotificationKindSwitch", b =>
+                {
+                    b.Property<string>("Kind")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("OffByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OffByName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("OffSince")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Kind");
+
+                    b.ToTable("NotificationKindSwitches", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.NotificationPlatform", b =>
                 {
                     b.Property<Guid>("Id")

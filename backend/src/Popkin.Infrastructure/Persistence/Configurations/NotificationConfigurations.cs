@@ -82,6 +82,18 @@ public sealed class NotificationPlatformConfiguration : IEntityTypeConfiguration
     }
 }
 
+public sealed class NotificationKindSwitchConfiguration : IEntityTypeConfiguration<NotificationKindSwitch>
+{
+    public void Configure(EntityTypeBuilder<NotificationKindSwitch> builder)
+    {
+        builder.ToTable("NotificationKindSwitches");
+        builder.HasKey(s => s.Kind);
+        builder.Property(s => s.Kind).HasConversion<string>().HasMaxLength(32);
+        builder.Property(s => s.OffByName).HasMaxLength(200);
+        builder.Property(s => s.Reason).HasMaxLength(500);
+    }
+}
+
 public sealed class OutgoingEmailConfiguration : IEntityTypeConfiguration<OutgoingEmail>
 {
     public void Configure(EntityTypeBuilder<OutgoingEmail> builder)

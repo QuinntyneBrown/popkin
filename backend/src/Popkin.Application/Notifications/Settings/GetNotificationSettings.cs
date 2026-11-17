@@ -34,7 +34,7 @@ public sealed record NotificationSettingsDto(
 
 public sealed record GetNotificationSettingsQuery : IRequest<NotificationSettingsDto>;
 
-public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurrentPerson current, IPhotoStore photos, Contacts.ContactsSwitch contacts, TimeProvider clock)
+public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurrentPerson current, IPhotoStore photos, Contacts.ContactsSwitch contacts, INotificationPlatform platform, TimeProvider clock)
     : IRequestHandler<GetNotificationSettingsQuery, NotificationSettingsDto>
 {
     public async Task<NotificationSettingsDto> Handle(GetNotificationSettingsQuery request, CancellationToken cancellationToken)
@@ -60,7 +60,7 @@ public sealed class GetNotificationSettingsQueryHandler(IAppDbContext db, ICurre
                         settings.IsOn(entry.Kind, NotificationChannel.Email),
                         settings.IsOn(entry.Kind, NotificationChannel.Phone),
                         entry.Required,
-                        OffForEveryone: false))
+                        OffForEveryone: !entry.Required && platform.IsKindOff(entry.Kind)))
                     .ToList()))
             .ToList();
 

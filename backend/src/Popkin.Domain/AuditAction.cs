@@ -37,6 +37,8 @@ public enum AuditAction
     ExportedAuditLog,
     PausedMemberEmail,
     ResumedMemberEmail,
+    TurnedNotificationKindOff,
+    TurnedNotificationKindOn,
 }
 
 /// <summary>What an audit entry is about.</summary>
@@ -55,4 +57,5 @@ public enum AuditTargetKind
     Admin,
     ModerationView,
     MemberEmail,
+    NotificationKind,
 }

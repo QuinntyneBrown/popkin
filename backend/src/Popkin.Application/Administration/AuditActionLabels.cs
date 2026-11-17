@@ -41,6 +41,8 @@ public static class AuditActionLabels
         [AuditAction.ExportedAuditLog] = "Exported audit log",
         [AuditAction.PausedMemberEmail] = "Paused member email",
         [AuditAction.ResumedMemberEmail] = "Resumed member email",
+        [AuditAction.TurnedNotificationKindOff] = "Turned notification off",
+        [AuditAction.TurnedNotificationKindOn] = "Turned notification on",
     };
 
     public static string Of(AuditAction action) => Labels[action];

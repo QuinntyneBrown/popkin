@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Popkin.Api.Tests.Support;
+using Popkin.Domain;
+using Popkin.Infrastructure.Persistence;
 
 namespace Popkin.Api.Tests.Administration;
 
@@ -136,5 +139,103 @@ public sealed class AdminNotificationsTests
         var ownerAllowed = (await owner.GetFromJsonAsync<JsonElement>("/api/admin/me")).GetProperty("allowed").EnumerateArray().Select(a => a.GetString()).ToList();
         Assert.Contains("ManageNotifications", ownerAllowed);
         Assert.Contains("HoldNotifications", ownerAllowed);
+    }
+
+    // Given an Owner turns "Mentions and replies" off for everyone with a reason, when a reply
+    // happens, then no member is emailed it, the row reads off since now by them with the reason,
+    // and the member's own switch is kept and shown off by Popkin; turned back on, the missed reply
+    // is never sent and the next one is (L2-171 AC1–AC4).
+    [Fact]
+    public async Task An_owner_turns_a_kind_off_for_everyone_and_back_on()
+    {
+        using var api = new ApiFactory();
+        var owner = await api.SignedInOwnerAsync();
+        var lakeside = await api.StartLakesideAsync("KeepItGoing");
+        var everyone = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
+        var ruth = await api.JoinedByEmailAsync(lakeside.Code, "Ruth Lindqvist", "ruth@example.com");
+        await api.DispatchAsync();
+        var asked = (await ruth.SentMessageAsync(lakeside.Id, everyone, "Can someone grab the paddles?")).Id();
+
+        var off = await owner.PutAsJsonAsync("/api/admin/notifications/kinds/MentionsAndReplies", new { on = false, reason = "Replies firing twice" });
+        await lakeside.Host.RepliedAsync(lakeside.Id, everyone, asked, "On it");
+        await api.DispatchAsync();
+        api.Clock.Advance(TimeSpan.FromMinutes(10));
+        await api.DispatchAsync();
+        var mine = await ruth.GetFromJsonAsync<JsonElement>("/api/me/notifications");
+        var row = (await owner.GetFromJsonAsync<JsonElement>("/api/admin/notifications")).GetProperty("groups")[0].GetProperty("kinds")[0];
+
+        Assert.Equal(HttpStatusCode.OK, off.StatusCode);
+        Assert.Empty(api.NotificationEmails.Sent);
+        Assert.True(row.GetProperty("offForEveryone").GetBoolean());
+        Assert.Equal("Owner", row.GetProperty("offByName").GetString());
+        Assert.Equal("Replies firing twice", row.GetProperty("offReason").GetString());
+        Assert.Equal(api.Clock.GetUtcNow().AddMinutes(-10), row.GetProperty("offSince").GetDateTimeOffset());
+        var replies = mine.GetProperty("groups")[0].GetProperty("kinds")[0];
+        Assert.True(replies.GetProperty("offForEveryone").GetBoolean());
+        Assert.True(replies.GetProperty("email").GetBoolean());
+
+        var on = await owner.PutAsJsonAsync("/api/admin/notifications/kinds/MentionsAndReplies", new { on = true, reason = "Fixed" });
+        api.Clock.Advance(TimeSpan.FromMinutes(10));
+        await api.DispatchAsync();
+        Assert.Equal(HttpStatusCode.OK, on.StatusCode);
+        Assert.False((await on.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("offForEveryone").GetBoolean());
+        Assert.Empty(api.NotificationEmails.Sent);
+        await lakeside.Host.RepliedAsync(lakeside.Id, everyone, asked, "Got two");
+        await api.DispatchAsync();
+        api.Clock.Advance(TimeSpan.FromMinutes(10));
+        await api.DispatchAsync();
+        Assert.Single(api.NotificationEmails.Sent);
+
+        var entries = (await owner.GetFromJsonAsync<JsonElement>("/api/admin/audit")).GetProperty("entries").EnumerateArray().ToList();
+        Assert.Equal(["TurnedNotificationKindOn", "TurnedNotificationKindOff"], entries.Take(2).Select(e => e.GetProperty("action").GetString()));
+        Assert.Equal("Mentions and replies", entries[1].GetProperty("targetName").GetString());
+    }
+
+    // Switching a kind to the state it has changes nothing and records nothing; "Sign-in codes and
+    // security" cannot be switched, an unknown kind is 404, a reason is required, and only an Owner
+    // may switch (L2-154 AC2, L2-171 AC5).
+    [Fact]
+    public async Task A_kind_switch_is_refused_as_the_design_says()
+    {
+        using var api = new ApiFactory();
+        var owner = await api.SignedInOwnerAsync();
+        var (support, _) = await api.SignedInAdminAsync(owner, "sam@popkin.app", "Support");
+
+        var same = await owner.PutAsJsonAsync("/api/admin/notifications/kinds/NewPhotos", new { on = true, reason = "Already on" });
+
+        Assert.Equal(HttpStatusCode.OK, same.StatusCode);
+        await (await owner.PutAsJsonAsync("/api/admin/notifications/kinds/SignInAndSecurity", new { on = false, reason = "No" }))
+            .AssertProblem(HttpStatusCode.BadRequest, "notification_required");
+        await (await owner.PutAsJsonAsync("/api/admin/notifications/kinds/Fireworks", new { on = false, reason = "No" }))
+            .AssertProblem(HttpStatusCode.NotFound, "notification_kind_not_found");
+        await (await owner.PutAsJsonAsync("/api/admin/notifications/kinds/NewPhotos", new { on = false }))
+            .AssertProblem(HttpStatusCode.BadRequest, "reason_required");
+        await (await support.PutAsJsonAsync("/api/admin/notifications/kinds/NewPhotos", new { on = false, reason = "Spam" }))
+            .AssertProblem(HttpStatusCode.Forbidden, "role_not_allowed");
+        var entries = (await owner.GetFromJsonAsync<JsonElement>("/api/admin/audit")).GetProperty("entries").EnumerateArray();
+        Assert.DoesNotContain(entries, e => e.GetProperty("action").GetString()!.StartsWith("TurnedNotificationKind"));
+    }
+
+    // Given a kind switched off in the database by another way than this API, when 30 seconds have
+    // passed, then members' settings show it off, with no release and no restart.
+    [Fact]
+    public async Task A_kind_switched_off_elsewhere_is_honoured_within_30_seconds()
+    {
+        using var api = new ApiFactory();
+        var lakeside = await api.StartLakesideAsync();
+        Assert.False(await PhotosOffAsync(lakeside.Host));
+        using (var scope = api.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.NotificationKindSwitches.Add(NotificationKindSwitch.Off(NotificationKind.NewPhotos, Guid.NewGuid(), "Owner", "Spam", api.Clock.GetUtcNow()));
+            await db.SaveChangesAsync();
+        }
+
+        Assert.False(await PhotosOffAsync(lakeside.Host));
+        api.Clock.Advance(TimeSpan.FromSeconds(31));
+        Assert.True(await PhotosOffAsync(lakeside.Host));
+
+        static async Task<bool> PhotosOffAsync(HttpClient member) =>
+            (await member.GetFromJsonAsync<JsonElement>("/api/me/notifications")).GetProperty("groups")[0].GetProperty("kinds")[3].GetProperty("offForEveryone").GetBoolean();
     }
 }

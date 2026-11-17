@@ -13,7 +13,7 @@ public sealed record DispatchResult(int Events, int Sent);
 public sealed record DispatchNotificationsCommand : IRequest<DispatchResult>;
 
 public sealed class DispatchNotificationsCommandHandler(
-    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot, UpdateEmails emails, PopkinMetrics metrics)
+    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot, INotificationPlatform notifications, UpdateEmails emails, PopkinMetrics metrics)
     : IRequestHandler<DispatchNotificationsCommand, DispatchResult>
 {
     private const int EventsPerTick = 200;
@@ -131,6 +131,7 @@ public sealed class DispatchNotificationsCommandHandler(
             HasAddress = account?.Email is { Length: > 0 },
             HasDevice = hasDevice,
             EmailPaused = platform.EmailPausedAt is not null,
+            KindOffForEveryone = notifications.IsKindOff(notification.Kind),
             EmailOn = settings.EmailOn,
             Frequency = settings.Frequency,
             RecipientIsNamed = person == notification.RecipientPersonId,

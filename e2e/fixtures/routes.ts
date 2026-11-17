@@ -369,6 +369,10 @@ export const routes = {
     app: '/account/notifications?tab=people',
     mock: 'pages/notification-settings/birthday-off.html',
   },
+  notificationSettingsOffByPopkin: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/off-by-popkin.html',
+  },
   notificationSettingsNoBirthdays: {
     app: '/account/notifications?tab=people',
     mock: 'pages/notification-settings/no-birthdays.html',

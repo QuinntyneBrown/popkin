@@ -21,4 +21,10 @@ public sealed class AdminNotificationsController(ISender sender) : AdminControll
     [HttpPost("resume")]
     public async Task<ActionResult<AdminSendStatusDto>> Resume(ReasonRequest request, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new ResumeMemberEmailCommand(request.Reason), cancellationToken));
+
+    public sealed record SwitchKindRequest(bool On, string? Reason);
+
+    [HttpPut("kinds/{kind}")]
+    public async Task<ActionResult<AdminNotificationKindDto>> SwitchKind(string kind, SwitchKindRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new SwitchNotificationKindCommand(kind, request.On, request.Reason), cancellationToken));
 }
