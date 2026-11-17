@@ -45,7 +45,8 @@
 }
 
 :host(.skeleton--card) {
-  height: var(--space-32);
+  /* A shorter card, such as a day of This week, sets the knob. */
+  height: var(--pk-skeleton-height, var(--space-32));
   border-radius: var(--radius-lg);
 }
 

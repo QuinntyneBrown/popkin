@@ -13,18 +13,20 @@
 
 .schedule__skeleton-days {
   display: flex;
-  gap: var(--space-3);
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .schedule__skeleton-day {
   flex: 1;
-  height: var(--space-20);
+  --pk-skeleton-height: var(--space-20);
 }
 
 .schedule__skeleton-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  align-items: center;
+  gap: var(--space-2);
 }
 
 @media (min-width: 48rem) {
