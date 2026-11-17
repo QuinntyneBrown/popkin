@@ -2,6 +2,7 @@ using MediatR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Invites;
 using Popkin.Application.Security;
+using Popkin.Application.Notifications;
 using Popkin.Domain;
 
 namespace Popkin.Application.Experiences;
@@ -29,6 +30,7 @@ public sealed class ShareExperienceCommandHandler(
 
         var experience = Experience.Share(popkin.Id, membership.Id, kind, title, when, place, picture, clock.GetUtcNow());
         db.Experiences.Add(experience);
+        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, experience.SharedAt);
         try
         {
             await db.SaveChangesAsync(cancellationToken);

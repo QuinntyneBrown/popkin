@@ -5,6 +5,7 @@ using Popkin.Application.Chat;
 using Popkin.Application.Photos;
 using Popkin.Application.Problems;
 using Popkin.Application.Realtime;
+using Popkin.Application.Notifications;
 using Popkin.Domain;
 
 namespace Popkin.Application.Invites;
@@ -86,6 +87,7 @@ public sealed class JoinPopkinCommandHandler(
         var everyone = await ChatThreads.EveryoneAsync(db, popkin.Id, cancellationToken);
         var note = Message.PoppedIn(everyone.Id, membership);
         db.Messages.Add(note);
+        db.ForMembers(NotificationKind.PeopleJoining, popkin.Id, current.PersonId, membership.Id, membership.JoinedAt);
         if (avatar is null)
         {
             await db.SaveChangesAsync(cancellationToken);

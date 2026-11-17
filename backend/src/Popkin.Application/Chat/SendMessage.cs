@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Notifications;
 using Popkin.Application.Problems;
 using Popkin.Application.Security;
 using Popkin.Domain;
@@ -82,7 +83,7 @@ public sealed class SendMessageCommandHandler(
             photo!.JoinAlbum(now);
         }
 
-        await RecordNotificationAsync(popkin.Id, membership, message, replyTo, now, cancellationToken);
+        await RecordNotificationAsync(popkin.Id, membership, thread, message, replyTo, now, cancellationToken);
 
         try
         {
@@ -129,26 +130,34 @@ public sealed class SendMessageCommandHandler(
             await ChatPhotos.OfAsync(db, photos, stored, cancellationToken));
 
     /// <summary>
-    /// The notification the message adds, in the same save (deliver-notifications): a reply tells
-    /// the author of the message replied to (L2-154 "Mentions and replies").
+    /// The notifications the message adds, in the same save (deliver-notifications): a message in
+    /// Everyone tells its members, a reply also tells the author of the message replied to, and a
+    /// direct message tells the other member only (L2-174 AC2).
     /// </summary>
     private async Task RecordNotificationAsync(
-        Guid popkinId, Membership author, Message message, Message? replyTo, DateTimeOffset now, CancellationToken cancellationToken)
+        Guid popkinId, Membership author, ChatThread thread, Message message, Message? replyTo, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        if (replyTo is null || replyTo.AuthorMembershipId == author.Id)
+        if (thread.Kind == ChatThreadKind.Direct)
         {
+            var otherId = thread.MemberAId == author.Id ? thread.MemberBId : thread.MemberAId;
+            if (await PersonOfAsync(otherId) is { } other)
+            {
+                db.ForOne(NotificationKind.DirectMessages, popkinId, author.PersonId, message.Id, other, now);
+            }
+
             return;
         }
 
-        var repliedTo = await db.Memberships.AsNoTracking()
-            .Where(m => m.Id == replyTo.AuthorMembershipId)
+        db.ForMembers(NotificationKind.GroupChat, popkinId, author.PersonId, message.Id, now);
+        if (replyTo is not null && replyTo.AuthorMembershipId != author.Id && await PersonOfAsync(replyTo.AuthorMembershipId) is { } repliedTo)
+        {
+            db.ForOne(NotificationKind.MentionsAndReplies, popkinId, author.PersonId, message.Id, repliedTo, now);
+        }
+
+        Task<Guid?> PersonOfAsync(Guid? membershipId) => db.Memberships.AsNoTracking()
+            .Where(m => m.Id == membershipId)
             .Select(m => (Guid?)m.PersonId)
             .FirstOrDefaultAsync(cancellationToken);
-        if (repliedTo is { } recipient)
-        {
-            db.NotificationEvents.Add(NotificationEvent.Record(
-                NotificationKind.MentionsAndReplies, NotificationAudience.Recipient, popkinId, author.PersonId, message.Id, recipient, now));
-        }
     }
 
     private Task<Message?> StoredAsync(Guid authorMembershipId, Guid clientMessageId, CancellationToken cancellationToken) =>

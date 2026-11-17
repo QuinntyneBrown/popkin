@@ -30,9 +30,18 @@ public sealed class SaveStoryCommandHandler(
         var sprint = await db.Sprints.SingleAsync(s => s.PopkinId == popkin.Id, cancellationToken);
 
         var before = story.PointsLeft;
+        var (columnFrom, ownerFrom, dueFrom) = (story.Column, story.OwnerMembershipId, story.DueDate);
         var now = clock.GetUtcNow();
         story.Change(title, column, points, tag, owner, due, now);
         PlanStories.Record(db, story, before, now);
+        await PlanNotifications.RecordAsync(
+            db,
+            story,
+            membership,
+            now,
+            ownerFrom,
+            new { columnFrom = columnFrom.ToString(), columnTo = story.Column.ToString(), ownerFrom, ownerTo = story.OwnerMembershipId, dueFrom, dueTo = story.DueDate },
+            cancellationToken);
         sprint.Changed();
         await db.SaveChangesAsync(cancellationToken);
         await notifier.PlanChanged(popkin.Id, sprint.Version);

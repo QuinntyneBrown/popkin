@@ -19,13 +19,7 @@ public sealed class DispatchTests
     public async Task A_reply_reaches_the_phone_of_the_member_replied_to_once()
     {
         using var api = new ApiFactory();
-        var lakeside = await api.StartLakesideAsync();
-        var everyone = await lakeside.Host.EveryoneThreadIdAsync(lakeside.Id);
-        var ruth = await api.JoinedAsync(lakeside.Code, "Ruth Lindqvist", "(415) 555-0166");
-        var joel = await api.JoinedAsync(lakeside.Code, "Joel", "(415) 555-0123");
-        await ruth.AllowsAlertsAsync();
-        await joel.AllowsAlertsAsync();
-        var asked = (await ruth.SentMessageAsync(lakeside.Id, everyone, "Can someone grab the paddles?")).Id();
+        var (_, lakeside, everyone, ruth, joel, asked) = await RuthAskedAsync(api);
 
         await joel.RepliedAsync(lakeside.Id, everyone, asked, "Put me down for the paddles");
         await api.DispatchAsync();
@@ -61,6 +55,9 @@ public sealed class DispatchTests
         await ruth.AllowsAlertsAsync();
         await joel.AllowsAlertsAsync();
         var asked = (await ruth.SentMessageAsync(lakeside.Id, everyone, "Can someone grab the paddles?")).Id();
+        // What the setting up told the others is sent and forgotten.
+        await api.DispatchAsync();
+        api.PhoneAlerts.Clear();
         return new Thread(api, lakeside, everyone, ruth, joel, asked);
     }
 

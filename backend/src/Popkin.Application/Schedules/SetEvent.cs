@@ -2,6 +2,7 @@ using MediatR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
 using Popkin.Application.Security;
+using Popkin.Application.Notifications;
 using Popkin.Domain;
 
 namespace Popkin.Application.Schedules;
@@ -20,7 +21,7 @@ public sealed class SetEventCommandHandler(
     {
         // The switch, then who may ask and whether the Popkin is open, then what was asked.
         features.Require(Feature.Schedules, request.PopkinId);
-        var (popkin, _) = await guard.RequireHostAsync(request.PopkinId, cancellationToken);
+        var (popkin, host) = await guard.RequireHostAsync(request.PopkinId, cancellationToken);
         var label = request.Label?.Trim() ?? string.Empty;
         if (label.Length is 0 or > PopkinRules.MaxEventLabelLength)
         {
@@ -38,6 +39,7 @@ public sealed class SetEventCommandHandler(
         }
 
         popkin.SetEvent(label, request.FirstDay, request.LastDay);
+        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, host.PersonId, popkin.Id, clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
         await notifier.ScheduleChanged(popkin.Id);
         return EventDto.Of(popkin)!;
@@ -47,14 +49,16 @@ public sealed class SetEventCommandHandler(
 /// <summary>The Host removes the event; time off opens on the current week again (L2-085 AC5).</summary>
 public sealed record RemoveEventCommand(Guid PopkinId) : IRequest;
 
-public sealed class RemoveEventCommandHandler(IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPopkinNotifier notifier)
+public sealed class RemoveEventCommandHandler(
+    IAppDbContext db, IFeatureSwitches features, IMembershipGuard guard, IPopkinNotifier notifier, TimeProvider clock)
     : IRequestHandler<RemoveEventCommand>
 {
     public async Task Handle(RemoveEventCommand request, CancellationToken cancellationToken)
     {
         features.Require(Feature.Schedules, request.PopkinId);
-        var (popkin, _) = await guard.RequireHostAsync(request.PopkinId, cancellationToken);
+        var (popkin, host) = await guard.RequireHostAsync(request.PopkinId, cancellationToken);
         popkin.RemoveEvent();
+        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, host.PersonId, popkin.Id, clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
         await notifier.ScheduleChanged(popkin.Id);
     }

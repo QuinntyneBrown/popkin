@@ -49,6 +49,17 @@ public sealed class DispatchNotificationsCommandHandler(
                 .Where(m => m.PopkinId == notification.PopkinId && m.LeftAt == null && m.PersonId != notification.ActorPersonId)
                 .Select(m => m.PersonId)
                 .ToListAsync(cancellationToken);
+        // A reply's author hears of the reply, not of the same message in Everyone too, so one
+        // message never reaches one person twice (deliver-notifications).
+        if (notification.Kind == NotificationKind.GroupChat)
+        {
+            var told = await db.NotificationEvents
+                .Where(e => e.SubjectId == notification.SubjectId && e.Kind == NotificationKind.MentionsAndReplies && e.RecipientPersonId != null)
+                .Select(e => e.RecipientPersonId!.Value)
+                .ToListAsync(cancellationToken);
+            people = people.Except(told).ToList();
+        }
+
         var already = await db.NotificationDeliveries
             .Where(d => d.EventId == notification.Id)
             .Select(d => new { d.PersonId, d.Channel })

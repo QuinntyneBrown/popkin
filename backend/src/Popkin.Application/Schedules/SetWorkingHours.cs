@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
 using Popkin.Application.Security;
+using Popkin.Application.Notifications;
 using Popkin.Domain;
 
 namespace Popkin.Application.Schedules;
@@ -51,6 +52,7 @@ public sealed class SetWorkingHoursCommandHandler(
             }
         }
 
+        db.ForMembers(NotificationKind.ScheduleChanges, popkin.Id, membership.PersonId, membership.Id, clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
         // The members with the view open read their week again.
         await notifier.ScheduleChanged(popkin.Id);

@@ -3,6 +3,7 @@ using Popkin.Application.Abstractions;
 using Popkin.Application.Invites;
 using Popkin.Application.Problems;
 using Popkin.Application.Security;
+using Popkin.Application.Notifications;
 using Popkin.Domain;
 
 namespace Popkin.Application.Photos;
@@ -42,6 +43,7 @@ public sealed class AddPhotoCommandHandler(
             processed.Display.ContentType,
             files.OriginalKey);
         db.Photos.Add(photo);
+        db.ForMembers(NotificationKind.NewPhotos, popkin.Id, membership.PersonId, photo.Id, photo.AddedAt);
         try
         {
             await db.SaveChangesAsync(cancellationToken);

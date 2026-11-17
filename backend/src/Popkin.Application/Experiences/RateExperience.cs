@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Problems;
 using Popkin.Application.Security;
+using Popkin.Application.Notifications;
 using Popkin.Domain;
 
 namespace Popkin.Application.Experiences;
@@ -35,6 +36,7 @@ public sealed class RateExperienceCommandHandler(IAppDbContext db, IMembershipGu
         }
 
         var now = clock.GetUtcNow();
+        db.ForMembers(NotificationKind.Experiences, popkin.Id, membership.PersonId, experience.Id, now);
         if (await MyRatings.FindAsync(db, experience.Id, membership.Id, cancellationToken) is { } rating)
         {
             // The member has rated: their rating changes and the count stays the same (L2-039 AC3).

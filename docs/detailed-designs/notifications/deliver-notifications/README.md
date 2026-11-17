@@ -58,6 +58,10 @@ dispatcher only carries it out.
 | `JoinPopkinCommandHandler` | `PeopleJoining` | Active members but the one who joined | — |
 | `ShareExperienceCommandHandler`, `RateExperienceCommandHandler`, `CommentOnExperienceCommandHandler` | `Experiences` | Active members but the actor | — |
 
+`SubjectId` is the message, the photo, the story, the experience or the new membership. Time
+off and working hours have no row of their own to point at, so a schedule event's subject is the
+member's membership, or the Popkin for its event; the email reads that member's week.
+
 A reply in Everyone records two events: `GroupChat` for the Popkin and `MentionsAndReplies` for
 the author of the message replied to. Fan-out gives the author the more specific event only, so
 one message never reaches one person twice. Chat has no @mention: no requirement or mock defines

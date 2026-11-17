@@ -27,7 +27,9 @@ public sealed class DeleteStoryCommandHandler(IAppDbContext db, IFeatureSwitches
         var sprint = await db.Sprints.SingleAsync(s => s.PopkinId == popkin.Id, cancellationToken);
         db.Stories.Remove(story);
         // Its points leave the days from now on; the days before still count them.
-        PlanStories.Record(db, story, story.PointsLeft, 0, clock.GetUtcNow());
+        var now = clock.GetUtcNow();
+        PlanStories.Record(db, story, story.PointsLeft, 0, now);
+        await PlanNotifications.RecordAsync(db, story, membership, now, story.OwnerMembershipId, facts: null, cancellationToken);
         sprint.Changed();
         await db.SaveChangesAsync(cancellationToken);
         await notifier.PlanChanged(popkin.Id, sprint.Version);
