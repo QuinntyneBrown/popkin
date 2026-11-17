@@ -26,14 +26,20 @@ An admin holds a Popkin. The designs also list holds on one person added by hand
 to stop all mail while travelling"), but draw no way to add one. That is gap 125; the table can
 hold such a row, and no endpoint adds one.
 
-> **Built against a fake backend.** The admin app's side is built first, on the fake of
-> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md); the API, Domain and Worker
-> parts below are not built yet. The dialogs take the reason with `pk-textarea` and
+> **Built.** The admin app's side was built first, on the fake of
+> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md), which is now deleted: the
+> API, Domain and Worker parts below are built, with these differences. `NotificationHold` holds a
+> Popkin only (`PopkinId`, no `Target` or `PersonId`), and `INotificationPlatform` has
+> `IsPopkinHeld` but no `IsPersonHeld`, since nothing adds a manual person hold until gap 125 is
+> settled. `NotificationHoldRules.HeldAutomatically(deletedAt, erasedAt)` holds an account from
+> its deletion until its data is erased; suspension joins it when built. "Holds {n}" counts the
+> manual holds and the deleting accounts, as the list shows them. The automatic part is not paged
+> yet. The dialogs take the reason with `pk-textarea` and
 > `ActionDialogState`, as Features does; `pk-reason-field` is not built. The hold and release
 > dialogs are the page's one `NotificationActionDialog`, given their words by `holds-text.ts`.
 > The list reuses `pk-data-table` (ADR 0029): new `popkin`, `note` and `status` cells, and the
 > `person` cell's photo, keep the classes `who`, `who__name`, `who__sub` and `kind-about`, in place
-> of a separate `pk-who`. The closing sentence is `pk-aside-note`. The fake answers
+> of a separate `pk-who`. The closing sentence is `pk-aside-note`. The API answers
 > `suppressedAddresses` as null, so the sentence leaves the number out, as gap 129 says.
 
 ## Description

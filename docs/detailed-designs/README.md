@@ -688,7 +688,7 @@ Settled so far:
 | The SignalR client package | Shared real-time rules above: `@microsoft/signalr` from npm, on the server's release line |
 | Reconnect delays and the disconnect grace period | [Live messages](chat/live-messages/README.md) and [Group call](calls/group-call/README.md) |
 | The admin notification mocks gap 137 listed | `docs/mocks/admin/dialogs/notification-hold-add/`, `notification-defaults-save/`, the `invalid` state of the four other dialogs and the Defaults tab's `defaults-edited`, `defaults-invalid`, `defaults-saved`, `defaults-loading` and `defaults-error` (17 November 2026) |
-| How the admin Notifications page runs before its backend | [ADR 0030](../adr/0030-admin-notifications-on-a-fake-backend.md): a fake interceptor in the `api` library, off in e2e |
+| How the admin Notifications page ran before its backend | [ADR 0030](../adr/0030-admin-notifications-on-a-fake-backend.md): a fake interceptor in the `api` library, off in e2e; ended 17 November 2026, when the API served it |
 | How pure frontend logic is tested | [ADR 0011](../adr/0011-unit-tests-for-frontend-logic.md) |
 | How the hub is stubbed in tests | [ADR 0010](../adr/0010-the-hub-in-tests.md) |
 | The rule that ends a run of messages, the day labels and where the character count first shows | [Send a message to everyone](chat/send-message-to-everyone/README.md): the author, a day or a system note; "Today", "Yesterday", five weekdays, then the date; from 1,800 characters |

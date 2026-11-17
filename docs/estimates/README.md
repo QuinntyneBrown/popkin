@@ -1,6 +1,6 @@
 # Estimates
 
-- Overall effort: 378 days
+- Overall effort: 390 days
 - Complete: 88%
 
 | Subsystem | Effort | Complete |
@@ -20,7 +20,7 @@
 | [schedules](schedules.md) | 20 days | 100% |
 | [admin-access](admin-access.md) | 16 days | 97% |
 | [plan](plan.md) | 17 days | 100% |
-| [admin-platform](admin-platform.md) | 16 days | 30% |
+| [admin-platform](admin-platform.md) | 28 days | 57% |
 | [contacts](contacts.md) | 67 days | 100% |
 | [notifications](notifications.md) | 39 days | 99% |
 
@@ -31,4 +31,4 @@
 3. The SMS and email providers, which the crew invites need too.
 4. Reliability: a saved answer for every screen and an app that opens without a connection.
 5. Contacts, built in full and switched on (`Features:Contacts`) when its last pull request merges; it went in this order: add (with privacy's guard), profile (with privacy's not-found screen), people, the rest of open, delete, dates, follow-ups, log, memories, habits, connections, groups, import, Today and reminders. A log entry keeps its promises as follow-ups and its yearly milestone as a key date, so log comes after follow-ups and dates.
-6. Notifications: the app side is built (settings, the delivery pipeline, the Popkin update email, levels, mutes, unsubscribe, birthday, story and wrap-up reminders, digests and the 90-day purge). Notification email goes out from the first deployment of this branch: `postalAddress` is set in `infra/main.bicep`. The admin controls are next, with the default birthday reminder for new members (L2-173).
+6. Notifications: the app side is built (settings, the delivery pipeline, the Popkin update email, levels, mutes, unsubscribe, birthday, story and wrap-up reminders, digests and the 90-day purge). Notification email goes out from the first deployment of this branch: `postalAddress` is set in `infra/main.bicep`. The admin controls are built too: pause and resume, kinds off for everyone, holds and the defaults, with the default birthday reminder for new members (L2-173).

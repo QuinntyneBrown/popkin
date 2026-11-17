@@ -25,9 +25,17 @@ member who has chosen keeps that choice (L2-173 AC4). The page, its sending stat
 side is [Notification settings](../../notifications/notification-settings/README.md) and
 [Birthday reminders by person](../../notifications/birthday-reminders-by-person/README.md).
 
-> **Built against a fake backend.** The admin app's side is built first, on the fake of
-> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md); the API, Domain and Worker
-> parts below are not built yet. The dialogs take the reason with `pk-textarea` and
+> **Built.** The admin app's side was built first, on the fake of
+> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md), which is now deleted: the
+> API, Domain and Worker parts below are built, with these differences. `NotificationPlatform`
+> keeps the names its dispatcher already read: `BundlingMinutes`, `DailyMost` and `QuietUntil`
+> hold "Bundle changes within", "Most emails per person per day" and the end of quiet hours, and
+> `CurrentDefaults` gives the five as a `NotificationDefaults`. Every reader reads the one row as
+> it is now (`NotificationPlatformRow`) rather than through `INotificationPlatform.Defaults`, so a
+> change applies at the next request or tick. There is no separate validator:
+> `NotificationDefaultsRules.Check` gives the field and the words. `ReminderPreferences.BirthdayLead`
+> became nullable in this change; saving the reminder preferences keeps it null while the
+> birthday lead sent is the default shown. The dialogs take the reason with `pk-textarea` and
 > `ActionDialogState`, as Features does; `pk-reason-field` is not built. "Save new defaults?" is
 > the one `NotificationActionDialog` of the page, given the change list (`pk-change-list`), not a
 > dialog of its own. `pk-limit-row` draws the text fields and the select itself, as the mock's

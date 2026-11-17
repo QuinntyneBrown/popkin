@@ -6,6 +6,11 @@ Accepted, 17 November 2026. Amends [ADR 0023](0023-features-switched-on-by-a-set
 "no build-time flag, no environment file" it sets aside for the admin app's one setting below,
 and only until the backend this record waits for is built.
 
+Ended, 17 November 2026. The API serves every endpoint under `/api/admin/notifications`, so the
+fake, the `fakeNotificationsBackend` setting and the admin app's `e2e` build configuration are
+deleted, as the consequences below say, and `responses.json` holds the recorded answers. ADR
+0023 applies to the admin app again without exception.
+
 ## Context
 
 The admin Notifications page (L1-042, L2-169 to L2-173) is specified, designed
