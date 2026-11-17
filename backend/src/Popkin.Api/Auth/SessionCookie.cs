@@ -26,7 +26,8 @@ public static class SessionCookie
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.Cookie.SameSite = SameSiteMode.Strict;
                 options.Cookie.Path = "/";
-                options.ExpireTimeSpan = Domain.Session.Lifetime;
+                // Each ticket carries its session's expiry; this is only the handler's fallback.
+                options.ExpireTimeSpan = TimeSpan.FromDays(Domain.LimitDefaults.Of(Domain.LimitKey.SessionDays));
                 options.SlidingExpiration = false;
                 options.EventsType = typeof(SessionCookieEvents);
             });
@@ -57,20 +58,32 @@ public static class SessionCookie
 
 /// <summary>
 /// Checks the server-side session on every request, so a revoked session stops at once
-/// (L2-050 AC3), and answers 401/403 instead of redirecting.
+/// (L2-050 AC3), renews the cookie when the session was renewed (L2-176 AC2), and answers 401/403
+/// instead of redirecting.
 /// </summary>
-public sealed class SessionCookieEvents(ISender sender) : CookieAuthenticationEvents
+public sealed class SessionCookieEvents(ISender sender, TimeProvider clock) : CookieAuthenticationEvents
 {
     public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
     {
         var principal = context.Principal;
-        var live = Guid.TryParse(principal?.FindFirstValue(SessionCookie.SessionClaim), out var sessionId)
+        var use = Guid.TryParse(principal?.FindFirstValue(SessionCookie.SessionClaim), out var sessionId)
             && Guid.TryParse(principal?.FindFirstValue(ClaimTypes.NameIdentifier), out var personId)
-            && await sender.Send(new ValidateSessionQuery(sessionId, personId), context.HttpContext.RequestAborted);
-        if (!live)
+                ? await sender.Send(new UseSessionCommand(sessionId, personId), context.HttpContext.RequestAborted)
+                : SessionUse.Ended;
+        if (!use.Live)
         {
             context.RejectPrincipal();
             await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return;
+        }
+
+        if (use.RenewedUntil is { } renewedUntil)
+        {
+            // The handler re-issues the ticket for IssuedUtc..ExpiresUtc from now, so the fresh
+            // cookie expires with the renewed session (L2-176 AC2).
+            context.Properties.IssuedUtc = clock.GetUtcNow();
+            context.Properties.ExpiresUtc = renewedUntil;
+            context.ShouldRenew = true;
         }
     }
 

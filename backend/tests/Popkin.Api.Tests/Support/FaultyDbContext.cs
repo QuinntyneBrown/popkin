@@ -125,6 +125,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<FeatureSetting> FeatureSettings => inner.FeatureSettings;
 
+    public DbSet<LimitSetting> LimitSettings => inner.LimitSettings;
+
     public DbSet<FeatureChosenPopkin> FeatureChosenPopkins => inner.FeatureChosenPopkins;
 
     public DbSet<PopkinFeatureOff> PopkinFeaturesOff => inner.PopkinFeaturesOff;

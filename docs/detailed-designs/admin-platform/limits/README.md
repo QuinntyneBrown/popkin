@@ -4,13 +4,14 @@
 
 Popkin refuses a file that is too large and a request that comes too often. Until now each of
 those numbers is a constant in the code, so changing one takes a release. *Limits* is the page of
-the Popkin admin app (`/limits`) where an Owner changes the upload sizes and the rate limits, with
-a reason, and the API honours the new values within a minute, with no release and no restart
-(L1-027).
+the Popkin admin app (`/limits`) where an Owner changes the upload sizes, the rate limits and how long a
+sign-in lasts, with a reason, and the API honours the new values within a minute, with no release
+and no restart (L1-027, L2-117, L2-176).
 
 - **limit** — whole number of 1 or more that bounds a file's size or a request's rate
 - **upload size** — largest file one upload may carry, per file: Photo, Profile picture, Album export part
 - **rate limit** — most requests of one kind that one member, destination or address may make in a window
+- **sign-in length** — days a person stays signed in on a device after they last used Popkin on it (L2-176)
 - **default** — value a limit holds until an Owner changes it, the value the code has today
 - **unsaved change** — limit edited on the page and not yet saved
 
@@ -34,6 +35,14 @@ rule of `backend/src/Popkin.Api/Problems/RequestLimits.cs`, read it in place of 
 | Sign-in codes per address per 10 minutes | `CodesPerAddressPerTenMinutes` | per 10 minutes | 10 (L2-053 AC1) | `RateLimitPolicyNames.CodesPerAddress`, a fixed window of 10 |
 | Invite codes tried per address per 10 minutes | `InviteCodesPerAddressPerTenMinutes` | per 10 minutes | 20 (L2-053 AC3) | `RateLimitPolicyNames.InviteCodes`, a fixed window of 20 |
 
+| Sign-in lasts | `SessionDays` | days since the last use | 365 (L2-176 AC1), at most 400 | `Session.Lifetime`, 30 days from sign in, read by `ConfirmCodeCommandHandler` and the session cookie |
+
+The sign-in length is the panel "Sessions", after "Rate limits". It alone has a maximum: 400 days,
+the longest a browser keeps a cookie (Chrome caps a cookie's expiry at 400 days), so the API
+refuses a larger value with `limit_not_allowed` (L2-176 AC4). Admin sessions are not governed by
+it and stay 12 hours (L2-176 AC9). How the session uses it is in
+[Sessions](../../accounts/sessions/README.md).
+
 A megabyte is 1,048,576 bytes, as `10 * 1024 * 1024` is in the code. The photos policy
 (`RateLimitPolicyNames.Photos`, 60 photos per person per minute) and the call-signal limit
 (`SignalRateLimitFilter`, 600 a minute) are not on the page and stay constants.
@@ -53,6 +62,10 @@ Admin app, `docs/mocks/admin/pages/limits/`:
 - `saved.html` — the toast "Limits saved", "{limits} change for everyone within a minute."
   (L2-117 AC5).
 - `viewer.html` — "Only Owners can change limits.", every field read-only (L2-117 AC7).
+- Every state draws the panel "Sessions", "How long a person stays signed in on a device they keep
+  using.", with the row "Sign-in lasts", "Days since the person last used Popkin on the device ·
+  default 365 days", in days (L2-176 AC3); `edited.html` changes it to 30 and `invalid.html` holds
+  "Enter a whole number from 1 to 400." under it.
 - `loading.html`, `error.html` — skeletons; "Couldn't load the limits" with "Try again"
   (L2-089 AC7).
 
@@ -87,13 +100,13 @@ L2-087 AC1).
 Every endpoint is on `AdminLimitsController`, under
 `[Authorize(AuthenticationSchemes = AdminSessionCookie.Scheme)]`.
 
-- `GET /api/admin/limits` — any admin. `200` `AdminLimitsDto`: `uploads` and `rates`, each an
-  `AdminLimitDto[]` (`limit`, `value`, `defaultValue`, `unit`, `changedAt`, `changedByName`), in
-  the order of the table above.
+- `GET /api/admin/limits` — any admin. `200` `AdminLimitsDto`: `uploads`, `rates` and
+  `sessions`, each an `AdminLimitDto[]` (`limit`, `value`, `defaultValue`, `maxValue?`, `unit`,
+  `changedAt`, `changedByName`), in the order of the table above.
 - `PUT /api/admin/limits` — body `{ changes: [{ limit, value }], reason }`. `200`
   `AdminLimitsDto`. Refusals: `400` `reason_required`, `reason_too_long` (`ReasonRules`); `400`
   `limit_not_allowed` naming `changes[i].value` for a value that is not a whole number of 1 or
-  more; `400` `limit_unknown`; `403` `role_not_allowed` for Support and Viewer (L2-086 AC1). A
+  more, or above the limit's maximum; `400` `limit_unknown`; `403` `role_not_allowed` for Support and Viewer (L2-086 AC1). A
   change to the value a limit already has is dropped; a body with no change left is `400`
   `no_change`.
 - `GET /api/limits/uploads` — new, for the Popkin web app, any signed-in person. `200`
@@ -102,14 +115,15 @@ Every endpoint is on `AdminLimitsController`, under
 
 ### Backend
 
-- **`LimitKey`** (Domain) — the seven keys of the table.
+- **`LimitKey`** (Domain) — the eight keys of the table.
 - **`LimitDefaults`** (Domain) — the one home of the defaults. `Photo.MaxFileBytes`,
   `AvatarPhotos.MaxBytes`, `JoinPopkinCommandHandler.MaxPhotoBytes` and
   `VerificationCode.MaxPerWindow` are removed in its favour, and the numbers in
   `RateLimitPolicyNames` with them.
 - **`LimitSetting`** (Domain, new table) — `Limit` (key), `Value`, `ChangedAt`,
   `ChangedByAdminId`, `ChangedByName`. A limit without a row holds its default (L2-117 AC2).
-- **`ILimits`** (Application, new) — `Get(LimitKey): int`, `PhotoBytes`, `ProfilePictureBytes`.
+- **`ILimits`** (Application, new) — `Get(LimitKey): int`, `PhotoBytes`, `ProfilePictureBytes`,
+  `SessionLength` (`SessionDays` as a `TimeSpan`).
   Synchronous, so a rate-limiter partition can read it. `PlatformSnapshot` implements it from its
   `PlatformValues`, refreshed by `PlatformSnapshotMiddleware` when older than 30 seconds
   ([Feature switches](../feature-switches/README.md)), so a saved limit is honoured within a minute
@@ -126,6 +140,10 @@ Every endpoint is on `AdminLimitsController`, under
   put it in the partition key (`{address}|{permits}`, `{personId}|{permits}`). ASP.NET Core keeps
   one limiter per partition key, so a changed value starts a new limiter and its count starts
   afresh; the old limiter is discarded once idle. `SlidingLogRateLimiter` is unchanged.
+- **Sessions** (changed) — `ConfirmCodeCommandHandler` starts a session with
+  `ILimits.SessionLength`, and `UseSessionCommandHandler` renews each live session with it on use
+  ([Sessions](../../accounts/sessions/README.md)). `PlatformSnapshotMiddleware` moves before
+  `UseAuthentication` so the session check reads a fresh snapshot.
 - **`CodeIssuer`** (changed) — counts against `ILimits.Get(CodesPerDestinationPerHour)` in the
   hour of `VerificationCode.LimitWindow`; the count is in the database, so a change applies at the
   next request without a fresh start.
@@ -183,7 +201,13 @@ Every endpoint is on `AdminLimitsController`, under
 - A direct test of `PlatformSnapshot`'s limits, one case per row: no row is the default; a row's
   value; stale after 30 seconds of `FakeTimeProvider`.
 - A direct test of `ChangeLimitsCommandValidator`, one case per row: 0, -1, 1.5, empty, 1, a
-  value equal to the saved one.
+  value equal to the saved one, and for `SessionDays` 400 and 401.
+- API acceptance tests of the sign-in length (L2-176): a new session's cookie expires 365 days
+  ahead; a session used every 300 days stays live past 365 days from sign in; one unused for 365
+  days is 401; an Owner saves 7 days and a session used after is renewed for 7 days and ends after
+  7 unused; 401 and 0 are `400` `limit_not_allowed`.
+- A direct test of `Session.Renew`, one case per row: an hour later moves it, less than an hour
+  does not, a shorter length moves it back.
 - Playwright (admin project): each page state and the dialog's default, busy, invalid and failed
   paths through `AdminLimitsPage`.
 
@@ -192,8 +216,22 @@ Every endpoint is on `AdminLimitsController`, under
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-117` | `L1-027` | Limits: An Owner changes the upload sizes and rate limits without a release. (AC1–AC8) |
+| `L2-176` | `L1-027` | How long a sign-in lasts: each use starts the sign-in length again; an Owner sets it on Limits. (AC1–AC9) |
+
+## Build order
+
+The page is built in slices. The first, for L2-176, builds the page with its panel "Sessions"
+alone: `LimitKey.SessionDays`, `LimitSetting`, `ILimits.SessionLength` in `PlatformSnapshot`, both
+endpoints, the audit entry, `LimitsPage` with the save bar and `SaveLimitsDialog`, and
+`AdminLimitsStore`. The panels "Upload sizes" and "Rate limits", with their readers in the code
+listed above, come with the next slices; until then `uploads` and `rates` are empty and the page
+draws no panel for them.
 
 ## Diagrams
+
+The diagrams show the upload sizes and rate limits only; the sign-in length reads and saves the
+same way, and its effect on a session is drawn in [Sessions](../../accounts/sessions/README.md)
+(known gap 139).
 
 ### System context
 

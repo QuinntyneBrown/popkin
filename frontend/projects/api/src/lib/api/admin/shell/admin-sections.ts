@@ -5,7 +5,7 @@ export interface AdminNavItem {
   /** The `page` of the section's route, which marks it current. */
   page: string;
   /** An icon of the `components` library. */
-  icon: 'shield' | 'scroll' | 'toggle' | 'bell';
+  icon: 'shield' | 'scroll' | 'toggle' | 'bell' | 'sliders';
 }
 
 export interface AdminNavGroup {
@@ -23,6 +23,7 @@ export const ADMIN_SECTIONS: readonly AdminNavGroup[] = [
     items: [
       { label: 'Features', route: '/features', page: 'features', icon: 'toggle' },
       { label: 'Notifications', route: '/notifications', page: 'notifications', icon: 'bell' },
+      { label: 'Limits', route: '/limits', page: 'limits', icon: 'sliders' },
     ],
   },
   {

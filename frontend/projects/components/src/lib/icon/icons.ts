@@ -452,6 +452,17 @@ export const ICONS = {
   ],
   // The admin app's sections and its bar (docs/mocks/admin).
   shield: [{ path: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z' }],
+  sliders: [
+    { line: [21, 14, 4, 4] },
+    { line: [10, 3, 4, 4] },
+    { line: [21, 12, 12, 12] },
+    { line: [8, 3, 12, 12] },
+    { line: [21, 16, 20, 20] },
+    { line: [12, 3, 20, 20] },
+    { line: [14, 14, 2, 6] },
+    { line: [8, 8, 10, 14] },
+    { line: [16, 16, 18, 22] },
+  ],
   scroll: [
     { path: 'M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4' },
     { path: 'M19 17V5a2 2 0 0 0-2-2H4' },

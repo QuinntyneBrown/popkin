@@ -30,7 +30,8 @@ front-end guard and interceptor.
 
 ### Back end
 
-- **`Session`** (`Popkin.Domain`, introduced) — `Id`, `PersonId`, `CreatedAt`, `ExpiresAt`, `RevokedAt?`. `Start(personId, now)` sets `ExpiresAt` to 30 days after `now` (L2-007 AC1). `IsLive(now)` and `Revoke(now)` express the rules. `IAppDbContext` gains `DbSet<Session> Sessions`; `SessionConfiguration` indexes `PersonId`. Whether each authenticated request extends `ExpiresAt` (sliding expiry) or the 30 days run from sign in (absolute expiry) is `<TO SUPPLY>`.
+- **`Session`** (`Popkin.Domain`, introduced) — `Id`, `PersonId`, `CreatedAt`, `ExpiresAt`, `RevokedAt?`. `Start(personId, now, length)` sets `ExpiresAt` to the sign-in length after `now` (L2-176 AC1). `IsLive(now)` and `Revoke(now)` express the rules. `IAppDbContext` gains `DbSet<Session> Sessions`; `SessionConfiguration` indexes `PersonId`.
+- **Sliding expiry (changed by L2-176)** — each use of a live session starts the sign-in length again (L2-007 AC1, L2-176 AC2). `Session.Renew(now, length)` moves `ExpiresAt` to `now + length` and says whether it moved; it moves only when the new expiry is at least `Session.RenewStep` (one hour) later than the stored one, or earlier than it (a length an Owner shortened, L2-176 AC6), so an active device writes its session at most once an hour. The length is `ILimits.SessionLength`, the `SessionDays` limit an Owner sets on Limits ([Limits](../../admin-platform/limits/README.md)), 365 days by default and at most 400, the longest a browser keeps a cookie. A session started before this change keeps its 30-day `ExpiresAt` until its next use, which renews it.
 - **Address hosts (changed by L2-067)** — every Popkin has its own host under
   `popkin.community` (L1-016), and one session must serve them all (L2-067 AC3). The cookie
   therefore becomes `__Secure-popkin` with `Domain` set to the base domain, keeping `HttpOnly`,
@@ -38,12 +39,13 @@ front-end guard and interceptor.
   retired. The same-site proof also accepts an `Origin` on any address host. Both changes are
   designed in [Address safety](../../security/address-safety/README.md); the text below records
   the design as journey 1 built it.
-- **Cookie options** (`Program.cs`, changed) — `Cookie.Name = "__Host-popkin"`, `Cookie.HttpOnly = true` (existing), `Cookie.SecurePolicy = CookieSecurePolicy.Always`, `Cookie.Path = "/"`, `ExpireTimeSpan` 30 days, `Events` replaced by `SessionCookieEvents`, which keeps the existing 401 and 403 answers instead of redirects. The `__Host-` prefix forbids a `Domain` attribute and requires `Secure`, so the cookie goes only to the origin that set it and only over HTTPS (L2-007 AC4).
+- **Cookie options** (`Program.cs`, changed) — `Cookie.Name = "__Host-popkin"`, `Cookie.HttpOnly = true` (existing), `Cookie.SecurePolicy = CookieSecurePolicy.Always`, `Cookie.Path = "/"`, `ExpireTimeSpan` the default sign-in length (each ticket carries its own `ExpiresUtc`), `Events` replaced by `SessionCookieEvents`, which keeps the existing 401 and 403 answers instead of redirects. The `__Host-` prefix forbids a `Domain` attribute and requires `Secure`, so the cookie goes only to the origin that set it and only over HTTPS (L2-007 AC4).
 - **SameSite: Lax to Strict (changed)** — L2-007 AC4 requires that the cookie "is not sent with requests from other sites". `SameSite=Lax` still sends it on top-level cross-site navigations, so it does not meet the criterion. `SameSite=Strict` does. All API calls come from the single-page app on the same site, so Strict costs nothing: an invite link opened from another site loads the app shell, and the app's later API calls are same-site. This corrects the existing setting; the change belongs in the same change set as this feature.
 - **`SameSiteRequestMiddleware`** (`Popkin.Api`, introduced) — runs before authentication. For `POST`, `PUT`, `PATCH` and `DELETE` under `/api` and `/hubs`, it accepts the request when `Sec-Fetch-Site` is `same-origin`, or, where that header is absent, when `Origin` equals the configured app origin (`App:Origin`). Otherwise it answers 403 `cross_site_request` (L2-050 AC2). This "same-site proof" replaces anti-forgery tokens, which the SPA would otherwise have to fetch from an extra anonymous endpoint; together with `SameSite=Strict` it closes cross-site request forgery.
-- **`SessionCookieIssuer`** (`Popkin.Api`, introduced) — `SignInAsync(http, personId, sessionId, expiresAt)` builds a `ClaimsPrincipal` with `ClaimTypes.NameIdentifier` = `PersonId` and `pk:sid` = `SessionId`, sets `IsPersistent` and `ExpiresUtc`, and calls `HttpContext.SignInAsync`. `SignOutAsync(http)` deletes the cookie. The confirm-code endpoint calls the first; sign out (manage-account design) and account deletion call the second.
-- **`SessionCookieEvents`** (`Popkin.Api`, introduced, derives from `CookieAuthenticationEvents`) — `ValidatePrincipal` sends `ValidateSessionQuery` on every request. When the session is not live it calls `RejectPrincipal()` and deletes the cookie, so a revoked session stops working at once (L2-050 AC3). There is no cache in front of this check; a cache would delay revocation.
-- **`ValidateSessionQuery`** / **`ValidateSessionQueryHandler`** (`Popkin.Application.Auth`, introduced) — loads the `Session` by `SessionId` and checks that it belongs to `PersonId`, is live at `TimeProvider.GetUtcNow()`, and that the `Person` has no `DeletedAt`.
+- **`SessionCookieIssuer`** (`Popkin.Api`, introduced; built as `SessionCookie`) — `SignInAsync(http, personId, sessionId, expiresAt)` builds a `ClaimsPrincipal` with `ClaimTypes.NameIdentifier` = `PersonId` and `pk:sid` = `SessionId`, sets `IsPersistent` and `ExpiresUtc`, and calls `HttpContext.SignInAsync`. `SignOutAsync(http)` deletes the cookie. The confirm-code endpoint calls the first; sign out (manage-account design) and account deletion call the second.
+- **`SessionCookieEvents`** (`Popkin.Api`, introduced, derives from `CookieAuthenticationEvents`) — `ValidatePrincipal` sends `UseSessionCommand` on every request. When the session is not live it calls `RejectPrincipal()` and deletes the cookie, so a revoked session stops working at once (L2-050 AC3). There is no cache in front of this check; a cache would delay revocation. When the command renewed the session, it sets the ticket's `IssuedUtc` to now and `ExpiresUtc` to the new expiry and sets `ShouldRenew`, so the response carries a fresh cookie whose expiry matches the session (L2-176 AC2).
+- **`UseSessionCommand`** / **`UseSessionCommandHandler`** (`Popkin.Application.Auth`, introduced as `ValidateSessionQuery`, changed by L2-176) — loads the `Session` by `SessionId` and checks that it belongs to `PersonId`, is live at `TimeProvider.GetUtcNow()`, and that the `Person` has no `DeletedAt`; then calls `Session.Renew` with `ILimits.SessionLength` and saves when it moved. It answers `SessionUse(Live, RenewedUntil?)`.
+- **The platform snapshot before authentication (changed by L2-176)** — `PlatformSnapshotMiddleware` runs before `UseAuthentication`, so the sign-in length the session check reads is at most 30 seconds old.
 - **`ICurrentPerson`** / **`HttpCurrentPerson`** (introduced) — reads `PersonId` and `SessionId` from the claims for handlers. Handlers never read `HttpContext` themselves.
 - **`GetSessionQuery`** / **`GetSessionQueryHandler`**, **`SessionDto`** (introduced) — return the caller's id, name and photo URL for `AuthController.GetSession`.
 - **Fallback policy** (existing) — every endpoint requires an authenticated user unless it carries `[AllowAnonymous]`. The anonymous set is exactly `HealthController` (`GET /api/health` and `GET /api/health/ready`, each a status and nothing else, L2-050 AC5), `AuthController.RequestCode`, `ResendCode`, `ConfirmCode` and the invite preview (`InvitesController`, invites design) (L2-050 AC1). Swagger stays above `UseAuthentication`. `PopkinHub` is mapped under the same policy, so a connection without a live session is refused with 401 during negotiation (L2-050 AC4).
@@ -60,12 +62,15 @@ front-end guard and interceptor.
 
 ### Tests
 
-- API integration tests on InMemory sign in through the code endpoints, then assert: the `Set-Cookie` attributes (`HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/`, expiry 30 days ahead); 401 on a private endpoint without a cookie; 401 after the session is revoked or expires (with `TimeProvider` advanced); 403 `cross_site_request` for a `POST` with a foreign `Origin`; 200 for each anonymous endpoint without a cookie.
+- API integration tests on InMemory sign in through the code endpoints, then assert: the `Set-Cookie` attributes (`HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/`, expiry the sign-in length ahead); 401 on a private endpoint without a cookie; 401 after the session is revoked or expires (with `TimeProvider` advanced); 403 `cross_site_request` for a `POST` with a foreign `Origin`; 200 for each anonymous endpoint without a cookie.
 - Playwright specs open a private route with `GET /api/auth/session` stubbed to 401 and assert the sign-in screen opens and, after confirming, the requested screen opens.
 
 ### Open questions settled in journey 1
 
 - **Expiry** — absolute: 30 days from sign in, no sliding (`SlidingExpiration = false`).
+  Superseded by L2-176: the session slides, renewed by `UseSessionCommand` (the cookie handler's
+  own `SlidingExpiration` stays off, since the session, not the ticket, decides), and its length
+  is the Owner's sign-in length.
 - **SameSite** — changed from `Lax` to `Strict`, with `__Host-popkin`, `Secure`, `HttpOnly` and
   `Path=/`.
 - **Same-site proof** — `SameSiteRequestMiddleware` as designed; a request with neither
@@ -79,10 +84,15 @@ front-end guard and interceptor.
 | L2 ID | Refines (L1) | Requirement |
 |-------|--------------|-------------|
 | `L2-007` | `L1-002` | Sessions: A signed-in person stays signed in on their device until they sign out or the session ends. |
+| `L2-176` | `L1-027` | How long a sign-in lasts: each use starts the sign-in length again; an Owner sets it on Limits. |
 | `L2-050` | `L1-012` | Every request is authenticated: Nothing private is served without a session. |
 | `L2-067` | `L1-012` | Addresses are safe: An address per Popkin must not weaken the privacy of a Popkin or the session of a person. AC3, AC4 and AC6 change this design; see [Address safety](../../security/address-safety/README.md). |
 
 ## Diagrams
+
+The diagrams were not redrawn after L2-176: they show a 30-day absolute expiry and
+`ValidateSessionQuery`, where the text above has the sliding sign-in length and `UseSessionCommand`
+(known gap 139).
 
 ### System context
 
@@ -115,7 +125,7 @@ through `SessionCookieEvents`, then the fallback policy authorises.
 
 ### Behaviour — start a session
 
-A confirmed code starts a `Session` that lasts 30 days. `SessionCookieIssuer` writes the
+A confirmed code starts a `Session` that lasts the sign-in length (30 days in the diagram, before L2-176). `SessionCookieIssuer` writes the
 `__Host-popkin` cookie with the attributes L2-007 AC4 requires.
 
 ![Sequence diagram for starting a session](diagrams/sequence-start-session.png)

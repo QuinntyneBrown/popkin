@@ -299,7 +299,7 @@ Each design follows the source named below and marks the conflict in its own REA
 | Admin platform | [Feature switches](admin-platform/feature-switches/README.md) | L2-076, L2-077 |
 | Admin platform | [Announcements](admin-platform/announcements/README.md) | L2-115 |
 | Admin platform | [See an announcement](admin-platform/see-announcement/README.md) | L2-116 |
-| Admin platform | [Limits](admin-platform/limits/README.md) | L2-117 |
+| Admin platform | [Limits](admin-platform/limits/README.md) | L2-117, L2-176 |
 | Admin platform | [Settings](admin-platform/settings/README.md) | L2-118 |
 | Contacts | [Open Contacts](contacts/open-contacts/README.md) | L2-121, L2-123, L2-124 |
 | Contacts | [Only you see your Contacts](contacts/contacts-privacy/README.md) | L2-122 |
@@ -671,6 +671,7 @@ or design that settled it.
 | 136 | Notifications screen states no mock draws: a member of no active Popkin on "Popkins"; "Mute someone" finding nobody; a muted person who no longer shares a Popkin; the account with no email address (L2-156 AC5); whether a banner closes by itself after 8 seconds, as the mock's note says ([Notification settings](notifications/notification-settings/README.md)) | Notification settings | |
 | 137 | Admin notification mocks still to draw: the dialog that holds a Popkin with a reason (`notification-hold-add`), the dialog that saves the defaults with a reason (`notification-defaults-save`), and the Defaults tab's invalid, saved, loading and error states; the drawn dialogs mark the reason optional where L2-087 AC1 now asks for one ([Notification holds](admin-platform/notification-holds/README.md), [Notification defaults](admin-platform/notification-defaults/README.md)) | Admin Notifications | |
 | 138 | Three admin notification details the designs left open. L2-087 AC1 already names the notification dialogs (the designs say it does not), so the reason is required in all six. Focus starts in the reason (L2-087 AC1), not on the safe choice as the mocks' note said. The release dialog is titled "Release the hold on {name}?", as the mock and design draw it, where L2-172 AC4 says "Release this hold?"; whether L2-172 AC4 takes the mock's words is `<TO SUPPLY>` by its owner | Admin Notifications | |
+| 139 | The diagrams of [Sessions](accounts/sessions/README.md) and [Limits](admin-platform/limits/README.md) were not redrawn for L2-176: Sessions shows a 30-day absolute expiry and `ValidateSessionQuery`, where the text has the sliding sign-in length and `UseSessionCommand`; Limits draws no "Sessions" panel | None | |
 
 Settled so far:
 

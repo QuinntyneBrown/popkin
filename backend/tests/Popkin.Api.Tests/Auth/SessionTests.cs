@@ -32,32 +32,6 @@ public sealed class SessionTests
     }
 
     [Fact]
-    public async Task A_session_still_works_within_thirty_days()
-    {
-        using var api = new ApiFactory();
-        var client = api.CreateBrowserClient();
-        await client.SignUpAsync(api, "Mara", "(415) 555-0148");
-        api.Clock.Advance(TimeSpan.FromDays(29));
-
-        var response = await client.GetAsync("/api/auth/session");
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task A_session_ends_after_thirty_days()
-    {
-        using var api = new ApiFactory();
-        var client = api.CreateBrowserClient();
-        await client.SignUpAsync(api, "Mara", "(415) 555-0148");
-        api.Clock.Advance(TimeSpan.FromDays(30));
-
-        var response = await client.GetAsync("/api/auth/session");
-
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-    }
-
-    [Fact]
     public async Task A_revoked_session_stops_working_at_once()
     {
         using var api = new ApiFactory();

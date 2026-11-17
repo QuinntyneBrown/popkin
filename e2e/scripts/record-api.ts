@@ -9,7 +9,7 @@
  * and leaves it, she adds the album's first photo, she shares an experience, rates it and
  * comments on it, she wraps the Popkin up and reads its recap, and Dev leaves it. Then she gives her full name, reads her
  * account and saves a photo; Joel signs out; and Mara deletes her account. Last, Lena Fischer
- * signs in to the admin app, adds three admins, turns Schedules off and reads and changes Notifications. Each answer is keyed
+ * signs in to the admin app, adds three admins, turns Schedules off, reads and changes Notifications and Limits. Each answer is keyed
  * "METHOD /api/path?query", the key the e2e fixture looks up, so one answer is kept per key:
  * the accounts answers are Mara's, and the other people's sign-ups are not recorded.
  */
@@ -593,6 +593,8 @@ await call('GET', '/api/admin/notifications');
 await call('GET', '/api/admin/notifications/holds');
 await call('GET', '/api/admin/notifications/holds/popkin-search?q=lake');
 await call('GET', '/api/admin/notifications/defaults');
+// Limits (L2-176): the sign-in length at its default of 365 days.
+await call('GET', '/api/admin/limits');
 // Then she makes Aiko a Viewer and removes Marco; the list and the log above stay as they were.
 await call('PUT', `/api/admin/admins/${aiko.id}/role`, {
   role: 'Viewer',
@@ -621,6 +623,11 @@ await call('PUT', '/api/admin/notifications/defaults', {
   quietTo: '08:00',
   birthdayLead: 'OneWeekBefore',
   reason: 'Fewer emails at launch',
+});
+// Last, she shortens the sign-in length to 30 days; Limits above stays as it was.
+await call('PUT', '/api/admin/limits', {
+  changes: [{ limit: 'SessionDays', value: 30 }],
+  reason: 'Shared tablets at the venue',
 });
 
 const file = join(import.meta.dirname, '..', 'fixtures', 'api', 'responses.json');

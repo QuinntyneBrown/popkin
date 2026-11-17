@@ -111,6 +111,8 @@ public interface IAppDbContext
 
     DbSet<FeatureSetting> FeatureSettings { get; }
 
+    DbSet<LimitSetting> LimitSettings { get; }
+
     DbSet<FeatureChosenPopkin> FeatureChosenPopkins { get; }
 
     DbSet<PopkinFeatureOff> PopkinFeaturesOff { get; }

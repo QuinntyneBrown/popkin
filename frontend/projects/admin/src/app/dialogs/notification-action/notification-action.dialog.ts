@@ -22,7 +22,8 @@ export interface NotificationActionData<T> {
 /**
  * The notification changes that ask for a reason (L2-087 AC1): "Pause all member email?",
  * "Resume sending?" and "Turn {kind} off for everyone?" or back on (L2-170 AC1, AC3, L2-171 AC1,
- * AC3), and "Save new defaults?" with what changes (L2-173 AC4). Focus starts in the reason, which is required. It closes with the saved answer; a failure
+ * AC3), "Save new defaults?" with what changes (L2-173 AC4), and "Save new limits?" on Limits
+ * (L2-117 AC5, L2-176 AC5). Focus starts in the reason, which is required. It closes with the saved answer; a failure
  * keeps it open with the reason as typed (L2-087 AC5).
  */
 @Component({

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   AdminFeature,
   AdminFeatures,
+  AdminLimits,
   AdminNotificationDefaults,
   AdminNotificationHold,
   AdminNotificationHolds,
@@ -13,14 +14,16 @@ import {
   FeatureMode,
   FeaturePopkinMatch,
   HoldPopkinMatch,
+  LimitChangeRequest,
   NotificationDefaultsChange,
   NotificationKindId,
 } from '../../../models/admin';
 import { PopkinFeature } from '../../../models/home';
 
 /**
- * Features (docs/detailed-designs/admin-platform/feature-switches) and Notifications
- * (docs/detailed-designs/admin-platform/notifications).
+ * Features (docs/detailed-designs/admin-platform/feature-switches), Notifications
+ * (docs/detailed-designs/admin-platform/notifications) and Limits
+ * (docs/detailed-designs/admin-platform/limits).
  */
 export interface AdminPlatformApi {
   features(): Observable<AdminFeatures>;
@@ -62,6 +65,9 @@ export interface AdminPlatformApi {
     defaults: NotificationDefaultsChange,
     reason: string | null,
   ): Observable<AdminNotificationDefaults>;
+  limits(): Observable<AdminLimits>;
+  /** 400 `limit_not_allowed`, `limit_unknown`, `no_change`, `reason_required`; 403 for Support and Viewer. */
+  changeLimits(changes: LimitChangeRequest[], reason: string | null): Observable<AdminLimits>;
 }
 
 export const ADMIN_PLATFORM_API = new InjectionToken<AdminPlatformApi>('AdminPlatformApi');
@@ -159,5 +165,13 @@ export class HttpAdminPlatformApi implements AdminPlatformApi {
       ...defaults,
       reason,
     });
+  }
+
+  limits(): Observable<AdminLimits> {
+    return this.http.get<AdminLimits>('/api/admin/limits');
+  }
+
+  changeLimits(changes: LimitChangeRequest[], reason: string | null): Observable<AdminLimits> {
+    return this.http.put<AdminLimits>('/api/admin/limits', { changes, reason });
   }
 }

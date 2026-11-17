@@ -947,7 +947,8 @@
       "route": "admin.popkin.community/limits",
       "requirements": [
         "L2-086",
-        "L2-117"
+        "L2-117",
+        "L2-176"
       ],
       "states": [
         "default",
@@ -969,7 +970,8 @@
       "opens_from": "limits",
       "requirements": [
         "L2-087",
-        "L2-117"
+        "L2-117",
+        "L2-176"
       ],
       "states": [
         "default",

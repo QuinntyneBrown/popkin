@@ -3861,6 +3861,24 @@
       "changedByName": null
     }
   },
+  "GET /api/admin/limits": {
+    "status": 200,
+    "body": {
+      "uploads": [],
+      "rates": [],
+      "sessions": [
+        {
+          "limit": "SessionDays",
+          "value": 365,
+          "defaultValue": 365,
+          "maxValue": 400,
+          "unit": "days",
+          "changedAt": null,
+          "changedByName": null
+        }
+      ]
+    }
+  },
   "PUT /api/admin/admins/cf2bf28f-3da1-4af8-9592-8decab839808/role": {
     "status": 200,
     "body": {
@@ -3942,6 +3960,24 @@
       "birthdayLead": "OneWeekBefore",
       "changedAt": "2026-11-17T16:06:09.614632+00:00",
       "changedByName": "Lena Fischer"
+    }
+  },
+  "PUT /api/admin/limits": {
+    "status": 200,
+    "body": {
+      "uploads": [],
+      "rates": [],
+      "sessions": [
+        {
+          "limit": "SessionDays",
+          "value": 30,
+          "defaultValue": 365,
+          "maxValue": 400,
+          "unit": "days",
+          "changedAt": "2026-11-17T22:38:19.6385+00:00",
+          "changedByName": "Lena Fischer"
+        }
+      ]
     }
   }
 }

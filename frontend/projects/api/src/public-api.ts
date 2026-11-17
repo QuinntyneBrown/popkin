@@ -144,6 +144,8 @@ export * from './lib/api/admin/platform/admin-notifications.store';
 export * from './lib/api/admin/platform/notifications-text';
 export * from './lib/api/admin/platform/holds-text';
 export * from './lib/api/admin/platform/notification-defaults-draft';
+export * from './lib/api/admin/platform/admin-limits.store';
+export * from './lib/api/admin/platform/limits-draft';
 export * from './lib/models/contacts';
 export * from './lib/models/connections';
 export * from './lib/models/groups';

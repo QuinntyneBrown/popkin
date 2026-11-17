@@ -35,6 +35,7 @@ public static class DependencyInjection
         services.AddSingleton<IFeatureSwitches>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
         services.AddSingleton<IPlatformSnapshot>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
         services.AddSingleton<INotificationPlatform>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
+        services.AddSingleton<ILimits>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
 
         var development = environment?.IsDevelopment() ?? false;
         var developmentCode = configuration["Auth:DevelopmentCode"];

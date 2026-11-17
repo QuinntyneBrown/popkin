@@ -278,3 +278,30 @@ export interface AdminNotificationDefaults extends NotificationDefaultsChange {
   changedAt: string | null;
   changedByName: string | null;
 }
+
+/** A limit an Owner changes on Limits (L2-117, L2-176); the upload sizes and rates join it. */
+export type LimitKeyId = 'SessionDays';
+
+/** One row of Limits: its value, default, bounds, unit and last change. */
+export interface AdminLimit {
+  limit: LimitKeyId;
+  value: number;
+  defaultValue: number;
+  maxValue: number | null;
+  unit: string;
+  changedAt: string | null;
+  changedByName: string | null;
+}
+
+/** `GET /api/admin/limits`: each panel's rows. Uploads and rates are empty until built. */
+export interface AdminLimits {
+  uploads: AdminLimit[];
+  rates: AdminLimit[];
+  sessions: AdminLimit[];
+}
+
+/** One change of `PUT /api/admin/limits`. */
+export interface LimitChangeRequest {
+  limit: LimitKeyId;
+  value: number;
+}
