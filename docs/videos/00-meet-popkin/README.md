@@ -49,15 +49,15 @@ re-records its shots changes this one too.
 |---|---|
 | [01](../01-journey-01-start-a-popkin/README.md) Start a Popkin | `created-xs` |
 | [02](../02-journey-02-join-by-invite/README.md) Join by invite | `invite-xs`, `welcome-xs` |
-| [04](../04-journey-04-popkin-home/README.md) Popkin home | `home-xs`, `invite-qr` |
-| [05](../05-journey-05-share-photos/README.md) Share photos | `album-xl` |
-| [07](../07-journey-07-group-call/README.md) Group call | `call-six-xl`, `call-six-xs` |
-| [08](../08-journey-08-rate-an-experience/README.md) Rate an experience | `detail-xs`, `score` |
+| [04](../05-journey-04-popkin-home/README.md) Popkin home | `home-xs`, `invite-qr` |
+| [05](../04-journey-05-share-photos/README.md) Share photos | `album-xl` |
+| [07](../08-journey-07-group-call/README.md) Group call | `call-six-xl`, `call-six-xs` |
+| [08](../07-journey-08-rate-an-experience/README.md) Rate an experience | `detail-xs`, `score` |
 | [09](../09-journey-09-wrap-up/README.md) Wrap up | `recap-xs`, `recap-stats`, `recap-moment` |
-| [10](../10-journey-10-discover-popkin/README.md) Discover Popkin | `landing-xs-dark`, `compare-table`, `landing-xs`, `landing-m`, `landing-l`, `landing-xl` |
-| [14](../11-journey-11-direct-message/README.md) Direct message | `dm-xs` |
-| [15](../20-journey-20-say-keen/README.md) Say keen | `want-xs`, `panel-keen` |
-| [16](../12-journey-12-react-and-reply/README.md) React and reply | `hearted-xs`, `mara-quote` |
+| [10](../18-journey-10-discover-popkin/README.md) Discover Popkin | `landing-xs-dark`, `compare-table`, `landing-xs`, `landing-m`, `landing-l`, `landing-xl` |
+| [14](../12-journey-11-direct-message/README.md) Direct message | `dm-xs` |
+| [15](../16-journey-20-say-keen/README.md) Say keen | `want-xs`, `panel-keen` |
+| [16](../14-journey-12-react-and-reply/README.md) React and reply | `hearted-xs`, `mara-quote` |
 
 ## What it says, and what it leaves out
 

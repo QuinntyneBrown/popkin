@@ -10,15 +10,15 @@ const shot = (film, name) => `../${film}/shots/${name}.png`;
 const F = {
   start: '01-journey-01-start-a-popkin',
   join: '02-journey-02-join-by-invite',
-  home: '04-journey-04-popkin-home',
-  photos: '05-journey-05-share-photos',
-  call: '07-journey-07-group-call',
-  rate: '08-journey-08-rate-an-experience',
+  home: '05-journey-04-popkin-home',
+  photos: '04-journey-05-share-photos',
+  call: '08-journey-07-group-call',
+  rate: '07-journey-08-rate-an-experience',
   wrap: '09-journey-09-wrap-up',
-  land: '10-journey-10-discover-popkin',
-  dm: '11-journey-11-direct-message',
-  keen: '20-journey-20-say-keen',
-  react: '12-journey-12-react-and-reply',
+  land: '18-journey-10-discover-popkin',
+  dm: '12-journey-11-direct-message',
+  keen: '16-journey-20-say-keen',
+  react: '14-journey-12-react-and-reply',
 };
 
 const lineOf = (id, n) => Film.timing.lines.filter((line) => line.scene === id)[n];
