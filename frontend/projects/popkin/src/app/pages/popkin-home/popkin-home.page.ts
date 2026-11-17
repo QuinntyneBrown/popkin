@@ -30,6 +30,7 @@ import {
   POPKINS_API,
   PopkinFeaturesView,
   featuresHint,
+  dialogConfig,
 } from 'api';
 import {
   Alert,
@@ -219,14 +220,13 @@ export class PopkinHomePage {
 
   /** "Bring someone in" (L2-011); closing it returns focus to what opened it. */
   protected invite(): void {
-    this.dialog.open<void, InviteData>(InviteDialog, {
-      data: { popkinId: this.popkinId(), accent: this.accent() },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    this.dialog.open<void, InviteData>(
+      InviteDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.accent() },
+        ariaDescribedBy: 'dlg-desc',
+      }),
+    );
   }
 
   /** The Host's banner of the last hour offers "Change how long it lasts" (L2-044 AC2). */
@@ -255,19 +255,19 @@ export class PopkinHomePage {
   private openSettings(opener: HTMLElement | null, choices: FeatureChoiceView[]): void {
     const popkin = this.popkin();
     if (!popkin) return;
-    const opened = this.dialog.open<PopkinSetting, PopkinSettingsData>(PopkinSettingsDialog, {
-      data: {
-        accent: this.accent(),
-        name: popkin.name,
-        host: popkin.viewerRole === 'Host',
-        lengthHint: lengthHint(popkin.endsAt, new Date()),
-        eventHint: popkin.schedules ? eventHint(popkin.event) : undefined,
-        featuresHint: featuresHint(choices),
-      },
-      ariaLabelledBy: 'dlg-title',
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<PopkinSetting, PopkinSettingsData>(
+      PopkinSettingsDialog,
+      dialogConfig({
+        data: {
+          accent: this.accent(),
+          name: popkin.name,
+          host: popkin.viewerRole === 'Host',
+          lengthHint: lengthHint(popkin.endsAt, new Date()),
+          eventHint: popkin.schedules ? eventHint(popkin.event) : undefined,
+          featuresHint: featuresHint(choices),
+        },
+      }),
+    );
     opened.closed.subscribe((setting) => {
       if (setting === 'edit') this.editLook(opener);
       if (setting === 'length') this.changeLength(opener);
@@ -283,20 +283,20 @@ export class PopkinHomePage {
   private editLook(opener: HTMLElement | null): void {
     const popkin = this.popkin();
     if (!popkin) return;
-    const opened = this.dialog.open<PopkinSettingsView, EditPopkinData>(EditPopkinDialog, {
-      data: {
-        popkinId: this.popkinId(),
-        name: popkin.name,
-        emoji: popkin.emoji,
-        colour: popkin.colour,
-      },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      autoFocus: '#pname',
-      restoreFocus: opener ?? true,
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<PopkinSettingsView, EditPopkinData>(
+      EditPopkinDialog,
+      dialogConfig({
+        data: {
+          popkinId: this.popkinId(),
+          name: popkin.name,
+          emoji: popkin.emoji,
+          colour: popkin.colour,
+        },
+        ariaDescribedBy: 'dlg-desc',
+        autoFocus: '#pname',
+        restoreFocus: opener ?? true,
+      }),
+    );
     opened.closed.subscribe((saved) => {
       if (saved) this.store.applySettings(saved);
     });
@@ -306,19 +306,19 @@ export class PopkinHomePage {
   protected changeLength(opener: HTMLElement | null = null): void {
     const popkin = this.popkin();
     if (!popkin) return;
-    const opened = this.dialog.open<PopkinSettingsView, ChangeLengthData>(ChangeLengthDialog, {
-      data: {
-        popkinId: this.popkinId(),
-        accent: this.accent(),
-        length: popkin.length,
-        endsAt: popkin.endsAt,
-      },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      restoreFocus: opener ?? true,
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<PopkinSettingsView, ChangeLengthData>(
+      ChangeLengthDialog,
+      dialogConfig({
+        data: {
+          popkinId: this.popkinId(),
+          accent: this.accent(),
+          length: popkin.length,
+          endsAt: popkin.endsAt,
+        },
+        ariaDescribedBy: 'dlg-desc',
+        restoreFocus: opener ?? true,
+      }),
+    );
     opened.closed.subscribe((saved) => {
       if (saved) this.store.applySettings(saved);
     });
@@ -328,15 +328,15 @@ export class PopkinHomePage {
   private setEvent(opener: HTMLElement | null): void {
     const popkin = this.popkin();
     if (!popkin) return;
-    const opened = this.dialog.open<SetEventResult, SetEventData>(SetEventDialog, {
-      data: { popkinId: this.popkinId(), accent: this.accent(), event: popkin.event },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      autoFocus: '#elabel',
-      restoreFocus: opener ?? true,
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<SetEventResult, SetEventData>(
+      SetEventDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.accent(), event: popkin.event },
+        ariaDescribedBy: 'dlg-desc',
+        autoFocus: '#elabel',
+        restoreFocus: opener ?? true,
+      }),
+    );
     opened.closed.subscribe((result) => {
       if (!result) return;
       this.store.applyEvent(result.event);
@@ -346,14 +346,14 @@ export class PopkinHomePage {
 
   /** "Features" (L2-153): once saved, the tabs and the home follow at once and a toast says so. */
   private features(opener: HTMLElement | null, choices: FeatureChoiceView[]): void {
-    const opened = this.dialog.open<PopkinFeaturesView, PopkinFeaturesData>(PopkinFeaturesDialog, {
-      data: { popkinId: this.popkinId(), accent: this.accent(), choices },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      restoreFocus: opener ?? true,
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<PopkinFeaturesView, PopkinFeaturesData>(
+      PopkinFeaturesDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), accent: this.accent(), choices },
+        ariaDescribedBy: 'dlg-desc',
+        restoreFocus: opener ?? true,
+      }),
+    );
     opened.closed.subscribe((saved) => {
       if (!saved) return;
       this.store.applyFeatures(saved);
@@ -363,13 +363,13 @@ export class PopkinHomePage {
 
   /** "Leave this Popkin" (L2-047): once the member has left, My Popkins opens without it. */
   private leave(name: string): void {
-    const opened = this.dialog.open<boolean, LeavePopkinData>(LeavePopkinDialog, {
-      data: { popkinId: this.popkinId(), name, accent: this.accent() },
-      ariaLabelledBy: 'dlg-title',
-      ariaDescribedBy: 'dlg-desc',
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const opened = this.dialog.open<boolean, LeavePopkinData>(
+      LeavePopkinDialog,
+      dialogConfig({
+        data: { popkinId: this.popkinId(), name, accent: this.accent() },
+        ariaDescribedBy: 'dlg-desc',
+      }),
+    );
     opened.closed.subscribe((left) => {
       if (left) void this.router.navigateByUrl('/popkins');
     });

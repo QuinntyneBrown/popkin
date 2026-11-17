@@ -9,6 +9,7 @@ import {
   PopkinLength,
   accentOf,
   formatEnd,
+  dialogConfig,
 } from 'api';
 import {
   Alert,
@@ -85,15 +86,15 @@ export class HowLongPage {
   }
 
   protected pickEnd(): void {
-    const ref = this.dialog.open<Date, EndDateData>(EndDateDialog, {
-      data: { endsAt: this.customEnd(), accent: this.accent() },
-      ariaLabelledBy: 'end-title',
-      ariaDescribedBy: 'end-desc',
-      autoFocus: '#day',
-      // pk-dialog draws its own backdrop, as the mocks do.
-      hasBackdrop: false,
-      ariaModal: true,
-    });
+    const ref = this.dialog.open<Date, EndDateData>(
+      EndDateDialog,
+      dialogConfig({
+        data: { endsAt: this.customEnd(), accent: this.accent() },
+        ariaLabelledBy: 'end-title',
+        ariaDescribedBy: 'end-desc',
+        autoFocus: '#day',
+      }),
+    );
     ref.closed.subscribe((end) => {
       if (end) this.store.update({ customEndsAt: end.toISOString() });
     });
