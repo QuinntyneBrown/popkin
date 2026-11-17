@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+:host(.cluster--center) {
+  justify-content: center;
+}
+
+:host(.cluster--between) {
+  justify-content: space-between;
+  flex-wrap: nowrap;
+}

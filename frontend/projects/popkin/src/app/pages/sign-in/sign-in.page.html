@@ -14,7 +14,7 @@
     text="One link, one QR code, and your whole group is in."
   ></aside>
   <header pk-top-bar slot="header" back="/welcome"></header>
-  <form id="sign-in" class="stack stack--lg" novalidate (submit)="submit($event)">
+  <form id="sign-in" pk-stack gap="lg" novalidate (submit)="submit($event)">
     @if (status() === 'failed') {
       <div pk-alert heading="We couldn’t send your code.">
         Check your connection and try again. Nothing you typed was lost.
@@ -35,7 +35,7 @@
       [error]="contactError() ?? undefined"
     ></div>
   </form>
-  <div slot="actions" class="stack stack--sm">
+  <div slot="actions" pk-stack gap="sm">
     <button
       pk-button
       variant="primary"

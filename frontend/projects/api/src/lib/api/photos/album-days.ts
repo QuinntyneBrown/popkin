@@ -1,11 +1,10 @@
 import { AlbumFilter, PhotoSummaryView } from '../../models/photos';
+import { LONG_WEEKDAYS as WEEKDAYS, SHORT_MONTHS as MONTHS } from '../text/calendar';
 
 /**
  * The album's words and its days, built from what the API answers. Days and times are read
  * on the device, as the member lives them.
  */
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAY = 24 * 60 * 60 * 1000;
 
 /** A photo as a cell of the grid. */

@@ -1,7 +1,7 @@
 import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MyHours, SCHEDULE_API, ThisWeekView, dayError, stretchesOf } from 'api';
-import { Alert, Button, DialogFrame, HoursRow, HoursStretch } from 'components';
+import { Alert, Button, DialogFrame, HoursRow, HoursStretch, Stack } from 'components';
 
 export interface MyHoursData {
   popkinId: string;
@@ -17,7 +17,7 @@ export interface MyHoursData {
  */
 @Component({
   selector: 'pk-my-hours-dialog',
-  imports: [Alert, Button, DialogFrame, HoursRow],
+  imports: [Alert, Button, DialogFrame, HoursRow, Stack],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './my-hours.dialog.html',
 })

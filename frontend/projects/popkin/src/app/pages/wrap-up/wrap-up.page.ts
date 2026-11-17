@@ -31,6 +31,7 @@ import {
   Screen,
   SettingRow,
   SplitAside,
+  Stack,
   TopBar,
 } from 'components';
 import { catchError, forkJoin, of } from 'rxjs';
@@ -52,6 +53,7 @@ import { catchError, forkJoin, of } from 'rxjs';
     Screen,
     SettingRow,
     SplitAside,
+    Stack,
     TopBar,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

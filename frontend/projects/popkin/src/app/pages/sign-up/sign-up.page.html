@@ -14,7 +14,7 @@
     text="One link, one QR code, and your whole group is in."
   ></aside>
   <header pk-top-bar slot="header" back="/welcome" [step]="1" [steps]="3"></header>
-  <form id="sign-up" class="stack stack--lg" novalidate (submit)="submit($event)">
+  <form id="sign-up" pk-stack gap="lg" novalidate (submit)="submit($event)">
     @if (problems().length) {
       <div pk-form-summary [problems]="problems()"></div>
     }

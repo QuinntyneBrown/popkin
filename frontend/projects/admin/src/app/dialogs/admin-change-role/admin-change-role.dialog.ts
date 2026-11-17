@@ -31,7 +31,7 @@ export class ChangeAdminRoleDialog {
   private readonly ref = inject<DialogRef<AdminRow>>(DialogRef);
   private readonly api = inject(ADMIN_ACCESS_API);
 
-  protected readonly state = new ActionDialogState('Optional');
+  protected readonly state = new ActionDialogState('Optional', this.ref);
   protected readonly reason = signal('');
   protected readonly maxLength = REASON_MAX_LENGTH;
   protected readonly heading = changeRoleHeading(this.data.admin.name, this.data.role);
@@ -40,15 +40,13 @@ export class ChangeAdminRoleDialog {
     this.data.admin.role,
     this.data.role,
   );
-  protected readonly busy = computed(() => this.state.status() === 'busy');
+  protected readonly busy = this.state.busy;
   protected readonly lastOwner = computed(() => this.state.failure()?.code === 'last_owner');
 
   protected async confirm(): Promise<void> {
-    this.ref.disableClose = true;
     const row = await this.state.confirm(this.reason(), (reason) =>
       this.api.changeRole(this.data.admin.id, this.data.role, reason),
     );
-    this.ref.disableClose = false;
     if (row) this.ref.close(row);
   }
 

@@ -37,7 +37,7 @@
           [disabled]="saving()"
           (picked)="pick($event)"
         ></div>
-        <form id="account" class="stack stack--lg" novalidate (submit)="save($event)">
+        <form id="account" pk-stack gap="lg" novalidate (submit)="save($event)">
           @if (problems().length) {
             <div pk-form-summary [problems]="problems()"></div>
           }

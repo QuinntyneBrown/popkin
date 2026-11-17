@@ -8,6 +8,8 @@ export class ContactProfilePage {
   /** “Loves”, the whole list. */
   readonly lovesList: Locator;
   readonly main: Locator;
+  /** The head: the way back to People at one end, the actions at the other (`pk-cluster`). */
+  readonly head: Locator;
   readonly back: Locator;
   readonly edit: Locator;
   readonly more: Locator;
@@ -74,6 +76,7 @@ export class ContactProfilePage {
     this.factsList = page.locator('dl.contact-facts');
     this.lovesList = page.locator('ul.likes');
     this.main = page.locator('.contacts-page');
+    this.head = this.main.locator('.cluster--between').first();
     this.back = this.main.getByRole('link', { name: 'People', exact: true });
     this.edit = page.getByRole('link', { name: 'Edit profile' });
     this.more = page.getByRole('button', { name: /^More for / });

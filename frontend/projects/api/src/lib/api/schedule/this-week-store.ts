@@ -22,6 +22,7 @@ import {
   tintAt,
   timelineText,
 } from './this-week-text';
+import { LONG_WEEKDAYS as longDays, SHORT_WEEKDAYS as shortDays } from '../text/calendar';
 
 /** A day button: "Wed", "16", "6/6 free". */
 export interface ThisWeekDay {
@@ -68,9 +69,6 @@ export interface MyHours {
 }
 
 export type ThisWeekState = 'loading' | 'ready' | 'error' | 'off' | 'not-found';
-
-const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const longDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /** This week of one Popkin, seven days from the viewer's today (docs/detailed-designs/schedules/this-week). One per screen. */
 @Injectable()

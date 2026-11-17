@@ -4,8 +4,7 @@ import { lakesideInvite } from '../../fixtures/journeys';
 import { parity } from '../../fixtures/parity';
 import { PopkinCreatedPage } from '../../pages/popkin-created.page';
 
-// The QR code itself differs (the mock draws a version-2 sample, the app encodes the link at
-// error correction H), so the card's link is compared and the code is left to the sweep.
+// The card's name and link; the QR code itself is compared in qr.spec.ts.
 parity('qr-card', [
   {
     key: 'popkinCreated',

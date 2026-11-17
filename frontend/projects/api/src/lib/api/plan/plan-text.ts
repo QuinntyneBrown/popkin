@@ -3,8 +3,7 @@ import { BurnDownView, ForecastView, SprintView, StoryColumn, StoryView } from '
 import { accentOf } from '../../models/popkin';
 import { weekLabel } from '../schedule/schedule-weeks';
 import { countWord } from '../schedule/this-week-text';
-
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+import { SHORT_MONTHS as months } from '../text/calendar';
 
 /** The columns in the order the board shows them, with their names (L2-068 AC3). */
 export const COLUMNS: readonly { key: StoryColumn; heading: string }[] = [

@@ -1,9 +1,9 @@
+import { LONG_WEEKDAYS as WEEKDAYS, SHORT_MONTHS as MONTHS } from '../text/calendar';
+import { counted } from '../text/counts';
 /**
  * The sentences of joining by invite, built from what the API answers. Days and times are read
  * on the device, as the person will live them.
  */
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAY = 24 * 60 * 60 * 1000;
 
 function startOfDay(date: Date): number {
@@ -45,7 +45,7 @@ export function wrappedUpLine(wrappedUpAt: Date, inviter: string, now: Date): st
 
 /** "1 person", "14 people". */
 export function peopleCount(count: number): string {
-  return count === 1 ? '1 person' : `${count} people`;
+  return counted(count, 'person', 'people');
 }
 
 /** The welcome: two members named and the rest counted (L2-014 AC1). */

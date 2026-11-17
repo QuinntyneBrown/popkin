@@ -23,6 +23,7 @@ import {
   QR_SCANNER,
   BrowserNetworkStatus,
   CHAT_API,
+  CHAT_DIALOGS,
   EXPERIENCES_API,
   SCHEDULE_API,
   HttpScheduleApi,
@@ -60,6 +61,7 @@ import {
 import { routes } from './app.routes';
 import { offlineNavigation } from './guards/offline-navigation';
 import { unauthorizedInterceptor } from './guards/unauthorized.interceptor';
+import { CdkChatDialogs } from './dialogs/chat-dialogs';
 
 /** Composition root: every API contract is bound to its implementation here. */
 export const appConfig: ApplicationConfig = {
@@ -81,6 +83,7 @@ export const appConfig: ApplicationConfig = {
     { provide: POPKINS_API, useClass: HttpPopkinsApi },
     { provide: INVITES_API, useClass: HttpInvitesApi },
     { provide: CHAT_API, useClass: HttpChatApi },
+    { provide: CHAT_DIALOGS, useClass: CdkChatDialogs },
     { provide: PHOTOS_API, useClass: HttpPhotosApi },
     { provide: EXPERIENCES_API, useClass: HttpExperiencesApi },
     { provide: SCHEDULE_API, useClass: HttpScheduleApi },

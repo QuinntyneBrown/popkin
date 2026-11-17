@@ -24,7 +24,7 @@
         {{ name() }} is still open and nothing has changed. Try again in a moment.
       </div>
     }
-    <div class="stack stack--lg">
+    <div pk-stack gap="lg">
       <ul pk-facts>
         <li
           pk-fact
@@ -48,7 +48,7 @@
         [(checked)]="keepPhotos"
       ></div>
     </div>
-    <div slot="actions" class="stack stack--sm">
+    <div slot="actions" pk-stack gap="sm">
       <button
         pk-button
         type="button"

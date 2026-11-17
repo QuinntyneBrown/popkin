@@ -1,4 +1,4 @@
-import { AvatarView } from './invite';
+import { AvatarView, MemberBriefView } from './invite';
 import { PopkinColour } from './popkin';
 
 /** What an experience is: something the group did, a restaurant, or something it wants to do. */
@@ -15,7 +15,7 @@ export interface ExperienceCardView {
   pictureUrl: string | null;
   emoji: string;
   colour: PopkinColour;
-  sharedBy: { membershipId: string; firstName: string; avatar: AvatarView };
+  sharedBy: MemberBriefView;
   /** Free text such as "Sat morning"; null when the sharer gave none. */
   when: string | null;
   sharedAt: string;
@@ -45,11 +45,7 @@ export interface ExperienceCommentView {
 
 /** One experience, on its own page (L2-038). */
 /** One member who is keen: a first name and a face. */
-export interface KeenMemberView {
-  membershipId: string;
-  firstName: string;
-  avatar: AvatarView;
-}
+export type KeenMemberView = MemberBriefView;
 
 /** Who is keen on an idea (L2-042 AC1): how many, whether the reader is, the first four. */
 export interface KeenView {

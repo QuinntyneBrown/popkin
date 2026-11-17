@@ -1,8 +1,7 @@
 import { clock } from '../popkins/home-text';
 import { timeLeft } from '../popkins/time-left';
+import { SHORT_MONTHS as MONTHS, SHORT_WEEKDAYS as DAYS } from '../text/calendar';
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const HOUR_MS = 60 * 60_000;
 const DAY_MS = 24 * HOUR_MS;
 const grouped = new Intl.NumberFormat('en-US');

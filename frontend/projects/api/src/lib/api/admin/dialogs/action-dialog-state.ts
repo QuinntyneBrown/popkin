@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
-import { Observable, firstValueFrom } from 'rxjs';
-import { ApiProblem, toApiProblem } from '../../problem';
+import { Observable, tap } from 'rxjs';
+import { Closable, ConfirmDialogState } from '../../dialogs/confirm-dialog-state';
 
 /** Whether an action needs a reason for the audit log (L2-087). */
 export type ReasonPolicy = 'Required' | 'Optional';
@@ -8,49 +8,46 @@ export type ReasonPolicy = 'Required' | 'Optional';
 /** The most characters a reason may have (L2-087 AC6). */
 export const REASON_MAX_LENGTH = 500;
 
+const REASON_REQUIRED = 'Give a reason; it goes in the audit log.';
+const REASON_TOO_LONG = `Keep the reason to ${REASON_MAX_LENGTH} characters.`;
+
 /**
  * One action dialog's state (docs/detailed-designs/admin-access/give-a-reason): the reason, the
- * one send while busy, and what a failure was. The reason is kept as typed after a failure.
+ * one send while busy, and what a failure was. The reason is kept as typed after a failure. It is
+ * a confirmation dialog's state (ADR 0029) with a reason for the audit log.
  */
-export class ActionDialogState {
-  readonly status = signal<'idle' | 'busy' | 'failed'>('idle');
+export class ActionDialogState extends ConfirmDialogState {
   readonly reasonError = signal<string | null>(null);
-  readonly failure = signal<ApiProblem | null>(null);
 
-  constructor(private readonly policy: ReasonPolicy) {}
+  constructor(
+    private readonly policy: ReasonPolicy,
+    ref?: Closable,
+  ) {
+    super(ref);
+  }
 
   /** Sends once; resolves the answer, or `undefined` when nothing was sent or it failed. */
   async confirm<T>(
     reason: string,
     send: (reason: string | null) => Observable<T>,
   ): Promise<T | undefined> {
-    if (this.status() === 'busy') return undefined;
+    if (this.busy()) return undefined;
     const trimmed = reason.trim();
     if (this.policy === 'Required' && !trimmed) {
-      this.reasonError.set('Give a reason; it goes in the audit log.');
+      this.reasonError.set(REASON_REQUIRED);
       return undefined;
     }
     this.reasonError.set(null);
-    this.failure.set(null);
-    this.status.set('busy');
-    try {
-      const answer = await firstValueFrom(send(trimmed || null), { defaultValue: undefined as T });
-      this.status.set('idle');
-      return answer;
-    } catch (error: unknown) {
-      const problem = toApiProblem(error);
-      if (problem.code === 'reason_required' || problem.code === 'reason_too_long') {
-        this.reasonError.set(
-          problem.code === 'reason_required'
-            ? 'Give a reason; it goes in the audit log.'
-            : `Keep the reason to ${REASON_MAX_LENGTH} characters.`,
-        );
-        this.status.set('idle');
-        return undefined;
-      }
-      this.failure.set(problem);
-      this.status.set('failed');
-      return undefined;
-    }
+    let answer: T | undefined;
+    const sent = await this.send(
+      () => send(trimmed || null).pipe(tap((value) => (answer = value))),
+      (problem) => {
+        if (problem.code === 'reason_required') this.reasonError.set(REASON_REQUIRED);
+        else if (problem.code === 'reason_too_long') this.reasonError.set(REASON_TOO_LONG);
+        else return 'failed';
+        return 'idle';
+      },
+    );
+    return sent ? answer : undefined;
   }
 }

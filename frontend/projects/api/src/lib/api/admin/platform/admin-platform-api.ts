@@ -4,20 +4,28 @@ import { Observable } from 'rxjs';
 import {
   AdminFeature,
   AdminFeatures,
-  Feature,
   FeatureMode,
   FeaturePopkinMatch,
 } from '../../../models/admin';
+import { PopkinFeature } from '../../../models/home';
 
 /** Features (docs/detailed-designs/admin-platform/feature-switches). */
 export interface AdminPlatformApi {
   features(): Observable<AdminFeatures>;
   /** 403 `role_not_allowed` for Support and Viewer. */
-  changeMode(feature: Feature, mode: FeatureMode, reason: string | null): Observable<AdminFeature>;
+  changeMode(
+    feature: PopkinFeature,
+    mode: FeatureMode,
+    reason: string | null,
+  ): Observable<AdminFeature>;
   /** 409 `popkin_wrapped_up` or `feature_popkin_already_chosen`. */
-  addPopkin(feature: Feature, popkinId: string, reason: string | null): Observable<AdminFeature>;
-  removePopkin(feature: Feature, popkinId: string): Observable<AdminFeature>;
-  searchPopkins(feature: Feature, text: string): Observable<FeaturePopkinMatch[]>;
+  addPopkin(
+    feature: PopkinFeature,
+    popkinId: string,
+    reason: string | null,
+  ): Observable<AdminFeature>;
+  removePopkin(feature: PopkinFeature, popkinId: string): Observable<AdminFeature>;
+  searchPopkins(feature: PopkinFeature, text: string): Observable<FeaturePopkinMatch[]>;
 }
 
 export const ADMIN_PLATFORM_API = new InjectionToken<AdminPlatformApi>('AdminPlatformApi');
@@ -30,22 +38,30 @@ export class HttpAdminPlatformApi implements AdminPlatformApi {
     return this.http.get<AdminFeatures>('/api/admin/features');
   }
 
-  changeMode(feature: Feature, mode: FeatureMode, reason: string | null): Observable<AdminFeature> {
+  changeMode(
+    feature: PopkinFeature,
+    mode: FeatureMode,
+    reason: string | null,
+  ): Observable<AdminFeature> {
     return this.http.put<AdminFeature>(`/api/admin/features/${feature}`, { mode, reason });
   }
 
-  addPopkin(feature: Feature, popkinId: string, reason: string | null): Observable<AdminFeature> {
+  addPopkin(
+    feature: PopkinFeature,
+    popkinId: string,
+    reason: string | null,
+  ): Observable<AdminFeature> {
     return this.http.post<AdminFeature>(`/api/admin/features/${feature}/popkins`, {
       popkinId,
       reason,
     });
   }
 
-  removePopkin(feature: Feature, popkinId: string): Observable<AdminFeature> {
+  removePopkin(feature: PopkinFeature, popkinId: string): Observable<AdminFeature> {
     return this.http.delete<AdminFeature>(`/api/admin/features/${feature}/popkins/${popkinId}`);
   }
 
-  searchPopkins(feature: Feature, text: string): Observable<FeaturePopkinMatch[]> {
+  searchPopkins(feature: PopkinFeature, text: string): Observable<FeaturePopkinMatch[]> {
     return this.http.get<FeaturePopkinMatch[]>(`/api/admin/features/${feature}/popkins/search`, {
       params: { q: text },
     });

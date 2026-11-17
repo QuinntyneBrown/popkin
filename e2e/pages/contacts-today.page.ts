@@ -65,4 +65,9 @@ export class ContactsTodayPage {
   markNotDone(text: string): Locator {
     return this.toDo.getByRole('button', { name: `Mark not done: ${text}` });
   }
+
+  /** One who chip of "It's been a while", a link to Log ("Sam · 59 days"). */
+  driftChip(name: string): Locator {
+    return this.driftChips.getByRole('link', { name, exact: true });
+  }
 }

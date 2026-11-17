@@ -40,7 +40,7 @@ export class FeatureAddPopkinDialog {
   private readonly ref = inject<DialogRef<AdminFeature>>(DialogRef);
   private readonly api = inject(ADMIN_PLATFORM_API);
 
-  protected readonly state = new ActionDialogState('Optional');
+  protected readonly state = new ActionDialogState('Optional', this.ref);
   protected readonly failed = FEATURE_ADD_FAILED;
   protected readonly description = addPopkinText(this.feature.feature);
   protected readonly text = signal('');
@@ -49,7 +49,7 @@ export class FeatureAddPopkinDialog {
   /** The text the matches answer, so the notes never speak of an older search. */
   private readonly answered = signal('');
 
-  protected readonly busy = computed(() => this.state.status() === 'busy');
+  protected readonly busy = this.state.busy;
   protected readonly options = computed<PickListOption[]>(() =>
     this.matches()
       .filter((m) => !m.alreadyOn)
@@ -92,11 +92,9 @@ export class FeatureAddPopkinDialog {
   protected async confirm(): Promise<void> {
     const popkinId = this.picked();
     if (!popkinId) return;
-    this.ref.disableClose = true;
     const saved = await this.state.confirm('', () =>
       this.api.addPopkin(this.feature.feature, popkinId, null),
     );
-    this.ref.disableClose = false;
     if (saved) this.ref.close(saved);
   }
 

@@ -1,0 +1,13 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+:host(.stack--sm) {
+  gap: var(--space-3);
+}
+
+:host(.stack--lg) {
+  gap: var(--space-6);
+}

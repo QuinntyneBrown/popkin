@@ -1,0 +1,25 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding: 0 var(--space-4) 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-muted);
+  font: var(--font-weight-semibold) var(--font-size-sm-plus) / 1 var(--font-family-sans);
+  text-decoration: none;
+}
+
+/* As a link it reads in the default colour, as the design system's `a.who-chip` does. */
+:host(a) {
+  color: var(--color-fg-default);
+}
+
+/* The member on it says so in the outline and in aria-pressed (L2-069 AC2). */
+:host([aria-pressed='true']) {
+  background: var(--color-bg-surface);
+  color: var(--color-fg-default);
+  box-shadow: 0 0 0 var(--border-width-thick) var(--color-border-focus);
+}

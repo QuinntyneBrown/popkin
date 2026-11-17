@@ -1,9 +1,8 @@
+import { LONG_WEEKDAYS as WEEKDAYS, SHORT_MONTHS as MONTHS } from '../text/calendar';
 /**
  * The words of a thread, built from what the API answers. Days and times are read on the
  * device, as the member lives them.
  */
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAY = 24 * 60 * 60 * 1000;
 
 function startOfDay(date: Date): number {

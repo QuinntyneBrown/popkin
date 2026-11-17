@@ -1,4 +1,4 @@
-import { AvatarView } from './invite';
+import { AvatarView, MemberBriefView } from './invite';
 
 export type AlbumFilter = 'everyone' | 'mine';
 
@@ -6,7 +6,7 @@ export type AlbumFilter = 'everyone' | 'mine';
 export interface PhotoSummaryView {
   id: string;
   caption: string | null;
-  uploader: { membershipId: string; firstName: string; avatar: AvatarView };
+  uploader: MemberBriefView;
   /** When it was taken, or added when the file did not say. ISO date-time. */
   takenAt: string;
   addedAt: string;
@@ -50,13 +50,18 @@ export interface PhotoDetailView {
 /** One comment on a photo (L2-035), oldest first. */
 export interface PhotoCommentView {
   id: string;
-  author: { membershipId: string; firstName: string; avatar: AvatarView };
+  author: MemberBriefView;
   addedAt: string;
   text: string;
   /** The member's own, which they may delete (L2-035 AC5). */
   mine: boolean;
 }
 
-/** What an upload reports while it runs, then the photo it became. */
-export type PhotoUploadEvent =
-  { kind: 'progress'; fraction: number } | { kind: 'done'; photo: PhotoSummaryView };
+/**
+ * What an upload reports while it runs, then what it became (ADR 0029): a photo's or a memory's
+ * upload alike. `P` is how far it has got; `D` what was kept.
+ */
+export type UploadEvent<P, D> = ({ kind: 'progress' } & P) | ({ kind: 'done' } & D);
+
+/** A photo on its way: how much is sent, as a fraction, then the photo it became. */
+export type PhotoUploadEvent = UploadEvent<{ fraction: number }, { photo: PhotoSummaryView }>;

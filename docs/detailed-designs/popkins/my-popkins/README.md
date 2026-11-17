@@ -93,8 +93,8 @@ Popkins.
   storage, so the offline state can show it (L2-056 AC4). It is keyed to the person, so nobody
   else who signs in on the device reads it. The photo addresses are removed before it is saved,
   because they expire within the hour; a saved list shows initials. It is cleared when a 401
-  signs the person out (`unauthorizedInterceptor`); sign out itself (journey 17) and account
-  deletion (journey 19) must clear it too.
+  signs the person out (`unauthorizedInterceptor`), on sign out (journey 17) and on account
+  deletion (journey 19), all through `SessionTeardown` (ADR 0029).
 - **`PopkinsApi.listMine()`** — `HttpPopkinsApi` behind `POPKINS_API`.
 - **Components** — introduced in the `components` library for this screen: `pk-page-screen`,
   `pk-popkin-grid`, `pk-wrapped-list` and `pk-popkin-skeleton`.

@@ -1,24 +1,8 @@
+import { LONG_MONTHS as monthNames, SHORT_MONTHS as months } from '../text/calendar';
 /*
  * The weeks of Schedules (docs/detailed-designs/schedules/time-off): a week runs Monday to
  * Sunday, and a day is a calendar date, `YYYY-MM-DD`, counted on the viewer's own clock.
  */
-
-const monthNames = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** The day of a date on the device, not in UTC. */
 export function isoDate(date: Date): string {

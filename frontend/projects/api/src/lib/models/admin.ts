@@ -1,3 +1,4 @@
+import { PopkinFeature } from './home';
 /** The admin app's answers (docs/detailed-designs/admin-access). */
 
 export type AdminRole = 'Owner' | 'Support' | 'Viewer';
@@ -104,9 +105,6 @@ export interface AdminRolesView {
   rows: AdminPermissionRowView[];
 }
 
-/** A feature an Owner switches (L2-076). */
-export type Feature = 'Plan' | 'Schedules';
-
 /** Who has a feature: nobody, the chosen Popkins only, or every Popkin. */
 export type FeatureMode = 'Off' | 'Chosen' | 'Everyone';
 
@@ -119,7 +117,7 @@ export interface ChosenPopkin {
 
 /** One panel of the Features page (L2-076 AC1, AC5). */
 export interface AdminFeature {
-  feature: Feature;
+  feature: PopkinFeature;
   mode: FeatureMode;
   /** How many live Popkins there are, for "On in all {n} live Popkins." */
   livePopkins: number;

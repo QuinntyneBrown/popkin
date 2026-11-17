@@ -17,7 +17,7 @@ import {
   toApiProblem,
   tryAgainIn,
 } from 'api';
-import { Alert, Button, Link, Screen, SplitAside, TextField, TopBar } from 'components';
+import { Alert, Button, Link, Screen, SplitAside, Stack, TextField, TopBar } from 'components';
 
 /** Sign in with the phone number or email of an account and a new code (L2-006). */
 @Component({
@@ -30,6 +30,7 @@ import { Alert, Button, Link, Screen, SplitAside, TextField, TopBar } from 'comp
     RouterLink,
     Screen,
     SplitAside,
+    Stack,
     TextField,
     TopBar,
   ],

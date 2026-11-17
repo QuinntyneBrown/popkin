@@ -24,10 +24,11 @@ import {
 } from 'api';
 import { PhotoViewer } from 'components';
 import {
+  ConfirmDeleteData,
+  ConfirmDeleteDialog,
   DELETE_COMMENT,
-  DeleteCommentData,
-  DeleteCommentDialog,
-} from '../../dialogs/delete-comment/delete-comment.dialog';
+  deleteComment,
+} from '../../dialogs/confirm-delete/confirm-delete.dialog';
 import { DeletePhotoData, DeletePhotoDialog } from '../../dialogs/delete-photo/delete-photo.dialog';
 import {
   PhotoActionsData,
@@ -199,11 +200,11 @@ export class PhotoViewPage {
 
   /** L2-035 AC5: gone once the member has confirmed. */
   protected async deleteComment(commentId: string): Promise<void> {
-    const ref = this.dialog.open<boolean, DeleteCommentData>(
-      DeleteCommentDialog,
+    const ref = this.dialog.open<boolean, ConfirmDeleteData>(
+      ConfirmDeleteDialog,
       dialogConfig({
         ...DELETE_COMMENT,
-        data: { accent: this.frame.accent() },
+        data: deleteComment(this.frame.accent()),
       }),
     );
     if (await firstValueFrom(ref.closed)) this.comments.remove(commentId);

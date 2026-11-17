@@ -121,4 +121,24 @@ test.describe('Leave a Popkin', () => {
 
     await expect(new NotFoundPage(page).root).toBeVisible();
   });
+
+  // L2-056 AC8
+  test('cannot be closed while it leaves: Escape, Close and Stay wait for the answer', async ({
+    page,
+  }) => {
+    const leaving = await aMemberAtHome(page);
+    const release = leaving.hold();
+    await page.goto(homeUrl);
+    const dialog = await openLeave(page);
+
+    await dialog.leave.click();
+    await expect(dialog.leave).toHaveText('Leaving…');
+    await page.keyboard.press('Escape');
+    await dialog.close.click();
+
+    await expect(dialog.root).toHaveCount(1);
+    await expect(dialog.stay).toBeDisabled();
+    release();
+    await expect(page).toHaveURL(popkinsUrl);
+  });
 });

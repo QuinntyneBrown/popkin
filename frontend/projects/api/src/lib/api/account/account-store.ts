@@ -1,13 +1,11 @@
-import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Observable, of, switchMap } from 'rxjs';
 import { AccountView } from '../../models/account';
 import { SessionStore } from '../auth/session.store';
+import { DelayedLoading } from '../loading/delayed-loading';
 import { PhotoProblem } from '../invites/profile-photo';
 import { toApiProblem } from '../problem';
 import { ACCOUNT_API } from './account-api';
-
-/** How long the account may take before the screen says it is loading (L2-056 AC1). */
-export const ACCOUNT_LOADING_AFTER_MS = 300;
 
 /**
  * The account screen (docs/detailed-designs/accounts/manage-account): the person's account, and
@@ -17,35 +15,23 @@ export const ACCOUNT_LOADING_AFTER_MS = 300;
 export class AccountStore {
   private readonly api = inject(ACCOUNT_API);
   private readonly sessions = inject(SessionStore);
-  private slow?: ReturnType<typeof setTimeout>;
+  private readonly loading = new DelayedLoading();
 
   /** `pending` shows nothing yet; `loading` once 300 ms pass without an answer. */
-  readonly state = signal<'pending' | 'loading' | 'ready' | 'error'>('pending');
+  readonly state = this.loading.state;
   readonly account = signal<AccountView | null>(null);
   readonly saveState = signal<'idle' | 'saving' | 'saved' | 'failed'>('idle');
   readonly nameInvalid = signal(false);
   readonly photoProblem = signal<PhotoProblem | null>(null);
 
-  constructor() {
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.slow));
-  }
-
   load(): void {
-    this.state.set('pending');
-    clearTimeout(this.slow);
-    this.slow = setTimeout(() => {
-      if (this.state() === 'pending') this.state.set('loading');
-    }, ACCOUNT_LOADING_AFTER_MS);
+    this.loading.begin();
     this.api.getAccount().subscribe({
       next: (account) => {
-        clearTimeout(this.slow);
         this.account.set(account);
-        this.state.set('ready');
+        this.loading.ready();
       },
-      error: () => {
-        clearTimeout(this.slow);
-        this.state.set('error');
-      },
+      error: () => this.loading.failed(),
     });
   }
 
