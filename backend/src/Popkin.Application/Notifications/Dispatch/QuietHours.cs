@@ -10,6 +10,9 @@ public sealed record QuietHours(TimeOnly Start, TimeOnly End)
 {
     public static QuietHours Default { get; } = new(new TimeOnly(21, 0), new TimeOnly(8, 0));
 
+    /// <summary>No quiet hours: for what they already held back to their end.</summary>
+    public static QuietHours None { get; } = new(TimeOnly.MinValue, TimeOnly.MinValue);
+
     public bool Contains(TimeOnly time) =>
         Start <= End ? time >= Start && time < End : time >= Start || time < End;
 

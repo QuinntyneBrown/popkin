@@ -67,3 +67,21 @@ public sealed class NotificationPlatformConfiguration : IEntityTypeConfiguration
         builder.Property(p => p.PauseReason).HasMaxLength(200);
     }
 }
+
+public sealed class OutgoingEmailConfiguration : IEntityTypeConfiguration<OutgoingEmail>
+{
+    public void Configure(EntityTypeBuilder<OutgoingEmail> builder)
+    {
+        builder.ToTable("OutgoingEmails");
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Kind).HasConversion<string>().HasMaxLength(16);
+        builder.Property(e => e.Status).HasConversion<string>().HasMaxLength(16);
+        builder.Property(e => e.SuppressedBy).HasConversion<string>().HasMaxLength(32);
+        builder.Property(e => e.DedupKey).HasMaxLength(160);
+        builder.Property(e => e.ProviderMessageId).HasMaxLength(128);
+        builder.HasIndex(e => e.DedupKey).IsUnique();
+        builder.HasIndex(e => new { e.Status, e.SendAfter });
+        builder.HasIndex(e => new { e.PersonId, e.PopkinId, e.Status });
+        builder.HasOne<Person>().WithMany().HasForeignKey(e => e.PersonId).OnDelete(DeleteBehavior.Cascade);
+    }
+}

@@ -154,6 +154,28 @@ public sealed class NotificationDelivery
         SendAfter = now,
     };
 
+    public static NotificationDelivery Bundled(Guid eventId, Guid personId, Guid outgoingEmailId, DateTimeOffset sendAfter) => new()
+    {
+        Id = Guid.NewGuid(),
+        EventId = eventId,
+        PersonId = personId,
+        Channel = NotificationChannel.Email,
+        Status = NotificationDeliveryStatus.Bundled,
+        OutgoingEmailId = outgoingEmailId,
+        SendAfter = sendAfter,
+    };
+
+    /// <summary>An email change that waits for the person's digest (L2-161 AC4, AC5).</summary>
+    public static NotificationDelivery AwaitingDigest(Guid eventId, Guid personId, DateTimeOffset now) => new()
+    {
+        Id = Guid.NewGuid(),
+        EventId = eventId,
+        PersonId = personId,
+        Channel = NotificationChannel.Email,
+        Status = NotificationDeliveryStatus.AwaitingDigest,
+        SendAfter = now,
+    };
+
     public void MarkSent(DateTimeOffset now)
     {
         Status = NotificationDeliveryStatus.Sent;

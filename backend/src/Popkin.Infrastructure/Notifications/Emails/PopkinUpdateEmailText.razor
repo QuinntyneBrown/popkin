@@ -1,0 +1,28 @@
+@* The plain-text part of the Popkin update. *@
+<EmailShellText Shell="Model.Shell">
+@Model.Lead.Headline@("\n\n")
+@switch (Model.Lead)
+{
+    case MessageLead message:
+        if (message.Answers is { } own)
+        {
+@("You · ")@own.At@("\n")@own.Text@("\n\n")
+        }
+@message.AuthorName@(" · ")@message.At@("\n")@message.Text@("\n")
+        break;
+}
+@("\n")@Model.Lead.Button.Label@(": ")@Model.Lead.Button.Url@("\n")
+@if (Model.AlsoNew.Count > 0)
+{
+@("\nAlso new in the last ")@Model.WindowMinutes@(" minutes\n")
+    foreach (var row in Model.AlsoNew)
+    {
+@("- ")@row.Line@(" · ")@row.At@("\n")
+    }
+}
+</EmailShellText>
+
+@code {
+    [Parameter, EditorRequired]
+    public PopkinUpdateEmailModel Model { get; set; } = default!;
+}

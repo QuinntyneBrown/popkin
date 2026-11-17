@@ -42,6 +42,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 
     public CapturingPhoneNotifications PhoneAlerts { get; } = new();
 
+    public CapturingNotificationEmails NotificationEmails { get; } = new();
+
     public CapturingWeekAheadEmails WeekAheadEmails { get; } = new();
 
     public FixedCodeGenerator CodeGenerator { get; } = new();
@@ -69,6 +71,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
         builder.UseSetting("Invites:BaseUrl", "https://popk.in/");
         // Phone sign-in is on for every test but those of its switch (ADR 0023).
         builder.UseSetting("Features:PhoneSignIn", "true");
+        // The footer's postal address (L2-163 AC5).
+        builder.UseSetting("Email:PostalAddress", "1 Test Street, Testville");
         // Contacts is on for every test but those of its switch (ADR 0023).
         builder.UseSetting("Features:Contacts", "true");
         // The first Owner of the admin app (L2-078 AC1, L2-119 AC9).
@@ -102,6 +106,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<ICrewInviteSender>(CrewInvites.For(Domain.ContactChannel.Email));
             services.RemoveAll<IPhoneNotificationSender>();
             services.AddSingleton<IPhoneNotificationSender>(PhoneAlerts);
+            services.RemoveAll<INotificationEmailSender>();
+            services.AddSingleton<INotificationEmailSender>(NotificationEmails);
             services.RemoveAll<IContactsEmailSender>();
             services.AddSingleton<IContactsEmailSender>(WeekAheadEmails);
         });

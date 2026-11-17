@@ -1,0 +1,40 @@
+@* The Popkin update (L2-164): the lead change, its button, and "Also new" (AC6). *@
+<EmailShell Shell="Model.Shell">
+<h1 class="email__headline" style="margin:0 0 16px;font-size:22px;line-height:1.3;color:@EmailStyles.Ink;">@Model.Lead.Headline</h1>
+@switch (Model.Lead)
+{
+    case MessageLead message:
+        <div class="email-thread">
+        @if (message.Answers is { } own)
+        {
+            <div class="email-thread__msg email-thread__msg--before" style="opacity:.75;margin-bottom:12px;">
+            <p class="email-thread__who" style="margin:0 0 4px;font-size:13px;color:@EmailStyles.InkFaint;">You · @own.At</p>
+            <p class="email-thread__text" style="margin:0;font-size:15px;line-height:1.5;color:@EmailStyles.InkSoft;white-space:pre-line;">@own.Text</p>
+            </div>
+        }
+        <div class="email-thread__msg" style="border-left:3px solid @EmailStyles.Of(Model.Shell.Popkin?.Colour ?? ""); padding-left:12px;">
+        <p class="email-thread__who" style="margin:0 0 4px;font-size:13px;color:@EmailStyles.InkFaint;">@message.AuthorName · @message.At</p>
+        <p class="email-thread__quote" style="margin:0;font-size:16px;line-height:1.5;color:@EmailStyles.Ink;white-space:pre-line;">@message.Text</p>
+        </div>
+        </div>
+        break;
+}
+<EmailButton Link="Model.Lead.Button" />
+@if (Model.AlsoNew.Count > 0)
+{
+<div class="email__rule" style="border-top:1px solid @EmailStyles.Line;margin-top:20px;padding-top:16px;">
+<h2 class="email__section-title" style="margin:0 0 8px;font-size:14px;color:@EmailStyles.InkSoft;">Also new in the last @Model.WindowMinutes minutes</h2>
+<table role="presentation" class="email-also" width="100%" cellpadding="0" cellspacing="0">
+@foreach (var row in Model.AlsoNew)
+{
+<tr class="email-also__item"><td class="email-also__text" style="padding:6px 0;font-size:14px;color:@EmailStyles.Ink;">@row.Line</td><td class="email-also__at" align="right" style="padding:6px 0;font-size:13px;color:@EmailStyles.InkFaint;white-space:nowrap;">@row.At</td></tr>
+}
+</table>
+</div>
+}
+</EmailShell>
+
+@code {
+    [Parameter, EditorRequired]
+    public PopkinUpdateEmailModel Model { get; set; } = default!;
+}

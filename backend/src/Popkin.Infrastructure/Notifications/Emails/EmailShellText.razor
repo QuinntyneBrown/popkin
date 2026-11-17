@@ -1,0 +1,24 @@
+@* The plain-text part of the shell: the same words and links as the HTML (L2-163 AC4). The renderer
+   decodes Razor's encoding, so the text keeps members' words as written. *@
+@if (Shell.Popkin is { } popkin)
+{
+@popkin.Name@("\n\n")
+}
+@ChildContent
+@("\n\n---\n")
+@Shell.Reason@("\n\n")
+@if (Shell.Mute is { } mute)
+{
+@mute.Label@(": ")@mute.Url@("\n")
+}
+@("Notification settings: ")@Shell.SettingsUrl@("\n")
+@("Unsubscribe from all email: ")@Shell.UnsubscribeUrl@("\n\n")
+@Shell.PostalAddress@("\n")
+
+@code {
+    [Parameter, EditorRequired]
+    public EmailShellModel Shell { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

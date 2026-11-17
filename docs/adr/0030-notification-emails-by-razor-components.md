@@ -48,8 +48,9 @@ The options weighed:
 
 ## Consequences
 
-- `Popkin.Infrastructure` takes a framework reference to `Microsoft.AspNetCore.App` (it already runs
-  inside the API and the Worker, both on the ASP.NET Core shared framework).
+- `Popkin.Infrastructure` takes a framework reference to `Microsoft.AspNetCore.App` and builds with
+  the Razor SDK. The API's image already carries the ASP.NET Core runtime; the Worker's image moves
+  from `dotnet/runtime` to `dotnet/aspnet` to carry it too.
 - Email templates are tested by rendering a model and asserting on the HTML and text, not by
   comparing screenshots; no visual sweep covers them.
 - A later need for marketing-edited templates would need a different engine and its own ADR.

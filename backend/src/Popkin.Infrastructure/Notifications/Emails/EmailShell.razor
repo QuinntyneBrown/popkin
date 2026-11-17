@@ -1,0 +1,48 @@
+@* The shell every notification email shares (L2-163): one centred column of at most 600 px built from
+   tables with inline styles, the header with the Popkin's tile, the body, and the footer with the
+   reason, the narrowest mute, settings, unsubscribe and the postal address. *@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@Shell.Subject</title>
+</head>
+<body class="email" style="margin:0;padding:0;background:@EmailStyles.Canvas;@EmailStyles.Font color:@EmailStyles.Ink;">
+<div class="email__preheader" style="display:none;max-height:0;overflow:hidden;">@Shell.Preheader</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:@EmailStyles.Canvas;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" class="email__col" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;">
+<tr><td class="email__card" style="background:@EmailStyles.Surface;border:1px solid @EmailStyles.Line;border-radius:16px;padding:24px;">
+<table role="presentation" class="email__head" width="100%" cellpadding="0" cellspacing="0"><tr>
+<td style="font-weight:700;font-size:18px;color:@EmailStyles.Ink;"><span class="wordmark">popkin</span></td>
+@if (Shell.Popkin is { } popkin)
+{
+<td align="right" class="email__popkin" style="font-size:14px;color:@EmailStyles.InkSoft;"><span class="popkin-tile" aria-hidden="true" style="display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:8px;background:@EmailStyles.Of(popkin.Colour);">@popkin.Emoji</span> @popkin.Name</td>
+}
+</tr></table>
+<div class="email__body" style="padding-top:16px;">@ChildContent</div>
+</td></tr>
+<tr><td class="email__footer" style="padding:20px 8px;font-size:13px;line-height:1.5;color:@EmailStyles.InkFaint;">
+<p style="margin:0 0 8px;">@Shell.Reason</p>
+<p class="email__links" style="margin:0 0 8px;">
+@if (Shell.Mute is { } mute)
+{
+<a href="@mute.Url" style="color:@EmailStyles.Link;">@mute.Label</a><span aria-hidden="true"> · </span>
+}
+<a href="@Shell.SettingsUrl" style="color:@EmailStyles.Link;">Notification settings</a><span aria-hidden="true"> · </span><a href="@Shell.UnsubscribeUrl" style="color:@EmailStyles.Link;">Unsubscribe from all email</a>
+</p>
+<p class="email__address" style="margin:0;">@Shell.PostalAddress</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+
+@code {
+    [Parameter, EditorRequired]
+    public EmailShellModel Shell { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

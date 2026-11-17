@@ -12,7 +12,7 @@ public sealed record DispatchResult(int Events, int Sent);
 public sealed record DispatchNotificationsCommand : IRequest<DispatchResult>;
 
 public sealed class DispatchNotificationsCommandHandler(
-    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot)
+    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot, UpdateEmails emails)
     : IRequestHandler<DispatchNotificationsCommand, DispatchResult>
 {
     private const int EventsPerTick = 200;
@@ -37,6 +37,8 @@ public sealed class DispatchNotificationsCommandHandler(
 
         await db.SaveChangesAsync(cancellationToken);
         var sent = await SendPhoneAlertsAsync(platform, now, cancellationToken);
+        sent += await emails.SendDueAsync(
+            (notification, person, channel, ct) => QuestionAsync(notification, person, channel, platform, now, ct), platform, now, cancellationToken);
         return new DispatchResult(events.Count, sent);
     }
 
@@ -66,15 +68,22 @@ public sealed class DispatchNotificationsCommandHandler(
             .ToListAsync(cancellationToken);
         foreach (var person in people.Distinct())
         {
-            if (already.Any(d => d.PersonId == person && d.Channel == NotificationChannel.Phone))
+            foreach (var channel in (NotificationChannel[])[NotificationChannel.Phone, NotificationChannel.Email])
             {
-                continue;
-            }
+                if (already.Any(d => d.PersonId == person && d.Channel == channel))
+                {
+                    continue;
+                }
 
-            var decision = NotificationRules.Decide(await QuestionAsync(notification, person, NotificationChannel.Phone, platform, now, cancellationToken));
-            db.NotificationDeliveries.Add(decision.Sends
-                ? NotificationDelivery.Due(notification.Id, person, NotificationChannel.Phone, decision.At)
-                : NotificationDelivery.Suppressed(notification.Id, person, NotificationChannel.Phone, decision.Rule!.Value, now));
+                var question = await QuestionAsync(notification, person, channel, platform, now, cancellationToken);
+                var decision = NotificationRules.Decide(question);
+                db.NotificationDeliveries.Add(
+                    decision.Outcome == NotificationOutcome.Suppress
+                        ? NotificationDelivery.Suppressed(notification.Id, person, channel, decision.Rule!.Value, now)
+                    : channel == NotificationChannel.Phone
+                        ? NotificationDelivery.Due(notification.Id, person, channel, decision.At)
+                    : await emails.PlaceAsync(notification, person, decision, question, question.Frequency, platform, now, cancellationToken));
+            }
         }
     }
 
@@ -113,6 +122,7 @@ public sealed class DispatchNotificationsCommandHandler(
             HasDevice = hasDevice,
             EmailPaused = platform.EmailPausedAt is not null,
             EmailOn = settings.EmailOn,
+            Frequency = settings.Frequency,
             RecipientIsNamed = person == notification.RecipientPersonId,
             SwitchOn = settings.IsOn(notification.Kind, channel),
             QuietHours = new QuietHours(platform.QuietFrom, platform.QuietUntil),
@@ -139,7 +149,7 @@ public sealed class DispatchNotificationsCommandHandler(
             {
                 // A delivery held for the end of quiet hours is not held again by them now.
                 var question = await QuestionAsync(notification, delivery.PersonId, delivery.Channel, platform, now, cancellationToken);
-                var decision = NotificationRules.Decide(question with { QuietHours = new QuietHours(TimeOnly.MinValue, TimeOnly.MinValue) });
+                var decision = NotificationRules.Decide(question with { QuietHours = QuietHours.None });
                 if (decision.Sends)
                 {
                     passing.Add((delivery, notification));

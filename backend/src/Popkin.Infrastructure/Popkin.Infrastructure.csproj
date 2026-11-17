@@ -1,5 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
   <ItemGroup>
+    <!-- Notification emails are Razor components rendered with HtmlRenderer (ADR 0030). -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\Popkin.Application\Popkin.Application.csproj" />
     <PackageReference Include="Azure.Communication.Email" />
     <PackageReference Include="Azure.Communication.Sms" />
@@ -9,7 +11,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="WebPush" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
   </ItemGroup>

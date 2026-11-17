@@ -35,6 +35,12 @@ public static class DependencyInjection
         services.AddSingleton(new Contacts.ContactsSwitch(bool.TryParse(configuration?["Features:Contacts"], out var contacts) && contacts));
         // ADR 0028: empty while no Web Push key is configured.
         services.AddSingleton(new Notifications.Devices.PushPublicKey(configuration?["Push:PublicKey"] ?? ""));
+        // Every link in an email opens the web app (L2-163 AC6).
+        services.AddSingleton(new Notifications.Emails.PopkinUrlBuilder(configuration?["App:Origin"] ?? "https://app.popkin.community"));
+        services.AddSingleton<Notifications.Emails.NotificationLinks>();
+        services.AddSingleton(new Notifications.Emails.NotificationEmailSettings(configuration?["Email:PostalAddress"] ?? ""));
+        services.AddScoped<Notifications.Emails.PopkinUpdateEmailComposer>();
+        services.AddScoped<Notifications.Dispatch.UpdateEmails>();
         return services;
     }
 }

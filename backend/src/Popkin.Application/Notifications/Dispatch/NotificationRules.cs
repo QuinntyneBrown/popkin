@@ -42,6 +42,9 @@ public sealed record NotificationQuestion(NotificationKind Kind, NotificationCha
     public bool SwitchOn { get; init; } = true;
 
     public QuietHours QuietHours { get; init; } = QuietHours.Default;
+
+    /// <summary>How the person takes activity email; the rules do not read it, the bundling does.</summary>
+    public NotificationFrequency Frequency { get; init; } = NotificationFrequency.AsItHappens;
 }
 
 public enum NotificationOutcome

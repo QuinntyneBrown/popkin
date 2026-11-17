@@ -35,4 +35,12 @@ public static class NotificationExtensions
     /// <summary>The signed-in person's id, from their session.</summary>
     public static async Task<Guid> PersonIdAsync(this HttpClient member) =>
         (await member.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/auth/session")).GetProperty("personId").GetGuid();
+
+    /// <summary>A person who signs up by email and joins through the invite code.</summary>
+    public static async Task<HttpClient> JoinedByEmailAsync(this ApiFactory api, string code, string name, string email)
+    {
+        var member = await api.SignedUpByEmailAsync(name, email);
+        (await member.JoinAsync(code, name)).EnsureSuccessStatusCode();
+        return member;
+    }
 }

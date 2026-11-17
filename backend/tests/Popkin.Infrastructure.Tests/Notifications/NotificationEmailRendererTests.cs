@@ -1,0 +1,107 @@
+using System.Text.RegularExpressions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Popkin.Application.Abstractions;
+using Popkin.Application.Notifications.Emails;
+using Popkin.Infrastructure.Notifications.Emails;
+
+namespace Popkin.Infrastructure.Tests.Notifications;
+
+/// <summary>The renderer of notification emails (ADR 0030, L2-163).</summary>
+public sealed partial class NotificationEmailRendererTests
+{
+    private static readonly EmailShellModel Shell = new(
+        "Walt replied to you in Lakeside Weekend",
+        "Count me in",
+        "Walt via Popkin",
+        new PopkinHeader("Lakeside Weekend", "🏕️", "Teal"),
+        "You’re getting this because you’re in Lakeside Weekend and asked for mentions and replies by email, as it happens.",
+        new EmailLink("Mute Lakeside Weekend", "https://app.popkin.community/account/notifications?tab=popkins&mute=1"),
+        "https://app.popkin.community/account/notifications?tab=types",
+        "https://app.popkin.community/unsubscribe?t=abc",
+        "Popkin Ltd · 4 Brewery Wharf, Leeds LS10 1JQ");
+
+    private static PopkinUpdateEmailModel Reply(string text, params AlsoNewRow[] also) => new(
+        Shell,
+        new MessageLead(
+            "Walt replied to you",
+            new EmailLink("Reply in Popkin", "https://app.popkin.community/p/1/chat/everyone"),
+            "Walt Brennan",
+            text,
+            "10:41",
+            new QuotedMessage("Who’s up for the sunrise canoe?", "10:31")),
+        also,
+        10);
+
+    private static Task<RenderedEmail> RenderAsync(EmailModel model)
+    {
+        var services = new ServiceCollection().AddLogging().BuildServiceProvider();
+        return new NotificationEmailRenderer(services, NullLoggerFactory.Instance).RenderAsync(model, CancellationToken.None);
+    }
+
+    // A member's words with markup arrive encoded in the HTML and as written in the text (L2-163 AC7).
+    [Fact]
+    public async Task Members_words_are_encoded_in_the_HTML_and_kept_in_the_text()
+    {
+        var email = await RenderAsync(Reply("<script>alert(1)</script> & co"));
+
+        Assert.DoesNotContain("<script>", email.Html);
+        Assert.Contains("&lt;script&gt;alert(1)&lt;/script&gt; &amp; co", email.Html);
+        Assert.Contains("<script>alert(1)</script> & co", email.Text);
+    }
+
+    // The HTML says its language, and every image has alt text (L2-163 AC4).
+    [Fact]
+    public async Task The_HTML_has_its_language_and_every_image_its_alt()
+    {
+        var email = await RenderAsync(Reply("Count me in"));
+
+        Assert.StartsWith("<!DOCTYPE html>", email.Html);
+        Assert.Contains("<html lang=\"en\">", email.Html);
+        Assert.All(ImageTags().Matches(email.Html), img => Assert.Contains("alt=", img.Value));
+    }
+
+    // The text part holds every link of the HTML part (L2-163 AC4).
+    [Fact]
+    public async Task The_text_holds_every_link_of_the_HTML()
+    {
+        var email = await RenderAsync(Reply("Count me in", new AlsoNewRow("Dev added 6 photos", "10:38")));
+
+        var links = Hrefs().Matches(email.Html).Select(m => System.Net.WebUtility.HtmlDecode(m.Groups[1].Value)).ToList();
+        Assert.Equal(4, links.Count);
+        Assert.All(links, link => Assert.Contains(link, email.Text));
+    }
+
+    // The footer has the narrowest mute, settings and unsubscribe, in order, then the postal address (L2-163 AC5).
+    [Fact]
+    public async Task The_footer_has_its_three_links_in_order_and_the_address()
+    {
+        var email = await RenderAsync(Reply("Count me in"));
+
+        var mute = email.Html.IndexOf(">Mute Lakeside Weekend<", StringComparison.Ordinal);
+        var settings = email.Html.IndexOf(">Notification settings<", StringComparison.Ordinal);
+        var unsubscribe = email.Html.IndexOf(">Unsubscribe from all email<", StringComparison.Ordinal);
+        var address = email.Html.IndexOf("4 Brewery Wharf", StringComparison.Ordinal);
+        Assert.True(mute > 0 && mute < settings && settings < unsubscribe && unsubscribe < address, email.Html);
+        Assert.Contains("Popkin Ltd · 4 Brewery Wharf, Leeds LS10 1JQ", email.Text);
+    }
+
+    // With no other change there is no "Also new"; with one, it is listed (L2-164 AC1, AC6).
+    [Fact]
+    public async Task Also_new_is_shown_only_for_a_bundle()
+    {
+        var single = await RenderAsync(Reply("Count me in"));
+        var bundle = await RenderAsync(Reply("Count me in", new AlsoNewRow("Dev added 6 photos", "10:38")));
+
+        Assert.DoesNotContain("Also new", single.Html);
+        Assert.Contains("Also new in the last 10 minutes", bundle.Html);
+        Assert.Contains("- Dev added 6 photos · 10:38", bundle.Text);
+    }
+
+    [GeneratedRegex("<img[^>]*>")]
+    private static partial Regex ImageTags();
+
+    [GeneratedRegex("href=\"([^\"]+)\"")]
+    private static partial Regex Hrefs();
+}

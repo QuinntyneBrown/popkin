@@ -85,6 +85,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<NotificationPlatform> NotificationPlatforms => Set<NotificationPlatform>();
 
+    public DbSet<OutgoingEmail> OutgoingEmails => Set<OutgoingEmail>();
+
     public DbSet<ContactGroupMember> ContactGroupMembers => Set<ContactGroupMember>();
 
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();

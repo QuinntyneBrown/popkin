@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.DataProtection;
+using Popkin.Application.Notifications.Emails;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
@@ -168,6 +170,24 @@ public static class DependencyInjection
         else
         {
             services.AddSingleton<IContactsEmailSender, Contacts.NoContactsEmailSender>();
+        }
+
+        // Notification emails (ADR 0030): rendered from Razor components, and sent only when the
+        // service, the sender address and the footer's postal address are all configured
+        // (L2-163 AC5); otherwise each is marked failed and nothing is sent.
+        services.AddDataProtection();
+        services.AddSingleton<IUnsubscribeTokens, Notifications.UnsubscribeTokens>();
+        services.AddSingleton<INotificationEmailRenderer, Notifications.Emails.NotificationEmailRenderer>();
+        if (communicationCredential is not null
+            && configuration["Notifications:EmailSender"] is { Length: > 0 } notificationSender
+            && configuration["Email:PostalAddress"] is { Length: > 0 })
+        {
+            services.AddSingleton<INotificationEmailSender>(
+                new Notifications.AcsNotificationEmailSender(new EmailClient(new Uri(communicationEndpoint!), communicationCredential), notificationSender));
+        }
+        else
+        {
+            services.AddSingleton<INotificationEmailSender, Notifications.NoNotificationEmailSender>();
         }
 
         if (configuration["Push:PublicKey"] is { Length: > 0 } pushPublic && configuration["Push:PrivateKey"] is { Length: > 0 } pushPrivate)

@@ -1,0 +1,9 @@
+@* A button at least 44 px tall (L2-163 AC3), as a table cell so every client draws it. *@
+<table role="presentation" class="email__actions" cellpadding="0" cellspacing="0" style="margin:20px 0 4px;"><tr>
+<td style="background:@EmailStyles.Accent;border-radius:999px;"><a class="btn btn--primary" href="@Link.Url" style="display:inline-block;padding:12px 22px;min-height:20px;line-height:20px;font-weight:600;font-size:15px;color:@EmailStyles.Ink;text-decoration:none;">@Link.Label</a></td>
+</tr></table>
+
+@code {
+    [Parameter, EditorRequired]
+    public EmailLink Link { get; set; } = default!;
+}
