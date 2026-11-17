@@ -4,6 +4,7 @@ import {
   DefaultBirthdayLead,
   NotificationDefaultsChange,
 } from '../../../models/admin';
+import { NotificationDialogText } from './notifications-text';
 
 /** A default the Defaults tab edits (docs/detailed-designs/admin-platform/notification-defaults). */
 export type NotificationDefaultField =
@@ -204,4 +205,37 @@ export function activityEmailHelp(choice: string, bundleMinutes: number): string
     default:
       return `One email per change, bundled if several land within ${bundleMinutes} minutes.`;
   }
+}
+
+/** "Save new defaults?" (L2-173 AC4, L2-087 AC1). */
+export const SAVE_DEFAULTS_DIALOG: NotificationDialogText = {
+  heading: 'Save new defaults?',
+  description: 'These apply within a minute to every member who hasn’t chosen their own:',
+  confirm: 'Save',
+  busy: 'Saving…',
+  keep: 'Cancel',
+  placeholder: 'For example: fewer, fuller emails',
+};
+
+export const DEFAULTS_SAVED_TOAST: [string, string] = [
+  'Defaults saved',
+  'They apply within a minute to members who haven’t chosen their own.',
+];
+
+/** The panel's foot: who changed the defaults last and when, or "Nothing changed yet.". */
+export function defaultsFoot(
+  saved: AdminNotificationDefaults,
+  now: Date,
+  timeZone: string,
+): string {
+  if (!saved.changedAt || !saved.changedByName) return 'Nothing changed yet.';
+  const day = (date: Date, options: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat('en-GB', { timeZone, ...options }).format(date);
+  const at = new Date(saved.changedAt);
+  const ymd = { year: 'numeric', month: '2-digit', day: '2-digit' } as const;
+  const when =
+    day(at, ymd) === day(now, ymd)
+      ? 'today'
+      : day(at, { weekday: 'short', day: 'numeric', month: 'short' });
+  return `Last changed ${when} by ${saved.changedByName}.`;
 }

@@ -26,6 +26,10 @@ import {
   PopkinColour,
   accentOf,
   activityEmailHelp,
+  AdminNotificationDefaults,
+  DEFAULTS_SAVED_TOAST,
+  defaultsFoot,
+  SAVE_DEFAULTS_DIALOG,
   NotificationDefaultField,
   heldNote,
   RELEASED_TOAST,
@@ -177,7 +181,7 @@ export class NotificationsPage {
       lead: [
         { key: 'birthdayLead', value: v.birthdayLead, options: BIRTHDAY_LEADS },
       ] as LimitField[],
-      foot: 'Nothing changed yet.',
+      foot: defaultsFoot(draft.saved, new Date(), this.timeZone),
     };
   });
 
@@ -276,6 +280,23 @@ export class NotificationsPage {
       if (this.current() === 'defaults' && untracked(this.store.defaultsStatus) === 'idle') {
         untracked(() => this.store.loadDefaults());
       }
+    });
+  }
+
+  /** "Save new defaults?" with what changes and a reason; the saved ones are the new start (AC4). */
+  protected saveDefaults(): void {
+    const draft = this.store.defaults();
+    if (!draft?.valid || draft.unsaved === 0) return;
+    const request = draft.request();
+    this.ask<AdminNotificationDefaults>({
+      text: SAVE_DEFAULTS_DIALOG,
+      danger: false,
+      changes: draft.changes,
+      send: (reason) => this.api.changeNotificationDefaults(request, reason),
+    }).subscribe((saved) => {
+      if (!saved) return;
+      this.store.defaultsSaved(saved);
+      this.toaster.show('success', ...DEFAULTS_SAVED_TOAST);
     });
   }
 

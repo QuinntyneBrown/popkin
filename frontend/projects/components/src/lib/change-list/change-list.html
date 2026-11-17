@@ -1,0 +1,5 @@
+@for (change of changes(); track change.name) {
+  <li>
+    {{ change.name }}: <s>{{ change.from }}</s> → <strong>{{ change.to }}</strong> {{ change.unit }}
+  </li>
+}

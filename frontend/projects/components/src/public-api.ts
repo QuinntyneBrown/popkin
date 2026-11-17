@@ -21,6 +21,7 @@ export * from './lib/segmented-control/segmented-control';
 export * from './lib/send-status/send-status';
 export * from './lib/page-tabs/page-tabs';
 export * from './lib/aside-note/aside-note';
+export * from './lib/change-list/change-list';
 export * from './lib/limit-row/limit-row';
 export * from './lib/save-bar/save-bar';
 export * from './lib/popover/popover';

@@ -491,7 +491,7 @@ export async function theMockDefaults(
 
 /**
  * Answers saving the defaults as the API would, changing `defaults` so the page's next read
- * agrees, and records each body. Lena Fischer saves now.
+ * agrees, and records each body. Lena Fischer saves at noon on 14 July.
  */
 export async function savesDefaults(
   page: Page,
@@ -510,7 +510,7 @@ export async function savesDefaults(
       quietFrom: body.quietFrom,
       quietTo: body.quietTo,
       birthdayLead: body.birthdayLead,
-      changedAt: new Date().toISOString(),
+      changedAt: new Date(2026, 6, 14, 12, 0).toISOString(),
       changedByName: 'Lena Fischer',
     });
     return route.fulfill({ json: defaults });

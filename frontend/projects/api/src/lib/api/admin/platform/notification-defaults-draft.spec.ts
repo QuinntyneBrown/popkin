@@ -4,6 +4,7 @@ import {
   NotificationDefaultField,
   NotificationDefaultsDraft,
   activityEmailHelp,
+  defaultsFoot,
 } from './notification-defaults-draft';
 
 /** The first values of L2-161 and L2-173 AC2. */
@@ -145,6 +146,18 @@ describe('NotificationDefaultsDraft (L2-173)', () => {
     );
     expect(activityEmailHelp('WeeklyDigest', 10)).toBe(
       'One email on Sundays at 6 pm with everything that changed that week.',
+    );
+  });
+
+  it('says who changed the defaults last, and when', () => {
+    const now = new Date('2026-07-14T12:00:00Z');
+    expect(defaultsFoot(first, now, 'UTC')).toBe('Nothing changed yet.');
+    const changed = (at: string) => ({ ...first, changedAt: at, changedByName: 'Lena Fischer' });
+    expect(defaultsFoot(changed('2026-07-14T08:00:00Z'), now, 'UTC')).toBe(
+      'Last changed today by Lena Fischer.',
+    );
+    expect(defaultsFoot(changed('2026-07-12T08:00:00Z'), now, 'UTC')).toBe(
+      'Last changed Sun 12 Jul by Lena Fischer.',
     );
   });
 });

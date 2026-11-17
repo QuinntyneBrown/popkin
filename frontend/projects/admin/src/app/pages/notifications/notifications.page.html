@@ -276,6 +276,7 @@
                     [count]="fields.draft.unsaved"
                     [blocked]="fields.draft.valid ? null : 'Fix the highlighted default to save'"
                     (discard)="store.discardDefaults()"
+                    (save)="saveDefaults()"
                   ></div>
                 }
               }
