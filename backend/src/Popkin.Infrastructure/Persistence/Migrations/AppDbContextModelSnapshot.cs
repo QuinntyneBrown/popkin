@@ -931,6 +931,31 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("KeyDates", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.LimitSetting", b =>
+                {
+                    b.Property<string>("Limit")
+                        .HasMaxLength(48)
+                        .HasColumnType("nvarchar(48)");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ChangedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChangedByName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.HasKey("Limit");
+
+                    b.ToTable("LimitSettings", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.Membership", b =>
                 {
                     b.Property<Guid>("Id")

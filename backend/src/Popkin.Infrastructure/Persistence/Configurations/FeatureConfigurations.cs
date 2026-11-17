@@ -16,6 +16,17 @@ public sealed class FeatureSettingConfiguration : IEntityTypeConfiguration<Featu
     }
 }
 
+public sealed class LimitSettingConfiguration : IEntityTypeConfiguration<LimitSetting>
+{
+    public void Configure(EntityTypeBuilder<LimitSetting> builder)
+    {
+        builder.ToTable("LimitSettings");
+        builder.HasKey(s => s.Limit);
+        builder.Property(s => s.Limit).HasConversion<string>().HasMaxLength(48);
+        builder.Property(s => s.ChangedByName).HasMaxLength(100).IsRequired();
+    }
+}
+
 public sealed class FeatureChosenPopkinConfiguration : IEntityTypeConfiguration<FeatureChosenPopkin>
 {
     public void Configure(EntityTypeBuilder<FeatureChosenPopkin> builder)

@@ -58,6 +58,7 @@ public sealed class PlatformSnapshot(IServiceScopeFactory scopes, TimeProvider c
             var chosen = await db.FeatureChosenPopkins.AsNoTracking().Select(c => new { c.Feature, c.PopkinId }).ToListAsync(cancellationToken);
             var hostOff = await db.PopkinFeaturesOff.AsNoTracking().Select(o => new { o.Feature, o.PopkinId }).ToListAsync(cancellationToken);
             var kindsOff = await db.NotificationKindSwitches.AsNoTracking().Select(s => s.Kind).ToListAsync(cancellationToken);
+            var limits = await db.LimitSettings.AsNoTracking().ToDictionaryAsync(s => s.Limit, s => s.Value, cancellationToken);
             var held = await db.NotificationHolds.AsNoTracking().Where(h => h.ReleasedAt == null).Select(h => h.PopkinId).ToListAsync(cancellationToken);
             _values = new PlatformValues(
                 modes,
@@ -66,6 +67,7 @@ public sealed class PlatformSnapshot(IServiceScopeFactory scopes, TimeProvider c
             {
                 KindsOff = kindsOff.ToHashSet(),
                 HeldPopkins = held.ToHashSet(),
+                Limits = limits,
             };
         }
         catch

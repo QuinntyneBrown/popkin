@@ -112,6 +112,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<FeatureSetting> FeatureSettings => Set<FeatureSetting>();
 
+    public DbSet<LimitSetting> LimitSettings => Set<LimitSetting>();
+
     public DbSet<FeatureChosenPopkin> FeatureChosenPopkins => Set<FeatureChosenPopkin>();
 
     public DbSet<PopkinFeatureOff> PopkinFeaturesOff => Set<PopkinFeatureOff>();
