@@ -29,6 +29,7 @@ export interface ChoiceOption<T extends string = string> {
     role: 'radiogroup',
     '[attr.aria-label]': 'showLabel() ? null : label()',
     '[attr.aria-labelledby]': 'showLabel() ? labelId() : null',
+    '[class.option-grid]': 'grid()',
   },
 })
 export class ChoiceCard {
@@ -38,6 +39,13 @@ export class ChoiceCard {
   readonly showLabel = input(false);
   readonly labelId = input('choice-label');
   readonly value = model.required<string>();
+  /**
+   * The cards side by side in a row of three from 640 px, one above another below, each title
+   * at its full size: how often activity email comes (L2-155 AC4).
+   */
+  readonly grid = input(false);
+  /** Every card dimmed and not chosen: the choice does not apply as things stand (L2-156 AC3). */
+  readonly disabled = input(false);
 
   private readonly cards = viewChildren<ElementRef<HTMLButtonElement>>('card');
 

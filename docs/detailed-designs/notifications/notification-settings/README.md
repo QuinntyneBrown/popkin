@@ -50,9 +50,9 @@ The mock is `docs/mocks/pages/notification-settings/`. Its manifest entry gives 
 
 Where the mock and the specs differ, the specs stand and the mock changes:
 
-- The mock lists "Plans coming up" and calls the story kind "To-dos due" with "To-dos added,
-  moved, or given to you". The screen lists the twelve kinds of L2-154 only, with "Stories due"
-  and "Stories added, moved or given to you" (known gap 123).
+- The mock listed "Plans coming up" and called the story kind "To-dos due". It now lists the
+  twelve kinds of L2-154 only, with "Stories due" and "Stories added, moved or given to you"
+  (known gap 123), changed with the screen's first slice.
 - The mock draws the tabs as an ARIA tab list (`role="tab"`, `aria-selected`). L2-155 AC2 asks for
   navigation that carries `aria-current="page"`, so the screen uses `pk-view-nav` with links.
 - The mock's note says turning any switch off shows an undo bar for 8 seconds. L2-156 to L2-159

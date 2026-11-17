@@ -10,7 +10,7 @@ public sealed class NotificationCatalogueTests
     [Theory]
     [InlineData(NotificationKind.MentionsAndReplies, NotificationGroup.Activity, "Mentions and replies", "Someone @mentions you or replies to you", true, true, false)]
     [InlineData(NotificationKind.DirectMessages, NotificationGroup.Activity, "Direct messages", "A message just to you", true, true, false)]
-    [InlineData(NotificationKind.GroupChat, NotificationGroup.Activity, "Group chat", "New messages in a Popkin's chat", false, true, false)]
+    [InlineData(NotificationKind.GroupChat, NotificationGroup.Activity, "Group chat", "New messages in a Popkin’s chat", false, true, false)]
     [InlineData(NotificationKind.NewPhotos, NotificationGroup.Activity, "New photos", "Photos added to an album", true, false, false)]
     [InlineData(NotificationKind.PlanChanges, NotificationGroup.Activity, "Plan changes", "Stories added, moved or given to you", true, true, false)]
     [InlineData(NotificationKind.ScheduleChanges, NotificationGroup.Activity, "Schedule changes", "Someone books time off or the week shifts", true, false, false)]
@@ -42,7 +42,7 @@ public sealed class NotificationCatalogueTests
 
     // Group | Name | Sentence
     [Theory]
-    [InlineData(NotificationGroup.Activity, "When something changes", "Anything new in a Popkin you're in.")]
+    [InlineData(NotificationGroup.Activity, "When something changes", "Anything new in a Popkin you’re in.")]
     [InlineData(NotificationGroup.Reminders, "Reminders", "Nudges ahead of dates that matter.")]
     [InlineData(NotificationGroup.Account, "Your account", "Always sent, so you can get back in.")]
     public void Each_group_reads_in_its_words(NotificationGroup group, string name, string about)

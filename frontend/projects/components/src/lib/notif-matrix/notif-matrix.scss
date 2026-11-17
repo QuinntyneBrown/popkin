@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  border-block: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.notif-matrix__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--space-14) var(--space-14);
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--space-16);
+  padding-block: var(--space-3);
+}
+
+@media (min-width: 40rem) {
+  .notif-matrix__row {
+    grid-template-columns: minmax(0, 1fr) var(--space-18) var(--space-18);
+  }
+}
+
+.notif-matrix__row + .notif-matrix__row {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.notif-matrix__name {
+  display: block;
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-snug)
+    var(--font-family-sans);
+}
+
+.notif-matrix__about {
+  display: block;
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.notif-matrix__cell {
+  display: grid;
+  place-items: center;
+}
+
+.notif-matrix__lock {
+  grid-column: span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1-5);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  color: var(--color-fg-subtle);
+}

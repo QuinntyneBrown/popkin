@@ -274,3 +274,20 @@
     --pk-aside-width: var(--layout-split-aside-xl);
   }
 }
+
+/* A page of settings: a wider column than a form's (the Notifications screen, L2-155 AC4). */
+:host(.screen--settings) .screen__body {
+  padding-bottom: var(--space-20);
+}
+
+@media (min-width: 40rem) {
+  :host(.screen--settings) .screen__body {
+    max-width: var(--layout-container-narrow);
+  }
+}
+
+@media (min-width: 48rem) {
+  :host(.screen--settings) .screen__body {
+    padding-inline: var(--space-8);
+  }
+}

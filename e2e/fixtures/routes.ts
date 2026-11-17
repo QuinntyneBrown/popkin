@@ -327,6 +327,18 @@ export const routes = {
   deleteAccount: { app: '/account', mock: 'dialogs/delete-account/default.html' },
   deleteAccountConfirm: { app: '/account', mock: 'dialogs/delete-account/confirm.html' },
   deleteAccountBusy: { app: '/account', mock: 'dialogs/delete-account/busy.html' },
+  notificationSettings: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/default.html',
+  },
+  notificationSettingsLoading: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/loading.html',
+  },
+  notificationSettingsError: {
+    app: '/account/notifications',
+    mock: 'pages/notification-settings/error.html',
+  },
   landing: { app: '/', mock: 'pages/landing/default.html' },
   // The marketing site (ADR 0017), a second application served on :4201.
   marketingHome: { app: `${MARKETING}/`, mock: 'pages/marketing-home/default.html' },

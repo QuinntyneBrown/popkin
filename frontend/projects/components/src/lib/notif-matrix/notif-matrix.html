@@ -1,0 +1,30 @@
+@for (row of rows(); track row.key) {
+  <li class="notif-matrix__row">
+    <span>
+      <span class="notif-matrix__name">{{ row.name }}</span>
+      <span class="notif-matrix__about">{{ row.about }}</span>
+    </span>
+    @if (row.required) {
+      <span class="notif-matrix__lock"><svg pk-icon name="lock" size="sm"></svg> Always on</span>
+    } @else {
+      <span class="notif-matrix__cell">
+        <button
+          pk-switch
+          [attr.aria-label]="row.name + ' by email'"
+          [disabled]="row.emailDisabled ?? false"
+          [checked]="row.email"
+          (checkedChange)="switched.emit({ key: row.key, channel: 'email', on: $event })"
+        ></button>
+      </span>
+      <span class="notif-matrix__cell">
+        <button
+          pk-switch
+          [attr.aria-label]="row.name + ' on your phone'"
+          [disabled]="row.phoneDisabled ?? false"
+          [checked]="row.phone"
+          (checkedChange)="switched.emit({ key: row.key, channel: 'phone', on: $event })"
+        ></button>
+      </span>
+    }
+  </li>
+}

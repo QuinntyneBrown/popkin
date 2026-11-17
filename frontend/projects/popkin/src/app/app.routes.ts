@@ -386,6 +386,14 @@ export const routes: Routes = [
     data: data({ shell: 'bare', page: 'account' }),
     title: 'Your account · Popkin',
   },
+  {
+    path: 'account/notifications',
+    canActivate: [signedInGuard],
+    loadComponent: () =>
+      import('./pages/notifications/notifications.page').then((m) => m.NotificationsPage),
+    data: data({ shell: 'bare', page: 'notification-settings' }),
+    title: 'Notifications · Popkin',
+  },
   // Open to anyone, signed in or not (L2-082, L2-083).
   {
     path: 'privacy',

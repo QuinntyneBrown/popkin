@@ -27,13 +27,13 @@ public sealed class NotificationSettingsTests
 
         var groups = settings.GetProperty("groups").EnumerateArray().ToList();
         Assert.Equal(["When something changes", "Reminders", "Your account"], groups.Select(g => g.GetProperty("name").GetString()));
-        Assert.Equal("Anything new in a Popkin you're in.", groups[0].GetProperty("about").GetString());
+        Assert.Equal("Anything new in a Popkin you’re in.", groups[0].GetProperty("about").GetString());
         var kinds = groups.SelectMany(g => g.GetProperty("kinds").EnumerateArray()).ToList();
         Assert.Equal(12, kinds.Count);
 
         var groupChat = kinds.Single(k => k.GetProperty("kind").GetString() == "GroupChat");
         Assert.Equal("Group chat", groupChat.GetProperty("name").GetString());
-        Assert.Equal("New messages in a Popkin's chat", groupChat.GetProperty("about").GetString());
+        Assert.Equal("New messages in a Popkin’s chat", groupChat.GetProperty("about").GetString());
         Assert.False(groupChat.GetProperty("email").GetBoolean());
         Assert.True(groupChat.GetProperty("phone").GetBoolean());
         Assert.False(groupChat.GetProperty("required").GetBoolean());

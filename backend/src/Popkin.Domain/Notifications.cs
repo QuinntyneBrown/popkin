@@ -60,7 +60,7 @@ public static class NotificationCatalogue
 {
     public static IReadOnlyList<NotificationGroupEntry> Groups { get; } =
     [
-        new(NotificationGroup.Activity, "When something changes", "Anything new in a Popkin you're in."),
+        new(NotificationGroup.Activity, "When something changes", "Anything new in a Popkin you’re in."),
         new(NotificationGroup.Reminders, "Reminders", "Nudges ahead of dates that matter."),
         new(NotificationGroup.Account, "Your account", "Always sent, so you can get back in."),
     ];
@@ -69,7 +69,7 @@ public static class NotificationCatalogue
     [
         Activity(NotificationKind.MentionsAndReplies, "Mentions and replies", "Someone @mentions you or replies to you", true, true),
         Activity(NotificationKind.DirectMessages, "Direct messages", "A message just to you", true, true),
-        Activity(NotificationKind.GroupChat, "Group chat", "New messages in a Popkin's chat", false, true),
+        Activity(NotificationKind.GroupChat, "Group chat", "New messages in a Popkin’s chat", false, true),
         Activity(NotificationKind.NewPhotos, "New photos", "Photos added to an album", true, false),
         Activity(NotificationKind.PlanChanges, "Plan changes", "Stories added, moved or given to you", true, true, Feature.Plan),
         Activity(NotificationKind.ScheduleChanges, "Schedule changes", "Someone books time off or the week shifts", true, false, Feature.Schedules),

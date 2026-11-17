@@ -26,6 +26,8 @@ export class AccountPage {
   readonly saved: Locator;
   readonly summary: Locator;
   readonly failed: Locator;
+  /** "Notifications", which opens the Notifications screen (L2-048 AC6). */
+  readonly notifications: Locator;
   readonly signOut: Locator;
   readonly deleteAccount: Locator;
   /** The Sign out row, a link in the mock and a button in the app. */
@@ -71,6 +73,7 @@ export class AccountPage {
     this.summary = page.locator('.form-summary');
     this.failed = page.getByRole('main').locator('.alert');
     this.menu = page.locator('.menu-list');
+    this.notifications = page.getByRole('link', { name: 'Notifications' });
     this.signOut = this.menu.getByRole('button', { name: 'Sign out' });
     this.signOutRow = this.menu.locator('.menu-list__item', { hasText: 'Sign out' });
     this.deleteAccount = this.menu.getByRole('button', { name: 'Delete my account' });

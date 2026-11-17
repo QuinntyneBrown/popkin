@@ -84,3 +84,27 @@
   border-radius: var(--radius-full);
   background: var(--accent-line);
 }
+
+/* A row of three from 640 px (the mock's `option-grid`): the radio and the words at the top. */
+:host(.option-grid) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2-5);
+}
+
+@media (min-width: 40rem) {
+  :host(.option-grid) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+:host(.option-grid) .option-card {
+  align-items: flex-start;
+  min-height: 0;
+  padding: var(--space-4);
+}
+
+.option-card:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}

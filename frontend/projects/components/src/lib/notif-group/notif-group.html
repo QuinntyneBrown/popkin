@@ -1,0 +1,11 @@
+<div class="notif-group__head">
+  <div>
+    <h3 class="notif-group__title" [id]="id">{{ heading() }}</h3>
+    @if (about()) {
+      <p class="notif-group__about">{{ about() }}</p>
+    }
+  </div>
+  <span class="notif-group__col" aria-hidden="true">Email</span>
+  <span class="notif-group__col" aria-hidden="true">Phone</span>
+</div>
+<ng-content />

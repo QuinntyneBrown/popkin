@@ -12,6 +12,8 @@ import {
 } from '@angular/router';
 import {
   ACCOUNT_API,
+  NOTIFICATIONS_API,
+  HttpNotificationsApi,
   AUTH_API,
   HttpAccountApi,
   LocalStorageThemePreferences,
@@ -75,6 +77,7 @@ export const appConfig: ApplicationConfig = {
     ),
     { provide: AUTH_API, useClass: HttpAuthApi },
     { provide: ACCOUNT_API, useClass: HttpAccountApi },
+    { provide: NOTIFICATIONS_API, useClass: HttpNotificationsApi },
     { provide: THEME_PREFERENCES, useClass: LocalStorageThemePreferences },
     // The theme chosen on this device is drawn before the first screen (L2-048 AC4).
     provideAppInitializer(() => inject(THEME_PREFERENCES).apply()),

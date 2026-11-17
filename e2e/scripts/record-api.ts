@@ -520,6 +520,8 @@ await call('DELETE', `/api/popkins/${created.id}/members/me`);
 person = mara;
 await call('PATCH', '/api/account', { name: 'Mara Okafor' });
 await call('GET', '/api/account');
+// Her notification settings, as she has never changed them (L2-154 AC1).
+await call('GET', '/api/me/notifications');
 const portrait = new FormData();
 portrait.append(
   'photo',

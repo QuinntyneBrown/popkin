@@ -1,0 +1,64 @@
+<div pk-screen layout="column" width="settings">
+  <header pk-top-bar slot="header" [line]="true" back="/account" backLabel="Your account"></header>
+  <div
+    pk-page-head
+    heading="Notifications"
+    sub="What reaches you by email and on your phone, Popkin by Popkin."
+  ></div>
+  @switch (store.state()) {
+    @case ('loading') {
+      <p class="visually-hidden" role="status">Loading your notification settings…</p>
+      <div class="stack" aria-hidden="true">
+        <span pk-skeleton shape="title" [width]="40"></span>
+        <span pk-skeleton shape="text" [width]="60"></span>
+        <span pk-skeleton shape="card" width="full"></span>
+        <span pk-skeleton shape="pill" width="full"></span>
+        <span pk-skeleton shape="card" width="full"></span>
+      </div>
+    }
+    @case ('error') {
+      <div
+        pk-empty-state
+        icon="offline"
+        heading="We couldn’t load your notification settings"
+        text="Nothing has changed, and your email and phone alerts keep arriving as before."
+        [alert]="true"
+      >
+        <button pk-button variant="primary" size="md" type="button" (click)="store.open()">
+          <svg pk-icon name="retry" size="md"></svg>Try again
+        </button>
+        <a pk-button variant="secondary" size="md" routerLink="/account">Your account</a>
+      </div>
+    }
+    @case ('ready') {
+      @if (email(); as email) {
+        <section
+          pk-settings-section
+          heading="Email me about activity"
+          text="Reminders and sign-in codes always arrive on time."
+          toggle="Email"
+          toggleName="Email notifications"
+          [checked]="email.on"
+          [toggleDisabled]="!email.available"
+        >
+          @if (email.available) {
+            <div
+              pk-choice-card
+              label="Email me about activity"
+              [grid]="true"
+              [options]="frequencies"
+              [value]="email.frequency"
+            ></div>
+          } @else {
+            <p class="text-muted">Add an email to your account to get Popkin email.</p>
+          }
+        </section>
+      }
+      @for (group of groups(); track group.group) {
+        <section pk-notif-group [heading]="group.name" [about]="group.about">
+          <ul pk-notif-matrix [rows]="rows(group)"></ul>
+        </section>
+      }
+    }
+  }
+</div>
