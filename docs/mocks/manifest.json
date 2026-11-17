@@ -399,6 +399,58 @@
       }
     },
     {
+      "id": "app-shortcuts",
+      "kind": "page",
+      "title": "App shortcuts",
+      "route": "(the phone’s home screen)",
+      "requirements": [],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "loading": "The phone draws the menu from the web app manifest; Popkin loads nothing.",
+        "empty": "The manifest always lists the same three shortcuts.",
+        "error": "The phone draws the menu; nothing Popkin loads can fail."
+      },
+      "notes": "From the Magic Patterns “Quick Add” design (Home Screen, long-press). Its home-screen widget is left out: a web app cannot add one."
+    },
+    {
+      "id": "quick-add",
+      "kind": "page",
+      "title": "Quick add",
+      "route": "/contacts/quick-add",
+      "requirements": [],
+      "states": [
+        "default",
+        "filled",
+        "invalid",
+        "submitting",
+        "error"
+      ],
+      "not_applicable": {
+        "loading": "The screen needs no request before it shows: it starts blank.",
+        "empty": "The screen is a form; it has no collection that can be empty."
+      },
+      "notes": "From the Magic Patterns “Quick Add” design. Only a name is needed; the rest of Add someone (L2-129) can follow."
+    },
+    {
+      "id": "contact-added",
+      "kind": "page",
+      "title": "Added to Contacts",
+      "route": "/contacts/people/:id/added",
+      "requirements": [],
+      "states": [
+        "default",
+        "another"
+      ],
+      "not_applicable": {
+        "loading": "It opens from the save's answer, so it has nothing to wait for.",
+        "empty": "The screen lists nothing; it has no collection that can be empty.",
+        "error": "The screen loads no data; a failed save stays on quick add (`quick-add/error`)."
+      },
+      "notes": "From the Magic Patterns “Quick Add” design (Added)."
+    },
+    {
       "id": "log-entry",
       "kind": "page",
       "title": "Log a conversation",
