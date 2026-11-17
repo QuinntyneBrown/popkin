@@ -85,11 +85,13 @@ jobs:
         env:
           AUTH_CODE_HASH_KEY: ${{ secrets.AUTH_CODE_HASH_KEY }}
           PHOTOS_SIGNING_KEY: ${{ secrets.PHOTOS_SIGNING_KEY }}
+          PUSH_PRIVATE_KEY: ${{ secrets.PUSH_PRIVATE_KEY }}
         run: |
           outputs=$(az deployment group create --resource-group "$RESOURCE_GROUP" \
             --name "popkin-$IMAGE_TAG" --template-file infra/main.bicep \
             --parameters imageTag="$IMAGE_TAG" \
               authCodeHashKey="$AUTH_CODE_HASH_KEY" photosSigningKey="$PHOTOS_SIGNING_KEY" \
+              pushPrivateKey="$PUSH_PRIVATE_KEY" \
             --query properties.outputs -o json)
           echo "appUrl=$(jq -r .appUrl.value <<<"$outputs")" >> "$GITHUB_OUTPUT"
           echo "adminUrl=$(jq -r .adminUrl.value <<<"$outputs")" >> "$GITHUB_OUTPUT"

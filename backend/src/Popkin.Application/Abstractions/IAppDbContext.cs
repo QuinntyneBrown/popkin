@@ -48,6 +48,34 @@ public interface IAppDbContext
 
     DbSet<Contact> Contacts { get; }
 
+    DbSet<KeyDate> KeyDates { get; }
+
+    DbSet<ReminderPreferences> ReminderPreferences { get; }
+
+    DbSet<FollowUp> FollowUps { get; }
+
+    DbSet<TimelineEntry> TimelineEntries { get; }
+
+    DbSet<Memory> Memories { get; }
+
+    DbSet<Habit> Habits { get; }
+
+    DbSet<HabitKept> HabitKept { get; }
+
+    DbSet<Connection> Connections { get; }
+
+    DbSet<ContactGroup> ContactGroups { get; }
+
+    DbSet<ImportBatch> ImportBatches { get; }
+
+    DbSet<ContactReminder> ContactReminders { get; }
+
+    DbSet<ContactWeeklyEmail> ContactWeeklyEmails { get; }
+
+    DbSet<PushSubscription> PushSubscriptions { get; }
+
+    DbSet<ContactGroupMember> ContactGroupMembers { get; }
+
     DbSet<WorkingStretch> WorkingStretches { get; }
 
     DbSet<Admin> Admins { get; }

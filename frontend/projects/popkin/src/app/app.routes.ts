@@ -281,6 +281,64 @@ export const routes: Routes = [
     title: 'Today · Contacts · Popkin',
   },
   {
+    path: 'contacts/people',
+    pathMatch: 'full',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-people/contacts-people.page').then((m) => m.ContactsPeoplePage),
+    data: data({ shell: 'app', page: 'contacts-people' }),
+  },
+  {
+    path: 'contacts/follow-ups',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-follow-ups/contacts-follow-ups.page').then(
+        (m) => m.ContactsFollowUpsPage,
+      ),
+    data: data({ shell: 'app', page: 'contacts-follow-ups' }),
+  },
+  {
+    path: 'contacts/dates',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-dates/contacts-dates.page').then((m) => m.ContactsDatesPage),
+    data: data({ shell: 'app', page: 'contacts-dates' }),
+  },
+  {
+    path: 'contacts/habits',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-habits/contacts-habits.page').then((m) => m.ContactsHabitsPage),
+    data: data({ shell: 'app', page: 'contacts-habits' }),
+    title: 'Habits · Contacts · Popkin',
+  },
+  {
+    path: 'contacts/connections',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-connections/contacts-connections.page').then(
+        (m) => m.ContactsConnectionsPage,
+      ),
+    data: data({ shell: 'app', page: 'contacts-connections' }),
+    title: 'Connections · Contacts · Popkin',
+  },
+  {
+    path: 'contacts/groups',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-groups/contacts-groups.page').then((m) => m.ContactsGroupsPage),
+    data: data({ shell: 'app', page: 'contacts-groups' }),
+    title: 'Groups · Contacts · Popkin',
+  },
+  {
+    path: 'contacts/groups/:groupId',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-groups/contacts-groups.page').then((m) => m.ContactsGroupsPage),
+    data: data({ shell: 'app', page: 'contacts-groups' }),
+    title: 'Groups · Contacts · Popkin',
+  },
+  {
     path: 'contacts/people/new',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>
@@ -295,6 +353,16 @@ export const routes: Routes = [
       import('./pages/contact-profile/contact-profile.page').then((m) => m.ContactProfilePage),
     data: data({ shell: 'app', page: 'contact-profile' }),
     title: 'Profile · Contacts · Popkin',
+  },
+  {
+    path: 'contacts/people/:contactId/log',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-log-entry/contacts-log-entry.page').then(
+        (m) => m.ContactsLogEntryPage,
+      ),
+    data: data({ shell: 'bare', page: 'log-entry' }),
+    title: 'Log · Contacts · Popkin',
   },
   {
     path: 'contacts/people/:contactId/edit',

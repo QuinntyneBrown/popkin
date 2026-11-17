@@ -31,6 +31,33 @@ describe('Toaster', () => {
     expect(shown()).toEqual(['We couldn’t save that follow-up']);
   });
 
+  // L2-140 AC1: a reminder stays until dismissed, and says when it is
+  it('keeps a lasting toast, and tells who asked when it is dismissed or acted on', () => {
+    const dismissed = vi.fn();
+    toaster.show('info', 'Grace turns 33 on Saturday', undefined, undefined, {
+      lasting: true,
+      dismissed,
+    });
+    toaster.show(
+      'info',
+      'Ruth turns 78 on 24 October',
+      undefined,
+      { label: 'Open', run: vi.fn() },
+      {
+        lasting: true,
+        dismissed,
+      },
+    );
+
+    vi.advanceTimersByTime(60_000);
+    expect(shown()).toEqual(['Grace turns 33 on Saturday', 'Ruth turns 78 on 24 October']);
+    toaster.dismiss(toaster.toasts()[0].id);
+    toaster.act(toaster.toasts()[0]);
+
+    expect(shown()).toEqual([]);
+    expect(dismissed).toHaveBeenCalledTimes(2);
+  });
+
   // L2-124 AC2
   it('waits while it is held', () => {
     toaster.show('success', 'Marked done');

@@ -49,6 +49,34 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Contact> Contacts => Set<Contact>();
 
+    public DbSet<KeyDate> KeyDates => Set<KeyDate>();
+
+    public DbSet<ReminderPreferences> ReminderPreferences => Set<ReminderPreferences>();
+
+    public DbSet<FollowUp> FollowUps => Set<FollowUp>();
+
+    public DbSet<TimelineEntry> TimelineEntries => Set<TimelineEntry>();
+
+    public DbSet<Memory> Memories => Set<Memory>();
+
+    public DbSet<Habit> Habits => Set<Habit>();
+
+    public DbSet<HabitKept> HabitKept => Set<HabitKept>();
+
+    public DbSet<Connection> Connections => Set<Connection>();
+
+    public DbSet<ContactGroup> ContactGroups => Set<ContactGroup>();
+
+    public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
+
+    public DbSet<ContactReminder> ContactReminders => Set<ContactReminder>();
+
+    public DbSet<ContactWeeklyEmail> ContactWeeklyEmails => Set<ContactWeeklyEmail>();
+
+    public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
+
+    public DbSet<ContactGroupMember> ContactGroupMembers => Set<ContactGroupMember>();
+
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();
 
     public DbSet<Admin> Admins => Set<Admin>();

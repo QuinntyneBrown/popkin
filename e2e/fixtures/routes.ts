@@ -14,6 +14,9 @@ const created = responses['POST /api/popkins'].body;
 const invite = `/i/${created.inviteCode}`;
 const chat = `/p/${created.id}/chat/everyone`;
 const home = `/p/${created.id}`;
+/** Thursday Night Group and Sheffield lot, as e2e/fixtures/groups.ts numbers them. */
+const thursdayGroup = '00000000-0000-4000-e000-000000000003';
+const sheffieldGroup = '00000000-0000-4000-e000-000000000004';
 const call = `${home}/call`;
 const photos = `${home}/photos`;
 // The photo the mocks open: the first of the album fixture.
@@ -187,6 +190,139 @@ export const routes = {
   myPopkinsOffline: { app: '/popkins', mock: 'pages/my-popkins/offline.html' },
   // Contacts (journey 25): Mara keeps nobody yet in the recording.
   contactsTodayEmpty: { app: '/contacts', mock: 'pages/contacts-today/empty.html' },
+  contactsToday: { app: '/contacts', mock: 'pages/contacts-today/default.html' },
+  contactsTodayDone: { app: '/contacts', mock: 'pages/contacts-today/done.html' },
+  contactsTodayLoading: { app: '/contacts', mock: 'pages/contacts-today/loading.html' },
+  contactsTodayError: { app: '/contacts', mock: 'pages/contacts-today/error.html' },
+  // Reminders (L2-140): a reminder over Today, and a browser that blocks notifications on Dates.
+  contactsReminder: { app: '/contacts', mock: 'notifications/contacts-toast/info.html' },
+  contactsNotificationsBlocked: {
+    app: '/contacts/dates',
+    mock: 'notifications/contacts-toast/blocked.html',
+  },
+  // Import from your Popkins (L2-151), opened from People with nobody in it.
+  importContacts: { app: '/contacts/people', mock: 'dialogs/import-contacts/default.html' },
+  importContactsBusy: { app: '/contacts/people', mock: 'dialogs/import-contacts/busy.html' },
+  importContactsNobody: { app: '/contacts/people', mock: 'dialogs/import-contacts/nobody.html' },
+  importContactsFailed: { app: '/contacts/people', mock: 'dialogs/import-contacts/failed.html' },
+  importContactsLoading: { app: '/contacts/people', mock: 'dialogs/import-contacts/loading.html' },
+  importContactsError: { app: '/contacts/people', mock: 'dialogs/import-contacts/error.html' },
+  importContactsEmpty: { app: '/contacts/people', mock: 'dialogs/import-contacts/empty.html' },
+  contactsPeople: { app: '/contacts/people', mock: 'pages/contacts-people/default.html' },
+  contactsPeopleFamily: { app: '/contacts/people', mock: 'pages/contacts-people/family.html' },
+  contactsPeopleNoResults: {
+    app: '/contacts/people',
+    mock: 'pages/contacts-people/no-results.html',
+  },
+  contactsPeopleLoading: { app: '/contacts/people', mock: 'pages/contacts-people/loading.html' },
+  contactsPeopleError: { app: '/contacts/people', mock: 'pages/contacts-people/error.html' },
+  contactsPeopleEmpty: { app: '/contacts/people', mock: 'pages/contacts-people/empty.html' },
+  contactsFollowUps: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/default.html',
+  },
+  contactsFollowUpsPromises: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/promises.html',
+  },
+  contactsFollowUpsDone: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/done.html',
+  },
+  contactsFollowUpsEmpty: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/empty.html',
+  },
+  contactsFollowUpsLoading: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/loading.html',
+  },
+  contactsFollowUpsError: {
+    app: '/contacts/follow-ups',
+    mock: 'pages/contacts-follow-ups/error.html',
+  },
+  contactsDates: { app: '/contacts/dates', mock: 'pages/contacts-dates/default.html' },
+  contactsDatesBirthdays: { app: '/contacts/dates', mock: 'pages/contacts-dates/birthdays.html' },
+  contactsDatesEmpty: { app: '/contacts/dates', mock: 'pages/contacts-dates/empty.html' },
+  contactsDatesLoading: { app: '/contacts/dates', mock: 'pages/contacts-dates/loading.html' },
+  contactsDatesError: { app: '/contacts/dates', mock: 'pages/contacts-dates/error.html' },
+  addDate: { app: '/contacts/dates', mock: 'dialogs/add-date/default.html' },
+  addDateInvalid: { app: '/contacts/dates', mock: 'dialogs/add-date/invalid.html' },
+  addDateBusy: { app: '/contacts/dates', mock: 'dialogs/add-date/busy.html' },
+  contactsHabits: { app: '/contacts/habits', mock: 'pages/contacts-habits/default.html' },
+  contactsHabitsKept: { app: '/contacts/habits', mock: 'pages/contacts-habits/kept.html' },
+  contactsHabitsEmpty: { app: '/contacts/habits', mock: 'pages/contacts-habits/empty.html' },
+  contactsHabitsLoading: { app: '/contacts/habits', mock: 'pages/contacts-habits/loading.html' },
+  contactsHabitsError: { app: '/contacts/habits', mock: 'pages/contacts-habits/error.html' },
+  contactsConnections: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/none.html',
+  },
+  contactsConnectionsChidi: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/default.html',
+  },
+  contactsConnectionsFamily: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/family.html',
+  },
+  contactsConnectionsEmpty: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/empty.html',
+  },
+  contactsConnectionsLoading: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/loading.html',
+  },
+  contactsConnectionsError: {
+    app: '/contacts/connections',
+    mock: 'pages/contacts-connections/error.html',
+  },
+  // The default mock opens Thursday Night Group beside the list, as a wide screen does.
+  contactsGroups: {
+    app: `/contacts/groups/${thursdayGroup}`,
+    mock: 'pages/contacts-groups/default.html',
+  },
+  contactsGroupsDetail: {
+    app: `/contacts/groups/${thursdayGroup}`,
+    mock: 'pages/contacts-groups/detail.html',
+  },
+  contactsGroupsStart: {
+    app: `/contacts/groups/${sheffieldGroup}`,
+    mock: 'pages/contacts-groups/start.html',
+  },
+  contactsGroupsEmpty: { app: '/contacts/groups', mock: 'pages/contacts-groups/empty.html' },
+  contactsGroupsLoading: { app: '/contacts/groups', mock: 'pages/contacts-groups/loading.html' },
+  contactsGroupsError: { app: '/contacts/groups', mock: 'pages/contacts-groups/error.html' },
+  newGroup: { app: '/contacts/groups', mock: 'dialogs/new-group/default.html' },
+  newGroupInvalid: { app: '/contacts/groups', mock: 'dialogs/new-group/invalid.html' },
+  newGroupBusy: { app: '/contacts/groups', mock: 'dialogs/new-group/busy.html' },
+  groupAddPeople: {
+    app: `/contacts/groups/${thursdayGroup}`,
+    mock: 'dialogs/group-add-people/default.html',
+  },
+  groupAddPeopleBusy: {
+    app: `/contacts/groups/${thursdayGroup}`,
+    mock: 'dialogs/group-add-people/busy.html',
+  },
+  connectPerson: { app: '/contacts/connections', mock: 'dialogs/connect-person/default.html' },
+  connectPersonChoose: {
+    app: '/contacts/connections',
+    mock: 'dialogs/connect-person/choose.html',
+  },
+  connectPersonInvalid: {
+    app: '/contacts/connections',
+    mock: 'dialogs/connect-person/invalid.html',
+  },
+  connectPersonNoResults: {
+    app: '/contacts/connections',
+    mock: 'dialogs/connect-person/no-results.html',
+  },
+  connectPersonBusy: { app: '/contacts/connections', mock: 'dialogs/connect-person/busy.html' },
+  newHabit: { app: `${chidi}`, mock: 'dialogs/new-habit/default.html' },
+  newHabitChoose: { app: '/contacts/habits', mock: 'dialogs/new-habit/choose.html' },
+  newHabitInvalid: { app: `${chidi}`, mock: 'dialogs/new-habit/invalid.html' },
+  newHabitBusy: { app: `${chidi}`, mock: 'dialogs/new-habit/busy.html' },
   addContact: { app: '/contacts/people/new', mock: 'pages/add-contact/default.html' },
   addContactInvalid: { app: '/contacts/people/new', mock: 'pages/add-contact/invalid.html' },
   addContactSubmitting: { app: '/contacts/people/new', mock: 'pages/add-contact/submitting.html' },
@@ -194,9 +330,35 @@ export const routes = {
   editContact: { app: `${femi}/edit`, mock: 'pages/add-contact/edit.html' },
   contactProfile: { app: `${chidi}`, mock: 'pages/contact-profile/default.html' },
   contactProfileEmpty: { app: femi, mock: 'pages/contact-profile/empty.html' },
+  contactProfileFollowUps: {
+    app: `${chidi}?view=follow-ups`,
+    mock: 'pages/contact-profile/follow-ups.html',
+  },
+  contactProfileMemories: {
+    app: `${chidi}?view=memories`,
+    mock: 'pages/contact-profile/memories.html',
+  },
+  addMemory: { app: `${chidi}?view=memories`, mock: 'dialogs/add-memory/default.html' },
+  addMemoryChosen: { app: `${chidi}?view=memories`, mock: 'dialogs/add-memory/chosen.html' },
+  addMemoryFile: { app: `${chidi}?view=memories`, mock: 'dialogs/add-memory/file.html' },
+  addMemoryNote: { app: `${chidi}?view=memories`, mock: 'dialogs/add-memory/note.html' },
+  addMemoryInvalid: { app: `${chidi}?view=memories`, mock: 'dialogs/add-memory/invalid.html' },
+  addMemoryBusy: { app: `${chidi}?view=memories`, mock: 'dialogs/add-memory/busy.html' },
+  contactProfileMilestones: { app: `${chidi}`, mock: 'pages/contact-profile/milestones.html' },
+  logEntry: { app: `${chidi}/log`, mock: 'pages/log-entry/default.html' },
+  logEntryMilestone: { app: `${chidi}/log?kind=milestone`, mock: 'pages/log-entry/milestone.html' },
+  logEntryInvalid: { app: `${chidi}/log`, mock: 'pages/log-entry/invalid.html' },
+  logEntrySubmitting: { app: `${chidi}/log`, mock: 'pages/log-entry/submitting.html' },
+  logEntryError: { app: `${chidi}/log`, mock: 'pages/log-entry/error.html' },
+  addPromise: { app: `${chidi}/log`, mock: 'dialogs/add-promise/default.html' },
+  addPromiseInvalid: { app: `${chidi}/log`, mock: 'dialogs/add-promise/invalid.html' },
   contactProfileLoading: { app: `${chidi}`, mock: 'pages/contact-profile/loading.html' },
   contactProfileError: { app: `${chidi}`, mock: 'pages/contact-profile/error.html' },
   contactProfileNotFound: { app: `${chidi}`, mock: 'pages/contact-profile/not-found.html' },
+  deleteContact: { app: `${chidi}`, mock: 'dialogs/delete-contact/default.html' },
+  deleteContactBusy: { app: `${chidi}`, mock: 'dialogs/delete-contact/busy.html' },
+  deleteContactFailed: { app: `${chidi}`, mock: 'dialogs/delete-contact/failed.html' },
+  editContactOfChidi: { app: `${chidi}/edit`, mock: 'pages/add-contact/edit.html' },
   contactActions: { app: `${chidi}`, mock: 'dialogs/contact-actions/default.html' },
   contactActionsNotClosest: { app: femi, mock: 'dialogs/contact-actions/not-closest.html' },
   scanToJoin: { app: '/popkins', mock: 'dialogs/scan-to-join/default.html' },

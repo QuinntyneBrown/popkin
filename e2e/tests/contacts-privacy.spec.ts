@@ -5,6 +5,7 @@ import { recordedContactId } from '../fixtures/contacts';
 import { expect, test } from '../fixtures/pk-test';
 import { answer, problem } from '../fixtures/stubs';
 import { ContactProfilePage } from '../pages/contact-profile.page';
+import { LogEntryPage } from '../pages/log-entry.page';
 
 const chidi = () => recordedContactId('Chidi Okafor');
 const NOT_FOUND = [
@@ -43,5 +44,19 @@ test.describe('Only you see your Contacts', () => {
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(NOT_FOUND[0]);
     await expect(page.getByRole('link', { name: 'Go to People' })).toBeVisible();
+  });
+
+  // L2-122 AC2
+  test('logging for a contact not in my Contacts reads as not there, with no form', async ({
+    page,
+  }) => {
+    await answer(page, `GET /api/contacts/people/${chidi()}`, problem(404, 'contact_not_found'));
+    await page.goto(`/contacts/people/${chidi()}/log`);
+
+    const log = new LogEntryPage(page);
+    await expect(log.heading).toHaveText(NOT_FOUND[0]);
+    await expect(log.goToPeople).toHaveAttribute('href', '/contacts/people');
+    await expect(log.form).toHaveCount(0);
+    await expect(log.save).toHaveCount(0);
   });
 });

@@ -1,7 +1,8 @@
 // Acceptance Test
 // Traces to: L2-121
 // Description: My Popkins offers Contacts while it is switched on, and the app keeps it closed otherwise.
-import { contactsOfMara, contactsOff, contactsUnknown } from '../fixtures/contacts';
+import { contactsMorning, contactsOff, contactsUnknown } from '../fixtures/contacts';
+import { marasToday } from '../fixtures/today';
 import { expect, test } from '../fixtures/pk-test';
 import { ContactsTodayPage } from '../pages/contacts-today.page';
 import { MyPopkinsPage } from '../pages/my-popkins.page';
@@ -62,7 +63,7 @@ test.describe('the Contacts navigation', () => {
     await expect(nav.name).toHaveText('Contacts');
     await expect(nav.countLine).toHaveText('ContactsOnly you can see them');
     await expect(nav.back).toHaveAttribute('href', '/popkins');
-    await expect(nav.tabs).toHaveText([
+    await expect(nav.tabNames).toHaveText([
       'Today',
       'People',
       'Dates',
@@ -78,9 +79,10 @@ test.describe('the Contacts navigation', () => {
 
   // L2-121 AC3
   test('counts the people kept', async ({ page, pk }) => {
-    await contactsOfMara(page);
+    await page.clock.install({ time: contactsMorning });
+    await marasToday(page);
 
-    await pk.open('contactsTodayEmpty');
+    await pk.open('contactsToday');
 
     await expect(new ContactsTodayPage(page).nav.countLine).toHaveText(
       'Contacts13 people · only you',
@@ -94,7 +96,7 @@ test.describe('the Contacts navigation', () => {
     await pk.open('contactsTodayEmpty');
 
     const nav = new ContactsTodayPage(page).nav;
-    await expect(nav.tabs.locator('visible=true')).toHaveText([
+    await expect(nav.tabNames.locator('visible=true')).toHaveText([
       'Today',
       'People',
       'Dates',

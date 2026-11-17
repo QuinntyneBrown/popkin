@@ -421,6 +421,22 @@
       }
     },
     {
+      "id": "add-promise",
+      "kind": "dialog",
+      "title": "Add a promise",
+      "opens_from": "log-entry",
+      "requirements": [
+        "L2-133"
+      ],
+      "states": [
+        "default",
+        "invalid"
+      ],
+      "not_applicable": {
+        "busy": "A promise is kept in the log entry and saved with it, so the dialog sends nothing and never waits."
+      }
+    },
+    {
       "id": "contacts-dates",
       "kind": "page",
       "title": "Contacts · Dates",
@@ -1567,7 +1583,8 @@
       "states": [
         "default",
         "invalid",
-        "busy"
+        "busy",
+        "choose"
       ]
     },
     {
@@ -1613,7 +1630,8 @@
         "default",
         "invalid",
         "busy",
-        "no-results"
+        "no-results",
+        "choose"
       ]
     },
     {
@@ -1627,7 +1645,12 @@
       ],
       "states": [
         "default",
-        "busy"
+        "loading",
+        "empty",
+        "error",
+        "busy",
+        "nobody",
+        "failed"
       ],
       "not_applicable": {
         "invalid": "Each person is a tick box; with nobody ticked the button reads Import nobody and is off, so nothing can be invalid."
@@ -1680,7 +1703,10 @@
       "states": [
         "default",
         "invalid",
-        "busy"
+        "busy",
+        "chosen",
+        "file",
+        "note"
       ]
     },
     {
@@ -1714,7 +1740,7 @@
         "info",
         "success",
         "warning",
-        "danger"
+        "danger", "blocked"
       ]
     }
   ]

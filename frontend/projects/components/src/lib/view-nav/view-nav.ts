@@ -8,6 +8,8 @@ export interface ViewLink {
   /** The view in the address's query, such as `{ view: 'follow-ups' }`. */
   query?: Record<string, string>;
   current: boolean;
+  /** How many the view holds, after its words, quieter: "Follow-ups 1". None at 0. */
+  count?: number;
 }
 
 /**

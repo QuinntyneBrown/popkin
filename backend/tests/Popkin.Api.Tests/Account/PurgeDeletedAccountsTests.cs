@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Net.Http.Json;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 using Popkin.Api.Tests.Support;
@@ -53,6 +55,67 @@ public sealed class PurgeDeletedAccountsTests
         var waltPerson = db.People.Single(p => p.Name == "Walt Brennan");
         Assert.Equal("+14155550177", waltPerson.Phone);
         Assert.Contains(db.Sessions, s => s.PersonId == waltPerson.Id);
+    }
+
+    // Given Mara, who kept Chidi with his photo and then deleted her account, and Lena, who
+    // keeps Bea, when the erasure runs, then Chidi, his photo's file, his memories' files, his habit and his connection are gone and Bea stays
+    // (L2-049 AC4, L2-132; known gap 110).
+    [Fact]
+    public async Task A_deleted_accounts_contacts_are_erased()
+    {
+        using var api = new ApiFactory();
+        var mara = await api.SignedUpAsync("Mara Okafor", "(415) 555-0148");
+        var lena = await api.SignedUpAsync("Lena Fischer", "(415) 555-0123");
+        var chidi = await mara.AddContactAsync(ContactsExtensions.Named("Chidi Okafor"), TestPhotos.WithLocation(MagickFormat.Jpeg));
+        chidi.EnsureSuccessStatusCode();
+        var chidiId = (await chidi.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        (await mara.PostAsJsonAsync($"/api/contacts/people/{chidiId}/conversations", new
+        {
+            clientId = Guid.NewGuid(),
+            channel = "Phone",
+            loggedAt = "2026-09-15T08:40:00-07:00",
+            note = "First week at Arup",
+        })).EnsureSuccessStatusCode();
+        (await mara.PostAsJsonAsync($"/api/contacts/people/{chidiId}/memories/notes", new { clientId = Guid.NewGuid(), text = "Gift ideas" }))
+            .EnsureSuccessStatusCode();
+        var speech = new MultipartFormDataContent
+        {
+            { new ByteArrayContent("%PDF-1.7"u8.ToArray()), "file", "Wedding speech.pdf" },
+            { new StringContent(Guid.NewGuid().ToString()), "clientId" },
+        };
+        (await mara.PostAsync($"/api/contacts/people/{chidiId}/memories/files", speech)).EnsureSuccessStatusCode();
+        var habit = await mara.PostAsJsonAsync("/api/contacts/habits", new { clientId = Guid.NewGuid(), contactId = chidiId, what = "Lunch", rhythm = "Weekly" });
+        var habitId = (await habit.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("id").GetGuid();
+        (await mara.PostAsJsonAsync($"/api/contacts/habits/{habitId}/kept", new
+        {
+            clientId = Guid.NewGuid(),
+            keptOn = DateOnly.FromDateTime(api.Clock.GetUtcNow().UtcDateTime).ToString("yyyy-MM-dd"),
+        })).EnsureSuccessStatusCode();
+        var tomasId = (await mara.AddedContactAsync("Tomás Reyes")).GetProperty("id").GetGuid();
+        (await mara.PostAsJsonAsync("/api/contacts/connections", new { clientId = Guid.NewGuid(), contactId = chidiId, otherContactId = tomasId, kind = "Partner", words = "Married", promised = false }))
+            .EnsureSuccessStatusCode();
+        (await mara.PostAsJsonAsync("/api/contacts/groups", new { clientId = Guid.NewGuid(), name = "Mum’s house", kind = "Household", contactIds = new[] { chidiId, tomasId } }))
+            .EnsureSuccessStatusCode();
+        await lena.AddedContactAsync("Bea Lind");
+        (await mara.PostAsJsonAsync("/api/contacts/follow-ups", new { clientId = Guid.NewGuid(), text = "Call Sam" }))
+            .EnsureSuccessStatusCode();
+        (await mara.DeleteAsync("/api/account")).EnsureSuccessStatusCode();
+        api.Clock.Advance(TimeSpan.FromDays(1));
+
+        await api.SendAsync(new PurgeDeletedAccountsCommand());
+
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        Assert.Equal(["Bea Lind"], db.Contacts.Select(c => c.Name).ToList());
+        Assert.Empty(db.FollowUps);
+        Assert.Empty(db.TimelineEntries);
+        Assert.Empty(db.Memories);
+        Assert.Empty(db.Habits);
+        Assert.Empty(db.HabitKept);
+        Assert.Empty(db.Connections);
+        Assert.Empty(db.ContactGroups);
+        Assert.Empty(db.ContactGroupMembers);
+        Assert.Empty(api.Photos.Files);
     }
 
     // Given Mara, who deleted her account, and someone who then signed up with her number,

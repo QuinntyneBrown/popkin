@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+/* No face chosen: the design system's dashed add card, holding words rather than an action. */
+:host(.connection-panel--hint) {
+  padding: var(--space-4);
+  border: var(--border-width-hairline) dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.connection-panel__hint {
+  font: var(--text-h3);
+}
+
+.connection-panel__legend {
+  margin-top: var(--space-1);
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.connection-panel__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.connection-panel__who {
+  flex: 1;
+  min-width: 0;
+}
+
+.connection-panel__name {
+  font: var(--text-title);
+}
+
+.connection-panel__sub {
+  font: var(--text-body-sm);
+  color: var(--color-fg-muted);
+}
+
+.connection-panel__list {
+  margin-top: var(--space-4);
+}
+
+.connection-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.connection-panel__list:empty,
+.connection-panel__actions:empty {
+  display: none;
+}

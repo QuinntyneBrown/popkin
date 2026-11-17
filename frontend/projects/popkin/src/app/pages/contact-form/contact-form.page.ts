@@ -6,21 +6,29 @@ import {
   effect,
   inject,
   input,
+  OnInit,
   signal,
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Dialog } from '@angular/cdk/dialog';
 import { Router, RouterLink } from '@angular/router';
 import {
   CONTACT_CIRCLES,
   ContactCircle,
   ContactFormStore,
+  FollowUpsStore,
+  KeyDateDraft,
+  NO_COUNTS,
   NOT_FOUND_TEXT,
   PHOTO_ACCEPT,
+  REMINDER_LEADS,
   SAVE_FAILED_TEXT,
   Toaster,
   contactValuesOf,
+  draftDay,
+  draftKind,
   editHeading,
   failedText,
   saveFailedHeading,
@@ -29,6 +37,11 @@ import {
   Banner,
   Button,
   ChipOption,
+  DateEntry,
+  PersonPick,
+  ToggleChips,
+  ToggleChipOption,
+  Link,
   EmptyState,
   ChoiceChips,
   FormPair,
@@ -36,11 +49,23 @@ import {
   FormSection,
   FormSections,
   FormSummary,
+  MenuItem,
+  MenuList,
   PhotoPicker,
   Screen,
   TextField,
   TopBar,
 } from 'components';
+import { AddDateData, AddDateDialog } from '../../dialogs/add-date/add-date.dialog';
+import {
+  ConnectPersonData,
+  ConnectPersonDialog,
+  ConnectPersonResult,
+} from '../../dialogs/connect-person/connect-person.dialog';
+import {
+  DeleteContactData,
+  DeleteContactDialog,
+} from '../../dialogs/delete-contact/delete-contact.dialog';
 
 const NAME_MESSAGE = 'Add a name so you can find them later.';
 
@@ -53,6 +78,10 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
   imports: [
     Banner,
     Button,
+    DateEntry,
+    PersonPick,
+    ToggleChips,
+    Link,
     ChoiceChips,
     EmptyState,
     FormPair,
@@ -65,21 +94,30 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
     Screen,
     TextField,
     TopBar,
+    MenuItem,
+    MenuList,
   ],
   providers: [ContactFormStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './contact-form.page.html',
 })
-export class ContactFormPage {
+export class ContactFormPage implements OnInit {
   /** The contact being edited, from `/contacts/people/:contactId/edit`; none when adding. */
   readonly contactId = input<string>();
+  /** The name typed in People's search, from `?name=`, filled in on Add someone (L2-127 AC3). */
+  readonly name = input<string>();
   protected readonly store = inject(ContactFormStore);
   private readonly router = inject(Router);
   private readonly toaster = inject(Toaster);
+  private readonly dialog = inject(Dialog);
+  private readonly followUps = inject(FollowUpsStore);
   protected readonly notFound = NOT_FOUND_TEXT;
   protected readonly unread = failedText(null);
   protected readonly accept = PHOTO_ACCEPT;
   protected readonly nameMessage = NAME_MESSAGE;
+  protected readonly leads = REMINDER_LEADS.map((l) => ({ ...l }));
+  protected readonly draftKind = draftKind;
+  protected readonly draftDay = draftDay;
   protected readonly circles: ChipOption<ContactCircle>[] = CONTACT_CIRCLES.map((circle) => ({
     value: circle,
     label: circle,
@@ -118,6 +156,12 @@ export class ContactFormPage {
     return contactId ? `/contacts/people/${contactId}` : '/contacts/people';
   });
 
+  ngOnInit(): void {
+    const name = this.name()?.trim();
+    if (!this.contactId() && name) this.form.controls.name.setValue(name);
+    this.store.loadGroups();
+  }
+
   constructor() {
     inject(DestroyRef).onDestroy(() => this.releasePreview());
     effect(() => {
@@ -131,6 +175,10 @@ export class ContactFormPage {
       const { circle, ...values } = contactValuesOf(editing);
       this.form.setValue(values);
       this.circle.set(circle ?? '');
+    });
+    // Kept offline: People opens, as Cancel does, and the outbox says so (L2-123 AC4).
+    effect(() => {
+      if (this.store.kept()) void this.router.navigateByUrl('/contacts/people');
     });
     // The contact's profile opens once they are kept, saying so after an add (L2-129 AC5).
     effect(() => {
@@ -161,5 +209,80 @@ export class ContactFormPage {
   private releasePreview(): void {
     const preview = this.preview();
     if (preview) URL.revokeObjectURL(preview);
+  }
+
+  /** "Another date": Add a date for the contact on the form, saved with them (L2-129 AC2). */
+  protected addDate(): void {
+    this.dialog
+      .open<KeyDateDraft, AddDateData>(AddDateDialog, {
+        data: { draft: true },
+        ariaLabelledBy: 'dlg-title',
+        hasBackdrop: false,
+        ariaModal: true,
+      })
+      .closed.subscribe((draft) => {
+        if (draft) this.store.addDate(draft);
+      });
+  }
+
+  /** "Groups": the person's groups as toggles (L2-147 AC6). */
+  protected readonly groupOptions = computed<ToggleChipOption[]>(() =>
+    this.store.groups().map((g) => ({ value: g.id, label: g.name, emoji: g.emoji })),
+  );
+
+  /** "Connect to someone": Connect in draft mode, saved with the contact (L2-150 AC9). */
+  protected connectTo(): void {
+    const editing = this.store.editing();
+    const first = this.form.controls.name.value.trim().split(/\s+/)[0] || 'them';
+    this.dialog
+      .open<ConnectPersonResult, ConnectPersonData>(ConnectPersonDialog, {
+        data: {
+          contact: { id: editing?.id ?? '', firstName: editing?.firstName ?? first },
+          mode: 'draft',
+          exclude: this.store.connections().map((c) => c.otherContactId),
+        },
+        ariaLabelledBy: 'dlg-title',
+        hasBackdrop: false,
+        ariaModal: true,
+      })
+      .closed.subscribe((result) => {
+        if (!result?.draft) return;
+        this.store.addConnection({
+          id: null,
+          otherContactId: result.draft.otherContactId,
+          name: result.person.name,
+          initials: result.person.initials ?? '',
+          accent: result.person.accent,
+          photoUrl: result.person.photo ?? null,
+          kind: result.draft.kind,
+          words: result.draft.words,
+          promised: result.draft.promised,
+        });
+      });
+  }
+
+  /** Edit's "Delete {first name}" (L2-132): once they are gone, People opens. */
+  protected delete(): void {
+    const editing = this.store.editing();
+    if (!editing) return;
+    this.dialog
+      .open<boolean, DeleteContactData>(DeleteContactDialog, {
+        data: {
+          accent: 'coral',
+          contactId: editing.id,
+          firstName: editing.firstName,
+          counts: {
+            ...NO_COUNTS,
+            ...editing.kept,
+            followUps: this.followUps.countFor(editing.id),
+          },
+        },
+        ariaLabelledBy: 'dlg-title',
+        hasBackdrop: false,
+        ariaModal: true,
+      })
+      .closed.subscribe((deleted) => {
+        if (deleted) void this.router.navigateByUrl('/contacts/people');
+      });
   }
 }

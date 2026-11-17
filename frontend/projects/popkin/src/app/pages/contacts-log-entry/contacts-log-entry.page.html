@@ -1,0 +1,171 @@
+<div pk-screen body="flush">
+  @if (contact.state() === 'notFound') {
+    <div
+      pk-empty-state
+      icon="not-found"
+      [heading]="notFound.heading"
+      [level]="1"
+      [alert]="true"
+      [text]="notFound.text"
+    >
+      <a pk-button variant="primary" size="md" routerLink="/contacts/people">Go to People</a>
+    </div>
+  } @else {
+    <header
+      pk-top-bar
+      slot="header"
+      backLabel="Cancel"
+      backIcon="close"
+      [back]="profileLink()"
+      [heading]="heading()"
+      [avatar]="avatar()"
+      [line]="true"
+      [sticky]="true"
+    >
+      <button
+        pk-button
+        slot="end"
+        variant="primary"
+        size="sm"
+        type="submit"
+        form="log-form"
+        [busy]="saving()"
+      >
+        {{ saving() ? 'Saving…' : 'Save' }}
+      </button>
+    </header>
+    <form pk-log-form id="log-form" (submit)="save($event)">
+      @if (problems().length) {
+        <div pk-form-summary [problems]="problems()"></div>
+      }
+      @if (store.state() === 'photoFailed') {
+        <div pk-alert heading="We couldn’t add the photo.">
+          {{ firstName() }}’s milestone is saved. Check your connection and try Save again.
+        </div>
+      }
+      @if (store.state() === 'failed') {
+        <div pk-alert heading="We couldn’t save this.">
+          Your note is still here. Check your connection and try Save again.
+        </div>
+      }
+      <div
+        pk-segmented-control
+        label="What to log"
+        [options]="what"
+        [value]="store.kind()"
+        (valueChange)="choose($event)"
+        [disabled]="saving()"
+      ></div>
+      @if (store.kind() === 'conversation') {
+        <div class="cluster">
+          <div
+            pk-choice-chips
+            fieldId="channel"
+            label="How you talked"
+            [hideLabel]="true"
+            [outline]="true"
+            [options]="channels"
+            [value]="store.channel()"
+            (valueChange)="setChannel($event)"
+            [disabled]="saving()"
+          ></div>
+          <span pk-log-when>{{ when() }}</span>
+        </div>
+        <div
+          pk-textarea
+          fieldId="talk"
+          label="What did you talk about?"
+          [rows]="6"
+          [maxlength]="2000"
+          [formControl]="form.controls.note"
+          [error]="error('talk')"
+          [readonly]="saving()"
+        ></div>
+        <section
+          pk-log-section
+          heading="Anything you said you’d do?"
+          hint="It goes on your follow-ups, so it doesn’t slip."
+        >
+          @for (promise of store.promises(); track $index) {
+            <div
+              pk-promise
+              data-accent="amber"
+              [text]="promise.text"
+              [when]="promiseWhen(promise.dueOn)"
+              (removed)="store.removePromise($index)"
+            ></div>
+          }
+          <div>
+            <button pk-link type="button" variant="accent" (click)="addPromise()">
+              <svg pk-icon name="plus" size="md"></svg>Add a promise or follow-up
+            </button>
+          </div>
+        </section>
+        <section pk-log-section heading="Worth remembering" [divided]="true">
+          <div class="cluster">
+            <button pk-chip type="button" [outline]="true" (click)="addDate()">
+              <svg pk-icon name="plus" size="md"></svg>&nbsp;Add a date
+            </button>
+          </div>
+        </section>
+      } @else {
+        <div
+          pk-kind-grid
+          fieldId="ms"
+          label="What kind"
+          [options]="kinds"
+          [value]="store.milestoneKind()"
+          (valueChange)="setMilestoneKind($event)"
+        ></div>
+        <div
+          pk-text-field
+          fieldId="what"
+          label="What happened?"
+          [maxlength]="200"
+          [formControl]="form.controls.title"
+          [error]="error('what')"
+          [readonly]="saving()"
+        ></div>
+        <div pk-form-pair>
+          <div
+            pk-text-field
+            fieldId="when"
+            label="When"
+            type="date"
+            [formControl]="form.controls.happenedOn"
+            [error]="error('when')"
+            [readonly]="saving()"
+          ></div>
+          <div
+            pk-memory-chooser
+            fieldId="photo"
+            heading="Photo"
+            [label]="store.photo()?.name ?? 'Add a photo'"
+            [accept]="photoTypes"
+            [error]="error('photo')"
+            [disabled]="saving()"
+            (picked)="store.pickPhoto($event)"
+          ></div>
+        </div>
+        <div
+          pk-textarea
+          fieldId="note"
+          label="Note"
+          [rows]="3"
+          [maxlength]="2000"
+          [formControl]="form.controls.milestoneNote"
+          [readonly]="saving()"
+        ></div>
+        <div
+          pk-setting-row
+          icon="calendar"
+          heading="Remember this every year"
+          [text]="store.yearlyHint()"
+          [checked]="store.everyYear()"
+          (checkedChange)="store.everyYear.set($event)"
+          [disabled]="saving()"
+        ></div>
+      }
+    </form>
+  }
+</div>

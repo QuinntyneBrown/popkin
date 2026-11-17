@@ -1,0 +1,18 @@
+<div class="tick-group__head">
+  <span pk-popkin-tile size="sm" [emoji]="emoji()" [attr.data-accent]="accent()"></span>
+  <h3 class="tick-group__name" [id]="headingId()">{{ name() }}</h3>
+  <span class="tick-group__count">{{ count() }}</span>
+</div>
+<ul
+  pk-tick-list
+  [label]="name()"
+  [items]="visible()"
+  [disabled]="disabled()"
+  [value]="value()"
+  (valueChange)="value.set($event)"
+></ul>
+@if (hidden() > 0) {
+  <button pk-link type="button" variant="text" [disabled]="disabled()" (click)="expanded.set(true)">
+    Show {{ hidden() }} more
+  </button>
+}

@@ -21,24 +21,32 @@ Popkin uses no custom tooltips.
 | 9 | Job row | Background job table row that expands to show its runs and details. | 1 day || Built, parity pending |
 | 10 | Service health | Summary and per-service state on Health: all good, degraded or down. | 1 day | Built, parity pending |
 | 11 | Trend chart and uptime | Accessible SVG trend for one series and an uptime bar, on Dashboard, Health and Metrics. | 1.5 days || Built, parity pending |
-| 12 | Contact row | A person in the People list, linking to their profile. | 0.5 days | Built, parity pending |
+| 12 | Contact row | A person in the People list, linking to their profile. | 0.5 days | Built, with parity (row, quiet row, Closest) and a loading state |
 | 13 | Contact header and facts | Head of a person's profile with their details as a description list. | 1 day || Built; header parity done (phone, email only) |
-| 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, parity pending |
-| 15 | Contact timeline | A person's history on their profile, newest first, as an ordered list. | 1 day || Built, parity pending |
+| 14 | Info card and add card | Sand card of facts, such as a habit, and a card that adds one. | 0.5 days | Built, with parity (habit) |
+| 15 | Contact timeline | A person's history on their profile, newest first, as an ordered list. | 1 day | Built, with parity (conversation, milestone, memory) |
 | 16 | Form sections | Splits the long Add someone form into sections with kind toggle buttons. | 1 day | Built, parity pending |
-| 17 | Task | A follow-up to do, with the field that adds one. | 1 day || Built, parity pending |
-| 18 | Keep strip and habit row | A habit's rhythm with someone, showing which times were kept. | 1 day | Built, parity pending |
-| 19 | Spotlight and date tile | The one most important thing on a screen, tinted, with a date tile. | 0.5 days || Built, parity pending |
-| 20 | Group browser | Navigation list of households, small groups and teams, with each group's detail. | 1 day | Built, parity pending |
-| 21 | Connection map | Draws who knows whom: your people as faces linked by relationship. | 2 days || Built, parity pending |
-| 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell. | 0.5 days | Built, parity pending |
-| 23 | Filter chips | Pressed-button filters with counts, such as the circles on People; `pk-choice-chips` is a radio group. | To estimate | |
-| 24 | List row | The design system's `list-row`, not built yet, for rows on Today and in groups. | To estimate | |
-| 25 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today. | To estimate | |
-| 26 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins; it needs a design-system page. | To estimate | |
+| 17 | Task | A follow-up to do, with the field that adds one; `pk-task-list` lists a bucket of them. | 1 day | Built, with parity (late, plain, done; the list; the add field) |
+| 18 | Keep strip and habit row | A habit's rhythm with someone, showing which times were kept; `pk-habit-list` lists them. | 1 day | Built, with parity (first and last row) |
+| 19 | Spotlight and date tile | The one most important thing on a screen, tinted, with a date tile. | 0.5 days || Built; spotlight parity done (row), date tile pending |
+| 20 | Group browser | Navigation list of households, small groups and teams, with each group's detail. | 1 day | Built, with parity (list) |
+| 21 | Connection map | Draws who knows whom: your people as faces linked by relationship; `pk-connection-panel` beside it. | 2 days || Built, with parity (none, focus, family; the panel's hint and chosen) |
+| 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell; `narrow` is one column at the narrow container (Follow-ups, Habits). | 0.5 days | Built; list head with parity |
+| 23 | Filter chips | Pressed-button filters with counts, such as the circles on People; `pk-choice-chips` is a radio group. | 0.25 days | Built, with parity |
+| 24 | List row | The design system's `list-row` on Today: `pk-today-dates` (Coming up) and `pk-recent-list` (Recently). | 0.5 days | Built, with parity (coming up; recently at 1280) |
+| 25 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today: `pk-drift-chips`. | 0.25 days | Built, with parity |
+| 26 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins. | 0.5 days | Built, with parity: ungrouped for Add people (ticked), and grouped with "Show {n} more" as `pk-tick-group` for Import (ticked, nobody) |
 | 27 | Back link | The page head's `page-head__back` on its own, beside a profile's actions ("People"). | 0.25 days | Built, with parity |
+| 28 | Date list | Dates' rows: the date tile, the faces, the title, its line and "in {n} days". | 0.5 days | Built, with parity |
+| 29 | Key dates | A profile's dates with their reminders. | 0.25 days | Built, with parity |
+| 30 | Reminder defaults | Dates' aside: the default lead per kind, and phone and Monday email. | 0.5 days | Built, with parity |
+| 31 | Log form, section and when | Log's one column, its parts named like fields, and when a conversation is logged. | 0.5 days | Built, with parity (form, promises, divided) |
+| 32 | Memory list, chooser and upload | Memories' files and notes, Add's "Choose a photo", and the chosen photo or file with its progress. | 0.5 days | Built, with parity (list, chooser ×4, chosen) |
+| 33 | People around and person choice | A contact's people as short linked rows, keyed on Connections; Connect's "Who" as a radio list. | 0.5 days | Built, with parity (panel; chosen, invalid) |
+| 34 | Group members, Coming up, group chips and toggle chips | A group's members and its next dates; a profile's groups as links; the form's Groups as toggles. | 0.5 days | Built; members and Coming up with parity (thursday, sheffield; two, three) |
+| 35 | It's been a while | Today's drifting people set apart under Recently by a hairline: the line and its who chips (`pk-drift`). | 0.25 days | Built, with parity |
 
-Total: 26 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
+Total: 31 components. Rows 1 to 22 come to about 20.5 days (admin 10.5, Contacts 10); rows 23 to
 26 came from the Contacts designs and are not estimated yet.
 
 The even-numbered components were built on 15 November 2026, in the library only, before their

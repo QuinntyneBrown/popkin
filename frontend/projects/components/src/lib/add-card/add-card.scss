@@ -16,6 +16,10 @@
   cursor: pointer;
 }
 
+:host(.add-card--center) {
+  justify-content: center;
+}
+
 :host(:hover) {
   background: var(--color-bg-subtle);
   color: var(--color-fg-default);

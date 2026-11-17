@@ -1,0 +1,97 @@
+<div
+  pk-dialog
+  heading="Import from your Popkins"
+  description="Everyone you share a Popkin with, once each. They aren’t told, and only you will see them."
+  accent="coral"
+>
+  @switch (store.state()) {
+    @case ('loading') {
+      <p class="visually-hidden" role="status">Loading your Popkins’ people…</p>
+      <div class="stack" aria-hidden="true">
+        @for (row of skeletonRows; track row) {
+          <div class="cluster">
+            <span pk-skeleton shape="circle"></span>
+            <span pk-skeleton shape="text" [width]="40"></span>
+          </div>
+        }
+      </div>
+    }
+    @case ('failed') {
+      <div
+        pk-alert
+        heading="We couldn’t load your Popkins’ people."
+        action="Try again"
+        (acted)="store.load()"
+      >
+        Check your connection and try again.
+      </div>
+    }
+    @default {
+      @if (store.nobody()) {
+        <div
+          pk-empty-state
+          icon="users"
+          [level]="3"
+          [compact]="true"
+          heading="No one to import yet"
+          text="When you share a Popkin with someone, they show here."
+        ></div>
+      } @else {
+        <div class="stack">
+          @if (store.state() === 'importFailed') {
+            <div pk-alert heading="We couldn’t import them.">
+              Everyone you ticked is still ticked. Check your connection and try again.
+            </div>
+          }
+          @if (store.count()) {
+            <button
+              pk-link
+              type="button"
+              variant="accent"
+              [disabled]="busy()"
+              (click)="store.tickAll(false)"
+            >
+              Tick nobody
+            </button>
+          } @else {
+            <button pk-link type="button" variant="accent" (click)="store.tickAll(true)">
+              Tick everyone
+            </button>
+          }
+          @for (section of sections(); track section.popkin.popkinId) {
+            <section
+              pk-tick-group
+              [headingId]="'imp-' + section.popkin.popkinId"
+              [name]="section.popkin.name"
+              [emoji]="section.popkin.emoji"
+              [accent]="section.popkin.colour.toLowerCase()"
+              [count]="section.count"
+              [items]="section.items"
+              [shown]="shown"
+              [disabled]="busy()"
+              [value]="ticksOf(section)"
+              (valueChange)="store.setTicks(section.ids, $event)"
+            ></section>
+          }
+        </div>
+      }
+    }
+  }
+  @if (!store.nobody() && store.state() !== 'failed') {
+    <button
+      pk-button
+      slot="footer"
+      type="button"
+      variant="primary"
+      [block]="true"
+      [busy]="busy()"
+      [disabled]="busy() || !store.count()"
+      (click)="import()"
+    >
+      {{ label() }}
+    </button>
+  }
+  <button pk-button slot="footer" type="button" variant="quiet" [block]="true" (click)="close()">
+    {{ store.nobody() ? 'Close' : 'Not now' }}
+  </button>
+</div>

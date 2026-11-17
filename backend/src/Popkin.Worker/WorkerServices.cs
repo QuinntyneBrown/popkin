@@ -76,3 +76,11 @@ public sealed class NoCurrentPerson : ICurrentPerson
 
     public Guid? FindPersonId() => null;
 }
+
+/// <summary>A Worker job is no admin: the admin handlers are registered with the rest, never sent.</summary>
+public sealed class NoCurrentAdmin : ICurrentAdmin
+{
+    public Guid AdminId => throw new InvalidOperationException("A Worker job has no signed-in admin.");
+
+    public Guid SessionId => throw new InvalidOperationException("A Worker job has no admin session.");
+}

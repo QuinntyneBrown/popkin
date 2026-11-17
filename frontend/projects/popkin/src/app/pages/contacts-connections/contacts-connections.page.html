@@ -1,0 +1,122 @@
+<div pk-app-screen accent="coral" layout="tab" body="fill">
+  <div pk-contacts-page>
+    <div
+      pk-page-head
+      slot="head"
+      heading="Connections"
+      sub="Who’s family, who’s friends, and how everyone knows each other"
+      back="Groups"
+      backLink="/contacts/groups"
+      [backBelowM]="true"
+    ></div>
+    @if (store.empty()) {
+      <div
+        pk-empty-state
+        icon="network"
+        heading="Your map starts with you"
+        text="Connect two people — a couple, a parent and child, old friends — and they appear here, joined by a line."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="connect()">
+          <svg pk-icon name="plus" size="md"></svg>Connect two people
+        </button>
+      </div>
+    } @else if (store.state() === 'failed') {
+      <div
+        pk-empty-state
+        icon="alert"
+        [alert]="true"
+        heading="We couldn’t load your connections"
+        text="Your map is safe. Check your connection and try again."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+          Try again
+        </button>
+      </div>
+    } @else {
+      <div
+        pk-filter-chips
+        label="Show"
+        [options]="filters"
+        [value]="store.filter()"
+        (valueChange)="store.filter.set($any($event))"
+      ></div>
+      @if (store.state() === 'loading') {
+        <p class="visually-hidden" role="status">Loading your connections…</p>
+        <div pk-contacts-grid layout="aside" [spaced]="true" aria-hidden="true">
+          <span pk-skeleton shape="map"></span>
+          <div class="stack">
+            <span pk-skeleton shape="title" [width]="60"></span>
+            <div class="cluster">
+              <span pk-skeleton shape="circle"></span>
+              <div class="stack">
+                <span pk-skeleton shape="text" [width]="40"></span>
+                <span pk-skeleton shape="text" [width]="70"></span>
+              </div>
+            </div>
+            <div class="cluster">
+              <span pk-skeleton shape="circle"></span>
+              <div class="stack">
+                <span pk-skeleton shape="text" [width]="40"></span>
+                <span pk-skeleton shape="text" [width]="70"></span>
+              </div>
+            </div>
+            <div class="cluster">
+              <span pk-skeleton shape="circle"></span>
+              <div class="stack">
+                <span pk-skeleton shape="text" [width]="40"></span>
+                <span pk-skeleton shape="text" [width]="70"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div pk-contacts-grid layout="aside" [spaced]="true">
+          <div
+            pk-connection-map
+            [people]="store.people()"
+            [lines]="store.view().lines"
+            [dim]="store.view().dim"
+            [youPhoto]="store.youPhoto()"
+            [youAccent]="store.youAccent"
+            [focus]="store.focus()"
+            (focusChange)="store.choose($event)"
+          ></div>
+          <aside
+            pk-connection-panel
+            [person]="chosen()"
+            [hint]="hint"
+            [legend]="legend"
+            (cleared)="store.clear()"
+          >
+            @if (chosen()) {
+              <ul pk-people-around slot="list" [people]="rows()"></ul>
+            }
+            @if (store.chosen(); as person) {
+              <div slot="actions" class="cluster">
+                <a
+                  pk-button
+                  variant="secondary"
+                  size="sm"
+                  [routerLink]="['/contacts/people', person.contactId]"
+                  >Open profile</a
+                >
+                <button pk-button type="button" variant="quiet" size="sm" (click)="connect()">
+                  Connect
+                </button>
+              </div>
+            }
+          </aside>
+        </div>
+      }
+    }
+  </div>
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    place="contacts"
+    contactsCurrent="connections"
+    [members]="frame.countLine()"
+    [due]="frame.due()"
+    [dueLabel]="frame.dueLabel()"
+  ></nav>
+</div>

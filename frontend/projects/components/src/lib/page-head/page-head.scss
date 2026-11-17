@@ -4,7 +4,8 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: var(--space-4) var(--space-6);
-  margin-bottom: var(--space-6);
+  /* A page that sets its own rhythm (Contacts) narrows the space below the head. */
+  margin-bottom: var(--pk-page-head-gap, var(--space-6));
 }
 
 .page-head__id {
@@ -45,4 +46,10 @@
   .page-head__title {
     font: var(--text-h1);
   }
+}
+
+/* The back link takes a line of its own above the title. */
+.page-head__back {
+  margin-right: 100%;
+  margin-bottom: var(--space-3);
 }

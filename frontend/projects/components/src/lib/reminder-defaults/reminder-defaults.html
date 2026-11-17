@@ -1,0 +1,46 @@
+<h2 class="reminder-defaults__heading" [id]="headingId">Reminders</h2>
+<p class="reminder-defaults__intro">
+  Each date can have its own lead time. These are the defaults for new ones.
+</p>
+@for (kind of defaults(); track kind.key) {
+  <div class="reminder-defaults__kind">
+    <span class="reminder-defaults__title" aria-hidden="true">{{ kind.heading }}</span>
+    <div
+      pk-select-field
+      [fieldId]="'default-' + kind.key"
+      [label]="kind.heading + ': remind me'"
+      [hideLabel]="true"
+      [options]="options()"
+      [value]="kind.value"
+      (valueChange)="changed.emit({ key: kind.key, value: $event })"
+    ></div>
+  </div>
+}
+<div class="reminder-defaults__ways">
+  <div class="reminder-defaults__way">
+    <svg pk-icon name="phone" size="md"></svg>
+    <span class="reminder-defaults__words">
+      <span class="reminder-defaults__title">Phone notifications</span>
+      <span class="reminder-defaults__sub" id="way-phone-sub">At 9 am on reminder days</span>
+    </span>
+    <button
+      pk-switch
+      aria-label="Phone notifications"
+      aria-describedby="way-phone-sub"
+      [(checked)]="phone"
+    ></button>
+  </div>
+  <div class="reminder-defaults__way">
+    <svg pk-icon name="mail" size="md"></svg>
+    <span class="reminder-defaults__words">
+      <span class="reminder-defaults__title">Monday email</span>
+      <span class="reminder-defaults__sub" id="way-email-sub">The week ahead, every Monday</span>
+    </span>
+    <button
+      pk-switch
+      aria-label="Monday email"
+      aria-describedby="way-email-sub"
+      [(checked)]="email"
+    ></button>
+  </div>
+</div>

@@ -1,3 +1,4 @@
+import { CONTACTS_API } from '../contacts/contacts-api';
 import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { PopkinFeature } from '../../models/home';
@@ -18,6 +19,7 @@ export class NewPopkinCreator {
   private readonly popkins = inject(POPKINS_API);
   private readonly router = inject(Router);
   private readonly toaster = inject(Toaster);
+  private readonly contacts = inject(CONTACTS_API);
 
   readonly status = signal<'idle' | 'popping' | 'failed'>('idle');
 
@@ -45,6 +47,7 @@ export class NewPopkinCreator {
     this.popkins.createPopkin(request).subscribe({
       next: (created) => {
         if (draft.crewOf) this.inviteCrew(created.id, draft.crewOf);
+        if (draft.groupOf) this.inviteGroup(created.id, draft.groupOf);
         void this.router.navigateByUrl(`/p/${created.id}/created`).then(() => {
           this.store.reset();
           this.status.set('idle');
@@ -57,6 +60,24 @@ export class NewPopkinCreator {
   /** A step that opens starts without the last attempt's failure. */
   clear(): void {
     if (this.status() === 'failed') this.status.set('idle');
+  }
+
+  /** "Start a Popkin with them" (L2-148 AC3): the new Popkin is there either way. */
+  private inviteGroup(popkinId: string, groupOf: string): void {
+    this.contacts.invitePopkinGroup(popkinId, groupOf).subscribe({
+      next: () =>
+        this.toaster.show(
+          'success',
+          'Invites are on their way',
+          'Everyone in the group with a phone or email gets one.',
+        ),
+      error: () =>
+        this.toaster.show(
+          'danger',
+          'We couldn’t invite the group',
+          'Share the code or the link with them instead.',
+        ),
+    });
   }
 
   /** "Pop up another with this crew" (L2-046 AC5): the new Popkin is there either way. */

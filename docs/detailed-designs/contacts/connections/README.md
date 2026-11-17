@@ -59,29 +59,31 @@ Popkin web app, `docs/mocks/pages/contacts-connections/`:
   them to Chidi." and "Add “Femi”" (L2-150 AC3).
 - `busy.html` — "Connecting…", disabled.
 
-### Conflicts and gaps
+### Rulings (known gap 109, settled)
 
-- **Direction and words (gap 109).** Whether a connection reads both ways and in whose words is
-  open. The design stores one row per pair, with the owner's words, and shows the same words from
-  either side ("Married" on Chidi's and on Tomás's). A second connection of the same pair is
-  refused with `409` `already_connected` until gap 109 says otherwise (`<TO SUPPLY>`).
-- **The line to "You" (gap 109).** The mock draws a line from "You" to most faces, and the panel
-  lists "You · Brother". The design draws it from the contact's `ContactCircle` and labels it with
-  how the person knows them; whether that is right is `<TO SUPPLY>`.
-- **Promised introductions (gap 109).** No form makes a dotted line. `pk-connection-map` takes a
-  `promised` flag per line, and the API sends none until gap 109 settles where one comes from.
-- **Who is on the map (gap 109).** The design draws every contact in at least one connection;
-  which contacts it leaves out is `<TO SUPPLY>`. How the faces are placed is `<TO SUPPLY>`: the
-  mock places them by hand.
-- **Connect with no contact chosen (gap 109).** "Connect two people" on the empty map opens the
-  dialog with no first contact; what it asks first is `<TO SUPPLY>`.
-- **The kind's default.** The mock draws "Family" chosen; whether a kind starts chosen is
-  `<TO SUPPLY>`. "In your words" is optional, as no invalid state asks for it; its limit is
-  `<TO SUPPLY>`.
-- **"Add “{name}”"** opens Add someone; whether it fills the name and returns to the dialog is
-  `<TO SUPPLY>`. Who the "Who" list leaves out besides the contact itself is `<TO SUPPLY>`.
-- **Deleting or changing a connection** is not drawn. Deleting a contact removes every connection
-  it is in, at either end, through `ContactRemoval` ([Delete a contact](../delete-contact/README.md)).
+- **Direction and words.** One row per pair, with the owner's words, shown the same from either
+  side ("Married" on Chidi's and on Tomás's). The pair is stored smaller id first; a second
+  connection of the same pair, in either order, is `409` `already_connected`, and "Who" leaves out
+  anyone already connected, so the dialog never offers it (L2-150 AC5).
+- **The line to "You".** Drawn from the contact's `ContactCircle`: Family a family line, Work a
+  work line, Friends, Neighbours and Clubs a friend line; no circle, no line. The panel labels it
+  with their "Known as", else the circle (L2-149 AC6, AC7).
+- **Promised introductions.** "Not introduced yet" ("A dotted line, until you've introduced
+  them.") in Connect stores `Promised`; the line is dotted while it is set (L2-150 AC6).
+- **Who is on the map and where.** Every contact in at least one connection, spaced evenly round
+  an oval (radius 0.4 of the map's width and height) from the top, clockwise, in the order they
+  were first connected; the mocks are drawn from this rule (L2-149 AC6).
+- **Connect with no contact chosen.** "Connect two people" opens Connect titled "Connect two
+  people" with "Connect" as a select ("Choose someone") above "Who"; nobody chosen reads
+  "Connect: choose the first person." (L2-150 AC7, mock `choose.html`).
+- **The kind's default.** "Family", as drawn. "In your words" is optional, at most 60 characters
+  (`words_too_long`, "Keep it to 60 characters.").
+- **"Add “{name}”"** opens Add someone with the name filled (`?name=`); it does not return to the
+  dialog. "Who" leaves out the contact itself and everyone already connected to them.
+- **Changing and removing.** A connection is removed in Add someone or Edit, under "How they
+  connect" ("Remove the connection to {first name}"), and saved with the contact; to change one,
+  remove it and connect again (L2-150 AC9). Deleting a contact removes every connection it is in
+  through `ContactRemoval`.
 
 ### API
 
@@ -90,8 +92,12 @@ MediatR request. Nothing tells either contact (L2-122 AC3).
 
 - `GET /api/contacts/connections` — `200` `ConnectionMapDto`: `people` (`MapPersonDto[]`:
   `contactId`, `firstName`, `fullName`, `photoUrl`, `howKnown`, `circle`) and `connections`
-  (`ConnectionDto[]`: `id`, `contactId`, `otherContactId`, `kind`, `words`).
-- `POST /api/contacts/connections` — body `{ clientId, contactId, otherContactId, kind, words? }`.
+  (`ConnectionDto[]`: `id`, `contactId`, `otherContactId`, `kind`, `words`, `promised`), people in
+  the order they were first connected. `MapPersonDto` also carries `knownAs` and `accent`.
+- `DELETE /api/contacts/connections/{id}` — `204`; another person's is `404`
+  `connection_not_found`.
+- `POST /api/contacts/connections` — body `{ clientId, contactId, otherContactId, kind, words?,
+  promised }`.
   `201` `ConnectionDto`. A second request with the same `clientId` returns the first connection.
   Refusals: `400` `who_required` (the summary "Who: pick who {first name} is connected to."),
   `connection_to_self`, `kind_not_allowed`, `words_too_long`; `404` `contact_not_found` for either
@@ -101,6 +107,7 @@ MediatR request. Nothing tells either contact (L2-122 AC3).
 
 - **`ConnectionKind`** (Domain) — `Family`, `Partner`, `Friend`, `Work`.
 - **`Connection`** (Domain) — `Id`, `OwnerId`, `ContactId`, `OtherContactId`, `Kind`, `Words?`,
+  `Promised`,
   `ClientId`, `CreatedAt`. `Connect(owner, contact, other, kind, words, clientId, now)` refuses a
   contact connected to itself. The pair is stored with the smaller id first, so one unique index
   on (`OwnerId`, `ContactId`, `OtherContactId`) holds either order.
@@ -109,6 +116,10 @@ MediatR request. Nothing tells either contact (L2-122 AC3).
   connections and the contacts in them, no tracking.
 - **`ConnectCommandHandler`** — checks both contacts with `IContactGuard.RequireOwnedAsync`,
   refuses an existing pair, saves once.
+- **`ContactProfileDto.Around`** — the contact's connections as `AroundDto` (`contactId`, `name`,
+  `initials`, `accent`, `photoUrl`, `kind`, `words`), drawn as "People around {first name}".
+- **`SaveContactRequest.Connect`/`Disconnect`** — what "How they connect" adds and removes, saved
+  with the contact in the same `SaveChanges`.
 - No hub event. No log, metric or span carries a contact's name or the words.
 
 ### Frontend (Popkin web app)
@@ -116,27 +127,28 @@ MediatR request. Nothing tells either contact (L2-122 AC3).
 - **`ContactsConnectionsPage`** (`pages/contacts-connections/contacts-connections.page.ts`, route
   `/contacts/connections`, `shell: 'app'`, `page: 'contacts-connections'`) — composes
   `pk-contacts-page`, `pk-page-head` with the "Groups" back link below medium screens,
-  `pk-choice-chips` as toggle chips for the filter, `pk-connection-map`, the panel's `pk-contact-list`
-  list with `pk-button` "Open profile", "Connect" and `pk-icon-button` "Clear the focus",
-  `pk-empty-state` and `pk-skeleton`.
+  `pk-filter-chips` "Show" (each kind keyed with `pk-link-key`), `pk-connection-map`, and
+  `pk-connection-panel` holding `pk-people-around` and "Open profile" and "Connect";
+  `pk-empty-state` and `pk-skeleton`. `?contact={id}` opens with that face chosen (L2-149 AC8).
 - **`ConnectPersonDialog`** (`dialogs/connect-person/connect-person.dialog.ts`) — `pk-dialog`
-  titled "Connect {first name} to…", `pk-search-field` "Search your people" (matching is gap
-  101), `pk-pick-list` "Who" of contacts with their photos, the no-results note with "Add
-  “{name}”", `pk-choice-chips` "How they know each other", `pk-text-field` "In your words",
-  `pk-form-summary` and "Connect" / "Connecting…". On success it closes and the map shows the
-  line (L2-150 AC4). Its `mode` input is `save` (the default, which calls `ConnectionsStore.connect`)
-  or `draft`, used by Add someone and Edit: it validates the same way, sends nothing, and closes
-  with `{ otherContactId, kind, words }` for the contact form to save with the contact.
-- **`ConnectionsStore`** (`frontend/projects/api/src/lib/api/contacts/connections-store.ts`) —
-  `loading | ready | failed`, `filter`, `focus` (a contact id or null), `lines`, `panel`;
-  `choose(id)` focuses or, for the chosen face, clears; `clear()`; `connect(request)` through
-  `ContactsOutbox`.
-- **`connection-filter.ts`** (pure) — `linesFor(connections, filter, focus)`: each line's kind,
-  shown or hidden by the filter table below, and `on` or `dim` by the focus.
-- **`connections-text.ts`** — "Tap anyone to see their people", the legend, "Connect {first name}
-  to…", "Who: pick who {first name} is connected to.", "No one called “{name}” in your contacts"
-  and the kind labels.
-- **`CONTACTS_API`** — `connectionMap()`, `connect(request)`.
+  titled "Connect {first name} to…" or "Connect two people" (with "Connect" as
+  `pk-select-field` first), `pk-search-field` "Search your people" (`matchesName`, as People),
+  `pk-person-choice` "Who" A to Z, the no-results `pk-empty-state` with "Add “{name}”" to
+  `/contacts/people/new?name=`, `pk-choice-chips` "How they know each other", `pk-text-field`
+  "In your words", `pk-setting-row` "Not introduced yet", `pk-form-summary` and "Connect" /
+  "Connecting…". `mode: 'draft'` (Add someone, Edit) sends nothing and closes with the draft.
+- **`ConnectionsStore`** (`api/contacts/connections-store.ts`) — `loading | ready | failed`,
+  `filter`, `focus`, `people`, `view` (`connectionMapOf`), `chosen`, `rows`; `choose(id)` focuses
+  or, for the chosen face, clears; `clear()`; `connected()` reads the map again.
+- **`connections-view.ts`** (pure) — `placeFaces` (the oval), `mapLinks` (the lines to "You" from
+  the circle, then the connections, a promised one pending) and `panelRows`.
+- **`connections-text.ts`** — the hint and legend, `lineToYou`, Connect's title, summaries,
+  errors and no-results words.
+- **`CONTACTS_API`** — `connectionMap()`, `connect(request)`, `disconnect(id)`.
+- **Profile** — "People around {first name}" is `pk-people-around` of `ContactProfileView.around`.
+- **Add someone and Edit** — "How they connect" lists the drafts and the kept connections as
+  `pk-person-pick` with "Remove the connection to {first name}", and "Connect to someone" opens
+  Connect in draft mode; `ContactFormStore` sends `connect` and `disconnect` with the contact.
 - **`pk-connection-map`** (components, backlog row 21) — "You" and the faces as buttons with
   `aria-pressed` and the full name, lines in an `aria-hidden` SVG: family coral, partner coral,
   friend green, work dashed grey, promised dotted. Colour is never alone: the dash and dot carry
@@ -151,20 +163,22 @@ MediatR request. Nothing tells either contact (L2-122 AC3).
 
 ### Tests
 
-- API acceptance tests (InMemory, `Popkin.Api.Tests/Contacts/ConnectionsTests`): a connection made
-  shows on the map from both contacts; a resend with the same `clientId` saves once; nobody chosen
-  is `400` `who_required`; a contact connected to itself is `400` `connection_to_self`; another
-  person's contact is `404` `contact_not_found`; the same pair in either order is `409`
-  `already_connected`.
-- Direct tests of `Connection.Connect` (pair order, self) and `ConnectionRules.Words`.
-- Unit tests (api library): `linesFor` one case per row of the filter table, with and without a
-  focus; `ConnectionsStore.choose` twice clears the focus; `connections-text`.
-- Playwright (`e2e/tests/contacts/connections.spec.ts`) through `ContactsConnectionsPage` and
-  `ConnectPersonDialog` with recorded responses: no focus, focusing Chidi and clearing it by
-  choosing again and by "Clear the focus", the Family filter, the empty and error states, and the
-  dialog's invalid, no-results and busy states and a connection made. `routes.ts` gains every
-  state of both screens.
-- Parity: `pk-connection-map` with no focus, a focus, a filter and a promised line.
+- API acceptance tests (InMemory, `Popkin.Api.Tests/Contacts/ConnectionsTests`, 7): a connection
+  made shows on the map and on both profiles, and a resend saves once; the same pair either way
+  is `409` `already_connected`; `who_required`, `connection_to_self`, `kind_not_allowed`,
+  `words_too_long` and another person's contact (`404`); a promised line, and only the owner
+  sees or removes one; one removed; connected and removed with the contact; and gone with either
+  contact. `PurgeDeletedAccountsTests` checks erasure.
+- Direct tests (`Popkin.Application.Tests/Contacts/ConnectionTests`): the pair's order, a contact
+  to itself, the words, the kinds and the line to "You", one case per row.
+- Unit tests (api library, `connections-view.spec.ts`): `placeFaces`, `lineToYou` per circle,
+  `mapLinks`, `panelRows`, and Connect's words.
+- Playwright (`tests/contacts-connections.spec.ts`) through `ContactsConnectionsPage` and
+  `ConnectPersonDialog`, on the mocks' map: drawn, a face chosen and cleared both ways, opened
+  for a contact, Family, empty and failed; Connect's list, nobody chosen, no results, a
+  connection made dotted, busy, and from the empty map. `routes.ts` keys every state.
+- Parity: `pk-connection-map` (none, focus, family), `pk-connection-panel` (hint, chosen),
+  `pk-people-around` and `pk-person-choice` (chosen, invalid).
 
 ## Requirements
 

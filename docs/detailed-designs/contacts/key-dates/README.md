@@ -47,7 +47,8 @@ Every key date belongs to one owner, and only that owner sees or changes it (L2-
 
 `docs/mocks/dialogs/add-date/` (opens from Dates and from a profile's "Add a date"):
 
-- `default.html` — "Add a date"; "For" with the contact ("Ben Hale", "Uni friend") and "Change";
+- `default.html` — "Add a date"; "For", a select of the owner's people with "Ben Hale" chosen
+  (from a profile, that contact alone);
   "What kind" as a radio group of "Birthday", "Anniversary" and "Something else"; "What's the
   day?" ("Their wedding, a new job…"); "The day" (a date field); "Remind me" with the six lead
   times; the switch "Every year" ("It comes round again, with the same reminder."); "Save the
@@ -61,31 +62,42 @@ and on the contact's profile, and a date kept every year comes round each year w
 reminder (L2-138 AC4). A changed default applies to dates added after it; a kept date keeps its
 own lead time (L2-139 AC2), and changing one date's reminder changes that date alone (AC3).
 
-### Conflicts and gaps
+### Rulings (known gaps 103 and 113, settled 2026-11-16)
 
-- **Kinds.** Add a date offers three kinds; Dates filters "Milestones" and lists a work
-  anniversary. The design keeps four kinds: `Milestone` arises from a milestone remembered every
-  year ([Log a conversation or milestone](../log-entry/README.md)), and `Other` is "Something
-  else". Under "Milestones" Dates shows `Milestone` and `Other`. The default of `Other` is
-  `<TO SUPPLY>` (the mock starts it at "1 week before"); known gap 103.
-- **How far ahead** Dates looks, changing a date's day once added and how a one-off date such as
-  "Iris is one month old" arises are known gap 103. Until it is settled, Dates lists every next
-  occurrence, whatever its distance.
-- **The line.** "Hackney Town Hall, 2 pm", "Ben & Kate's daughter" and "Work anniversary" are
-  lines Add a date has no field for. The design shows the age or the years when the year is
-  known and nothing otherwise. Proposed as a new known gap.
-- **Two contacts on one date.** "Chidi & Tomás's anniversary" shows both avatars; "For" names one
-  contact. The design keeps one `ContactId` per key date and shows that contact alone. Proposed
-  as a new known gap.
-- **"For" from Dates.** On a profile, "For" is that contact. From Dates the mock names Ben with
-  "Change", and no picker is drawn. What "For" starts with and what "Change" opens are
-  `<TO SUPPLY>`; proposed as a new known gap.
-- **"Soon" and "near".** The tile of the first two rows is tinted (`date-tile--soon`); the
-  distance that tints it is `<TO SUPPLY>`, as the profile's "when it is near" is (gap 101).
-- **"1 month before"** and a birthday on 29 February in a year without one: the reminder day of
-  each is `<TO SUPPLY>`.
-- **"Today"** — Dates counts from the device day it sends, as Today does
-  ([Today](../today/README.md)). The Worker needs the owner's time zone, which is known gap 104.
+- **Kinds.** Four kinds: `Birthday`, `Anniversary`, `Milestone` (from a milestone remembered every
+  year, [Log](../log-entry/README.md)) and `Other` ("Something else"). Add a date offers three;
+  under "Milestones" Dates shows `Milestone` and `Other`. `Other` starts at "1 week before".
+- **How far ahead.** Dates lists the next occurrence of every key date, at most a year ahead,
+  soonest first; a one-off date that has passed is not listed. A date's day is not changed once
+  added: it is removed and added again.
+- **One-off dates.** "Iris is one month old" is Something else with "Every year" off.
+- **The line.** No field: the line is the age ("Turns 33") or the years ("5 years married") when
+  the first year is known, and nothing otherwise. The mocks' "Ben & Kate’s daughter" and "Work
+  anniversary" lines are gone.
+- **One contact per date.** "Chidi’s anniversary" shows Chidi alone; the mocks draw it so.
+- **Titles.** Dates names a birthday or an anniversary "{first name}’s birthday" / "…’s
+  anniversary", and any other date by its title; a profile names them "Birthday", "Anniversary"
+  or the title.
+- **"For" from Dates.** A select "For" of the owner's people, A to Z, starting at "Choose
+  someone"; with nobody chosen the dialog says "For: choose who the date is for.". From a
+  profile, "For" is that contact, with no "Change".
+- **Soon.** Dates tints a date 14 days away or fewer and always reads "today", "tomorrow" or "in
+  {n} days"; a profile shows the days left at 30 or fewer (gap 101).
+- **"1 month before"** is the same day of the month before, or that month's last day. **29
+  February** falls on 28 February in a year without it.
+- **"Today"** — Dates counts from the device day it sends, as Today does. The Worker reminds at 9 am
+  in the zone the device last saved ([Reminders](../reminders/README.md), gap 104 ruled).
+- **The day field.** "The day" is a full date. A date every year keeps its year only when it is
+  before this year, its first year ("Turns 33"); a later one is its next day. A one-off date keeps
+  its year.
+- **A profile's days left** count from the device's day against `nextOn`, as Dates does.
+- **Components.** Dates' rows are `pk-date-list` (the date tile of `pk-spotlight`, the faces of
+  `pk-avatar-stack`, `size="base"`), its aside `pk-reminder-defaults`; a profile's dates are
+  `pk-key-dates` with "Add a date" as an accent `pk-link`; the form's are `pk-date-entry`.
+- **Built in steps.** Add someone's "Dates to remember" saves its drafts with the contact
+  ([Add someone](../add-contact/README.md)): Add a date opens in draft mode, without "For". A
+  milestone date arises with Log; the reminders themselves go out with
+  [Reminders](../reminders/README.md).
 
 ### API
 
@@ -101,7 +113,7 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
 - `POST /api/contacts/people/{contactId}/key-dates` — body `{ clientId, kind, title?, month,
   day, year?, everyYear, lead }`. `201` `KeyDateRowDto`. A resend with the same `clientId`
   answers `200` with the date already saved. Refusals: `400` `day_required`, `day_not_valid`,
-  `kind_not_allowed`, `lead_not_allowed`, `title_too_long` (length `<TO SUPPLY>`, gap 103);
+  `kind_not_allowed`, `lead_not_allowed`, `title_too_long` (80 characters, gap 103);
   `404` `contact_not_found`.
 - `PUT /api/contacts/key-dates/{keyDateId}/reminder` — body `{ lead }`. `200` `KeyDateRowDto`;
   `404` `key_date_not_found` (L2-139 AC3). Add someone's "Remind me about the {kind}" uses it
@@ -126,9 +138,8 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
 - **`ReminderPreferences`** (Domain) — one row per owner: `BirthdayLead` (`OneWeekBefore`),
   `AnniversaryLead` (`ThreeDaysBefore`), `MilestoneLead` (`OnTheDay`), `PhoneNotifications` and
   `MondayEmail` (both `true`, L2-140 AC4). `Defaults(ownerId)` and `DefaultFor(kind)`.
-- **`IOwnerClock`** (Application) — `Today(ownerId)` and `LocalNow(ownerId)` over `TimeProvider`,
-  in the owner's zone (`<TO SUPPLY>`, gap 104), for the Worker, which has no device day
-  ([Reminders](../reminders/README.md)).
+- **`ReminderPreferences.TimeZone`** and **`ReminderRules.LocalNow`** — the owner's 9 am for the
+  Worker, which has no device day ([Reminders](../reminders/README.md), gap 104 ruled).
 - **`GetContactDatesQueryHandler`** — reads the owner's key dates with their contact's first
   name and avatar, computes each occurrence, days left and years from `on`, filters by kind,
   orders by occurrence, and adds the preferences.

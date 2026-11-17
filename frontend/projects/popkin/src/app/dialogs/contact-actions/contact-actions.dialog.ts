@@ -11,10 +11,11 @@ export interface ContactActionsData {
   closest: { label: string; hint: string };
 }
 
-export type ContactAction = 'closest' | 'edit' | 'connections';
+export type ContactAction = 'closest' | 'edit' | 'connections' | 'delete';
 
 /**
- * "More for {first name}" (L2-131): Closest, Edit profile and the contact's connections. It
+ * "More for {first name}" (L2-131): Closest, Edit profile, the contact's connections and Delete
+ * (L2-132). It
  * closes with the one chosen; the profile acts on it.
  */
 @Component({

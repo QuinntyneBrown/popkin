@@ -12,7 +12,7 @@ const chidi = () => recordedContactId('Chidi Okafor');
 const femi = () => recordedContactId('Femi Bankole');
 
 test.describe('A contact’s profile', () => {
-  // L2-128 AC1, AC3, AC6, AC8
+  // L2-128 AC1, AC3, AC6, AC8; L2-122 AC4 (first name, never a pronoun)
   test('shows Chidi: who he is, how to reach him, about him and his history', async ({
     page,
     pk,
@@ -45,9 +45,9 @@ test.describe('A contact’s profile', () => {
       'Long bike rides',
       'Hot sauce collecting',
     ]);
-    await expect(profile.makeHabit).toHaveText('Make a habit of seeing Chidi');
-    await expect(profile.historyTabs).toHaveText(['Timeline', 'Follow-ups', 'Memories & files']);
-    await expect(profile.emptyTimeline).toHaveText('Nothing logged with Chidi yet');
+    await expect(profile.habitTitle).toHaveText('Lunch with Chidi');
+    await expect(profile.historyTabs).toHaveText(['Timeline', 'Follow-ups 1', 'Memories & files']);
+    await expect(profile.timelineEntries).toHaveCount(3);
   });
 
   // L2-128 AC3
@@ -63,6 +63,16 @@ test.describe('A contact’s profile', () => {
     await expect(profile.email).toHaveAttribute('href', 'mailto:femi.b@mail.com');
     await expect(profile.message).toHaveCount(0);
     await expect(profile.call).toHaveCount(0);
+  });
+
+  // L2-128 AC1, L2-151 AC3: an imported contact is kept with their name alone.
+  test('leaves About out for someone known by name alone', async ({ page, pk }) => {
+    await femiProfile(page, { phone: null, email: null, city: null, howWeMet: null, loves: [] });
+    await pk.open('contactProfileEmpty');
+
+    const profile = new ContactProfilePage(page);
+    await expect(profile.name).toHaveText('Femi Bankole');
+    await expect(profile.about).toHaveCount(0);
   });
 
   // L2-121 AC6
@@ -105,7 +115,7 @@ test.describe('A contact’s profile', () => {
 
 test.describe('More for a contact', () => {
   // L2-131 AC1, AC2
-  test('offers Closest, Edit and connections, and takes Chidi out of Closest', async ({
+  test('offers Closest, Edit, connections and Delete, and takes Chidi out of Closest', async ({
     page,
     pk,
   }) => {
@@ -123,6 +133,7 @@ test.describe('More for a contact', () => {
       /^\s*Take Chidi out of Closest\s*Chidi stays in People and Family\.\s*$/,
       /^\s*Edit profile\s*$/,
       /^\s*See Chidi’s connections\s*$/,
+      /^\s*Delete Chidi\s*$/,
     ]);
     await menu.item('Take Chidi out of Closest').click();
 

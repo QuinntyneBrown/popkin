@@ -1,0 +1,27 @@
+@for (entry of entries(); track $index) {
+  <li>
+    <a class="recent-list__row" [routerLink]="entry.link">
+      <span
+        pk-avatar
+        size="36"
+        [initials]="entry.face.initials"
+        [photo]="entry.face.photoUrl"
+        [attr.data-accent]="entry.face.accent"
+      ></span>
+      <span class="recent-list__main">
+        <span class="recent-list__head">
+          <span
+            class="recent-list__dot"
+            [attr.data-accent]="entry.kind === 'milestone' ? 'amber' : 'coral'"
+            aria-hidden="true"
+          ></span>
+          <span class="recent-list__title">{{ entry.title }}</span>
+        </span>
+        @if (entry.note) {
+          <span class="recent-list__text">{{ entry.note }}</span>
+        }
+      </span>
+      <span class="recent-list__when">{{ entry.when }}</span>
+    </a>
+  </li>
+}

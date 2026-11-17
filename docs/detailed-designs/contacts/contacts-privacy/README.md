@@ -47,13 +47,15 @@ rows, so another person's contacts never appear to be refused.
 - **Pronouns in the mocks.** Today's "Last time: she asked you to do a reading at her wedding."
   (`contacts-today/default.html`) is a pronoun in a line Contacts shows (L2-122 AC4). When the
   line quotes what the owner typed, the words are the owner's and are shown as typed; what "Last
-  time:" quotes is open (known gap 99). Text Contacts composes itself ("Message Grace", "Grace is
+  time:" quotes the first sentence of the latest conversation's note (known gap 99, ruled
+  2026-11-16). Text Contacts composes itself ("Message Grace", "Grace is
   into", "Grace's birthday", "Loading Chidi's profile…") uses the first name only.
 - **First name.** Add someone has one "Name" field (`add-contact/default.html`); the first name is
-  its first word ("Grace Adeyemi" is Grace). Whether a contact can carry a separate first name or
-  a nickname is open with the contact's fields (known gap 102).
+  its first word ("Grace Adeyemi" is Grace). A contact has no separate first name or nickname
+  (known gap 102, ruled 2026-11-16).
 - **Deleting a contact** removes it from the owner's Contacts only, through `ContactRemoval`
-  (shared section); which of its rows that removes is open (known gap 110).
+  (shared section), with its key dates, habit and kept periods, both ends of each connection and
+  its group memberships (known gap 110, ruled 2026-11-16).
 - **An imported contact** keeps the `PersonId` of the account it came from. That person is not
   told, and a later change to their account does not reach the contact. Erasing that account
   leaves the contact as it is and clears its `PersonId` (gap 117, ruled 2026-11-16).
@@ -83,12 +85,11 @@ Every Contacts endpoint is under `/api/contacts/**`, on a controller in
   read, `rows.Where(r => r.OwnerId == ownerId)`. Every Contacts handler starts its reads with it.
 - **`IContactGuard`** / **`ContactGuard`** (`Popkin.Application/Contacts/Security/`) —
   `RequireOwnedAsync(Guid contactId, CancellationToken)` returns the `Contact` whose `Id` and
-  `OwnerId` match, or throws `ContactGuard.NotFound()` (`404` `contact_not_found`).
-  `RequireOwnedGroupAsync(Guid groupId, CancellationToken)` does the same for `ContactGroup` with
-  `ContactGuard.GroupNotFound()` (`404` `group_not_found`).
-  `RequireAllOwnedAsync(IReadOnlyCollection<Guid> contactIds, CancellationToken)` checks a write's
-  contacts in one read and refuses the whole write if one is not owned. It depends on
-  `IAppDbContext` and `ICurrentPerson` only, like `MembershipGuard`.
+  `OwnerId` match, or throws `ContactGuard.NotFound()` (`404` `contact_not_found`). It depends on
+  `IAppDbContext` and `ICurrentPerson` only, like `MembershipGuard`. A group is checked where
+  groups are kept: `GroupRules.RequireOwnedAsync` answers `404` `group_not_found`, and
+  `GroupRules.ContactsAsync` passes each of a write's contacts through the guard before anything
+  is saved, so one foreign contact refuses the whole write.
 - **Nobody is told (L2-122 AC3).** A Contacts handler sends no hub event (it has no
   `IPopkinClient`), creates no notification for another person, sends no email or text to a
   contact, and changes no `Membership`. The Worker's `SendContactRemindersJob` writes only to the
@@ -125,13 +126,20 @@ Every Contacts endpoint is under `/api/contacts/**`, on a controller in
 - Nobody is told: importing and deleting a contact who has an account sends that account's hub
   connection (a real SignalR client on `ApiFactory`) nothing, and `ApiFactory`'s fake senders
   record no message.
-- Direct test of `ContactGuard`, one case per row: own contact; another owner's; deleted;
-  unknown id; own group; another owner's group; `RequireAllOwnedAsync` with one foreign id.
+- The guard's cases are proven through the API where each is used, so no database is stood up
+  for a one-line query: another owner's and an unknown contact read alike (`EditContactTests`);
+  a deleted one (`DeleteContactTests`); another owner's group, and a group write naming another
+  owner's contact (`GroupsTests`); a follow-up naming one (`FollowUpsTests`).
+- `ContactsPrivacyTests`: Mara imports Walt, keeps a date for him and deletes him; Walt's hub
+  connection hears nothing of it before Mara's next Lakeside message reaches him, and no code,
+  invite, phone reminder or email is sent.
 - Unit tests: `ContactProfileStore` maps `contact_not_found` and a malformed id to `not-found`;
   `firstName`.
 - Playwright: `tests/contacts-privacy.spec.ts` through `ContactProfilePage`
   (`pages/contact-profile.page.ts`): a link to a contact not in Contacts shows the not-found
-  screen with "Go to People" and no other action; "Go to People" opens People. The answer `404`
+  screen with "Go to People" and no other action; "Go to People" opens People; a malformed
+  address is not asked for; Edit and Log for such a contact show the same screen, Log with no
+  form (`LogEntryPage`). The answer `404`
   `contact_not_found` is stubbed in `stubs.ts`; `routes.ts` gains `contactProfileNotFound`.
 
 ## Requirements

@@ -41,6 +41,9 @@ import {
   INVITES_API,
   LocalOutboxStorage,
   NETWORK_STATUS,
+  CONTACTS_OUTBOX_STORAGE,
+  ContactsOutbox,
+  LocalContactsOutboxStorage,
   OUTBOX_STORAGE,
   POPKINS_API,
   RECAP_API,
@@ -73,6 +76,8 @@ export const appConfig: ApplicationConfig = {
     { provide: THEME_PREFERENCES, useClass: LocalStorageThemePreferences },
     // The theme chosen on this device is drawn before the first screen (L2-048 AC4).
     provideAppInitializer(() => inject(THEME_PREFERENCES).apply()),
+    // Contacts writes kept offline are sent when the app opens online (L2-123 AC4).
+    provideAppInitializer(() => void inject(ContactsOutbox)),
     { provide: POPKINS_API, useClass: HttpPopkinsApi },
     { provide: INVITES_API, useClass: HttpInvitesApi },
     { provide: CHAT_API, useClass: HttpChatApi },
@@ -85,6 +90,7 @@ export const appConfig: ApplicationConfig = {
     { provide: POPKIN_REALTIME, useClass: SignalRPopkinRealtime },
     { provide: NETWORK_STATUS, useClass: BrowserNetworkStatus },
     { provide: OUTBOX_STORAGE, useClass: LocalOutboxStorage },
+    { provide: CONTACTS_OUTBOX_STORAGE, useClass: LocalContactsOutboxStorage },
     { provide: POPKINS_SNAPSHOT, useClass: LocalPopkinsSnapshot },
     { provide: QR_SCANNER, useClass: BrowserQrScanner },
     { provide: CALLS_API, useClass: HttpCallsApi },

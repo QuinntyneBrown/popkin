@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   NewPopkinDraft,
   POPKIN_COLOURS,
@@ -67,10 +67,20 @@ export class NameYourPopkinPage implements OnInit {
   private readonly cameBack =
     this.router.lastSuccessfulNavigation()?.finalUrl?.toString().startsWith('/new/length') ?? false;
 
+  /** `?group=` and `?name=`: "Start a Popkin with them" from a Contacts group (L2-148 AC3). */
+  readonly group = input<string>();
+  private readonly route = inject(ActivatedRoute);
+
   ngOnInit(): void {
     const crew = this.crew();
     if (crew) this.store.update({ crewOf: crew });
     else if (!this.cameBack) this.store.update({ crewOf: null });
+    const group = this.group();
+    if (group) {
+      const name = (this.route.snapshot.queryParamMap.get('name') ?? '').slice(0, 40);
+      this.store.update({ groupOf: group, name });
+      this.name.setValue(name, { emitEvent: false });
+    } else if (!this.cameBack) this.store.update({ groupOf: null });
   }
 
   protected chooseEmoji(emoji: string): void {

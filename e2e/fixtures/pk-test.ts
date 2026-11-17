@@ -1,5 +1,6 @@
 import { test as base, expect, type Page } from '@playwright/test';
 import responses from './api/responses.json';
+import { serveRecordedPhotos } from './contacts';
 import { Hub } from './hub';
 import { routes, type RouteKey, type ScreenRoute } from './routes';
 
@@ -78,6 +79,9 @@ export const test = base.extend<{ pk: Pk; unanswered: string[]; hub: Hub }>({
       }
       await route.fulfill({ status: answer.status, json: featuresOff(key, answer.body) });
     });
+    // A contact's photo the recording made is a signed address no recording answers: any screen
+    // that lists contacts may draw one, so each is the mocks' picture, unless a test serves its own.
+    await serveRecordedPhotos(page);
     await use(page);
   },
   pk: async ({ page }, use) => {

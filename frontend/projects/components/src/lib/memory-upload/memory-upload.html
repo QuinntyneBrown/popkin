@@ -1,0 +1,14 @@
+@if (src()) {
+  <img class="memory-upload__photo" [src]="src()" [alt]="alt()" />
+} @else {
+  <span class="memory-upload__tile"><svg pk-icon name="file-text" size="md"></svg></span>
+}
+<div class="memory-upload__main">
+  <div class="memory-upload__name">{{ name() }}</div>
+  @if (status()) {
+    <div class="memory-upload__status">{{ status() }}</div>
+  }
+  @if (percent() !== null) {
+    <div pk-progress [value]="percent()!" [label]="'Uploading ' + name()"></div>
+  }
+</div>

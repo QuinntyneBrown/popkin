@@ -1,0 +1,74 @@
+<div pk-dialog heading="New group" accent="coral">
+  <div class="stack">
+    @if (problems().length) {
+      <div pk-form-summary [problems]="problems()"></div>
+    }
+    @if (failed()) {
+      <div pk-alert heading="We couldn’t make the group.">
+        Everything you wrote is still here. Check your connection and try again.
+      </div>
+    }
+    <div
+      pk-text-field
+      fieldId="gname"
+      label="Name"
+      placeholder="Mum’s house, the five-a-side…"
+      [error]="error('gname')"
+      [readonly]="busy()"
+      [formControl]="name"
+    ></div>
+    <div
+      pk-choice-chips
+      fieldId="gkind"
+      label="What kind"
+      [outline]="true"
+      [options]="kinds"
+      [disabled]="busy()"
+      [value]="kind()"
+      (valueChange)="kind.set($any($event))"
+    ></div>
+    <div>
+      <span pk-field-label id="gwho">Who’s in</span>
+      <div class="stack" role="list" aria-labelledby="gwho">
+        @for (person of people(); track person.id; let i = $index) {
+          <div
+            pk-person-pick
+            role="listitem"
+            [name]="person.name"
+            [text]="person.knownAs ?? person.circle ?? undefined"
+            [initials]="person.initials"
+            [photo]="person.photoUrl"
+            [accent]="person.accent.toLowerCase()"
+            [removeLabel]="takeOut(person)"
+            (removed)="remove(i)"
+          ></div>
+        }
+      </div>
+      <button pk-link type="button" variant="accent" [disabled]="busy()" (click)="addPeople()">
+        <svg pk-icon name="plus" size="md"></svg>Add people
+      </button>
+    </div>
+    <div
+      pk-textarea
+      fieldId="gnote"
+      label="Note"
+      [rows]="3"
+      hint="Optional. Only you can see it."
+      [error]="error('gnote')"
+      [readonly]="busy()"
+      [formControl]="note"
+    ></div>
+  </div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy()"
+    (click)="make()"
+  >
+    {{ busy() ? 'Making it…' : 'Make the group' }}
+  </button>
+</div>

@@ -1,0 +1,29 @@
+<div pk-dialog [heading]="title" titleId="add-people-title" accent="coral">
+  <div class="stack">
+    @if (failed()) {
+      <div pk-alert heading="We couldn’t add them.">
+        Everyone you ticked is still ticked. Check your connection and try again.
+      </div>
+    }
+    <div pk-search-field label="Search your people" [(value)]="search"></div>
+    <ul
+      pk-tick-list
+      label="Your people"
+      [items]="items()"
+      [disabled]="busy()"
+      [(value)]="ticked"
+    ></ul>
+  </div>
+  <button
+    pk-button
+    slot="footer"
+    type="button"
+    variant="primary"
+    [block]="true"
+    [busy]="busy()"
+    [disabled]="busy() || !ticked().length"
+    (click)="add()"
+  >
+    {{ busy() ? 'Adding…' : label() }}
+  </button>
+</div>

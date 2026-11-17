@@ -1,0 +1,23 @@
+@for (member of members(); track $index) {
+  <li>
+    <a class="row" [routerLink]="member.link">
+      <span
+        pk-avatar
+        size="lg"
+        [name]="member.name"
+        [initials]="member.initials"
+        [photo]="member.photo"
+        [attr.data-accent]="member.accent"
+      ></span>
+      <span class="row__main">
+        <span class="row__title truncate">{{ member.name }}</span>
+        @if (member.text) {
+          <span class="row__text truncate">{{ member.text }}</span>
+        }
+      </span>
+      @if (member.meta) {
+        <span class="row__meta">{{ member.meta }}</span>
+      }
+    </a>
+  </li>
+}

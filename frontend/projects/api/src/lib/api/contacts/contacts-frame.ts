@@ -2,6 +2,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { CONTACTS_API } from './contacts-api';
 import { countLine } from './contacts-text';
+import { FollowUpsStore } from './follow-ups-store';
+import { followUpsDueLabel } from './follow-ups-text';
 
 /**
  * What every Contacts page shows around its own content: the count line of the navigation
@@ -11,6 +13,7 @@ import { countLine } from './contacts-text';
 @Injectable({ providedIn: 'root' })
 export class ContactsFrame {
   private readonly api = inject(CONTACTS_API);
+  private readonly followUps = inject(FollowUpsStore);
 
   /** How many contacts I keep; null until the summary has been read. */
   readonly people = signal<number | null>(null);
@@ -18,6 +21,10 @@ export class ContactsFrame {
     const people = this.people();
     return people === null ? '' : countLine(people);
   });
+
+  /** Follow-ups late or due today, the badge of the Follow-ups tab (L2-121 AC5). */
+  readonly due = computed(() => this.followUps.due());
+  readonly dueLabel = computed(() => followUpsDueLabel(this.due()));
 
   /**
    * Whether Contacts is open, read before a Contacts page opens (ADR 0023): true once the
@@ -27,6 +34,7 @@ export class ContactsFrame {
     return this.api.summary().pipe(
       map((summary) => {
         this.people.set(summary.people);
+        this.followUps.refresh();
         return true;
       }),
       catchError(() => of(false)),

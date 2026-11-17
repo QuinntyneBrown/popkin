@@ -1,0 +1,67 @@
+:host {
+  display: block;
+}
+
+.person-choice__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A hairline between two people. */
+li + li {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+/* A short row that is a radio, across the dialog. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--space-14);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-sm);
+}
+
+.row:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+/* The chosen person's check, in the accent; aria-checked says it. */
+.row__check {
+  display: inline-flex;
+  flex: none;
+  color: var(--accent-text);
+}
+
+.field__error {
+  display: flex;
+  gap: var(--space-1-5);
+  align-items: flex-start;
+  margin-top: var(--space-2);
+  font: var(--font-weight-medium) var(--font-size-sm) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-danger-fg);
+}

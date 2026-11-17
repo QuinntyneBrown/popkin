@@ -89,22 +89,29 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
 ### Conflicts and gaps
 
 - **One person.** The count line reads "{n} people · only you" and the badge "{n} follow-ups late
-  or due today". The count line reads "1 person · only you" for one; the badge's words for one
-  follow-up are `<TO SUPPLY>`.
+  or due today". The count line reads "1 person · only you" for one, and the badge "1 follow-up
+  late or due today" (known gap 111, ruled 2026-11-16).
 - **Toasts that wait.** `Toaster` removes a success toast after 8 seconds whatever the pointer
   does; L2-124 AC2 asks it to wait while hovered or focused. This design adds the wait to
   `Toaster` for the whole app, which L2-056 AC7 does not forbid.
 - **Danger toasts are polite.** The mocks put every toast in one `aria-live="polite"` region; the
   design keeps it, so a failure is announced without interrupting.
-- **Other devices.** Whether Contacts syncs between a person's devices beyond the offline queue
-  is open (known gap 110). A second device sees a change on its next read.
+- **Other devices** (gap 110, ruled). Contacts does not push between devices; a second device
+  sees a change on its next read.
+- **Photos offline** (gap 118, ruled). A photo waits with its write in memory, as chat's do; the
+  write is in local storage. A reload while offline sends the write without its photo.
+- **Add someone offline.** Save keeps the contact in the outbox, shows the warning toast and
+  opens People, as Cancel does, when People was opened before (a screen never fetched shows
+  the offline screen, L2-056 AC4); People, offline, shows its failure state. When the connection
+  returns the outbox sends the add, then the frame and an open People read again.
 - **Built in steps.** The switch, the way in from My Popkins, the Contacts navigation, Today's
   greeting and empty state, the guard that keeps a closed Contacts on My Popkins (with My
   Popkins as the safe answer, ADR 0023) and toasts that wait are built first. `ContactsOutbox`
   comes with the first write (Add someone), the loading and failure states with the first page
   that reads its own data (People), and the Follow-ups badge with Follow-ups.
-- **Time zone.** The device day is the day the person sees. The Worker's reminders need the
-  owner's time zone, which is open (known gap 104).
+- **Time zone.** The device day is the day the person sees. Each Contacts page that opens saves
+  the device's zone, and the Worker's reminders come at 9 am there
+  ([Reminders](../reminders/README.md), known gap 104 ruled).
 
 ### API
 

@@ -1,0 +1,15 @@
+@for (habit of habits(); track habit.id) {
+  <li
+    pk-habit-row
+    [heading]="habit.heading"
+    [often]="habit.often"
+    [link]="habit.link"
+    [name]="habit.name"
+    [photo]="habit.photo"
+    [initials]="habit.initials"
+    [accent]="habit.accent"
+    [periods]="habit.periods"
+    [streak]="habit.streak"
+    [next]="habit.next"
+  ></li>
+}

@@ -8,10 +8,14 @@ import {
   viewChildren,
 } from '@angular/core';
 import { Chip } from '../chip/chip';
+import { Icon } from '../icon/icon';
+import { IconName } from '../icon/icons';
 
 export interface ChipOption<T extends string = string> {
   value: T;
   label: string;
+  /** Drawn before the label, as Log's "How you talked". */
+  icon?: IconName;
 }
 
 /**
@@ -25,7 +29,7 @@ export interface ChipOption<T extends string = string> {
  */
 @Component({
   selector: 'div[pk-choice-chips]',
-  imports: [Chip],
+  imports: [Chip, Icon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './choice-chips.html',
   styleUrl: './choice-chips.scss',
@@ -40,6 +44,8 @@ export class ChoiceChips {
   readonly disabled = input(false);
   /** Outlined chips, as a form of sections draws its choices (Add someone's Circle). */
   readonly outline = input(false);
+  /** The label is read by assistive technology only, as the mocks draw a group beside its text. */
+  readonly hideLabel = input(false);
 
   protected readonly labelId = computed(() => `${this.fieldId()}-l`);
 

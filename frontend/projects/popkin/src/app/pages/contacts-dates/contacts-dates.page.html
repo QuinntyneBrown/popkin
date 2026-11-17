@@ -1,0 +1,91 @@
+<div pk-app-screen accent="coral" layout="tab" body="fill">
+  <div pk-contacts-page>
+    <div
+      pk-page-head
+      slot="head"
+      heading="Dates"
+      sub="Birthdays, anniversaries and the days that matter to your people"
+    >
+      <button
+        pk-button
+        slot="actions"
+        type="button"
+        variant="secondary"
+        size="sm"
+        (click)="addDate()"
+      >
+        Add a date
+      </button>
+    </div>
+    @if (store.empty()) {
+      <div
+        pk-empty-state
+        icon="cake"
+        heading="No dates yet"
+        text="Add a birthday or an anniversary and we’ll remind you ahead of it, in good time to send a card."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="addDate()">
+          Add a date
+        </button>
+      </div>
+    } @else if (store.state() === 'failed') {
+      <div
+        pk-empty-state
+        icon="alert"
+        [alert]="true"
+        heading="We couldn’t load your dates"
+        text="Your reminders still go out. Check your connection and try again."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+          Try again
+        </button>
+      </div>
+    } @else if (store.state() === 'loading') {
+      <p class="visually-hidden" role="status">Loading your dates…</p>
+      <div pk-contacts-grid layout="aside" aria-hidden="true">
+        <div class="stack">
+          <span pk-skeleton shape="pill"></span>
+          <span pk-skeleton shape="title" [width]="30"></span>
+          <ul pk-date-list [dates]="[]" [loading]="true"></ul>
+        </div>
+        <span pk-skeleton shape="card"></span>
+      </div>
+    } @else {
+      <div pk-contacts-grid layout="aside">
+        <div class="stack">
+          <div
+            pk-filter-chips
+            label="Show"
+            [options]="filters"
+            [value]="store.filter()"
+            (valueChange)="show($event)"
+          ></div>
+          @for (month of months(); track month.id) {
+            <section pk-section [heading]="month.heading">
+              <ul pk-date-list [dates]="month.items"></ul>
+            </section>
+          }
+        </div>
+        <aside
+          pk-reminder-defaults
+          [defaults]="defaults()"
+          [options]="leads"
+          [phone]="store.preferences().phoneNotifications"
+          [email]="store.preferences().mondayEmail"
+          (phoneChange)="store.changeWay('phoneNotifications', $event)"
+          (emailChange)="store.changeWay('mondayEmail', $event)"
+          (changed)="changeDefault($event)"
+        ></aside>
+      </div>
+    }
+  </div>
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    place="contacts"
+    contactsCurrent="dates"
+    [members]="frame.countLine()"
+    [due]="frame.due()"
+    [dueLabel]="frame.dueLabel()"
+  ></nav>
+</div>

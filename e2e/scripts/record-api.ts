@@ -317,7 +317,134 @@ chidi.append(
 const chidiKept = await call('POST', '/api/contacts/people', chidi, false);
 await call('PUT', `/api/contacts/people/${chidiKept.id}/closest`);
 await call('GET', `/api/contacts/people/${chidiKept.id}`);
+// She opens People on the morning of the mocks: Chidi and Femi, both in Closest (L2-126).
+await call('GET', '/api/contacts/people?on=2026-09-15');
+// She adds Chidi's birthday, then opens Dates, everything and birthdays, and changes the
+// birthday default (L2-137 to L2-139).
+await call('POST', `/api/contacts/people/${chidiKept.id}/key-dates`, {
+  clientId: '00000000-0000-4000-c000-000000000010',
+  kind: 'Birthday',
+  title: null,
+  month: 1,
+  day: 24,
+  year: 1990,
+  everyYear: true,
+  lead: 'OneWeekBefore',
+});
+await call('GET', '/api/contacts/dates?on=2026-09-15&kind=all');
+await call('GET', '/api/contacts/dates?on=2026-09-15&kind=birthdays');
+await call('PUT', '/api/contacts/reminder-preferences', {
+  birthdayLead: 'TwoWeeksBefore',
+  anniversaryLead: 'ThreeDaysBefore',
+  milestoneLead: 'OnTheDay',
+  phoneNotifications: true,
+  mondayEmail: true,
+});
+await call('GET', '/api/contacts/reminder-preferences');
+// She adds a follow-up for Chidi, due the Sunday after the mocks' Tuesday, reads Follow-ups,
+// and ticks it done (L2-141, L2-142).
+const commute = await call('POST', '/api/contacts/follow-ups', {
+  clientId: '00000000-0000-4000-c000-000000000020',
+  text: 'Ask Chidi how the commute is going',
+  contactId: chidiKept.id,
+  dueOn: '2026-09-20',
+});
+await call('GET', '/api/contacts/follow-ups');
+await call('PUT', `/api/contacts/follow-ups/${commute.id}/done`, { done: true });
+// Habits (L2-143 to L2-145, known gap 105 ruled): none yet; she starts lunch every 2 weeks with
+// Chidi, says they met up and undoes it, ends it and undoes that, and reads Habits again.
+await call('GET', '/api/contacts/habits');
+const lunch = await call('POST', '/api/contacts/habits', {
+  clientId: '00000000-0000-4000-c000-000000000050',
+  contactId: chidiKept.id,
+  what: 'Lunch',
+  rhythm: 'EveryTwoWeeks',
+});
+const metUp = await call('POST', `/api/contacts/habits/${lunch.id}/kept`, {
+  clientId: '00000000-0000-4000-c000-000000000051',
+  keptOn: new Date().toISOString().slice(0, 10),
+});
+await call('DELETE', `/api/contacts/habits/${lunch.id}/kept/${metUp.keptId}`);
+await call('POST', `/api/contacts/habits/${lunch.id}/end`);
+await call('DELETE', `/api/contacts/habits/${lunch.id}/end`);
+// Connections (L2-149, L2-150, known gap 109 ruled): her map starts with her; she connects Chidi
+// and Femi as old friends, reads the map, and removes it again.
+await call('GET', '/api/contacts/connections', undefined, false);
+const oldFriends = await call('POST', '/api/contacts/connections', {
+  clientId: '00000000-0000-4000-c000-000000000060',
+  contactId: chidiKept.id,
+  otherContactId: femiKept.id,
+  kind: 'Friend',
+  words: 'Old friends',
+  promised: false,
+});
+await call('GET', '/api/contacts/connections');
+await call('DELETE', `/api/contacts/connections/${oldFriends.id}`);
+// Groups (L2-146 to L2-148, known gaps 108 and 116 ruled): none yet; she makes a household with
+// Chidi, adds Femi, reads Groups and the form's list of them, and starts the Popkin with them.
+await call('GET', '/api/contacts/groups?on=2026-09-15', undefined, false);
+const sundays = await call('POST', '/api/contacts/groups', {
+  clientId: '00000000-0000-4000-c000-000000000070',
+  name: 'Sunday lunch',
+  kind: 'Household',
+  note: 'First Sunday of the month, at Mum’s.',
+  contactIds: [chidiKept.id],
+});
+await call('POST', `/api/contacts/groups/${sundays.id}/members`, { contactIds: [femiKept.id] });
+await call('GET', '/api/contacts/groups?on=2026-09-15');
+await call('GET', '/api/contacts/groups');
+await call('POST', `/api/contacts/groups/${sundays.id}/popkin`, { popkinId: created.id });
+// Nothing is logged with Femi (L2-135 AC2). She logs Chidi's new job, every year, and a phone
+// call with a promise, as his profile draws them, then reads his timeline: all, milestones,
+// conversations (L2-133 to L2-135).
+await call('GET', `/api/contacts/people/${femiKept.id}/timeline?show=all`);
+await call('POST', `/api/contacts/people/${chidiKept.id}/milestones`, {
+  clientId: '00000000-0000-4000-c000-000000000030',
+  kind: 'NewJob',
+  title: 'Started as Senior Engineer at Arup',
+  happenedOn: '2026-08-31',
+  note: 'Bridges team. He’d been after this one for two years.',
+  everyYear: true,
+});
+await call('POST', `/api/contacts/people/${chidiKept.id}/conversations`, {
+  clientId: '00000000-0000-4000-c000-000000000031',
+  channel: 'Phone',
+  loggedAt: '2026-09-06T19:30:00+01:00',
+  note: 'Loving the team, hates the commute. Thinking of moving closer to Piccadilly by Christmas. Tomás is pushing for a dog.',
+  promises: [{ text: 'Send him the flat-hunting checklist', dueOn: '2026-09-17' }],
+});
+// Memories (L2-136, known gap 107 ruled): Femi has none. Mara keeps Chidi's hot sauce night, the
+// photo his timeline draws, then the wedding speech and gift ideas, and reads them.
+await call('GET', `/api/contacts/people/${femiKept.id}/memories`);
+const hotSauce = new FormData();
+hotSauce.append(
+  'file',
+  new Blob([readFileSync(join(mockImages, 'tacos.jpg'))], { type: 'image/jpeg' }),
+  'IMG_4471.jpg',
+);
+hotSauce.append('clientId', '00000000-0000-4000-c000-000000000040');
+hotSauce.append('caption', 'Hot sauce night');
+hotSauce.append('takenOn', '2026-08-08');
+await call('POST', `/api/contacts/people/${chidiKept.id}/memories/photos`, hotSauce);
+const speech = new FormData();
+speech.append(
+  'file',
+  new Blob(['%PDF-1.7\n% The wedding speech\n'], { type: 'application/pdf' }),
+  'Wedding speech.pdf',
+);
+speech.append('clientId', '00000000-0000-4000-c000-000000000041');
+await call('POST', `/api/contacts/people/${chidiKept.id}/memories/files`, speech);
+await call('POST', `/api/contacts/people/${chidiKept.id}/memories/notes`, {
+  clientId: '00000000-0000-4000-c000-000000000042',
+  text: 'Gift ideas: Fela reissue on vinyl, Dishoom cookbook, bike lights',
+});
+await call('GET', `/api/contacts/people/${chidiKept.id}/memories`);
+await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=all`);
+await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=milestones`);
+await call('GET', `/api/contacts/people/${chidiKept.id}/timeline?show=conversations`);
 await call('DELETE', `/api/contacts/people/${chidiKept.id}/closest`);
+// She deletes Chidi from his profile (L2-132).
+await call('DELETE', `/api/contacts/people/${chidiKept.id}`);
 
 // Photos: Mara has added none, adds one with a caption, then reads the album and the photo.
 const album = `/api/popkins/${created.id}/photos`;
@@ -400,6 +527,24 @@ portrait.append(
   'call1.jpg',
 );
 await call('PUT', '/api/account/photo', portrait);
+
+// Today (L2-125, known gaps 99 and 111 ruled): Mara's day on the morning of the mocks.
+await call('GET', '/api/contacts/today?on=2026-09-15');
+// Reminders (L2-140, known gaps 104 and 114 ruled): every Contacts page reads them, none yet as
+// the Worker has not run, and saves the device's zone.
+await call('GET', '/api/contacts/reminders');
+await call('PUT', '/api/contacts/time-zone', { zone: 'Europe/London' });
+// Import (L2-151, known gaps 110 and 117 ruled): who she shares a Popkin with and does not keep
+// yet; she imports Walt, once, and a resend imports no one more.
+const candidates = await call('GET', '/api/contacts/import');
+const waltToImport = candidates.popkins
+  .flatMap((p: { people: { personId: string; name: string }[] }) => p.people)
+  .find((p: { name: string }) => p.name === 'Walt Brennan');
+const importWalt = {
+  clientId: '00000000-0000-4000-c000-000000000080',
+  personIds: [waltToImport.personId],
+};
+await call('POST', '/api/contacts/import', importWalt);
 
 // Signing out ends the session it is sent with, so Joel's is the one recorded; then Mara deletes
 // her account, which ends hers. Both come last.

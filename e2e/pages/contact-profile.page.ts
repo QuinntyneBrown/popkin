@@ -3,6 +3,10 @@ import type { Locator, Page } from '@playwright/test';
 /** A contact's profile, `/contacts/people/:contactId` (L2-128, L2-122 AC2, L2-123). */
 export class ContactProfilePage {
   readonly root: Locator;
+  /** About’s facts, the whole list. */
+  readonly factsList: Locator;
+  /** “Loves”, the whole list. */
+  readonly lovesList: Locator;
   readonly main: Locator;
   readonly back: Locator;
   readonly edit: Locator;
@@ -21,9 +25,41 @@ export class ContactProfilePage {
   readonly loves: Locator;
   /** "Make a habit of seeing {first name}" (L2-128 AC5). */
   readonly makeHabit: Locator;
+  /** Our habit's card (L2-128 AC5), and "End this habit" under it (L2-144 AC3). */
+  readonly habit: Locator;
+  readonly habitOver: Locator;
+  readonly habitTitle: Locator;
+  readonly habitStrip: Locator;
+  readonly habitFoot: Locator;
+  readonly endHabit: Locator;
+  /** "People around {first name}" (L2-150 AC4). */
+  readonly around: Locator;
+  /** The contact's groups, as chips at the end of People around (L2-146 AC4). */
+  readonly groupChips: Locator;
+  readonly keyDates: Locator;
+  readonly keyDateRows: Locator;
+  readonly addDate: Locator;
+  readonly keyDateList: Locator;
   readonly history: Locator;
   readonly historyTabs: Locator;
+  /** The history's view nav, for the parity specs. */
+  readonly historyNav: Locator;
+  readonly addField: Locator;
+  readonly addFollowUp: Locator;
+  readonly followUps: Locator;
   readonly emptyTimeline: Locator;
+  readonly timeline: Locator;
+  readonly timelineEntries: Locator;
+  readonly timelineFilters: Locator;
+  readonly logMilestone: Locator;
+  readonly logConversation: Locator;
+  readonly memoriesIntro: Locator;
+  readonly addMemory: Locator;
+  readonly memoryGrid: Locator;
+  readonly memoryPhotos: Locator;
+  readonly memoryList: Locator;
+  readonly memoryRows: Locator;
+  readonly memoriesFailed: Locator;
   /** The loading line (L2-123 AC1). */
   readonly loading: Locator;
   /** The failed and not-found states (`pk-empty-state`). */
@@ -35,6 +71,8 @@ export class ContactProfilePage {
 
   constructor(page: Page) {
     this.root = page.locator('body[data-page="contact-profile"]');
+    this.factsList = page.locator('dl.contact-facts');
+    this.lovesList = page.locator('ul.likes');
     this.main = page.locator('.contacts-page');
     this.back = this.main.getByRole('link', { name: 'People', exact: true });
     this.edit = page.getByRole('link', { name: 'Edit profile' });
@@ -48,12 +86,40 @@ export class ContactProfilePage {
     this.email = this.header.getByRole('link', { name: 'Email' });
     this.log = this.header.getByRole('link', { name: 'Log' });
     this.about = page.getByRole('region', { name: /^About / });
+    this.keyDates = page.getByRole('region', { name: 'Key dates' });
+    this.keyDateList = this.keyDates.locator('ul.divided');
+    this.keyDateRows = this.keyDates.locator('li');
+    this.addDate = this.keyDates.getByRole('button', { name: 'Add a date' });
     this.facts = this.about.locator('.contact-facts__item');
     this.loves = this.about.locator('.likes__item');
     this.makeHabit = page.locator('.add-card');
+    this.habit = page.locator('.info-card').filter({ has: page.locator('.keep-strip') });
+    this.habitOver = this.habit.locator('.info-card__over');
+    this.habitTitle = this.habit.locator('.info-card__title');
+    this.habitStrip = this.habit.locator('.keep-strip');
+    this.habitFoot = this.habit.locator('.info-card__foot');
+    this.endHabit = page.getByRole('button', { name: 'End this habit' });
+    this.around = page.getByRole('region', { name: /^People around / });
+    this.groupChips = this.around.locator('.chips');
     this.history = page.getByRole('navigation', { name: /’s history$/ });
+    this.historyNav = page.locator('nav.view-nav');
+    this.addField = page.locator('.add-field');
     this.historyTabs = this.history.getByRole('link');
+    this.addFollowUp = page.getByRole('textbox', { name: /^Add a follow-up for / });
+    this.followUps = page.locator('li.task');
     this.emptyTimeline = page.getByRole('heading', { name: /^Nothing logged with / });
+    this.timeline = page.locator('ol.contact-timeline');
+    this.timelineEntries = this.timeline.locator('li.contact-timeline__item');
+    this.timelineFilters = page.getByRole('group', { name: 'Show' });
+    this.logMilestone = page.getByRole('link', { name: 'Milestone', exact: true });
+    this.logConversation = page.getByRole('link', { name: 'Conversation', exact: true });
+    this.memoriesIntro = page.getByText(/Photos, files and notes you’ve kept about /);
+    this.addMemory = page.getByRole('button', { name: 'Add', exact: true });
+    this.memoryGrid = page.locator('.memory-grid');
+    this.memoryPhotos = this.memoryGrid.locator('figcaption');
+    this.memoryList = page.locator('ul.memory-list');
+    this.memoryRows = this.memoryList.locator('li');
+    this.memoriesFailed = page.getByRole('heading', { name: /^We couldn’t load .*’s memories$/ });
     this.loading = page.getByRole('status').filter({ hasText: /^Loading / });
     this.state = page.locator('.contacts-page :is([role="alert"] .empty, .empty[role="alert"])');
     this.stateHeading = this.state.getByRole('heading');
@@ -66,5 +132,9 @@ export class ContactProfilePage {
     return this.facts
       .filter({ has: this.about.page().getByText(label, { exact: true }) })
       .locator('dd');
+  }
+
+  timelineFilter(name: 'All' | 'Conversations' | 'Milestones'): Locator {
+    return this.timelineFilters.getByRole('button', { name });
   }
 }

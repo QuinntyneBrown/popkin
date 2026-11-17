@@ -1,0 +1,58 @@
+:host {
+  display: block;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.today-dates__item + .today-dates__item {
+  border-top: var(--border-width-hairline) solid var(--color-border-default);
+}
+
+.today-dates__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--space-18);
+  color: inherit;
+  text-decoration: none;
+}
+
+.today-dates__row:hover {
+  color: inherit;
+}
+
+.today-dates__faces {
+  display: flex;
+  flex: none;
+}
+
+.today-dates__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.today-dates__title,
+.today-dates__text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-dates__title {
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.today-dates__text {
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}
+
+.today-dates__days {
+  flex: none;
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+}

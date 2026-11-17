@@ -46,7 +46,7 @@ Popkin web app, `docs/mocks/pages/contacts-habits/`, on Tuesday 15 September 202
 
 `docs/mocks/dialogs/new-habit/`:
 
-- `default.html` — "New habit"; "With" showing Ifeoma Okafor, "Sister", and "Change"; "What"
+- `default.html` — "New habit"; "With" showing Chidi Okafor, "Brother", and "Change"; "What"
   ("Sunday call, lunch, a walk…"); "How often" as radio chips "Weekly", "Every 2 weeks" and
   "Monthly", "Weekly" chosen; "We’ll remind you when it’s due, and nudge again if a week slips
   by."; "Start the habit" (L2-145 AC1).
@@ -54,32 +54,41 @@ Popkin web app, `docs/mocks/pages/contacts-habits/`, on Tuesday 15 September 202
   and the field error "Say what you’ll do together, like “Sunday call”." (L2-145 AC2).
 - `busy.html` — "Starting…", disabled.
 
-### Conflicts and gaps
+### Rulings (gap 105, settled)
 
-- **Counting (gap 105).** Which day a weekly or monthly habit falls on, where each period starts,
-  how "Kept {n} of the last 12" and "{n} weeks running" are counted, and whether a second "We met
-  up" in one period is refused, are open. The mocks disagree with any one reading: Mum's strip
-  misses one of 12 yet reads "11 weeks running". The API therefore returns the days kept and the
-  web app counts them with `habitKeeping`, whose period rule is `<TO SUPPLY>` until gap 105 is
-  settled.
-- **Last time of a new habit.** The design takes the day a habit starts as its first last time,
-  so a new weekly habit is due a week later (proposal under gap 105, `<TO SUPPLY>`).
-- **Several overdue habits.** Only one is drawn. Which leads, and where the others show, are
-  `<TO SUPPLY>`; the design leads with the one overdue longest and lists the rest as rows.
-- **Rhythm words.** Grace's row read "Every month"; the rhythm is "Monthly", and the mocks were
-  changed to match (`docs/mocks/README.md` note 10).
-- **A habit's name.** L2-122 AC4 names a contact by first name, so a habit reads "{what} with
-  {first name}"; the mocks' "Sunday call with Mum" became "Sunday call with Ada".
-- **Copy not drawn.** How lateness reads beyond "Two days overdue", the period word of a weekly or
-  monthly habit ("Logged for this week" and "this month" are the design's reading), the row of a
-  habit due today, and "Call {first name}" for a contact with no phone are `<TO SUPPLY>`.
-- **New habit's contact.** Which contact "With" shows when the dialog opens from Habits, and what
-  "Change" opens, are not drawn: `<TO SUPPLY>`. From a profile it is that contact.
-- **Editing, pausing and ending** a habit are gap 105; nothing here builds them. Deleting a
-  contact removes their habit and its kept periods through `ContactRemoval`
-  ([Delete a contact](../delete-contact/README.md)).
-- **Time zone (gap 104).** Days are calendar days with no time; the web app sends the device's date
-  as the day kept, and the API accepts it within one day of its own UTC date.
+- **Periods.** A habit's periods are counted back from its due day in steps of its rhythm (7
+  days, 14 days, or a calendar month by `AddMonths`); the latest is the one today falls in. A
+  period is kept when a day kept falls in it; the latest, unkept, is due (a new habit's first
+  period, or one whose due day has come); any other unkept period is missed. Periods before the habit started are not drawn, so a
+  new habit reads "Kept {n} of the last {m}" with fewer than 12 (L2-143 AC5). The kept mock
+  follows from it: after a late "We met up" the period that was due is missed and a new kept one
+  is drawn.
+- **Running.** Kept periods in a row ending with the latest, a latest one still due not breaking
+  it; shown from two: "{n} weeks running", "{n} fortnights running", "{n} months running"
+  (L2-143 AC6). The mocks' "11 weeks running" and "7 months running" did not count their strips;
+  they now read "10 weeks running" and "8 months running".
+- **Last time and due day.** A habit's last time is its latest day kept, else the day it started;
+  its due day is its last time plus its rhythm. A new weekly habit is due a week after it starts.
+- **Keeping again.** "We met up" is on the spotlight only; once kept it reads "Logged for this
+  {week | fortnight | month}" and is pressed until Habits opens again. The API keeps any day
+  within one day of its own, once per client id.
+- **Several overdue.** The one overdue longest leads; the others are rows with "Overdue since
+  {day}" for their next; a habit due today reads "Due today" (L2-143 AC7).
+- **Lateness.** "One day overdue" to "Nine days overdue" in words, then "{n} days overdue".
+- **No phone.** "Call {first name}" is left out for a contact with no phone.
+- **New habit's contact.** From a profile, "With" is that contact with "Change"; from Habits, or
+  after "Change", "With" is a select, "Choose someone", of the people with no habit yet
+  (`dialogs/new-habit/choose.html`). Nothing chosen: "With: choose who the habit is with."
+  (L2-145 AC5). One habit per contact: a second is `409` `habit_exists` (AC6).
+- **Ending.** "End this habit", under the habit on the profile, ends it at once with the toast
+  "{habit} ended" and "Undo" (L2-144 AC3). Editing and pausing are not offered: to change one,
+  end it and start another. An ended habit keeps its kept days, so Undo restores it as it was.
+- **Rhythm words** are "Weekly", "Every 2 weeks", "Monthly" (`docs/mocks/README.md` note 10),
+  and a habit reads "{what} with {first name}" (L2-122 AC4).
+- **"What"** is up to 80 characters: "Keep it to 80 characters." (`what_too_long`).
+- Deleting a contact removes their habit and its kept days through `ContactRemoval`.
+- **Time zone (gap 104).** Days are calendar days with no time; the web app sends the device's
+  date as the day kept, and the API accepts it within one day of its own UTC date.
 
 ### API
 
@@ -87,22 +96,27 @@ Every endpoint is on `HabitsController` (`Popkin.Api/Controllers/Contacts/`); ea
 MediatR request. Another person's habit answers `404` `habit_not_found` (proposed, L2-122 AC1).
 
 - `GET /api/contacts/habits` — `200` `HabitDto[]`: `id`, `contactId`, `contactFirstName`,
-  `contactPhone`, `contactPhotoUrl`, `what`, `rhythm`, `startedOn`, `lastTime`, `dueOn`, and
-  `keptOn` (the days kept, newest first, as far back as 12 periods).
+  `contactName`, `contactInitials`, `contactAccent`, `contactPhone`, `contactPhotoUrl`, `what`,
+  `rhythm`, `startedOn`, `lastTime`, `dueOn`, and `keptOn` (the days kept, newest first, as far
+  back as 12 periods). The profile's `habit` is the same `HabitDto`, or `null`.
 - `POST /api/contacts/habits` — body `{ clientId, contactId, what, rhythm }`. `201` `HabitDto`.
   Refusals: `400` `what_required` (the summary "What: say what you’ll do together."),
-  `what_too_long` (limit `<TO SUPPLY>`), `rhythm_not_allowed`; `404` `contact_not_found`.
+  `what_too_long` (80), `rhythm_not_allowed`; `404` `contact_not_found`; `409` `habit_exists`.
 - `POST /api/contacts/habits/{id}/kept` — body `{ clientId, keptOn }`. `201` `HabitKeptDto`
   (`keptId`, `habit`), whose `habit.dueOn` is the next one. Refusals: `400` `kept_on_out_of_range`;
   `404` `habit_not_found`.
 - `DELETE /api/contacts/habits/{id}/kept/{keptId}` — "Undo". `200` `HabitDto`, as before the
   keep (L2-144 AC2); `404` `habit_not_found`.
+- `POST /api/contacts/habits/{id}/end` — "End this habit". `204`; `404` `habit_not_found`.
+- `DELETE /api/contacts/habits/{id}/end` — its "Undo". `200` `HabitDto`; `404`
+  `habit_not_found`; `409` `habit_exists` if another was started with them since.
 
 ### Backend
 
 - **`HabitRhythm`** (Domain) — `Weekly`, `EveryTwoWeeks`, `Monthly`.
 - **`Habit`** (Domain) — `Id`, `OwnerId`, `ContactId`, `What`, `Rhythm`, `StartedOn`
-  (`DateOnly`), `ClientId`, `CreatedAt`, and its `HabitKept` rows. `Start(owner, contact, what,
+  (`DateOnly`), `EndedAt` (null while it runs), `ClientId`, `CreatedAt`, and its `HabitKept`
+  rows. `End(now)`, `Resume()`. `Start(owner, contact, what,
   rhythm, startedOn, clientId, now)`; `LastTime` (latest kept day, else `StartedOn`); `DueOn()`
   is `LastTime` plus the rhythm; `IsOverdue(today)` is `today > DueOn()` (L2-143 AC3);
   `Keep(keptOn, clientId)`; `Unkeep(keptId)`.
@@ -125,7 +139,8 @@ MediatR request. Another person's habit answers `404` `habit_not_found` (propose
   habit, `pk-habit-row` per habit, `pk-empty-state` and `pk-skeleton`. "New habit" opens
   `NewHabitDialog`.
 - **`NewHabitDialog`** (`dialogs/new-habit/new-habit.dialog.ts`) — CDK dialog in `pk-dialog`, with
-  the contact as `pk-avatar` and name, `pk-text-field` "What", `pk-choice-chips` "How often",
+  the contact as `pk-person-pick` and "Change", or "With" as `pk-select-field` of my people with no
+  habit yet (with its error), `pk-text-field` "What", `pk-choice-chips` "How often",
   `pk-form-summary` and `pk-button` "Start the habit" / "Starting…". It validates "What" before
   sending; it closes on success, and the habit then shows on Habits and the profile (L2-145 AC3).
 - **`HabitsStore`** (`frontend/projects/api/src/lib/api/contacts/habits-store.ts`) — `loading |
@@ -134,12 +149,16 @@ MediatR request. Another person's habit answers `404` `habit_not_found` (propose
   and raises the toast "{habit} logged", "Your next one is due by {day}." with "Undo".
 - **`habit-rules.ts`** (pure) — `habitDue(dueOn, today)`: `due` on the due day, `overdue` with
   the days late after it, `ahead` before it; `habitKeeping(keptOn, rhythm, today)`: the 12 cells
-  of the keep strip, "{n} of the last 12" and the run (period rule `<TO SUPPLY>`, gap 105).
+  of the keep strip (oldest first), the kept count and the run, as ruled above.
 - **`habits-text.ts`** — "Two days overdue", "Overdue since {day}", "{rhythm} · you’ve kept {n}
   of the last 12", "{n} weeks running", "{n} months running", "Next {day}", "Logged for this
   fortnight", "{habit} logged", "Your next one is due by {day}." and the rhythm words.
 - **`CONTACTS_API`** — `habits()`, `startHabit(request)`, `keepHabit(id, keptOn, clientId)`,
   `unkeepHabit(id, keptId)`.
+- The profile's habit is `pk-info-card` with a small `pk-keep-strip` and its foot; "End this habit"
+  under it ends it through `ContactProfileStore.endHabit`, with the toast "{habit} ended" and
+  Undo; without one, "Make a habit of seeing {first name}" opens New habit with them.
+- **`pk-habit-list`** lists the rows, each ruled from the one above.
 - **`pk-keep-strip`** and **`pk-habit-row`** (components, backlog row 18) — the strip is
   `role="img"` with the label "Kept {n} of the last 12", so kept is never told by colour alone.
   **`pk-spotlight`** (row 19) — the tinted lead with its actions.
@@ -153,21 +172,33 @@ MediatR request. Another person's habit answers `404` `habit_not_found` (propose
 | Monthly | Jan 31 | Feb 28 (2026) | Mar 1 | overdue by 1 day |
 | Weekly | Sep 8 | Sep 15 | Sep 15 | due, not overdue |
 
+The keep strip, newest periods last (K kept, · missed, D due):
+
+| Rhythm | Started | Days kept | Due day | Today | Latest periods | Kept | Run |
+|---|---|---|---|---|---|---|---|
+| Weekly | Aug 1 | Aug 30, Sep 6, Sep 13 | Sep 20 | Sep 15 | 8 drawn: `·····KKK` | 3 of the last 8 | 3 weeks |
+| Every 2 weeks | Jan 1 | Aug 16, Aug 30 | Sep 13 | Sep 15 | `…KKD` | latest is due | 2 fortnights |
+| Every 2 weeks | Jan 1 | Aug 16, Aug 30, Sep 15 | Sep 29 | Sep 15 | `…K·K` (Aug 18–Sep 1 kept, Sep 1–15 missed) | | none |
+| Monthly | Jan 1 | Sep 3 | Oct 3 | Sep 15 | `…K` (Sep 3–Oct 3) | | |
+| Weekly | Jan 1 | Sep 1 | Sep 8 | Sep 15 | `…K·D` (Sep 8–15 missed, Sep 15–22 due) | | |
+| Weekly | Sep 15 | none | Sep 22 | Sep 15 | 1 drawn: `D` | 0 of the last 1, latest is due | none |
+
 ### Tests
 
-- API acceptance tests (InMemory, `Popkin.Api.Tests/Contacts/HabitsTests`): a habit started is
+- API acceptance tests (InMemory, `Popkin.Api.Tests/Contacts/HabitsTests`, 10): a habit started is
   listed with its due day; "We met up" moves the due day on; Undo puts it back; a resent keep
   saves once; "What" empty is `400` `what_required`; another person's habit is `404`
   `habit_not_found`; a day kept too far from today is `400` `kept_on_out_of_range` under
   `FakeTimeProvider`.
 - Direct tests of `HabitSchedule.Next` and `Habit.IsOverdue`, one case per row of the table above.
-- Unit tests (api library): `habitDue`, `habitKeeping` once gap 105 fixes the period,
+- Unit tests (api library): `habitDue`, `habitKeeping` (one case per row of the periods table),
   `HabitsStore` keep, undo and a failed keep, and `habits-text`.
-- Playwright (`e2e/tests/contacts/habits.spec.ts`) through `ContactsHabitsPage` and
-  `NewHabitDialog` with recorded responses: the overdue lead and rows as drawn, "We met up" with
-  the toast and Undo, the empty and error states, New habit's invalid and busy states, and a
-  habit started. `routes.ts` gains every state of `contacts-habits` and `new-habit`.
-- Parity: `pk-keep-strip`, `pk-habit-row` and `pk-spotlight` in its row form.
+- Playwright: `tests/contacts-habits.spec.ts` (13) through `ContactsHabitsPage`, `NewHabitDialog`
+  and `ContactProfilePage`, on recorded responses and the mocks' habits: Habits as drawn, We met up and Undo, empty,
+  failed, New habit from Habits and from a profile, Change, busy, the profile's card, and End
+  with Undo. `routes.ts` keys every state of `contacts-habits` and `new-habit`.
+- Parity: `pk-spotlight` in its row form with its strip, `pk-habit-row` (first and last),
+  `pk-info-card` (the profile's habit) and `pk-person-pick` with Change.
 
 ## Requirements
 

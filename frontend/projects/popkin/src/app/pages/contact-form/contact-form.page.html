@@ -96,6 +96,64 @@
           [disabled]="saving()"
         ></div>
       </section>
+      <section
+        pk-form-section
+        heading="Dates to remember"
+        hint="We’ll nudge you ahead of each one."
+      >
+        @for (date of store.dates(); track $index; let i = $index) {
+          <div
+            pk-date-entry
+            [fieldId]="'remind-' + i"
+            [kind]="draftKind(date)"
+            [date]="draftDay(date)"
+            [options]="leads"
+            [remind]="date.reminder"
+            (remindChange)="store.changeReminder(i, $any($event))"
+            (removed)="store.removeDate(i)"
+          ></div>
+        }
+        <div>
+          <button pk-link type="button" variant="accent" [disabled]="saving()" (click)="addDate()">
+            Another date
+          </button>
+        </div>
+      </section>
+      <section pk-form-section heading="How they connect" hint="Builds your map of who’s who.">
+        <div>
+          @for (connection of store.connections(); track $index; let i = $index) {
+            <div
+              pk-person-pick
+              [name]="connection.name"
+              [text]="connection.words ?? connection.kind"
+              [initials]="connection.initials"
+              [photo]="connection.photoUrl"
+              [accent]="connection.accent"
+              (removed)="store.removeConnection(i)"
+            ></div>
+          }
+          <button
+            pk-link
+            type="button"
+            variant="accent"
+            [disabled]="saving()"
+            (click)="connectTo()"
+          >
+            <svg pk-icon name="plus" size="md"></svg>Connect to someone
+          </button>
+        </div>
+        @if (groupOptions().length) {
+          <div
+            pk-toggle-chips
+            fieldId="groups"
+            label="Groups"
+            [options]="groupOptions()"
+            [disabled]="saving()"
+            [value]="store.groupIds()"
+            (valueChange)="store.groupIds.set($event)"
+          ></div>
+        }
+      </section>
       <section pk-form-section heading="Details" hint="Optional.">
         <div pk-form-pair>
           <div
@@ -140,6 +198,20 @@
           ></div>
         </div>
       </section>
+      @if (store.editing(); as editing) {
+        <div pk-menu-list [separated]="true">
+          <button
+            pk-menu-item
+            type="button"
+            icon="trash"
+            [danger]="true"
+            [disabled]="saving()"
+            (click)="delete()"
+          >
+            Delete {{ editing.firstName }}
+          </button>
+        </div>
+      }
     </form>
   }
 </div>

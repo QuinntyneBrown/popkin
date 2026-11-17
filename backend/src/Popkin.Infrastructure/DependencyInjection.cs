@@ -157,6 +157,30 @@ public static class DependencyInjection
             }
         }
 
+        // Contacts reminders: the Monday email by Azure Communication Services (ADR 0021) and the
+        // phone by Web Push (ADR 0028). Unconfigured, each sends nothing; the in-app reminder stands.
+        if (communicationCredential is not null && emailSender is { Length: > 0 })
+        {
+            var datesLink = $"{(configuration["App:Origin"] ?? "https://app.popkin.community").TrimEnd('/')}/contacts/dates";
+            services.AddSingleton<IContactsEmailSender>(
+                new Contacts.EmailContactsSender(new EmailClient(new Uri(communicationEndpoint!), communicationCredential), emailSender, datesLink));
+        }
+        else
+        {
+            services.AddSingleton<IContactsEmailSender, Contacts.NoContactsEmailSender>();
+        }
+
+        if (configuration["Push:PublicKey"] is { Length: > 0 } pushPublic && configuration["Push:PrivateKey"] is { Length: > 0 } pushPrivate)
+        {
+            services.AddSingleton(new Contacts.WebPushKeys(pushPublic, pushPrivate, configuration["Push:Subject"] is { Length: > 0 } subject ? subject : "mailto:hello@popkin.community"));
+            services.AddSingleton<IPhoneNotificationSender>(sp => new Contacts.WebPushPhoneNotificationSender(
+                sp.GetRequiredService<IServiceScopeFactory>(), sp.GetRequiredService<Contacts.WebPushKeys>(), new HttpClient { Timeout = TimeSpan.FromSeconds(30) }));
+        }
+        else
+        {
+            services.AddSingleton<IPhoneNotificationSender, Contacts.NoPhoneNotificationSender>();
+        }
+
         return services;
     }
 

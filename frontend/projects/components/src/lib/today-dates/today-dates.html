@@ -1,0 +1,26 @@
+@for (date of dates(); track $index) {
+  <li class="today-dates__item">
+    <a class="today-dates__row" [routerLink]="date.link">
+      <span pk-date-tile [top]="date.top" [day]="date.day" [bare]="true"></span>
+      <span class="today-dates__faces" role="img" [attr.aria-label]="date.who">
+        @for (face of date.faces; track $index) {
+          <span
+            pk-avatar
+            size="36"
+            [ring]="true"
+            [initials]="face.initials"
+            [photo]="face.photo"
+            [attr.data-accent]="face.accent"
+          ></span>
+        }
+      </span>
+      <span class="today-dates__main">
+        <span class="today-dates__title">{{ date.title }}</span>
+        @if (date.line) {
+          <span class="today-dates__text">{{ date.line }}</span>
+        }
+      </span>
+      <span class="today-dates__days">{{ date.days }}</span>
+    </a>
+  </li>
+}

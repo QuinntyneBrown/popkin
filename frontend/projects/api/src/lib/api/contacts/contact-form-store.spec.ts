@@ -4,6 +4,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContactProfileView } from '../../models/contacts';
 import { CONTACTS_API } from './contacts-api';
+import { ContactsOutbox } from './contacts-outbox';
 import {
   ContactFormStore,
   ContactFormValues,
@@ -24,6 +25,8 @@ const typed: ContactFormValues = {
 
 const femiId = '566025c4-1a2b-4c3d-8e9f-0a1b2c3d4e5f';
 const femi = { id: femiId, name: 'Femi Bankole', firstName: 'Femi' } as ContactProfileView;
+
+const outbox = { offline: vi.fn(() => false), keepAdd: vi.fn() };
 
 describe('contactRequestOf', () => {
   it('trims the name and splits the things they love at commas (known gap 102)', () => {
@@ -83,7 +86,11 @@ describe('ContactFormStore', () => {
       editContact: vi.fn(() => of(femi)),
     };
     TestBed.configureTestingModule({
-      providers: [ContactFormStore, { provide: CONTACTS_API, useValue: api }],
+      providers: [
+        ContactFormStore,
+        { provide: CONTACTS_API, useValue: api },
+        { provide: ContactsOutbox, useValue: outbox },
+      ],
     });
     store = TestBed.inject(ContactFormStore);
   });
@@ -157,6 +164,125 @@ describe('ContactFormStore', () => {
     expect(store.saved()).toEqual(femi);
   });
 
+  it('sends Dates to remember with the contact: added, reminder changed, removed (L2-129 AC2)', () => {
+    store.addDate({
+      kind: 'Birthday',
+      title: null,
+      month: 3,
+      day: 9,
+      year: null,
+      everyYear: true,
+      reminder: 'OneWeekBefore',
+    });
+    store.addDate({
+      kind: 'Other',
+      title: 'Wedding',
+      month: 12,
+      day: 26,
+      year: 2026,
+      everyYear: false,
+      reminder: 'OneMonthBefore',
+    });
+    store.changeReminder(0, 'OnTheDay');
+    store.removeDate(1);
+
+    store.save(typed, null);
+
+    expect(api.addContact).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keyDates: [expect.objectContaining({ kind: 'Birthday', reminder: 'OnTheDay' })],
+      }),
+      null,
+    );
+  });
+
+  it('editing, sends the connections added and removes those taken off on Save (L2-150 AC9)', () => {
+    api.contact.mockReturnValue(
+      of({
+        ...femi,
+        around: [
+          {
+            id: 'k1',
+            contactId: 'grace',
+            name: 'Grace Adeyemi',
+            initials: 'GA',
+            accent: 'Plum',
+            photoUrl: null,
+            kind: 'Partner',
+            words: null,
+            promised: false,
+          },
+        ],
+      }),
+    );
+    api.editContact.mockReturnValue(of(femi));
+    store.edit(femiId);
+    expect(store.connections().map((c) => [c.id, c.name, c.accent])).toEqual([
+      ['k1', 'Grace Adeyemi', 'plum'],
+    ]);
+
+    store.addConnection({
+      id: null,
+      otherContactId: 'chidi',
+      name: 'Chidi Okafor',
+      initials: 'CO',
+      accent: 'sky',
+      photoUrl: null,
+      kind: 'Friend',
+      words: 'Old friends',
+      promised: true,
+    });
+    store.removeConnection(0);
+    store.save(typed, null);
+
+    expect(api.editContact).toHaveBeenCalledWith(
+      femiId,
+      expect.objectContaining({
+        connect: [
+          { otherContactId: 'chidi', kind: 'Friend', words: 'Old friends', promised: true },
+        ],
+        disconnect: ['k1'],
+      }),
+      null,
+    );
+  });
+
+  it('editing, starts Dates to remember from the dates kept (L2-130 AC1)', () => {
+    api.contact.mockReturnValue(
+      of({
+        ...femi,
+        keyDates: [
+          {
+            id: 'd1',
+            kind: 'Birthday',
+            title: null,
+            month: 3,
+            day: 9,
+            year: null,
+            everyYear: true,
+            reminder: 'OneWeekBefore',
+            nextOn: '2027-03-09',
+            daysLeft: 175,
+          },
+        ],
+      }),
+    );
+    store.edit(femiId);
+
+    expect(store.dates()).toEqual([
+      {
+        id: 'd1',
+        kind: 'Birthday',
+        title: null,
+        month: 3,
+        day: 9,
+        year: null,
+        everyYear: true,
+        reminder: 'OneWeekBefore',
+      },
+    ]);
+  });
+
   it('editing, a failed save is failed and keeps the contact being edited', () => {
     api.editContact.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0 })));
     store.edit(femiId);
@@ -185,5 +311,19 @@ describe('ContactFormStore', () => {
     store.edit('not-a-contact');
     expect(store.reading()).toBe('notFound');
     expect(api.contact).not.toHaveBeenCalled();
+  });
+
+  // L2-123 AC4
+  it('keeps an add made offline in the outbox, under a new client id next time', () => {
+    outbox.offline.mockReturnValue(true);
+    store.save(typed, null);
+
+    expect(outbox.keepAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Femi Bankole' }),
+      null,
+    );
+    expect(store.kept()).toBe(true);
+    expect(store.state()).toBe('idle');
+    outbox.offline.mockReturnValue(false);
   });
 });
