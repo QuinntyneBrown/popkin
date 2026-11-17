@@ -12,54 +12,61 @@ skinparam class {
 title Class structure — Reminders
 
 package "Popkin.Domain" {
+  enum ReminderKind {
+    KeyDate
+    FollowUp
+    Habit
+  }
   class ContactReminder {
     +Guid Id
     +Guid OwnerId
-    +Guid KeyDateId
-    +DateOnly OccursOn
+    +ReminderKind Kind
+    +Guid SubjectId
+    +Guid? ContactId
     +DateOnly DueOn
+    +string Words
     +DateTimeOffset CreatedAt
     +DateTimeOffset? NotifiedAt
     +DateTimeOffset? DismissedAt
     +Dismiss(now: DateTimeOffset): void
     +MarkNotified(now: DateTimeOffset): void
   }
-  class ContactWeeklyEmail {
-    +Guid OwnerId
-    +DateOnly WeekOf
-    +DateTimeOffset SentAt
-  }
   class KeyDate {
     +Guid Id
     +ReminderLead Lead
+    +bool RemindersOn
     +NextOccurrence(today: DateOnly): DateOnly?
     +ReminderDay(occursOn: DateOnly): DateOnly
   }
   class ReminderPreferences {
-    +bool PhoneNotifications
-    +bool MondayEmail
+    +ReminderLead BirthdayLead
+    +ReminderLead AnniversaryLead
+    +ReminderLead MilestoneLead
+  }
+  class NotificationPreferences {
+    +Guid PersonId
+    +string? TimeZone
+  }
+  class NotificationEvent {
+    +NotificationKind Kind
+    +Guid? RecipientPersonId
+    +Guid SubjectId
+    +string? Facts
+    +string? DedupKey
   }
 }
 package "Popkin.Application" {
   class SendContactRemindersCommand
-  class ContactRemindersResult {
-    +int Added
-    +int PhoneSent
-    +int EmailsSent
-    +int Failed
-  }
   class SendContactRemindersCommandHandler {
-    +Handle(command: SendContactRemindersCommand): Task<ContactRemindersResult>
+    +Handle(command: SendContactRemindersCommand): Task<int>
   }
-  interface IOwnerClock {
-    +Today(ownerId: Guid): DateOnly
-    +LocalNow(ownerId: Guid): DateTimeOffset
-  }
-  interface IPhoneNotificationSender {
-    +SendAsync(ownerId: Guid, reminder: PhoneReminder, ct: CancellationToken): Task
-  }
-  interface IContactsEmailSender {
-    +SendWeekAheadAsync(destination: string, email: WeekAheadEmail, ct: CancellationToken): Task
+  class ReminderRules {
+    +{static} Hour: int = 8
+    +{static} LocalNow(zone: string?, utcNow): DateTimeOffset
+    +{static} IsTime(localNow): bool
+    +{static} DateWords(date, firstName, occursOn, today): string
+    +{static} FollowUpWords(text): string
+    +{static} HabitWords(what, firstName, overdue): string
   }
   class GetContactRemindersQueryHandler {
     +Handle(query: GetContactRemindersQuery): Task<ContactReminderDto[]>
@@ -68,32 +75,24 @@ package "Popkin.Application" {
     +Handle(command: DismissContactReminderCommand): Task
   }
 }
-package "Popkin.Infrastructure" {
-  class NoPhoneNotificationSender
-  class AcsContactsEmailSender
-}
 package "Popkin.Worker" {
   abstract class "PeriodicJob<TResponse>" as PeriodicJob {
     #NewCommand(): IRequest<TResponse>
   }
   class SendContactRemindersJob {
-    #NewCommand(): IRequest<ContactRemindersResult>
+    #NewCommand(): IRequest<int>
   }
 }
 PeriodicJob <|-- SendContactRemindersJob
 SendContactRemindersJob ..> SendContactRemindersCommand : sends
 SendContactRemindersCommandHandler ..> SendContactRemindersCommand : handles
-SendContactRemindersCommandHandler ..> ContactRemindersResult : returns
-SendContactRemindersCommandHandler ..> IOwnerClock
-SendContactRemindersCommandHandler ..> KeyDate : reads
-SendContactRemindersCommandHandler ..> ReminderPreferences : reads
+SendContactRemindersCommandHandler ..> ReminderRules
+SendContactRemindersCommandHandler ..> KeyDate : reads RemindersOn
+SendContactRemindersCommandHandler ..> NotificationPreferences : reads TimeZone
 SendContactRemindersCommandHandler --> ContactReminder : adds once
-SendContactRemindersCommandHandler --> ContactWeeklyEmail : records
-SendContactRemindersCommandHandler ..> IPhoneNotificationSender
-SendContactRemindersCommandHandler ..> IContactsEmailSender
-IPhoneNotificationSender <|.. NoPhoneNotificationSender
-IContactsEmailSender <|.. AcsContactsEmailSender
-ContactReminder "*" --> "1" KeyDate
+SendContactRemindersCommandHandler --> NotificationEvent : adds Birthdays once
+ContactReminder --> ReminderKind
 DismissContactReminderCommandHandler --> ContactReminder : dismisses
 GetContactRemindersQueryHandler ..> ContactReminder : reads
+KeyDate ..> ReminderPreferences : lead starts from default
 @enduml

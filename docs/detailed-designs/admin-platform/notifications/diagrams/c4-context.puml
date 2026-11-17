@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Member email and notification kinds
+
+Person(owner, "Owner", "Admin who may pause email and switch kinds")
+Person(staff, "Support or Viewer admin", "Reads the sending status and the kinds")
+Person(member, "Member", "Gets email and phone alerts")
+System(popkin, "Popkin", "Pop-up communities, with notifications")
+System_Ext(acs, "Azure Communication Services", "Email provider")
+System_Ext(push, "Web Push services", "Browser push endpoints")
+
+Rel(owner, popkin, "Pauses and resumes member email, switches a kind off for everyone, with a reason, in", "Popkin admin app")
+Rel(staff, popkin, "Reads Notifications in", "Popkin admin app")
+Rel(popkin, acs, "Hands member email and sign-in codes to", "HTTPS")
+Rel(popkin, push, "Sends phone alerts through", "Web Push")
+Rel(acs, member, "Delivers email to")
+Rel(push, member, "Delivers phone alerts to")
+@enduml

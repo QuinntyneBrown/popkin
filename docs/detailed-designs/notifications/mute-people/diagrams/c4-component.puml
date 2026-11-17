@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Mute people
+
+Container_Boundary(web, "Popkin web app") {
+  Component(view, "NotificationsPage, People view", "Angular page", "Muted people, Mute someone")
+  Component(store, "NotificationSettingsStore", "api library", "searchMuteCandidates(), mute(), unmute()")
+  Component(client, "HttpNotificationsApi", "NOTIFICATIONS_API", "Typed HTTP client")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "NotificationSettingsController", "ASP.NET Core controller", "mute-candidates, mutes")
+  Component(search, "SearchMuteCandidatesQueryHandler", "MediatR handler", "Up to five people in shared active Popkins")
+  Component(mute, "MutePersonCommandHandler", "MediatR handler", "Adds PersonMute once")
+  Component(unmute, "UnmutePersonCommandHandler", "MediatR handler", "Removes the caller's row")
+  Component(shared, "SharedPopkins", "Application", "Popkins two people both belong to")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(rules, "NotificationRules", "Application, pure", "Suppresses with rule muted_person")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "PersonMute, Membership")
+Rel(view, store, "Reads, calls")
+Rel(store, client, "JSON/HTTPS")
+Rel(client, ctrl, "GET, POST, DELETE")
+Rel(ctrl, search, "Sends SearchMuteCandidatesQuery")
+Rel(ctrl, mute, "Sends MutePersonCommand")
+Rel(ctrl, unmute, "Sends UnmutePersonCommand")
+Rel(search, shared, "Uses")
+Rel(mute, shared, "Requires a shared active Popkin")
+Rel(search, db, "Reads", "EF Core")
+Rel(mute, db, "Writes", "EF Core")
+Rel(unmute, db, "Writes", "EF Core")
+Rel(rules, db, "Actor muted by recipient?", "EF Core")
+@enduml

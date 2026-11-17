@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — Send a Popkin update
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "DispatchNotificationsJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DispatchNotificationsCommandHandler" as dispatch
+  participant "PopkinUpdateEmailComposer" as composer
+  participant "NotificationRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "NotificationEmailRenderer" as renderer
+  participant "AcsNotificationEmailSender" as sender
+  database "Popkin database" as db
+  participant "Photo store" as blobs
+end box
+participant "Azure Communication Services" as acs
+time -> job : 15 s elapse
+job -> dispatch : Send DispatchNotificationsCommand
+dispatch -> db : Open Update emails whose DueAt has passed
+db --> dispatch : OutgoingEmail rows
+loop Each due email
+  dispatch -> db : Status Open -> Sending (once; DedupKey unique, L2-175 AC3)
+  dispatch -> rules : Still allowed now? pause, hold, membership, settings (L2-174 AC1)
+  rules --> dispatch : Allowed, or the rule that stops it
+  alt Stopped
+    dispatch -> db : Suppressed with the rule
+  else Allowed
+    dispatch -> composer : ComposeAsync(email)
+    composer -> db : Events of the bundle; each change as it is now
+    db --> composer : Messages, photos, stories, memberships
+    composer -> composer : Drop what no longer stands; newest leads; 3 "Also new" (L2-164 AC6)
+    composer -> composer : Cut text at 300; sender "{first name} via Popkin" (L2-163 AC1, AC7)
+    composer --> dispatch : PopkinUpdateEmailModel, or Nothing
+    alt Nothing left (L2-161 AC9)
+      dispatch -> db : Suppressed "nothing_left"
+    else Model
+      dispatch -> renderer : Render(model)
+      renderer --> dispatch : Subject, HTML (lang, alt, encoded), text, inline images (L2-163 AC3, AC4)
+      dispatch -> sender : SendAsync(message)
+      sender -> blobs : Read thumbnails
+      blobs --> sender : Bytes
+      sender -> acs : Send with List-Unsubscribe and List-Unsubscribe-Post (L2-168 AC4)
+      acs --> sender : Accepted, or failure
+      sender --> dispatch : SendResult
+      dispatch -> db : Sent, Failed (retry with backoff) or Dropped
+    end
+  end
+  dispatch -> db : Save this email
+end
+dispatch --> job : Result; no hub event (ADR 0015)
+@enduml

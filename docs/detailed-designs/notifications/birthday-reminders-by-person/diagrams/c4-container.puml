@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Birthday reminders by person
+
+Person(owner, "Person", "Owner of the contacts")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "People view of Notifications; Contacts' profile and Dates")
+  Container(api, "Popkin API", "ASP.NET Core", "Lists birthdays; saves one date's reminder")
+  Container(worker, "Popkin Worker", ".NET worker", "SendContactRemindersJob reads Lead and RemindersOn")
+  ContainerDb(db, "Popkin database", "SQL Server", "KeyDate.Lead, KeyDate.RemindersOn, ReminderPreferences, NotificationPlatform")
+}
+Rel(owner, web, "Uses", "HTTPS")
+Rel(web, api, "GET /api/me/notifications, PUT /api/contacts/key-dates/{id}/reminder", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(worker, db, "Reads each date's reminder", "EF Core")
+@enduml

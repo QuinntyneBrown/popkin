@@ -1,0 +1,37 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Notification settings
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "NotificationsPage", "Angular page", "Email section, view nav, What you hear about")
+  Component(store, "NotificationSettingsStore", "api library", "Loads, saves optimistically, reverts, banners")
+  Component(client, "HttpNotificationsApi", "NOTIFICATIONS_API", "Typed HTTP client")
+  Component(pushSub, "BrowserPushSubscriber", "PUSH_SUBSCRIBER", "Asks the browser, saves the subscription")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "NotificationSettingsController", "ASP.NET Core controller", "/api/me/notifications")
+  Component(get, "GetNotificationSettingsQueryHandler", "MediatR handler", "Effective settings with names and groups")
+  Component(email, "SetActivityEmailCommandHandler", "MediatR handler", "Email on or off")
+  Component(freq, "SetActivityFrequencyCommandHandler", "MediatR handler", "As it happens, daily, weekly")
+  Component(kind, "SetNotificationKindCommandHandler", "MediatR handler", "One kind, one or both channels")
+  Component(cat, "NotificationCatalogue", "Domain", "Twelve kinds, groups, defaults, required")
+  Component(eff, "EffectiveNotificationSettings", "Application", "Choice, else platform default, else catalogue")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "NotificationPreferences, NotificationKindChoice")
+Rel(page, store, "Reads signals, calls actions")
+Rel(store, client, "settings(), setEmail(), setFrequency(), setKind()")
+Rel(store, pushSub, "subscribe() when a phone switch turns on")
+Rel(client, ctrl, "JSON/HTTPS")
+Rel(ctrl, get, "Sends GetNotificationSettingsQuery")
+Rel(ctrl, email, "Sends SetActivityEmailCommand")
+Rel(ctrl, freq, "Sends SetActivityFrequencyCommand")
+Rel(ctrl, kind, "Sends SetNotificationKindCommand")
+Rel(get, eff, "Resolves")
+Rel(eff, cat, "Defaults and names")
+Rel(kind, cat, "Refuses a required kind")
+Rel(get, db, "Reads", "EF Core")
+Rel(email, db, "Writes", "EF Core")
+Rel(freq, db, "Writes", "EF Core")
+Rel(kind, db, "Writes", "EF Core")
+@enduml

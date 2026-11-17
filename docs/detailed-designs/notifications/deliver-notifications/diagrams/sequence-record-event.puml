@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — Record an event
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "GroupChatPage" as page
+  participant "CHAT_API" as client
+end box
+box "Backend — Popkin API application" #D1FADF
+  participant "MessagesController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendMessageCommandHandler" as handler
+  participant "NotificationEvent" as event
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Send a reply in Everyone
+page -> client : sendMessage(...)
+client -> controller : POST message
+controller -> handler : Send SendMessageCommand
+handler -> db : Guard membership, load thread and reply-to
+db --> handler : Thread, replied message
+handler -> handler : Message.Send(...)
+handler -> event : Record(GroupChat, popkin, actor, messageId)
+handler -> event : Record(MentionsAndReplies, ..., recipient = replied author)
+handler -> db : SaveChanges: message and both events together
+db --> handler : Committed (or nothing saved)
+handler -> notifier : MessageAdded(audience, dto) — live hub event, unchanged
+handler --> controller : SendMessageResult
+controller --> client : 201 MessageDto
+client --> page : Message shown
+page --> actor : Reply in the thread
+@enduml

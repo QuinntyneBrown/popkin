@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — A held Popkin and its release
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as poster
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "ReleaseHoldDialog" as dialog
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminNotificationsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ReleaseNotificationHoldCommandHandler" as handler
+  participant "NotificationHoldRules" as rules
+end box
+box "Backend — Popkin Worker and Infrastructure" #FFF4E5
+  participant "DispatchNotificationsCommandHandler" as dispatch
+  participant "PlatformSnapshot" as snap
+  database "Popkin database" as db
+end box
+poster -> controller : Posts a message in the held Popkin
+controller -> db : Message and NotificationEvent in one save
+dispatch -> db : New NotificationEvent
+dispatch -> snap : IsPopkinHeld(popkinId)
+snap --> dispatch : true
+dispatch -> db : Each member's deliveries Suppressed, rule Held, email and phone (L2-172 AC3)
+note right of dispatch : No member is told; their settings and screens are unchanged.
+dispatch -> rules : IsHeldAutomatically(recipient) for other Popkins' deliveries
+rules --> dispatch : true while suspended or deleting (L2-172 AC5)
+== Release ==
+actor -> dialog : "Release the hold on Class of 2015 Reunion?", reason, "Release hold"
+dialog -> controller : POST /api/admin/notifications/holds/{holdId}/release
+controller -> handler : Send ReleaseNotificationHoldCommand
+handler -> handler : RequireAsync(HoldNotifications); ReasonRules.Required
+handler -> db : NotificationHold.Release(admin, reason, now); audit ReleasedNotificationHold; one save
+handler -> snap : Invalidate()
+controller --> dialog : 200, toast "Hold released"
+poster -> controller : Next message
+dispatch -> snap : IsPopkinHeld(popkinId)
+snap --> dispatch : false
+dispatch -> dispatch : Members' own settings decide (L2-161 AC1)
+note right of dispatch : Deliveries suppressed while held stay suppressed;\nnothing held back is sent (L2-172 AC4).
+@enduml

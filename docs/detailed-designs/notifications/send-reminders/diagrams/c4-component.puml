@@ -1,0 +1,35 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Send reminders
+
+Container_Boundary(worker, "Popkin Worker") {
+  Component(cjob, "SendContactRemindersJob", "PeriodicJob, 5 min", "Key dates, follow-ups, habits")
+  Component(pjob, "SendPopkinRemindersJob", "PeriodicJob, 5 min", "Stories due, Popkins wrapping up")
+  Component(djob, "DispatchNotificationsJob", "PeriodicJob, 15 s", "Sends events")
+}
+Container_Boundary(app, "Popkin Application") {
+  Component(chandler, "SendContactRemindersCommandHandler", "MediatR handler", "In-app reminder at 8 am plus a Birthdays event")
+  Component(phandler, "SendPopkinRemindersCommandHandler", "MediatR handler", "Adds StoriesDue and PopkinWrappingUp events once")
+  Component(prules, "PopkinReminderRules", "Pure type", "18:00 the day before; the wrap-up window")
+  Component(dispatch, "DispatchNotificationsCommandHandler", "MediatR handler", "Rules, then send at once (Deliver notifications)")
+  Component(composers, "KeyDateReminder / StoryDue / WrapUp EmailComposer", "INotificationEmailComposer", "Read the subject now; build the model")
+  Component(alerts, "PhoneAlerts", "Application service", "Title, body and URL of each alert")
+  Component(renderer, "INotificationEmailRenderer", "Port", "HTML and text")
+  Component(mail, "INotificationEmailSender", "Port", "Azure Communication Services")
+  Component(phone, "IPhoneNotificationSender", "Port", "WebPushPhoneNotificationSender")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "NotificationEvent (DedupKey unique)")
+Rel(cjob, chandler, "Sends SendContactRemindersCommand")
+Rel(pjob, phandler, "Sends SendPopkinRemindersCommand")
+Rel(phandler, prules, "Uses")
+Rel(chandler, db, "Adds ContactReminder and event", "EF Core")
+Rel(phandler, db, "Adds events", "EF Core")
+Rel(djob, dispatch, "Sends DispatchNotificationsCommand")
+Rel(dispatch, db, "Reads events; records deliveries", "EF Core")
+Rel(dispatch, composers, "Compose")
+Rel(dispatch, renderer, "Render")
+Rel(dispatch, mail, "SendAsync")
+Rel(dispatch, alerts, "Build")
+Rel(dispatch, phone, "SendAsync")
+@enduml

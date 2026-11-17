@@ -1,0 +1,74 @@
+@startuml
+title UML sequence behaviour — An Owner pauses and resumes member email
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "NotificationsPage" as page
+  participant "PauseEmailDialog, ResumeEmailDialog" as dialog
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminNotificationsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "PauseMemberEmailCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Worker" #FFF4E5
+  participant "DispatchNotificationsCommandHandler" as dispatch
+  database "Popkin database" as db
+end box
+actor -> page : "Pause all email"
+page -> dialog : "Pause all member email?" (L2-170 AC1)
+actor -> dialog : Reason, "Pause all email"
+alt Reason empty
+  dialog --> actor : "Give a reason; it goes in the audit log." Nothing sent (L2-087 AC2)
+else Reason given
+  dialog -> client : pauseEmail(reason)
+  client -> controller : POST /api/admin/notifications/pause
+  controller -> handler : Send PauseMemberEmailCommand
+  handler -> guard : RequireAsync(ManageNotifications)
+  alt Support or Viewer
+    guard --> controller : 403 role_not_allowed (L2-170 AC5)
+  else Owner
+    handler -> db : NotificationPlatform.Pause(admin, reason, now)
+    handler -> audit : Record(PausedMemberEmail, MemberEmail, reason, queued)
+    handler -> db : SaveChangesAsync, one transaction (L2-170 AC4)
+    controller --> client : 200 AdminSendStatusDto
+    client --> page : "All member email is paused"
+  end
+end
+== Next dispatcher tick, within a minute (L2-170 AC2) ==
+dispatch -> db : Read NotificationPlatform (not cached)
+dispatch -> db : Due member email stays queued in due order
+note right of dispatch : Sign-in codes go through ICodeSender and never wait.\nPhone alerts are unchanged.
+== Later ==
+actor -> page : "Resume sending"
+page -> dialog : "Resume sending?", "{n} queued emails send in order over about {m} minutes." (L2-170 AC3)
+actor -> dialog : Reason, "Resume sending"
+dialog -> client : resumeEmail(reason)
+client -> controller : POST /api/admin/notifications/resume
+controller -> handler : Send ResumeMemberEmailCommand (same guard, reason, audit)
+handler -> db : NotificationPlatform.Resume(); audit; one save
+controller --> client : 200, "Email is sending"
+dispatch -> db : Next tick: queued email in due order
+alt Queued more than 6 hours
+  dispatch -> db : Mark Dropped, never sent late (L2-170 AC3)
+else Within 6 hours
+  dispatch -> dispatch : Send through INotificationEmailSender, reading the person's rules again (L2-174 AC1)
+end
+@enduml

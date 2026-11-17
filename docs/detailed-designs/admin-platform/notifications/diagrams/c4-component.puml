@@ -1,0 +1,45 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Member email and notification kinds
+
+Container_Boundary(admin, "Popkin admin app") {
+  Component(page, "NotificationsPage", "Angular page", "pk-send-status, Kinds table, tabs")
+  Component(dialogs, "PauseEmailDialog, ResumeEmailDialog, NotificationKindDialog", "CDK dialogs", "Required reason")
+  Component(store, "AdminNotificationsStore", "api library", "Data, tab, polling, actions")
+  Component(client, "ADMIN_PLATFORM_API", "api library contract", "HttpAdminPlatformApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminNotificationsController", "ASP.NET Core controller", "Admin scheme only")
+  Component(read, "GetAdminNotificationsQueryHandler", "MediatR handler", "Status, kinds, counts")
+  Component(pause, "PauseMemberEmail / ResumeMemberEmail handlers", "MediatR handlers", "ManageNotifications, reason, audit")
+  Component(sw, "SwitchNotificationKindCommandHandler", "MediatR handler", "ManageNotifications, reason, audit, Invalidate")
+  Component(guard, "IAdminGuard", "Application", "RequireAsync(ManageNotifications)")
+  Component(audit, "IAuditLog", "Application", "RecordAsync(AuditRecord)")
+  Component(stats, "NotificationStats", "Infrastructure", "INotificationStats: totals per kind")
+  Component(snap, "PlatformSnapshot", "Infrastructure singleton", "INotificationPlatform.IsKindOff")
+  ComponentDb(db, "Popkin database", "SQL Server", "NotificationPlatform, NotificationKindSwitch, AuditEntry")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(dispatch, "DispatchNotificationsCommandHandler", "MediatR handler", "Reads the pause each tick; NotificationRules")
+}
+Rel(page, store, "Reads and acts through")
+Rel(page, dialogs, "Opens")
+Rel(dialogs, store, "Confirms through")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "/api/admin/notifications")
+Rel(ctrl, read, "Sends GetAdminNotificationsQuery")
+Rel(ctrl, pause, "Sends Pause / ResumeMemberEmailCommand")
+Rel(ctrl, sw, "Sends SwitchNotificationKindCommand")
+Rel(pause, guard, "Checks role")
+Rel(sw, guard, "Checks role")
+Rel(pause, audit, "Records")
+Rel(sw, audit, "Records")
+Rel(read, stats, "Counts")
+Rel(pause, db, "Saves once", "EF Core")
+Rel(sw, db, "Saves once", "EF Core")
+Rel(sw, snap, "Invalidate()")
+Rel(snap, db, "Reloads switches", "EF Core")
+Rel(dispatch, db, "Reads NotificationPlatform", "EF Core")
+Rel(dispatch, snap, "IsKindOff(kind)")
+@enduml

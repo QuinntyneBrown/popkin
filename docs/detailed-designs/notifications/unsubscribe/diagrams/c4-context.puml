@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Unsubscribe
+
+Person(person, "Person", "Gets Popkin email")
+System_Ext(client, "Mail client", "Gmail, Outlook, Apple Mail; shows its own Unsubscribe button")
+System(popkin, "Popkin", "Sends activity and reminder email; keeps notification settings")
+System_Ext(acs, "Azure Communication Services", "Sends email (ADR 0021)")
+
+Rel(popkin, acs, "Sends email with List-Unsubscribe headers", "HTTPS")
+Rel(acs, client, "Delivers email")
+Rel(person, client, "Reads email in")
+Rel(client, popkin, "One-click unsubscribe (RFC 8058)", "HTTPS POST")
+Rel(person, popkin, "Opens footer links in", "HTTPS")
+@enduml

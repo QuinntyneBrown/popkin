@@ -1,0 +1,89 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Birthday reminders by person
+
+package "Popkin.Domain" {
+  enum ReminderLead {
+    OnTheDay
+    OneDayBefore
+    ThreeDaysBefore
+    OneWeekBefore
+    TwoWeeksBefore
+    OneMonthBefore
+  }
+  class KeyDate {
+    +Guid Id
+    +Guid OwnerId
+    +Guid ContactId
+    +KeyDateKind Kind
+    +int Month
+    +int Day
+    +int? Year
+    +ReminderLead Lead
+    +bool RemindersOn
+    +ChangeLead(lead: ReminderLead): void
+    +TurnReminders(on: bool): void
+    +NextOccurrence(today: DateOnly): DateOnly?
+    +YearsOn(occursOn: DateOnly): int?
+  }
+  class ReminderPreferences {
+    +Guid OwnerId
+    +ReminderLead? BirthdayLead
+    +ReminderLead AnniversaryLead
+    +ReminderLead MilestoneLead
+  }
+  class NotificationPlatform {
+    +ReminderLead? DefaultBirthdayLead
+  }
+  class Contact {
+    +Guid Id
+    +string Name
+    +string? PhotoKey
+  }
+}
+package "Popkin.Application" {
+  class ReminderDefaults {
+    +ForNewBirthday(ownerId): (ReminderLead lead, bool on)
+  }
+  class BirthdayRemindersReader {
+    +ReadAsync(ownerId, today): Task<BirthdayReminderDto[]>
+  }
+  class BirthdayReminderDto <<record>> {
+    +Guid KeyDateId
+    +Guid ContactId
+    +string Name
+    +string? PhotoUrl
+    +DateOnly OccursOn
+    +int? Turns
+    +int InDays
+    +string Lead
+    +bool RemindersOn
+  }
+  class ChangeKeyDateReminderCommand <<record>> {
+    +Guid KeyDateId
+    +string? Lead
+    +bool? On
+  }
+  class ChangeKeyDateReminderCommandHandler {
+    +Handle(c): Task<ContactKeyDateDto>
+  }
+}
+KeyDate --> ReminderLead
+KeyDate "*" --> "1" Contact
+ReminderDefaults ..> ReminderPreferences
+ReminderDefaults ..> NotificationPlatform
+BirthdayRemindersReader ..> KeyDate : Kind = Birthday
+BirthdayRemindersReader ..> Contact
+BirthdayRemindersReader ..> BirthdayReminderDto : returns
+ChangeKeyDateReminderCommandHandler ..> ChangeKeyDateReminderCommand : handles
+ChangeKeyDateReminderCommandHandler --> KeyDate : one value
+@enduml

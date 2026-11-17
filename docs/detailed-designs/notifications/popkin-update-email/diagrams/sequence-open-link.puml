@@ -1,0 +1,47 @@
+@startuml
+title UML sequence behaviour — Open a link from the email
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Member" as actor
+participant "Mail client" as mail
+box "Frontend — Popkin web app" #E0F2FE
+  participant "Router and session guard" as guard
+  participant "Thread page" as page
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ThreadsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IMembershipGuard" as membership
+end box
+actor -> mail : Chooses "Reply in Popkin"
+mail -> guard : Open https://{address}.popkin.community/chat/... (L2-163 AC6)
+alt No session
+  guard -> actor : Sign in, then return to the same link
+else Session
+  guard -> page : Open the thread at the message
+  page -> ctrl : GET the thread
+  ctrl -> membership : RequireMemberAsync
+  alt No longer a member
+    membership --> ctrl : 404 popkin_not_found
+    ctrl --> page : ProblemDetails
+    page --> actor : Popkin not found
+  else Member
+    membership --> ctrl : Membership
+    ctrl --> page : Thread
+    page --> actor : The message, ready to reply
+  end
+end
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Notification defaults
+
+Container_Boundary(console, "Popkin admin app") {
+  Component(tab, "NotificationsPage (Defaults tab)", "Angular page", "pk-limit-row, pk-save-bar")
+  Component(dialog, "SaveDefaultsDialog", "CDK dialog", "Change list, required reason")
+  Component(draft, "NotificationDefaultsDraft", "api library", "Draft, validity, unsaved count")
+  Component(client, "ADMIN_PLATFORM_API", "api library contract", "HttpAdminPlatformApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminNotificationsController", "ASP.NET Core controller", "Admin scheme only")
+  Component(handler, "ChangeNotificationDefaultsCommandHandler", "MediatR handler", "ManageNotifications, reason, audit, one save")
+  Component(rules, "NotificationDefaultsRules", "Domain", "Ranges of each default")
+  Component(audit, "IAuditLog", "Application", "RecordAsync(AuditRecord)")
+  Component(snap, "PlatformSnapshot", "Infrastructure singleton", "INotificationPlatform.Defaults")
+  Component(settings, "Member settings and key-date handlers", "MediatR handlers", "Frequency ?? default; BirthdayLead ?? default")
+  ComponentDb(db, "Popkin database", "SQL Server", "NotificationPlatform, AuditEntry")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(rulesW, "NotificationRules", "Application", "Bundling window, daily most, quiet hours")
+}
+Rel(tab, draft, "Edits")
+Rel(tab, dialog, "Opens")
+Rel(dialog, client, "Saves through")
+Rel(client, ctrl, "PUT /api/admin/notifications/defaults")
+Rel(ctrl, handler, "Sends ChangeNotificationDefaultsCommand")
+Rel(handler, rules, "Checks each value")
+Rel(handler, audit, "Records the change")
+Rel(handler, db, "Saves once", "EF Core")
+Rel(handler, snap, "Invalidate()")
+Rel(snap, db, "Reloads", "EF Core")
+Rel(settings, snap, "Defaults")
+Rel(rulesW, snap, "Defaults (the Worker's own snapshot)")
+@enduml

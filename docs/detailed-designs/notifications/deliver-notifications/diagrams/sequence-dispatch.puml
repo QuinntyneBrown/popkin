@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — Fan out and decide
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "DispatchNotificationsJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DispatchNotificationsCommandHandler" as handler
+  participant "LocalClock" as clock
+  participant "NotificationRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+time -> job : 15 s elapse
+job -> handler : Send DispatchNotificationsCommand
+handler -> db : Up to 200 events with no DispatchedAt, oldest first
+db --> handler : Events
+handler -> db : Active memberships of each audience, less the actor (L2-161 AC2, L2-174 AC1)
+db --> handler : Recipients
+handler -> db : Preferences, kind choices, levels, mutes, holds, NotificationPlatform
+db --> handler : NotificationContext
+loop Each recipient and channel
+  handler -> clock : LocalNow(personId)
+  clock --> handler : Local time, UTC before a zone is saved (L2-161 AC7)
+  handler -> rules : Decide(question)
+  rules --> handler : Send(at) or Suppress(rule) (L2-161 AC1)
+  alt Email, as it happens, under the daily most
+    handler -> db : Join or open bundle; SendAfter = first + window (L2-161 AC3, AC6)
+  else Email, digest frequency or daily most reached
+    handler -> db : Delivery AwaitingDigest (L2-161 AC4, AC5)
+  else Phone
+    handler -> db : Delivery Due at now or end of quiet hours (L2-161 AC6)
+  else Suppressed
+    handler -> db : Delivery Suppressed with its rule
+  end
+end
+handler -> db : Set DispatchedAt; save (unique EventId, PersonId, Channel; L2-175 AC3)
+db --> handler : Committed
+handler --> job : DispatchResult
+job -> job : Ticked(); no hub event (ADR 0015)
+@enduml

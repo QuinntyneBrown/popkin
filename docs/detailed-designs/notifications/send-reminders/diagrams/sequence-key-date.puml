@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — Remind of a key date
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "SendContactRemindersJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendContactRemindersCommandHandler" as handler
+  participant "KeyDate" as date
+  participant "DispatchNotificationsCommandHandler" as dispatch
+  participant "KeyDateReminderEmailComposer" as composer
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "Email and push senders" as senders
+end box
+time -> job : 5 min elapse
+job -> handler : Send SendContactRemindersCommand
+loop Each owner from 8 am local (L2-140 AC1)
+  handler -> db : Key dates with RemindersOn (L2-159 AC4); follow-ups; habits
+  handler -> date : NextOccurrence, ReminderDay
+  date --> handler : Due today
+  handler -> db : Add ContactReminder once; add event Birthdays with Facts.reminder (one save)
+end
+dispatch -> db : Event; "Birthdays" for email and phone; unsubscribed? hold? pause?
+alt Facts.reminder is KeyDate
+  dispatch -> composer : ComposeAsync
+  composer -> db : Contact, Loves, latest conversation, open follow-up
+  composer --> dispatch : Ahead or today model; footer "Stop birthday reminders for {name}" (L2-166)
+  dispatch -> senders : Email (owner only, AC7) and phone alert "Grace turns 33 on Saturday"
+else FollowUp or Habit
+  dispatch -> senders : Phone alert only (L2-140 AC2)
+end
+dispatch -> db : Sent; nothing logged of the contact
+@enduml

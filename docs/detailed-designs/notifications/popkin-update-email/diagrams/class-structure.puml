@@ -1,0 +1,144 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Popkin update email
+
+package "Popkin.Domain" {
+  enum NotificationEmailKind {
+    Update
+    DailyDigest
+    WeeklyDigest
+    KeyDateReminder
+    StoryDue
+    WrapUp
+  }
+  enum OutgoingEmailStatus {
+    Open
+    Sending
+    Sent
+    Suppressed
+    Failed
+    Dropped
+  }
+  class OutgoingEmail {
+    +Guid Id
+    +Guid PersonId
+    +NotificationEmailKind EmailKind
+    +Guid? PopkinId
+    +string DedupKey
+    +DateTimeOffset OpenedAt
+    +DateTimeOffset DueAt
+    +OutgoingEmailStatus Status
+    +string? SuppressedBy
+    +int Attempts
+    +DateTimeOffset? SentAt
+    +string? ProviderMessageId
+  }
+  class NotificationDelivery {
+    +Guid EventId
+    +Guid PersonId
+    +NotificationChannel Channel
+    +Guid? OutgoingEmailId
+  }
+  class NotificationEvent {
+    +NotificationKind Kind
+    +Guid? PopkinId
+    +Guid? ActorPersonId
+    +Guid SubjectId
+    +string? Facts
+    +DateTimeOffset OccurredAt
+  }
+}
+package "Popkin.Application" {
+  class EmailShellModel {
+    +string Subject
+    +string Preheader
+    +string FromDisplayName
+    +PopkinHeader? Popkin
+    +string Reason
+    +FooterLink? Mute
+    +string SettingsUrl
+    +string UnsubscribeUrl
+    +string PostalAddress
+  }
+  class PopkinUpdateEmailModel {
+    +EmailShellModel Shell
+    +UpdateBlock Lead
+    +AlsoNewRow[] AlsoNew
+    +int WindowMinutes
+  }
+  abstract class UpdateBlock
+  class ReplyBlock
+  class MessageBlock
+  class PhotosBlock {
+    +int Count
+    +string? Caption
+    +ImageRef[] Shown
+  }
+  class PlanBlock {
+    +PlanStoryLine[] Stories
+  }
+  class JoinedBlock {
+    +string FirstName
+    +string? InvitedBy
+    +int MemberCount
+  }
+  interface INotificationEmailComposer {
+    +EmailKind: NotificationEmailKind
+    +ComposeAsync(email: OutgoingEmail, ct): Task<ComposedEmail>
+  }
+  class PopkinUpdateEmailComposer
+  class EmailText {
+    +{static} Cut(text: string, max: int): string
+    +{static} Preheader(text: string): string
+    +{static} FirstName(displayName: string): string
+  }
+  class NotificationLinks
+  interface INotificationEmailRenderer {
+    +Render(model: EmailModel): RenderedEmail
+  }
+  class RenderedEmail {
+    +string Subject
+    +string Html
+    +string Text
+    +InlineImage[] Images
+  }
+  interface INotificationEmailSender {
+    +SendAsync(message: OutgoingMessage, ct): Task<SendResult>
+  }
+}
+package "Popkin.Infrastructure" {
+  class NotificationEmailRenderer
+  class AcsNotificationEmailSender
+  class NoNotificationEmailSender
+}
+OutgoingEmail --> NotificationEmailKind
+OutgoingEmail --> OutgoingEmailStatus
+NotificationDelivery "*" --> "0..1" OutgoingEmail : rides in
+NotificationDelivery "*" --> "1" NotificationEvent
+INotificationEmailComposer <|.. PopkinUpdateEmailComposer
+PopkinUpdateEmailComposer ..> OutgoingEmail : composes
+PopkinUpdateEmailComposer ..> NotificationEvent : reads
+PopkinUpdateEmailComposer ..> EmailText
+PopkinUpdateEmailComposer ..> NotificationLinks
+PopkinUpdateEmailComposer ..> PopkinUpdateEmailModel : builds
+PopkinUpdateEmailModel *-- EmailShellModel
+PopkinUpdateEmailModel *-- UpdateBlock
+UpdateBlock <|-- ReplyBlock
+UpdateBlock <|-- MessageBlock
+UpdateBlock <|-- PhotosBlock
+UpdateBlock <|-- PlanBlock
+UpdateBlock <|-- JoinedBlock
+INotificationEmailRenderer ..> RenderedEmail : returns
+INotificationEmailRenderer <|.. NotificationEmailRenderer
+INotificationEmailSender <|.. AcsNotificationEmailSender
+INotificationEmailSender <|.. NoNotificationEmailSender
+@enduml

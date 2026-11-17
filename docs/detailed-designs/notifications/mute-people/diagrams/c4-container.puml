@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Mute people
+
+Person(person, "Member", "Owner of the mutes")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Muted people on the People view")
+  Container(api, "Popkin API", "ASP.NET Core", "Searches people in shared Popkins; mutes and unmutes")
+  Container(worker, "Popkin Worker", ".NET worker", "Suppresses deliveries about a muted actor")
+  ContainerDb(db, "Popkin database", "SQL Server", "PersonMute, Membership")
+}
+Rel(person, web, "Uses", "HTTPS")
+Rel(web, api, "GET mute-candidates, POST and DELETE mutes", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(worker, db, "Reads PersonMute at fan-out and at send", "EF Core")
+@enduml

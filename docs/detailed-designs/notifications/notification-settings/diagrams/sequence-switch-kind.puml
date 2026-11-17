@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — Switch one kind on one channel
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "pk-notif-matrix" as matrix
+  participant "NotificationSettingsStore" as store
+  participant "BrowserPushSubscriber" as push
+  participant "HttpNotificationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "NotificationSettingsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SetNotificationKindCommandHandler" as handler
+  participant "NotificationCatalogue" as cat
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> matrix : Tap, click or Space on "New photos on your phone"
+matrix -> store : setKind(NewPhotos, Phone, true)
+store -> store : Show the new state at once (optimistic)
+opt Phone channel turned on and this device has no subscription (L2-157 AC5)
+  store -> push : subscribe()
+  push --> store : Granted, saved; or Refused
+  opt Refused
+    store --> matrix : Row note "This device hasn't allowed alerts."
+  end
+end
+store -> client : setKind("NewPhotos", { phone: true })
+client -> ctrl : PUT /api/me/notifications/kinds/NewPhotos
+ctrl -> handler : Send SetNotificationKindCommand
+handler -> cat : Of(NewPhotos)
+cat --> handler : Not required
+alt Kind is SignInAndSecurity
+  handler --> ctrl : 400 notification_required, nothing changes (L2-154 AC2)
+else Allowed
+  handler -> db : Upsert NotificationKindChoice(PersonId, Kind).Phone = true; save
+  db --> handler : Committed
+  handler --> ctrl : Done
+  ctrl --> client : 204
+  client --> store : Saved (L2-155 AC5)
+end
+opt Save fails
+  store --> matrix : Switch goes back to off
+  store --> actor : Toast "We couldn't save that. Try again." (L2-155 AC5)
+end
+@enduml

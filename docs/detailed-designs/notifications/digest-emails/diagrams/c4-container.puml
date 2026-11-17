@@ -1,0 +1,21 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Digest emails
+
+Person(member, "Member", "Recipient")
+System_Ext(acs, "Azure Communication Services", "Email")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "My Popkins, Notifications")
+  Container(api, "Popkin API", "ASP.NET Core", "Saves changes with their events; saves the frequency")
+  Container(worker, "Popkin Worker", ".NET worker", "DispatchNotificationsJob holds changes; SendDigestsJob sends")
+  ContainerDb(db, "Popkin database", "SQL Server", "NotificationDelivery (AwaitingDigest), OutgoingEmail, content")
+  Container(blobs, "Photo store", "Azure Blob Storage", "Album photos, private")
+}
+Rel(member, web, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Writes", "EF Core")
+Rel(worker, db, "Reads held changes and content; records the digest", "EF Core")
+Rel(worker, blobs, "Reads thumbnails", "HTTPS")
+Rel(worker, acs, "Sends the digest", "HTTPS")
+@enduml

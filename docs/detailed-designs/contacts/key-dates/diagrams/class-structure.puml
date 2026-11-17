@@ -38,6 +38,7 @@ package "Popkin.Domain" {
     +int? Year
     +bool EveryYear
     +ReminderLead Lead
+    +bool RemindersOn
     +Guid? SourceEntryId
     +NextOccurrence(today: DateOnly): DateOnly?
     +ReminderDay(occursOn: DateOnly): DateOnly
@@ -49,8 +50,6 @@ package "Popkin.Domain" {
     +ReminderLead BirthdayLead
     +ReminderLead AnniversaryLead
     +ReminderLead MilestoneLead
-    +bool PhoneNotifications
-    +bool MondayEmail
     +{static} Defaults(ownerId: Guid): ReminderPreferences
     +DefaultFor(kind: KeyDateKind): ReminderLead
   }

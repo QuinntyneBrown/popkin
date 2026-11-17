@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Bundle and send an email
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DispatchNotificationsCommandHandler" as handler
+  participant "NotificationRules" as rules
+  participant "OutgoingEmail" as email
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "INotificationEmailRenderer" as renderer
+  participant "AcsNotificationEmailSender" as sender
+  database "Popkin database" as db
+end box
+participant "Azure Communication Services" as acs
+handler -> db : Open bundles with SendAfter passed; NotificationPlatform pause
+db --> handler : Bundles, pause state
+alt Member email paused (L2-170 AC2)
+  handler -> email : Close; status Queued
+else Sending
+  loop Each bundle
+    handler -> db : Re-read membership, features, holds, mutes, settings (L2-174 AC1)
+    db --> handler : Current context
+    handler -> rules : Decide each delivery again
+    rules --> handler : Still Send, or Suppress(rule)
+    handler -> db : ThreadReadState of chat deliveries (L2-161 AC9, gap 130)
+    db --> handler : Read states
+    alt No delivery left
+      handler -> email : Mark Empty; nothing sent
+    else Deliveries left
+      handler -> renderer : Render(update model: lead change, "Also new" rows)
+      renderer --> handler : HTML and plain-text parts, text escaped
+      handler -> email : MarkSending(); save before calling the provider
+      handler -> sender : SendAsync(message, operation id = OutgoingEmail.Id)
+      sender -> acs : Send with List-Unsubscribe headers
+      alt Accepted
+        acs --> sender : Accepted
+        sender --> handler : Accepted
+        handler -> email : MarkSent(now); deliveries Sent
+        handler -> handler : Record email_latency (L2-175 AC1)
+      else Passing failure (timeout, 429, 5xx)
+        sender --> handler : Transient
+        handler -> email : Retry(now, backoff 30 s ... 1 h); Dropped after 6 h (L2-175 AC2)
+      else Address refused
+        sender --> handler : Permanent
+        handler -> email : Mark Failed; not retried
+      end
+    end
+    handler -> db : Save this email only
+  end
+end
+@enduml

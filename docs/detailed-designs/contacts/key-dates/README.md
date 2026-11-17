@@ -36,8 +36,10 @@ Every key date belongs to one owner, and only that owner sees or changes it (L2-
   screens, the reminder ("1 week before") (L2-137 AC1, AC3). The aside "Reminders" reads "Each
   date can have its own lead time. These are the defaults for new ones." with "Birthdays",
   "Anniversaries" and "Milestones", each a select named "{Kinds}: remind me" of the six lead
-  times, at first "1 week before", "3 days before" and "On the day" (L2-139 AC1). Under them the
-  switches "Phone notifications" and "Monday email" belong to [Reminders](../reminders/README.md).
+  times, at first "1 week before", "3 days before" and "On the day" (L2-139 AC1). The mock also
+  draws the switches "Phone notifications" and "Monday email" under them; L2-140 withdrew both
+  on 17 November 2026 (AC4), so Dates shows no switch and the mock changes
+  ([Reminders](../reminders/README.md)).
 - `birthdays.html` — "Birthdays" pressed; only birthdays show (L2-137 AC2).
 - `empty.html` — "No dates yet", "Add a birthday or an anniversary and we'll remind you ahead of
   it, in good time to send a card." with "Add a date", and no reminder settings (L2-137 AC4).
@@ -85,7 +87,7 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
   {n} days"; a profile shows the days left at 30 or fewer (gap 101).
 - **"1 month before"** is the same day of the month before, or that month's last day. **29
   February** falls on 28 February in a year without it.
-- **"Today"** — Dates counts from the device day it sends, as Today does. The Worker reminds at 9 am
+- **"Today"** — Dates counts from the device day it sends, as Today does. The Worker reminds at 8 am
   in the zone the device last saved ([Reminders](../reminders/README.md), gap 104 ruled).
 - **The day field.** "The day" is a full date. A date every year keeps its year only when it is
   before this year, its first year ("Turns 33"); a later one is its next day. A one-off date keeps
@@ -121,8 +123,8 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
 - `DELETE /api/contacts/key-dates/{keyDateId}` — `204`; `404` `key_date_not_found`. Add someone's
   "Remove the {kind}" uses it.
 - `GET /api/contacts/reminder-preferences` — `200` `ReminderPreferencesDto` `{ birthdayLead,
-  anniversaryLead, milestoneLead, phoneNotifications, mondayEmail }`; an owner without a row gets
-  the defaults.
+  anniversaryLead, milestoneLead }`; an owner without a row gets the defaults. The fields
+  `phoneNotifications` and `mondayEmail` are removed with L2-140's change of 17 November 2026.
 - `PUT /api/contacts/reminder-preferences` — the whole `ReminderPreferencesDto`. `200`. Refusals:
   `400` `lead_not_allowed`.
 
@@ -136,10 +138,17 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
   gives the occurrence's year minus `Year`, or null; `ChangeLead(lead)`. Unique index on
   (`OwnerId`, `ClientId`).
 - **`ReminderPreferences`** (Domain) — one row per owner: `BirthdayLead` (`OneWeekBefore`),
-  `AnniversaryLead` (`ThreeDaysBefore`), `MilestoneLead` (`OnTheDay`), `PhoneNotifications` and
-  `MondayEmail` (both `true`, L2-140 AC4). `Defaults(ownerId)` and `DefaultFor(kind)`.
-- **`ReminderPreferences.TimeZone`** and **`ReminderRules.LocalNow`** — the owner's 9 am for the
-  Worker, which has no device day ([Reminders](../reminders/README.md), gap 104 ruled).
+  `AnniversaryLead` (`ThreeDaysBefore`), `MilestoneLead` (`OnTheDay`); `Defaults(ownerId)` and
+  `DefaultFor(kind)`. `PhoneNotifications` and `MondayEmail` are removed (L2-140, changed
+  2026-11-17). A person who has never changed "Birthdays: remind me" starts from the birthday lead
+  an Owner sets for new members, or "1 week before" when none is set (L2-139 AC4,
+  [Notification defaults](../../admin-platform/notification-defaults/README.md)).
+- **`KeyDate.RemindersOn`** (new, default `true`) — the date's reminder switch, set from
+  Notifications › People. Its lead is the same `Lead` this page changes, one value edited in two
+  places (L2-139 AC5, [Birthday reminders by person](../../notifications/birthday-reminders-by-person/README.md)).
+- **`NotificationPreferences.TimeZone`** (moved from `ReminderPreferences.TimeZone`) and
+  **`ReminderRules.LocalNow`** — the owner's 8 am for the Worker, which has no device day
+  ([Reminders](../reminders/README.md), gap 104 ruled, L2-140 changed 2026-11-17).
 - **`GetContactDatesQueryHandler`** — reads the owner's key dates with their contact's first
   name and avatar, computes each occurrence, days left and years from `on`, filters by kind,
   orders by occurrence, and adds the preferences.
@@ -159,7 +168,7 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
   `/contacts/dates`, data `{ shell: 'app', page: 'contacts-dates' }`) — composes
   `pk-contacts-page` (aside variant), `pk-page-head`, `pk-choice-chips` for the filter, one
   `pk-section` per month of rows with the date tile of `pk-spotlight`, `pk-avatar-stack` and the
-  reminder text, `pk-info-card` "Reminders" with three `pk-select-field` and the switches,
+  reminder text, `pk-info-card` "Reminders" with three `pk-select-field` (no switches),
   `pk-skeleton` while loading, and `pk-empty-state` for empty and failed.
 - **`AddDateDialog`** (`dialogs/add-date/add-date.dialog.ts`) — CDK Dialog opened with
   `{ contactId? }` from Dates and from a profile. Composes `pk-dialog`, `pk-form-summary`, the
@@ -188,7 +197,7 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
 - Direct tests of `KeyDate`, one case per row: next occurrence before, on and after the day;
   every year and one-off; the reminder day for each of the five lead times in days, with
   "1 month before" and 29 February added once supplied; years with and without a first year.
-  `ReminderPreferences.Defaults` gives the three defaults and both switches on.
+  `ReminderPreferences.Defaults` gives the three defaults.
 - Playwright: `tests/contacts-dates.spec.ts` through `ContactsDatesPage` and `AddDateDialog` page
   objects, on recorded responses: the list and its filter, empty, failed with "Try again", the
   invalid day, a saved date, a changed default. `routes.ts` keys each state of the mocks.
@@ -200,7 +209,7 @@ own lead time (L2-139 AC2), and changing one date's reminder changes that date a
 |-------|--------------|-------------|
 | `L2-137` | `L1-033` | Dates: Dates lists the days that matter to the person's contacts. (AC1–AC4) |
 | `L2-138` | `L1-033` | Add a date: A key date is added for a contact. (AC1–AC4) |
-| `L2-139` | `L1-033` | Reminder defaults: Each date has its own reminder, starting from a default for its kind. (AC1–AC3) |
+| `L2-139` | `L1-033` | Reminder defaults: Each date has its own reminder, starting from a default for its kind. (AC1–AC5) |
 
 ## Diagrams
 

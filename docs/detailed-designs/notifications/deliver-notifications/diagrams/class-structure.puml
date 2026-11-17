@@ -1,0 +1,164 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Deliver notifications
+
+enum NotificationKind {
+  MentionsAndReplies
+  DirectMessages
+  GroupChat
+  NewPhotos
+  PlanChanges
+  ScheduleChanges
+  PeopleJoining
+  Experiences
+  Birthdays
+  StoriesDue
+  PopkinWrappingUp
+  SignInAndSecurity
+}
+enum NotificationChannel {
+  Email
+  Phone
+}
+enum DeliveryStatus {
+  Bundled
+  AwaitingDigest
+  Due
+  Sent
+  Suppressed
+  Retrying
+  Dropped
+  Failed
+}
+enum SuppressionRule {
+  OwnAction
+  NotAMember
+  WrappedUp
+  FeatureOff
+  NoAddress
+  NoDevice
+  KindOffForEveryone
+  Held
+  Unsubscribed
+  MutedPerson
+  PopkinMuted
+  JustForMe
+  KindSwitchedOff
+  Seen
+}
+class NotificationEvent {
+  +Guid Id
+  +NotificationKind Kind
+  +Guid? PopkinId
+  +Guid? ActorPersonId
+  +Guid SubjectId
+  +Guid? RecipientPersonId
+  +DateTimeOffset OccurredAt
+  +DateTimeOffset? DispatchedAt
+  +string? DedupKey
+  +string? Facts
+  +{static} Record(...): NotificationEvent
+}
+class NotificationDelivery {
+  +Guid Id
+  +Guid EventId
+  +Guid PersonId
+  +NotificationChannel Channel
+  +DeliveryStatus Status
+  +SuppressionRule? Rule
+  +Guid? OutgoingEmailId
+  +DateTimeOffset SendAfter
+  +int Attempts
+  +DateTimeOffset? NextAttemptAt
+  +Suppress(rule): void
+  +MarkSent(now): void
+}
+class OutgoingEmail {
+  +Guid Id
+  +Guid PersonId
+  +OutgoingEmailKind Kind
+  +OutgoingEmailStatus Status
+  +string DedupKey
+  +DateTimeOffset SendAfter
+  +int Attempts
+  +Close(now): void
+  +MarkSending(): void
+  +MarkSent(now): void
+  +Retry(now, backoff): void
+  +Drop(now): void
+}
+class NotificationRules <<static>> {
+  +Decide(q: NotificationQuestion): NotificationDecision
+}
+class NotificationQuestion {
+  +NotificationKind Kind
+  +NotificationChannel Channel
+  +bool IsActor
+  +bool IsActiveMember
+  +bool WrappedUp
+  +bool FeatureOn
+  +bool HasAddress
+  +bool HasDevice
+  +bool EmailPaused
+  +bool KindOffForEveryone
+  +bool Held
+  +bool EmailOn
+  +bool ActorMuted
+  +NotificationLevel Level
+  +bool IsRecipient
+  +bool SwitchOn
+  +TimeOnly LocalTime
+  +QuietHours Quiet
+}
+class NotificationDecision {
+  +bool Send
+  +DateTimeOffset? At
+  +bool Queue
+  +SuppressionRule? Rule
+}
+class QuietHours {
+  +TimeOnly Start
+  +TimeOnly End
+  +Contains(t: TimeOnly): bool
+  +EndAfter(localNow): DateTimeOffset
+}
+class DispatchNotificationsCommandHandler {
+  +Handle(cmd: DispatchNotificationsCommand): Task<DispatchResult>
+}
+interface INotificationEmailSender {
+  +SendAsync(message, ct): Task<SendOutcome>
+}
+interface IPhoneNotificationSender {
+  +SendAsync(personId, alert: PhoneAlert, ct): Task
+}
+class PhoneAlert {
+  +string Title
+  +string Body
+  +string Url
+}
+
+NotificationEvent "1" *-- "*" NotificationDelivery : fans out to
+OutgoingEmail "1" o-- "*" NotificationDelivery : collects (email)
+NotificationEvent --> NotificationKind
+NotificationDelivery --> NotificationChannel
+NotificationDelivery --> DeliveryStatus
+NotificationDelivery --> SuppressionRule
+NotificationRules ..> NotificationQuestion : reads
+NotificationRules ..> NotificationDecision : returns
+NotificationQuestion --> QuietHours
+DispatchNotificationsCommandHandler ..> NotificationRules : asks
+DispatchNotificationsCommandHandler ..> NotificationEvent : dispatches
+DispatchNotificationsCommandHandler ..> OutgoingEmail : opens / sends
+DispatchNotificationsCommandHandler ..> INotificationEmailSender
+DispatchNotificationsCommandHandler ..> IPhoneNotificationSender
+IPhoneNotificationSender ..> PhoneAlert
+@enduml

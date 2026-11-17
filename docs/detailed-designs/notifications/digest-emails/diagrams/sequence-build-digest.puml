@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — Build a digest
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DigestEmailComposer" as composer
+  participant "DigestRules" as rules
+  participant "NotificationLinks" as links
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+composer -> rules : Period(previous digest, now, weekly)
+rules --> composer : Since 6 pm yesterday, or last Sunday
+composer -> db : Held changes in the period, with each change as it is now
+db --> composer : Changes still standing
+composer -> db : Unread Everyone messages by others, per Popkin not muted or Just for me
+db --> composer : Counts
+composer -> db : Own stories due within 2 days (Plan on, not Done); key dates within 2 days (RemindersOn)
+db --> composer : Rows
+composer -> rules : NeedsYou(stories, dates) (L2-165 AC2)
+rules --> composer : Up to 5 rows, stories first
+composer -> rules : OrderSections; PickLines; photos (AC3, AC4)
+rules --> composer : Sections, most first; 3 lines; 4 photos; "and {n} messages"
+composer -> rules : Subject(needs, changes, popkins, weekly)
+rules --> composer : "Your day in Popkin: ..."
+composer -> links : Open Popkin; Mute a Popkin; settings; unsubscribe (AC6)
+links --> composer : URLs
+composer --> composer : DigestEmailModel, or Nothing when no change is left
+@enduml

@@ -1,0 +1,103 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Digest emails
+
+package "Popkin.Domain" {
+  enum ActivityFrequency {
+    AsItHappens
+    DailyDigest
+    WeeklyDigest
+  }
+  enum DeliveryStatus {
+    Pending
+    AwaitingDigest
+    Bundled
+    Sent
+    Suppressed
+    Failed
+    Dropped
+  }
+  class NotificationPreferences {
+    +Guid PersonId
+    +bool EmailOn
+    +ActivityFrequency? Frequency
+    +string? TimeZone
+  }
+  class NotificationDelivery {
+    +Guid EventId
+    +Guid PersonId
+    +NotificationChannel Channel
+    +DeliveryStatus Status
+    +Guid? OutgoingEmailId
+  }
+  class OutgoingEmail {
+    +NotificationEmailKind EmailKind
+    +string DedupKey
+    +OutgoingEmailStatus Status
+    +string? SuppressedBy
+  }
+}
+package "Popkin.Application" {
+  class SendDigestsCommand
+  class SendDigestsCommandHandler {
+    +Handle(command: SendDigestsCommand): Task<int>
+  }
+  class DigestEmailComposer {
+    +ComposeAsync(email: OutgoingEmail, ct): Task<ComposedEmail>
+  }
+  class DigestRules {
+    +{static} Period(last: DateTimeOffset?, now: DateTimeOffset, weekly: bool): Range
+    +{static} OrderSections(sections): DigestSection[]
+    +{static} PickLines(changes): DigestLine[]
+    +{static} NeedsYou(stories, dates, today): NeedsYouRow[]
+    +{static} Subject(needs: int, changes: int, popkins: int, weekly: bool): string
+  }
+  class DigestEmailModel {
+    +EmailShellModel Shell
+    +string Greeting
+    +string PeriodLine
+    +NeedsYouRow[] NeedsYou
+    +DigestSection[] Sections
+    +string OpenUrl
+  }
+  class DigestSection {
+    +PopkinHeader Popkin
+    +int NewCount
+    +ImageRef[] Photos
+    +DigestLine[] Lines
+    +int MoreMessages
+  }
+  class NeedsYouRow {
+    +NeedsYouKind Kind
+    +string Line
+    +string From
+  }
+  interface INotificationEmailComposer
+}
+package "Popkin.Worker" {
+  class SendDigestsJob
+}
+SendDigestsJob ..> SendDigestsCommand : sends
+SendDigestsCommandHandler ..> SendDigestsCommand : handles
+SendDigestsCommandHandler ..> NotificationPreferences : reads
+SendDigestsCommandHandler --> OutgoingEmail : adds once
+SendDigestsCommandHandler --> NotificationDelivery : marks used
+SendDigestsCommandHandler ..> DigestEmailComposer
+INotificationEmailComposer <|.. DigestEmailComposer
+DigestEmailComposer ..> DigestRules
+DigestEmailComposer ..> DigestEmailModel : builds
+DigestEmailModel *-- "0..*" DigestSection
+DigestEmailModel *-- "0..5" NeedsYouRow
+NotificationPreferences --> ActivityFrequency
+NotificationDelivery --> DeliveryStatus
+NotificationDelivery "*" --> "0..1" OutgoingEmail
+@enduml

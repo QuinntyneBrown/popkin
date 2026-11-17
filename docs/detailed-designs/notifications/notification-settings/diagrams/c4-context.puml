@@ -1,0 +1,11 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Notification settings
+
+Person(person, "Person", "Signed in; belongs to Popkins and keeps Contacts")
+System(popkin, "Popkin", "Platform for pop-up communities")
+System_Ext(push, "Browser push service", "Web Push endpoint of the person's browser (ADR 0028)")
+Rel(person, popkin, "Chooses what reaches them by email and phone in", "HTTPS")
+Rel(popkin, push, "Registers the device's subscription with", "Web Push")
+@enduml

@@ -1,0 +1,130 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Notification settings
+
+package "Popkin.Domain" {
+  enum NotificationKind {
+    MentionsAndReplies
+    DirectMessages
+    GroupChat
+    NewPhotos
+    PlanChanges
+    ScheduleChanges
+    PeopleJoining
+    Experiences
+    Birthdays
+    StoriesDue
+    PopkinWrappingUp
+    SignInAndSecurity
+  }
+  enum NotificationGroup {
+    Activity
+    Reminders
+    Account
+  }
+  enum NotificationChannel {
+    Email
+    Phone
+  }
+  enum NotificationFrequency {
+    AsItHappens
+    DailyDigest
+    WeeklyDigest
+  }
+  class NotificationCatalogueEntry <<record>> {
+    +NotificationKind Kind
+    +NotificationGroup Group
+    +string Name
+    +string About
+    +bool EmailByDefault
+    +bool PhoneByDefault
+    +bool Required
+    +PopkinFeature? Feature
+  }
+  class NotificationCatalogue <<static>> {
+    +All: IReadOnlyList<NotificationCatalogueEntry>
+    +Groups: IReadOnlyList<NotificationGroupEntry>
+    +Of(kind: NotificationKind): NotificationCatalogueEntry
+  }
+  class NotificationPreferences {
+    +Guid PersonId
+    +bool EmailOn
+    +NotificationFrequency? Frequency
+    +string? TimeZone
+    +DateTimeOffset UpdatedAt
+    +TurnEmail(on: bool, now): void
+    +ChooseFrequency(f: NotificationFrequency, now): void
+  }
+  class NotificationKindChoice {
+    +Guid PersonId
+    +NotificationKind Kind
+    +bool? Email
+    +bool? Phone
+    +Choose(channel: NotificationChannel, on: bool): void
+  }
+  class NotificationKindSwitch {
+    +NotificationKind Kind
+    +DateTimeOffset OffSince
+  }
+}
+package "Popkin.Application" {
+  class EffectiveNotificationSettings {
+    +Frequency: NotificationFrequency
+    +IsOn(kind, channel): bool
+  }
+  class GetNotificationSettingsQueryHandler {
+    +Handle(q: GetNotificationSettingsQuery): Task<NotificationSettingsDto>
+  }
+  class SetActivityEmailCommandHandler {
+    +Handle(c: SetActivityEmailCommand): Task
+  }
+  class SetActivityFrequencyCommandHandler {
+    +Handle(c: SetActivityFrequencyCommand): Task
+  }
+  class SetNotificationKindCommandHandler {
+    +Handle(c: SetNotificationKindCommand): Task
+  }
+  class NotificationSettingsDto <<record>> {
+    +ActivityEmailDto Email
+    +NotificationGroupDto[] Groups
+    +PopkinLevelDto[] Popkins
+    +BirthdayReminderDto[] Birthdays
+    +MutedPersonDto[] Muted
+  }
+  class NotificationKindDto <<record>> {
+    +string Kind
+    +string Name
+    +string About
+    +bool Email
+    +bool Phone
+    +bool Required
+    +bool OffForEveryone
+  }
+}
+NotificationCatalogue *-- "12" NotificationCatalogueEntry
+NotificationCatalogueEntry --> NotificationKind
+NotificationCatalogueEntry --> NotificationGroup
+NotificationPreferences --> NotificationFrequency
+NotificationPreferences "1" o-- "*" NotificationKindChoice : PersonId
+NotificationKindChoice --> NotificationKind
+EffectiveNotificationSettings ..> NotificationPreferences
+EffectiveNotificationSettings ..> NotificationKindChoice
+EffectiveNotificationSettings ..> NotificationCatalogue
+GetNotificationSettingsQueryHandler ..> EffectiveNotificationSettings
+GetNotificationSettingsQueryHandler ..> NotificationKindSwitch : off for everyone
+GetNotificationSettingsQueryHandler ..> NotificationSettingsDto : returns
+NotificationSettingsDto *-- NotificationKindDto
+SetActivityEmailCommandHandler --> NotificationPreferences
+SetActivityFrequencyCommandHandler --> NotificationPreferences
+SetNotificationKindCommandHandler --> NotificationKindChoice
+SetNotificationKindCommandHandler ..> NotificationCatalogue : refuses Required
+@enduml

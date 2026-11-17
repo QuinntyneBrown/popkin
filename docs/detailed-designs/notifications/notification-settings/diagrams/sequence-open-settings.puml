@@ -1,0 +1,57 @@
+@startuml
+title UML sequence behaviour — Open the Notifications screen
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AccountPage" as account
+  participant "NotificationsPage" as page
+  participant "NotificationSettingsStore" as store
+  participant "HttpNotificationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "NotificationSettingsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetNotificationSettingsQueryHandler" as handler
+  participant "EffectiveNotificationSettings" as eff
+  participant "NotificationCatalogue" as cat
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> account : Choose "Notifications" (L2-048 AC6)
+account -> page : Navigate /account/notifications?tab=types
+page -> store : open(tab)
+store -> client : settings()
+client -> ctrl : GET /api/me/notifications
+ctrl -> handler : Send GetNotificationSettingsQuery(ICurrentPerson.PersonId)
+handler -> db : NotificationPreferences, NotificationKindChoice rows,\nNotificationPlatform defaults, NotificationKindSwitch rows
+db --> handler : Rows (none for a person who never chose)
+handler -> eff : Resolve each kind and channel
+eff -> cat : Defaults of L2-154 for what was never chosen
+cat --> eff : Email and phone defaults, Required
+eff --> handler : Effective settings (L2-154 AC1)
+handler --> ctrl : NotificationSettingsDto with names, groups, offForEveryone
+ctrl --> client : 200
+client --> store : NotificationSettings view
+store --> page : ready
+page --> actor : "Email me about activity", view nav, "What you hear about" (L2-155 AC1)
+alt Request fails
+  ctrl --> client : 5xx or network error
+  store --> page : failed
+  page --> actor : "We couldn't load your notification settings." with "Try again", no control (L2-155 AC6)
+end
+@enduml

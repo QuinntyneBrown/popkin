@@ -1,0 +1,67 @@
+@startuml
+title UML sequence behaviour — An Owner saves new defaults
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "NotificationsPage (Defaults)" as page
+  participant "NotificationDefaultsDraft" as draft
+  participant "SaveDefaultsDialog" as dialog
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminNotificationsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangeNotificationDefaultsCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "NotificationDefaultsRules" as rules
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "PlatformSnapshot" as snap
+  database "Popkin database" as db
+end box
+actor -> page : "Daily digest"; bundle 10 → 61
+page -> draft : Edit the draft
+alt A value outside its range
+  draft --> page : "Enter a whole number from 1 to 60.", aria-invalid; "Fix the highlighted default to save" (L2-173 AC3)
+else All valid
+  draft --> page : "2 unsaved changes", "Save defaults"
+  actor -> page : "Save defaults"
+  page -> dialog : "Save new defaults?", "Activity email: As it happens → Daily digest"
+  actor -> dialog : Reason, "Save"
+  dialog -> client : changeNotificationDefaults(defaults, reason)
+  client -> controller : PUT /api/admin/notifications/defaults
+  controller -> handler : Send ChangeNotificationDefaultsCommand
+  handler -> guard : RequireAsync(ManageNotifications)
+  alt Support or Viewer
+    guard --> controller : 403 role_not_allowed (L2-173 AC5)
+  else Owner
+    handler -> handler : ReasonRules.Required
+    handler -> rules : Check(defaults)
+    alt Out of range
+      rules --> controller : 400 default_not_allowed, field and range (L2-173 AC3)
+    else In range
+      handler -> db : NotificationPlatform.ChangeDefaults(defaults, admin, now)
+      handler -> audit : Record(ChangedNotificationDefaults, old and new per default, reason)
+      handler -> db : SaveChangesAsync, one transaction
+      handler -> snap : Invalidate()
+      controller --> client : 200 AdminNotificationDefaultsDto
+      client --> page : Toast "Defaults saved"; "Nothing changed yet."
+    end
+  end
+end
+@enduml

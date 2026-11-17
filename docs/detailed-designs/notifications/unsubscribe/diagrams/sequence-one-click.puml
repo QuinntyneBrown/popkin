@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — One-click unsubscribe
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+participant "Mail client" as mail
+box "Frontend — Popkin web app" #E0F2FE
+  participant "UnsubscribePage" as page
+  participant "NOTIFICATIONS_API" as client
+end box
+box "Backend — Popkin API application" #D1FADF
+  participant "SameSiteRequestMiddleware" as csrf
+  participant "NotificationLinksController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "UnsubscribeFromAllEmailCommandHandler" as handler
+  participant "IUnsubscribeTokens" as tokens
+  participant "NotificationPreferences" as prefs
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt Mail client's Unsubscribe button (L2-168 AC4)
+  actor -> mail : Unsubscribe
+  mail -> csrf : POST /api/notifications/unsubscribe?t=… body List-Unsubscribe=One-Click
+else Footer link "Unsubscribe from all email" (L2-168 AC3)
+  actor -> page : Open /unsubscribe?t=… (GET changes nothing)
+  page -> client : unsubscribe(token)
+  client -> csrf : POST /api/notifications/unsubscribe?t=…
+end
+csrf -> controller : This path accepted from any site; token is the proof
+controller -> controller : AllowAnonymous; rate limit Unsubscribe
+controller -> handler : Send UnsubscribeFromAllEmailCommand(token)
+handler -> tokens : TryRead(token)
+tokens --> handler : PersonId, purpose, IssuedAt, or unreadable
+alt Unreadable, other purpose, older than 90 days, or person deleted (L2-168 AC5)
+  handler --> controller : Expired
+  controller --> client : 410 unsubscribe_link_expired
+  client --> page : expired
+  page --> actor : "This link has expired. Sign in to change your email settings."
+else Valid
+  handler -> db : NotificationPreferences of the person
+  db --> handler : Preferences
+  handler -> prefs : TurnEmailOff(now)
+  prefs --> handler : Changed, or already off (L2-168 AC6)
+  handler -> db : Save
+  handler --> controller : Unsubscribed or AlreadyOff
+  controller --> client : 200 { unsubscribed: true }
+  client --> page : done
+  page --> actor : "You're unsubscribed from all Popkin email." / "Sign-in codes still arrive."
+end
+@enduml

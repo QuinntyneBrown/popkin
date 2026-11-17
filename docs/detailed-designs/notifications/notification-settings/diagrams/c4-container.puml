@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Notification settings
+
+Person(person, "Person", "Owner of the settings")
+System_Ext(push, "Browser push service", "Web Push (ADR 0028)")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Notifications screen at /account/notifications")
+  Container(api, "Popkin API", "ASP.NET Core", "Reads and saves the person's notification settings")
+  Container(worker, "Popkin Worker", ".NET worker", "Reads the settings when it sends (Deliver notifications)")
+  ContainerDb(db, "Popkin database", "SQL Server", "NotificationPreferences, NotificationKindChoice, NotificationKindSwitch, PushSubscription")
+}
+Rel(person, web, "Uses", "HTTPS")
+Rel(web, api, "GET and PUT /api/me/notifications/**", "JSON/HTTPS")
+Rel(web, push, "Subscribes the device", "Push API")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(worker, db, "Reads the settings at fan-out and at send", "EF Core")
+@enduml

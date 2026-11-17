@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — An admin holds a Popkin
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "NotificationsPage (Holds)" as page
+  participant "HoldPopkinDialog" as dialog
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminNotificationsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SearchHoldPopkinsQueryHandler" as search
+  participant "HoldPopkinNotificationsCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "PlatformSnapshot" as snap
+  database "Popkin database" as db
+end box
+actor -> page : "Hold a Popkin", types "reunion"
+page -> client : searchHoldPopkins("reunion")
+client -> controller : GET /api/admin/notifications/holds/popkin-search?q=reunion
+controller -> search : Send SearchHoldPopkinsQuery
+search -> db : Active, name contains or invite code equals, not held, at most 20
+search --> page : Matches with tile, name, code (L2-172 AC2)
+actor -> page : Chooses "Class of 2015 Reunion"
+page -> dialog : "Hold Class of 2015 Reunion?", reason
+actor -> dialog : Reason, "Hold"
+alt Reason empty
+  dialog --> actor : "Give a reason; it goes in the audit log." (L2-087 AC2)
+else Reason given
+  dialog -> client : holdPopkin(popkinId, reason)
+  client -> controller : POST /api/admin/notifications/holds
+  controller -> handler : Send HoldPopkinNotificationsCommand
+  handler -> guard : RequireAsync(HoldNotifications)
+  alt Viewer
+    guard --> controller : 403 role_not_allowed (L2-172 AC7)
+  else Owner or Support
+    handler -> db : Load the Popkin; 404, 409 wrapped up, 409 already held
+    handler -> db : Add NotificationHold(Popkin, reason, admin, now)
+    handler -> audit : Record(HeldNotifications, Popkin, reason, members)
+    handler -> db : SaveChangesAsync, one transaction
+    handler -> snap : Invalidate()
+    controller --> client : 201 AdminNotificationHoldDto
+    client --> page : Row "Until released", toast "{Popkin} is held"
+  end
+end
+@enduml

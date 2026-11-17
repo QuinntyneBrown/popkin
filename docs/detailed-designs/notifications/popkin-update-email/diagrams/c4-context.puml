@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Popkin update email
+
+Person(member, "Member", "Belongs to a Popkin; chose activity email as it happens")
+Person(actor, "Another member", "Replies, adds photos, changes the plan, joins")
+System(popkin, "Popkin", "Platform for pop-up communities")
+System_Ext(acs, "Azure Communication Services", "Sends Popkin's email (ADR 0021)")
+System_Ext(mail, "Member's mail client", "Gmail, Outlook, Apple Mail")
+Rel(actor, popkin, "Makes a change in", "HTTPS")
+Rel(popkin, acs, "Sends the update email via", "HTTPS")
+Rel(acs, mail, "Delivers to", "SMTP")
+Rel(member, mail, "Reads the email in")
+Rel(member, popkin, "Follows a link back to", "HTTPS")
+@enduml

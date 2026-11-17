@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Deliver notifications
+
+Container_Boundary(api, "Popkin API") {
+  Component(handlers, "Recording handlers", "MediatR handlers", "SendMessage, AddPhoto, story, schedule, JoinPopkin, experience handlers")
+}
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "DispatchNotificationsJob", "PeriodicJob, 15 s", "Sends one command per tick")
+  Component(dispatch, "DispatchNotificationsCommandHandler", "MediatR handler", "Fan-out, decision, bundling, sending, retries")
+  Component(rules, "NotificationRules", "Pure type", "Precedence, levels, quiet hours, daily most (L2-161)")
+  Component(clock, "LocalClock", "Application service", "Person's local now from their time zone")
+  Component(renderer, "INotificationEmailRenderer", "Infrastructure", "HTML and plain-text parts")
+  Component(email, "INotificationEmailSender", "AcsNotificationEmailSender", "Hands email to Azure Communication Services")
+  Component(phone, "IPhoneNotificationSender", "WebPushPhoneNotificationSender", "Sends PhoneAlert; removes gone subscriptions")
+  Component(metrics, "PopkinMetrics", "Meter Popkin", "popkin.notifications.*")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "Events, deliveries, outgoing emails, settings")
+System_Ext(acs, "Azure Communication Services", "Email")
+System_Ext(push, "Browser push services", "Web Push")
+
+Rel(handlers, db, "Adds NotificationEvent with the change", "EF Core")
+Rel(job, dispatch, "Sends DispatchNotificationsCommand")
+Rel(dispatch, db, "Reads events and context; writes deliveries", "EF Core")
+Rel(dispatch, clock, "Asks local now")
+Rel(dispatch, rules, "Decide(question)")
+Rel(dispatch, renderer, "Render(model)")
+Rel(dispatch, email, "SendAsync(message)")
+Rel(dispatch, phone, "SendAsync(personId, alert)")
+Rel(dispatch, metrics, "Records outcomes")
+Rel(email, acs, "Sends", "HTTPS")
+Rel(phone, push, "Sends", "Web Push")
+@enduml

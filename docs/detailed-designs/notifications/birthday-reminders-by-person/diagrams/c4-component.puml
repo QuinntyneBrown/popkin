@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Birthday reminders by person
+
+Container_Boundary(web, "Popkin web app") {
+  Component(view, "NotificationsPage, People view", "Angular page", "Birthday reminders list")
+  Component(store, "NotificationSettingsStore", "api library", "setBirthdayReminder(), undo bar")
+  Component(dates, "DatesStore and profile", "api library", "Show the same lead and switch")
+  Component(client, "HttpContactsApi", "CONTACTS_API", "changeReminder(keyDateId, { lead, on })")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "KeyDatesController", "ASP.NET Core controller", "PUT key-dates/{id}/reminder")
+  Component(handler, "ChangeKeyDateReminderCommandHandler", "MediatR handler", "One date's lead and switch")
+  Component(reader, "BirthdayRemindersReader", "Application", "Owner's birthdays, soonest first")
+  Component(add, "AddKeyDateCommandHandler", "MediatR handler", "A new date starts from the default")
+  Component(defaults, "ReminderDefaults", "Application", "Person's default, else platform's, else 1 week before")
+}
+ComponentDb(db, "Popkin database", "SQL Server", "KeyDate, ReminderPreferences, NotificationPlatform")
+Rel(view, store, "Reads, calls")
+Rel(store, client, "JSON/HTTPS")
+Rel(dates, client, "Same endpoint")
+Rel(client, ctrl, "PUT")
+Rel(ctrl, handler, "Sends ChangeKeyDateReminderCommand")
+Rel(handler, db, "KeyDate.ChangeLead, TurnReminders; save", "EF Core")
+Rel(reader, db, "Reads", "EF Core")
+Rel(add, defaults, "Lead and RemindersOn for a new birthday")
+Rel(defaults, db, "ReminderPreferences.BirthdayLead, NotificationPlatform.DefaultBirthdayLead", "EF Core")
+@enduml

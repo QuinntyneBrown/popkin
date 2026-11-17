@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Turn activity email off and back on, choose a frequency
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "NotificationsPage" as page
+  participant "NotificationSettingsStore" as store
+  participant "HttpNotificationsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "NotificationSettingsController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SetActivityEmailCommandHandler" as email
+  participant "SetActivityFrequencyCommandHandler" as freq
+  participant "NotificationPreferences" as prefs
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Turn the "Email" switch off
+page -> store : setEmail(false)
+store --> page : Frequency and every email switch disabled and dimmed;\nkept choices unchanged (L2-156 AC3, L2-157 AC4)
+store --> page : Undo bar "You're unsubscribed from all Popkin email. Sign-in codes still arrive,\nand your phone alerts are unchanged." with "Turn email back on" and "Dismiss"
+store -> client : setEmail(false)
+client -> ctrl : PUT /api/me/notifications/email { on: false }
+ctrl -> email : Send SetActivityEmailCommand(false)
+email -> prefs : TurnEmail(false, now)
+email -> db : Save
+db --> email : Committed
+ctrl --> client : 204
+actor -> page : "Turn email back on"
+page -> store : setEmail(true)
+store --> page : Every email switch shows its kept choice; banner closes (L2-156 AC4)
+store -> client : setEmail(true)
+client -> ctrl : PUT /api/me/notifications/email { on: true }
+ctrl -> email : Send SetActivityEmailCommand(true)
+alt Account has no email address
+  email --> ctrl : 409 no_email_address (L2-156 AC5)
+else
+  email -> prefs : TurnEmail(true, now)
+  email -> db : Save
+  ctrl --> client : 204
+end
+actor -> page : Choose "Daily digest" (radio group, arrow keys or tap)
+page -> store : setFrequency(DailyDigest)
+store -> client : setFrequency("DailyDigest")
+client -> ctrl : PUT /api/me/notifications/frequency
+ctrl -> freq : Send SetActivityFrequencyCommand
+freq -> prefs : ChooseFrequency(DailyDigest, now)
+freq -> db : Save
+ctrl --> client : 204, or 400 invalid_frequency
+@enduml

@@ -1,0 +1,56 @@
+@startuml
+title UML sequence behaviour — Remind of a story due
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "SendPopkinRemindersJob" as job
+  participant "DispatchNotificationsJob" as djob
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendPopkinRemindersCommandHandler" as handler
+  participant "PopkinReminderRules" as rules
+  participant "DispatchNotificationsCommandHandler" as dispatch
+  participant "StoryDueEmailComposer" as composer
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+  participant "Email and push senders" as senders
+end box
+time -> job : 5 min elapse
+job -> handler : Send SendPopkinRemindersCommand
+handler -> db : Live Popkins with Plan on; owned stories not Done with a due date
+db --> handler : Stories with their owner's time zone
+loop Each story
+  handler -> rules : StoryDueAt(dueOn, zone) (L2-162 AC2)
+  rules --> handler : 18:00 the day before, local
+  opt Now past it and before the due date
+    handler -> db : Add event StoriesDue, DedupKey reminder:stories_due:{story}:{dueOn}:{person} (unique, AC4)
+  end
+end
+handler -> db : Save
+time -> djob : 15 s elapse
+djob -> dispatch : Send DispatchNotificationsCommand
+dispatch -> db : Story now: still not Done, still theirs, Plan on? (L2-174 AC1, L2-167 AC5)
+alt Allowed by settings and controls
+  dispatch -> composer : ComposeAsync
+  composer --> dispatch : "Due tomorrow: {story}", tag, owner, points, "Open the plan" (L2-167 AC1)
+  dispatch -> senders : Email at once; phone alert (no quiet hours, no digest)
+  senders --> dispatch : Results
+  dispatch -> db : Sent
+else Stopped
+  dispatch -> db : Suppressed with the rule
+end
+@enduml

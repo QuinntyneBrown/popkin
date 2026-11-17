@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Digest emails
+
+Person(member, "Member", "Chose a daily or weekly digest, or hit the day's most")
+System(popkin, "Popkin", "Platform for pop-up communities")
+System_Ext(acs, "Azure Communication Services", "Sends Popkin's email (ADR 0021)")
+Rel(popkin, acs, "Sends the digest at 6 pm local via", "HTTPS")
+Rel(acs, member, "Delivers the digest to")
+Rel(member, popkin, "Opens My Popkins or Notifications from", "HTTPS")
+@enduml

@@ -38,6 +38,8 @@ enum AdminAction {
   ChangeFeature
   ChangeLimits
   PublishAnnouncement
+  ManageNotifications
+  HoldNotifications
   ManageAdmins
   ExportAuditLog
 }
@@ -50,6 +52,8 @@ enum AdminPermissionRow {
   Calls
   Operations
   Platform
+  Notifications
+  NotificationHolds
   Admins
   AuditExport
 }

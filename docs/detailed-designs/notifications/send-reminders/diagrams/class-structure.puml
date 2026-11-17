@@ -1,0 +1,99 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Send reminders
+
+package "Popkin.Domain" {
+  class NotificationEvent {
+    +Guid Id
+    +NotificationKind Kind
+    +Guid? PopkinId
+    +Guid? RecipientPersonId
+    +Guid SubjectId
+    +string? Facts
+    +string? DedupKey
+    +DateTimeOffset OccurredAt
+  }
+  class ContactReminder {
+    +Guid OwnerId
+    +ReminderKind Kind
+    +Guid SubjectId
+    +DateOnly DueOn
+    +string Words
+  }
+  class KeyDate {
+    +ReminderLead Lead
+    +bool RemindersOn
+    +NextOccurrence(today: DateOnly): DateOnly?
+    +ReminderDay(occursOn: DateOnly): DateOnly
+    +YearsOn(occursOn: DateOnly): int?
+  }
+  class Story {
+    +Guid? OwnerMembershipId
+    +DateOnly? DueDate
+    +StoryColumn Column
+    +StoryTag Tag
+  }
+  class PopkinSpace {
+    +PopkinLength Length
+    +DateTimeOffset? EndsAt
+    +DateTimeOffset? WrappedUpAt
+    +DateTimeOffset CreatedAt
+  }
+}
+package "Popkin.Application" {
+  class SendContactRemindersCommandHandler {
+    +Handle(command): Task<int>
+  }
+  class SendPopkinRemindersCommandHandler {
+    +Handle(command): Task<int>
+  }
+  class PopkinReminderRules {
+    +{static} StoryDueAt(dueOn: DateOnly, zone: string?): DateTimeOffset
+    +{static} WrapUpWindow(endsAt: DateTimeOffset, createdAt: DateTimeOffset): Range?
+  }
+  interface INotificationEmailComposer {
+    +ComposeAsync(email: OutgoingEmail, ct): Task<ComposedEmail>
+  }
+  class KeyDateReminderEmailComposer
+  class StoryDueEmailComposer
+  class WrapUpEmailComposer
+  class PhoneAlerts {
+    +For(evt: NotificationEvent): PhoneAlert
+  }
+  class PhoneAlert {
+    +string Title
+    +string Body
+    +string Url
+  }
+  interface IPhoneNotificationSender {
+    +SendAsync(personId: Guid, alert: PhoneAlert, ct): Task
+  }
+}
+package "Popkin.Worker" {
+  class SendContactRemindersJob
+  class SendPopkinRemindersJob
+}
+SendContactRemindersJob ..> SendContactRemindersCommandHandler : command
+SendPopkinRemindersJob ..> SendPopkinRemindersCommandHandler : command
+SendContactRemindersCommandHandler ..> KeyDate : reads
+SendContactRemindersCommandHandler --> ContactReminder : adds once
+SendContactRemindersCommandHandler --> NotificationEvent : adds Birthdays
+SendPopkinRemindersCommandHandler ..> Story : reads
+SendPopkinRemindersCommandHandler ..> PopkinSpace : reads
+SendPopkinRemindersCommandHandler ..> PopkinReminderRules
+SendPopkinRemindersCommandHandler --> NotificationEvent : adds StoriesDue, PopkinWrappingUp
+INotificationEmailComposer <|.. KeyDateReminderEmailComposer
+INotificationEmailComposer <|.. StoryDueEmailComposer
+INotificationEmailComposer <|.. WrapUpEmailComposer
+PhoneAlerts ..> PhoneAlert : builds
+IPhoneNotificationSender ..> PhoneAlert
+@enduml
