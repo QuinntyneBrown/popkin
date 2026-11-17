@@ -22,8 +22,8 @@ Findings are grouped into two parts:
 | `CQ-03` | **High** | Backend (`Features`) | Concurrency race and non-atomic `DateTimeOffset?` read in `PlatformSnapshot.RefreshIfStaleAsync`: setting `_stale = false` and `_loadedAt` before the DB read lets concurrent requests bypass `_loading` and read stale/empty switches | `backend/src/Popkin.Infrastructure/Features/PlatformSnapshot.cs:19-68` |
 | `CQ-04` | **High** | Backend (`Auth`) | `ConfirmCodeCommandHandler` hardcodes `PhotoUrl: null` in the returned `SessionDto`, losing an existing user's profile avatar in `SessionStore` until page reload | `backend/src/Popkin.Application/Auth/ConfirmCode.cs:90` |
 | `CQ-05` | **High** | Frontend (`api` Outboxes) | Privacy & multi-user bug (`L2-054`): `MessageOutbox` (`popkin.outbox`), `ContactsOutbox` (`popkin.contacts-outbox`), and `DraftStore` are not cleared on sign-out, account deletion, or `401`, and failed `ContactsOutbox` entries are never purged | `frontend/projects/api/src/lib/api/contacts/contacts-outbox.ts:108-114`, `dialogs/sign-out/sign-out.dialog.ts:56-64` |
-| `CQ-06` | **Medium** | Frontend (`popkin` Auth) | `unauthorizedInterceptor` does not call `realtime.stop()` on `401`, leaving the SignalR hub connection open after session expiration/revocation | `frontend/projects/popkin/src/app/guards/unauthorized.interceptor.ts:21-29` |
-| `CQ-07` | **Medium** | Frontend (`popkin` Dialogs) | Five destructive confirmation dialogs (`delete-experience`, `delete-story`, `delete-contact`, `delete-photo`, `leave-popkin`) omit `ref.disableClose = true` and do not disable their Cancel/Keep button while `busy()` | `frontend/projects/popkin/src/app/dialogs/delete-*/` |
+| `CQ-06` | **Medium** | Frontend (`popkin` Auth) | **Resolved.** `unauthorizedInterceptor` does not call `realtime.stop()` on `401`, leaving the SignalR hub connection open after session expiration/revocation | `frontend/projects/popkin/src/app/guards/unauthorized.interceptor.ts:21-29` |
+| `CQ-07` | **Medium** | Frontend (`popkin` Dialogs) | **Resolved.** Five destructive confirmation dialogs (`delete-experience`, `delete-story`, `delete-contact`, `delete-photo`, `leave-popkin`) omit `ref.disableClose = true` and do not disable their Cancel/Keep button while `busy()` | `frontend/projects/popkin/src/app/dialogs/delete-*/` |
 | `CQ-08` | **Medium** | Backend (`Contacts`) | N+1 query in `GroupReads`/`GroupRules.ContactsAsync` (`foreach` awaiting `RequireOwnedAsync`), missing `.AsNoTracking()` across 6 read queries in `GetTodayQueryHandler`, and full-history `TimelineEntries` note scan in memory | `backend/src/Popkin.Application/Contacts/Today/Today.cs:105-157`, `Groups/Groups.cs:97-107` |
 | `CQ-09` | **Medium** | Backend (`Auth`) | `ValidateSessionQueryHandler` executes two sequential DB queries (`Sessions` then `People`) on every authenticated HTTP request | `backend/src/Popkin.Application/Auth/Sessions.cs:14-23` |
 | `CQ-10` | **Medium** | Backend (`Domain`) | `Admin.NameFrom(email)` does not clamp the derived name to `Person.MaxNameLength` (40 chars), risking DB column truncation for long email local parts | `backend/src/Popkin.Domain/Admin.cs:87-92` |
@@ -31,29 +31,29 @@ Findings are grouped into two parts:
 | `CQ-12` | **Medium** | Backend (`Photos` / `Chat`) | Inconsistent ProblemDetails `code` for invalid emoji reactions (`reaction_invalid` in `ReactionValidator.Require` vs `emoji_not_allowed` in `PhotoReactions.RequireAsync`) | `backend/src/Popkin.Application/Photos/ReactToPhoto.cs:77-80`, `Chat/ReactionValidator.cs:21-22` |
 | `CQ-13` | **Low** | Backend (`Domain`) | `ExperienceScore.Of` and `CountFor` do not bounds-check `stars` (`1..5`), throwing `IndexOutOfRangeException` on invalid input | `backend/src/Popkin.Domain/ExperienceScore.cs:24-33` |
 | `CQ-14` | **Low** | Backend (`Controllers`) | `ExperiencesController.Edit` and `AdminAuditController.Export` perform form-field presence logic and clock/CSV byte formatting inside controllers (`AGENTS.md` controller rule) | `backend/src/Popkin.Api/Controllers/ExperiencesController.cs:66-78`, `AdminAuditController.cs:10, 22-28` |
-| `CQ-15` | **Low** | Frontend (`popkin` / `e2e`) | `AGENTS.md` violations: forbidden `stack--sm` class and raw `<ul><li><strong>` markup in `delete-account.dialog.html`; 7 active components missing parity specs in `e2e/tests/parity/`; chat helpers in `pages/conversations/` instead of `api` | `frontend/projects/popkin/src/app/dialogs/delete-account/delete-account.dialog.html:10-13`, `pages/conversations/` |
+| `CQ-15` | **Low** | Frontend (`popkin` / `e2e`) | **Resolved.** `AGENTS.md` violations: forbidden `stack--sm` class and raw `<ul><li><strong>` markup in `delete-account.dialog.html`; 7 active components missing parity specs in `e2e/tests/parity/`; chat helpers in `pages/conversations/` instead of `api` | `frontend/projects/popkin/src/app/dialogs/delete-account/delete-account.dialog.html:10-13`, `pages/conversations/` |
 | `CQ-16` | **Low** | Frontend (`api` Naming) | Inconsistent store naming (`7` `*.store.ts` vs `30` `*-store.ts` vs `2` `*-state.ts`), type drift on `accent` (`string` vs `PopkinColour`) and `colour`, and chronological barrel order in `public-api.ts` | `frontend/projects/api/src/public-api.ts:5-170`, `src/lib/models/*.ts` |
 
 ### Part 2 — Redundant, Duplicated, and Dead Code
 
 | ID | Category | Area | Summary | Location |
 |---|---|---|---|---|
-| `RD-01` | Exact Duplication | Frontend (`api`) | `LocalOutboxStorage` and `LocalContactsOutboxStorage` are 100% identical except for the `localStorage` key constant (`'popkin.outbox'` vs `'popkin.contacts-outbox'`), and `LocalPopkinsSnapshot` duplicates `storage()` | `frontend/projects/api/src/lib/api/chat/local-outbox-storage.ts`, `contacts/local-contacts-outbox-storage.ts` |
-| `RD-02` | Near-Duplicate | Frontend (`api`) | `MessageOutbox` and `ContactsOutbox` duplicate offline queue state machines, `Sending -> Waiting` reload recovery, `inFlight` pumping, and in-memory `File` map handling | `frontend/projects/api/src/lib/api/chat/message-outbox.ts`, `contacts/contacts-outbox.ts` |
-| `RD-03` | Near-Duplicate | Frontend (`popkin` & `admin`) | Duplicated route guards (`signedInGuard` vs `adminSessionGuard`, `signedOutGuard` vs `signedOutAdminGuard`) and `401` HTTP interceptors (`unauthorizedInterceptor` vs `adminAuthInterceptor`) | `frontend/projects/popkin/src/app/guards/*.ts`, `projects/admin/src/app/guards/*.ts` |
-| `RD-04` | Exact / Structural Duplication | Frontend (`popkin` Dialogs) | `delete-message.dialog` and `delete-comment.dialog` are identical; 5 async delete/leave dialogs (`delete-experience`, `delete-story`, `delete-contact`, `delete-photo`, `leave-popkin`) duplicate the `busy`/`failed` state machine that `admin` extracted to `ActionDialogState` | `frontend/projects/popkin/src/app/dialogs/delete-*/`, `leave-popkin/` |
-| `RD-05` | Duplicated Logic | Frontend (`popkin`) | Client-side session teardown (`realtime.stop()`, `sessions.clear()`, `snapshot.clear()`, scroll reset) is duplicated across `sign-out.dialog.ts`, `delete-account.dialog.ts`, and `unauthorized.interceptor.ts` | `frontend/projects/popkin/src/app/dialogs/sign-out/`, `delete-account/`, `guards/unauthorized.interceptor.ts` |
-| `RD-06` | Unused Code (24 Components) | Frontend (`components` & `api`) | 24 `pk-*` components in `frontend/projects/components/src/lib/` (plus `trendChartOf` in `api`) have zero usages across `popkin`, `admin`, `marketing`, and parent components (built ahead of unbuilt admin screens under ADR 0025) | `frontend/projects/components/src/lib/*` (see full list in `RD-06`) |
-| `RD-07` | Overlapping Components | Frontend (`components`) | 5 overlapping key-value/definition-list components (`contact-facts`, `facts`/`fact`, `key-values`, `settings-list`, `stat-pair`) and 8 overlapping chip-bar components (`chip`, `choice-chips`, `drift-chips`, `filter-chips`, `group-chips`, `toggle-chips`, `week-chips`, `who-chips`) | `frontend/projects/components/src/lib/*` |
-| `RD-08` | Duplicated Types & Models | Frontend (`api/models`) | Duplicate `Feature` (`admin.ts:108`) vs `PopkinFeature` (`home.ts:50`); 4 identical member summary interfaces (`MessageAuthorView`, `MemberJoinedView`, `KeenMemberView`, `StoryOwnerView`) + 3 inline copies; 10 duplicated contact identity shapes; duplicate upload event unions | `frontend/projects/api/src/lib/models/*.ts` |
+| `RD-01` | Exact Duplication | Frontend (`api`) | **Resolved.** `LocalOutboxStorage` and `LocalContactsOutboxStorage` are 100% identical except for the `localStorage` key constant (`'popkin.outbox'` vs `'popkin.contacts-outbox'`), and `LocalPopkinsSnapshot` duplicates `storage()` | `frontend/projects/api/src/lib/api/chat/local-outbox-storage.ts`, `contacts/local-contacts-outbox-storage.ts` |
+| `RD-02` | Near-Duplicate | Frontend (`api`) | **Resolved.** `MessageOutbox` and `ContactsOutbox` duplicate offline queue state machines, `Sending -> Waiting` reload recovery, `inFlight` pumping, and in-memory `File` map handling | `frontend/projects/api/src/lib/api/chat/message-outbox.ts`, `contacts/contacts-outbox.ts` |
+| `RD-03` | Near-Duplicate | Frontend (`popkin` & `admin`) | **Resolved.** Duplicated route guards (`signedInGuard` vs `adminSessionGuard`, `signedOutGuard` vs `signedOutAdminGuard`) and `401` HTTP interceptors (`unauthorizedInterceptor` vs `adminAuthInterceptor`) | `frontend/projects/popkin/src/app/guards/*.ts`, `projects/admin/src/app/guards/*.ts` |
+| `RD-04` | Exact / Structural Duplication | Frontend (`popkin` Dialogs) | **Resolved.** `delete-message.dialog` and `delete-comment.dialog` are identical; 5 async delete/leave dialogs (`delete-experience`, `delete-story`, `delete-contact`, `delete-photo`, `leave-popkin`) duplicate the `busy`/`failed` state machine that `admin` extracted to `ActionDialogState` | `frontend/projects/popkin/src/app/dialogs/delete-*/`, `leave-popkin/` |
+| `RD-05` | Duplicated Logic | Frontend (`popkin`) | **Resolved.** Client-side session teardown (`realtime.stop()`, `sessions.clear()`, `snapshot.clear()`, scroll reset) is duplicated across `sign-out.dialog.ts`, `delete-account.dialog.ts`, and `unauthorized.interceptor.ts` | `frontend/projects/popkin/src/app/dialogs/sign-out/`, `delete-account/`, `guards/unauthorized.interceptor.ts` |
+| `RD-06` | Unused Code (24 Components) | Frontend (`components` & `api`) | **Resolved.** 24 `pk-*` components in `frontend/projects/components/src/lib/` (plus `trendChartOf` in `api`) have zero usages across `popkin`, `admin`, `marketing`, and parent components (built ahead of unbuilt admin screens under ADR 0025) | `frontend/projects/components/src/lib/*` (see full list in `RD-06`) |
+| `RD-07` | Overlapping Components | Frontend (`components`) | **Resolved.** 5 overlapping key-value/definition-list components (`contact-facts`, `facts`/`fact`, `key-values`, `settings-list`, `stat-pair`) and 8 overlapping chip-bar components (`chip`, `choice-chips`, `drift-chips`, `filter-chips`, `group-chips`, `toggle-chips`, `week-chips`, `who-chips`) | `frontend/projects/components/src/lib/*` |
+| `RD-08` | Duplicated Types & Models | Frontend (`api/models`) | **Resolved.** Duplicate `Feature` (`admin.ts:108`) vs `PopkinFeature` (`home.ts:50`); 4 identical member summary interfaces (`MessageAuthorView`, `MemberJoinedView`, `KeenMemberView`, `StoryOwnerView`) + 3 inline copies; 10 duplicated contact identity shapes; duplicate upload event unions | `frontend/projects/api/src/lib/models/*.ts` |
 | `RD-09` | Near-Duplicate | Backend (`Api/Auth` & `Domain`) | `SessionCookie` vs `AdminSessionCookie` (cookie options, `SignInAsync`, `ValidatePrincipal`, `HttpCurrentPerson` vs `HttpCurrentAdmin`) and `Session` vs `AdminSession` domain entities | `backend/src/Popkin.Api/Auth/SessionCookie.cs`, `AdminSessionCookie.cs`, `Popkin.Domain/Session.cs`, `AdminSession.cs` |
 | `RD-10` | Near-Duplicate | Backend (`Application/Auth`) | `ConfirmCodeCommandHandler` vs `ConfirmAdminCodeCommandHandler` and `RequestCode` vs `RequestAdminCode` duplicate verification code lookup, expiration/consumption checks, hash verification, and `DbUpdateConcurrencyException` handling | `backend/src/Popkin.Application/Auth/ConfirmCode.cs`, `Administration/Auth/ConfirmAdminCode.cs` |
 | `RD-11` | Near-Duplicate | Backend (`Chat` & `Photos`) | `MessageReaction` vs `PhotoReaction` entities and `Reactions.Summary` vs `PhotoReactions.OfAsync` emoji grouping/ordering queries | `backend/src/Popkin.Domain/MessageReaction.cs`, `PhotoReaction.cs`, `Application/Chat/Reactions.cs`, `Photos/ReactToPhoto.cs` |
 | `RD-12` | Repeated Boilerplate | Backend (`Api/Controllers`) | 7 controller actions repeat `await using var content = photo?.OpenReadStream(); var upload = photo is null ? null : new PhotoUpload(content!, photo.Length);`, and `PhotoUpload` lives in `Popkin.Application.Invites` | `AccountController.cs`, `ContactMemoriesController.cs`, `ContactsPeopleController.cs`, `ExperiencesController.cs` |
 | `RD-13` | Repeated Helpers | Backend (`Domain` & `Application`) | Duplicated canonical `Guid` pair ordering (`ChatThread.OrderedPair` vs `Connection.Order`), string trim-to-null (`Contact.Clean`, `FollowUp.Trimmed`, inline), and contact avatar projection (`PersonName.FirstName`, `PersonName.Initials`, `AvatarAccent.For`, `photos.GetReadUrl`) across 8 Contacts handlers | `Popkin.Domain/ChatThread.cs`, `Connection.cs`, `Contact.cs`, `FollowUp.cs`, `Popkin.Application/Contacts/**` |
 | `RD-14` | Unused Enum Values | Backend (`Domain`) | `AdminAction` (18 of 21 values), `AuditAction` (26 of 33 values), and `AuditTargetKind` (9 of 12 values) declare constants for unbuilt admin features with no handlers or controllers | `backend/src/Popkin.Domain/AdminAction.cs`, `AuditAction.cs`, `AdminPermissions.cs` |
-| `RD-15` | Repeated Boilerplate | Frontend (`api` Stores) | 300 ms delayed-loading timer boilerplate (`slow?: ReturnType<typeof setTimeout>`, `DestroyRef.onDestroy`, `pending -> loading -> ready/error`) is copy-pasted across 20+ stores in `frontend/projects/api` | `frontend/projects/api/src/lib/api/**/*-store.ts` |
-| `RD-16` | Fragmented Helpers | Frontend (`api` Text) | 33 separate `*-text.ts` files (14 in `contacts/` alone) re-implement overlapping pluralization, relative day/weekday formatting, and ProblemDetails error-to-message mapping | `frontend/projects/api/src/lib/api/**/*-text.ts` |
+| `RD-15` | Repeated Boilerplate | Frontend (`api` Stores) | **Resolved.** 300 ms delayed-loading timer boilerplate (`slow?: ReturnType<typeof setTimeout>`, `DestroyRef.onDestroy`, `pending -> loading -> ready/error`) is copy-pasted across 20+ stores in `frontend/projects/api` | `frontend/projects/api/src/lib/api/**/*-store.ts` |
+| `RD-16` | Fragmented Helpers | Frontend (`api` Text) | **Resolved.** 33 separate `*-text.ts` files (14 in `contacts/` alone) re-implement overlapping pluralization, relative day/weekday formatting, and ProblemDetails error-to-message mapping | `frontend/projects/api/src/lib/api/**/*-text.ts` |
 
 ---
 
@@ -178,6 +178,8 @@ Findings are grouped into two parts:
   When a user signs out (`sign-out.dialog.ts:58`) or deletes their account (`delete-account.dialog.ts:60`), the app calls `this.realtime.stop()`, `this.sessions.clear()`, and `this.snapshot.clear()`. However, when `unauthorizedInterceptor` catches an unexpected `401` (e.g., revoked or expired session), it calls `sessions.clear()` and `snapshot.clear()` but never calls `inject(POPKIN_REALTIME).stop()`. The active WebSocket/SignalR connection remains open in the background while the user is redirected to `/sign-in`.
 - **Recommendation**:
   Centralize client session teardown in one service method called by `sign-out.dialog.ts`, `delete-account.dialog.ts`, and `unauthorized.interceptor.ts`.
+- **Resolution**:
+  Resolved 17 November 2026 (3ccccc54): `SessionTeardown` (`api/auth/session-teardown.ts`) closes the live connection and forgets the session and the saved list of My Popkins for sign out, account deletion and the 401 interceptor alike; `session-ended.spec.ts` proves a 401 closes the hub connection.
 
 ---
 
@@ -193,6 +195,8 @@ Findings are grouped into two parts:
   `sign-out.dialog.ts` (line 36), `delete-account.dialog.ts` (line 55), and `admin-remove.dialog.ts` (line 36) set `this.ref.disableClose = true` while a destructive request is in flight and bind `[disabled]="busy()"` on the Cancel button. The five dialogs listed above do neither: a user can press `Escape`, click the backdrop, or click "Cancel"/"Keep" while the `DELETE` request is in flight, causing the dialog to close as `false` right before the `next` callback navigates or mutates page state.
 - **Recommendation**:
   Set `this.ref.disableClose = true` during the in-flight request (resetting on error) and bind `[disabled]="busy()"` on the secondary cancel button across all five dialogs.
+- **Resolution**:
+  Resolved 17 November 2026 (20453417): `ConfirmDialogState` (`api/dialogs/confirm-dialog-state.ts`) sets `disableClose` while busy in all five dialogs, sign out and Delete your account, which also disable their cancel button; `pk-dialog`'s backdrop and Close now respect `disableClose` too. L2-056 AC8, the busy mocks and a behaviour test per dialog say so.
 
 ---
 
@@ -346,6 +350,8 @@ Findings are grouped into two parts:
      `conversation-list.ts` and `message-actions.ts` live under `frontend/projects/popkin/src/app/pages/conversations/` and are shared across `conversations.page.ts`, `group-chat.page.ts`, and `direct-message.page.ts` without unit tests in `projects/api`.
 - **Recommendation**:
   Replace raw `<ul class="stack stack--sm text-sm">` in `delete-account.dialog.html` with a `pk-*` component; add parity specs for `closest`, `schedule`, `status`, `link-key`, and `app-screen` (or record exemptions in ADR 0008); and move pure helpers from `pages/conversations/` into `projects/api/src/lib/api/chat/`.
+- **Resolution**:
+  Resolved 17 November 2026: 1. the app templates set spacing with `pk-stack` and `pk-cluster`, New habit's label is `pk-field-label` and Delete your account's list is `pk-term-list` (a3c5839d); 2. `closest`, `app-screen`, `schedule`, `link-key`, `files-input` and `qr` have parity specs, and `status` turned out unused and was removed (bbf28fdd, a85e2b2b); 3. `ConversationList` and `MessageActions` are in `api/chat/` with unit tests, opening their dialogs through `CHAT_DIALOGS` (b9b18e27). [ADR 0029](../adr/0029-one-library-no-unused-components.md).
 
 ---
 
@@ -377,6 +383,8 @@ Findings are grouped into two parts:
   `LocalOutboxStorage` and `LocalContactsOutboxStorage` are character-for-character identical (37 lines each) except for the `KEY` string (`'popkin.outbox'` vs `'popkin.contacts-outbox'`) and the entry type parameter (`OutboxEntry` vs `ContactsOutboxEntry`). `LocalPopkinsSnapshot` also duplicates the same `private storage(): Storage | null` helper.
 - **Recommendation**:
   Replace both classes with a single generic `LocalJsonArrayStorage<T>` (or shared `BrowserLocalStorage` helper) parameterized by the storage key.
+- **Resolution**:
+  Resolved 17 November 2026: both storages delegate to `JsonListStorage` ([PR 89](https://github.com/QuinntyneBrown/popkin/pull/89)), and both outboxes keep their state through `OutboxQueue` (7ea057ee).
 
 ---
 
@@ -392,6 +400,8 @@ Findings are grouped into two parts:
   - Updating the signal and writing through to storage (`update` / `change` methods in `message-outbox.ts:224-240` and `contacts-outbox.ts:119-128`).
 - **Recommendation**:
   Extract a shared base/helper for persistent client-side outbox state (`held` signal, `Sending -> Waiting` recovery, `change`/`update` persistence) while keeping per-thread vs single-queue pumping specialized.
+- **Resolution**:
+  Resolved 17 November 2026 (7ea057ee): `OutboxQueue` (`api/storage/outbox-queue.ts`) holds the entries, the Sending to Waiting recovery, the files and the write-through; `MessageOutbox` and `ContactsOutbox` keep only their sending rules. Their unit tests pass unchanged.
 
 ---
 
@@ -405,6 +415,8 @@ Findings are grouped into two parts:
   The route guards and `401` interceptors in `projects/popkin` and `projects/admin` have identical control flow, differing only in which session store they inject (`SessionStore` vs `AdminSessionStore`), which sign-in URL prefix is exempt (`/api/auth/codes` vs `/api/admin/auth/`), and where `signedOutGuard` redirects (`/popkins` vs `/`).
 - **Recommendation**:
   Provide reusable guard/interceptor factories in `frontend/projects/api` configured by each app's `app.config.ts` / `app.routes.ts`.
+- **Resolution**:
+  Resolved 17 November 2026 (e8140dd3): `signedInGuardOf`, `signedOutGuardOf` and `unauthorizedInterceptorOf` (`api/auth/session-guards.ts`), with unit tests; each app names its store, its exempt requests and its home.
 
 ---
 
@@ -429,6 +441,8 @@ Findings are grouped into two parts:
   2. All five async delete/leave dialogs repeat `readonly busy = signal(false); readonly failed = signal(false);` and identical `<div pk-dialog>` + `<div pk-alert variant="danger">` + danger/secondary button templates. Meanwhile, the admin app already has `ActionDialogState` (`frontend/projects/api/src/lib/api/admin/dialogs/action-dialog-state.ts`) for dialog `busy`/`failed` state.
 - **Recommendation**:
   Consolidate confirmation dialogs or share a reusable `ConfirmDialogState` helper in `projects/api` (handling `busy`, `failed`, and `DialogRef.disableClose`) across both `popkin` and `admin`.
+- **Resolution**:
+  Resolved 17 November 2026 (20453417): Delete this message and Delete this comment are one `ConfirmDeleteDialog`; the five async dialogs, sign out, Delete your account and admin's `ActionDialogState` share `ConfirmDialogState`. The action sheets are different menus and stay apart.
 
 ---
 
@@ -442,6 +456,8 @@ Findings are grouped into two parts:
   `SignOutDialog.finish()` and `DeleteAccountDialog.confirm()` contain the exact same 6-line teardown sequence (`realtime.stop()`, `sessions.clear()`, `snapshot.clear()`, `ref.close()`, `router.navigateByUrl(...)`, `scroller.scrollToPosition([0, 0])`), and `unauthorizedInterceptor` duplicates a partial version of it.
 - **Recommendation**:
   Extract a single teardown method on `SessionStore` (or an `AuthSessionCleanup` service in `projects/api`).
+- **Resolution**:
+  Resolved 17 November 2026 (3ccccc54): `SessionTeardown.forget()` and `end(url)`.
 
 ---
 
@@ -480,6 +496,8 @@ Findings are grouped into two parts:
     24. `uptime` (`frontend/projects/components/src/lib/uptime/uptime.ts`)
 - **Recommendation**:
   Track these 24 components in `docs/component-backlog.md` until their corresponding Admin Console screens and parity specs are built, or prune any whose target admin screen is deferred.
+- **Resolution**:
+  Resolved 17 November 2026 (89727a8a, a85e2b2b): the 24 components and `trendChartOf` are removed, and so is `status`, which only `pk-status-note` matched. [ADR 0029](../adr/0029-one-library-no-unused-components.md) builds a component with its first screen; their design-system pages stay and `docs/component-backlog.md` marks them "Not built: built with its screen".
 
 ---
 
@@ -491,6 +509,8 @@ Findings are grouped into two parts:
   2. **8 chip-row components**: `chip`, `choice-chips`, `drift-chips`, `filter-chips`, `group-chips`, `toggle-chips`, `week-chips`, and `who-chips` each wrap horizontal chip lists with slight variations in selection state or routing.
 - **Recommendation**:
   Where the design system allows, compose domain chip bars from `pk-chip` / `pk-filter-chips` rather than introducing a new component directory per screen.
+- **Resolution**:
+  Resolved 17 November 2026 (e4aed7e1): the who chip, drawn by `pk-who-chips` and `pk-drift-chips` alike, is one `pk-who-chip`; the other chip rows are different ARIA patterns of `pk-chip` or another block (`weeks`), and the three key-value components are three blocks in the mocks, so they stay apart ([ADR 0029](../adr/0029-one-library-no-unused-components.md)).
 
 ---
 
@@ -515,6 +535,8 @@ Findings are grouped into two parts:
     - `GroupMemberView` (`models/groups.ts:9-21`) duplicates all 8 fields of `MapPersonView` (`models/connections.ts:15-25`).
 - **Recommendation**:
   Consolidate `Feature` and `PopkinFeature`; extract a single `MemberBriefView` interface; unify `UploadEvent<T>`; and share a base `ContactSummaryView` and `KeyDateFields` interface across `models/`.
+- **Resolution**:
+  Resolved 17 November 2026 (0f48f0ee): `PopkinFeature`, `MemberBriefView`, `UploadEvent<P, D>`, `ContactSummaryView` and `KeyDateFields`.
 
 ---
 
@@ -625,6 +647,8 @@ Findings are grouped into two parts:
   Followed by identical `setTimeout` setup and `clearTimeout(this.slow)` calls in `next` and `error` callbacks. Notably, Known Gap 24 (`docs/detailed-designs/README.md`) mentions that the designed `screenLoad()` helper in `Loading, failure and offline` was never built, which is why every store re-implements this timer by hand.
 - **Recommendation**:
   Implement the `screenLoad()` helper (or a small `DelayedLoadState` utility in `frontend/projects/api/src/lib/api/`) to replace the repeated `setTimeout` / `clearTimeout` / `DestroyRef` boilerplate across all stores.
+- **Resolution**:
+  Resolved 17 November 2026 (5ed52f6f): `DelayedLoading` (`api/loading/delayed-loading.ts`), with unit tests. By then only `AccountStore` still kept the timer by hand; it uses the helper.
 
 ---
 
@@ -636,3 +660,6 @@ Findings are grouped into two parts:
   Short month names (`['Jan', 'Feb', ...]`), weekday names (`['Sun', 'Mon', ...]`), `"today"` / `"tomorrow"` / `"in {n} days"` / `"{n} days ago"` formatting, and singular/plural count formatting are re-implemented across multiple `*-text.ts` files in `contacts/`, `schedule/`, `photos/`, `chat/`, and `popkins/`.
 - **Recommendation**:
   Extract shared calendar/relative-day formatting primitives in `frontend/projects/api/src/lib/api/` while keeping screen-specific copy functions in their respective domain modules.
+- **Resolution**:
+  Resolved 17 November 2026 (279302c8): `api/text/` holds the calendar names, `counted`/`plural` and `daysAway`; the 21 files that kept their own names read them from there, and the retry message of a ProblemDetails refusal, the counts and the relative days use the helpers.
+
