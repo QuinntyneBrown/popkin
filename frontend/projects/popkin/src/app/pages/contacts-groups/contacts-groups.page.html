@@ -1,0 +1,123 @@
+<div pk-app-screen accent="coral" layout="tab" body="fill">
+  <div pk-contacts-page>
+    <div pk-page-head slot="head" heading="Groups" sub="Households, teams, small groups and clubs">
+      <a pk-button slot="actions" variant="secondary" size="sm" routerLink="/contacts/connections">
+        <svg pk-icon name="network" size="md"></svg>Connections
+      </a>
+      <button
+        pk-button
+        slot="actions"
+        type="button"
+        variant="primary"
+        size="sm"
+        (click)="newGroup()"
+      >
+        <svg pk-icon name="plus" size="md"></svg>New group
+      </button>
+    </div>
+    @if (store.empty()) {
+      <div
+        pk-empty-state
+        icon="users"
+        heading="No groups yet"
+        text="Put a household, a team or a small group together, so their dates and notes sit in one place."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="newGroup()">
+          <svg pk-icon name="plus" size="md"></svg>New group
+        </button>
+      </div>
+    } @else if (store.state() === 'failed') {
+      <div
+        pk-empty-state
+        icon="alert"
+        [alert]="true"
+        heading="We couldn’t load your groups"
+        text="Nothing is lost. Check your connection and try again."
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.load()">
+          Try again
+        </button>
+      </div>
+    } @else if (store.state() === 'loading') {
+      <p class="visually-hidden" role="status">Loading your groups…</p>
+      <div class="stack" aria-hidden="true">
+        <span pk-skeleton shape="text" [width]="20"></span>
+        @for (row of skeletons; track row) {
+          <div class="cluster">
+            <span pk-skeleton shape="tile"></span>
+            <div class="stack">
+              <span pk-skeleton shape="text" [width]="40"></span>
+              <span pk-skeleton shape="text" [width]="70"></span>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div
+        pk-group-browser
+        [kinds]="kinds()"
+        [currentId]="store.openId()"
+        [open]="open()"
+        [detail]="!!open()"
+        backLink="/contacts/groups"
+      >
+        @if (store.open()?.popkin; as popkin) {
+          <a pk-button slot="actions" variant="primary" size="sm" [routerLink]="['/p', popkin.id]">
+            <svg pk-icon name="open" size="md"></svg>{{ openLabel() }}
+          </a>
+        } @else if (store.open(); as group) {
+          <a
+            pk-button
+            slot="actions"
+            variant="primary"
+            size="sm"
+            routerLink="/new"
+            [queryParams]="{ group: group.id, name: group.name }"
+          >
+            <svg pk-icon name="plus" size="md"></svg>Start a Popkin with them
+          </a>
+        }
+        @if (store.open(); as group) {
+          <button
+            pk-button
+            slot="actions"
+            type="button"
+            variant="secondary"
+            size="sm"
+            (click)="addPeople(group)"
+          >
+            <svg pk-icon name="plus" size="md"></svg>Add people
+          </button>
+        }
+        @if (store.open(); as group) {
+          <section aria-labelledby="g-people">
+            <div pk-list-head headingId="g-people" [level]="3" [heading]="peopleHeading()"></div>
+            <ul pk-group-members [members]="members()"></ul>
+          </section>
+          <div class="stack">
+            @if (group.note) {
+              <div pk-info-card>
+                <p pk-info-line icon="note">{{ group.note }}</p>
+              </div>
+            }
+            @if (comingUp().length) {
+              <section aria-labelledby="g-coming">
+                <div pk-list-head headingId="g-coming" [level]="3" heading="Coming up"></div>
+                <ul pk-coming-up [dates]="comingUp()"></ul>
+              </section>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+  <nav
+    pk-popkin-nav
+    slot="nav"
+    place="contacts"
+    contactsCurrent="groups"
+    [members]="frame.countLine()"
+    [due]="frame.due()"
+    [dueLabel]="frame.dueLabel()"
+  ></nav>
+</div>

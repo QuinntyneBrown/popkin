@@ -167,3 +167,33 @@ public sealed class ConnectionConfiguration : IEntityTypeConfiguration<Connectio
         builder.HasOne<Contact>().WithMany().HasForeignKey(c => c.OtherContactId).OnDelete(DeleteBehavior.NoAction);
     }
 }
+
+public sealed class ContactGroupConfiguration : IEntityTypeConfiguration<ContactGroup>
+{
+    public void Configure(EntityTypeBuilder<ContactGroup> builder)
+    {
+        builder.ToTable("ContactGroups");
+        builder.HasKey(g => g.Id);
+        // A resend saves once (L2-123 AC4).
+        builder.HasIndex(g => new { g.OwnerId, g.ClientId }).IsUnique();
+        builder.Property(g => g.Name).HasMaxLength(ContactGroup.MaxNameLength);
+        builder.Property(g => g.Note).HasMaxLength(ContactGroup.MaxNoteLength);
+        builder.Property(g => g.Kind).HasConversion<string>().HasMaxLength(16);
+        builder.Ignore(g => g.Emoji);
+        // A group goes with its account (L2-049); the Popkin it starts keeps going without it.
+        builder.HasOne<Person>().WithMany().HasForeignKey(g => g.OwnerId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(g => g.Members).WithOne().HasForeignKey(m => m.GroupId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public sealed class ContactGroupMemberConfiguration : IEntityTypeConfiguration<ContactGroupMember>
+{
+    public void Configure(EntityTypeBuilder<ContactGroupMember> builder)
+    {
+        builder.ToTable("ContactGroupMembers");
+        builder.HasKey(m => new { m.GroupId, m.ContactId });
+        builder.HasIndex(m => m.ContactId);
+        // ContactRemoval removes a deleted contact's memberships; the group stays (L2-147 AC7).
+        builder.HasOne<Contact>().WithMany().HasForeignKey(m => m.ContactId).OnDelete(DeleteBehavior.NoAction);
+    }
+}

@@ -28,6 +28,8 @@ export class PersonPick {
 
   /** "Change": offered in place of Remove. */
   readonly changeLabel = input<string>();
+  /** The remove button's name; "Remove the connection to {first name}" unless given ("Take Grace out"). */
+  readonly removeLabel = input<string>();
 
   readonly removed = output<void>();
   readonly changed = output<void>();

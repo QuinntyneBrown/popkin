@@ -39,6 +39,8 @@ import {
   ChipOption,
   DateEntry,
   PersonPick,
+  ToggleChips,
+  ToggleChipOption,
   Link,
   EmptyState,
   ChoiceChips,
@@ -78,6 +80,7 @@ const NAME_MESSAGE = 'Add a name so you can find them later.';
     Button,
     DateEntry,
     PersonPick,
+    ToggleChips,
     Link,
     ChoiceChips,
     EmptyState,
@@ -156,6 +159,7 @@ export class ContactFormPage implements OnInit {
   ngOnInit(): void {
     const name = this.name()?.trim();
     if (!this.contactId() && name) this.form.controls.name.setValue(name);
+    this.store.loadGroups();
   }
 
   constructor() {
@@ -220,6 +224,11 @@ export class ContactFormPage implements OnInit {
         if (draft) this.store.addDate(draft);
       });
   }
+
+  /** "Groups": the person's groups as toggles (L2-147 AC6). */
+  protected readonly groupOptions = computed<ToggleChipOption[]>(() =>
+    this.store.groups().map((g) => ({ value: g.id, label: g.name, emoji: g.emoji })),
+  );
 
   /** "Connect to someone": Connect in draft mode, saved with the contact (L2-150 AC9). */
   protected connectTo(): void {

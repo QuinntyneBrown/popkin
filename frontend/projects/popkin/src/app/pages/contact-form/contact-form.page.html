@@ -142,6 +142,17 @@
             <svg pk-icon name="plus" size="md"></svg>Connect to someone
           </button>
         </div>
+        @if (groupOptions().length) {
+          <div
+            pk-toggle-chips
+            fieldId="groups"
+            label="Groups"
+            [options]="groupOptions()"
+            [disabled]="saving()"
+            [value]="store.groupIds()"
+            (valueChange)="store.groupIds.set($event)"
+          ></div>
+        }
       </section>
       <section pk-form-section heading="Details" hint="Optional.">
         <div pk-form-pair>

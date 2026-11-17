@@ -1,3 +1,4 @@
+using Popkin.Application.Contacts.Groups;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Contacts.Connections;
 using Popkin.Application.Contacts.Dates;
@@ -28,11 +29,19 @@ public sealed record ContactProfileDto(
     IReadOnlyList<ContactKeyDateDto> KeyDates,
     ContactKeptDto? Kept = null,
     HabitDto? Habit = null,
-    IReadOnlyList<AroundDto>? Around = null)
+    IReadOnlyList<AroundDto>? Around = null,
+    IReadOnlyList<GroupChipDto>? Groups = null)
 {
-    /// <summary>The profile with "People around {first name}" (L2-150 AC4).</summary>
+    /// <summary>
+    /// The profile with "People around {first name}": their connections (L2-150 AC4) and the chips
+    /// of their groups (L2-146 AC4).
+    /// </summary>
     public async Task<ContactProfileDto> WithAroundAsync(IAppDbContext db, Guid owner, IPhotoStore photos, CancellationToken cancellationToken) =>
-        this with { Around = await ConnectionReads.AroundAsync(db, owner, Id, photos, cancellationToken) };
+        this with
+        {
+            Around = await ConnectionReads.AroundAsync(db, owner, Id, photos, cancellationToken),
+            Groups = await GroupReads.OfContactAsync(db, owner, Id, cancellationToken),
+        };
 
     public static ContactProfileDto Of(
         Contact contact, IPhotoStore photos, IReadOnlyList<ContactKeyDateDto>? keyDates = null, ContactKeptDto? kept = null, HabitDto? habit = null) =>

@@ -68,6 +68,8 @@ import {
   KeepStrip,
   PeopleAround,
   AroundItem,
+  GroupChips,
+  GroupChipItem,
   KeyDateItem,
   KeyDates,
   Likes,
@@ -128,6 +130,7 @@ const MODAL = { ariaLabelledBy: 'dlg-title', hasBackdrop: false, ariaModal: true
     InfoCard,
     KeepStrip,
     PeopleAround,
+    GroupChips,
     KeyDates,
     Likes,
     Link,
@@ -342,6 +345,15 @@ export class ContactProfilePage {
       accent: a.accent.toLowerCase(),
       meta: connectionWords(a.words, a.kind),
       link: ['/contacts/people', a.contactId],
+    })),
+  );
+
+  /** Their groups' chips, each opening that group (L2-146 AC4). */
+  protected readonly groupChips = computed<GroupChipItem[]>(() =>
+    (this.store.profile()?.groups ?? []).map((g) => ({
+      emoji: g.emoji,
+      name: g.name,
+      link: ['/contacts/groups', g.id],
     })),
   );
 

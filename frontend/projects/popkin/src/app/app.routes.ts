@@ -323,6 +323,22 @@ export const routes: Routes = [
     title: 'Connections · Contacts · Popkin',
   },
   {
+    path: 'contacts/groups',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-groups/contacts-groups.page').then((m) => m.ContactsGroupsPage),
+    data: data({ shell: 'app', page: 'contacts-groups' }),
+    title: 'Groups · Contacts · Popkin',
+  },
+  {
+    path: 'contacts/groups/:groupId',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contacts-groups/contacts-groups.page').then((m) => m.ContactsGroupsPage),
+    data: data({ shell: 'app', page: 'contacts-groups' }),
+    title: 'Groups · Contacts · Popkin',
+  },
+  {
     path: 'contacts/people/new',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>

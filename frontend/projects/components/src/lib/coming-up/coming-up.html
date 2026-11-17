@@ -1,0 +1,7 @@
+@for (date of dates(); track $index) {
+  <li class="coming-up__item">
+    <span pk-avatar-stack size="xs" [avatars]="[date.who]"></span>
+    <span class="coming-up__title">{{ date.title }}</span>
+    <span class="coming-up__day">{{ date.day }}</span>
+  </li>
+}

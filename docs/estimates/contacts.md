@@ -14,7 +14,7 @@
 | memories | 3 days | 95% |
 | habits | 4 days | 90% |
 | today | 5 days | 10% |
-| groups | 5 days | 0% |
+| groups | 5 days | 95% |
 | connections | 6 days | 95% |
 | import-from-popkins | 3 days | 0% |
 | reminders | 6 days | 0% |

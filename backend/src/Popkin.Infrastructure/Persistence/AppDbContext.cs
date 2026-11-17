@@ -65,6 +65,10 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<Connection> Connections => Set<Connection>();
 
+    public DbSet<ContactGroup> ContactGroups => Set<ContactGroup>();
+
+    public DbSet<ContactGroupMember> ContactGroupMembers => Set<ContactGroupMember>();
+
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();
 
     public DbSet<Admin> Admins => Set<Admin>();

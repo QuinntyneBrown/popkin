@@ -1,3 +1,4 @@
+using Popkin.Application.Contacts.Groups;
 using MediatR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Contacts.Connections;
@@ -33,11 +34,13 @@ public sealed class AddContactCommandHandler(
         var (name, details) = SaveContactValidator.Validate(request.Contact);
         var drafts = KeyDateDrafts.Validate(request.Contact.KeyDates);
         var connect = ConnectionDrafts.Validate(request.Contact.Connect);
+        var groups = await GroupMemberships.ValidateAsync(db, owner, request.Contact.GroupIds, cancellationToken);
         var avatar = request.Photo is null ? null : await AvatarPhotos.ReadAsync(request.Photo, processor, cancellationToken);
         var contact = Contact.Create(owner, request.Contact.ClientId, name, details, clock.GetUtcNow());
         db.Contacts.Add(contact);
         await KeyDateDrafts.ApplyAsync(db, contact, drafts, clock.GetUtcNow(), cancellationToken);
         await ConnectionDrafts.ApplyAsync(db, guard, contact, connect, null, clock.GetUtcNow(), cancellationToken);
+        await GroupMemberships.ApplyAsync(db, contact.Id, groups, clock.GetUtcNow(), cancellationToken);
         if (avatar is null)
         {
             await db.SaveChangesAsync(cancellationToken);

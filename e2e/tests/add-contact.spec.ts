@@ -83,6 +83,7 @@ test.describe('Add someone', () => {
       keyDates: [],
       connect: [],
       disconnect: [],
+      groupIds: [],
     });
     await expect(page).toHaveURL(`/contacts/people/${femi().id}`);
     await expect(new Toasts(page).toast).toHaveText('Femi is in your Contacts.');
@@ -212,6 +213,7 @@ test.describe('Edit', () => {
       keyDates: [],
       connect: [],
       disconnect: [],
+      groupIds: [],
     });
     await expect(page).toHaveURL(`/contacts/people/${kept().id}`);
   });

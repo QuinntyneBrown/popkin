@@ -13,6 +13,11 @@ export interface NewPopkinDraftState {
    * this crew" (L2-046 AC5). Null for a Popkin started on its own.
    */
   crewOf: string | null;
+  /**
+   * The Contacts group whose members are sent the new Popkin's invite: "Start a Popkin with
+   * them" (L2-148 AC3). Null for a Popkin started any other way.
+   */
+  groupOf: string | null;
   /** The features chosen on "What should it have?", both on at first (L2-152 AC1). */
   features: { plan: boolean; schedules: boolean };
 }
@@ -24,6 +29,7 @@ const FIRST: NewPopkinDraftState = {
   length: 'TheWeekend',
   customEndsAt: null,
   crewOf: null,
+  groupOf: null,
   features: { plan: true, schedules: true },
 };
 

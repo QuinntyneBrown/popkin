@@ -2,6 +2,7 @@ import { HttpClient, HttpEvent, HttpEventType } from '@angular/common/http';
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { Observable, filter, map } from 'rxjs';
 import { ConnectRequest, ConnectionView, ConnectionsView } from '../../models/connections';
+import { GroupView, MakeGroupRequest } from '../../models/groups';
 import {
   AddFollowUpRequest,
   AddKeyDateRequest,
@@ -82,6 +83,14 @@ export interface ContactsApi {
   endHabit(id: string): Observable<void>;
   /** Its Undo. */
   resumeHabit(id: string): Observable<HabitView>;
+  /** Groups (L2-146), for the device's day; without it, the API's own. */
+  groups(on?: string): Observable<GroupView[]>;
+  /** "Make the group" (L2-147); a resend keeps it once. */
+  makeGroup(request: MakeGroupRequest): Observable<GroupView>;
+  /** "Add {n} people" (L2-147 AC3). */
+  addGroupPeople(groupId: string, contactIds: string[]): Observable<GroupView>;
+  /** "Start a Popkin with them": links the group and invites its members (L2-148 AC3). */
+  invitePopkinGroup(popkinId: string, groupId: string): Observable<void>;
   /** Connections: the faces and the lines (L2-149). */
   connectionMap(): Observable<ConnectionsView>;
   /** Connect (L2-150); a resend keeps it once. */
@@ -221,6 +230,22 @@ export class HttpContactsApi implements ContactsApi {
 
   resumeHabit(id: string): Observable<HabitView> {
     return this.http.delete<HabitView>(`/api/contacts/habits/${id}/end`);
+  }
+
+  groups(on?: string): Observable<GroupView[]> {
+    return this.http.get<GroupView[]>('/api/contacts/groups', on ? { params: { on } } : {});
+  }
+
+  makeGroup(request: MakeGroupRequest): Observable<GroupView> {
+    return this.http.post<GroupView>('/api/contacts/groups', request);
+  }
+
+  addGroupPeople(groupId: string, contactIds: string[]): Observable<GroupView> {
+    return this.http.post<GroupView>(`/api/contacts/groups/${groupId}/members`, { contactIds });
+  }
+
+  invitePopkinGroup(popkinId: string, groupId: string): Observable<void> {
+    return this.http.post<void>(`/api/contacts/groups/${groupId}/popkin`, { popkinId });
   }
 
   connectionMap(): Observable<ConnectionsView> {

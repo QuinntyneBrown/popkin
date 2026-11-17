@@ -1,3 +1,4 @@
+using Popkin.Application.Contacts.Groups;
 using MediatR;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Contacts.Connections;
@@ -26,6 +27,7 @@ public sealed class EditContactCommandHandler(
         var (name, details) = SaveContactValidator.Validate(request.Contact);
         var drafts = KeyDateDrafts.Validate(request.Contact.KeyDates);
         var connect = ConnectionDrafts.Validate(request.Contact.Connect);
+        var groups = await GroupMemberships.ValidateAsync(db, contact.OwnerId, request.Contact.GroupIds, cancellationToken);
         var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
         var avatar = request.Photo is null ? null : await AvatarPhotos.ReadAsync(request.Photo, processor, cancellationToken);
         contact.Rename(name);
@@ -37,6 +39,7 @@ public sealed class EditContactCommandHandler(
         }
 
         await ConnectionDrafts.ApplyAsync(db, guard, contact, connect, request.Contact.Disconnect, clock.GetUtcNow(), cancellationToken);
+        await GroupMemberships.ApplyAsync(db, contact.Id, groups, clock.GetUtcNow(), cancellationToken);
         if (avatar is null)
         {
             await db.SaveChangesAsync(cancellationToken);

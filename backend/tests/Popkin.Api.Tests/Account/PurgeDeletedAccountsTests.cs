@@ -94,6 +94,8 @@ public sealed class PurgeDeletedAccountsTests
         var tomasId = (await mara.AddedContactAsync("Tomás Reyes")).GetProperty("id").GetGuid();
         (await mara.PostAsJsonAsync("/api/contacts/connections", new { clientId = Guid.NewGuid(), contactId = chidiId, otherContactId = tomasId, kind = "Partner", words = "Married", promised = false }))
             .EnsureSuccessStatusCode();
+        (await mara.PostAsJsonAsync("/api/contacts/groups", new { clientId = Guid.NewGuid(), name = "Mum’s house", kind = "Household", contactIds = new[] { chidiId, tomasId } }))
+            .EnsureSuccessStatusCode();
         await lena.AddedContactAsync("Bea Lind");
         (await mara.PostAsJsonAsync("/api/contacts/follow-ups", new { clientId = Guid.NewGuid(), text = "Call Sam" }))
             .EnsureSuccessStatusCode();
@@ -111,6 +113,8 @@ public sealed class PurgeDeletedAccountsTests
         Assert.Empty(db.Habits);
         Assert.Empty(db.HabitKept);
         Assert.Empty(db.Connections);
+        Assert.Empty(db.ContactGroups);
+        Assert.Empty(db.ContactGroupMembers);
         Assert.Empty(api.Photos.Files);
     }
 
