@@ -1,14 +1,37 @@
 import { Dialog } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import {
   ADMIN_PLATFORM_API,
+  AdminNotificationHold,
   AdminNotificationKind,
   AdminNotificationsStore,
   AdminSendStatus,
   AdminSessionStore,
+  HELD_SUB,
   NOTIFICATIONS_SUB,
   PAUSED_TOAST,
+  PopkinColour,
+  accentOf,
+  heldNote,
+  RELEASED_TOAST,
+  heldToast,
+  holdBy,
+  holdDialog,
+  releaseDialog,
+  holdLine,
+  holdName,
+  holdUntil,
   PAUSE_DIALOG,
   RESUMED_TOAST,
   Toaster,
@@ -24,16 +47,24 @@ import {
   statusTitle,
 } from 'api';
 import {
+  AsideNote,
   Button,
   DataTable,
+  DataTableAction,
+  DataTableCell,
   DataTableColumn,
   DataTableGroup,
+  DataTableRow,
   DataTableSwitch,
   EmptyState,
   Icon,
   PageHead,
   PageTabs,
   Panel,
+  PickList,
+  PickListOption,
+  Popover,
+  SearchField,
   SegmentedControl,
   SegmentedOption,
   SendStatus,
@@ -54,6 +85,16 @@ const KIND_COLUMNS: readonly DataTableColumn[] = [
   { label: 'For everyone', end: true },
 ];
 
+const HOLD_COLUMNS: readonly DataTableColumn[] = [
+  { label: 'Held' },
+  { label: 'Why' },
+  { label: 'Until' },
+  { label: 'Actions', hidden: true, end: true },
+];
+
+/** People have no colour of their own; the list gives each the next, as the mock does. */
+const PERSON_ACCENTS = ['coral', 'teal', 'plum', 'amber', 'sky', 'berry'];
+
 /**
  * Notifications (L2-169): whether member email is going out, and each kind's traffic, with a
  * switch per kind for everyone. The page reads itself again every minute.
@@ -61,6 +102,7 @@ const KIND_COLUMNS: readonly DataTableColumn[] = [
 @Component({
   selector: 'pk-notifications-page',
   imports: [
+    AsideNote,
     Button,
     DataTable,
     EmptyState,
@@ -68,7 +110,10 @@ const KIND_COLUMNS: readonly DataTableColumn[] = [
     PageHead,
     PageTabs,
     Panel,
+    PickList,
+    Popover,
     RouterLink,
+    SearchField,
     SegmentedControl,
     SendStatus,
   ],
@@ -90,6 +135,35 @@ export class NotificationsPage {
 
   protected readonly sub = NOTIFICATIONS_SUB;
   protected readonly kindColumns = KIND_COLUMNS;
+  protected readonly holdColumns = HOLD_COLUMNS;
+  protected readonly heldSub = HELD_SUB;
+
+  /** Why the signed-in admin cannot hold or release (L2-172 AC7). */
+  protected readonly holdBlocked = computed(() => this.session.blockedReason('HoldNotifications'));
+
+  /** Each hold: its Popkin or person, why, who and when, until when, and "Release" (L2-172). */
+  protected readonly holdGroups = computed<DataTableGroup[]>(() => {
+    const holds = this.store.holds()?.holds ?? [];
+    const people = holds.filter((h) => h.person);
+    return [{ rows: holds.map((hold) => this.holdRow(hold, people.indexOf(hold))) }];
+  });
+
+  /** Whether "Hold a Popkin"'s popover is open (L2-172 AC2). */
+  protected readonly adding = signal(false);
+
+  protected readonly holdOptions = computed<PickListOption[]>(() =>
+    this.store.holdMatches().map((m) => ({
+      id: m.popkinId,
+      name: m.name,
+      emoji: m.emoji,
+      accent: accentOf(m.colour as PopkinColour),
+      detail: m.inviteCode,
+    })),
+  );
+
+  protected readonly heldNote = computed(() =>
+    heldNote(this.store.holds()?.suppressedAddresses ?? null),
+  );
 
   /** Why the signed-in admin cannot pause, resume or switch a kind (L2-170 AC5, L2-171 AC5). */
   protected readonly manageBlocked = computed(() =>
@@ -148,6 +222,90 @@ export class NotificationsPage {
 
   constructor() {
     this.store.load();
+    // Holds are read when their tab first shows.
+    effect(() => {
+      if (this.current() === 'holds' && untracked(this.store.holdsStatus) === 'idle') {
+        untracked(() => this.store.loadHolds());
+      }
+    });
+  }
+
+  /** Opens "Hold a Popkin" with every Popkin that can be held, or closes it. */
+  protected toggleAdding(): void {
+    const open = !this.adding();
+    this.adding.set(open);
+    if (open) this.store.searchHolds('');
+  }
+
+  /** A match picked: "Hold {Popkin}?" with a reason (L2-172 AC2, L2-087 AC1). */
+  protected pickHold(popkinId: string | null): void {
+    const match = this.store.holdMatches().find((m) => m.popkinId === popkinId);
+    if (!match) return;
+    this.adding.set(false);
+    this.ask<AdminNotificationHold>({
+      text: holdDialog(match.name),
+      danger: false,
+      send: (reason) => this.api.holdPopkin(match.popkinId, reason),
+    }).subscribe((hold) => {
+      if (!hold) return;
+      this.store.holdAdded(hold);
+      this.toaster.show('success', ...heldToast(match.name));
+    });
+  }
+
+  /** "Release the hold on {name}?" with a reason (L2-172 AC4). */
+  protected release(event: DataTableAction): void {
+    const hold = this.store.holds()?.holds.find((h) => h.id === event.rowId);
+    if (!hold?.id) return;
+    const holdId = hold.id;
+    this.ask<true>({
+      text: releaseDialog(holdName(hold)),
+      danger: false,
+      send: (reason) => this.api.releaseHold(holdId, reason).pipe(map(() => true as const)),
+    }).subscribe((released) => {
+      if (!released) return;
+      this.store.holdReleased(holdId);
+      this.toaster.show('success', ...RELEASED_TOAST);
+    });
+  }
+
+  private holdRow(hold: AdminNotificationHold, person: number): DataTableRow {
+    const name = holdName(hold);
+    const who: DataTableCell = hold.popkin
+      ? {
+          kind: 'popkin',
+          text: name,
+          sub: holdLine(hold),
+          emoji: hold.popkin.emoji,
+          accent: accentOf(hold.popkin.colour as PopkinColour),
+        }
+      : {
+          kind: 'person',
+          text: name,
+          sub: holdLine(hold),
+          photo: hold.person?.avatar ?? null,
+          accent: PERSON_ACCENTS[person % PERSON_ACCENTS.length],
+        };
+    // An automatic hold ends with its suspension or deletion, not here (L2-172 AC5).
+    const end: DataTableCell =
+      hold.automatic || !hold.id
+        ? { kind: 'status', text: 'Automatic' }
+        : {
+            kind: 'action',
+            text: 'Release',
+            label: `Release the hold on ${name}`,
+            action: 'release',
+            disabledReason: this.holdBlocked(),
+          };
+    return {
+      id: hold.id ?? `automatic-${hold.target}-${hold.person?.id ?? hold.popkin?.id}`,
+      cells: [
+        who,
+        { kind: 'note', text: hold.why, sub: holdBy(hold, this.timeZone) },
+        { text: holdUntil(hold.until) },
+        end,
+      ],
+    };
   }
 
   /** "Pause all member email?" (L2-170 AC1). */

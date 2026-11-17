@@ -20,6 +20,8 @@ export * from './lib/link/link';
 export * from './lib/segmented-control/segmented-control';
 export * from './lib/send-status/send-status';
 export * from './lib/page-tabs/page-tabs';
+export * from './lib/aside-note/aside-note';
+export * from './lib/popover/popover';
 export * from './lib/status/status';
 export * from './lib/text-field/text-field';
 export * from './lib/alert/alert';

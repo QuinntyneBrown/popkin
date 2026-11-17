@@ -1,5 +1,5 @@
 import { theMockAdmins } from '../../fixtures/admin';
-import { theMockNotifications } from '../../fixtures/admin-notifications';
+import { theMockHolds, theMockNotifications } from '../../fixtures/admin-notifications';
 import { parity } from '../../fixtures/parity';
 import { AdminsPage } from '../../pages/admin/admins.page';
 import { NotificationsPage } from '../../pages/admin/notifications.page';
@@ -20,5 +20,13 @@ parity('data-table', [
     region: (page) => new NotificationsPage(page).panel,
     before: async (page) => void (await theMockNotifications(page)),
     widths: [1280],
+  },
+  // Holds: a Popkin's tile, people's avatars and a photo, who and when, and "Automatic"
+  // (L2-172 AC1, AC5).
+  {
+    key: 'adminNotificationsHolds',
+    name: 'notification-holds',
+    region: (page) => new NotificationsPage(page).held.locator('.data-table'),
+    before: async (page) => void (await theMockHolds(page)),
   },
 ]);

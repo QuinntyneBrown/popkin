@@ -4,11 +4,14 @@ import { Observable } from 'rxjs';
 import {
   AdminFeature,
   AdminFeatures,
+  AdminNotificationHold,
+  AdminNotificationHolds,
   AdminNotificationKind,
   AdminNotifications,
   AdminSendStatus,
   FeatureMode,
   FeaturePopkinMatch,
+  HoldPopkinMatch,
   NotificationKindId,
 } from '../../../models/admin';
 import { PopkinFeature } from '../../../models/home';
@@ -44,6 +47,13 @@ export interface AdminPlatformApi {
     on: boolean,
     reason: string | null,
   ): Observable<AdminNotificationKind>;
+  notificationHolds(): Observable<AdminNotificationHolds>;
+  /** Active Popkins not already held whose name contains the text or whose code is it. */
+  searchHoldPopkins(text: string): Observable<HoldPopkinMatch[]>;
+  /** 403 for a Viewer; 409 `popkin_already_held`, `popkin_wrapped_up`. */
+  holdPopkin(popkinId: string, reason: string | null): Observable<AdminNotificationHold>;
+  /** 403 for a Viewer; 404 `hold_not_found`. */
+  releaseHold(holdId: string, reason: string | null): Observable<void>;
 }
 
 export const ADMIN_PLATFORM_API = new InjectionToken<AdminPlatformApi>('AdminPlatformApi');
@@ -106,5 +116,26 @@ export class HttpAdminPlatformApi implements AdminPlatformApi {
       on,
       reason,
     });
+  }
+
+  notificationHolds(): Observable<AdminNotificationHolds> {
+    return this.http.get<AdminNotificationHolds>('/api/admin/notifications/holds');
+  }
+
+  searchHoldPopkins(text: string): Observable<HoldPopkinMatch[]> {
+    return this.http.get<HoldPopkinMatch[]>('/api/admin/notifications/holds/popkin-search', {
+      params: { q: text },
+    });
+  }
+
+  holdPopkin(popkinId: string, reason: string | null): Observable<AdminNotificationHold> {
+    return this.http.post<AdminNotificationHold>('/api/admin/notifications/holds', {
+      popkinId,
+      reason,
+    });
+  }
+
+  releaseHold(holdId: string, reason: string | null): Observable<void> {
+    return this.http.post<void>(`/api/admin/notifications/holds/${holdId}/release`, { reason });
   }
 }

@@ -85,6 +85,85 @@
           ></div>
         </section>
       }
+      @case ('holds') {
+        <div role="tabpanel" aria-labelledby="tab-holds">
+          @switch (store.holdsStatus()) {
+            @case ('failed') {
+              <section pk-panel>
+                <div
+                  pk-empty-state
+                  icon="alert"
+                  heading="Couldn’t load holds"
+                  text="The admin API didn’t answer. Nothing has changed; try again, or check Health if it keeps happening."
+                  [compact]="true"
+                  [panel]="true"
+                >
+                  <button
+                    pk-button
+                    type="button"
+                    variant="primary"
+                    size="md"
+                    (click)="store.loadHolds()"
+                  >
+                    <svg pk-icon name="retry" size="sm"></svg>Try again
+                  </button>
+                </div>
+              </section>
+            }
+            @default {
+              <section pk-panel heading="Held" [sub]="heldSub">
+                <div
+                  pk-popover
+                  slot="head"
+                  label="Hold a Popkin"
+                  [end]="true"
+                  [open]="adding()"
+                  (openChange)="adding.set($event)"
+                >
+                  <button
+                    pk-button
+                    slot="trigger"
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    [attr.aria-expanded]="adding()"
+                    [disabledReason]="holdBlocked()"
+                    (click)="toggleAdding()"
+                  >
+                    <svg pk-icon name="plus" size="sm"></svg> Hold a Popkin
+                  </button>
+                  <div
+                    pk-search-field
+                    label="Name or code"
+                    variant="popover"
+                    [value]="store.holdSearch()"
+                    (valueChange)="store.searchHolds($event)"
+                  ></div>
+                  <ul
+                    pk-pick-list
+                    label="Popkins that can be held"
+                    [options]="holdOptions()"
+                    [notes]="store.holdNotes()"
+                    [value]="null"
+                    (valueChange)="pickHold($event)"
+                  ></ul>
+                </div>
+                <div
+                  pk-data-table
+                  label="Popkins and people whose notifications are held, why, and until when"
+                  [columns]="holdColumns"
+                  [groups]="holdGroups()"
+                  [loading]="store.holdsStatus() !== 'ready'"
+                  (acted)="release($event)"
+                ></div>
+              </section>
+              @if (store.holdsStatus() === 'ready') {
+                <p pk-aside-note>{{ heldNote() }}</p>
+              }
+            }
+          }
+        </div>
+      }
     }
   }
 }

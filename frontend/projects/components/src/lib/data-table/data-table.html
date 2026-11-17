@@ -61,6 +61,7 @@
                         size="36"
                         [attr.data-accent]="cell.accent"
                         [name]="cell.text"
+                        [photo]="cell.photo ?? null"
                       ></span>
                       <span class="who__text">
                         <span class="who__name"
@@ -122,6 +123,28 @@
                       [disabledReason]="cell.disabledReason ?? null"
                       (checkedChange)="turned(toggle, row.id, $event)"
                     ></button>
+                  }
+                  @case ('popkin') {
+                    <span class="who">
+                      <span
+                        pk-popkin-tile
+                        size="sm"
+                        [attr.data-accent]="cell.accent"
+                        [emoji]="cell.emoji ?? ''"
+                      ></span>
+                      <span class="who__text">
+                        <span class="who__name">{{ cell.text }}</span>
+                        <span class="who__sub">{{ cell.sub }}</span>
+                      </span>
+                    </span>
+                  }
+                  @case ('note') {
+                    <span
+                      >{{ cell.text }}<span class="kind-about">{{ cell.sub }}</span></span
+                    >
+                  }
+                  @case ('status') {
+                    <span pk-status>{{ cell.text }}</span>
                   }
                   @case ('lock') {
                     <span class="lock-note"

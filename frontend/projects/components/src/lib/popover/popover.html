@@ -1,0 +1,12 @@
+<ng-content select="[slot=trigger]" />
+@if (open()) {
+  <div
+    class="popover"
+    role="dialog"
+    [class.popover--end]="end()"
+    [attr.aria-label]="label()"
+    (keydown.arrowdown)="down($event)"
+  >
+    <ng-content />
+  </div>
+}
