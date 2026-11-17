@@ -13,6 +13,9 @@ public static class PhoneAlerts
     public static PhoneAlert For(NotificationKind kind, string popkinName, string actorFirstName, string url) =>
         new(popkinName, LineOf(kind, actorFirstName), url);
 
+    /// <summary>The line of the one alert for what quiet hours held back.</summary>
+    public static string HeldBack(int count) => $"{count} new things while you were away";
+
     public static string LineOf(NotificationKind kind, string actor) => kind switch
     {
         NotificationKind.MentionsAndReplies => $"{actor} replied to you",

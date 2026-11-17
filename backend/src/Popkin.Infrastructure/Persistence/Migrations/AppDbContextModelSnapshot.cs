@@ -1259,6 +1259,39 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("NotificationKindChoices", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.NotificationPlatform", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BundlingMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DailyMost")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("EmailPausedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("PauseReason")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("PausedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeOnly>("QuietFrom")
+                        .HasColumnType("time");
+
+                    b.Property<TimeOnly>("QuietUntil")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NotificationPlatform", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.NotificationPreferences", b =>
                 {
                     b.Property<Guid>("PersonId")

@@ -82,6 +82,8 @@ public interface IAppDbContext
 
     DbSet<NotificationDelivery> NotificationDeliveries { get; }
 
+    DbSet<NotificationPlatform> NotificationPlatforms { get; }
+
     DbSet<ContactGroupMember> ContactGroupMembers { get; }
 
     DbSet<WorkingStretch> WorkingStretches { get; }

@@ -83,6 +83,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
     public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
 
+    public DbSet<NotificationPlatform> NotificationPlatforms => Set<NotificationPlatform>();
+
     public DbSet<ContactGroupMember> ContactGroupMembers => Set<ContactGroupMember>();
 
     public DbSet<WorkingStretch> WorkingStretches => Set<WorkingStretch>();

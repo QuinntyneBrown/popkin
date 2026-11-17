@@ -96,6 +96,8 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<NotificationDelivery> NotificationDeliveries => inner.NotificationDeliveries;
 
+    public DbSet<NotificationPlatform> NotificationPlatforms => inner.NotificationPlatforms;
+
     public DbSet<ContactGroupMember> ContactGroupMembers => inner.ContactGroupMembers;
 
     public DbSet<WorkingStretch> WorkingStretches => inner.WorkingStretches;

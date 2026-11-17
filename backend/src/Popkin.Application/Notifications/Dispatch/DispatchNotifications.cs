@@ -11,14 +11,19 @@ public sealed record DispatchResult(int Events, int Sent);
 /// <summary>One tick of the dispatcher (deliver-notifications, "Fan-out and decision").</summary>
 public sealed record DispatchNotificationsCommand : IRequest<DispatchResult>;
 
-public sealed class DispatchNotificationsCommandHandler(IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone)
+public sealed class DispatchNotificationsCommandHandler(
+    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot)
     : IRequestHandler<DispatchNotificationsCommand, DispatchResult>
 {
     private const int EventsPerTick = 200;
 
     public async Task<DispatchResult> Handle(DispatchNotificationsCommand request, CancellationToken cancellationToken)
     {
+        // The Worker serves no request, so the switches are refreshed here (ADR 0024).
+        await snapshot.RefreshIfStaleAsync(cancellationToken);
         var now = clock.GetUtcNow();
+        var platform = await db.NotificationPlatforms.AsNoTracking().FirstOrDefaultAsync(cancellationToken)
+            ?? NotificationPlatform.Defaults();
         var events = await db.NotificationEvents
             .Where(e => e.DispatchedAt == null)
             .OrderBy(e => e.OccurredAt)
@@ -26,17 +31,17 @@ public sealed class DispatchNotificationsCommandHandler(IAppDbContext db, TimePr
             .ToListAsync(cancellationToken);
         foreach (var notification in events)
         {
-            await FanOutAsync(notification, now, cancellationToken);
+            await FanOutAsync(notification, platform, now, cancellationToken);
             notification.MarkDispatched(now);
         }
 
         await db.SaveChangesAsync(cancellationToken);
-        var sent = await SendPhoneAlertsAsync(now, cancellationToken);
+        var sent = await SendPhoneAlertsAsync(platform, now, cancellationToken);
         return new DispatchResult(events.Count, sent);
     }
 
     /// <summary>One delivery per person and channel, with the rules' outcome (L2-161 AC1, AC2).</summary>
-    private async Task FanOutAsync(NotificationEvent notification, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task FanOutAsync(NotificationEvent notification, NotificationPlatform platform, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var people = notification.Audience == NotificationAudience.Recipient
             ? notification.RecipientPersonId is { } recipient ? [recipient] : []
@@ -55,68 +60,121 @@ public sealed class DispatchNotificationsCommandHandler(IAppDbContext db, TimePr
                 continue;
             }
 
-            var decision = NotificationRules.Decide(await QuestionAsync(notification, person, NotificationChannel.Phone, cancellationToken));
+            var decision = NotificationRules.Decide(await QuestionAsync(notification, person, NotificationChannel.Phone, platform, now, cancellationToken));
             db.NotificationDeliveries.Add(decision.Sends
-                ? NotificationDelivery.Due(notification.Id, person, NotificationChannel.Phone, now)
+                ? NotificationDelivery.Due(notification.Id, person, NotificationChannel.Phone, decision.At)
                 : NotificationDelivery.Suppressed(notification.Id, person, NotificationChannel.Phone, decision.Rule!.Value, now));
         }
     }
 
     /// <summary>Reads what the rules ask about one person, as it is now (L2-174 AC1).</summary>
     private async Task<NotificationQuestion> QuestionAsync(
-        NotificationEvent notification, Guid person, NotificationChannel channel, CancellationToken cancellationToken)
+        NotificationEvent notification,
+        Guid person,
+        NotificationChannel channel,
+        NotificationPlatform platform,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
-        var member = notification.PopkinId is not { } popkinId
-            || await db.Memberships.AnyAsync(
-                m => m.PopkinId == popkinId && m.PersonId == person && m.LeftAt == null
-                    && db.People.Any(p => p.Id == person && p.DeletedAt == null),
-                cancellationToken);
+        var account = await db.People.AsNoTracking()
+            .Where(p => p.Id == person)
+            .Select(p => new { p.Email, p.DeletedAt })
+            .FirstOrDefaultAsync(cancellationToken);
+        var member = account is { DeletedAt: null }
+            && (notification.PopkinId is not { } popkinId
+                || await db.Memberships.AnyAsync(m => m.PopkinId == popkinId && m.PersonId == person && m.LeftAt == null, cancellationToken));
         var wrappedUp = notification.PopkinId is { } id
             && await db.Popkins.AnyAsync(p => p.Id == id && p.Status == PopkinStatus.WrappedUp, cancellationToken);
-        var hasDevice = await db.PushSubscriptions.AnyAsync(s => s.PersonId == person, cancellationToken);
+        var feature = NotificationCatalogue.Of(notification.Kind).Feature;
+        var featureOff = feature is { } f && notification.PopkinId is { } popkin && !features.IsOn(f, popkin);
+        var hasDevice = channel == NotificationChannel.Phone
+            && await db.PushSubscriptions.AnyAsync(s => s.PersonId == person, cancellationToken);
         var preferences = await db.NotificationPreferences.AsNoTracking().FirstOrDefaultAsync(p => p.PersonId == person, cancellationToken);
         var choices = await db.NotificationKindChoices.AsNoTracking().Where(c => c.PersonId == person).ToListAsync(cancellationToken);
         var settings = new EffectiveNotificationSettings(preferences, choices);
-        return new NotificationQuestion(
-            notification.Kind,
-            channel,
-            RecipientIsActor: person == notification.ActorPersonId,
-            RecipientIsActiveMember: member,
-            PopkinWrappedUp: wrappedUp,
-            HasDevice: hasDevice,
-            SwitchOn: settings.IsOn(notification.Kind, channel));
+        return new NotificationQuestion(notification.Kind, channel, now, LocalClock.ZoneOf(preferences?.TimeZone))
+        {
+            RecipientIsActor = person == notification.ActorPersonId,
+            RecipientIsActiveMember = member,
+            PopkinWrappedUp = wrappedUp,
+            FeatureOff = featureOff,
+            HasAddress = account?.Email is { Length: > 0 },
+            HasDevice = hasDevice,
+            EmailPaused = platform.EmailPausedAt is not null,
+            EmailOn = settings.EmailOn,
+            RecipientIsNamed = person == notification.RecipientPersonId,
+            SwitchOn = settings.IsOn(notification.Kind, channel),
+            QuietHours = new QuietHours(platform.QuietFrom, platform.QuietUntil),
+        };
     }
 
     /// <summary>
-    /// Sends each phone delivery that is due, after the rules are read again (L2-174 AC1). Each
-    /// is saved on its own, so one failure stops one alert.
+    /// Sends each phone delivery that is due, after the rules are read again (L2-174 AC1). The
+    /// alerts quiet hours held back for one person and one Popkin go as one. Each is saved on its
+    /// own, so one failure stops one alert.
     /// </summary>
-    private async Task<int> SendPhoneAlertsAsync(DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<int> SendPhoneAlertsAsync(NotificationPlatform platform, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var due = await db.NotificationDeliveries
             .Where(d => d.Channel == NotificationChannel.Phone && d.Status == NotificationDeliveryStatus.Due && d.SendAfter <= now)
-            .OrderBy(d => d.SendAfter)
+            .Join(db.NotificationEvents, d => d.EventId, e => e.Id, (d, e) => new { Delivery = d, Event = e })
+            .OrderBy(x => x.Event.OccurredAt)
             .ToListAsync(cancellationToken);
         var sent = 0;
-        foreach (var delivery in due)
+        foreach (var group in due.GroupBy(x => (x.Delivery.PersonId, x.Event.PopkinId)))
         {
-            var notification = await db.NotificationEvents.SingleAsync(e => e.Id == delivery.EventId, cancellationToken);
-            var decision = NotificationRules.Decide(await QuestionAsync(notification, delivery.PersonId, delivery.Channel, cancellationToken));
-            if (!decision.Sends)
+            var passing = new List<(NotificationDelivery Delivery, NotificationEvent Event)>();
+            foreach (var (delivery, notification) in group.Select(x => (x.Delivery, x.Event)))
             {
-                delivery.Suppress(decision.Rule!.Value);
+                // A delivery held for the end of quiet hours is not held again by them now.
+                var question = await QuestionAsync(notification, delivery.PersonId, delivery.Channel, platform, now, cancellationToken);
+                var decision = NotificationRules.Decide(question with { QuietHours = new QuietHours(TimeOnly.MinValue, TimeOnly.MinValue) });
+                if (decision.Sends)
+                {
+                    passing.Add((delivery, notification));
+                }
+                else
+                {
+                    delivery.Suppress(decision.Rule!.Value);
+                }
             }
-            else
+
+            if (passing.Count > 0)
             {
-                await phone.SendAsync(delivery.PersonId, await AlertAsync(notification, cancellationToken), cancellationToken);
-                delivery.MarkSent(now);
-                sent++;
+                var heldBack = passing.Count > 1 && passing.All(p => p.Delivery.SendAfter > p.Event.OccurredAt.AddMinutes(1));
+                var alerts = new List<PhoneAlert>();
+                if (heldBack)
+                {
+                    alerts.Add(await HeldBackAlertAsync(passing[0].Event, passing.Count, cancellationToken));
+                }
+                else
+                {
+                    foreach (var (_, notification) in passing)
+                    {
+                        alerts.Add(await AlertAsync(notification, cancellationToken));
+                    }
+                }
+
+                foreach (var alert in alerts)
+                {
+                    await phone.SendAsync(group.Key.PersonId, alert, cancellationToken);
+                    sent++;
+                }
+
+                passing.ForEach(p => p.Delivery.MarkSent(now));
             }
 
             await db.SaveChangesAsync(cancellationToken);
         }
 
         return sent;
+    }
+
+    /// <summary>The one alert for what quiet hours held back in one Popkin.</summary>
+    private async Task<PhoneAlert> HeldBackAlertAsync(NotificationEvent first, int count, CancellationToken cancellationToken)
+    {
+        var popkin = await db.Popkins.AsNoTracking().SingleAsync(p => p.Id == first.PopkinId, cancellationToken);
+        return new PhoneAlert(popkin.Name, PhoneAlerts.HeldBack(count), $"/p/{popkin.Id}");
     }
 
     private async Task<PhoneAlert> AlertAsync(NotificationEvent notification, CancellationToken cancellationToken)

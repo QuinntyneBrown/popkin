@@ -57,3 +57,13 @@ public sealed class NotificationDeliveryConfiguration : IEntityTypeConfiguration
         builder.HasOne<NotificationEvent>().WithMany().HasForeignKey(d => d.EventId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+public sealed class NotificationPlatformConfiguration : IEntityTypeConfiguration<NotificationPlatform>
+{
+    public void Configure(EntityTypeBuilder<NotificationPlatform> builder)
+    {
+        builder.ToTable("NotificationPlatform");
+        builder.HasKey(p => p.Id);
+        builder.Property(p => p.PauseReason).HasMaxLength(200);
+    }
+}
