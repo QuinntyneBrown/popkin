@@ -19,6 +19,7 @@
   cursor: not-allowed;
 }
 
+:host(:disabled),
 :host([aria-disabled='true']) {
   opacity: var(--opacity-disabled);
 }
