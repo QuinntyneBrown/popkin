@@ -48,7 +48,8 @@ const marketingServer = {
 
 // The admin app (ADR 0016, ADR 0024), a further application of the same workspace.
 const adminServer = {
-  command: 'npm run start:admin --prefix ../frontend',
+  // The e2e build leaves the notifications fake out, so the fixtures answer them (ADR 0030).
+  command: 'npm run start:admin:e2e --prefix ../frontend',
   url: 'http://localhost:4202',
   reuseExistingServer: !ci,
   timeout: 240_000,

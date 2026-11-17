@@ -1,6 +1,7 @@
 :host {
   display: block;
   overflow-x: auto;
+  margin-top: var(--space-5);
 }
 
 .data-table {
@@ -130,6 +131,40 @@
   text-align: right;
 }
 
+.data-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A notification kind (Notifications › Kinds): its name, why it sends, and on a phone its totals. */
+.kind-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+}
+
+.kind-name--off {
+  color: var(--color-fg-subtle);
+}
+
+.kind-about,
+.kind-totals {
+  display: block;
+  font: var(--text-caption);
+  color: var(--color-fg-subtle);
+}
+
+.lock-note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  white-space: nowrap;
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-family-sans);
+  color: var(--color-fg-subtle);
+}
+
 @media (max-width: 47.99rem) {
   .data-table thead {
     position: absolute;
@@ -198,5 +233,17 @@
 
   .data-table .data-table__group {
     padding: 0;
+  }
+
+  /* A kind keeps its name and its switch on one line (L2-169 AC5). */
+  .data-table tr:has(.kind-name) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .data-table td.data-table__num {
+    text-align: right;
   }
 }

@@ -2,7 +2,10 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { Avatar } from '../avatar/avatar';
 import { Badge } from '../badge/badge';
 import { Button } from '../button/button';
+import { Icon } from '../icon/icon';
 import { Skeleton } from '../skeleton/skeleton';
+import { Status } from '../status/status';
+import { Switch } from '../switch/switch';
 
 /** A column: its name, and whether the name is for assistive technology only ("Actions"). */
 export interface DataTableColumn {
@@ -10,17 +13,25 @@ export interface DataTableColumn {
   hidden?: boolean;
   /** The column of a row's actions, at the row's end. */
   end?: boolean;
+  /** Figures: right-aligned, in even digits. */
+  num?: boolean;
+  /** Shown from 768 px only; on a phone the lead cell says it instead (L2-169 AC5). */
+  wide?: boolean;
 }
 
 /**
  * A cell: plain text, `strong`, `time` (subtle, even figures), `name` (a name with a line under
  * it), `person` (a name, a badge such as "You" and an email by an avatar in `accent`), `role` (a
- * select of `options` named `label`) or `action` (a quiet button named `label`, switched off
- * with a `disabledReason`). `title` is a tooltip on plain text.
+ * select of `options` named `label`), `action` (a quiet button named `label`, switched off
+ * with a `disabledReason`), `kind` (a notification kind's name, with the status pill `off` and
+ * what sends it under it, and `totals` under that on a phone), `switch` (a switch named
+ * `label`, `on` or not, switched off with a `disabledReason`) or `lock` (a lock and its words,
+ * "Required"). `title` is a tooltip on plain text.
  */
 export interface DataTableCell {
   text: string;
-  kind?: 'text' | 'strong' | 'time' | 'name' | 'person' | 'role' | 'action';
+  kind?:
+    'text' | 'strong' | 'time' | 'name' | 'person' | 'role' | 'action' | 'kind' | 'switch' | 'lock';
   sub?: string;
   title?: string;
   badge?: string;
@@ -31,6 +42,12 @@ export interface DataTableCell {
   /** The action a button takes, given back with the row when it is pressed. */
   action?: string;
   disabledReason?: string | null;
+  /** A switch's state. */
+  on?: boolean;
+  /** The status pill beside a kind's name: "Off for everyone". */
+  off?: string;
+  /** A kind's totals, under its name on a phone. */
+  totals?: string;
 }
 
 export interface DataTableRow {
@@ -51,6 +68,13 @@ export interface DataTableChoice {
   revert: () => void;
 }
 
+/** A switch turned in a row; `revert` turns it back, as when its dialog is cancelled. */
+export interface DataTableSwitch {
+  rowId: string | number;
+  on: boolean;
+  revert: () => void;
+}
+
 export interface DataTableAction {
   rowId: string | number;
   action: string;
@@ -64,7 +88,7 @@ export interface DataTableAction {
  */
 @Component({
   selector: 'div[pk-data-table]',
-  imports: [Avatar, Badge, Button, Skeleton],
+  imports: [Avatar, Badge, Button, Icon, Skeleton, Status, Switch],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './data-table.html',
   styleUrl: './data-table.scss',
@@ -79,6 +103,7 @@ export class DataTable {
 
   readonly chose = output<DataTableChoice>();
   readonly acted = output<DataTableAction>();
+  readonly switched = output<DataTableSwitch>();
 
   protected readonly skeletonRows = [0, 1, 2, 3, 4];
 

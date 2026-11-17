@@ -8,7 +8,9 @@ import {
   HttpAdminAccessApi,
   HttpAdminAuthApi,
   HttpAdminPlatformApi,
+  fakeAdminNotificationsBackend,
 } from 'api';
+import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { adminAuthInterceptor } from './guards/admin-auth.interceptor';
 
@@ -17,7 +19,13 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([adminAuthInterceptor])),
+    provideHttpClient(
+      withInterceptors([
+        adminAuthInterceptor,
+        // Notifications have no API yet; the fake answers them in the browser (ADR 0030).
+        ...(environment.fakeNotificationsBackend ? [fakeAdminNotificationsBackend()] : []),
+      ]),
+    ),
     { provide: ADMIN_AUTH_API, useClass: HttpAdminAuthApi },
     { provide: ADMIN_ACCESS_API, useClass: HttpAdminAccessApi },
     { provide: ADMIN_PLATFORM_API, useClass: HttpAdminPlatformApi },

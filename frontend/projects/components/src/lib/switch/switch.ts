@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 
 /**
  * Switch (docs/design-system/components/switch.html): one setting that is on or off and takes
@@ -17,9 +17,21 @@ import { ChangeDetectionStrategy, Component, model } from '@angular/core';
     type: 'button',
     role: 'switch',
     '[attr.aria-checked]': 'checked()',
-    '(click)': 'checked.set(!checked())',
+    '[attr.aria-disabled]': 'disabledReason() ? "true" : null',
+    '[attr.title]': 'disabledReason()',
+    '(click)': 'turn()',
   },
 })
 export class Switch {
   readonly checked = model(false);
+  /**
+   * Why the switch is off-limits for this person (L2-086 AC2, AC3): it is `aria-disabled` with
+   * the reason as its title, stays focusable and ignores a press.
+   */
+  readonly disabledReason = input<string | null>(null);
+
+  protected turn(): void {
+    if (this.disabledReason()) return;
+    this.checked.set(!this.checked());
+  }
 }

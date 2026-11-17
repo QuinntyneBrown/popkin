@@ -1,0 +1,63 @@
+<div pk-page-head heading="Notifications" [sub]="sub"></div>
+@switch (store.status()) {
+  @case ('loading') {
+    <p class="visually-hidden" role="status">Loading notifications…</p>
+    <section pk-panel>
+      <div
+        pk-data-table
+        label="Notifications"
+        [columns]="kindColumns"
+        [groups]="[]"
+        [loading]="true"
+      ></div>
+    </section>
+  }
+  @case ('failed') {
+    <section pk-panel>
+      <div
+        pk-empty-state
+        icon="alert"
+        heading="Couldn’t load notifications"
+        text="The admin API didn’t answer. Nothing has changed and mail keeps sending; try again, or check Health if it keeps happening."
+        [compact]="true"
+        [panel]="true"
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.load()">
+          <svg pk-icon name="retry" size="sm"></svg>Try again
+        </button>
+        <a pk-button variant="secondary" size="md" routerLink="/health">Open Health</a>
+      </div>
+    </section>
+  }
+  @default {
+    <section
+      pk-send-status
+      [state]="store.sending()?.paused ? 'paused' : 'sending'"
+      [heading]="title()"
+      [text]="text()"
+    ></section>
+    <div pk-page-tabs>
+      <div
+        pk-segmented-control
+        label="Notifications"
+        idPrefix="tab"
+        [scroll]="true"
+        [options]="tabs()"
+        [value]="current()"
+        (valueChange)="choose($event)"
+      ></div>
+    </div>
+    @switch (current()) {
+      @case ('kinds') {
+        <section pk-panel role="tabpanel" aria-labelledby="tab-kinds">
+          <div
+            pk-data-table
+            label="Every kind of notification, how many went out in the last 24 hours, and whether it is on for everyone"
+            [columns]="kindColumns"
+            [groups]="kindGroups()"
+          ></div>
+        </section>
+      }
+    }
+  }
+}

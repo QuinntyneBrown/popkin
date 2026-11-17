@@ -14,8 +14,13 @@
   background: var(--accent-line);
 }
 
-:host(:disabled) {
+:host(:disabled),
+:host([aria-disabled='true']) {
   cursor: not-allowed;
+}
+
+:host([aria-disabled='true']) {
+  opacity: var(--opacity-disabled);
 }
 
 .switch__thumb {

@@ -4,12 +4,19 @@ import { Observable } from 'rxjs';
 import {
   AdminFeature,
   AdminFeatures,
+  AdminNotificationKind,
+  AdminNotifications,
+  AdminSendStatus,
   FeatureMode,
   FeaturePopkinMatch,
+  NotificationKindId,
 } from '../../../models/admin';
 import { PopkinFeature } from '../../../models/home';
 
-/** Features (docs/detailed-designs/admin-platform/feature-switches). */
+/**
+ * Features (docs/detailed-designs/admin-platform/feature-switches) and Notifications
+ * (docs/detailed-designs/admin-platform/notifications).
+ */
 export interface AdminPlatformApi {
   features(): Observable<AdminFeatures>;
   /** 403 `role_not_allowed` for Support and Viewer. */
@@ -26,6 +33,17 @@ export interface AdminPlatformApi {
   ): Observable<AdminFeature>;
   removePopkin(feature: PopkinFeature, popkinId: string): Observable<AdminFeature>;
   searchPopkins(feature: PopkinFeature, text: string): Observable<FeaturePopkinMatch[]>;
+  notifications(): Observable<AdminNotifications>;
+  /** 403 `role_not_allowed` for Support and Viewer; 409 `email_already_paused`. */
+  pauseEmail(reason: string | null): Observable<AdminSendStatus>;
+  /** 403 `role_not_allowed` for Support and Viewer; 409 `email_not_paused`. */
+  resumeEmail(reason: string | null): Observable<AdminSendStatus>;
+  /** 400 `notification_required` for "Sign-in codes and security"; 403 for Support and Viewer. */
+  switchKind(
+    kind: NotificationKindId,
+    on: boolean,
+    reason: string | null,
+  ): Observable<AdminNotificationKind>;
 }
 
 export const ADMIN_PLATFORM_API = new InjectionToken<AdminPlatformApi>('AdminPlatformApi');
@@ -64,6 +82,29 @@ export class HttpAdminPlatformApi implements AdminPlatformApi {
   searchPopkins(feature: PopkinFeature, text: string): Observable<FeaturePopkinMatch[]> {
     return this.http.get<FeaturePopkinMatch[]>(`/api/admin/features/${feature}/popkins/search`, {
       params: { q: text },
+    });
+  }
+
+  notifications(): Observable<AdminNotifications> {
+    return this.http.get<AdminNotifications>('/api/admin/notifications');
+  }
+
+  pauseEmail(reason: string | null): Observable<AdminSendStatus> {
+    return this.http.post<AdminSendStatus>('/api/admin/notifications/pause', { reason });
+  }
+
+  resumeEmail(reason: string | null): Observable<AdminSendStatus> {
+    return this.http.post<AdminSendStatus>('/api/admin/notifications/resume', { reason });
+  }
+
+  switchKind(
+    kind: NotificationKindId,
+    on: boolean,
+    reason: string | null,
+  ): Observable<AdminNotificationKind> {
+    return this.http.put<AdminNotificationKind>(`/api/admin/notifications/kinds/${kind}`, {
+      on,
+      reason,
     });
   }
 }
