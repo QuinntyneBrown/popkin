@@ -670,6 +670,7 @@ or design that settled it.
 | 135 | Lead times: Notifications › People offers five (L2-159 AC1) while Dates offers six, with "1 month before" (L2-139 AC1); the design shows the sixth only on a birthday that already has it ([Birthday reminders by person](notifications/birthday-reminders-by-person/README.md)) | Birthday reminders by person | |
 | 136 | Notifications screen states no mock draws: a member of no active Popkin on "Popkins"; "Mute someone" finding nobody; a muted person who no longer shares a Popkin; the account with no email address (L2-156 AC5); whether a banner closes by itself after 8 seconds, as the mock's note says ([Notification settings](notifications/notification-settings/README.md)) | Notification settings | |
 | 137 | Admin notification mocks still to draw: the dialog that holds a Popkin with a reason (`notification-hold-add`), the dialog that saves the defaults with a reason (`notification-defaults-save`), and the Defaults tab's invalid, saved, loading and error states; the drawn dialogs mark the reason optional where L2-087 AC1 now asks for one ([Notification holds](admin-platform/notification-holds/README.md), [Notification defaults](admin-platform/notification-defaults/README.md)) | Admin Notifications | |
+| 138 | Three admin notification details the designs left open. L2-087 AC1 already names the notification dialogs (the designs say it does not), so the reason is required in all six. Focus starts in the reason (L2-087 AC1), not on the safe choice as the mocks' note said. The release dialog is titled "Release the hold on {name}?", as the mock and design draw it, where L2-172 AC4 says "Release this hold?"; whether L2-172 AC4 takes the mock's words is `<TO SUPPLY>` by its owner | Admin Notifications | |
 
 Settled so far:
 
@@ -686,6 +687,8 @@ Settled so far:
 | The logging sink | [ADR 0012](../adr/0012-opentelemetry.md): OpenTelemetry, exported over OTLP |
 | The SignalR client package | Shared real-time rules above: `@microsoft/signalr` from npm, on the server's release line |
 | Reconnect delays and the disconnect grace period | [Live messages](chat/live-messages/README.md) and [Group call](calls/group-call/README.md) |
+| The admin notification mocks gap 137 listed | `docs/mocks/admin/dialogs/notification-hold-add/`, `notification-defaults-save/`, the `invalid` state of the four other dialogs and the Defaults tab's `defaults-edited`, `defaults-invalid`, `defaults-saved`, `defaults-loading` and `defaults-error` (17 November 2026) |
+| How the admin Notifications page runs before its backend | [ADR 0030](../adr/0030-admin-notifications-on-a-fake-backend.md): a fake interceptor in the `api` library, off in e2e |
 | How pure frontend logic is tested | [ADR 0011](../adr/0011-unit-tests-for-frontend-logic.md) |
 | How the hub is stubbed in tests | [ADR 0010](../adr/0010-the-hub-in-tests.md) |
 | The rule that ends a run of messages, the day labels and where the character count first shows | [Send a message to everyone](chat/send-message-to-everyone/README.md): the author, a day or a system note; "Today", "Yesterday", five weekdays, then the date; from 1,800 characters |

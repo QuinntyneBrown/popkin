@@ -776,13 +776,25 @@
       "kind": "page",
       "title": "Notifications",
       "route": "admin.popkin.community/notifications",
-      "requirements": [],
+      "requirements": [
+        "L2-169",
+        "L2-170",
+        "L2-171",
+        "L2-172",
+        "L2-173",
+        "L2-086"
+      ],
       "states": [
         "default",
         "paused",
         "holds",
         "hold-adding",
         "defaults",
+        "defaults-edited",
+        "defaults-invalid",
+        "defaults-saved",
+        "defaults-loading",
+        "defaults-error",
         "support",
         "viewer",
         "loading",
@@ -791,7 +803,7 @@
       "not_applicable": {
         "empty": "Every kind of notification always exists, and the Holds list always has the automatic holds."
       },
-      "notes": "From the Magic Patterns Popkin Admin › Notifications design. No requirement covers it yet."
+      "notes": "From the Magic Patterns Popkin Admin › Notifications design, aligned on 17 November 2026 to L2-154 (twelve kinds, “Stories”), L2-172 (“Until released”) and L2-087 (the reason is required)."
     },
     {
       "id": "announcement-publish",
@@ -834,61 +846,99 @@
       "kind": "dialog",
       "title": "Pause all member email",
       "opens_from": "notifications",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-170"
+      ],
       "states": [
         "default",
         "busy",
-        "failed"
-      ],
-      "not_applicable": {
-        "invalid": "The only field, the reason, is optional; nothing can be invalid."
-      }
+        "failed",
+        "invalid"
+      ]
     },
     {
       "id": "notifications-resume",
       "kind": "dialog",
       "title": "Resume sending",
       "opens_from": "notifications",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-170"
+      ],
       "states": [
         "default",
         "busy",
-        "failed"
-      ],
-      "not_applicable": {
-        "invalid": "The only field, the reason, is optional; nothing can be invalid."
-      }
+        "failed",
+        "invalid"
+      ]
     },
     {
       "id": "notification-kind-switch",
       "kind": "dialog",
       "title": "Switch a kind for everyone",
       "opens_from": "notifications",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-171"
+      ],
       "states": [
         "default",
         "turn-on",
         "busy",
-        "failed"
-      ],
-      "not_applicable": {
-        "invalid": "The only field, the reason, is optional; nothing can be invalid."
-      }
+        "failed",
+        "invalid"
+      ]
     },
     {
       "id": "notification-hold-release",
       "kind": "dialog",
       "title": "Release a hold",
       "opens_from": "notifications",
-      "requirements": [],
+      "requirements": [
+        "L2-087",
+        "L2-172"
+      ],
       "states": [
         "default",
         "busy",
+        "failed",
+        "invalid"
+      ]
+    },
+    {
+      "id": "notification-hold-add",
+      "kind": "dialog",
+      "title": "Hold a Popkin",
+      "opens_from": "notifications",
+      "requirements": [
+        "L2-087",
+        "L2-172"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
         "failed"
       ],
-      "not_applicable": {
-        "invalid": "The only field, the reason, is optional; nothing can be invalid."
-      }
+      "close": "../../pages/notifications/hold-adding.html"
+    },
+    {
+      "id": "notification-defaults-save",
+      "kind": "dialog",
+      "title": "Save new defaults",
+      "opens_from": "notifications",
+      "requirements": [
+        "L2-087",
+        "L2-173"
+      ],
+      "states": [
+        "default",
+        "busy",
+        "invalid",
+        "failed"
+      ],
+      "close": "../../pages/notifications/defaults-edited.html"
     },
     {
       "id": "limits",

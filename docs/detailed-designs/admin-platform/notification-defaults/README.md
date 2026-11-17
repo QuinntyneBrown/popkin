@@ -25,6 +25,11 @@ member who has chosen keeps that choice (L2-173 AC4). The page, its sending stat
 side is [Notification settings](../../notifications/notification-settings/README.md) and
 [Birthday reminders by person](../../notifications/birthday-reminders-by-person/README.md).
 
+> **Built against a fake backend.** The admin app's side is built first, on the fake of
+> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md); the API, Domain and Worker
+> parts below are not built yet. The dialogs take the reason with `pk-textarea` and
+> `ActionDialogState`, as Features does; `pk-reason-field` is not built.
+
 ## Description
 
 ### The defaults
