@@ -21,6 +21,7 @@ import {
   NotificationSettingsStore,
   UNSUBSCRIBED_TEXT,
   DEVICE_REFUSED,
+  OFF_BY_POPKIN,
   LEVEL_CHOICES,
   PopkinColour,
   PopkinLevelView,
@@ -245,7 +246,11 @@ export class NotificationsPage implements OnInit {
       required: kind.required,
       emailDisabled: emailBlocked || kind.offForEveryone,
       phoneDisabled: kind.offForEveryone,
-      note: kind.phone && refused.has(kind.kind) ? DEVICE_REFUSED : undefined,
+      note: kind.offForEveryone
+        ? OFF_BY_POPKIN
+        : kind.phone && refused.has(kind.kind)
+          ? DEVICE_REFUSED
+          : undefined,
     }));
   }
 }

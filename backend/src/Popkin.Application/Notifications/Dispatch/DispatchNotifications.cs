@@ -13,7 +13,7 @@ public sealed record DispatchResult(int Events, int Sent);
 public sealed record DispatchNotificationsCommand : IRequest<DispatchResult>;
 
 public sealed class DispatchNotificationsCommandHandler(
-    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot, UpdateEmails emails, PopkinMetrics metrics)
+    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot, INotificationPlatform notifications, UpdateEmails emails, PopkinMetrics metrics)
     : IRequestHandler<DispatchNotificationsCommand, DispatchResult>
 {
     private const int EventsPerTick = 200;
@@ -107,7 +107,7 @@ public sealed class DispatchNotificationsCommandHandler(
     {
         var account = await db.People.AsNoTracking()
             .Where(p => p.Id == person)
-            .Select(p => new { p.Email, p.DeletedAt })
+            .Select(p => new { p.Email, p.DeletedAt, p.ErasedAt })
             .FirstOrDefaultAsync(cancellationToken);
         var membership = notification.PopkinId is { } popkinId
             ? await db.Memberships.AsNoTracking().FirstOrDefaultAsync(m => m.PopkinId == popkinId && m.PersonId == person && m.LeftAt == null, cancellationToken)
@@ -121,7 +121,7 @@ public sealed class DispatchNotificationsCommandHandler(
             && await db.PushSubscriptions.AnyAsync(s => s.PersonId == person, cancellationToken);
         var preferences = await db.NotificationPreferences.AsNoTracking().FirstOrDefaultAsync(p => p.PersonId == person, cancellationToken);
         var choices = await db.NotificationKindChoices.AsNoTracking().Where(c => c.PersonId == person).ToListAsync(cancellationToken);
-        var settings = new EffectiveNotificationSettings(preferences, choices);
+        var settings = new EffectiveNotificationSettings(preferences, choices, platform.DefaultFrequency);
         return new NotificationQuestion(notification.Kind, channel, now, LocalClock.ZoneOf(preferences?.TimeZone))
         {
             RecipientIsActor = person == notification.ActorPersonId,
@@ -131,6 +131,9 @@ public sealed class DispatchNotificationsCommandHandler(
             HasAddress = account?.Email is { Length: > 0 },
             HasDevice = hasDevice,
             EmailPaused = platform.EmailPausedAt is not null,
+            KindOffForEveryone = notifications.IsKindOff(notification.Kind),
+            Held = notification.PopkinId is { } heldPopkin && notifications.IsPopkinHeld(heldPopkin)
+                || account is not null && NotificationHoldRules.HeldAutomatically(account.DeletedAt, account.ErasedAt) is not null,
             EmailOn = settings.EmailOn,
             Frequency = settings.Frequency,
             RecipientIsNamed = person == notification.RecipientPersonId,

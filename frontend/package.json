@@ -6,7 +6,6 @@
     "start": "ng serve popkin",
     "start:marketing": "npm run media:sync && ng serve marketing",
     "start:admin": "ng serve admin",
-    "start:admin:e2e": "ng serve admin --configuration e2e",
     "build": "ng build popkin",
     "build:marketing": "npm run media:sync && ng build marketing",
     "build:admin": "ng build admin",

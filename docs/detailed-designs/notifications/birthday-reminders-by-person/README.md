@@ -19,7 +19,7 @@ same two fields.
 - **lead time** — how long before the birthday its reminder comes: "On the day", "1 day before", "3 days before", "1 week before" or "2 weeks before" (`KeyDate.Lead`)
 - **birthday's switch** — whether the birthday reminds at all (`KeyDate.RemindersOn`); off, the birthday stays in Contacts and nothing reminds of it
 - **person's default** — "Birthdays: remind me" on Dates (`ReminderPreferences.BirthdayLead`), the lead time a new birthday starts at
-- **default for new members** — the birthday lead an Owner sets in the admin app (`NotificationPlatform.DefaultBirthdayLead`), used until the person changes their own
+- **default for new members** — the birthday lead an Owner sets in the admin app (`NotificationPlatform.BirthdayLead`), used until the person changes their own
 
 Everything here is the owner's own Contacts data. Nothing is shown to another person or an admin,
 and no contact is told (L2-122).
@@ -77,9 +77,11 @@ time has one writer.
 - **`ChangeKeyDateReminderCommand(KeyDateId, Lead?, On?)`** — the existing handler gains `On`. It
   stays one load, one change and one save, guarded by `KeyDateRules.RequireOwnedAsync` and
   `ContactsSwitch.Require()`.
-- **Not built with the app side.** The default for new members is an admin setting (L2-173), so
-  `ReminderPreferences.BirthdayLead` nullable and `ReminderDefaults.ForNewBirthday` below come
-  with the admin plan. Until then a new birthday starts at the person's own default, as before.
+- **Built with the admin defaults.** The default for new members is an admin setting (L2-173),
+  built with [Notification defaults](../../admin-platform/notification-defaults/README.md). The
+  rule below is `ReminderPreferences.DefaultFor(kind, birthdayDefault)` in the Domain, where a null
+  answer means "1 week before" and off, rather than a separate `ReminderDefaults` class; the
+  Owner's default is `NotificationPlatform.BirthdayLead`, not `DefaultBirthdayLead`.
 - **`ReminderPreferences.BirthdayLead`** — becomes nullable. Null means the person has never
   changed "Birthdays: remind me". Saving it on Dates sets it, as now.
 - **`ReminderDefaults.ForNewBirthday(ownerId)`** (Application) — returns the lead and the switch

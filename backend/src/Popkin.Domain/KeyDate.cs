@@ -155,7 +155,8 @@ public sealed class ReminderPreferences : IOwnedByPerson
 
     public Guid OwnerId { get; private set; }
 
-    public ReminderLead BirthdayLead { get; private set; }
+    /// <summary>Null until the person changes "Birthdays: remind me": a new birthday then follows the Owner's default (L2-173, L2-139 AC4).</summary>
+    public ReminderLead? BirthdayLead { get; private set; }
 
     public ReminderLead AnniversaryLead { get; private set; }
 
@@ -165,21 +166,25 @@ public sealed class ReminderPreferences : IOwnedByPerson
     public static ReminderPreferences Defaults(Guid ownerId) => new()
     {
         OwnerId = ownerId,
-        BirthdayLead = ReminderLead.OneWeekBefore,
+        BirthdayLead = null,
         AnniversaryLead = ReminderLead.ThreeDaysBefore,
         MilestoneLead = ReminderLead.OnTheDay,
     };
 
-    /// <summary>A new date's lead time; Something else starts at 1 week before (gap 113).</summary>
-    public ReminderLead DefaultFor(KeyDateKind kind) => kind switch
+    /// <summary>
+    /// A new date's lead time; Something else starts at 1 week before (gap 113). A birthday takes
+    /// the person's own lead, else the Owner's default, where null means its reminders start off.
+    /// </summary>
+    public ReminderLead? DefaultFor(KeyDateKind kind, ReminderLead? birthdayDefault) => kind switch
     {
-        KeyDateKind.Birthday => BirthdayLead,
+        KeyDateKind.Birthday => BirthdayLead ?? birthdayDefault,
         KeyDateKind.Anniversary => AnniversaryLead,
         KeyDateKind.Milestone => MilestoneLead,
         _ => ReminderLead.OneWeekBefore,
     };
 
-    public void Change(ReminderLead birthday, ReminderLead anniversary, ReminderLead milestone)
+    /// <summary>Saves the leads; a null birthday keeps following the Owner's default.</summary>
+    public void Change(ReminderLead? birthday, ReminderLead anniversary, ReminderLead milestone)
     {
         BirthdayLead = birthday;
         AnniversaryLead = anniversary;

@@ -12,6 +12,7 @@ import {
   theNotificationSettingsFailingOnce,
   theNotificationSettingsLoading,
   noBirthdaysYet,
+  newPhotosOffForEveryone,
 } from '../fixtures/notifications';
 import { expect, test } from '../fixtures/pk-test';
 import { AccountPage } from '../pages/account.page';
@@ -258,6 +259,27 @@ test.describe('this device', () => {
 
     const zone = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
     expect((await saved).postDataJSON()).toEqual({ zone });
+  });
+
+  // L2-171 AC4
+  test('a kind off for everyone keeps the member’s choice, disabled, and says Popkin switched it off', async ({
+    page,
+    pk,
+  }) => {
+    await newPhotosOffForEveryone(page);
+
+    await pk.open('notificationSettingsOffByPopkin');
+    const notifications = new NotificationSettingsPage(page);
+
+    await expect(notifications.kindSwitch('New photos', 'email')).toBeDisabled();
+    await expect(notifications.kindSwitch('New photos', 'phone')).toBeDisabled();
+    await expect(notifications.kindSwitch('New photos', 'email')).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+    await expect(notifications.group('When something changes')).toContainText(
+      'Switched off by Popkin for now',
+    );
   });
 
   // L2-157 AC5, ADR 0028

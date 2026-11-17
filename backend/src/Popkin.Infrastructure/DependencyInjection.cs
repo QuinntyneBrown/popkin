@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddSingleton<Features.PlatformSnapshot>();
         services.AddSingleton<IFeatureSwitches>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
         services.AddSingleton<IPlatformSnapshot>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
+        services.AddSingleton<INotificationPlatform>(sp => sp.GetRequiredService<Features.PlatformSnapshot>());
 
         var development = environment?.IsDevelopment() ?? false;
         var developmentCode = configuration["Auth:DevelopmentCode"];
@@ -232,6 +233,7 @@ public static class DependencyInjection
             }
         });
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+        services.AddScoped<Popkin.Application.Administration.Notifications.INotificationStats, Notifications.NotificationStats>();
         return services;
     }
 }

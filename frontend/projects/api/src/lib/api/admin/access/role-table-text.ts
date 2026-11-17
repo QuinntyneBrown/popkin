@@ -19,5 +19,11 @@ export const PERMISSION_LINES: readonly PermissionLine[] = [
   { group: 'Platform', label: 'Switch and roll out features', row: 'Platform' },
   { group: 'Platform', label: 'Change limits', row: 'Platform' },
   { group: 'Platform', label: 'Publish announcements', row: 'Platform' },
+  {
+    group: 'Platform',
+    label: 'Pause email, switch kinds and change defaults',
+    row: 'Notifications',
+  },
+  { group: 'Platform', label: 'Hold and release notifications', row: 'NotificationHolds' },
   { group: 'Access', label: 'Add, remove and change admins', row: 'Admins' },
 ];

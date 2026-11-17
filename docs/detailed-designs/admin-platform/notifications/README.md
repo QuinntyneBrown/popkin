@@ -32,9 +32,17 @@ and honoured within a minute, as feature switches are
 ([Feature switches](../feature-switches/README.md)). A member's own choices are never changed by
 either lever. They come back as they were when the lever is released.
 
-> **Built against a fake backend.** The admin app's side is built first, on the fake of
-> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md); the API, Domain and Worker
-> parts below are not built yet. The dialogs take the reason with `pk-textarea` and
+> **Built.** The admin app's side was built first, on the fake of
+> [ADR 0030](../../../adr/0030-admin-notifications-on-a-fake-backend.md), which is now deleted: the
+> API, Domain and Worker parts below are built as written, with these differences.
+> `NotificationPlatform` is not seeded by the migration: a read finds its first values when the
+> row is missing, and the first change adds it (`NotificationPlatformRow`). `Pause` and `Resume`
+> answer whether they changed anything, and the handlers refuse with the `409`s. "About {m}
+> minutes" assumes 100 queued emails a minute (`AdminNotificationPlatform.ResumeSendsPerMinute`),
+> an estimate, not a limit. The median is worked out from the day's sent emails in memory. The
+> snapshot's 30-second refresh is proven through the API (a switch written to the database is
+> honoured after 30 seconds) rather than by a direct test of `PlatformSnapshot`, and the pause's
+> Worker behaviour by the dispatcher's API tests. The dialogs take the reason with `pk-textarea` and
 > `ActionDialogState`, as Features does; `pk-reason-field` is not built. One
 > `NotificationActionDialog` serves the pause, the resume and a kind's switch. The kinds table
 > reuses `pk-data-table` (ADR 0029): its existing group rows, and new `kind`, `switch` and `lock`

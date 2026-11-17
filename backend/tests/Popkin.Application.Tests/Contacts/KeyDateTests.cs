@@ -75,9 +75,23 @@ public sealed class KeyDateTests
     {
         var defaults = ReminderPreferences.Defaults(Guid.NewGuid());
 
-        Assert.Equal(ReminderLead.OneWeekBefore, defaults.DefaultFor(KeyDateKind.Birthday));
-        Assert.Equal(ReminderLead.ThreeDaysBefore, defaults.DefaultFor(KeyDateKind.Anniversary));
-        Assert.Equal(ReminderLead.OnTheDay, defaults.DefaultFor(KeyDateKind.Milestone));
-        Assert.Equal(ReminderLead.OneWeekBefore, defaults.DefaultFor(KeyDateKind.Other));
+        Assert.Equal(ReminderLead.OneWeekBefore, defaults.DefaultFor(KeyDateKind.Birthday, ReminderLead.OneWeekBefore));
+        Assert.Equal(ReminderLead.ThreeDaysBefore, defaults.DefaultFor(KeyDateKind.Anniversary, null));
+        Assert.Equal(ReminderLead.OnTheDay, defaults.DefaultFor(KeyDateKind.Milestone, null));
+        Assert.Equal(ReminderLead.OneWeekBefore, defaults.DefaultFor(KeyDateKind.Other, null));
+    }
+
+    // A birthday follows the Owner's default until the person chooses, one case per source (L2-173, L2-139 AC4).
+    [Theory]
+    [InlineData(null, ReminderLead.ThreeDaysBefore, ReminderLead.ThreeDaysBefore)]
+    [InlineData(null, null, null)]
+    [InlineData(ReminderLead.OnTheDay, ReminderLead.ThreeDaysBefore, ReminderLead.OnTheDay)]
+    [InlineData(ReminderLead.OnTheDay, null, ReminderLead.OnTheDay)]
+    public void A_birthday_takes_the_persons_lead_else_the_owners_default(ReminderLead? own, ReminderLead? owners, ReminderLead? expected)
+    {
+        var preferences = ReminderPreferences.Defaults(Guid.NewGuid());
+        preferences.Change(own, ReminderLead.ThreeDaysBefore, ReminderLead.OnTheDay);
+
+        Assert.Equal(expected, preferences.DefaultFor(KeyDateKind.Birthday, owners));
     }
 }

@@ -13,7 +13,8 @@ namespace Popkin.Application.Notifications.Emails;
 /// </summary>
 public sealed class KeyDateReminderEmailComposer(IAppDbContext db, NotificationLinks links, NotificationEmailSettings settings)
 {
-    private static readonly CultureInfo English = CultureInfo.GetCultureInfo("en-GB");
+    // The invariant culture: English names that do not change with the server's ICU ("Sep", never "Sept").
+    private static readonly CultureInfo English = CultureInfo.InvariantCulture;
 
     public async Task<KeyDateReminderEmailModel?> ComposeAsync(OutgoingEmail email, NotificationEvent notification, CancellationToken cancellationToken)
     {

@@ -39,6 +39,9 @@ export const SAVE_FAILED = 'We couldn’t save that. Try again.';
 /** A phone switch turned on where the browser refused alerts (L2-157 AC5). */
 export const DEVICE_REFUSED = 'This device hasn’t allowed alerts.';
 
+/** The note on a kind an admin switched off for everyone (L2-171 AC4). */
+export const OFF_BY_POPKIN = 'Switched off by Popkin for now';
+
 /** The banner after email is switched off (L2-156 AC3). */
 export const UNSUBSCRIBED_TEXT =
   'You’re unsubscribed from all Popkin email. Sign-in codes still arrive, and your phone alerts are unchanged.';

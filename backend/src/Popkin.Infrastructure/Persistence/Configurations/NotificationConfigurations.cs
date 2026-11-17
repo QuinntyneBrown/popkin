@@ -76,7 +76,40 @@ public sealed class NotificationPlatformConfiguration : IEntityTypeConfiguration
     {
         builder.ToTable("NotificationPlatform");
         builder.HasKey(p => p.Id);
-        builder.Property(p => p.PauseReason).HasMaxLength(200);
+        builder.Property(p => p.PauseReason).HasMaxLength(500);
+        builder.Property(p => p.PausedByName).HasMaxLength(200);
+        builder.Ignore(p => p.IsPaused);
+        builder.Ignore(p => p.CurrentDefaults);
+        builder.Property(p => p.DefaultFrequency).HasConversion<string>().HasMaxLength(16);
+        builder.Property(p => p.BirthdayLead).HasConversion<string>().HasMaxLength(16);
+        builder.Property(p => p.DefaultsChangedByName).HasMaxLength(200);
+    }
+}
+
+public sealed class NotificationKindSwitchConfiguration : IEntityTypeConfiguration<NotificationKindSwitch>
+{
+    public void Configure(EntityTypeBuilder<NotificationKindSwitch> builder)
+    {
+        builder.ToTable("NotificationKindSwitches");
+        builder.HasKey(s => s.Kind);
+        builder.Property(s => s.Kind).HasConversion<string>().HasMaxLength(32);
+        builder.Property(s => s.OffByName).HasMaxLength(200);
+        builder.Property(s => s.Reason).HasMaxLength(500);
+    }
+}
+
+public sealed class NotificationHoldConfiguration : IEntityTypeConfiguration<NotificationHold>
+{
+    public void Configure(EntityTypeBuilder<NotificationHold> builder)
+    {
+        builder.ToTable("NotificationHolds");
+        builder.HasKey(h => h.Id);
+        builder.Property(h => h.Reason).HasMaxLength(500);
+        builder.Property(h => h.HeldByName).HasMaxLength(200);
+        builder.Property(h => h.ReleaseReason).HasMaxLength(500);
+        builder.Ignore(h => h.IsActive);
+        // One active hold on a Popkin.
+        builder.HasIndex(h => h.PopkinId).IsUnique().HasFilter("[ReleasedAt] IS NULL");
     }
 }
 

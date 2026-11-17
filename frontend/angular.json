@@ -255,17 +255,6 @@
                   "with": "projects/admin/src/environments/environment.development.ts"
                 }
               ]
-            },
-            "e2e": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "fileReplacements": [
-                {
-                  "replace": "projects/admin/src/environments/environment.ts",
-                  "with": "projects/admin/src/environments/environment.e2e.ts"
-                }
-              ]
             }
           },
           "defaultConfiguration": "production"
@@ -278,9 +267,6 @@
             },
             "development": {
               "buildTarget": "admin:build:development"
-            },
-            "e2e": {
-              "buildTarget": "admin:build:e2e"
             }
           },
           "defaultConfiguration": "development",

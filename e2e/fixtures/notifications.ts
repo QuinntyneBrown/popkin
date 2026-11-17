@@ -16,6 +16,26 @@ export async function theMockNotificationSettings(page: Page): Promise<void> {
   });
 }
 
+/**
+ * Mara's settings with "New photos" switched off for everyone by an admin, her own choice kept
+ * (`off-by-popkin.html`, L2-171 AC4).
+ */
+export async function newPhotosOffForEveryone(page: Page): Promise<void> {
+  await answer(page, 'GET /api/me/notifications', {
+    status: 200,
+    body: {
+      ...settings,
+      email: { on: true, available: true, frequency: 'AsItHappens' },
+      groups: settings.groups.map((group) => ({
+        ...group,
+        kinds: group.kinds.map((kind) =>
+          kind.kind === 'NewPhotos' ? { ...kind, offForEveryone: true } : kind,
+        ),
+      })),
+    },
+  });
+}
+
 /** The settings of an account that signs in by phone, as recorded: no email to switch on (L2-156 AC5). */
 export async function settingsWithoutAnEmailAddress(page: Page): Promise<void> {
   await answer(page, 'GET /api/me/notifications', { status: 200, body: settings });

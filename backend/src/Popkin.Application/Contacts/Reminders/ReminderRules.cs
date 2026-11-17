@@ -12,7 +12,8 @@ public static class ReminderRules
     /// <summary>The hour, where the person is, from which the day's reminders go.</summary>
     public const int Hour = 8;
 
-    private static readonly CultureInfo English = CultureInfo.GetCultureInfo("en-GB");
+    // The invariant culture: English names that do not change with the server's ICU ("Sep", never "Sept").
+    private static readonly CultureInfo English = CultureInfo.InvariantCulture;
 
     /// <summary>"today", "tomorrow", "on Saturday", or "on 22 September".</summary>
     public static string When(DateOnly occursOn, DateOnly today)

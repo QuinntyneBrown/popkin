@@ -1233,6 +1233,50 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("NotificationEvents", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.NotificationHold", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("HeldAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("HeldByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("HeldByName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("PopkinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ReleaseReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset?>("ReleasedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ReleasedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PopkinId")
+                        .IsUnique()
+                        .HasFilter("[ReleasedAt] IS NULL");
+
+                    b.ToTable("NotificationHolds", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.NotificationKindChoice", b =>
                 {
                     b.Property<Guid>("PersonId")
@@ -1253,11 +1297,42 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("NotificationKindChoices", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.NotificationKindSwitch", b =>
+                {
+                    b.Property<string>("Kind")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("OffByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("OffByName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("OffSince")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Kind");
+
+                    b.ToTable("NotificationKindSwitches", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.NotificationPlatform", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BirthdayLead")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<int>("BundlingMinutes")
                         .HasColumnType("int");
@@ -1265,15 +1340,31 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<int>("DailyMost")
                         .HasColumnType("int");
 
+                    b.Property<string>("DefaultFrequency")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<DateTimeOffset?>("DefaultsChangedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DefaultsChangedByName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<DateTimeOffset?>("EmailPausedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("PauseReason")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("PausedByAdminId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PausedByName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<TimeOnly>("QuietFrom")
                         .HasColumnType("time");
@@ -1731,7 +1822,6 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("BirthdayLead")
-                        .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("nvarchar(16)");
 
