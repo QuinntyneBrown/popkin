@@ -1,0 +1,23 @@
+{
+  "voice": "af_heart",
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "gapBeats": 1,
+  "outroSeconds": 3,
+  "music": { "file": "../assets/music/en-la-playa-soca.mp3", "offset": 0.27, "duckDb": 16, "betweenDb": 5, "fadeSeconds": 2 },
+  "scenes": [
+    { "id": "hook", "bars": 4, "lines": ["A Popkin ends. The people in it should not drift away. That is what Contacts is for."] },
+    { "id": "today", "bars": 7, "lines": ["Every morning, Today leads with what matters: Grace's birthday on Saturday, what she is into, and the last thing you talked about.", "Beside it, what to do today, and who it has been a while since."] },
+    { "id": "add", "bars": 5, "lines": ["Add someone with a name, and as much else as you know. Only you can see them."] },
+    { "id": "profile", "bars": 6, "lines": ["Their profile keeps it together: how to reach Chidi, your habit with him, and what he loves."] },
+    { "id": "log", "bars": 5, "lines": ["Log a conversation, and anything you promised becomes a follow-up."] },
+    { "id": "memories", "bars": 5, "lines": ["Keep memories with them: photos, files and notes."] },
+    { "id": "dates", "bars": 6, "lines": ["Dates gathers every birthday and anniversary, soonest first. Follow-ups lists what you said you would do."] },
+    { "id": "habits", "bars": 5, "lines": ["Habits keep a rhythm: lunch with Chidi every two weeks, and a nudge when it slips."] },
+    { "id": "connections", "bars": 6, "lines": ["Connections draws who knows whom, family, friends and work. Groups gather people, and start a Popkin with them."] },
+    { "id": "import", "bars": 6, "lines": ["And Import brings in everyone you share a Popkin with, once each. They are not told."] },
+    { "id": "grow", "bars": 4, "lines": ["On a phone, one column. On a desktop, the tabs become a sidebar."] },
+    { "id": "proof", "bars": 6, "lines": ["What the tests prove: reminders arrive at nine in the morning where you are, and nobody you add is ever told."] },
+    { "id": "close", "bars": 4, "lines": ["That is journey twenty-five. Popkin is a free platform for pop-up communities."] }
+  ]
+}
