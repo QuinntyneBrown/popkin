@@ -1,3 +1,4 @@
+using Popkin.Application.Telemetry;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
@@ -43,7 +44,7 @@ public static class PreferencesRows
 /// <summary>One kind on one or both channels (L2-157 AC3); the other kinds and channels are untouched.</summary>
 public sealed record SetNotificationKindCommand(string Kind, bool? Email, bool? Phone) : IRequest;
 
-public sealed class SetNotificationKindCommandHandler(IAppDbContext db, ICurrentPerson current)
+public sealed class SetNotificationKindCommandHandler(IAppDbContext db, ICurrentPerson current, PopkinMetrics metrics)
     : IRequestHandler<SetNotificationKindCommand>
 {
     public async Task Handle(SetNotificationKindCommand request, CancellationToken cancellationToken)
@@ -82,6 +83,15 @@ public sealed class SetNotificationKindCommandHandler(IAppDbContext db, ICurrent
         }
 
         await db.SaveChangesAsync(cancellationToken);
+        if (request.Email is not null)
+        {
+            metrics.NotificationSettingChanged("kind", "email");
+        }
+
+        if (request.Phone is not null)
+        {
+            metrics.NotificationSettingChanged("kind", "phone");
+        }
     }
 }
 
@@ -91,7 +101,7 @@ public sealed class SetNotificationKindCommandHandler(IAppDbContext db, ICurrent
 /// </summary>
 public sealed record SetActivityEmailCommand(bool? On) : IRequest;
 
-public sealed class SetActivityEmailCommandHandler(IAppDbContext db, ICurrentPerson current, TimeProvider clock)
+public sealed class SetActivityEmailCommandHandler(IAppDbContext db, ICurrentPerson current, TimeProvider clock, PopkinMetrics metrics)
     : IRequestHandler<SetActivityEmailCommand>
 {
     public async Task Handle(SetActivityEmailCommand request, CancellationToken cancellationToken)
@@ -114,13 +124,14 @@ public sealed class SetActivityEmailCommandHandler(IAppDbContext db, ICurrentPer
         var preferences = await db.PreferencesOfAsync(personId, cancellationToken);
         preferences.TurnEmail(on, clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
+        metrics.NotificationSettingChanged("email", "email");
     }
 }
 
 /// <summary>As it happens, a daily digest or a weekly digest (L2-156 AC1).</summary>
 public sealed record SetActivityFrequencyCommand(string? Frequency) : IRequest;
 
-public sealed class SetActivityFrequencyCommandHandler(IAppDbContext db, ICurrentPerson current, TimeProvider clock)
+public sealed class SetActivityFrequencyCommandHandler(IAppDbContext db, ICurrentPerson current, TimeProvider clock, PopkinMetrics metrics)
     : IRequestHandler<SetActivityFrequencyCommand>
 {
     public async Task Handle(SetActivityFrequencyCommand request, CancellationToken cancellationToken)
@@ -133,5 +144,6 @@ public sealed class SetActivityFrequencyCommandHandler(IAppDbContext db, ICurren
         var preferences = await db.PreferencesOfAsync(current.PersonId, cancellationToken);
         preferences.ChooseFrequency(frequency, clock.GetUtcNow());
         await db.SaveChangesAsync(cancellationToken);
+        metrics.NotificationSettingChanged("frequency", "email");
     }
 }

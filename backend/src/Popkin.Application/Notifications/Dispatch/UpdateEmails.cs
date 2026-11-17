@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
 using Popkin.Application.Notifications.Emails;
+using Popkin.Application.Telemetry;
 using Popkin.Domain;
 
 namespace Popkin.Application.Notifications.Dispatch;
@@ -11,7 +12,7 @@ namespace Popkin.Application.Notifications.Dispatch;
 /// bundles whose window has ended, each read again first (L2-161 AC3, AC4, AC9; L2-174 AC1).
 /// </summary>
 public sealed class UpdateEmails(
-    IAppDbContext db, PopkinUpdateEmailComposer composer, INotificationEmailRenderer renderer, INotificationEmailSender sender, NotificationLinks links)
+    IAppDbContext db, PopkinUpdateEmailComposer composer, INotificationEmailRenderer renderer, INotificationEmailSender sender, NotificationLinks links, PopkinMetrics metrics)
 {
     /// <summary>The delivery for an email change the rules let through (or held, while email is paused).</summary>
     public async Task<NotificationDelivery> PlaceAsync(
@@ -84,6 +85,8 @@ public sealed class UpdateEmails(
                 // Too late to be worth sending: after a long pause or six hours of failures
                 // (L2-170 AC3, L2-175 AC2).
                 email.Drop();
+                // A dropped email is counted by its email kind: the changes it held are no longer read.
+                metrics.NotificationDelivered(email.Kind.ToString(), "email", "dropped");
             }
             else
             {
@@ -137,6 +140,7 @@ public sealed class UpdateEmails(
             if (rule is { } stopped)
             {
                 x.Delivery.Suppress(stopped);
+                metrics.Suppressed(x.Event.Kind, NotificationChannel.Email, stopped);
             }
             else
             {
@@ -151,7 +155,12 @@ public sealed class UpdateEmails(
         if (model is null || address is not { Length: > 0 })
         {
             email.Suppress(SuppressionRule.NothingNew);
-            passing.ForEach(p => p.Delivery.Suppress(SuppressionRule.NothingNew));
+            foreach (var (delivery, notification) in passing)
+            {
+                delivery.Suppress(SuppressionRule.NothingNew);
+                metrics.Suppressed(notification.Kind, NotificationChannel.Email, SuppressionRule.NothingNew);
+            }
+
             return false;
         }
 
@@ -165,13 +174,20 @@ public sealed class UpdateEmails(
         {
             case EmailSendResult.Accepted accepted:
                 email.MarkSent(now, accepted.ProviderMessageId);
-                passing.ForEach(p => p.Delivery.MarkSent(now));
+                metrics.EmailAccepted(now - email.SendAfter);
+                foreach (var (delivery, notification) in passing)
+                {
+                    delivery.MarkSent(now);
+                    metrics.NotificationDelivered(notification.Kind.ToString(), "email", "sent");
+                }
+
                 return true;
             case EmailSendResult.Transient:
                 email.Retry(now + RetryBackoff.After(email.Attempts + 1));
                 return false;
             default:
                 email.Fail();
+                passing.ForEach(p => metrics.NotificationDelivered(p.Event.Kind.ToString(), "email", "failed"));
                 return false;
         }
     }

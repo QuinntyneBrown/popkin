@@ -17,6 +17,12 @@ public sealed class PopkinMetrics
     private readonly Counter<long> _auditEntriesPurged;
     private readonly Counter<long> _remindersSent;
     private readonly Counter<long> _reminderSendFailures;
+    private readonly Counter<long> _notificationEvents;
+    private readonly Counter<long> _notificationDeliveries;
+    private readonly Counter<long> _notificationsSuppressed;
+    private readonly Histogram<double> _emailLatency;
+    private readonly Histogram<double> _phoneLatency;
+    private readonly Counter<long> _settingsChanged;
 
     public PopkinMetrics(IMeterFactory meters)
     {
@@ -35,7 +41,44 @@ public sealed class PopkinMetrics
             "popkin.contacts.reminders.sent", description: "Contacts reminders added in the app, or sent by phone or email (L2-140).");
         _reminderSendFailures = meter.CreateCounter<long>(
             "popkin.contacts.reminders.send_failures", description: "Contacts reminders a phone or email provider could not send.");
+        _notificationEvents = meter.CreateCounter<long>(
+            "popkin.notifications.events", description: "Notification events fanned out, by kind (L2-161).");
+        _notificationDeliveries = meter.CreateCounter<long>(
+            "popkin.notifications.deliveries", description: "Notification deliveries by kind, channel and outcome: sent, suppressed, failed or dropped.");
+        _notificationsSuppressed = meter.CreateCounter<long>(
+            "popkin.notifications.suppressed", description: "Notification deliveries stopped, by the rule that stopped them (L2-161 AC1).");
+        _emailLatency = meter.CreateHistogram<double>(
+            "popkin.notifications.email_latency", unit: "s", description: "From an email's window closing to the provider accepting it (L2-175 AC1).");
+        _phoneLatency = meter.CreateHistogram<double>(
+            "popkin.notifications.phone_latency", unit: "s", description: "From a change to the push service accepting its alert (L2-175 AC1).");
+        _settingsChanged = meter.CreateCounter<long>(
+            "popkin.notifications.settings_changed", description: "Notification settings saved, by setting (email, frequency, kind) and channel.");
     }
+
+    public void NotificationEvent(string kind) => _notificationEvents.Add(1, new KeyValuePair<string, object?>("kind", kind));
+
+    /// <summary>`channel` is phone or email; `outcome` is sent, suppressed, failed or dropped.</summary>
+    public void NotificationDelivered(string kind, string channel, string outcome, int count = 1) =>
+        _notificationDeliveries.Add(
+            count,
+            new KeyValuePair<string, object?>("kind", kind),
+            new KeyValuePair<string, object?>("channel", channel),
+            new KeyValuePair<string, object?>("outcome", outcome));
+
+    /// <summary>A delivery the rules stopped: counted as an outcome and by its rule.</summary>
+    public void Suppressed(Domain.NotificationKind kind, Domain.NotificationChannel channel, Domain.SuppressionRule rule)
+    {
+        NotificationDelivered(kind.ToString(), channel == Domain.NotificationChannel.Phone ? "phone" : "email", "suppressed");
+        _notificationsSuppressed.Add(1, new KeyValuePair<string, object?>("rule", rule.ToString()));
+    }
+
+    public void EmailAccepted(TimeSpan latency) => _emailLatency.Record(Math.Max(0, latency.TotalSeconds));
+
+    public void PhoneAccepted(TimeSpan latency) => _phoneLatency.Record(Math.Max(0, latency.TotalSeconds));
+
+    /// <summary>`setting` is email, frequency or kind; `channel` is email or phone.</summary>
+    public void NotificationSettingChanged(string setting, string channel) =>
+        _settingsChanged.Add(1, new KeyValuePair<string, object?>("setting", setting), new KeyValuePair<string, object?>("channel", channel));
 
     /// <summary>L2-044 AC1: a Popkin wraps up within one minute of its end date.</summary>
     public void WrappedUpLate(TimeSpan lateness) => _wrapUpLateness.Record(lateness.TotalSeconds);

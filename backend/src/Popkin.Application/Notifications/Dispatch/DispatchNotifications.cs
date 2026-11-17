@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Popkin.Application.Abstractions;
+using Popkin.Application.Telemetry;
 using Popkin.Domain;
 
 namespace Popkin.Application.Notifications.Dispatch;
@@ -12,7 +13,7 @@ public sealed record DispatchResult(int Events, int Sent);
 public sealed record DispatchNotificationsCommand : IRequest<DispatchResult>;
 
 public sealed class DispatchNotificationsCommandHandler(
-    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot, UpdateEmails emails)
+    IAppDbContext db, TimeProvider clock, IPhoneNotificationSender phone, IFeatureSwitches features, IPlatformSnapshot snapshot, UpdateEmails emails, PopkinMetrics metrics)
     : IRequestHandler<DispatchNotificationsCommand, DispatchResult>
 {
     private const int EventsPerTick = 200;
@@ -33,6 +34,7 @@ public sealed class DispatchNotificationsCommandHandler(
         {
             await FanOutAsync(notification, platform, now, cancellationToken);
             notification.MarkDispatched(now);
+            metrics.NotificationEvent(notification.Kind.ToString());
         }
 
         await db.SaveChangesAsync(cancellationToken);
@@ -77,6 +79,11 @@ public sealed class DispatchNotificationsCommandHandler(
 
                 var question = await QuestionAsync(notification, person, channel, platform, now, cancellationToken);
                 var decision = NotificationRules.Decide(question);
+                if (decision.Rule is { } rule)
+                {
+                    metrics.Suppressed(notification.Kind, channel, rule);
+                }
+
                 db.NotificationDeliveries.Add(
                     decision.Outcome == NotificationOutcome.Suppress
                         ? NotificationDelivery.Suppressed(notification.Id, person, channel, decision.Rule!.Value, now)
@@ -159,6 +166,7 @@ public sealed class DispatchNotificationsCommandHandler(
                 else
                 {
                     delivery.Suppress(decision.Rule!.Value);
+                    metrics.Suppressed(notification.Kind, delivery.Channel, decision.Rule!.Value);
                 }
             }
 
@@ -186,16 +194,22 @@ public sealed class DispatchNotificationsCommandHandler(
                         sent++;
                     }
 
-                    passing.ForEach(p => p.Delivery.MarkSent(now));
+                    foreach (var (delivery, notification) in passing)
+                    {
+                        delivery.MarkSent(now);
+                        metrics.NotificationDelivered(notification.Kind.ToString(), "phone", "sent");
+                        metrics.PhoneAccepted(now - notification.OccurredAt);
+                    }
                 }
                 catch (Exception) when (!cancellationToken.IsCancellationRequested)
                 {
                     // No device took it: tried again on the backoff, and given up at six hours.
-                    foreach (var (delivery, _) in passing)
+                    foreach (var (delivery, notification) in passing)
                     {
                         if (RetryBackoff.GivenUp(delivery.SendAfter, now))
                         {
                             delivery.Drop();
+                            metrics.NotificationDelivered(notification.Kind.ToString(), "phone", "dropped");
                         }
                         else
                         {
