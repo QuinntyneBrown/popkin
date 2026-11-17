@@ -45,7 +45,7 @@ Popkin uses no custom tooltips.
 | 33 | People around and person choice | A contact's people as short linked rows, keyed on Connections; Connect's "Who" as a radio list. | 0.5 days | Built, with parity (panel; chosen, invalid) |
 | 34 | Group members, Coming up, group chips and toggle chips | A group's members and its next dates; a profile's groups as links; the form's Groups as toggles. | 0.5 days | Built; members and Coming up with parity (thursday, sheffield; two, three) |
 | 35 | It's been a while | Today's drifting people set apart under Recently by a hairline: the line and its who chips (`pk-drift`). | 0.25 days | Built, with parity |
-| 36 | Who chip | The design system's `who-chip` on its own (`pk-who-chip`, a button or a link), composed by `pk-who-chips` and `pk-drift-chips` ([ADR 0029](adr/0029-one-library-no-unused-components.md)). | 0.25 days | To build (ADR 0029) |
+| 36 | Who chip | The design system's `who-chip` on its own (`pk-who-chip`, a button or a link), composed by `pk-who-chips` and `pk-drift-chips` ([ADR 0029](adr/0029-one-library-no-unused-components.md)). | 0.25 days | Built, with parity (pressed, plain; as a link) |
 | 37 | Stack and cluster | The layout utilities' spacing as knobs (`pk-stack` `gap`, `pk-cluster` `justify`), so an application template writes no modifier class ([ADR 0029](adr/0029-one-library-no-unused-components.md)). | 0.25 days | Built, with parity (stack lg; cluster between, center) |
 | 38 | Term list | What goes and what stays in Delete your account: each item a bold term and its sentence (`pk-term-list`). | 0.25 days | Built, with parity |
 

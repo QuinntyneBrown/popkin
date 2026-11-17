@@ -1,22 +1,17 @@
-<span class="field__label" [id]="labelId()">{{ label() }}</span>
+<span pk-field-label [id]="labelId()">{{ label() }}</span>
 <div class="chips" role="group" [id]="fieldId()" [attr.aria-labelledby]="labelId()">
   @for (member of members(); track member.id) {
     <button
-      class="who-chip"
+      pk-who-chip
       type="button"
+      [accent]="member.accent"
+      [initials]="member.initials"
+      [photo]="member.photo"
       [attr.aria-pressed]="member.id === value()"
       [attr.aria-disabled]="disabled() ? 'true' : null"
       (click)="toggle(member.id)"
     >
-      <span
-        pk-avatar
-        size="sm"
-        aria-hidden="true"
-        [attr.data-accent]="member.accent"
-        [initials]="member.initials"
-        [photo]="member.photo"
-      ></span
-      >{{ member.name }}
+      {{ member.name }}
     </button>
   }
 </div>

@@ -150,6 +150,7 @@ export * from './lib/board-column/board-column';
 export * from './lib/story-card/story-card';
 export * from './lib/points-picker/points-picker';
 export * from './lib/tag-picker/tag-picker';
+export * from './lib/who-chip/who-chip';
 export * from './lib/who-chips/who-chips';
 export * from './lib/leave-row/leave-row';
 export * from './lib/hours-row/hours-row';
