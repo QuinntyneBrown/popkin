@@ -1,15 +1,22 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, catchError, debounceTime, map, of, switchMap } from 'rxjs';
 import {
   AdminNotificationHold,
   AdminNotificationHolds,
   AdminNotificationKind,
   AdminNotifications,
   AdminSendStatus,
+  HoldPopkinMatch,
 } from '../../../models/admin';
 import { ADMIN_PLATFORM_API } from './admin-platform-api';
+import { holdSearchNotes } from './holds-text';
 
 /** How often the page reads the status and the counts again (the admin app polls; ADR 0015). */
 export const NOTIFICATIONS_POLL_MS = 60_000;
+
+/** How long typing rests before "Hold a Popkin" searches. */
+export const HOLD_SEARCH_DELAY_MS = 300;
 
 /**
  * The Notifications page (docs/detailed-designs/admin-platform/notifications). One per page: it
@@ -32,9 +39,41 @@ export class AdminNotificationsStore {
   readonly holdsStatus = signal<'idle' | 'loading' | 'ready' | 'failed'>('idle');
   readonly holds = signal<AdminNotificationHolds | null>(null);
 
+  /** "Hold a Popkin"'s search: the text, the matches, and the text they answer (L2-172 AC2). */
+  readonly holdSearch = signal('');
+  readonly holdMatches = signal<HoldPopkinMatch[]>([]);
+  private readonly holdAnswered = signal('');
+  readonly holdNotes = computed(() =>
+    holdSearchNotes(this.holdAnswered(), this.holdMatches().length),
+  );
+  private readonly searches = new Subject<string>();
+
   constructor() {
     const poll = setInterval(() => this.refresh(), NOTIFICATIONS_POLL_MS);
-    inject(DestroyRef).onDestroy(() => clearInterval(poll));
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => clearInterval(poll));
+    // A newer text cancels the search before it; a failed search finds nothing.
+    this.searches
+      .pipe(
+        debounceTime(HOLD_SEARCH_DELAY_MS),
+        switchMap((text) =>
+          this.api.searchHoldPopkins(text.trim()).pipe(
+            catchError(() => of<HoldPopkinMatch[]>([])),
+            map((found) => ({ text, found })),
+          ),
+        ),
+        takeUntilDestroyed(destroyRef),
+      )
+      .subscribe(({ text, found }) => {
+        this.holdAnswered.set(text);
+        this.holdMatches.set(found);
+      });
+  }
+
+  /** Searches active Popkins not held, by name or code, once typing rests (L2-172 AC2). */
+  searchHolds(text: string): void {
+    this.holdSearch.set(text);
+    this.searches.next(text);
   }
 
   /** Reads the page, showing it loading; "Try again" calls it too. */

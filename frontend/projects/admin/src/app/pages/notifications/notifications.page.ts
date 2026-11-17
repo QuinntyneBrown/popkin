@@ -6,6 +6,7 @@ import {
   effect,
   inject,
   input,
+  signal,
   untracked,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
@@ -22,7 +23,9 @@ import {
   PopkinColour,
   accentOf,
   heldNote,
+  heldToast,
   holdBy,
+  holdDialog,
   holdLine,
   holdName,
   holdUntil,
@@ -54,6 +57,10 @@ import {
   PageHead,
   PageTabs,
   Panel,
+  PickList,
+  PickListOption,
+  Popover,
+  SearchField,
   SegmentedControl,
   SegmentedOption,
   SendStatus,
@@ -99,7 +106,10 @@ const PERSON_ACCENTS = ['coral', 'teal', 'plum', 'amber', 'sky', 'berry'];
     PageHead,
     PageTabs,
     Panel,
+    PickList,
+    Popover,
     RouterLink,
+    SearchField,
     SegmentedControl,
     SendStatus,
   ],
@@ -133,6 +143,19 @@ export class NotificationsPage {
     const people = holds.filter((h) => h.person);
     return [{ rows: holds.map((hold) => this.holdRow(hold, people.indexOf(hold))) }];
   });
+
+  /** Whether "Hold a Popkin"'s popover is open (L2-172 AC2). */
+  protected readonly adding = signal(false);
+
+  protected readonly holdOptions = computed<PickListOption[]>(() =>
+    this.store.holdMatches().map((m) => ({
+      id: m.popkinId,
+      name: m.name,
+      emoji: m.emoji,
+      accent: accentOf(m.colour as PopkinColour),
+      detail: m.inviteCode,
+    })),
+  );
 
   protected readonly heldNote = computed(() =>
     heldNote(this.store.holds()?.suppressedAddresses ?? null),
@@ -200,6 +223,29 @@ export class NotificationsPage {
       if (this.current() === 'holds' && untracked(this.store.holdsStatus) === 'idle') {
         untracked(() => this.store.loadHolds());
       }
+    });
+  }
+
+  /** Opens "Hold a Popkin" with every Popkin that can be held, or closes it. */
+  protected toggleAdding(): void {
+    const open = !this.adding();
+    this.adding.set(open);
+    if (open) this.store.searchHolds('');
+  }
+
+  /** A match picked: "Hold {Popkin}?" with a reason (L2-172 AC2, L2-087 AC1). */
+  protected pickHold(popkinId: string | null): void {
+    const match = this.store.holdMatches().find((m) => m.popkinId === popkinId);
+    if (!match) return;
+    this.adding.set(false);
+    this.ask<AdminNotificationHold>({
+      text: holdDialog(match.name),
+      danger: false,
+      send: (reason) => this.api.holdPopkin(match.popkinId, reason),
+    }).subscribe((hold) => {
+      if (!hold) return;
+      this.store.holdAdded(hold);
+      this.toaster.show('success', ...heldToast(match.name));
     });
   }
 

@@ -20,14 +20,21 @@ import { Icon } from '../icon/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './search-field.html',
   styleUrl: './search-field.scss',
-  host: { class: 'search', '[class.search--toolbar]': "variant() === 'toolbar'" },
+  host: {
+    class: 'search',
+    '[class.search--toolbar]': "variant() === 'toolbar'",
+    '[class.search--popover]': "variant() === 'popover'",
+  },
 })
 export class SearchField {
   /** The accessible name of the field and its placeholder. */
   readonly label = input.required<string>();
   readonly value = model('');
-  /** `toolbar` is the larger pill that grows to fill a toolbar's line. */
-  readonly variant = input<'default' | 'toolbar'>('default');
+  /**
+   * `toolbar` is the larger pill that grows to fill a toolbar's line; `popover` the small, quiet
+   * field at the top of a popover, as "Name or code" in "Hold a Popkin".
+   */
+  readonly variant = input<'default' | 'toolbar' | 'popover'>('default');
 
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field');
 

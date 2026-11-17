@@ -361,19 +361,20 @@ export const mockHolds = (): MockHolds => ({
 });
 
 /** The active Popkins not held, as `hold-adding.html` lists them. */
-export const mockHoldMatches = (): MockHoldMatch[] => [
-  ['popkin-bakery', 'Bakery Launch Crew', '🥐', 'Amber', 'CRMB-0093'],
-  ['popkin-brunch', 'Sunday Brunch Club', '🥞', 'Coral', 'SYRP-7710'],
-  ['popkin-lakeside', 'Lakeside Weekend', '🏕️', 'Teal', 'PINE-4821'],
-  ['popkin-owl', 'Hackathon Team Owl', '🦉', 'Sky', 'OWLS-2201'],
-  ['popkin-hornets', 'U10 Hornets Parents', '⚽', 'Leaf', 'HRNT-0410'],
-].map(([popkinId, name, emoji, colour, inviteCode]) => ({
-  popkinId,
-  name,
-  emoji,
-  colour,
-  inviteCode,
-}));
+export const mockHoldMatches = (): MockHoldMatch[] =>
+  [
+    ['popkin-bakery', 'Bakery Launch Crew', '🥐', 'Amber', 'CRMB-0093'],
+    ['popkin-brunch', 'Sunday Brunch Club', '🥞', 'Coral', 'SYRP-7710'],
+    ['popkin-lakeside', 'Lakeside Weekend', '🏕️', 'Teal', 'PINE-4821'],
+    ['popkin-owl', 'Hackathon Team Owl', '🦉', 'Sky', 'OWLS-2201'],
+    ['popkin-hornets', 'U10 Hornets Parents', '⚽', 'Leaf', 'HRNT-0410'],
+  ].map(([popkinId, name, emoji, colour, inviteCode]) => ({
+    popkinId,
+    name,
+    emoji,
+    colour,
+    inviteCode,
+  }));
 
 const gracePhoto = path.join(__dirname, '../../docs/mocks/assets/images/contact-grace.jpg');
 
@@ -400,4 +401,53 @@ export async function theMockHolds(
     return route.fulfill({ json: found });
   });
   return { notifications, holds };
+}
+
+/**
+ * Answers holding a Popkin and releasing a hold as the API would, changing `holds` and the tab's
+ * count so the page's next read agrees, and records each body. Lena Fischer holds at noon.
+ */
+export async function savesHolds(
+  page: Page,
+  { notifications, holds }: { notifications: MockNotifications; holds: MockHolds },
+): Promise<NotificationWrite[]> {
+  const writes: NotificationWrite[] = [];
+  await page.route('**/api/admin/notifications/holds', (route) => {
+    const request = route.request();
+    if (request.method() !== 'POST') return route.fallback();
+    const body = request.postDataJSON() as { popkinId: string; reason: string };
+    writes.push({ method: 'POST', path: new URL(request.url()).pathname, body });
+    const match = mockHoldMatches().find((m) => m.popkinId === body.popkinId)!;
+    const hold: MockHold = {
+      id: `hold-${match.popkinId}`,
+      target: 'Popkin',
+      automatic: false,
+      popkin: {
+        id: match.popkinId,
+        name: match.name,
+        emoji: match.emoji,
+        colour: match.colour,
+        members: 12,
+        inviteCode: match.inviteCode,
+      },
+      person: null,
+      why: body.reason,
+      byName: 'Lena Fischer',
+      since: new Date(2026, 6, 14, 12, 0).toISOString(),
+      until: 'UntilReleased',
+    };
+    holds.holds.unshift(hold);
+    notifications.holdCount += 1;
+    return route.fulfill({ status: 201, json: hold });
+  });
+  await page.route('**/api/admin/notifications/holds/*/release', (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    writes.push({ method: 'POST', path, body: request.postDataJSON() });
+    const id = path.split('/').at(-2);
+    holds.holds = holds.holds.filter((h) => h.id !== id);
+    notifications.holdCount -= 1;
+    return route.fulfill({ status: 200, body: '' });
+  });
+  return writes;
 }

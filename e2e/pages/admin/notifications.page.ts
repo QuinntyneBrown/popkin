@@ -74,6 +74,11 @@ export class NotificationsPage {
   readonly holdRows: Locator;
   readonly holdAPopkin: Locator;
   readonly heldNote: Locator;
+  /** "Hold a Popkin"'s popover: the search, its matches and its notes (L2-172 AC2). */
+  readonly holdPopover: Locator;
+  readonly holdSearch: Locator;
+  readonly holdMatches: Locator;
+  readonly holdNotes: Locator;
   /** Regions for the sweeps and the parity specs. */
   readonly pageHead: Locator;
   readonly pageTabs: Locator;
@@ -95,13 +100,18 @@ export class NotificationsPage {
     this.empty = page.locator('.panel .empty');
     this.tryAgain = page.getByRole('button', { name: 'Try again' });
     this.toast = page.locator('.toast');
+    // By its title's class, not its role, so it is found under an open dialog too.
     this.held = page.locator('.panel').filter({
-      has: page.getByRole('heading', { name: 'Held', exact: true }),
+      has: page.locator('.panel__title', { hasText: /^Held$/ }),
     });
     this.heldSub = this.held.locator('.panel__sub');
     this.holdRows = this.held.locator('.data-table tbody tr');
     this.holdAPopkin = this.held.getByRole('button', { name: 'Hold a Popkin' });
     this.heldNote = page.locator('.panel__aside-note');
+    this.holdPopover = page.getByRole('dialog', { name: 'Hold a Popkin' });
+    this.holdSearch = this.holdPopover.getByRole('searchbox', { name: 'Name or code' });
+    this.holdMatches = this.holdPopover.getByRole('option');
+    this.holdNotes = this.holdPopover.locator('.pick-list__note');
     this.pageHead = page.locator('.page-head');
     this.pageTabs = page.locator('.page-tabs');
     this.panel = page.locator('.panel').first();
@@ -109,6 +119,10 @@ export class NotificationsPage {
 
   tab(name: 'Kinds' | 'Holds' | 'Defaults'): Locator {
     return this.tabs.getByRole('tab', { name: new RegExp(`^${name}`) });
+  }
+
+  holdMatch(name: string): Locator {
+    return this.holdMatches.filter({ hasText: name });
   }
 
   hold(name: string): NotificationHoldRow {

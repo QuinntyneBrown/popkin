@@ -1,13 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AdminNotificationHold,
   AdminNotificationKind,
   AdminNotifications,
+  HoldPopkinMatch,
 } from '../../../models/admin';
 import { ADMIN_PLATFORM_API } from './admin-platform-api';
-import { AdminNotificationsStore, NOTIFICATIONS_POLL_MS } from './admin-notifications.store';
+import {
+  AdminNotificationsStore,
+  HOLD_SEARCH_DELAY_MS,
+  NOTIFICATIONS_POLL_MS,
+} from './admin-notifications.store';
 
 const kind = (
   name: string,
@@ -68,6 +73,7 @@ const hold = (id: string | null, name: string): AdminNotificationHold => ({
 describe('AdminNotificationsStore', () => {
   const notifications = vi.fn();
   const notificationHolds = vi.fn();
+  const searchHoldPopkins = vi.fn();
   let store: AdminNotificationsStore;
 
   beforeEach(() => {
@@ -79,7 +85,10 @@ describe('AdminNotificationsStore', () => {
     TestBed.configureTestingModule({
       providers: [
         AdminNotificationsStore,
-        { provide: ADMIN_PLATFORM_API, useValue: { notifications, notificationHolds } },
+        {
+          provide: ADMIN_PLATFORM_API,
+          useValue: { notifications, notificationHolds, searchHoldPopkins },
+        },
       ],
     });
     store = TestBed.inject(AdminNotificationsStore);
@@ -90,6 +99,7 @@ describe('AdminNotificationsStore', () => {
     vi.useRealTimers();
     notifications.mockReset();
     notificationHolds.mockReset();
+    searchHoldPopkins.mockReset();
   });
 
   it('reads the page and counts the kinds and holds, and fails when it cannot (L2-169 AC1)', () => {
@@ -162,5 +172,44 @@ describe('AdminNotificationsStore', () => {
     store.holdReleased('h1');
     expect(store.holds()?.holds.map((h) => h.id)).toEqual(['h2', null]);
     expect(store.holdCount()).toBe(4);
+  });
+
+  const match = (name: string): HoldPopkinMatch => ({
+    popkinId: name,
+    name,
+    emoji: '🥐',
+    colour: 'Amber',
+    inviteCode: 'CRMB-0093',
+  });
+
+  it('searches once typing rests, the newer text winning (L2-172 AC2)', () => {
+    const slow = new Subject<HoldPopkinMatch[]>();
+    searchHoldPopkins.mockImplementation((text: string) =>
+      text === 'bak' ? slow : of([match('Bakery Launch Crew')]),
+    );
+    store.searchHolds('b');
+    store.searchHolds('ba');
+    vi.advanceTimersByTime(HOLD_SEARCH_DELAY_MS - 1);
+    expect(searchHoldPopkins).not.toHaveBeenCalled();
+    store.searchHolds('bak');
+    vi.advanceTimersByTime(HOLD_SEARCH_DELAY_MS);
+    expect(searchHoldPopkins).toHaveBeenCalledTimes(1);
+
+    store.searchHolds(' bake ');
+    vi.advanceTimersByTime(HOLD_SEARCH_DELAY_MS);
+    slow.next([match('Stale')]);
+    expect(searchHoldPopkins).toHaveBeenLastCalledWith('bake');
+    expect(store.holdMatches().map((m) => m.name)).toEqual(['Bakery Launch Crew']);
+    expect(store.holdNotes()).toEqual([]);
+  });
+
+  it('says when nothing matches, and finds nothing when the search fails', () => {
+    searchHoldPopkins.mockReturnValue(throwError(() => new Error('down')));
+    store.searchHolds('zzz');
+    vi.advanceTimersByTime(HOLD_SEARCH_DELAY_MS);
+    expect(store.holdMatches()).toEqual([]);
+    expect(store.holdNotes()).toEqual([
+      'No active Popkin matches “zzz”. Wrapped-up and held Popkins aren’t listed.',
+    ]);
   });
 });

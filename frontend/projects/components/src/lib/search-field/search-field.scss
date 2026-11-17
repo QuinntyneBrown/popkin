@@ -49,3 +49,11 @@
   border-color: var(--color-border-default);
   font-size: var(--font-size-md-plus);
 }
+
+:host(.search--popover) .input {
+  height: var(--control-height-sm);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  font-size: var(--font-size-sm);
+}
