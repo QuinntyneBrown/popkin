@@ -109,8 +109,9 @@ Messages, `docs/mocks/notifications/contacts-toast/`:
   Popkins as the safe answer, ADR 0023) and toasts that wait are built first. `ContactsOutbox`
   comes with the first write (Add someone), the loading and failure states with the first page
   that reads its own data (People), and the Follow-ups badge with Follow-ups.
-- **Time zone.** The device day is the day the person sees. The Worker's reminders need the
-  owner's time zone, which is open (known gap 104).
+- **Time zone.** The device day is the day the person sees. Each Contacts page that opens saves
+  the device's zone, and the Worker's reminders come at 9 am there
+  ([Reminders](../reminders/README.md), known gap 104 ruled).
 
 ### API
 

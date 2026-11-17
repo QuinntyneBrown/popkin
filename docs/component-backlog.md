@@ -33,9 +33,9 @@ Popkin uses no custom tooltips.
 | 21 | Connection map | Draws who knows whom: your people as faces linked by relationship; `pk-connection-panel` beside it. | 2 days || Built, with parity (none, focus, family; the panel's hint and chosen) |
 | 22 | Contacts page and grid | The layout every Contacts section uses inside the Popkin shell; `narrow` is one column at the narrow container (Follow-ups, Habits). | 0.5 days | Built; list head with parity |
 | 23 | Filter chips | Pressed-button filters with counts, such as the circles on People; `pk-choice-chips` is a radio group. | 0.25 days | Built, with parity |
-| 24 | List row | The design system's `list-row`, not built yet, for rows on Today and in groups. | To estimate | |
-| 25 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today. | To estimate | |
-| 26 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins. | 0.5 days | Built ungrouped for Add people, with parity (ticked); the groups and "Show {n} more" come with Import |
+| 24 | List row | The design system's `list-row` on Today: `pk-today-dates` (Coming up) and `pk-recent-list` (Recently). | 0.5 days | Built, with parity (coming up; recently at 1280) |
+| 25 | Who chip as a link | A link form of `pk-who-chips`, for "It's been a while" on Today: `pk-drift-chips`. | 0.25 days | Built, with parity |
+| 26 | Tick list | A list of people to tick, grouped, with "Show {n} more", for Import from your Popkins. | 0.5 days | Built, with parity: ungrouped for Add people (ticked), and grouped with "Show {n} more" as `pk-tick-group` for Import (ticked, nobody) |
 | 27 | Back link | The page head's `page-head__back` on its own, beside a profile's actions ("People"). | 0.25 days | Built, with parity |
 | 28 | Date list | Dates' rows: the date tile, the faces, the title, its line and "in {n} days". | 0.5 days | Built, with parity |
 | 29 | Key dates | A profile's dates with their reminders. | 0.25 days | Built, with parity |

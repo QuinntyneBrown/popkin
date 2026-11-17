@@ -43,3 +43,4 @@ shares. Records 0009 to 0013 come from the audit
 Each record has the sections Status, Context, Decision and Consequences, in that order, and is
 named `NNNN-short-title.md`.
 | [0027](0027-parity-specs-run-by-hand.md) | The component parity specs run by hand with `npm run parity`; CI runs the behaviour specs only | Accepted |
+| [0028](0028-phone-reminders-by-web-push.md) | Phone reminders are sent by Web Push, signed with VAPID by the Worker | Accepted |
