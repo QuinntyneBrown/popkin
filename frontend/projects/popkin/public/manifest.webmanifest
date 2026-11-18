@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "Popkin",
+  "short_name": "Popkin",
+  "description": "A platform for pop-up communities.",
+  "start_url": "/popkins",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#ea7671",
+  "background_color": "#ffffff",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add someone",
+      "url": "/contacts/quick-add",
+      "icons": [{ "src": "/icons/shortcut-add-someone.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Contacts",
+      "url": "/contacts",
+      "icons": [{ "src": "/icons/shortcut-contacts.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ]
+}

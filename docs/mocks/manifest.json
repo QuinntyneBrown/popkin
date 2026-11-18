@@ -490,13 +490,15 @@
       "kind": "page",
       "title": "App shortcuts",
       "route": "(the phone’s home screen)",
-      "requirements": [],
+      "requirements": [
+        "L2-177"
+      ],
       "states": [
         "default"
       ],
       "not_applicable": {
         "loading": "The phone draws the menu from the web app manifest; Popkin loads nothing.",
-        "empty": "The manifest always lists the same three shortcuts.",
+        "empty": "The manifest always lists the same two shortcuts.",
         "error": "The phone draws the menu; nothing Popkin loads can fail."
       },
       "notes": "From the Magic Patterns “Quick Add” design (Home Screen, long-press). Its home-screen widget is left out: a web app cannot add one."
@@ -506,17 +508,21 @@
       "kind": "page",
       "title": "Quick add",
       "route": "/contacts/quick-add",
-      "requirements": [],
+      "requirements": [
+        "L2-177",
+        "L2-178",
+        "L2-179"
+      ],
       "states": [
         "default",
         "filled",
-        "invalid",
         "submitting",
         "error"
       ],
       "not_applicable": {
         "loading": "The screen needs no request before it shows: it starts blank.",
-        "empty": "The screen is a form; it has no collection that can be empty."
+        "empty": "The screen is a form; it has no collection that can be empty.",
+        "invalid": "“Save” stays off until a name is typed (L2-178 AC2), so nothing can be sent invalid."
       },
       "notes": "From the Magic Patterns “Quick Add” design. Only a name is needed; the rest of Add someone (L2-129) can follow."
     },
@@ -525,7 +531,10 @@
       "kind": "page",
       "title": "Added to Contacts",
       "route": "/contacts/people/:id/added",
-      "requirements": [],
+      "requirements": [
+        "L2-180",
+        "L2-181"
+      ],
       "states": [
         "default",
         "another"

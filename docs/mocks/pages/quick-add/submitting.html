@@ -7,8 +7,8 @@
 <meta name="mock:kind" content="page">
 <meta name="mock:screen" content="quick-add">
 <meta name="mock:state" content="submitting">
-<meta name="mock:requirements" content="">
-<meta name="description" content="Add someone with only a name: phone, how you know them and a circle are optional.">
+<meta name="mock:requirements" content="L2-177 L2-178 L2-179">
+<meta name="description" content="Add someone with only a name: phone, who they are and a circle are optional.">
 <link rel="stylesheet" href="../../../design-system/tokens/tokens.css">
 <link rel="stylesheet" href="../../../design-system/assets/components.css">
 <link rel="stylesheet" href="../../assets/mock.css">
@@ -16,9 +16,9 @@
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="screen"><header class="topbar topbar--line topbar--sticky"><a class="icon-btn" href="../../pages/contacts-today/default.html" aria-label="Cancel" title="Cancel"><svg class="icon icon--md" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></a><div class="topbar__titles"><h1 class="topbar__title truncate">Add someone</h1></div><div class="topbar__end" style="padding-right: var(--space-2);"><button class="btn btn--primary btn--sm" type="submit" form="form" disabled aria-disabled="true" aria-busy="true">Saving…</button></div></header><main id="main" class="screen__body"><div class="container container--narrow stack"><form class="stack" id="form" novalidate aria-busy="true">
-<div class="cluster" style="flex-wrap: nowrap; align-items: flex-start; gap: var(--space-4);"><button class="avatar avatar--xl avatar--blank" type="button" aria-label="Add a photo" style="border: 0; padding: 0;" disabled><svg class="icon icon--md" aria-hidden="true" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></button><div class="grow"><div class="field"><label class="visually-hidden" for="name">Name</label><input class="input input--display" id="name" type="text" value="Femi Bankole" placeholder="Their name" autocomplete="off" enterkeyhint="next" disabled></div></div></div>
-<div class="field"><label class="field__label" for="phone">Phone <span class="optional">Optional</span></label><input class="input" id="phone" type="tel" inputmode="tel" autocomplete="off" value="+44 7700 900631" placeholder="+44" enterkeyhint="next" disabled></div>
-<div class="field"><label class="field__label" for="relation">How you know them <span class="optional">Optional</span></label><input class="input" id="relation" type="text" value="Grace’s fiancé" placeholder="Sister, neighbour, old boss…" enterkeyhint="done" disabled></div>
+<div class="cluster" style="flex-wrap: nowrap; align-items: flex-start; gap: var(--space-4);"><button class="avatar avatar--xl avatar--blank" type="button" aria-label="Add a photo" style="border: 0; padding: 0;" disabled><svg class="icon icon--md" aria-hidden="true" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></button><div class="grow"><div class="field"><label class="visually-hidden" for="name">Name</label><input class="input input--display" id="name" type="text" value="Femi Bankole" placeholder="Their name" autocomplete="off" enterkeyhint="done" disabled></div></div></div>
+<div class="field"><label class="field__label" for="phone">Phone <span class="optional">Optional</span></label><input class="input" id="phone" type="tel" inputmode="tel" autocomplete="off" value="+44 7700 900631" enterkeyhint="done" disabled></div>
+<div class="field"><label class="field__label" for="relation">Who are they? <span class="optional">Optional</span></label><input class="input" id="relation" type="text" value="Grace’s fiancé" placeholder="Neighbour, Grace’s fiancé…" enterkeyhint="done" disabled></div>
 <div><span class="field__label" id="circle-label">Circle</span><div class="chips" role="radiogroup" aria-labelledby="circle-label"><button class="chip chip--outline" type="button" role="radio" aria-checked="false">Family</button><button class="chip chip--outline" type="button" role="radio" aria-checked="true">Friends</button><button class="chip chip--outline" type="button" role="radio" aria-checked="false">Work</button><button class="chip chip--outline" type="button" role="radio" aria-checked="false">Neighbours</button><button class="chip chip--outline" type="button" role="radio" aria-checked="false">Clubs</button></div></div>
 <div><button class="text-btn text-btn--accent" type="button" style="padding-inline: 0;" disabled><svg class="icon icon--md" aria-hidden="true" viewBox="0 0 24 24"><path d="M15 13a3 3 0 1 0-6 0"/><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><circle cx="12" cy="8" r="2"/></svg>Pick from my phone’s contacts</button></div>
 </form>
@@ -26,7 +26,7 @@
 <nav class="mock-bar" aria-label="Mock navigation">
   <a class="mock-bar__home" href="../../index.html" aria-label="All mocks">⌂</a>
   <span class="mock-bar__screen">Quick add</span>
-  <ul class="mock-bar__states"><li><a href="default.html">default</a></li><li><a href="filled.html">filled</a></li><li><a href="invalid.html">invalid</a></li><li><a href="submitting.html" aria-current="page">submitting</a></li><li><a href="error.html">error</a></li></ul>
+  <ul class="mock-bar__states"><li><a href="default.html">default</a></li><li><a href="filled.html">filled</a></li><li><a href="submitting.html" aria-current="page">submitting</a></li><li><a href="error.html">error</a></li></ul>
   <button type="button" data-theme-toggle aria-pressed="false">☾ Dark</button>
   <button type="button" data-chrome-toggle aria-label="Hide mock chrome">×</button>
 </nav>

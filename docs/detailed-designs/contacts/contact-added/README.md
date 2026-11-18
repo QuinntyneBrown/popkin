@@ -37,11 +37,12 @@ Popkin web app, `docs/mocks/pages/contact-added/`, route `/contacts/people/:cont
 ### Conflicts between the mocks and L2-180
 
 The mocks were drawn before L2-180 and L2-181. The design follows the requirements, and the mocks
-change `<TO SUPPLY>`:
+changed on 17 November 2026 (known gap 158):
 
 - **The tick.** L2-180 AC1 shows the photo or initials "with a tick"; the mocks draw no tick, and
-  no component draws one on an avatar. Proposed: a `tick` input on `pk-avatar`, a library change
-  with its parity spec `<TO SUPPLY>`.
+  no component draws one on an avatar. The tick sits outside the avatar's round clip, so it is a
+  component of its own, `pk-avatar-tick` (the design system's `avatar-tick`), with its parity
+  spec.
 - **The heading.** The mocks read "Femi's in your Contacts"; L2-180 AC1 reads "{first name}'s in
   your contacts".
 - **"Done".** The mocks' notes and `docs/mocks/README.md` open People; L2-180 AC4 opens Today.
@@ -53,14 +54,14 @@ change `<TO SUPPLY>`:
   reads `GET /api/contacts/people/{contactId}` through `CONTACTS_API.contact`. A contact not the
   owner's answers `404` `contact_not_found` (L2-122 AC1), and Added shows the empty state of
   `NOT_FOUND_TEXT` ("This person isn't in your contacts") with "Go to People", as Edit does.
-  Added has no loading or failed mock: while the read is under way it shows `<TO SUPPLY>`, and a
-  failed read shows `<TO SUPPLY>`.
+  Added has no loading or failed mock: while the read is under way it shows nothing below its
+  title, and a failed read shows the empty state of `failedText(null)` with "Try again", as
+  Edit does.
 - **The count.** `QuickAddSession` lives in memory for the web app's lifetime
   (`providedIn: 'root'`). Quick Add calls `opened()` as it opens; that starts a new session at
   0 unless "Add another" opened it. Each save adds 1. Added shows the count from 2. A reload, a
   sign-out or a new visit to Quick Add from the shortcut, Today or a link starts again, so Added
-  after a reload shows no count. Keeping the count across a reload (for example in
-  `sessionStorage`) is not required `<TO SUPPLY>`.
+  after a reload shows no count. The count is not kept across a reload.
 - **The count's words.** "{n} people added today" is the spec's wording although the session may
   cross midnight; the count is the session's, not the day's.
 - **"Add another"** calls `QuickAddSession.addAnother()` and navigates to `/contacts/quick-add`.
@@ -80,14 +81,14 @@ Nothing new. A direct visit reads `ContactsPeopleController.Get` (`GET
 
 - **`ContactAddedPage`** (`app/pages/contact-added/contact-added.page.ts` and `.html`), route
   `contacts/people/:contactId/added`, `canActivate: [signedInGuard, contactsOpenGuard]`, data
-  `{ shell: 'bare', page: 'contact-added' }`, title `<TO SUPPLY>`. It composes `pk-screen`
-  (`middle`), `pk-avatar` (`size="2xl"`, the photo or initials, `data-accent`, the tick), an
+  `{ shell: 'bare', page: 'contact-added' }`, title "Added · Contacts · Popkin". It composes `pk-screen`
+  (`middle`), `pk-avatar-tick` (the `2xl` photo or initials on `data-accent`, with the tick), an
   `h1` with `tabindex="-1"` focused on open, the line and the count as text (`text-muted`,
   `text-sm`), `pk-card` as a link with `pk-icon` to `/contacts/people/{id}/edit` (L2-180 AC3),
   `pk-button` "Done" (`variant="primary"`, `block`, `routerLink="/contacts"`, L2-180 AC4) and
   `pk-button` "Add another" (`variant="ghost"`, `block`), and `pk-empty-state` for a contact not
-  found. The two-line link row of the mock (`card--row`) is not a variant of `pk-card` yet
-  `<TO SUPPLY>`.
+  found. The two-line link row of the mock (`card--row`) is `pk-card` with `icon`, `heading` and
+  `text`: an icon tile, the two lines and a chevron.
 - **`QuickAddSession`** (`frontend/projects/api/src/lib/api/contacts/quick-add-session.ts`,
   `providedIn: 'root'`) — `count: Signal<number>`, `last: Signal<ContactProfileView | null>`,
   `opened()`, `added(contact)`, `addAnother()` and `contact(contactId)`, which answers `last`
@@ -110,7 +111,7 @@ Nothing new. A direct visit reads `ContactsPeopleController.Get` (`GET
   shows "2 people added today"; "Done" opens Today; "Add a birthday, how you met…" opens Edit
   for the contact; a direct visit reads the contact and shows no count. `routes.ts` keys
   `contact-added` default and another.
-- Parity: `pk-avatar` with its tick, and the link row of `pk-card` once supplied.
+- Parity: `pk-avatar-tick`, and the link row of `pk-card`.
 
 ## Requirements
 

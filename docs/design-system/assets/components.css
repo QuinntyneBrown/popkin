@@ -242,6 +242,9 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .avatar--2xl { width: var(--space-32); height: var(--space-32); font-size: var(--font-size-6xl); }
 .avatar--ring { box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-canvas); }
 .avatar--blank { background: var(--color-bg-subtle); color: var(--color-fg-subtle); }
+.avatar-tick { position: relative; display: inline-flex; flex: none; }
+.avatar-tick__mark { position: absolute; right: 0; bottom: 0; display: inline-grid; place-items: center; width: var(--space-10); height: var(--space-10); border-radius: var(--radius-full); background: var(--color-success-solid); color: var(--color-fg-on-success); box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-canvas); }
+.avatar-tick__mark .icon { stroke-width: 3; }
 .avatar-stack { display: inline-flex; align-items: center; }
 .avatar-stack > * + * { margin-left: calc(-1 * var(--space-2)); }
 .avatar-stack__more { display: inline-grid; place-items: center; height: var(--space-8); min-width: var(--space-8); padding: 0 var(--space-1); border-radius: var(--radius-full); background: var(--color-bg-subtle); color: var(--color-fg-muted); font: var(--font-weight-extrabold) var(--font-size-xs) / 1 var(--font-family-display); box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-canvas); }
