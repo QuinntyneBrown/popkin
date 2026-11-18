@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Delete a day
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Adder or Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "DeleteDayDialog" as dialog
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "DeleteDayCommandHandler" as handler
+  participant "IDayGuard" as access
+  participant "ImportantDayRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+dialog --> actor : "Delete {title}?", "It goes, with its reminder. Ava and Leo aren't told." or "It goes for all 6 members of Holiday Crew, with its reminder. Priya isn't told." (L2-193 AC2)
+alt "Cancel" or "Close"
+  actor -> dialog : "Cancel"
+  dialog --> actor : Closed; nothing changes
+else "Delete"
+  actor -> dialog : "Delete"
+  dialog --> actor : "Deleting…", buttons locked
+  dialog -> client : remove(dayId)
+  client -> ctrl : DELETE /api/days/{dayId}
+  ctrl -> handler : Send DeleteDayCommand
+  handler -> access : RequireDeletableAsync(dayId)
+  access --> handler : Day and isHost, or 404 day_not_found, 404 popkin_not_found, 409 popkin_wrapped_up
+  handler -> rules : CanDelete(day, person, isHost)
+  rules --> handler : Adder, or the Host on a Popkin's day; otherwise 403 day_not_yours (L2-193 AC3)
+  handler -> db : Days inside: clear WithinDayId (they become days of their own, L2-193 AC2)
+  handler -> db : Remove the day and its ImportantDayPerson rows; save once
+  db --> handler : Committed
+  opt A Popkin's day
+    handler -> hub : await ScheduleChanged(popkinId)
+  end
+  handler --> ctrl : Done
+  ctrl --> client : 204
+  alt Deleted, or 404 day_not_found on a retry
+    client --> dialog : Deleted
+    dialog --> actor : Closes; the screen reads its days again; nobody is told (L2-195 AC3)
+  else Fails
+    client --> dialog : Error
+    dialog --> actor : "We couldn't delete {title}. Nothing changed. Check your connection and try again." (L2-194 AC3)
+  end
+end
+@enduml

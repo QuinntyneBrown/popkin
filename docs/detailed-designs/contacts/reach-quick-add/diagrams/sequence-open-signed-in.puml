@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — The shortcut opens Quick Add signed in
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+participant "Phone" as phone
+box "Frontend — Popkin web app" #E0F2FE
+  participant "manifest.webmanifest" as manifest
+  participant "signedInGuard" as guard
+  participant "contactsOpenGuard" as open
+  participant "QuickAddPage" as page
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Session and Contacts endpoints" as api
+end box
+phone -> manifest : Read when Popkin is added to the home screen (gap 146)
+manifest --> phone : shortcuts "Add someone", "Contacts"
+actor -> phone : Long-press Popkin's icon
+phone --> actor : "Add someone" and "Contacts" (L2-177 AC1)
+alt "Contacts"
+  actor -> phone : "Contacts"
+  phone -> open : Open /contacts
+  open --> actor : Today (L2-125)
+else "Add someone"
+  actor -> phone : "Add someone"
+  phone -> guard : Open /contacts/quick-add
+  guard -> api : GET /api/auth/session
+  api --> guard : Signed in
+  guard -> open : Next guard
+  open -> api : GET /api/contacts/summary
+  api --> open : Contacts is on
+  open -> page : Load QuickAddPage
+  page -> page : Focus the name field, keyboard up (L2-177 AC2)
+  page --> actor : "Add someone", "Their name" focused
+end
+@enduml

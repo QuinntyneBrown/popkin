@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Added and add another
+
+Person(owner, "Person", "Keeps their own Contacts; the only one who sees them")
+System(popkin, "Popkin", "Platform for pop-up communities, with Contacts")
+
+Rel(owner, popkin, "Sees Added and adds the next person in", "HTTPS")
+@enduml

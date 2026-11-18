@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — Filter Important days
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ImportantDaysPage" as page
+  participant "ImportantDaysStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetImportantDaysQueryHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "IFeatureSwitches" as switches
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Just mine" or "🎄 Holiday Crew"
+page -> store : choose(show)
+store --> page : Chip pressed; rows kept until the answer
+store -> client : list(on, show)
+client -> ctrl : GET /api/days?on=2025-12-01&show={mine or popkinId}
+ctrl -> handler : Send GetImportantDaysQuery(Show)
+opt show is a Popkin
+  handler -> guard : RequireMemberAsync(popkinId)
+  guard --> handler : Member, or 404 popkin_not_found
+  handler -> switches : IsOn(Schedules, popkinId)
+  switches --> handler : On, or 404 popkin_not_found
+end
+handler -> db : Readable days and observed holidays
+db --> handler : Rows
+handler --> ctrl : Rows of that calendar; thisWeek and chips over everything
+ctrl --> client : 200
+alt Just mine
+  store --> page : Own days only (L2-184 AC2)
+else A Popkin
+  store --> page : That Popkin's days and its holidays only (L2-184 AC2)
+else Refused or failed
+  store --> page : failed
+  page --> actor : "Couldn't load your days" and "Try again" (L2-194 AC2)
+end
+page --> actor : "Mon, Dec 1 · 2 things this week" unchanged
+@enduml

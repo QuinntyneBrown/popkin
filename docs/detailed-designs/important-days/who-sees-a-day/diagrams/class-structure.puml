@@ -1,0 +1,80 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Who sees a day
+
+package "Popkin.Domain" {
+  class ImportantDay {
+    +Guid Id
+    +Guid AddedByPersonId
+    +Guid? PopkinId
+    +string Title
+  }
+  class ImportantDayPerson {
+    +Guid DayId
+    +Guid ContactId
+  }
+  class Contact {
+    +Guid Id
+    +Guid OwnerId
+    +Guid? PersonId
+  }
+  class Membership {
+    +Guid PopkinId
+    +Guid PersonId
+    +MembershipRole Role
+    +DateTimeOffset? LeftAt
+  }
+  class PopkinSpace {
+    +Guid Id
+    +Guid HostPersonId
+  }
+}
+package "Popkin.Application" {
+  interface ICurrentPerson {
+    +Guid PersonId
+  }
+  interface IMembershipGuard {
+    +RequireMemberAsync(popkinId: Guid): Task<(PopkinSpace, Membership)>
+  }
+  interface IFeatureSwitches {
+    +IsOn(feature: Feature, popkinId: Guid): bool
+  }
+  class DayVisibility {
+    +ReadableAsync(personId: Guid): Task<IQueryable<ImportantDay>>
+  }
+  interface IDayGuard {
+    +RequireReadableAsync(dayId: Guid): Task<ImportantDay>
+    +RequireChangeableAsync(dayId: Guid): Task<ImportantDay>
+    +RequireDeletableAsync(dayId: Guid): Task<ImportantDay>
+  }
+  class DayGuard {
+    +{static} NotFound(): ProblemException
+    +{static} NotYours(): ProblemException
+  }
+  class DayPeople <<static>> {
+    +{static} ShownTo(day: ImportantDay, people: DayPersonDto[], personId: Guid): DayPersonDto[]
+  }
+}
+ImportantDayPerson "*" --> "1" ImportantDay : about
+ImportantDayPerson "*" --> "1" Contact : the adder's own
+ImportantDay "*" --> "0..1" PopkinSpace : on
+Membership "*" --> "1" PopkinSpace
+DayGuard ..|> IDayGuard
+DayGuard ..> ICurrentPerson
+DayGuard ..> IMembershipGuard : Popkin's day
+DayGuard ..> ImportantDay : loads
+DayVisibility ..> ICurrentPerson
+DayVisibility ..> Membership : LeftAt null
+DayVisibility ..> IFeatureSwitches : Schedules on
+DayVisibility ..> ImportantDay : filters
+DayPeople ..> ImportantDay : adder only
+@enduml

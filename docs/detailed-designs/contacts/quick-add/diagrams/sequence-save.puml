@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — The owner saves someone in Quick Add
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "QuickAddPage" as page
+  participant "QuickAddStore" as store
+  participant "QuickAddSession" as session
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddContactCommandHandler" as handler
+  participant "SaveContactValidator" as validator
+  participant "Contact" as entity
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  participant "IPhotoStore" as photos
+  database "Popkin database" as db
+end box
+page --> actor : "Add someone", "Friends" chosen, name focused (L2-178 AC1)
+page -> store : canSave
+store --> page : false: "Save" switched off (L2-178 AC2)
+actor -> page : Type "Femi Bello", phone, "Who are they?", a circle
+page -> store : Values changed
+store --> page : canSave true
+actor -> page : "Save", or Enter in a field (L2-178 AC3)
+page -> store : save()
+store --> page : saving: "Saving…", fields locked (L2-123 AC5)
+store -> client : addContact(request with clientId, name trimmed, photo)
+client -> ctrl : POST /api/contacts/people (contact, photo)
+ctrl -> handler : Send AddContactCommand
+handler -> db : Contact with this clientId?
+db --> handler : None
+handler -> validator : Validate(request)
+validator --> handler : Trimmed name, details
+opt Photo picked
+  handler -> photos : SaveAsync(contacts/{key})
+end
+handler -> entity : Contact.Create(owner, clientId, name, details)
+handler -> db : Save once
+db --> handler : Committed
+handler --> ctrl : ContactProfileDto
+ctrl --> client : 201 with Location
+client --> store : ContactProfileView
+store -> session : added(contact)
+store --> page : saved
+page --> actor : Added at /contacts/people/{id}/added (L2-178 AC4)
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — The Important days list
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "ImportantDaysPage", "Angular page", "pk-filter-chips, pk-day-list, pk-day-row, pk-month-calendar, pk-days-layout")
+  Component(store, "ImportantDaysStore", "api library", "loading | ready | empty | failed; show; months; chosen date")
+  Component(month, "day-month.ts", "api library", "Weeks from Monday, dots, bands, labels")
+  Component(text, "days-text.ts", "api library", "this week, months, how soon, Only you, Holiday")
+  Component(client, "DAYS_API", "api library contract", "HttpDaysApi.list(on, show)")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "DaysController", "ASP.NET Core controller", "GET /api/days?on=&show=")
+  Component(handler, "GetImportantDaysQueryHandler", "MediatR handler", "Rows, nesting, this week, filter")
+  Component(visibility, "DayVisibility", "Application service", "Readable days of the caller")
+  Component(holidays, "ObservedHolidays", "Application service", "Published holidays of the caller's Popkins")
+  Component(guard, "IMembershipGuard", "Application service", "404 popkin_not_found for show of another Popkin")
+  Component(rules, "ImportantDayRules", "Domain rules", "Occurrence, HowSoon, ThisWeek, Nest")
+  ComponentDb(db, "Popkin database", "SQL Server", "Days, people, memberships, holidays")
+}
+Rel(page, store, "Reads state; choose, retry, chooseDate")
+Rel(page, text, "Words")
+Rel(store, month, "dayMonthOf(rows, month, today, chosen)")
+Rel(store, client, "list(on, show)")
+Rel(client, ctrl, "Calls", "JSON/HTTPS")
+Rel(ctrl, handler, "Sends GetImportantDaysQuery")
+Rel(handler, guard, "RequireMemberAsync for a Popkin's show")
+Rel(handler, visibility, "ReadableAsync(personId)")
+Rel(handler, holidays, "For(popkinIds, on)")
+Rel(handler, rules, "Shapes the rows")
+Rel(visibility, db, "Reads", "EF Core")
+Rel(holidays, db, "Reads published years", "EF Core")
+@enduml

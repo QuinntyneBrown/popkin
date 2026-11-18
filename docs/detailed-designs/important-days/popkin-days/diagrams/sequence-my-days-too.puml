@@ -1,0 +1,39 @@
+@startuml
+title UML sequence behaviour — My days too
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinDaysPage" as page
+  participant "PopkinDaysStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinDaysController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPopkinDaysQueryHandler" as handler
+  participant "ImportantDayRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Switch "My days too" on (role switch, aria-checked)
+page -> page : Put ?mine=true in the address
+page -> store : open(popkinId, { from, mine: true })
+store -> client : popkinDays(popkinId, { from, on, mine: true })
+client -> controller : GET /api/popkins/{popkinId}/days?from=&on=&mine=true
+controller -> handler : Send GetPopkinDaysQuery (switch and membership as on opening)
+handler -> db : The Popkin's days, and ImportantDay rows with no PopkinId and AddedByPersonId = me
+handler -> rules : SixWeeks with the own days in their own lanes
+controller --> client : 200 PopkinDaysDto, own days of kind Own
+client --> store : The six weeks
+store --> page : Own days dashed, "Only you" on the list, "Your own days show dashed. Only you can see them here." (L2-190 AC5)
+actor -> page : Switch "My days too" off
+page -> page : Remove ?mine from the address
+page -> store : open(popkinId, { from, mine: false })
+store --> page : The Popkin's days and holidays only (L2-190 AC5)
+@enduml

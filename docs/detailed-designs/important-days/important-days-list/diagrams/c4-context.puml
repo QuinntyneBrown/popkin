@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — The Important days list
+
+Person(person, "Person", "Signed in; reads their own days, their Popkins' days and holidays")
+Person(admin, "Admin", "Publishes the years of each holiday calendar")
+System(popkin, "Popkin", "Platform for pop-up communities, with Important days")
+
+Rel(person, popkin, "Reads Important days in", "HTTPS")
+Rel(admin, popkin, "Publishes holiday years in the admin app of", "HTTPS")
+@enduml

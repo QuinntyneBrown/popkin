@@ -1,0 +1,51 @@
+@startuml
+title UML sequence behaviour — A photo and the phone's contacts in Quick Add
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "QuickAddPage" as page
+  participant "QuickAddStore" as store
+  participant "BrowserPhoneContacts" as phone
+end box
+participant "Phone's contacts (navigator.contacts)" as book
+actor -> page : "Add a photo", pick a photo
+page -> store : pick(file)
+store --> page : photoUrl (object URL)
+page --> actor : Photo shows in place of the camera (L2-179 AC1)
+page -> phone : available
+alt No Contact Picker API
+  phone --> page : false
+  page --> actor : "Pick from my phone's contacts" not offered (L2-179 AC3)
+else Contact Picker API
+  phone --> page : true
+  page --> actor : "Pick from my phone's contacts"
+  actor -> page : "Pick from my phone's contacts"
+  page -> phone : pickOne()
+  phone -> book : select(['name', 'tel'], { multiple: false })
+  alt One picked
+    book --> phone : [{ name: ["Femi Bello"], tel: ["+44 7700 900123", …] }]
+    phone --> page : PhoneContact
+    page -> store : fill(picked)
+    store --> page : Name and first number filled (L2-179 AC2)
+  else None picked, refused or failed
+    book --> phone : [] or error
+    phone --> page : null
+    page --> actor : Quick Add unchanged (L2-179 AC4)
+  end
+end
+actor -> page : "Save"
+page --> actor : The photo is the contact's once the save succeeds (L2-179 AC1)
+@enduml

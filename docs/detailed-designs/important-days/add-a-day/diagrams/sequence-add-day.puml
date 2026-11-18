@@ -1,0 +1,86 @@
+@startuml
+title UML sequence behaviour — Add a day
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddDayPage" as page
+  participant "DayFormStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddDayCommandHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "ImportantDayRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : "Add day"
+page -> store : submit()
+alt "To" before "From"
+  store --> page : Problem on "To"
+  page --> actor : "One thing to fix", "Pick a day on or after the first day."; nothing saved (L2-187 AC4)
+else Valid
+  store --> page : adding
+  page --> actor : "Adding…", fields locked, "Close" stays (L2-187 AC5)
+  store -> client : add(body with clientId)
+  client -> ctrl : POST /api/days
+  ctrl -> handler : Send AddDayCommand
+  handler -> db : Day with (adder, clientId)?
+  alt Already saved
+    db --> handler : The day
+    handler --> ctrl : DayDto (resend)
+    ctrl --> client : 200, nothing saved again
+  else New
+    db --> handler : None
+    opt A Popkin's day
+      handler -> guard : Require Schedules; RequireActiveMemberAsync(popkinId)
+      guard --> handler : Member, or 404 popkin_not_found, 404 feature_off, 409 popkin_wrapped_up
+    end
+    handler -> handler : Title, place, dates, time, reminder; 400 ends_before_starts "Pick a day on or after the first day."
+    handler -> db : The contacts are the adder's own?
+    db --> handler : Yes, or 404 contact_not_found
+    opt withinDayId
+      handler -> rules : CanSitInside(day, longer) (L2-188)
+      rules --> handler : Yes, or 400 within_not_allowed
+    end
+    handler -> db : Add ImportantDay and ImportantDayPerson rows; save once
+    db --> handler : Committed
+    opt A Popkin's day
+      handler -> hub : await ScheduleChanged(popkinId) to the Popkin's group
+    end
+    handler --> ctrl : DayDto
+    ctrl --> client : 201
+  end
+  alt Saved
+    client --> store : DayDto
+    store --> page : saved
+    page --> actor : The screen it opened from, with the day on it (L2-187 AC5, L2-188 AC2)
+  else Fails
+    client --> store : Error
+    store --> page : failed; everything kept; same clientId
+    page --> actor : "We couldn't add {day}. Everything you typed is still here. …" (L2-187 AC6)
+  end
+end
+opt "Close"
+  actor -> page : "Close"
+  page --> actor : Nothing saved; the screen it opened from (L2-187 AC7)
+end
+@enduml

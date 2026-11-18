@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Reminders for a day
+
+System_Ext(push, "Browser push service", "Web Push")
+Container_Boundary(worker, "Popkin Worker") {
+  Component(job, "SendImportantDayRemindersJob", "PeriodicJob, every 5 minutes", "Sends SendImportantDayRemindersCommand")
+  Component(djob, "DispatchNotificationsJob", "PeriodicJob, every 15 seconds", "Sends DispatchNotificationsCommand")
+  Component(handler, "SendImportantDayRemindersCommandHandler", "MediatR handler", "Records one event per recipient and occurrence")
+  Component(rules, "ImportantDayRules", "Domain, pure", "NextOccurrence, ReminderDay")
+  Component(rrules, "ImportantDayReminderRules", "Application, pure", "9 am window in the recipient's zone")
+  Component(dispatch, "DispatchNotificationsCommandHandler", "MediatR handler", "Fan-out, NotificationRules, send")
+  Component(standing, "ImportantDayReminderStanding", "Application service", "Reads the day again; Nothing when it no longer stands")
+  Component(phone, "IPhoneNotificationSender", "Application port", "WebPushPhoneNotificationSender")
+  ComponentDb(db, "Popkin database", "SQL Server", "ImportantDay, Membership, NotificationEvent")
+}
+Rel(job, handler, "Sends SendImportantDayRemindersCommand")
+Rel(handler, rules, "NextOccurrence, ReminderDay")
+Rel(handler, rrules, "Due(day, zone, now)")
+Rel(handler, db, "Reads days, members, zones; adds events once", "EF Core")
+Rel(djob, dispatch, "Sends DispatchNotificationsCommand")
+Rel(dispatch, db, "Reads events; writes deliveries", "EF Core")
+Rel(dispatch, standing, "StandingAsync")
+Rel(standing, db, "Reads the day", "EF Core")
+Rel(dispatch, phone, "SendAsync(personId, PhoneAlert)")
+Rel(phone, push, "Pushes", "Web Push")
+@enduml

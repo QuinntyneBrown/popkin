@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — Open Add a day
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddDayPage" as page
+  participant "DayFormStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetDayChoicesQueryHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt From Important days
+  actor -> page : Open /days/new
+else From a Popkin's Days
+  actor -> page : Open /days/new?popkin={popkinId}
+end
+page -> store : open(popkinId?, device day)
+store -> client : choices()
+client -> ctrl : GET /api/days/choices
+ctrl -> handler : Send GetDayChoicesQuery
+handler -> db : Active memberships with Schedules on, member counts; own contacts A to Z
+db --> handler : Rows
+handler --> ctrl : DayChoicesDto
+ctrl --> client : 200
+client --> store : Choices
+store --> page : "Just me", or the Popkin when offered (L2-187 AC2); Date = device day; "1 day before"
+page --> actor : "Add a day", "Close", "Add day" off (L2-187 AC1, AC3)
+actor -> page : Type "What's the day?"
+page -> store : title
+store --> page : canSubmit (day-form.ts)
+page --> actor : "Add day" on
+actor -> page : Choose a Popkin
+page --> actor : "Remind everyone" (L2-187 AC1)
+@enduml

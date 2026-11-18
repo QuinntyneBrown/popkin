@@ -1,0 +1,41 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — A Popkin's holidays
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "PopkinDaysPage", "Angular page", "Holidays: pk-select-field for the Host, text for a member")
+  Component(hstore, "PopkinHolidaysStore", "api library", "Published calendars, choose, saving and failed")
+  Component(dstore, "PopkinDaysStore", "api library", "Reads Days again after a change and on ScheduleChanged")
+  Component(client, "HttpDaysApi", "Behind DAYS_API", "holidayCalendars, setHolidays, popkinDays")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(calctrl, "HolidayCalendarsController", "ASP.NET Core controller", "GET published calendars")
+  Component(ctrl, "PopkinDaysController", "ASP.NET Core controller", "PUT holidays, GET days")
+  Component(list, "ListHolidayCalendarsQueryHandler", "MediatR handler", "Calendars with a published year")
+  Component(cmd, "SetPopkinHolidaysCommandHandler", "MediatR handler", "Sets PopkinSpace.HolidayCalendarId")
+  Component(query, "GetPopkinDaysQueryHandler", "MediatR handler", "Holidays among the six weeks")
+  Component(published, "PublishedHolidays", "Application", "Holidays of published years in a range")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "404 feature_off")
+  Component(guard, "IMembershipGuard", "Application abstraction", "RequireHostAsync: 409 popkin_wrapped_up, 403 host_only")
+  Component(notifier, "IPopkinNotifier", "Application abstraction", "ScheduleChanged to the Popkin group")
+  ComponentDb(db, "Popkin database", "SQL Server", "HolidayCalendar, HolidayCalendarYear, Holiday, PopkinSpace")
+}
+Rel(page, hstore, "Chooses")
+Rel(page, dstore, "Shows Days")
+Rel(hstore, client, "holidayCalendars, setHolidays")
+Rel(hstore, dstore, "Reads again after a change")
+Rel(dstore, client, "popkinDays")
+Rel(client, calctrl, "HTTPS JSON")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(calctrl, list, "Sends ListHolidayCalendarsQuery")
+Rel(ctrl, cmd, "Sends SetPopkinHolidaysCommand")
+Rel(ctrl, query, "Sends GetPopkinDaysQuery")
+Rel(cmd, switches, "Requires Schedules")
+Rel(cmd, guard, "Requires the Host")
+Rel(cmd, notifier, "ScheduleChanged")
+Rel(query, published, "Reads the Popkin's calendar")
+Rel(list, db, "Reads")
+Rel(cmd, db, "Saves")
+Rel(published, db, "Reads")
+@enduml

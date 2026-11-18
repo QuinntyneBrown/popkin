@@ -1,0 +1,17 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Reach Quick Add
+
+Person(owner, "Person", "Owner of the Contacts")
+System_Ext(phone, "Phone", "Draws the app shortcuts from the manifest")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "manifest.webmanifest, /contacts/quick-add, sign-in")
+  Container(api, "Popkin API", "ASP.NET Core", "Session and Contacts reads")
+  ContainerDb(db, "Popkin database", "SQL Server", "Sessions, contacts")
+}
+Rel(owner, phone, "Long-presses Popkin's icon")
+Rel(phone, web, "Reads manifest; opens a shortcut's url", "HTTPS")
+Rel(web, api, "Reads the session and Contacts' summary", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — A Popkin's Days
+
+Person(member, "Member", "Belongs to the Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular SPA", "Days page: six weeks, the list and a day's details")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "GET /api/popkins/{popkinId}/days, hub event ScheduleChanged")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "ImportantDay, Holiday, HolidayCalendarYear, PopkinSpace")
+}
+Rel(member, web, "Opens Days, moves Earlier or Later, chooses a day", "HTTPS")
+Rel(web, api, "Reads six weeks of days", "JSON/HTTPS, session cookie")
+Rel(api, db, "Reads days and published holidays", "EF Core")
+Rel(api, web, "ScheduleChanged", "SignalR")
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — The Important days list
+
+Person(person, "Person", "Mara, on Important days")
+Person(admin, "Admin", "Holiday calendars")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Important days at /days: list, chips, month")
+  Container(adminApp, "Popkin admin app", "Angular", "Holiday calendars and their publish")
+  Container(api, "Popkin API", "ASP.NET Core", "GET /api/days?on=&show=")
+  ContainerDb(db, "Popkin database", "SQL Server", "ImportantDay, ImportantDayPerson, Contact, Membership, PopkinSpace, Holiday, HolidayCalendarYear")
+}
+Rel(person, web, "Uses", "HTTPS")
+Rel(admin, adminApp, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel(adminApp, api, "Publishes holiday years through", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+@enduml

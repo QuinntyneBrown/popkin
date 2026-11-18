@@ -1,0 +1,45 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Holiday calendars
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "HolidaysPage", "Angular page", "pk-report-list, pk-key-values, pk-data-table")
+  Component(shell, "pk-admin-shell", "components", "Sidebar with ADMIN_SECTIONS and badges")
+  Component(store, "AdminHolidayCalendarsStore", "api library", "List, chosen calendar and year")
+  Component(waiting, "AdminWaitingStore", "api library", "Counts every 60 s")
+  Component(text, "holidays-text.ts", "api library", "Banner, Dates through, dates")
+  Component(client, "ADMIN_PLATFORM_API", "api library contract", "HttpAdminPlatformApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminHolidayCalendarsController", "ASP.NET Core controller", "Admin scheme only")
+  Component(shellctrl, "AdminShellController", "ASP.NET Core controller", "GET /api/admin/waiting")
+  Component(list, "GetAdminHolidayCalendarsQueryHandler", "MediatR handler", "List and banner")
+  Component(detail, "GetAdminHolidayCalendarQueryHandler", "MediatR handler", "One calendar, one year")
+  Component(count, "GetAdminWaitingQueryHandler", "MediatR handler", "holidayCalendars count")
+  Component(rules, "HolidayCalendarRules", "Domain", "Dates through, draft, needs dates, years")
+  Component(use, "HolidayCalendarUse", "Application", "People and Popkins using a calendar")
+  Component(guard, "IAdminGuard", "Application", "CurrentAdminAsync")
+  ComponentDb(db, "Popkin database", "SQL Server", "HolidayCalendar, HolidayCalendarYear, Holiday")
+}
+Rel(page, store, "Reads")
+Rel(page, text, "Words")
+Rel(shell, waiting, "Badges")
+Rel(store, client, "Calls")
+Rel(waiting, client, "Calls")
+Rel(client, ctrl, "GET /api/admin/holiday-calendars[/{calendarId}]")
+Rel(client, shellctrl, "GET /api/admin/waiting")
+Rel(ctrl, list, "Sends GetAdminHolidayCalendarsQuery")
+Rel(ctrl, detail, "Sends GetAdminHolidayCalendarQuery")
+Rel(shellctrl, count, "Sends GetAdminWaitingQuery")
+Rel(list, guard, "Any admin")
+Rel(detail, guard, "Any admin")
+Rel(list, rules, "Decides")
+Rel(detail, rules, "Decides")
+Rel(count, rules, "NeedsDates")
+Rel(list, use, "Counts")
+Rel(detail, use, "Counts")
+Rel(use, db, "Reads", "EF Core")
+Rel(list, db, "Reads", "EF Core")
+Rel(detail, db, "Reads", "EF Core")
+@enduml

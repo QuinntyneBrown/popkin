@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Confirm and publish holiday dates
+
+Person(admin, "Owner or Support admin", "Admin")
+Person(member, "Member", "Of a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA, admin.popkin.community", "Holiday calendars page, Publish dialog")
+  Container(web, "Popkin web app", "Angular SPA", "Days and Important days")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/holiday-calendars, IAdminGuard, IAuditLog")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "Holiday, HolidayCalendarYear, AuditEntry")
+}
+Rel(admin, adminapp, "Changes and publishes", "HTTPS")
+Rel(adminapp, api, "PUT .../holidays/{holidayId}, POST .../years/{year}/publish", "JSON/HTTPS, admin cookie")
+Rel(member, web, "Opens Days", "HTTPS")
+Rel(web, api, "Reads published years on each request", "JSON/HTTPS")
+Rel(api, db, "Writes the change with its audit entry in one transaction", "EF Core")
+@enduml

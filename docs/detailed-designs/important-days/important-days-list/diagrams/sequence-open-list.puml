@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Open Important days
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ImportantDaysPage" as page
+  participant "ImportantDaysStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetImportantDaysQueryHandler" as handler
+  participant "DayVisibility" as visibility
+  participant "ObservedHolidays" as holidays
+  participant "ImportantDayRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /days
+page --> actor : Placeholder rows; status "Loading days…" (L2-194 AC1)
+page -> store : open(device day)
+store -> client : list("2025-12-01", everything)
+client -> ctrl : GET /api/days?on=2025-12-01&show=everything
+ctrl -> handler : Send GetImportantDaysQuery
+handler -> visibility : ReadableAsync(Mara)
+visibility -> db : Own days; days of Mara's Popkins with Schedules on
+db --> visibility : Days with people and contacts
+handler -> holidays : For(Mara's Popkins, on)
+holidays -> db : Holidays of observed calendars, published years only
+db --> holidays : Holidays
+handler -> rules : Occurrence, HowSoon, Nest, ThisWeek
+rules --> handler : Rows from today on, soonest first (L2-183 AC2)
+handler --> ctrl : ImportantDaysDto (people only on Mara's own additions)
+ctrl --> client : 200
+alt Read fails
+  client --> store : Error
+  store --> page : failed
+  page --> actor : "Couldn't load your days", "Check your connection and try again." and "Try again" (L2-194 AC2)
+  actor -> page : "Try again"
+  page -> store : retry()
+  store -> client : list(on, everything)
+else No day and no holiday
+  store --> page : empty
+  page --> actor : "Nothing coming up yet" and "Add your first day" (L2-186 AC1)
+else Days
+  store --> page : ready, grouped by month and nested
+  page --> actor : "Mon, Dec 1 · 2 things this week", chips, months and rows (L2-183 AC1–AC7, L2-184 AC1)
+  page --> actor : From 1024 px, "December 2025" beside the list, today ringed (L2-185 AC1, AC2)
+end
+@enduml

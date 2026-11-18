@@ -329,10 +329,24 @@ Each design follows the source named below and marks the conflict in its own REA
 | Admin platform | [Member email and notification kinds](admin-platform/notifications/README.md) | L2-169, L2-170, L2-171 |
 | Admin platform | [Notification holds](admin-platform/notification-holds/README.md) | L2-172 |
 | Admin platform | [Notification defaults](admin-platform/notification-defaults/README.md) | L2-173 |
+| Contacts | [Reach Quick Add](contacts/reach-quick-add/README.md) | L2-177 |
+| Contacts | [Quick Add](contacts/quick-add/README.md) | L2-178, L2-179 |
+| Contacts | [Added and add another](contacts/contact-added/README.md) | L2-180, L2-181 |
+| Important days | [Reach Important days](important-days/reach-important-days/README.md) | L2-182 |
+| Important days | [The Important days list](important-days/important-days-list/README.md) | L2-183, L2-184, L2-185, L2-186, L2-194 |
+| Important days | [Add a day](important-days/add-a-day/README.md) | L2-187, L2-188 |
+| Important days | [Edit and delete a day](important-days/edit-and-delete-a-day/README.md) | L2-193, L2-194 (AC3) |
+| Important days | [Reminders for a day](important-days/day-reminders/README.md) | L2-189 |
+| Important days | [A Popkin's Days](important-days/popkin-days/README.md) | L2-190, L2-191, L2-194 |
+| Important days | [A Popkin's holidays](important-days/popkin-holidays/README.md) | L2-192 |
+| Important days | [Who sees a day](important-days/who-sees-a-day/README.md) | L2-195 |
+| Admin platform | [Holiday calendars](admin-platform/holiday-calendars/README.md) | L2-196 |
+| Admin platform | [Confirm and publish holiday dates](admin-platform/publish-holiday-dates/README.md) | L2-197 |
 
 Every L2 requirement from L2-001 to L2-067 is realised by at least one feature above, and so is
 every admin requirement, L2-076 to L2-078 and L2-086 to L2-120, and every Contacts requirement,
-L2-121 to L2-151.
+L2-121 to L2-151, and every requirement of quick add, Important days and holiday calendars,
+L2-177 to L2-197.
 
 ## The admin app
 
@@ -522,6 +536,81 @@ of it, when and how, and sends it. The Worker still sends no hub events
   reminder and hands email and phone to notifications as the "Birthdays" kind. The Monday email,
   `ContactWeeklyEmail`, `IContactsEmailSender` and the two switches on Dates are removed (L2-140,
   gap 126) ([Send reminders](notifications/send-reminders/README.md)).
+
+## Important days and holiday calendars
+
+The Important days designs (`important-days/`, L1-044) and the two holiday calendar designs in
+`admin-platform/` (L1-045) share one architecture. They add no container. Their mocks are
+`docs/mocks/pages/important-days/`, `add-day/`, `popkin-days/`, `my-popkins/coming-up.html` and
+`docs/mocks/dialogs/day-actions/`, `delete-day/`, with `docs/mocks/admin/pages/holidays/` and
+`admin/dialogs/holidays-publish/`. They are drawn on the requirements' cast, Mara on Monday 1
+December 2025 (L2-182).
+
+- **One entity for every day.** `ImportantDay` (Domain): `Id`, `ClientId`, `AddedByPersonId`,
+  `PopkinId?` (null for the person's own calendar), `Title` (80 characters), `StartsOn` and
+  `EndsOn` (`DateOnly`, equal for one day), `StartsAt?` (`TimeOnly`, one day only; none is all
+  day), `Place?` (120 characters), `EveryYear`, `Reminder` (`DayReminder`: `None`, `OnTheDay`,
+  `OneDayBefore`, `ThreeDaysBefore`, `OneWeekBefore`, `TwoWeeksBefore`), `WithinDayId?` (the
+  longer day it sits inside, L2-188), `CreatedAt` and `UpdatedAt`. A unique index on
+  (`AddedByPersonId`, `ClientId`) makes a resend save once, as Contacts does. The people a day is
+  about are `ImportantDayPerson` rows (`DayId`, `ContactId`), the adder's own contacts (gap 141).
+  Occurrence, "how soon", nesting and the six-week grid are pure rules (`ImportantDayRules`,
+  Domain), tested one case per row.
+- **Who sees a day.** A day with no `PopkinId` is read and changed by its adder alone (L2-195
+  AC1). A Popkin's day is read by its members (L2-195 AC2), changed only by its adder, and deleted
+  by its adder or the Host (L2-193 AC3), `403` `day_not_yours` otherwise. Every handler loads a
+  day through `IDayGuard`, which answers `404` `day_not_found` for any day the person may not
+  read, an own day or a Popkin's, so no answer tells an outsider that a day exists behind an id;
+  `popkin_not_found` stays for the routes that name a Popkin (L2-051). No admin screen reads a
+  person's own days ([Who sees a day](important-days/who-sees-a-day/README.md)).
+- **The device's day.** Each read that depends on today takes `?on=yyyy-MM-dd` from the device
+  and answers `400` `invalid_date` otherwise, as Contacts does. The Worker reminds at 9 am in the
+  zone of `NotificationPreferences.TimeZone`.
+- **Holidays.** `HolidayCalendar` (`Id`, `Key`, `Name`, `Holds`, `HowSet`, `CreatedAt`),
+  `HolidayCalendarYear` (`CalendarId`, `Year`, `PublishedAt?`, `PublishedByAdminId?`) and
+  `Holiday` (`CalendarId`, `Year`, `Name`, `Note?`, `Date`, `Status`: `ByRule`, `Estimated`,
+  `Confirmed`, `ChangedAt`, `ChangedByAdminId?`). A Popkin observes one calendar or none,
+  `PopkinSpace.HolidayCalendarId?` (L2-192). People and Popkins see only published years, read
+  from the database on each request, which keeps "Changes reach everyone within an hour"
+  (L2-196 AC2) with room to spare. An estimated date reads "expected" (L2-192 AC4).
+- **API.** `DaysController` under `/api/days` (the person's Important days, the coming days of
+  My Popkins, add, edit and delete) and `PopkinDaysController` under `/api/popkins/{popkinId}/days`
+  (six weeks of a Popkin's days, and its holiday calendar), behind the default authenticated
+  policy; `HolidayCalendarsController` lists the published calendars for the Host's choice.
+  Each action sends one MediatR request; handlers live in `Popkin.Application/ImportantDays/`. A
+  Popkin's Days needs Schedules on, `404` `feature_off` otherwise
+  ([Choose a Popkin's features](popkins/choose-features/README.md)), and a wrapped-up Popkin
+  refuses changes with `409` `popkin_wrapped_up`. The admin app's
+  `AdminHolidayCalendarsController` is under `/api/admin/holiday-calendars`.
+- **Live updates.** A change to a Popkin's day, or to its holiday calendar, raises the existing
+  `ScheduleChanged` event of `IPopkinNotifier`, so an open Days reads again. A person's own days
+  have one reader and send no event, as Contacts does.
+- **Reminders** are the Worker's: `SendImportantDayRemindersJob` (a `PeriodicJob`, every 5
+  minutes) adds a `NotificationEvent` for each day whose reminder day has come, to its adder for
+  an own day and to every member for a Popkin's day (L2-189), and the notification pipeline sends
+  it once, by the dedup key `reminder:important-day:{dayId}:{occursOn}:{personId}`. Which
+  notification kind it belongs to is open (gap 140).
+- **Admin.** Changing and publishing a calendar is `AdminAction.ChangeHolidayCalendars`, allowed
+  to Owners and Support (L2-197 AC5); every change and publish writes an `AuditEntry` in the same
+  transaction, and a publish carries a reason (L2-197 AC3, AC4). The sidebar's count comes with
+  the shell's other counts.
+- **Web app.** `ImportantDaysPage` at `/days` and `AddDayPage` at `/days/new` and
+  `/days/:dayId/edit` (`shell: 'bare'`), `PopkinDaysPage` at `/p/:popkinId/schedule/days` beside
+  Time off and This week, and the dialogs `DayActionsDialog` and `DeleteDayDialog`. The `api`
+  library holds `DAYS_API` and the stores and rules under `frontend/projects/api/src/lib/api/days/`,
+  unit tested (ADR 0011).
+- **Words.** A day is a "day", never an "event" or a "trip" (AGENTS.md); a Popkin's view is
+  "Days". No log, metric dimension or span carries a day's title, place, note, the people it is
+  about or a holiday's name.
+
+## Quick Add
+
+Quick Add (`contacts/reach-quick-add`, `quick-add`, `contact-added`, L1-043) is a faster way into
+Contacts and keeps its architecture. It adds no endpoint: it saves through
+`POST /api/contacts/people` with a `clientId`, as Add someone does
+([Add or edit someone](contacts/add-contact/README.md)). The shortcuts on Popkin's icon need a web
+app manifest, which the Popkin web app does not have yet (gap 146). Its mocks are
+`docs/mocks/pages/app-shortcuts/`, `quick-add/` and `contact-added/`.
 
 ## Known gaps
 
@@ -773,6 +862,26 @@ Settled so far:
 | When an Everyone photo joins the album, and who reads a direct-message photo | [Send photos in chat](chat/send-photos-in-chat/README.md): when its message is sent, with `PhotosAdded`; only the direct message's two members, `404` `photo_not_found` to anyone else, and never in the album, its summaries or its zip (`Photo.InAlbum`, `Photo.ThreadId`) |
 | What a quote and a preview show for a photo message with no text, and what deleting one does to its photo | [Send photos in chat](chat/send-photos-in-chat/README.md): "Photo" ("You: Photo"; the client's own lines, known gap 76); the message goes, an Everyone photo stays in the album and a direct-message photo is removed |
 | A send with neither text nor photo, when an Everyone photo is added, a body over the request limit, and two sends of one photo | [Send photos in chat](chat/send-photos-in-chat/README.md): `400` `message_empty` "Write a message or choose a photo."; its `AddedAt` is when its message is sent; `413` `request_too_large` for every upload ([Input validation and encoding](security/input-validation-and-encoding/README.md)); a unique index on `Message.PhotoId`, and the loser is `400` `photo_not_found` |
+| 140 | Important-day reminders (L2-189) belong to no notification kind of L2-154, so no setting turns them off or picks their channel. Proposed: a thirteenth kind, "Important days", in the Reminders group, phone on and email off; needs L2-154 to change ([Reminders for a day](important-days/day-reminders/README.md)) | Reminders for a day | |
+| 141 | Who sees whom a Popkin's day is about: the people are the adder's contacts, which only the adder sees (L2-122), while L2-183 AC3 shows them on every row. Proposed: only the adder sees them, on Important days and in the details; other members see the day without them ([Who sees a day](important-days/who-sees-a-day/README.md)) | The Important days list; A Popkin's Days | |
+| 142 | A day's note: L2-191 AC1 shows "Its note", but Add a day (L2-187) offers no field to write one, so no day has a note until one is specified ([Add a day](important-days/add-a-day/README.md)) | Add a day; A Popkin's Days | |
+| 143 | The holiday calendar of a new Popkin: L2-192 does not say. Proposed: "Off" until the Host chooses one ([A Popkin's holidays](important-days/popkin-holidays/README.md)) | A Popkin's holidays | |
+| 144 | A calendar for a person's own Important days: L2-196 AC2 says people turn calendars on for themselves, but no requirement of the web app offers it. Until one does, "People using it" counts the members of the Popkins observing it ([Holiday calendars](admin-platform/holiday-calendars/README.md)) | Holiday calendars | |
+| 145 | Where the holiday dates come from: the dates "By rule" (computed or seeded), the first estimates, what "New calendar" asks (no requirement names it), and whether changing a date before publishing needs a reason, since L2-087 AC1 names no holiday dialog ([Confirm and publish holiday dates](admin-platform/publish-holiday-dates/README.md)) | Holiday calendars; Confirm and publish holiday dates | |
+| 146 | The shortcuts on Popkin's icon (L2-177 AC1) need a web app manifest with icons, `start_url` and `shortcuts`, which makes the web app installable; the web app has none. Needs its own ADR ([Reach Quick Add](contacts/reach-quick-add/README.md)) | Reach Quick Add | |
+| 147 | Two shapes of day the requirements leave open: "Every year" on a day of several days, and a longer day whose dates change so that a day inside it falls outside. Proposed: "Every year" is offered for both; a day that falls outside leaves its longer day, as on delete (L2-193 AC2) ([Edit and delete a day](important-days/edit-and-delete-a-day/README.md)) | Add a day; Edit and delete a day | |
+| 148 | The Important days and Holiday calendars mocks are in PR #103, not yet on main; the admin Popkin's "Important days" panel and its "Remove day" dialog are drawn there with no requirement behind them | Important days; Holiday calendars | |
+| 149 | The word "trip" in the requirements' own copy: L2-186's "a trip" and L2-188 AC1's "so it'll sit on that trip in everyone's calendar", where AGENTS.md names nothing "trip". The designs keep the requirements' words until the requirements change ([Add a day](important-days/add-a-day/README.md)) | Add a day; The Important days list | |
+| 150 | One holiday calendar observed by two of a person's Popkins: Important days shows each holiday once per Popkin, as the designs have it, or once ([The Important days list](important-days/important-days-list/README.md)) | The Important days list; A Popkin's holidays | |
+| 151 | What becomes of the days a member added to a Popkin when they leave it or delete their account: kept with no adder (only the Host can then delete them) or removed with them (L2-047, L2-049) ([Who sees a day](important-days/who-sees-a-day/README.md)) | Who sees a day; Edit and delete a day | |
+| 152 | Which Popkins count on Important days: a wrapped-up Popkin's days, and a Popkin's holidays while its Schedules are off. The designs leave out a Popkin with Schedules off ([The Important days list](important-days/important-days-list/README.md)) | The Important days list | |
+| 153 | Days that start before today: a longer day under way (which date its tile shows and how soon it reads), "Earlier" on a phone's list, which L2-190 AC4 starts from today, and "Previous month" before this month ([A Popkin's Days](important-days/popkin-days/README.md)) | The Important days list; A Popkin's Days | |
+| 154 | "Every year" on 29 February in a year without it, for Important days as for key dates ([Reminders for a day](important-days/day-reminders/README.md)) | Add a day; Reminders for a day | |
+| 155 | Whether a new or changed day on a Popkin records a "Schedule changes" notification for the other members; the designs record none, only the reminder of L2-189 ([Add a day](important-days/add-a-day/README.md)) | Add a day; Notifications | |
+| 156 | Whether Edit day can move a day between "Just me" and a Popkin; the design allows it, and the days inside the moved day become days of their own ([Edit and delete a day](important-days/edit-and-delete-a-day/README.md)) | Edit and delete a day | |
+| 157 | Quick Add offline: an add made offline waits in `ContactsOutbox` (L2-123 AC4), but Added (L2-178 AC4) needs the saved contact. Proposed: keep it in the outbox, say so with the offline toast and empty Quick Add, with no Added ([Quick Add](contacts/quick-add/README.md)) | Quick Add | |
+| 158 | The Quick Add mocks, drawn before L2-177 to L2-181, differ from them: a third shortcut "Log a conversation"; "How you know them" for "Who are they?"; Save left on with an invalid state; Enter moving to Phone; Added with no tick, "in your Contacts", and "Done" opening People rather than Today. The designs follow the requirements; the mocks change ([Quick Add](contacts/quick-add/README.md), [Added and add another](contacts/contact-added/README.md)) | Quick Add; Added and add another | |
+| 159 | Holiday calendars and the roles: L2-086's table has no row for them, though L2-197 AC5 lets Support change and publish, and the Viewer mock reads "Only Owners can change holiday calendars."; the designs follow L2-197 ([Confirm and publish holiday dates](admin-platform/publish-holiday-dates/README.md)) | Holiday calendars; Confirm and publish holiday dates | |
 
 ## Diagrams
 

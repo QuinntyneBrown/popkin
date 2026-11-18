@@ -1,0 +1,79 @@
+@startuml
+title UML sequence behaviour — An admin opens Holiday calendars and chooses a calendar
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "HolidaysPage" as page
+  participant "AdminHolidayCalendarsStore" as store
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminHolidayCalendarsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminHolidayCalendarsQueryHandler" as list
+  participant "GetAdminHolidayCalendarQueryHandler" as detail
+  participant "HolidayCalendarRules" as rules
+  participant "HolidayCalendarUse" as use
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Opens /holidays
+page --> actor : "Loading the holiday calendars…"
+page -> store : Load
+store -> client : holidayCalendars()
+client -> controller : GET /api/admin/holiday-calendars, admin cookie
+controller -> list : Send GetAdminHolidayCalendarsQuery
+list -> db : Calendars and their years
+db --> list : Rows
+list -> rules : DatesThrough, IsDraft, NeedsDates(thisYear)
+list -> use : Count people and Popkins
+use -> db : Active Popkins observing each, their members
+db --> use : Counts
+list --> controller : AdminHolidayCalendarsDto
+alt Read fails
+  controller --> client : Error
+  client --> store : Failure
+  store --> page : "Couldn’t load the holiday calendars", "Try again" (L2-089 AC7)
+else Read succeeds
+  controller --> client : 200
+  client --> store : Calendars, withoutNextYear
+  store --> page : List: name, holds, "{n} people", "Dates through {year}" or "Draft" (L2-196 AC2)
+  opt A calendar without next year's dates
+    page --> actor : "{names} have no dates after 31 Dec {year}." "From January, {n} people and their Popkins won’t see these holidays." (L2-196 AC3)
+  end
+  page -> store : Choose the first warned calendar, else the first
+  store -> client : holidayCalendar(calendarId)
+  client -> controller : GET /api/admin/holiday-calendars/{calendarId}
+  controller -> detail : Send GetAdminHolidayCalendarQuery
+  detail -> rules : Years(thisYear), ChosenYear
+  detail -> db : Year's holidays by date, last edit
+  db --> detail : Rows
+  detail -> use : People and Popkins
+  detail --> controller : AdminHolidayCalendarDto
+  controller --> client : 200
+  client --> store : Calendar
+  alt The year has holidays
+    store --> page : Name, how set, years, "People using it", "Popkins using it", "Last edited", holidays with status (L2-196 AC4)
+  else No holidays
+    store --> page : "No {year} dates yet." (L2-196 AC4)
+  end
+  actor -> page : Chooses a calendar or a year
+  page -> page : Navigate to /holidays/{calendarId}?year={year}
+  page -> store : Load that calendar and year, as above
+end
+@enduml

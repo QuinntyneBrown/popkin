@@ -1,0 +1,79 @@
+@startuml
+title UML sequence behaviour — An admin publishes a year
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "HolidaysPage" as page
+  participant "PublishHolidaysDialog" as dialog
+  participant "AdminHolidayCalendarsStore" as store
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminHolidayCalendarsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "PublishHolidayYearCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "HolidayCalendarYear" as year
+  participant "HolidayCalendarUse" as use
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+page --> actor : "5 of 5 dates are still estimates. Members see them as “expected”." or "All dates confirmed.", "Publish 2026" (L2-197 AC2)
+actor -> page : "Publish 2026"
+page -> dialog : Open with calendar, year, dates, estimates, Popkins
+dialog --> actor : "Publish Islamic holidays for 2026?", "5 dates appear on the Important days of everyone using this calendar, and on 1,340 Popkins.", "5 are estimates ..." (L2-197 AC3)
+actor -> dialog : Reason, "Publish 2026"
+alt Reason empty
+  dialog --> actor : "Give a reason; it goes in the audit log." Nothing sent (gap 145)
+else Reason given
+  dialog --> actor : "Publishing…", reason read-only
+  dialog -> store : publish(reason)
+  store -> client : publishHolidayYear(calendarId, 2026, reason)
+  client -> controller : POST /api/admin/holiday-calendars/{calendarId}/years/2026/publish
+  controller -> handler : Send PublishHolidayYearCommand
+  handler -> guard : RequireAsync(ChangeHolidayCalendars)
+  alt Viewer
+    guard --> controller : 403 role_not_allowed (L2-197 AC5)
+  else Owner or Support
+    handler -> handler : ReasonRules.Required
+    handler -> db : Load the year and its holidays
+    db --> handler : Year, 5 dates, 5 estimates
+    handler -> year : Publish(adminId, now)
+    alt Already published, or no holidays
+      year --> controller : 409 holiday_year_published, holiday_year_empty
+    else Published
+      year --> handler : PublishedAt set; Dates through 2026 (L2-197 AC4)
+      handler -> use : People and Popkins
+      use --> handler : 63,950 people, 1,340 Popkins
+      handler -> audit : Record(PublishedHolidayYear, HolidayCalendar, reason, counts) (L2-197 AC4)
+      handler -> db : SaveChangesAsync, one transaction (L2-120 AC5)
+      handler --> controller : HolidayYearPublishedDto
+      controller --> client : 200
+      client --> store : Published
+      store --> dialog : Close
+      store --> page : Toast "Published", "Islamic holidays 2026 is live for 63,950 people and 1,340 Popkins." (L2-197 AC4)
+      page -> store : Read the list and the calendar again
+      store --> page : "Dates through 2026", banner without the calendar, "Live since today."
+    end
+  end
+  opt Request fails
+    dialog --> actor : "That didn't go through", reason kept, dialog open (L2-087 AC5)
+  end
+end
+@enduml

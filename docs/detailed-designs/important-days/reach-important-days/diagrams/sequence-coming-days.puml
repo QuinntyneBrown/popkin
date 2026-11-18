@@ -1,0 +1,62 @@
+@startuml
+title UML sequence behaviour — The coming-days strip on My Popkins
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "MyPopkinsPage" as page
+  participant "MyPopkinsStore" as popkins
+  participant "ComingDaysStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetComingDaysQueryHandler" as handler
+  participant "DayVisibility" as visibility
+  participant "ImportantDayRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open My Popkins (/)
+page --> actor : Header with "Days", named "Important days" (L2-182 AC1)
+page -> popkins : open()
+page -> store : open(device day)
+store -> client : coming("2025-12-01")
+client -> ctrl : GET /api/days/coming?on=2025-12-01
+ctrl -> handler : Send GetComingDaysQuery
+handler -> visibility : ReadableAsync(Mara)
+visibility -> db : Own days and days of Mara's Popkins with Schedules on
+db --> visibility : Rows
+visibility --> handler : Readable days
+handler -> rules : Occurrence(day, on) per day without WithinDayId
+rules --> handler : Occurrence, or null when ended
+handler --> ctrl : ComingDaysDto, at most three, soonest first, no holidays (L2-182 AC2)
+ctrl --> client : 200
+alt Read fails
+  client --> store : Error
+  store --> page : days = []
+  page --> actor : Nothing above the Popkins, no message
+else No coming day
+  client --> store : { days: [] }
+  page --> actor : Nothing above the Popkins (L2-182 AC3)
+else Coming days, and the Popkins are ready
+  client --> store : Three days
+  store --> page : Tiles "Thu 4", "Sat 6", "Fri 12"
+  page --> actor : "Coming up" strip with weekday, date and title, then "All important days" (L2-182 AC2)
+end
+@enduml

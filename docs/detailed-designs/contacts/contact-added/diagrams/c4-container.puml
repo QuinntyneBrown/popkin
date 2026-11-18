@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Added and add another
+
+Person(owner, "Person", "Owner of the Contacts")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Added at /contacts/people/:contactId/added; the Quick Add session")
+  Container(api, "Popkin API", "ASP.NET Core", "GET /api/contacts/people/{contactId}")
+  ContainerDb(db, "Popkin database", "SQL Server", "Contact")
+}
+Rel(owner, web, "Uses", "HTTPS")
+Rel(web, api, "Reads the contact on a direct visit", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

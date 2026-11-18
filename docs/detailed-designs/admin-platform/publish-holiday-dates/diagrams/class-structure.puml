@@ -1,0 +1,113 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Confirm and publish holiday dates
+
+package "Popkin.Domain" {
+  enum AdminAction {
+    ...
+    ChangeHolidayCalendars
+  }
+  class AdminPermissions {
+    +Rows: AdminPermissionRow[]
+    +Allows(role, action): bool
+    +AllowedFor(role): AdminAction[]
+  }
+  class AdminPermissionRow {
+    +string Row = "HolidayCalendars"
+    +bool Owner = true
+    +bool Support = true
+    +bool Viewer = false
+  }
+  enum HolidayStatus {
+    ByRule
+    Estimated
+    Confirmed
+  }
+  class Holiday {
+    +Guid Id
+    +int Year
+    +DateOnly Date
+    +HolidayStatus Status
+    +DateTimeOffset ChangedAt
+    +Guid? ChangedByAdminId
+    +Change(date, adminId, now): void
+  }
+  class HolidayCalendarYear {
+    +Guid CalendarId
+    +int Year
+    +DateTimeOffset? PublishedAt
+    +Guid? PublishedByAdminId
+    +Publish(adminId, now): void
+  }
+  enum AuditAction {
+    ...
+    ChangedHolidayDate
+    PublishedHolidayYear
+  }
+  enum AuditTargetKind {
+    ...
+    HolidayCalendar
+  }
+}
+package "Popkin.Application" {
+  interface IAdminGuard {
+    +RequireAsync(action, ct): Task<Admin>
+  }
+  interface IAuditLog {
+    +RecordAsync(record, ct): Task
+  }
+  class ReasonRules {
+    +Required(reason): string
+  }
+  class ChangeHolidayDateCommand {
+    +Guid CalendarId
+    +Guid HolidayId
+    +DateOnly? Date
+  }
+  class ChangeHolidayDateCommandHandler {
+    +Handle(command): Task<AdminHolidayDto>
+  }
+  class PublishHolidayYearCommand {
+    +Guid CalendarId
+    +int Year
+    +string? Reason
+  }
+  class PublishHolidayYearCommandHandler {
+    +Handle(command): Task<HolidayYearPublishedDto>
+  }
+  class HolidayYearPublishedDto {
+    +string CalendarName
+    +int Year
+    +int People
+    +int Popkins
+  }
+  class HolidayCalendarUse
+}
+AdminPermissions *-- AdminPermissionRow
+AdminPermissionRow --> AdminAction
+Holiday --> HolidayStatus
+HolidayCalendarYear "1" *-- "*" Holiday
+ChangeHolidayDateCommandHandler ..> ChangeHolidayDateCommand : handles
+ChangeHolidayDateCommandHandler ..> IAdminGuard
+ChangeHolidayDateCommandHandler --> Holiday : Change
+ChangeHolidayDateCommandHandler ..> IAuditLog : ChangedHolidayDate
+PublishHolidayYearCommandHandler ..> PublishHolidayYearCommand : handles
+PublishHolidayYearCommandHandler ..> IAdminGuard
+PublishHolidayYearCommandHandler ..> ReasonRules
+PublishHolidayYearCommandHandler --> HolidayCalendarYear : Publish
+PublishHolidayYearCommandHandler ..> HolidayCalendarUse : counts
+PublishHolidayYearCommandHandler ..> IAuditLog : PublishedHolidayYear
+PublishHolidayYearCommandHandler ..> HolidayYearPublishedDto : returns
+IAdminGuard ..> AdminPermissions : Allows
+IAuditLog ..> AuditAction
+IAuditLog ..> AuditTargetKind
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Edit and delete a day
+
+Person(person, "Adder or Host", "Changes a day")
+Person(member, "Member", "Has the Popkin's Days open")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "DayActionsDialog, Edit day, DeleteDayDialog")
+  Container(api, "Popkin API", "ASP.NET Core", "/api/days/{dayId}; PopkinHub")
+  ContainerDb(db, "Popkin database", "SQL Server", "ImportantDay, ImportantDayPerson, Membership")
+  Container(worker, "Popkin Worker", ".NET worker", "Finds a deleted day gone when it reminds")
+}
+Rel(person, web, "Uses", "HTTPS")
+Rel(member, web, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Reads and writes", "EF Core")
+Rel(api, web, "ScheduleChanged for a Popkin's day", "SignalR")
+Rel(worker, db, "Reads days at send time", "EF Core")
+@enduml

@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — Choose a date in the month
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ImportantDaysPage" as page
+  participant "pk-month-calendar" as cal
+  participant "ImportantDaysStore" as store
+  participant "day-month.ts" as month
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+end box
+note over page : Viewport at least 1024 px (L2-185 AC1)
+actor -> cal : Choose "Tue, Dec 30" (click, tap, or Tab then Enter)
+cal -> store : chooseDate(2025-12-30)
+store -> month : dayMonthOf(rows, December 2025, today, chosen)
+month --> store : Dec 30 pressed; days covering it
+store --> page : chosen date, its days, rows to mark
+page --> actor : Rows of School winter break, Vegas week and Usher concert marked (L2-185 AC3)
+page --> actor : "Tue, Dec 30": each day's title, time, and Popkin's name or "Only you"
+opt No day on the date
+  page --> actor : "Nothing on this day." (L2-185 AC3)
+end
+actor -> cal : "Next month"
+cal -> store : nextMonth()
+store -> month : dayMonthOf(rows, January 2026, today, chosen)
+month --> store : Bands and up to three dots per date, holidays grey (L2-185 AC2)
+store --> page : January 2026
+note over ctrl : No request: the month is drawn from the rows already read
+@enduml

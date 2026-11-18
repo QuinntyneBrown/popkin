@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Quick Add
+
+Person(owner, "Person", "Owner of the Contacts")
+System_Ext(phoneBook, "Phone's contacts", "Browser Contact Picker")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Quick Add at /contacts/quick-add")
+  Container(api, "Popkin API", "ASP.NET Core", "POST /api/contacts/people")
+  ContainerDb(db, "Popkin database", "SQL Server", "Contact")
+  ContainerDb(store, "Photo store", "Azure Blob Storage", "Contact photos under contacts/")
+}
+Rel(owner, web, "Uses", "HTTPS")
+Rel(web, phoneBook, "select(['name', 'tel'])", "Contact Picker API")
+Rel(web, api, "Calls", "multipart/form-data over HTTPS")
+Rel(api, db, "Writes", "EF Core")
+Rel(api, store, "Writes the avatar", "IPhotoStore")
+@enduml

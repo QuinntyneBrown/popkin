@@ -1,0 +1,55 @@
+@startuml
+title UML sequence behaviour — Added on a direct visit
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactAddedPage" as page
+  participant "QuickAddSession" as session
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetContactQueryHandler" as handler
+  participant "IContactGuard" as guard
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /contacts/people/{id}/added after a reload
+page -> session : contact(id)
+session --> page : null; count 0
+page -> client : contact(id)
+client -> ctrl : GET /api/contacts/people/{id}
+ctrl -> handler : Send GetContactQuery
+handler -> guard : RequireOwnedAsync(id)
+guard -> db : Contact for this owner
+db --> guard : Row, or none
+alt Another person's or deleted
+  guard --> handler : 404 contact_not_found (L2-122 AC1)
+  handler --> ctrl : ProblemDetails
+  ctrl --> client : 404
+  client --> page : notFound
+  page --> actor : "This person isn't in your contacts" and "Go to People"
+else The owner's
+  guard --> handler : Contact
+  handler --> ctrl : ContactProfileDto
+  ctrl --> client : 200
+  client --> page : ContactProfileView
+  page --> actor : Heading and line, no count (L2-180 AC1, L2-181 AC2)
+end
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — A Popkin's Days
+
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "PopkinDaysPage", "Angular page", "Header, tools, weeks, list and details; from, mine and day in the address")
+  Component(store, "PopkinDaysStore", "api library", "State; reads again on ScheduleChanged, reconnected$ and every minute")
+  Component(text, "days-text.ts", "api library, pure", "Range, bar text, row lines, details' lines, chat draft")
+  Component(client, "HttpDaysApi", "Behind DAYS_API", "popkinDays")
+  Component(ui, "pk-days-weeks, pk-day-list, pk-day-detail, pk-days-tools, pk-date-tile, pk-chip", "components library", "Presentation")
+  Component(chat, "GroupChatPage", "Angular page", "Takes ?draft= as the composer's text")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "PopkinDaysController", "ASP.NET Core controller", "GET days")
+  Component(query, "GetPopkinDaysQueryHandler", "MediatR handler", "The six weeks of days, own days and holidays")
+  Component(rules, "ImportantDayRules", "Domain, pure", "Occurrence in a range, the six-week grid")
+  Component(switches, "IFeatureSwitches", "Application abstraction", "404 feature_off")
+  Component(guard, "IMembershipGuard", "Application abstraction", "404 popkin_not_found")
+  Component(holidays, "PublishedHolidays", "Application", "Published holidays of a calendar in a range")
+  ComponentDb(db, "Popkin database", "SQL Server", "ImportantDay, Holiday")
+}
+Rel(page, store, "Opens six weeks")
+Rel(page, ui, "Composes")
+Rel(page, chat, "Talk about it, with the draft")
+Rel(store, text, "Formats with")
+Rel(store, client, "popkinDays")
+Rel(client, ctrl, "HTTPS JSON")
+Rel(ctrl, query, "Sends GetPopkinDaysQuery")
+Rel(query, switches, "Requires Schedules")
+Rel(query, guard, "Requires membership")
+Rel(query, holidays, "Reads the Popkin's calendar")
+Rel(query, rules, "Places each occurrence")
+Rel(query, db, "Reads")
+Rel(holidays, db, "Reads")
+@enduml

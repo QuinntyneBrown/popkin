@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — Add another
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ContactAddedPage" as page
+  participant "QuickAddSession" as session
+  participant "QuickAddPage" as quick
+  participant "QuickAddStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as ctrl
+end box
+actor -> page : "Add another"
+page -> session : addAnother()
+page -> quick : Navigate to /contacts/quick-add
+quick -> session : opened()
+session -> session : Continuing: count kept
+quick -> store : New store, new clientId
+quick --> actor : Empty, "Friends" chosen, name focused (L2-181 AC1)
+actor -> quick : Name, "Save"
+quick -> store : save()
+store -> ctrl : POST /api/contacts/people
+ctrl --> store : 201 ContactProfileDto
+store -> session : added(contact)
+session -> session : count = 2
+store --> page : Added for the second person
+page --> actor : "2 people added today" (L2-181 AC2)
+@enduml

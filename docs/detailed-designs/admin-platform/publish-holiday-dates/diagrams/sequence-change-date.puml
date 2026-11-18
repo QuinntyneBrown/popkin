@@ -1,0 +1,68 @@
+@startuml
+title UML sequence behaviour — An admin changes a holiday's date
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Owner or Support admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "HolidaysPage" as page
+  participant "AdminHolidayCalendarsStore" as store
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminHolidayCalendarsController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ChangeHolidayDateCommandHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "Holiday" as holiday
+  participant "IAuditLog" as audit
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt Holiday "By rule"
+  page --> actor : No "Change" (L2-197 AC1)
+else Viewer
+  page --> actor : "Change" switched off, "Viewer admins can’t do this" (L2-197 AC5)
+else Estimated or Confirmed, Owner or Support
+  actor -> page : "Change the date of Ramadan begins"
+  page -> store : change(holidayId)
+  store --> page : Date field "Date of Ramadan begins", focused, "Confirmed", "Done" (L2-197 AC1)
+  actor -> page : Picks Wed 18 Feb, "Done" or Enter
+  page -> store : done(2026-02-18)
+  store -> client : changeHolidayDate(calendarId, holidayId, date)
+  client -> controller : PUT /api/admin/holiday-calendars/{calendarId}/holidays/{holidayId}
+  controller -> handler : Send ChangeHolidayDateCommand
+  handler -> guard : RequireAsync(ChangeHolidayCalendars)
+  alt Role not allowed
+    guard --> controller : 403 role_not_allowed
+  else Allowed
+    handler -> db : Load the holiday of the calendar
+    db --> handler : Holiday
+    handler -> holiday : Change(date, adminId, now)
+    alt By rule, or outside its year
+      holiday --> controller : 409 holiday_by_rule, 400 invalid_date
+    else Changed
+      holiday --> handler : Date set, Status Confirmed (L2-197 AC1)
+      handler -> audit : Record(ChangedHolidayDate, HolidayCalendar, old, new, oldStatus)
+      handler -> db : SaveChangesAsync, one transaction (L2-120 AC5)
+      handler --> controller : AdminHolidayDto
+      controller --> client : 200
+      client --> store : Holiday
+      store --> page : Row "Wed 18 Feb", "Confirmed", "Change"; "4 of 5 dates are still estimates." (L2-197 AC2)
+    end
+  end
+end
+@enduml

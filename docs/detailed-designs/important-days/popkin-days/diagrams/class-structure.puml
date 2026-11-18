@@ -1,0 +1,117 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — A Popkin's Days
+
+package "Popkin.Domain" {
+  class PopkinSpace {
+    +Guid Id
+    +Guid? HolidayCalendarId
+  }
+  class ImportantDay {
+    +Guid Id
+    +Guid AddedByPersonId
+    +Guid? PopkinId
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +bool EveryYear
+    +Guid? WithinDayId
+  }
+  class Holiday {
+    +Guid CalendarId
+    +int Year
+    +string Name
+    +DateOnly Date
+    +HolidayStatus Status
+  }
+  enum HolidayStatus {
+    ByRule
+    Estimated
+    Confirmed
+  }
+  class ImportantDayRules {
+    +{static} MondayOf(day: DateOnly): DateOnly
+    +{static} SixWeeksFrom(monday: DateOnly): DateRange
+    +{static} OccurrenceIn(day: ImportantDay, from: DateOnly, to: DateOnly): DateRange?
+    +{static} SixWeeks(from: DateOnly, placed: PlacedDay[]): GridWeek[]
+  }
+}
+package "Popkin.Application" {
+  class GetPopkinDaysQuery {
+    +Guid PopkinId
+    +DateOnly? From
+    +DateOnly On
+    +bool Mine
+  }
+  class PopkinDaysDto {
+    +DateOnly From
+    +DateOnly To
+    +HolidayCalendarDto? Calendar
+    +bool CanChooseHolidays
+    +bool CanAdd
+    +bool HasDays
+    +PlacedDayDto[] Days
+    +DaysWeekDto[] Weeks
+  }
+  class PlacedDayDto {
+    +string Key
+    +DayKind Kind
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +string? Note
+    +string? WithinKey
+    +AddedByDto? AddedBy
+    +bool Expected
+  }
+  enum DayKind {
+    Popkin
+    Own
+    Holiday
+  }
+  class DaysWeekDto {
+    +DateOnly Monday
+    +DayBarDto[] Bars
+    +DayItemDto[] Items
+    +DayItemDto[] Holidays
+  }
+  class DayBarDto {
+    +string Key
+    +int FromColumn
+    +int ToColumn
+    +int Lane
+    +bool Continued
+    +bool Continues
+  }
+  interface IFeatureSwitches {
+    +Require(feature: Feature, popkinId: Guid): void
+  }
+  interface IMembershipGuard {
+    +RequireMemberAsync(popkinId: Guid): Task
+  }
+}
+PopkinSpace "1" o-- "0..*" ImportantDay : PopkinId
+ImportantDay "0..1" o-- "0..*" ImportantDay : WithinDayId
+Holiday --> HolidayStatus
+GetPopkinDaysQuery ..> PopkinDaysDto : answers
+GetPopkinDaysQuery ..> ImportantDayRules
+GetPopkinDaysQuery ..> IFeatureSwitches
+GetPopkinDaysQuery ..> IMembershipGuard
+PopkinDaysDto "1" *-- "0..*" PlacedDayDto
+PopkinDaysDto "1" *-- "6" DaysWeekDto
+DaysWeekDto "1" *-- "0..*" DayBarDto
+PlacedDayDto --> DayKind
+@enduml

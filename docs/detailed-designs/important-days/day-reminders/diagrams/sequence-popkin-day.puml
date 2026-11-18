@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — Remind of a Popkin's day
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "SendImportantDayRemindersJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendImportantDayRemindersCommandHandler" as handler
+  participant "IFeatureSwitches" as features
+  participant "ImportantDayReminderRules" as rrules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+time -> job : 5 min elapse
+job -> handler : Send SendImportantDayRemindersCommand
+handler -> db : Popkins' days with a reminder that may fall due
+db --> handler : Days
+loop Each Popkin's day
+  handler -> db : Popkin live? Active memberships and their time zones
+  db --> handler : Members
+  handler -> features : Schedules on for this Popkin?
+  features --> handler : On, or skip the day
+  loop Each active member (L2-189 AC2)
+    handler -> rrules : Due(day, member's zone, now)
+    rrules --> handler : At 9:00 where this member is
+    opt Due
+      handler -> db : Add event ImportantDays, PopkinId, Recipient = member, DedupKey reminder:important-day:{day}:{occursOn}:{member}
+    end
+  end
+end
+handler -> db : Only keys not yet recorded; save once
+db --> handler : Committed
+@enduml

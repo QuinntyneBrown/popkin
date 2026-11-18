@@ -1,0 +1,18 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Who sees a day
+
+Person(adder, "Adder", "Keeps own days and adds days to their Popkins")
+Person(member, "Member", "Belongs to the Popkin a day is on")
+Person(outsider, "Person outside the Popkin", "Signed in; shares no Popkin, or not this one")
+Person_Ext(subject, "Person a day is about", "One of the adder's contacts; never told")
+Person(admin, "Admin", "Uses the admin app")
+System(popkin, "Popkin", "Platform for pop-up communities, with Important days")
+
+Rel(adder, popkin, "Reads and changes own days and the days they added in", "HTTPS")
+Rel(member, popkin, "Reads the Popkin's days, without their people, in", "HTTPS")
+Rel(outsider, popkin, "Reads none of these days in", "HTTPS")
+Rel(admin, popkin, "Reads no own day in", "HTTPS")
+Rel_Back(subject, popkin, "Sends nothing to")
+@enduml
