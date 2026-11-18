@@ -26,6 +26,7 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
     '[class.screen--arrival]': "layout() === 'arrival'",
     '[class.screen--middle]': 'middle()',
     '[class.screen--settings]': "width() === 'settings'",
+    '[class.screen--narrow]': "width() === 'narrow'",
     '[attr.data-accent]': 'accent()',
   },
 })
@@ -61,7 +62,8 @@ export class Screen {
   readonly footer = input(false);
   /**
    * `settings` widens a `column` screen for a page of settings, a kind and its two switches in a
-   * row: centred, at most 56 rem from 768 px (L2-155 AC4).
+   * row: centred, at most 56 rem from 768 px (L2-155 AC4). `narrow` sets the content in the
+   * narrow container of the mocks (`container container--narrow`), as Quick Add and Added are.
    */
-  readonly width = input<'form' | 'settings'>('form');
+  readonly width = input<'form' | 'settings' | 'narrow'>('form');
 }

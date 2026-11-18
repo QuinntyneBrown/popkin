@@ -4,7 +4,7 @@
     <ng-content select="[slot=label-end]" />
   </div>
 } @else {
-  <label class="field__label" [for]="fieldId()">
+  <label class="field__label" [class.visually-hidden]="hideLabel()" [for]="fieldId()">
     {{ label() }}
     @if (optional()) {
       <span class="optional">{{ optional() }}</span>
@@ -15,11 +15,13 @@
   #field
   class="input"
   [class.input--code]="variant() === 'code'"
+  [class.input--display]="variant() === 'display'"
   [id]="fieldId()"
   [type]="type()"
   [value]="value()"
   [attr.inputmode]="inputmode()"
   [attr.autocomplete]="autocomplete()"
+  [attr.enterkeyhint]="enterkeyhint()"
   [attr.autocapitalize]="autocapitalize()"
   [attr.placeholder]="placeholder()"
   [attr.maxlength]="maxlength()"

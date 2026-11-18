@@ -339,6 +339,13 @@ export const routes: Routes = [
     title: 'Groups · Contacts · Popkin',
   },
   {
+    path: 'contacts/quick-add',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () => import('./pages/quick-add/quick-add.page').then((m) => m.QuickAddPage),
+    data: data({ shell: 'bare', page: 'quick-add' }),
+    title: 'Add someone · Contacts · Popkin',
+  },
+  {
     path: 'contacts/people/new',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>
