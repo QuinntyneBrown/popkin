@@ -1,0 +1,13 @@
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+:host(.panel-grid--list-detail) {
+  align-items: start;
+
+  @media (min-width: 64rem) {
+    grid-template-columns: minmax(0, 23.75rem) minmax(0, 1fr);
+  }
+}

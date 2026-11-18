@@ -595,6 +595,24 @@ await call('GET', '/api/admin/notifications/holds/popkin-search?q=lake');
 await call('GET', '/api/admin/notifications/defaults');
 // Limits (L2-176): the sign-in length at its default of 365 days.
 await call('GET', '/api/admin/limits');
+// Holiday calendars (L2-196): the seed's five, Islamic holidays and Hindu festivals without next
+// year's dates. The page opens on Islamic holidays at next year; United States is all by rule;
+// Australia, a draft, has no dates in the last year of the tabs.
+const holidayCalendars = await call('GET', '/api/admin/holiday-calendars');
+const calendarNamed = (name: string) =>
+  holidayCalendars.calendars.find((c: { name: string }) => c.name === name).id;
+const thisYear = holidayCalendars.thisYear;
+await call('GET', `/api/admin/holiday-calendars/${calendarNamed('Islamic holidays')}`);
+await call(
+  'GET',
+  `/api/admin/holiday-calendars/${calendarNamed('Islamic holidays')}?year=${thisYear}`,
+);
+await call('GET', `/api/admin/holiday-calendars/${calendarNamed('United States')}`);
+await call('GET', `/api/admin/holiday-calendars/${calendarNamed('Australia')}`);
+await call(
+  'GET',
+  `/api/admin/holiday-calendars/${calendarNamed('Australia')}?year=${thisYear + 2}`,
+);
 // Then she makes Aiko a Viewer and removes Marco; the list and the log above stay as they were.
 await call('PUT', `/api/admin/admins/${aiko.id}/role`, {
   role: 'Viewer',

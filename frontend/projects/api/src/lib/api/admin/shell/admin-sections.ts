@@ -1,3 +1,6 @@
+import { AdminWaiting } from '../../../models/admin';
+import { withoutNextYearLabel } from '../platform/holidays-text';
+
 /** A section of the console, in the sidebar and the drawer (L2-089 AC1). */
 export interface AdminNavItem {
   label: string;
@@ -5,7 +8,11 @@ export interface AdminNavItem {
   /** The `page` of the section's route, which marks it current. */
   page: string;
   /** An icon of the `components` library. */
-  icon: 'shield' | 'scroll' | 'toggle' | 'bell' | 'sliders';
+  icon: 'shield' | 'scroll' | 'toggle' | 'bell' | 'sliders' | 'calendar';
+  /** The count of `GET /api/admin/waiting` shown beside it, when above zero. */
+  waiting?: keyof AdminWaiting;
+  /** The count's name, "{n} waiting" when not given. */
+  waitingLabel?: (n: number) => string;
 }
 
 export interface AdminNavGroup {
@@ -23,6 +30,14 @@ export const ADMIN_SECTIONS: readonly AdminNavGroup[] = [
     items: [
       { label: 'Features', route: '/features', page: 'features', icon: 'toggle' },
       { label: 'Notifications', route: '/notifications', page: 'notifications', icon: 'bell' },
+      {
+        label: 'Holiday calendars',
+        route: '/holidays',
+        page: 'holidays',
+        icon: 'calendar',
+        waiting: 'holidayCalendars',
+        waitingLabel: withoutNextYearLabel,
+      },
       { label: 'Limits', route: '/limits', page: 'limits', icon: 'sliders' },
     ],
   },

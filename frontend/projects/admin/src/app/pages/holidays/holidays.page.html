@@ -1,0 +1,74 @@
+<div pk-page-head heading="Holiday calendars" [sub]="sub"></div>
+@switch (store.status()) {
+  @case ('failed') {
+    <section pk-panel>
+      <div
+        pk-empty-state
+        icon="alert"
+        heading="Couldn’t load the holiday calendars"
+        text="The admin API didn’t answer. Nothing has changed; try again, or check Health if it keeps happening."
+        [compact]="true"
+        [panel]="true"
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+          <svg pk-icon name="retry" size="sm"></svg>Try again
+        </button>
+      </div>
+    </section>
+  }
+  @case ('ready') {
+    @if (banner(); as banner) {
+      <div pk-banner variant="warning" [heading]="banner.heading" [text]="banner.text"></div>
+    }
+    <div pk-panel-grid>
+      <section pk-panel>
+        <ul pk-report-list aria-label="Holiday calendars" [items]="items()"></ul>
+      </section>
+      @if (store.calendar(); as calendar) {
+        <section pk-panel [heading]="calendar.name" [sub]="calendar.howSet" [body]="true">
+          <div class="stack">
+            <div
+              pk-segmented-control
+              label="Year"
+              [options]="years()"
+              [value]="'' + calendar.year"
+              (valueChange)="chooseYear($event)"
+            ></div>
+            <dl pk-key-values [items]="figures()"></dl>
+            @if (calendar.holidays.length) {
+              <div
+                pk-data-table
+                [label]="tableLabel()"
+                [columns]="columns"
+                [groups]="groups()"
+              ></div>
+            } @else {
+              <div pk-empty-state [heading]="noDates()" [compact]="true"></div>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+  @default {
+    <p class="visually-hidden" role="status">Loading the holiday calendars…</p>
+    <div pk-panel-grid>
+      <section pk-panel [body]="true">
+        <div class="stack" aria-hidden="true">
+          <span pk-skeleton shape="text" [width]="60"></span>
+          <span pk-skeleton shape="text" [width]="40"></span>
+          <span pk-skeleton shape="text" [width]="60"></span>
+        </div>
+      </section>
+      <section pk-panel [body]="true">
+        <div
+          pk-data-table
+          label="Holidays"
+          [columns]="columns"
+          [groups]="[]"
+          [loading]="true"
+        ></div>
+      </section>
+    </div>
+  }
+}

@@ -5,7 +5,7 @@ import { Button } from '../button/button';
 import { Icon } from '../icon/icon';
 import { PopkinTile } from '../popkin-tile/popkin-tile';
 import { Skeleton } from '../skeleton/skeleton';
-import { Status } from '../status/status';
+import { Status, StatusTone } from '../status/status';
 import { Switch } from '../switch/switch';
 
 /** A column: its name, and whether the name is for assistive technology only ("Actions"). */
@@ -24,7 +24,7 @@ export interface DataTableColumn {
  * A cell: plain text, `strong`, `time` (subtle, even figures), `name` (a name with a line under
  * it), `person` (a name, a badge such as "You" and an email by an avatar in `accent`, or its
  * `photo`), `popkin` (a Popkin's tile with its `emoji` in `accent`, its name and a line), `note`
- * (text with a caption under it: who and when), `status` (a neutral status pill), `role` (a
+ * (text with a caption under it: who and when), `status` (a status pill, in its `tone`), `role` (a
  * select of `options` named `label`), `action` (a quiet button named `label`, switched off
  * with a `disabledReason`), `kind` (a notification kind's name, with the status pill `off` and
  * what sends it under it, and `totals` under that on a phone), `switch` (a switch named
@@ -67,6 +67,8 @@ export interface DataTableCell {
   photo?: string | null;
   /** A Popkin's emoji, on its tile. */
   emoji?: string;
+  /** A `status` pill's tone: "Estimated" warns. */
+  tone?: StatusTone;
 }
 
 export interface DataTableRow {

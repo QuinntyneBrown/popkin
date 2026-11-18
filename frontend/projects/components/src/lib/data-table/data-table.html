@@ -144,7 +144,7 @@
                     >
                   }
                   @case ('status') {
-                    <span pk-status>{{ cell.text }}</span>
+                    <span pk-status [tone]="cell.tone ?? 'neutral'">{{ cell.text }}</span>
                   }
                   @case ('lock') {
                     <span class="lock-note"

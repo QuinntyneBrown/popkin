@@ -24,7 +24,7 @@
                   pk-badge
                   class="admin-nav__badge"
                   [count]="item.waiting"
-                  [label]="item.waiting + ' waiting'"
+                  [label]="item.waitingLabel ?? item.waiting + ' waiting'"
                 ></span>
               }
             </a>

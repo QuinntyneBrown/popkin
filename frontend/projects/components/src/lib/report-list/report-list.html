@@ -1,0 +1,23 @@
+@for (item of items(); track item.id) {
+  <li>
+    <a
+      class="report-item"
+      [routerLink]="item.link"
+      [attr.aria-current]="item.current ? 'true' : null"
+    >
+      <span class="report-item__icon"><svg pk-icon [name]="item.icon"></svg></span>
+      <span class="report-item__text">
+        <span class="report-item__reason">{{ item.reason }}</span>
+        <span class="report-item__where">{{ item.where }}</span>
+        <span class="report-item__meta"
+          >{{ item.meta }}
+          @if (item.pill) {
+            <span pk-status [tone]="item.pill">{{ item.state }}</span>
+          } @else {
+            <span>{{ item.state }}</span>
+          }
+        </span>
+      </span>
+    </a>
+  </li>
+}

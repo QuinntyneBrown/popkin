@@ -4,7 +4,7 @@
 } @else if (routeData()?.shell === 'admin') {
   <div
     pk-admin-shell
-    [sections]="sections"
+    [sections]="sections()"
     [current]="routeData()?.page"
     [me]="me()"
     [label]="label"

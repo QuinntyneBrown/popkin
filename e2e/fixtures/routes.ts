@@ -1,5 +1,10 @@
 import responses from './api/responses.json';
 
+/** The recorded United States calendar, the one set by rule (L2-196). */
+const usCalendarId = responses['GET /api/admin/holiday-calendars'].body.calendars.find(
+  (c) => c.name === 'United States',
+)!.id;
+
 /**
  * Every screen state the suite opens, keyed once so one spec serves both targets: the Angular
  * app (`app` path) and the design reference (`mock` file under docs/mocks, opened when
@@ -109,6 +114,13 @@ export const routes = {
   adminLimitsViewer: { app: `${ADMIN}/limits`, mock: 'admin/pages/limits/viewer.html' },
   adminLimitsLoading: { app: `${ADMIN}/limits`, mock: 'admin/pages/limits/loading.html' },
   adminLimitsError: { app: `${ADMIN}/limits`, mock: 'admin/pages/limits/error.html' },
+  adminHolidays: { app: `${ADMIN}/holidays`, mock: 'admin/pages/holidays/default.html' },
+  adminHolidaysRule: {
+    app: `${ADMIN}/holidays/${usCalendarId}`,
+    mock: 'admin/pages/holidays/rule.html',
+  },
+  adminHolidaysLoading: { app: `${ADMIN}/holidays`, mock: 'admin/pages/holidays/loading.html' },
+  adminHolidaysError: { app: `${ADMIN}/holidays`, mock: 'admin/pages/holidays/error.html' },
   adminSaveLimits: { app: `${ADMIN}/limits`, mock: 'admin/dialogs/limit-save/default.html' },
   adminSaveLimitsBusy: { app: `${ADMIN}/limits`, mock: 'admin/dialogs/limit-save/busy.html' },
   adminSaveLimitsInvalid: { app: `${ADMIN}/limits`, mock: 'admin/dialogs/limit-save/invalid.html' },
