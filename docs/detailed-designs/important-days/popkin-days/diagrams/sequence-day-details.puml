@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — A day's details
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinDaysPage" as page
+  participant "PopkinDaysStore" as store
+  participant "days-text.ts" as text
+  participant "GroupChatPage" as chat
+  participant "TimeOffPage" as timeoff
+end box
+actor -> page : Choose a bar, an item, a holiday or a row
+page -> page : Put ?day={key} in the address
+page -> store : chosen(key)
+store -> text : The details' lines
+store --> page : Details beside the weeks from 1024 px, under them below, with "Close details" (L2-191 AC1)
+alt Inside a longer day
+  page --> actor : "During Vegas week", which opens that day's details
+end
+alt A day of several days
+  page --> actor : "Dec 27 – Jan 3 · 8 days" and "During it", each opening its details
+end
+alt A Popkin's day
+  page --> actor : "Added by Priya" with her avatar, "Talk about it"; "Who's off" for several days (L2-191 AC2)
+  actor -> page : Choose "Talk about it"
+  page -> text : Draft "About Usher concert on Tue, Dec 30: "
+  page -> chat : Navigate to /p/{popkinId}/chat/everyone?draft=
+  chat --> actor : The composer holds the draft, not sent
+  actor -> page : Choose "Who's off"
+  page -> timeoff : Navigate to /p/{popkinId}/schedule?week= the Monday of its first date
+else A holiday
+  page --> actor : "From the United States holiday calendar. Every member sees it."; no actions (L2-191 AC3)
+else My own day
+  page --> actor : "Your own day. Nobody in Holiday Crew can see it."; no actions (L2-191 AC4)
+end
+actor -> page : Choose "Close details"
+page -> page : Remove ?day=; the weeks take the whole width
+@enduml

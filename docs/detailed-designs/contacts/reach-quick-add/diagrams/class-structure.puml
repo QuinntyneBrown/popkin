@@ -1,0 +1,64 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Reach Quick Add
+
+package "frontend/projects/popkin/public" {
+  class WebAppManifest <<manifest.webmanifest>> {
+    +name: "Popkin"
+    +short_name: "Popkin"
+    +display: "standalone"
+    +scope: "/"
+    +start_url: <TO SUPPLY>
+    +icons: <TO SUPPLY>
+    +shortcuts: ManifestShortcut[]
+  }
+  class ManifestShortcut {
+    +name: string
+    +url: string
+    +icons: <TO SUPPLY>
+  }
+}
+package "frontend/projects/api" {
+  class session_guards <<session-guards.ts>> {
+    +signedInGuardOf(load: LoadSession): CanActivateFn
+    +signedOutGuardOf(load: LoadSession, home: string): CanActivateFn
+  }
+  class SessionStore {
+    +ensureLoaded(): Promise<unknown>
+  }
+  class ContactsFrame {
+    +open(): Observable<boolean>
+  }
+}
+package "frontend/projects/popkin (app)" {
+  class PkRouteData {
+    +shell: 'app' | 'bare'
+    +page: string
+  }
+  class QuickAddRoute <<app.routes.ts>> {
+    +path: "contacts/quick-add"
+    +canActivate: [signedInGuard, contactsOpenGuard]
+    +data: PkRouteData
+  }
+  class QuickAddPage {
+    -name: TextField
+    +ngAfterViewInit(): void
+  }
+}
+WebAppManifest "1" *-- "2" ManifestShortcut : shortcuts
+ManifestShortcut ..> QuickAddRoute : "Add someone" opens
+QuickAddRoute --> PkRouteData
+QuickAddRoute ..> session_guards : signedInGuard
+QuickAddRoute ..> ContactsFrame : contactsOpenGuard
+session_guards ..> SessionStore : load
+QuickAddRoute ..> QuickAddPage : loads
+@enduml

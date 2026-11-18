@@ -1,0 +1,111 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Holiday calendars
+
+package "Popkin.Domain" {
+  enum HolidayStatus {
+    ByRule
+    Estimated
+    Confirmed
+  }
+  class HolidayCalendar {
+    +Guid Id
+    +string Key
+    +string Name
+    +string Holds
+    +string HowSet
+    +DateTimeOffset CreatedAt
+  }
+  class HolidayCalendarYear {
+    +Guid CalendarId
+    +int Year
+    +DateTimeOffset? PublishedAt
+    +Guid? PublishedByAdminId
+  }
+  class Holiday {
+    +Guid Id
+    +Guid CalendarId
+    +int Year
+    +string Name
+    +string? Note
+    +DateOnly Date
+    +HolidayStatus Status
+    +DateTimeOffset ChangedAt
+    +Guid? ChangedByAdminId
+  }
+  class PopkinSpace {
+    +Guid Id
+    +PopkinStatus Status
+    +Guid? HolidayCalendarId
+  }
+  class HolidayCalendarRules {
+    +DatesThrough(years): int?
+    +IsDraft(years): bool
+    +NeedsDates(years, thisYear): bool
+    +Years(thisYear): int[]
+    +ChosenYear(years, thisYear): int
+  }
+}
+package "Popkin.Application" {
+  class HolidayCalendarUse {
+    +CountAsync(calendarIds, ct): Task<Dictionary<Guid, CalendarUse>>
+    +PeopleAcrossAsync(calendarIds, ct): Task<int>
+  }
+  class GetAdminHolidayCalendarsQueryHandler {
+    +Handle(query): Task<AdminHolidayCalendarsDto>
+  }
+  class GetAdminHolidayCalendarQueryHandler {
+    +Handle(query): Task<AdminHolidayCalendarDto>
+  }
+  class GetAdminWaitingQueryHandler {
+    +Handle(query): Task<AdminWaitingDto>
+  }
+  class AdminHolidayCalendarsDto {
+    +int ThisYear
+    +AdminHolidayCalendarRowDto[] Calendars
+    +WithoutNextYearDto WithoutNextYear
+  }
+  class AdminHolidayCalendarDto {
+    +Guid Id
+    +string Name
+    +string HowSet
+    +int[] Years
+    +int Year
+    +int People
+    +int Popkins
+    +LastEditedDto? LastEdited
+    +DateTimeOffset? PublishedAt
+    +AdminHolidayDto[] Holidays
+    +int Estimates
+  }
+  class AdminWaitingDto {
+    +int Reports
+    +int FailedJobs
+    +int FailedExports
+    +int HolidayCalendars
+  }
+}
+HolidayCalendar "1" *-- "*" HolidayCalendarYear : years
+HolidayCalendarYear "1" *-- "*" Holiday : holidays
+Holiday --> HolidayStatus
+PopkinSpace "*" o-- "0..1" HolidayCalendar : observes
+HolidayCalendarRules ..> HolidayCalendarYear : reads
+GetAdminHolidayCalendarsQueryHandler ..> HolidayCalendarRules
+GetAdminHolidayCalendarsQueryHandler ..> HolidayCalendarUse
+GetAdminHolidayCalendarsQueryHandler ..> AdminHolidayCalendarsDto : returns
+GetAdminHolidayCalendarQueryHandler ..> HolidayCalendarRules
+GetAdminHolidayCalendarQueryHandler ..> HolidayCalendarUse
+GetAdminHolidayCalendarQueryHandler ..> AdminHolidayCalendarDto : returns
+GetAdminWaitingQueryHandler ..> HolidayCalendarRules : NeedsDates
+GetAdminWaitingQueryHandler ..> AdminWaitingDto : returns
+HolidayCalendarUse ..> PopkinSpace : counts
+@enduml

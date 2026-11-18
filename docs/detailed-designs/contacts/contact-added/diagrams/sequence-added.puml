@@ -1,0 +1,40 @@
+@startuml
+title UML sequence behaviour — Added after a save
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "QuickAddStore" as store
+  participant "QuickAddSession" as session
+  participant "ContactAddedPage" as page
+  participant "contact-added-text.ts" as text
+end box
+store -> session : added(contact)
+session -> session : count + 1, last = contact
+store --> page : Navigate to /contacts/people/{id}/added
+page -> session : contact(id)
+session --> page : ContactProfileView, no request
+page -> text : addedHeading, addedLine(circle, knownAs), addedCount(count)
+text --> page : "Femi's in your contacts", "Friends · Grace's fiancé", null at 1
+page --> actor : Photo or initials with a tick, heading focused, line (L2-180 AC1)
+page --> actor : "Add a birthday, how you met…", "Now, or whenever you're ready", "Done", "Add another" (L2-180 AC2)
+alt "Add a birthday, how you met…"
+  actor -> page : Choose it
+  page --> actor : Edit at /contacts/people/{id}/edit (L2-180 AC3, L2-130)
+else "Done"
+  actor -> page : "Done"
+  page --> actor : Today at /contacts (L2-180 AC4, L2-125)
+end
+@enduml

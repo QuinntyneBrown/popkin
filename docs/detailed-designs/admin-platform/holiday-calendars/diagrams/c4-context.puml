@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Holiday calendars
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+Person(member, "Member", "Of a Popkin that observes a calendar")
+System(popkin, "Popkin", "Pop-up communities, with holiday calendars")
+
+Rel(admin, popkin, "Reads the calendars, their use and their holidays in", "Popkin admin app")
+Rel(member, popkin, "Sees the published holidays of the Popkin's calendar in", "Popkin web app")
+@enduml

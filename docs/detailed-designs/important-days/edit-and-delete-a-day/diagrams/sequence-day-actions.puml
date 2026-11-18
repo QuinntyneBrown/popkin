@@ -1,0 +1,49 @@
+@startuml
+title UML sequence behaviour — Open a day's actions
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ImportantDaysPage" as page
+  participant "DayActionsDialog" as dialog
+  participant "DeleteDayDialog" as del
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "ImportantDayRules" as rules
+end box
+note over page, ctrl : The list's read already carries canEdit and canDelete on each DayDto,\ncomputed by ImportantDayRules.CanEdit and CanDelete
+actor -> page : Choose a row
+alt A holiday, or neither canEdit nor canDelete
+  page --> actor : No actions (L2-193 AC4)
+else An action is allowed
+  page -> dialog : open(DayDto)
+  dialog --> actor : Title, "Thu, Dec 4 · 8:15 am · Only you", "Edit" when canEdit, "Delete" when canDelete (L2-193 AC1, AC3)
+  alt "Edit"
+    actor -> dialog : "Edit"
+    dialog --> page : closed(edit)
+    page --> actor : Navigate to /days/{dayId}/edit
+  else "Delete"
+    actor -> dialog : "Delete"
+    dialog --> page : closed(delete)
+    page -> del : open({ day, popkin? })
+    del --> actor : "Delete {title}?" (L2-193 AC2)
+  else "Close"
+    dialog --> page : closed
+  end
+end
+@enduml

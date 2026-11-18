@@ -1,0 +1,108 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Add a day
+
+package "Popkin.Domain" {
+  enum DayReminder {
+    None
+    OnTheDay
+    OneDayBefore
+    ThreeDaysBefore
+    OneWeekBefore
+    TwoWeeksBefore
+  }
+  class ImportantDay {
+    +Guid Id
+    +Guid ClientId
+    +Guid AddedByPersonId
+    +Guid? PopkinId
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +bool EveryYear
+    +DayReminder Reminder
+    +Guid? WithinDayId
+    +DateTimeOffset CreatedAt
+    +DateTimeOffset UpdatedAt
+    +bool IsSeveralDays
+    +{static} Add(...): ImportantDay
+  }
+  class ImportantDayPerson {
+    +Guid DayId
+    +Guid ContactId
+  }
+  class ImportantDayRules <<static>> {
+    +Contains(longer: ImportantDay, date: DateOnly): bool
+    +CanSitInside(day: ImportantDay, longer: ImportantDay): bool
+    +Shortest(longer: IEnumerable<ImportantDay>): IEnumerable<ImportantDay>
+  }
+}
+package "Popkin.Application" {
+  class AddDayCommand {
+    +Guid ClientId
+    +Guid? PopkinId
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +Guid[] ContactIds
+    +DayReminder Reminder
+    +bool EveryYear
+    +Guid? WithinDayId
+  }
+  class AddDayCommandHandler {
+    +Handle(command: AddDayCommand): Task<AddDayResult>
+  }
+  class GetLongerDaysQueryHandler {
+    +Handle(query: GetLongerDaysQuery): Task<LongerDayDto[]>
+  }
+  class GetDayChoicesQueryHandler {
+    +Handle(query: GetDayChoicesQuery): Task<DayChoicesDto>
+  }
+  class DayDto {
+    +Guid Id
+    +Guid? PopkinId
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +ContactChipDto[] People
+    +DayReminder Reminder
+    +bool EveryYear
+    +Guid? WithinDayId
+    +bool CanEdit
+    +bool CanDelete
+  }
+  interface IMembershipGuard {
+    +RequireActiveMemberAsync(popkinId: Guid): Task<(PopkinSpace, Membership)>
+  }
+  interface IPopkinNotifier {
+    +ScheduleChanged(popkinId: Guid): Task
+  }
+}
+ImportantDay --> DayReminder
+ImportantDay "1" *-- "*" ImportantDayPerson : about
+ImportantDay "*" --> "0..1" ImportantDay : within
+ImportantDayRules ..> ImportantDay
+AddDayCommandHandler ..> AddDayCommand : handles
+AddDayCommandHandler ..> IMembershipGuard
+AddDayCommandHandler ..> ImportantDayRules
+AddDayCommandHandler ..> IPopkinNotifier
+AddDayCommandHandler --> ImportantDay : adds
+AddDayCommandHandler ..> DayDto : returns
+GetLongerDaysQueryHandler ..> ImportantDayRules
+GetDayChoicesQueryHandler ..> IMembershipGuard
+@enduml

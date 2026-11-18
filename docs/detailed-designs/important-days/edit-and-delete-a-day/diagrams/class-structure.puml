@@ -1,0 +1,101 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Edit and delete a day
+
+package "Popkin.Domain" {
+  class ImportantDay {
+    +Guid Id
+    +Guid AddedByPersonId
+    +Guid? PopkinId
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +bool EveryYear
+    +DayReminder Reminder
+    +Guid? WithinDayId
+    +DateTimeOffset UpdatedAt
+    +Change(...): void
+    +LeaveLongerDay(): void
+  }
+  class ImportantDayPerson {
+    +Guid DayId
+    +Guid ContactId
+  }
+  class ImportantDayRules <<static>> {
+    +CanEdit(day: ImportantDay, personId: Guid): bool
+    +CanDelete(day: ImportantDay, personId: Guid, isHost: bool): bool
+    +StillInside(inner: ImportantDay, longer: ImportantDay): bool
+  }
+}
+package "Popkin.Application" {
+  interface IDayGuard {
+    +RequireReadableAsync(dayId: Guid): Task<LoadedDay>
+    +RequireChangeableAsync(dayId: Guid): Task<LoadedDay>
+    +RequireDeletableAsync(dayId: Guid): Task<LoadedDay>
+  }
+  class LoadedDay {
+    +ImportantDay Day
+    +bool IsHost
+  }
+  interface IMembershipGuard {
+    +RequireMemberAsync(popkinId: Guid): Task<(PopkinSpace, Membership)>
+    +RequireActiveMemberAsync(popkinId: Guid): Task<(PopkinSpace, Membership)>
+  }
+  class EditDayCommand {
+    +Guid DayId
+    +Guid? PopkinId
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +Guid[] ContactIds
+    +DayReminder Reminder
+    +bool EveryYear
+    +Guid? WithinDayId
+  }
+  class EditDayCommandHandler {
+    +Handle(command: EditDayCommand): Task<DayDto>
+  }
+  class DeleteDayCommand {
+    +Guid DayId
+  }
+  class DeleteDayCommandHandler {
+    +Handle(command: DeleteDayCommand): Task
+  }
+  class GetDayQueryHandler {
+    +Handle(query: GetDayQuery): Task<DayDto>
+  }
+  interface IPopkinNotifier {
+    +ScheduleChanged(popkinId: Guid): Task
+  }
+}
+ImportantDay "1" *-- "*" ImportantDayPerson : about
+ImportantDay "*" --> "0..1" ImportantDay : within
+IDayGuard ..> IMembershipGuard
+IDayGuard ..> LoadedDay : returns
+LoadedDay --> ImportantDay
+EditDayCommandHandler ..> EditDayCommand : handles
+EditDayCommandHandler ..> IDayGuard
+EditDayCommandHandler ..> ImportantDayRules
+EditDayCommandHandler --> ImportantDay : changes
+EditDayCommandHandler ..> IPopkinNotifier
+DeleteDayCommandHandler ..> DeleteDayCommand : handles
+DeleteDayCommandHandler ..> IDayGuard
+DeleteDayCommandHandler ..> ImportantDayRules
+DeleteDayCommandHandler --> ImportantDay : removes; frees days inside
+DeleteDayCommandHandler ..> IPopkinNotifier
+GetDayQueryHandler ..> IDayGuard
+GetDayQueryHandler ..> ImportantDayRules
+@enduml

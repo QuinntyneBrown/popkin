@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — Offer a longer day
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddDayPage" as page
+  participant "DayFormStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinDaysController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetLongerDaysQueryHandler" as handler
+  participant "IMembershipGuard" as guard
+  participant "ImportantDayRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Holiday Crew, "One day", Date 2025-12-30
+page -> store : date, calendar or "How long" changed
+alt "Just me" or "Several days"
+  store --> page : No offer (L2-188 AC3)
+else One day on a Popkin
+  store -> client : containing(popkinId, 2025-12-30)
+  client -> ctrl : GET /api/popkins/{id}/days/containing?date=2025-12-30
+  ctrl -> handler : Send GetLongerDaysQuery
+  handler -> guard : RequireMemberAsync(popkinId)
+  guard --> handler : Member, or 404 popkin_not_found
+  handler -> db : The Popkin's days of several days
+  db --> handler : Days
+  handler -> rules : Contains(longer, date); Shortest
+  rules --> handler : Vegas week
+  handler --> ctrl : LongerDayDto[]
+  ctrl --> client : 200
+  client --> store : Longer days (an answer to an earlier date is dropped)
+  store --> page : Offer the shortest, switched on
+  page --> actor : "Show it inside Vegas week", "It falls during Vegas week (Dec 27 – Jan 3)…" (L2-188 AC1)
+end
+@enduml

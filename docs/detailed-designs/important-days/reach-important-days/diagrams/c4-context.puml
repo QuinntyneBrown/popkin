@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Reach Important days
+
+Person(person, "Person", "Signed in; keeps their own days and belongs to Popkins")
+Person(member, "Other member", "Belongs to one of the person's Popkins")
+System(popkin, "Popkin", "Platform for pop-up communities, with My Popkins and Important days")
+
+Rel(person, popkin, "Opens My Popkins and Important days in", "HTTPS")
+Rel(member, popkin, "Sees the Popkin's days, never the person's own, in", "HTTPS")
+@enduml

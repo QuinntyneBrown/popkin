@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Reach Quick Add
+
+Person(owner, "Person", "Keeps their own Contacts; has added Popkin to the phone's home screen")
+System_Ext(phone, "Phone", "Home screen; lists an installed web app's shortcuts on a long press")
+System(popkin, "Popkin", "Platform for pop-up communities, with Contacts")
+
+Rel(owner, phone, "Long-presses Popkin's icon on")
+Rel(phone, popkin, "Reads the shortcuts of; opens /contacts/quick-add in", "HTTPS")
+Rel(owner, popkin, "Adds someone in", "HTTPS")
+@enduml

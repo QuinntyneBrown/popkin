@@ -1,0 +1,85 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — A Popkin's holidays
+
+package "Popkin.Domain" {
+  class PopkinSpace {
+    +Guid Id
+    +Guid? HolidayCalendarId
+    +ChooseHolidays(calendarId: Guid?): void
+  }
+  class HolidayCalendar {
+    +Guid Id
+    +string Key
+    +string Name
+    +string Holds
+    +string HowSet
+    +DateTimeOffset CreatedAt
+  }
+  class HolidayCalendarYear {
+    +Guid CalendarId
+    +int Year
+    +DateTimeOffset? PublishedAt
+    +Guid? PublishedByAdminId
+  }
+  class Holiday {
+    +Guid CalendarId
+    +int Year
+    +string Name
+    +string? Note
+    +DateOnly Date
+    +HolidayStatus Status
+  }
+  enum HolidayStatus {
+    ByRule
+    Estimated
+    Confirmed
+  }
+}
+package "Popkin.Application" {
+  class SetPopkinHolidaysCommand {
+    +Guid PopkinId
+    +Guid? CalendarId
+  }
+  class ListHolidayCalendarsQuery
+  class HolidayCalendarDto {
+    +Guid Id
+    +string Name
+  }
+  class PopkinHolidaysDto {
+    +HolidayCalendarDto? Calendar
+  }
+  class PublishedHolidays {
+    +{static} InAsync(db: IAppDbContext, calendarId: Guid, from: DateOnly, to: DateOnly): Task<Holiday[]>
+  }
+  interface IMembershipGuard {
+    +RequireHostAsync(popkinId: Guid): Task
+  }
+  interface IFeatureSwitches {
+    +Require(feature: Feature, popkinId: Guid): void
+  }
+  interface IPopkinNotifier {
+    +ScheduleChanged(popkinId: Guid): Task
+  }
+}
+PopkinSpace "0..*" --> "0..1" HolidayCalendar : observes
+HolidayCalendar "1" *-- "0..*" HolidayCalendarYear
+HolidayCalendarYear "1" *-- "0..*" Holiday
+Holiday --> HolidayStatus
+SetPopkinHolidaysCommand ..> PopkinHolidaysDto : answers
+SetPopkinHolidaysCommand ..> IMembershipGuard
+SetPopkinHolidaysCommand ..> IFeatureSwitches
+SetPopkinHolidaysCommand ..> IPopkinNotifier
+ListHolidayCalendarsQuery ..> HolidayCalendarDto : answers
+PopkinHolidaysDto --> HolidayCalendarDto
+PublishedHolidays ..> Holiday : reads published
+@enduml

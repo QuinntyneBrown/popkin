@@ -1,0 +1,34 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Edit and delete a day
+
+Container(web, "Popkin web app", "Angular", "DayActionsDialog, AddDayPage (edit), DeleteDayDialog, DAYS_API")
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "DaysController", "ASP.NET Core controller", "GET, PUT and DELETE /api/days/{dayId}")
+  Component(get, "GetDayQueryHandler", "MediatR handler", "The day with canEdit and canDelete")
+  Component(edit, "EditDayCommandHandler", "MediatR handler", "Changes the whole day once")
+  Component(del, "DeleteDayCommandHandler", "MediatR handler", "Removes the day; frees days inside")
+  Component(access, "IDayGuard", "Application service", "404 day_not_found for any day the person may not read")
+  Component(guard, "IMembershipGuard", "Application service", "404 popkin_not_found, 409 popkin_wrapped_up")
+  Component(rules, "ImportantDayRules", "Domain, pure", "CanEdit, CanDelete, StillInside")
+  Component(notifier, "IPopkinNotifier", "Application port", "ScheduleChanged(popkinId)")
+  ComponentDb(db, "Popkin database", "SQL Server", "ImportantDay, ImportantDayPerson")
+}
+Rel(web, ctrl, "Calls", "JSON/HTTPS")
+Rel(ctrl, get, "Sends GetDayQuery")
+Rel(ctrl, edit, "Sends EditDayCommand")
+Rel(ctrl, del, "Sends DeleteDayCommand")
+Rel(get, access, "RequireReadableAsync")
+Rel(edit, access, "RequireChangeableAsync")
+Rel(del, access, "RequireDeletableAsync")
+Rel(access, guard, "RequireMemberAsync / RequireActiveMemberAsync")
+Rel(get, rules, "CanEdit, CanDelete")
+Rel(edit, rules, "CanEdit, StillInside")
+Rel(del, rules, "CanDelete")
+Rel(edit, db, "Writes once", "EF Core")
+Rel(del, db, "Writes once", "EF Core")
+Rel(access, db, "Reads", "EF Core")
+Rel(edit, notifier, "After save, old and new Popkin")
+Rel(del, notifier, "After save, for a Popkin's day")
+@enduml

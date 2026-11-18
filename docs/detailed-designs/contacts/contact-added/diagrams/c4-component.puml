@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Added and add another
+
+Container_Boundary(web, "Popkin web app") {
+  Component(quick, "QuickAddPage, QuickAddStore", "Angular page, api library", "Calls opened() and added(contact)")
+  Component(page, "ContactAddedPage", "Angular page", "pk-screen, pk-avatar, pk-card, pk-button, pk-empty-state")
+  Component(session, "QuickAddSession", "api library, providedIn root", "count, last, opened, added, addAnother")
+  Component(text, "contact-added-text.ts", "api library", "addedHeading, addedLine, addedCount")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi.contact")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsPeopleController", "ASP.NET Core controller", "GET /api/contacts/people/{contactId}")
+  Component(query, "GetContactQueryHandler", "MediatR handler", "The owner's contact")
+  Component(guard, "IContactGuard", "Application service", "404 contact_not_found for another person's")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contact")
+}
+Rel(quick, session, "opened(), added(contact)")
+Rel(page, session, "contact(id), count, addAnother()")
+Rel(page, text, "Words")
+Rel(page, client, "contact(id) when the session lacks it")
+Rel(client, ctrl, "Calls", "JSON/HTTPS")
+Rel(ctrl, query, "Sends GetContactQuery")
+Rel(query, guard, "RequireOwnedAsync")
+Rel(query, db, "Reads", "EF Core")
+@enduml

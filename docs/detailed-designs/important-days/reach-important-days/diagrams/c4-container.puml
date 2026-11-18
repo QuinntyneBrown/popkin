@@ -1,0 +1,15 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Reach Important days
+
+Person(person, "Person", "Mara, on My Popkins")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "My Popkins with the Days button and the coming-days strip; Important days at /days")
+  Container(api, "Popkin API", "ASP.NET Core", "GET /api/days/coming, GET /api/popkins")
+  ContainerDb(db, "Popkin database", "SQL Server", "ImportantDay, PopkinSpace, Membership")
+}
+Rel(person, web, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Reads", "EF Core")
+@enduml

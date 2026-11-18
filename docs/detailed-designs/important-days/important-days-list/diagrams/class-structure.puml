@@ -1,0 +1,132 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — The Important days list
+
+package "Popkin.Domain" {
+  class ImportantDay {
+    +Guid Id
+    +Guid AddedByPersonId
+    +Guid? PopkinId
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +bool EveryYear
+    +Guid? WithinDayId
+  }
+  class ImportantDayPerson {
+    +Guid DayId
+    +Guid ContactId
+  }
+  class Holiday {
+    +Guid CalendarId
+    +int Year
+    +string Name
+    +DateOnly Date
+    +HolidayStatus Status
+  }
+  class HolidayCalendarYear {
+    +Guid CalendarId
+    +int Year
+    +DateTimeOffset? PublishedAt
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+    +Guid? HolidayCalendarId
+  }
+  enum HowSoon {
+    Today
+    Tomorrow
+    Days
+    NextWeek
+    Weeks
+  }
+  class ImportantDayRules <<static>> {
+    +{static} Occurrence(day, today): DayOccurrence?
+    +{static} HowSoon(daysLeft: int): (HowSoon, int)
+    +{static} ThisWeek(occursOn: DateOnly[], today): int
+    +{static} Nest(rows: DayRow[]): DayRow[]
+  }
+}
+package "Popkin.Application" {
+  class GetImportantDaysQuery {
+    +DateOnly On
+    +DayShow Show
+    +Guid? PopkinId
+  }
+  class GetImportantDaysQueryHandler {
+    +Handle(query: GetImportantDaysQuery): Task<ImportantDaysDto>
+  }
+  class DayVisibility {
+    +ReadableAsync(personId: Guid): Task<IQueryable<ImportantDay>>
+  }
+  class ObservedHolidays {
+    +For(popkinIds: Guid[], from: DateOnly): Task<PopkinHoliday[]>
+  }
+  class ImportantDaysDto {
+    +int ThisWeek
+    +DayPopkinDto[] Popkins
+    +DayRowDto[] Days
+  }
+  class DayRowDto {
+    +Guid Id
+    +DaySource Source
+    +string Title
+    +DateOnly OccursOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +string? Place
+    +bool EveryYear
+    +int DaysLeft
+    +HowSoonDto HowSoon
+    +DayPersonDto[] People
+    +DayPopkinDto? Popkin
+    +Guid? WithinDayId
+    +bool Expected
+    +bool CanEdit
+    +bool CanDelete
+  }
+}
+package "api library (web app)" {
+  class ImportantDaysStore {
+    +state: Signal<loading|ready|empty|failed>
+    +show: Signal<string>
+    +months: Signal<DayMonthGroup[]>
+    +chosen: Signal<Date>
+    +open(day: Date): void
+    +choose(show: string): void
+    +retry(): void
+    +chooseDate(date: Date): void
+  }
+  class "day-month.ts" as DayMonth <<pure>> {
+    +dayMonthOf(rows, month, today, chosen): DayMonth
+  }
+}
+ImportantDayPerson "*" --> "1" ImportantDay
+ImportantDay "*" --> "0..1" PopkinSpace : on
+ImportantDay "*" --> "0..1" ImportantDay : within
+Holiday "*" --> "1" HolidayCalendarYear : published in
+PopkinSpace "*" --> "0..1" HolidayCalendarYear : observes calendar of
+ImportantDayRules ..> HowSoon
+GetImportantDaysQueryHandler ..> GetImportantDaysQuery : handles
+GetImportantDaysQueryHandler ..> DayVisibility
+GetImportantDaysQueryHandler ..> ObservedHolidays
+GetImportantDaysQueryHandler ..> ImportantDayRules
+GetImportantDaysQueryHandler ..> ImportantDaysDto : returns
+ImportantDaysDto "1" *-- "*" DayRowDto
+ImportantDaysStore ..> ImportantDaysDto : reads through DAYS_API
+ImportantDaysStore ..> DayMonth
+@enduml

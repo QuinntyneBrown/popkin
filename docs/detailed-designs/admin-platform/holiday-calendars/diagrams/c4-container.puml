@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Container>
+LAYOUT_WITH_LEGEND()
+title Containers — Holiday calendars
+
+Person(admin, "Admin", "Owner, Support or Viewer")
+Person(member, "Member", "Of a Popkin")
+System_Boundary(popkin, "Popkin") {
+  Container(adminapp, "Popkin admin app", "Angular SPA, admin.popkin.community", "Holiday calendars page, sidebar count")
+  Container(web, "Popkin web app", "Angular SPA", "Days and Important days")
+  Container(api, "Popkin API", "ASP.NET Core, .NET 10", "/api/admin/holiday-calendars, /api/admin/waiting")
+  ContainerDb(db, "Popkin database", "SQL Server via EF Core", "HolidayCalendar, HolidayCalendarYear, Holiday, PopkinSpace, Membership")
+}
+Rel(admin, adminapp, "Reads", "HTTPS")
+Rel(adminapp, api, "GET /api/admin/holiday-calendars, GET /api/admin/waiting every 60 s", "JSON/HTTPS, admin cookie")
+Rel(member, web, "Opens Days", "HTTPS")
+Rel(web, api, "Reads published years", "JSON/HTTPS")
+Rel(api, db, "Reads calendars, years, holidays and use on each request", "EF Core")
+@enduml

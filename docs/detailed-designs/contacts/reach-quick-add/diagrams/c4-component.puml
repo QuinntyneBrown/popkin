@@ -1,0 +1,28 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Reach Quick Add
+
+System_Ext(phone, "Phone", "Opens a shortcut's url")
+Container_Boundary(web, "Popkin web app") {
+  Component(manifest, "manifest.webmanifest", "Web app manifest", "shortcuts: Add someone, Contacts (gap 146)")
+  Component(routes, "app.routes.ts", "Angular routes", "contacts/quick-add, shell bare, page quick-add")
+  Component(signedIn, "signedInGuard", "Route guard (signedInGuardOf)", "/sign-in?returnUrl= without a session")
+  Component(open, "contactsOpenGuard", "Route guard", "My Popkins while Contacts is off")
+  Component(session, "SessionStore", "api library", "ensureLoaded(), GET /api/auth/session")
+  Component(frame, "ContactsFrame", "api library", "open()")
+  Component(signIn, "SignInPage, VerifyCodePage", "Angular pages", "Keep and open returnUrl")
+  Component(page, "QuickAddPage", "Angular page", "Focuses the name field")
+}
+Container(api, "Popkin API", "ASP.NET Core", "Session and Contacts' summary")
+Rel(phone, manifest, "Reads")
+Rel(phone, routes, "Opens /contacts/quick-add")
+Rel(routes, signedIn, "Runs")
+Rel(routes, open, "Runs")
+Rel(routes, page, "Loads")
+Rel(signedIn, session, "Reads")
+Rel(signedIn, signIn, "Redirects with returnUrl")
+Rel(open, frame, "Reads")
+Rel(session, api, "GET /api/auth/session", "JSON/HTTPS")
+Rel(frame, api, "GET /api/contacts/summary", "JSON/HTTPS")
+@enduml

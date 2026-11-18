@@ -1,0 +1,77 @@
+@startuml
+title UML sequence behaviour — Edit a day
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Adder" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddDayPage (edit)" as page
+  participant "DayFormStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "EditDayCommandHandler" as handler
+  participant "IDayGuard" as access
+  participant "ImportantDayRules" as rules
+  participant "ImportantDay" as day
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open /days/{dayId}/edit
+page -> store : edit(dayId)
+store -> client : day(dayId), choices()
+client -> ctrl : GET /api/days/{dayId}
+ctrl --> client : 200 DayDto, or 404 day_not_found
+alt Gone, or canEdit false
+  page --> actor : Not-found screen
+else canEdit
+  page --> actor : "Edit day", everything filled in, "Save" (L2-193 AC1)
+  actor -> page : Change; "Save"
+  page --> actor : "Saving…" (<TO SUPPLY> words)
+  store -> client : edit(dayId, whole day)
+  client -> ctrl : PUT /api/days/{dayId}
+  ctrl -> handler : Send EditDayCommand
+  handler -> access : RequireChangeableAsync(dayId)
+  access --> handler : Day, or 404 day_not_found, 404 popkin_not_found, 409 popkin_wrapped_up
+  handler -> rules : CanEdit(day, person)
+  rules --> handler : Adder only; otherwise 403 day_not_yours (L2-193 AC3)
+  handler -> handler : Fields, contacts, longer day as Add a day
+  handler -> day : Change(...); replace ImportantDayPerson rows
+  handler -> db : Days inside this day
+  db --> handler : Days
+  loop Each day inside
+    handler -> rules : StillInside(inner, day)
+    opt No longer inside (gap 147)
+      handler -> day : inner.LeaveLongerDay()
+    end
+  end
+  handler -> db : Save once
+  db --> handler : Committed
+  opt On a Popkin, before or after
+    handler -> hub : await ScheduleChanged(old and new popkinId)
+  end
+  handler --> ctrl : DayDto
+  ctrl --> client : 200
+  alt Saved
+    page --> actor : The screen it opened from, with the change
+  else Fails
+    page --> actor : Nothing changes; everything typed kept (L2-194 AC3)
+  end
+end
+@enduml

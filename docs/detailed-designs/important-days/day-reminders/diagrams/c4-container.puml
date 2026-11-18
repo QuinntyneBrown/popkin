@@ -1,0 +1,19 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Containers — Reminders for a day
+
+Person(person, "Person", "Recipient")
+System_Ext(push, "Browser push service", "Web Push")
+System_Boundary(popkin, "Popkin") {
+  Container(web, "Popkin web app", "Angular", "Add a day; service worker opens alerts")
+  Container(api, "Popkin API", "ASP.NET Core", "Saves days and their reminders")
+  Container(worker, "Popkin Worker", ".NET worker", "SendImportantDayRemindersJob, DispatchNotificationsJob")
+  ContainerDb(db, "Popkin database", "SQL Server", "ImportantDay, Membership, NotificationPreferences, NotificationEvent, NotificationDelivery")
+}
+Rel(person, web, "Uses", "HTTPS")
+Rel(web, api, "Calls", "JSON/HTTPS")
+Rel(api, db, "Writes days", "EF Core")
+Rel(worker, db, "Finds what is due; adds events once; records sends", "EF Core")
+Rel(worker, push, "Sends alerts", "Web Push")
+@enduml

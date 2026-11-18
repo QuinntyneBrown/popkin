@@ -1,0 +1,45 @@
+@startuml
+title UML sequence behaviour — Holidays on Days
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinDaysPage" as page
+  participant "PopkinDaysStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinDaysController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetPopkinDaysQueryHandler" as handler
+  participant "PublishedHolidays" as published
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open Days
+page -> store : open(popkinId, from)
+store -> client : popkinDays(popkinId, { from, on, mine })
+client -> controller : GET /api/popkins/{popkinId}/days?from=&on=
+controller -> handler : Send GetPopkinDaysQuery (switch and membership first)
+alt PopkinSpace.HolidayCalendarId is null
+  handler --> controller : No holidays (L2-192 AC3)
+else A calendar
+  handler -> published : InAsync(calendarId, from, to)
+  published -> db : Holiday rows of published years, dates in the six weeks
+  published --> handler : Holidays with their status
+  handler -> handler : expected when the status is Estimated (L2-192 AC4)
+end
+controller --> client : 200 PopkinDaysDto: calendar, canChooseHolidays false, holidays as days
+client --> store : The six weeks
+alt Not the Host
+  store --> page : "Holidays United States" as text, no control (L2-192 AC2)
+end
+store --> page : Holidays under their dates, or rows with "Holiday"; an estimated one as expected
+actor -> page : Choose "Christmas Day"
+page --> actor : "From the United States holiday calendar. Every member sees it."; no actions (L2-191 AC3)
+@enduml

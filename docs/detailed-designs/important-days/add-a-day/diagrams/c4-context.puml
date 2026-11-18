@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Add a day
+
+Person(person, "Person", "Adds a day to their own calendar or to a Popkin's")
+Person(member, "Member", "Another member of the chosen Popkin")
+System(popkin, "Popkin", "Platform for pop-up communities, with Important days")
+
+Rel(person, popkin, "Adds a day in", "HTTPS")
+Rel(member, popkin, "Sees the Popkin's day on Days in", "HTTPS")
+@enduml

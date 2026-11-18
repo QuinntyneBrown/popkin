@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — A Popkin's holidays
+
+Person(host, "Host", "Chooses the holiday calendar the Popkin observes, or Off")
+Person(member, "Member", "Sees the Popkin's holidays on Days and on Important days")
+Person(admin, "Admin", "Keeps and publishes the holiday calendars")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences, schedules and important days")
+System(adminapp, "Popkin admin app", "Holiday calendars and their published years")
+
+Rel(host, popkin, "Chooses the holidays in")
+Rel(member, popkin, "Reads the holidays in")
+Rel(admin, adminapp, "Publishes a calendar's year in")
+Rel(adminapp, popkin, "Published years reach")
+@enduml

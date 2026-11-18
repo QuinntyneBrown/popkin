@@ -1,0 +1,64 @@
+@startuml
+title UML sequence behaviour — Opening Days
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Member" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinDaysPage" as page
+  participant "PopkinDaysStore" as store
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "PopkinDaysController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "GetPopkinDaysQueryHandler" as handler
+  participant "ImportantDayRules" as rules
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Choose "Days" in the view switch (L2-190 AC1)
+page -> store : open(popkinId, from from the address, or none)
+store --> page : state loading: placeholders, "Loading days…" (L2-194 AC1)
+store -> client : popkinDays(popkinId, { from, on: the device's date, mine })
+client -> controller : GET /api/popkins/{popkinId}/days?from=&on=2025-12-01&mine=false
+controller -> handler : Send GetPopkinDaysQuery
+handler -> switches : Require(Schedules, popkinId)
+alt Schedules is off
+  controller --> client : 404 feature_off (L2-077 AC3)
+  store --> page : state off: "Schedules is switched off"
+else On
+  handler -> guard : RequireMemberAsync(popkinId)
+  alt Not a member
+    controller --> client : 404 popkin_not_found (L2-051)
+  else Member
+    handler -> rules : MondayOf(from or on), SixWeeksFrom(monday) (L2-190 AC2)
+    handler -> db : The Popkin's ImportantDay rows; published holidays of its calendar
+    handler -> rules : OccurrenceIn each day; SixWeeks: bars, lanes, items, holidays (L2-190 AC3)
+    controller --> client : 200 PopkinDaysDto
+    client --> store : The six weeks
+    alt No day at all and no holiday
+      store --> page : state empty: "Nothing on Holiday Crew's calendar yet", "Add a day"
+    else Days to show
+      store --> page : From 768 px the weeks; narrower the list, soonest first (L2-190 AC3, AC4)
+    end
+  end
+end
+alt Failure
+  client --> store : Error
+  store --> page : "Couldn't load your days", "Check your connection and try again.", "Try again" (L2-194 AC2)
+end
+actor -> page : Choose "Earlier" or "Later"
+page -> page : Put ?from= four weeks before or after in the address (L2-190 AC2)
+page -> store : open(popkinId, from)
+notifier -> store : ScheduleChanged(popkinId) after another member's change
+store -> client : popkinDays(popkinId, the six weeks on screen)
+store --> page : The weeks follow without a reload
+@enduml

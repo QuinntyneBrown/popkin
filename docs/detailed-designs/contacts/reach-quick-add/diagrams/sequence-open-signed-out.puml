@@ -1,0 +1,42 @@
+@startuml
+title UML sequence behaviour — Quick Add's address opens signed out
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "signedInGuard" as guard
+  participant "SignInPage" as signIn
+  participant "VerifyCodePage" as verify
+  participant "QuickAddPage" as page
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "Auth endpoints" as api
+end box
+actor -> guard : Open /contacts/quick-add
+guard -> api : GET /api/auth/session
+api --> guard : No session (401)
+guard --> signIn : /sign-in?returnUrl=/contacts/quick-add (L2-177 AC3)
+signIn --> actor : Sign in shows first
+actor -> signIn : Phone or email
+signIn -> api : POST /api/auth/codes
+api --> signIn : Code sent
+signIn -> verify : /verify, pending code keeps returnUrl
+actor -> verify : Six-digit code
+verify -> api : POST /api/auth/codes/{id}/confirm
+api --> verify : Session cookie set
+verify -> guard : Open returnUrl /contacts/quick-add
+guard -> page : Signed in; contactsOpenGuard passes
+page --> actor : Quick Add with the name field focused (L2-177 AC2, AC3)
+@enduml

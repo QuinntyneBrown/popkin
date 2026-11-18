@@ -1,0 +1,57 @@
+@startuml
+title UML sequence behaviour — Another person's own day
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Lena (shares no Popkin with Mara)" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "ImportantDaysPage" as page
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "Day handler" as handler
+  participant "DayVisibility" as visibility
+  participant "IDayGuard" as guard
+  participant "ICurrentPerson" as current
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open Important days
+page -> client : list(on, everything)
+client -> ctrl : GET /api/days?on=2025-12-01&show=everything
+ctrl -> handler : Send GetImportantDaysQuery
+handler -> visibility : ReadableAsync(Lena)
+visibility -> current : PersonId
+current --> visibility : Lena
+visibility -> db : Own days where AddedByPersonId = Lena; days of Lena's Popkins
+db --> visibility : Lena's days only
+handler --> ctrl : No day of Mara's own calendar (L2-195 AC1)
+ctrl --> client : 200
+client --> page : Lena's list
+actor -> client : A link to Mara's "Picture day at Lincoln Elementary"
+client -> ctrl : GET /api/days/{dayId}
+ctrl -> handler : Send one request
+handler -> guard : RequireReadableAsync(dayId)
+guard -> db : Load by Id
+db --> guard : Own day, AddedByPersonId = Mara
+guard --> handler : 404 day_not_found, as for an unknown or deleted day
+handler --> ctrl : ProblemDetails, no title of the day
+ctrl --> client : 404 day_not_found
+client --> page : Not-found state (no mock yet)
+note over handler : Logs and spans carry the route template only
+@enduml

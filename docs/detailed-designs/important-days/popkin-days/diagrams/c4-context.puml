@@ -1,0 +1,10 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — A Popkin's Days
+
+Person(member, "Member", "Sees the days the whole group plans around, six weeks at a time")
+System(popkin, "Popkin", "Private space for one group: chat, calls, photos, experiences, schedules and important days")
+
+Rel(member, popkin, "Reads the Popkin's days, holidays and their own days in")
+@enduml

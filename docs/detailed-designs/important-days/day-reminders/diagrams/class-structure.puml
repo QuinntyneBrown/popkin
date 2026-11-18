@@ -1,0 +1,89 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Reminders for a day
+
+package "Popkin.Domain" {
+  enum DayReminder {
+    None
+    OnTheDay
+    OneDayBefore
+    ThreeDaysBefore
+    OneWeekBefore
+    TwoWeeksBefore
+  }
+  class ImportantDay {
+    +Guid Id
+    +Guid AddedByPersonId
+    +Guid? PopkinId
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +bool EveryYear
+    +DayReminder Reminder
+    +DateTimeOffset UpdatedAt
+  }
+  class ImportantDayRules <<static>> {
+    +NextOccurrence(day: ImportantDay, today: DateOnly): DateOnly?
+    +ReminderDay(occursOn: DateOnly, reminder: DayReminder): DateOnly?
+  }
+  enum NotificationKind {
+    ...
+    PopkinWrappingUp
+    SignInAndSecurity
+    ImportantDays
+  }
+  note bottom of NotificationKind : ImportantDays is proposed (gap 140)
+  class NotificationEvent {
+    +Guid Id
+    +NotificationKind Kind
+    +NotificationAudience Audience
+    +Guid? PopkinId
+    +Guid SubjectId
+    +Guid? RecipientPersonId
+    +string? DedupKey
+    +string? Facts
+    +{static} Record(...): NotificationEvent
+  }
+}
+package "Popkin.Application" {
+  class ImportantDayReminderRules <<static>> {
+    +int Hour = 9
+    +Window(reminderDay: DateOnly, occursOn: DateOnly, zone: TimeZoneInfo): (DateTimeOffset, DateTimeOffset)
+    +Due(day: ImportantDay, zone: TimeZoneInfo, now: DateTimeOffset): DateOnly?
+  }
+  class SendImportantDayRemindersCommandHandler {
+    +Handle(command: SendImportantDayRemindersCommand): Task<int>
+  }
+  class ImportantDayReminderStanding {
+    +StandingAsync(event: NotificationEvent, personId: Guid): Task<PhoneAlert?>
+  }
+  class PhoneAlert {
+    +string Title
+    +string Body
+    +string Url
+  }
+}
+package "Popkin.Worker" {
+  class SendImportantDayRemindersJob {
+    +{static} TimeSpan Period = 5 min
+    #NewCommand(): IRequest<int>
+  }
+}
+ImportantDay --> DayReminder
+ImportantDayRules ..> ImportantDay
+ImportantDayReminderRules ..> ImportantDayRules
+SendImportantDayRemindersJob ..> SendImportantDayRemindersCommandHandler : sends command
+SendImportantDayRemindersCommandHandler ..> ImportantDayReminderRules
+SendImportantDayRemindersCommandHandler --> NotificationEvent : records once
+NotificationEvent --> NotificationKind
+ImportantDayReminderStanding ..> ImportantDay : reads again
+ImportantDayReminderStanding ..> PhoneAlert : builds
+@enduml

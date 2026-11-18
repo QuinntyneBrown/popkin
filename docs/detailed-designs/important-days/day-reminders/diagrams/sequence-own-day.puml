@@ -1,0 +1,48 @@
+@startuml
+title UML sequence behaviour — Remind of an own day
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+participant "TimeProvider" as time
+box "Backend — Popkin Worker" #D1FADF
+  participant "SendImportantDayRemindersJob" as job
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "SendImportantDayRemindersCommandHandler" as handler
+  participant "ImportantDayRules" as rules
+  participant "ImportantDayReminderRules" as rrules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+time -> job : 5 min elapse
+job -> handler : Send SendImportantDayRemindersCommand
+handler -> db : Own days with a reminder that may fall due; the adder's time zone
+db --> handler : Days
+loop Each own day
+  handler -> rules : NextOccurrence(day, adder's local today)
+  rules --> handler : occursOn; next year's date for "Every year" once passed (L2-189 AC3)
+  handler -> rules : ReminderDay(occursOn, reminder)
+  rules --> handler : Reminder day, or none for "No reminder"
+  handler -> rrules : Due(day, zone, now)
+  rrules --> handler : From 9:00 on the reminder day until the day ends; not for a day updated after it
+  opt Due
+    handler -> db : Add event ImportantDays, Recipient = adder, DedupKey reminder:important-day:{day}:{occursOn}:{adder} (L2-189 AC1)
+  end
+end
+handler -> db : Only keys not yet recorded; save once
+db --> handler : Committed; a second tick adds none
+handler --> job : Count recorded
+job -> job : RemindersTicked("important_days")
+@enduml

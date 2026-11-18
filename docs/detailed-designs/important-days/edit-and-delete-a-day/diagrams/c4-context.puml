@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Edit and delete a day
+
+Person(adder, "Adder", "Added the day; edits and deletes it")
+Person(host, "Host", "Runs the Popkin; deletes a member's day")
+Person(member, "Member", "Sees the Popkin's days")
+System(popkin, "Popkin", "Platform for pop-up communities, with Important days")
+
+Rel(adder, popkin, "Edits and deletes a day in", "HTTPS")
+Rel(host, popkin, "Deletes a member's day in", "HTTPS")
+Rel(member, popkin, "Sees the change on Days in", "HTTPS")
+@enduml

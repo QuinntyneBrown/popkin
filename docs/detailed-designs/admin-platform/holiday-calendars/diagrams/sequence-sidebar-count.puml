@@ -1,0 +1,59 @@
+@startuml
+title UML sequence behaviour — The sidebar counts calendars without next year's dates
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Admin" as actor
+box "Frontend — Popkin admin app" #E0F2FE
+  participant "pk-admin-shell" as shell
+  participant "AdminWaitingStore" as waiting
+  participant "HttpAdminPlatformApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "AdminShellController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "GetAdminWaitingQueryHandler" as handler
+  participant "IAdminGuard" as guard
+  participant "HolidayCalendarRules" as rules
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> shell : Signs in, any page with shell 'admin'
+shell -> waiting : Start
+loop At start and every 60 s while signed in
+  waiting -> client : waiting()
+  client -> controller : GET /api/admin/waiting, admin cookie
+  controller -> handler : Send GetAdminWaitingQuery
+  handler -> guard : CurrentAdminAsync
+  handler -> db : Published years of each calendar
+  db --> handler : Years
+  handler -> rules : NeedsDates(years, thisYear) per calendar
+  rules --> handler : Warned, drafts excluded
+  handler --> controller : AdminWaitingDto { ..., holidayCalendars }
+  alt Read succeeds
+    controller --> client : 200
+    client --> waiting : Counts
+  else Read fails
+    waiting -> waiting : Keep the last counts
+  end
+  waiting --> shell : holidayCalendars
+  alt More than 0
+    shell --> actor : "Holiday calendars" between "Notifications" and "Limits", badge "{n}", named "{n} without next year’s dates" (L2-196 AC1)
+  else 0
+    shell --> actor : "Holiday calendars" with no badge
+  end
+end
+@enduml

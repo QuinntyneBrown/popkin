@@ -1,0 +1,29 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Who sees a day
+
+Container_Boundary(api, "Popkin API") {
+  Component(ctrls, "DaysController, PopkinDaysController", "ASP.NET Core controllers", "/api/days/**, /api/popkins/{popkinId}/days/**, default authenticated policy")
+  Component(handlers, "Day handlers", "MediatR handlers", "Popkin.Application/ImportantDays/*")
+  Component(visibility, "DayVisibility", "Application", "ReadableAsync: own days and days of the caller's Popkins with Schedules on")
+  Component(guard, "IDayGuard", "Application", "RequireReadableAsync, RequireChangeableAsync, RequireDeletableAsync")
+  Component(people, "DayPeople", "Application", "ShownTo: the people for the adder only (gap 141)")
+  Component(membership, "IMembershipGuard", "Application", "404 popkin_not_found")
+  Component(switches, "IFeatureSwitches", "Application", "IsOn(Schedules, popkinId)")
+  Component(current, "ICurrentPerson", "Application", "PersonId from the session")
+  ComponentDb(db, "Popkin database", "SQL Server", "ImportantDay, ImportantDayPerson, Membership")
+}
+Container(web, "Popkin web app", "Angular", "Shows what it is given; Only you on own days")
+Rel(web, ctrls, "Calls", "JSON/HTTPS")
+Rel(ctrls, handlers, "Sends one request")
+Rel(handlers, visibility, "Every list")
+Rel(handlers, guard, "One day by id")
+Rel(handlers, people, "A day's people")
+Rel(guard, membership, "A Popkin's day")
+Rel(visibility, switches, "Schedules on")
+Rel(visibility, current, "PersonId")
+Rel(guard, current, "PersonId")
+Rel(visibility, db, "Memberships, then days", "EF Core")
+Rel(guard, db, "Load by Id", "EF Core")
+@enduml

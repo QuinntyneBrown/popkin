@@ -1,0 +1,54 @@
+@startuml
+title UML sequence behaviour — The people a day is about are not told
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara (adder)" as actor
+actor "Femi (a contact with an account)" as femi
+box "Frontend — Popkin web app" #E0F2FE
+  participant "AddDayPage" as page
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+  participant "PopkinHub" as hub
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddDayCommandHandler" as handler
+  participant "IContactGuard" as contacts
+  participant "ICurrentPerson" as current
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Add "Leaving drinks" about Femi
+page -> client : add(body with clientId)
+client -> ctrl : POST /api/days
+ctrl -> handler : Send AddDayCommand
+handler -> current : PersonId
+current --> handler : Mara
+handler -> contacts : RequireOwnedAsync(Femi's contact)
+contacts --> handler : Mara's contact, or 404 contact_not_found
+handler -> db : Insert ImportantDay (AddedByPersonId = Mara, PopkinId null) and ImportantDayPerson
+handler -> db : SaveChangesAsync
+handler --> ctrl : The day
+ctrl --> client : 201
+note over hub, femi : No hub event, NotificationEvent, email, text or Web Push to Femi (L2-195 AC3)
+hub -[hidden]-> femi
+opt The day is on Holiday Crew, where Femi is a member
+  handler -> hub : ScheduleChanged through IPopkinNotifier to the Popkin group, no title
+  hub -> femi : ScheduleChanged; Femi's Days reads the day without its people
+end
+note over handler : Changing or deleting the day reaches Femi no more than adding it
+@enduml

@@ -1,0 +1,61 @@
+@startuml
+title UML sequence behaviour — The save fails or is cancelled
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Person" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "QuickAddPage" as page
+  participant "QuickAddStore" as store
+  participant "HttpContactsApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "ContactsPeopleController" as ctrl
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "AddContactCommandHandler" as handler
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+alt "Cancel"
+  actor -> page : "Cancel"
+  page --> actor : Nothing saved; Today at /contacts (L2-178 AC6)
+else "Save" fails
+  actor -> page : "Save"
+  page -> store : save()
+  store -> client : addContact(request with clientId)
+  client -> ctrl : POST /api/contacts/people
+  alt No connection or 5xx
+    client --> store : Error
+  else Refused
+    ctrl -> handler : Send AddContactCommand
+    handler --> ctrl : 400 ProblemDetails (contact_phone_invalid…)
+    ctrl --> client : 400
+    client --> store : Error
+  end
+  store --> page : failed; values, photo and clientId kept
+  page --> actor : "We couldn't save Femi. Everything you typed is still here. Check your connection and try Save again." (L2-178 AC5)
+  actor -> page : "Save" again
+  page -> store : save()
+  store -> client : addContact(same clientId)
+  client -> ctrl : POST /api/contacts/people
+  ctrl -> handler : Send AddContactCommand
+  handler -> db : Contact with this clientId?
+  db --> handler : The one a lost request saved, or none
+  handler --> ctrl : ContactProfileDto, saved once
+  ctrl --> client : 201
+  client --> page : Added opens (L2-178 AC4)
+end
+@enduml

@@ -1,0 +1,46 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Confirm and publish holiday dates
+
+Container_Boundary(adminapp, "Popkin admin app") {
+  Component(page, "HolidaysPage", "Angular page", "Change, Done, Publish {year}")
+  Component(dialog, "PublishHolidaysDialog", "CDK dialog", "Counts, required reason")
+  Component(state, "ActionDialogState", "api library", "Empty, busy, failed")
+  Component(store, "AdminHolidayCalendarsStore", "api library", "Row being changed, estimates")
+  Component(session, "AdminSessionStore", "api library", "blockedReason(ChangeHolidayCalendars)")
+  Component(client, "ADMIN_PLATFORM_API", "api library contract", "HttpAdminPlatformApi")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "AdminHolidayCalendarsController", "ASP.NET Core controller", "Admin scheme only")
+  Component(change, "ChangeHolidayDateCommandHandler", "MediatR handler", "Role, change, audit, one save")
+  Component(publish, "PublishHolidayYearCommandHandler", "MediatR handler", "Role, reason, publish, audit, one save")
+  Component(guard, "IAdminGuard", "Application", "RequireAsync(ChangeHolidayCalendars)")
+  Component(perm, "AdminPermissions", "Domain", "Owner and Support")
+  Component(reason, "ReasonRules", "Application", "Required, 500 characters")
+  Component(domain, "Holiday, HolidayCalendarYear", "Domain", "Change, Publish")
+  Component(use, "HolidayCalendarUse", "Application", "People and Popkins")
+  Component(audit, "IAuditLog", "Application", "RecordAsync(AuditRecord)")
+  ComponentDb(db, "Popkin database", "SQL Server", "Holiday, HolidayCalendarYear, AuditEntry")
+}
+Rel(page, store, "Changes, confirms")
+Rel(page, session, "Switches controls off")
+Rel(page, dialog, "Opens")
+Rel(dialog, state, "Delegates")
+Rel(dialog, store, "Publishes through")
+Rel(store, client, "Calls")
+Rel(client, ctrl, "PUT holiday, POST publish")
+Rel(ctrl, change, "Sends ChangeHolidayDateCommand")
+Rel(ctrl, publish, "Sends PublishHolidayYearCommand")
+Rel(change, guard, "Checks role")
+Rel(publish, guard, "Checks role")
+Rel(guard, perm, "Allows")
+Rel(publish, reason, "Required")
+Rel(change, domain, "Holiday.Change")
+Rel(publish, domain, "HolidayCalendarYear.Publish")
+Rel(publish, use, "Counts")
+Rel(change, audit, "ChangedHolidayDate")
+Rel(publish, audit, "PublishedHolidayYear")
+Rel(change, db, "Saves once", "EF Core")
+Rel(publish, db, "Saves once", "EF Core")
+@enduml

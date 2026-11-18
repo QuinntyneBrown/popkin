@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+LAYOUT_WITH_LEGEND()
+title System Context — Confirm and publish holiday dates
+
+Person(admin, "Owner or Support admin", "Confirms dates and publishes a year")
+Person(viewer, "Viewer admin", "Reads; changes nothing")
+Person(member, "Member", "Of a Popkin that observes the calendar")
+System(popkin, "Popkin", "Pop-up communities, with holiday calendars")
+
+Rel(admin, popkin, "Changes dates and publishes a year, with a reason, in", "Popkin admin app")
+Rel(viewer, popkin, "Sees the controls switched off in", "Popkin admin app")
+Rel(member, popkin, "Sees the published year's holidays in", "Popkin web app")
+@enduml

@@ -1,0 +1,101 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Quick Add
+
+package "frontend/projects/popkin" {
+  class QuickAddPage {
+    #store: QuickAddStore
+    #phoneContacts: PhoneContacts
+    +save(event: Event): void
+    +pickFromPhone(): Promise<void>
+    +pick(photo: File): void
+  }
+}
+package "frontend/projects/api (contacts)" {
+  class QuickAddStore {
+    +values: Signal<QuickAddValues>
+    +photo: Signal<File | null>
+    +photoUrl: Signal<string | null>
+    +canSave: Signal<boolean>
+    +state: Signal<'idle' | 'saving' | 'failed'>
+    +saved: Signal<ContactProfileView | null>
+    -clientId: string
+    +save(): void
+    +pick(photo: File): void
+    +fill(picked: PhoneContact): void
+    +reset(): void
+  }
+  class QuickAddValues {
+    +name: string
+    +phone: string
+    +knownAs: string
+    +circle: ContactCircle
+  }
+  interface PhoneContacts {
+    +available: boolean
+    +pickOne(): Promise<PhoneContact | null>
+  }
+  class BrowserPhoneContacts {
+    +available: boolean
+    +pickOne(): Promise<PhoneContact | null>
+  }
+  class PhoneContact {
+    +name: string
+    +phone: string | null
+  }
+  interface ContactsApi {
+    +addContact(request: SaveContactRequest, photo: File | null): Observable<ContactProfileView>
+  }
+  class QuickAddSession {
+    +opened(): void
+    +added(contact: ContactProfileView): void
+  }
+  enum ContactCircle {
+    Family
+    Friends
+    Work
+    Neighbours
+    Clubs
+  }
+}
+package "Popkin.Application" {
+  class SaveContactRequest {
+    +Guid ClientId
+    +string? Name
+    +string? KnownAs
+    +string? Circle
+    +string? Phone
+    +string? Email
+    +string? City
+    +string? HowWeMet
+    +IReadOnlyList<string>? Loves
+  }
+  class AddContactCommand {
+    +SaveContactRequest Contact
+    +PhotoUpload? Photo
+  }
+  class AddContactCommandHandler {
+    +Handle(request: AddContactCommand): Task<ContactProfileDto>
+  }
+}
+QuickAddPage --> QuickAddStore
+QuickAddPage ..> PhoneContacts : PHONE_CONTACTS
+BrowserPhoneContacts ..|> PhoneContacts
+PhoneContacts ..> PhoneContact : answers
+QuickAddStore *-- QuickAddValues
+QuickAddValues --> ContactCircle
+QuickAddStore ..> ContactsApi : CONTACTS_API
+QuickAddStore ..> QuickAddSession : added
+QuickAddStore ..> SaveContactRequest : builds
+AddContactCommand --> SaveContactRequest
+AddContactCommandHandler ..> AddContactCommand : handles
+@enduml

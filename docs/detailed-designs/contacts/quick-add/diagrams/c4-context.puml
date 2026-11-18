@@ -1,0 +1,12 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Quick Add
+
+Person(owner, "Person", "Keeps their own Contacts; the only one who sees them")
+System(popkin, "Popkin", "Platform for pop-up communities, with Contacts")
+System_Ext(phoneBook, "Phone's contacts", "The phone's own address book, shared one entry at a time through the browser")
+
+Rel(owner, popkin, "Adds someone with Quick Add in", "HTTPS")
+Rel(popkin, phoneBook, "Asks for one entry's name and phone", "Contact Picker API")
+@enduml

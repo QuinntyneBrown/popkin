@@ -1,0 +1,66 @@
+@startuml
+title UML sequence behaviour — Choosing the holidays
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+actor "Host" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "PopkinDaysPage" as page
+  participant "PopkinHolidaysStore" as hstore
+  participant "PopkinDaysStore" as dstore
+  participant "HttpDaysApi" as client
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "HolidayCalendarsController" as calctrl
+  participant "PopkinDaysController" as controller
+end box
+box "Backend — Popkin Application and Domain" #ECFDF3
+  participant "IFeatureSwitches" as switches
+  participant "IMembershipGuard" as guard
+  participant "Handler" as handler
+  participant "IPopkinNotifier" as notifier
+end box
+box "Backend — Popkin Infrastructure" #FFF4E5
+  database "Popkin database" as db
+end box
+actor -> page : Open Days with canChooseHolidays
+page -> hstore : Load the calendars
+hstore -> client : holidayCalendars()
+client -> calctrl : GET /api/holiday-calendars
+calctrl -> db : Calendars with a published HolidayCalendarYear
+calctrl --> client : 200 HolidayCalendarDto[]
+hstore --> page : "Holidays": each published calendar and "Off", the Popkin's chosen (L2-192 AC1)
+actor -> page : Choose "United Kingdom", or "Off"
+page -> hstore : choose(calendarId or null)
+hstore -> client : setHolidays(popkinId, calendarId)
+client -> controller : PUT /api/popkins/{popkinId}/holidays
+controller -> handler : Send SetPopkinHolidaysCommand
+handler -> switches : Require(Schedules, popkinId)
+handler -> guard : RequireHostAsync(popkinId)
+alt Schedules is off
+  controller --> client : 404 feature_off (L2-077 AC3)
+else Not a member
+  controller --> client : 404 popkin_not_found (L2-051)
+else Wrapped up
+  controller --> client : 409 popkin_wrapped_up (L2-045)
+else Not the Host
+  controller --> client : 403 host_only (L2-192 AC2)
+else No such published calendar
+  controller --> client : 400 invalid_calendar
+else Allowed
+  handler -> db : Set PopkinSpace.HolidayCalendarId; null is Off
+  handler -> notifier : ScheduleChanged(popkinId) to the Popkin group
+  controller --> client : 200 PopkinHolidaysDto
+  client --> hstore : The calendar
+  hstore -> dstore : Read the six weeks again
+  dstore --> page : The new calendar's holidays, or none for Off (L2-192 AC3)
+  notifier -> dstore : ScheduleChanged on every other member's open Days
+  dstore --> page : Their Days follow without a reload
+end
+alt Failure
+  client --> hstore : Error
+  hstore --> page : The choice returns to the calendar before; a message says it didn't go through (L2-194 AC3)
+end
+@enduml

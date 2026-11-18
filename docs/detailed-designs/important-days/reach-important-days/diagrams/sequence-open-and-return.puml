@@ -1,0 +1,44 @@
+@startuml
+title UML sequence behaviour — Open Important days and return to My Popkins
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam rectangle {
+  BorderColor #344054
+  FontColor #101828
+}
+skinparam package {
+  BorderColor #667085
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+actor "Mara" as actor
+box "Frontend — Popkin web app" #E0F2FE
+  participant "MyPopkinsPage" as page
+  participant "Router" as router
+  participant "ImportantDaysPage" as days
+  participant "ImportantDaysStore" as store
+end box
+box "Backend — Popkin API" #D1FADF
+  participant "DaysController" as ctrl
+end box
+alt "Days" button (icon only below 640 px)
+  actor -> page : Choose "Important days" (L2-182 AC1)
+else A day of the strip
+  actor -> page : Choose "Picture day at Lincoln Elementary" (L2-182 AC2)
+else "All important days"
+  actor -> page : Choose "All important days" (L2-182 AC2)
+end
+page -> router : navigate /days
+router -> days : Route data shell bare, page important-days
+days -> store : open(device day)
+store -> ctrl : GET /api/days?on=2025-12-01&show=everything
+ctrl --> store : 200 ImportantDaysDto
+days --> actor : "Important days" (The Important days list)
+actor -> days : Choose "Your Popkins"
+days -> router : navigate /
+router -> page : My Popkins opens (L2-182 AC4)
+page --> actor : Your Popkins, with the strip read again
+@enduml

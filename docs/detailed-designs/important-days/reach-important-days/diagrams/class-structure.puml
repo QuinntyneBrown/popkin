@@ -1,0 +1,93 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Reach Important days
+
+package "Popkin.Domain" {
+  class ImportantDay {
+    +Guid Id
+    +Guid AddedByPersonId
+    +Guid? PopkinId
+    +string Title
+    +DateOnly StartsOn
+    +DateOnly EndsOn
+    +TimeOnly? StartsAt
+    +bool EveryYear
+    +Guid? WithinDayId
+  }
+  class ImportantDayRules <<static>> {
+    +{static} Occurrence(day: ImportantDay, today: DateOnly): DayOccurrence?
+  }
+  class DayOccurrence <<record>> {
+    +DateOnly OccursOn
+    +DateOnly EndsOn
+  }
+  class PopkinSpace {
+    +Guid Id
+    +string Name
+    +string Emoji
+    +PopkinColour Colour
+  }
+}
+package "Popkin.Application" {
+  class GetComingDaysQuery {
+    +DateOnly On
+  }
+  class GetComingDaysQueryHandler {
+    +Handle(query: GetComingDaysQuery): Task<ComingDaysDto>
+  }
+  class DayVisibility {
+    +ReadableAsync(personId: Guid): Task<IQueryable<ImportantDay>>
+  }
+  class ComingDaysDto {
+    +ComingDayDto[] Days
+  }
+  class ComingDayDto {
+    +Guid Id
+    +string Title
+    +DateOnly OccursOn
+    +DateOnly EndsOn
+    +DayPopkinDto? Popkin
+  }
+  class DayPopkinDto {
+    +Guid Id
+    +string Emoji
+    +string Name
+    +PopkinColour Colour
+  }
+}
+package "api library (web app)" {
+  interface DaysApi {
+    +coming(on: string): Observable<ComingDaysView>
+  }
+  class ComingDaysStore {
+    +days: Signal<ComingDayView[]>
+    +open(day: Date): void
+  }
+}
+package "components library" {
+  class ComingDays <<pk-coming-days>> {
+    +days: ComingDay[]
+    +link: string
+  }
+}
+ImportantDay "*" --> "0..1" PopkinSpace : on
+ImportantDayRules ..> ImportantDay : reads
+ImportantDayRules ..> DayOccurrence : gives
+GetComingDaysQueryHandler ..> GetComingDaysQuery : handles
+GetComingDaysQueryHandler ..> DayVisibility
+GetComingDaysQueryHandler ..> ImportantDayRules
+GetComingDaysQueryHandler ..> ComingDaysDto : returns
+ComingDaysDto "1" *-- "0..3" ComingDayDto
+ComingDayDto --> DayPopkinDto
+ComingDaysStore ..> DaysApi
+ComingDays ..> ComingDaysStore : fed by MyPopkinsPage
+@enduml

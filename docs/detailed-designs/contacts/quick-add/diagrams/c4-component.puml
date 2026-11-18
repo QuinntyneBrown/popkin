@@ -1,0 +1,31 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Quick Add
+
+System_Ext(phoneBook, "Phone's contacts", "navigator.contacts")
+Container_Boundary(web, "Popkin web app") {
+  Component(page, "QuickAddPage", "Angular page", "pk-top-bar, pk-photo-picker, pk-text-field, pk-choice-chips, pk-banner")
+  Component(store, "QuickAddStore", "api library", "Values, photo, canSave, idle | saving | failed")
+  Component(picker, "PHONE_CONTACTS", "api library contract", "BrowserPhoneContacts")
+  Component(session, "QuickAddSession", "api library", "Counts saves since Quick Add opened")
+  Component(client, "CONTACTS_API", "api library contract", "HttpContactsApi.addContact")
+}
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "ContactsPeopleController", "ASP.NET Core controller", "POST /api/contacts/people")
+  Component(handler, "AddContactCommandHandler", "MediatR handler", "Client id, validation, avatar, one save")
+  Component(validator, "SaveContactValidator", "Application static class", "Name trimmed; 400 codes")
+  Component(photos, "IPhotoStore", "Application abstraction", "SaveAsync, DeleteAsync")
+  ComponentDb(db, "Popkin database", "SQL Server", "Contact")
+}
+Rel(page, store, "Reads and changes")
+Rel(page, picker, "pickOne()")
+Rel(picker, phoneBook, "select", "Contact Picker API")
+Rel(store, client, "addContact(request, photo)")
+Rel(store, session, "added(contact)")
+Rel(client, ctrl, "multipart/form-data")
+Rel(ctrl, handler, "Sends AddContactCommand")
+Rel(handler, validator, "Validates")
+Rel(handler, photos, "Writes the avatar")
+Rel(handler, db, "Saves once", "EF Core")
+@enduml

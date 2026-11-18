@@ -1,0 +1,33 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title Components — Add a day
+
+Container(web, "Popkin web app", "Angular", "AddDayPage, DayFormStore, day-form.ts, DAYS_API")
+Container_Boundary(api, "Popkin API") {
+  Component(ctrl, "DaysController", "ASP.NET Core controller", "GET /api/days/choices, POST /api/days")
+  Component(pctrl, "PopkinDaysController", "ASP.NET Core controller", "GET /api/popkins/{id}/days/containing")
+  Component(choices, "GetDayChoicesQueryHandler", "MediatR handler", "Active Popkins with Schedules on; the person's contacts")
+  Component(longer, "GetLongerDaysQueryHandler", "MediatR handler", "Longer days containing a date")
+  Component(add, "AddDayCommandHandler", "MediatR handler", "Checks and adds a day once")
+  Component(guard, "IMembershipGuard", "Application service", "404 popkin_not_found, 409 popkin_wrapped_up")
+  Component(features, "IFeatureSwitches", "Application service", "404 feature_off without Schedules")
+  Component(rules, "ImportantDayRules", "Domain, pure", "Contains, CanSitInside, Shortest")
+  Component(notifier, "IPopkinNotifier", "Application port", "ScheduleChanged(popkinId)")
+  ComponentDb(db, "Popkin database", "SQL Server", "ImportantDay, ImportantDayPerson")
+}
+Rel(web, ctrl, "Calls", "JSON/HTTPS")
+Rel(web, pctrl, "Calls", "JSON/HTTPS")
+Rel(ctrl, choices, "Sends GetDayChoicesQuery")
+Rel(ctrl, add, "Sends AddDayCommand")
+Rel(pctrl, longer, "Sends GetLongerDaysQuery(popkinId, date)")
+Rel(add, features, "Require(Schedules)")
+Rel(add, guard, "RequireActiveMemberAsync")
+Rel(longer, guard, "RequireMemberAsync")
+Rel(add, rules, "CanSitInside")
+Rel(longer, rules, "Contains, Shortest")
+Rel(add, db, "Writes once", "EF Core")
+Rel(choices, db, "Reads", "EF Core")
+Rel(longer, db, "Reads", "EF Core")
+Rel(add, notifier, "After save, for a Popkin's day")
+@enduml

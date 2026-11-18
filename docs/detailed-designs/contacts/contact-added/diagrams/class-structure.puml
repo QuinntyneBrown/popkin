@@ -1,0 +1,61 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam defaultFontName Arial
+skinparam ArrowColor #344054
+skinparam class {
+  BorderColor #344054
+  FontColor #101828
+  BackgroundColor #F9FAFB
+}
+title Class structure — Added and add another
+
+package "frontend/projects/popkin" {
+  class ContactAddedPage {
+    #contact: Signal<ContactProfileView | null>
+    #reading: Signal<'ready' | 'notFound' | <TO SUPPLY>>
+    #heading: Signal<string>
+    #line: Signal<string>
+    #count: Signal<string | null>
+    +addAnother(): void
+  }
+  class QuickAddPage {
+    +ngOnInit(): void
+  }
+}
+package "frontend/projects/api (contacts)" {
+  class QuickAddSession <<providedIn root>> {
+    +count: Signal<number>
+    +last: Signal<ContactProfileView | null>
+    -continuing: boolean
+    +opened(): void
+    +added(contact: ContactProfileView): void
+    +addAnother(): void
+    +contact(contactId: string): ContactProfileView | null
+  }
+  class contact_added_text <<contact-added-text.ts>> {
+    +addedHeading(firstName: string): string
+    +addedLine(circle: ContactCircle | null, knownAs: string | null): string
+    +addedCount(n: number): string | null
+  }
+  class ContactProfileView {
+    +id: string
+    +firstName: string
+    +initials: string
+    +accent: string
+    +photoUrl: string | null
+    +knownAs: string | null
+    +circle: ContactCircle | null
+  }
+  interface ContactsApi {
+    +contact(contactId: string): Observable<ContactProfileView>
+  }
+}
+QuickAddPage ..> QuickAddSession : opened()
+ContactAddedPage ..> QuickAddSession : contact, count, addAnother
+ContactAddedPage ..> contact_added_text
+ContactAddedPage ..> ContactsApi : CONTACTS_API
+QuickAddSession "1" o-- "0..1" ContactProfileView : last
+ContactsApi ..> ContactProfileView : answers
+@enduml

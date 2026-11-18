@@ -1,0 +1,13 @@
+@startuml
+!include <C4/C4_Component>
+LAYOUT_WITH_LEGEND()
+title System Context — Reminders for a day
+
+Person(person, "Person", "Adder of an own day; member of a Popkin with days")
+System(popkin, "Popkin", "Platform for pop-up communities, with Important days")
+System_Ext(push, "Browser push service", "Web Push (ADR 0028)")
+Rel(person, popkin, "Adds days with a reminder in", "HTTPS")
+Rel(popkin, push, "Sends 9 am phone alerts via", "Web Push")
+Rel(push, person, "Shows the alert on each allowed device")
+Rel(person, popkin, "Opens Important days or the Popkin's Days from", "HTTPS")
+@enduml
