@@ -18,6 +18,7 @@ import {
   PHONE_CONTACTS,
   PHOTO_ACCEPT,
   QUICK_ADD_CIRCLE,
+  QuickAddSession,
   QuickAddStore,
   SAVE_FAILED_TEXT,
   canQuickAdd,
@@ -85,6 +86,8 @@ export class QuickAddPage {
   private readonly name = viewChild.required<TextField>('name');
 
   constructor() {
+    // A new count starts here, unless Added's "Add another" opened Quick Add (L2-181 AC2).
+    inject(QuickAddSession).opened();
     inject(DestroyRef).onDestroy(() => this.releasePreview());
     // The name is focused as Quick Add opens, so a name can be typed at once (L2-177 AC2).
     afterNextRender(() => this.name().focus());

@@ -346,6 +346,14 @@ export const routes: Routes = [
     title: 'Add someone · Contacts · Popkin',
   },
   {
+    path: 'contacts/people/:contactId/added',
+    canActivate: [signedInGuard, contactsOpenGuard],
+    loadComponent: () =>
+      import('./pages/contact-added/contact-added.page').then((m) => m.ContactAddedPage),
+    data: data({ shell: 'bare', page: 'contact-added' }),
+    title: 'Added · Contacts · Popkin',
+  },
+  {
     path: 'contacts/people/new',
     canActivate: [signedInGuard, contactsOpenGuard],
     loadComponent: () =>

@@ -299,3 +299,8 @@
   margin-inline: auto;
   padding-inline: var(--layout-margin);
 }
+
+/* A narrow hero (Added): its column spans the container, and its text stays centred. */
+:host(.screen--narrow) .screen__body--hero .screen__content {
+  align-items: stretch;
+}

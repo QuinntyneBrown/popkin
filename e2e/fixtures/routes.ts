@@ -11,6 +11,8 @@ export interface ScreenRoute {
 }
 
 const created = responses['POST /api/popkins'].body;
+/** Femi Bankole, the contact Add someone and Quick Add save. */
+const femiId = responses['POST /api/contacts/people'].body.id;
 const invite = `/i/${created.inviteCode}`;
 const chat = `/p/${created.id}/chat/everyone`;
 const home = `/p/${created.id}`;
@@ -563,6 +565,14 @@ export const routes = {
   quickAddFilled: { app: '/contacts/quick-add', mock: 'pages/quick-add/filled.html' },
   quickAddSubmitting: { app: '/contacts/quick-add', mock: 'pages/quick-add/submitting.html' },
   quickAddError: { app: '/contacts/quick-add', mock: 'pages/quick-add/error.html' },
+  contactAdded: {
+    app: `/contacts/people/${femiId}/added`,
+    mock: 'pages/contact-added/default.html',
+  },
+  contactAddedAnother: {
+    app: `/contacts/people/${femiId}/added`,
+    mock: 'pages/contact-added/another.html',
+  },
   editContact: { app: `${femi}/edit`, mock: 'pages/add-contact/edit.html' },
   contactProfile: { app: `${chidi}`, mock: 'pages/contact-profile/default.html' },
   contactProfileEmpty: { app: femi, mock: 'pages/contact-profile/empty.html' },

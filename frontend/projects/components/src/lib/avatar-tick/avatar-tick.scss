@@ -1,0 +1,21 @@
+:host {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  /* Centred in a column of the page, as Added draws it, never stretched across it. */
+  align-self: center;
+}
+
+.avatar-tick__mark {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: inline-grid;
+  place-items: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  border-radius: var(--radius-full);
+  background: var(--color-success-solid);
+  color: var(--color-fg-on-success);
+  box-shadow: 0 0 0 var(--border-width-ring) var(--color-bg-canvas);
+}

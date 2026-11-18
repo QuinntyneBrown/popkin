@@ -87,8 +87,8 @@ Nothing new. A direct visit reads `ContactsPeopleController.Get` (`GET
   `text-sm`), `pk-card` as a link with `pk-icon` to `/contacts/people/{id}/edit` (L2-180 AC3),
   `pk-button` "Done" (`variant="primary"`, `block`, `routerLink="/contacts"`, L2-180 AC4) and
   `pk-button` "Add another" (`variant="ghost"`, `block`), and `pk-empty-state` for a contact not
-  found. The two-line link row of the mock (`card--row`) is `pk-card` with `icon`, `heading` and
-  `text`: an icon tile, the two lines and a chevron.
+  found. The two-line link row of the mock (`card--row`) is `pk-card` with `icon` and `text`, its
+  content the first line: an icon tile, the two lines and a chevron.
 - **`QuickAddSession`** (`frontend/projects/api/src/lib/api/contacts/quick-add-session.ts`,
   `providedIn: 'root'`) — `count: Signal<number>`, `last: Signal<ContactProfileView | null>`,
   `opened()`, `added(contact)`, `addAnother()` and `contact(contactId)`, which answers `last`

@@ -1,0 +1,67 @@
+<div pk-screen body="hero" width="narrow" [middle]="true">
+  @switch (store.state()) {
+    @case ('notFound') {
+      <div
+        pk-empty-state
+        icon="not-found"
+        [heading]="notFound.heading"
+        [level]="1"
+        [alert]="true"
+        [text]="notFound.text"
+      >
+        <a pk-button variant="primary" size="md" routerLink="/contacts/people">Go to People</a>
+      </div>
+    }
+    @case ('failed') {
+      <div
+        pk-empty-state
+        icon="server-error"
+        [heading]="unread.heading"
+        [level]="1"
+        [alert]="true"
+        [text]="unread.text"
+      >
+        <button pk-button type="button" variant="primary" size="md" (click)="store.retry()">
+          Try again
+        </button>
+      </div>
+    }
+    @case ('ready') {
+      @if (store.contact(); as contact) {
+        <div class="stack">
+          <span
+            pk-avatar-tick
+            [initials]="contact.initials"
+            [photo]="contact.photoUrl"
+            [attr.data-accent]="contact.accent.toLowerCase()"
+          ></span>
+          <div class="stack">
+            <h1 #headingEl tabindex="-1">{{ heading() }}</h1>
+            <p class="text-muted">{{ line() }}</p>
+            @if (store.count(); as count) {
+              <p class="text-sm">{{ count }}</p>
+            }
+          </div>
+          <a
+            pk-card
+            icon="cake"
+            text="Now, or whenever you’re ready"
+            [routerLink]="['/contacts/people', contact.id, 'edit']"
+            >Add a birthday, how you met…</a
+          >
+          <div class="stack">
+            <a pk-button variant="primary" [block]="true" routerLink="/contacts">Done</a>
+            <a
+              pk-button
+              variant="ghost"
+              [block]="true"
+              routerLink="/contacts/quick-add"
+              (click)="store.addAnother()"
+              >Add another</a
+            >
+          </div>
+        </div>
+      }
+    }
+  }
+</div>

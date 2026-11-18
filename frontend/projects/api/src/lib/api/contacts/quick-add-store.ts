@@ -3,6 +3,7 @@ import { ContactCircle, ContactProfileView, SaveContactRequest } from '../../mod
 import { contactRequestOf } from './contact-form-store';
 import { CONTACTS_API } from './contacts-api';
 import { ContactsOutbox } from './contacts-outbox';
+import { QuickAddSession } from './quick-add-session';
 
 /** What Quick Add asks for (L2-178 AC1): a name, and the rest optional. */
 export interface QuickAddValues {
@@ -36,6 +37,7 @@ export function quickAddRequestOf(values: QuickAddValues, clientId: string): Sav
 export class QuickAddStore {
   private readonly api = inject(CONTACTS_API);
   private readonly outbox = inject(ContactsOutbox);
+  private readonly session = inject(QuickAddSession);
   private clientId = crypto.randomUUID();
 
   readonly state = signal<'idle' | 'saving' | 'failed'>('idle');
@@ -58,6 +60,7 @@ export class QuickAddStore {
       next: (contact) => {
         this.clientId = crypto.randomUUID();
         this.state.set('idle');
+        this.session.added(contact);
         this.saved.set(contact);
       },
       error: () => this.state.set('failed'),

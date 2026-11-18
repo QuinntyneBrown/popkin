@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ContactProfileView } from '../../models/contacts';
 import { CONTACTS_API } from './contacts-api';
 import { ContactsOutbox } from './contacts-outbox';
+import { QuickAddSession } from './quick-add-session';
 import { QuickAddStore, QuickAddValues, canQuickAdd, quickAddRequestOf } from './quick-add-store';
 
 const typed: QuickAddValues = {
@@ -75,6 +76,7 @@ describe('QuickAddStore', () => {
 
     expect(store.state()).toBe('idle');
     expect(store.saved()).toBe(femi);
+    expect(TestBed.inject(QuickAddSession).contact('femi')).toBe(femi);
   });
 
   it('sends nothing more while a save is under way', () => {
