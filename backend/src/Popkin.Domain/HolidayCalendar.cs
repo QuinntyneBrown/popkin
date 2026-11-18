@@ -77,6 +77,18 @@ public sealed class HolidayCalendarYear
     }
 }
 
+/// <summary>What a change of a holiday's date came to (L2-197 AC1).</summary>
+public enum HolidayChange
+{
+    Changed,
+
+    /// <summary>A holiday by rule offers no change.</summary>
+    ByRule,
+
+    /// <summary>The date is not in the holiday's year.</summary>
+    OutsideYear,
+}
+
 /// <summary>A holiday of a calendar in one year (L2-196 AC4).</summary>
 public sealed class Holiday
 {
@@ -109,6 +121,29 @@ public sealed class Holiday
 
     public static Holiday Add(Guid calendarId, string name, string? note, DateOnly date, HolidayStatus status) =>
         new() { Id = Guid.NewGuid(), CalendarId = calendarId, Year = date.Year, Name = name, Note = note, Date = date, Status = status };
+
+    /// <summary>
+    /// An admin sets the date, which confirms it, the same date too (L2-197 AC1); a holiday by
+    /// rule and a date in another year change nothing.
+    /// </summary>
+    public HolidayChange Change(DateOnly date, Guid adminId, DateTimeOffset now)
+    {
+        if (Status == HolidayStatus.ByRule)
+        {
+            return HolidayChange.ByRule;
+        }
+
+        if (date.Year != Year)
+        {
+            return HolidayChange.OutsideYear;
+        }
+
+        Date = date;
+        Status = HolidayStatus.Confirmed;
+        ChangedAt = now;
+        ChangedByAdminId = adminId;
+        return HolidayChange.Changed;
+    }
 }
 
 /// <summary>"Dates through", the warning and the years of the Holiday calendars page (L2-196).</summary>

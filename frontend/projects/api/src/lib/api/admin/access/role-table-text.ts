@@ -25,5 +25,10 @@ export const PERMISSION_LINES: readonly PermissionLine[] = [
     row: 'Notifications',
   },
   { group: 'Platform', label: 'Hold and release notifications', row: 'NotificationHolds' },
+  {
+    group: 'Platform',
+    label: 'Change holiday dates and publish a year',
+    row: 'HolidayCalendars',
+  },
   { group: 'Access', label: 'Add, remove and change admins', row: 'Admins' },
 ];

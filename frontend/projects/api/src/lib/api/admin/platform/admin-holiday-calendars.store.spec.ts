@@ -25,13 +25,15 @@ const calendar = (id: string, year: number): AdminHolidayCalendar => ({
   popkins: 0,
   lastEdited: null,
   publishedAt: null,
-  holidays: [],
-  estimates: 0,
+  holidays: [{ id: 'eid', name: 'Eid', note: null, date: '2027-03-10', status: 'Estimated' }],
+  estimates: 1,
 });
 
 describe('AdminHolidayCalendarsStore (L2-196)', () => {
   const holidayCalendars = vi.fn();
   const holidayCalendar = vi.fn();
+  const changeHolidayDate = vi.fn();
+  const publishHolidayYear = vi.fn();
   let store: AdminHolidayCalendarsStore;
 
   beforeEach(() => {
@@ -48,7 +50,10 @@ describe('AdminHolidayCalendarsStore (L2-196)', () => {
     TestBed.configureTestingModule({
       providers: [
         AdminHolidayCalendarsStore,
-        { provide: ADMIN_PLATFORM_API, useValue: { holidayCalendars, holidayCalendar } },
+        {
+          provide: ADMIN_PLATFORM_API,
+          useValue: { holidayCalendars, holidayCalendar, changeHolidayDate, publishHolidayYear },
+        },
       ],
     });
     store = TestBed.inject(AdminHolidayCalendarsStore);
@@ -79,5 +84,44 @@ describe('AdminHolidayCalendarsStore (L2-196)', () => {
 
     store.retry();
     expect(store.status()).toBe('ready');
+  });
+
+  it('changes a date: the field holds it, Done saves it, Escape puts it back (L2-197 AC1)', () => {
+    changeHolidayDate.mockReturnValue(of({}));
+    store.open(null);
+
+    store.change('eid');
+    expect(store.changing()).toEqual({ holidayId: 'eid', date: '2027-03-10' });
+    store.cancel();
+    expect(store.changing()).toBeNull();
+
+    store.change('eid');
+    store.date('2027-03-11');
+    store.done();
+    expect(changeHolidayDate).toHaveBeenCalledWith('islamic', 'eid', '2027-03-11');
+    expect(store.changing()).toBeNull();
+    expect(holidayCalendar).toHaveBeenLastCalledWith('islamic', 2027);
+  });
+
+  it('keeps the field when a change fails', () => {
+    changeHolidayDate.mockReturnValue(throwError(() => new Error('down')));
+    store.open(null);
+    store.change('eid');
+    store.done();
+
+    expect(store.changing()).not.toBeNull();
+    expect(store.changeFailed()).toBe(true);
+  });
+
+  it('publishes the chosen year and reads the list again (L2-197 AC4)', () => {
+    publishHolidayYear.mockReturnValue(
+      of({ calendarName: 'islamic', year: 2027, people: 0, popkins: 0 }),
+    );
+    store.open(null);
+
+    store.publish('Dates').subscribe();
+
+    expect(publishHolidayYear).toHaveBeenCalledWith('islamic', 2027, 'Dates');
+    expect(holidayCalendars).toHaveBeenCalledTimes(2);
   });
 });

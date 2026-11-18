@@ -41,6 +41,15 @@ public static class HolidayExtensions
         return calendar.Id;
     }
 
+    /// <summary>Adds a year with no holidays to a calendar, not published.</summary>
+    public static async Task AddHolidayYearAsync(this ApiFactory api, Guid calendarId, int year)
+    {
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.HolidayCalendarYears.Add(HolidayCalendarYear.Start(calendarId, year));
+        await db.SaveChangesAsync();
+    }
+
     /// <summary>The Popkin observes the calendar, set straight in the store.</summary>
     public static async Task ObserveHolidaysAsync(this ApiFactory api, Guid popkinId, Guid? calendarId)
     {

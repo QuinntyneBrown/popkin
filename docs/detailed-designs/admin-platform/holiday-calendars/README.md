@@ -163,7 +163,11 @@ admin may read.
   with `aria-current` on the chosen one, and a status pill in its meta.
 - **`pk-key-values`** (components, new, backlog item 2) — the `kv` description list.
 - **`pk-data-table`** (changed) — a `status` cell takes a `tone` (`neutral`, `warn`, `ok`), and a
-  `note` cell draws the holiday's name with its note under it (`kind-name`, `kind-about`).
+  `titled` cell draws the holiday's name with its note (`kind-name`, `kind-about`): beside it on
+  a phone, under it from 768 px. "Last edited" reads "Not yet" while the calendar is as the seed
+  set it.
+- **`pk-panel-grid`** (components, new) — the `panel-grid--list-detail` layout of the list beside
+  the chosen calendar.
 - **`AdminHolidayCalendarsStore`** (`frontend/projects/api/src/lib/api/admin/platform/`, new) —
   the list, the chosen calendar and year, loading and failure. Unit tested (ADR 0011).
 - **`holidays-text.ts`** (api library, new) — the banner ("{names} have no dates after 31 Dec

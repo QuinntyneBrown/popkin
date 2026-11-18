@@ -22,6 +22,9 @@ export class AdminHolidaysPage {
   readonly table: Locator;
   readonly holidays: Locator;
   readonly noDates: Locator;
+  /** The line under the table, with "Publish {year}" (L2-197 AC2). */
+  readonly foot: Locator;
+  readonly publish: Locator;
   readonly loading: Locator;
   readonly empty: Locator;
   readonly tryAgain: Locator;
@@ -43,6 +46,8 @@ export class AdminHolidaysPage {
     this.table = this.calendar.locator('table.data-table');
     this.holidays = this.table.locator('tbody tr');
     this.noDates = this.calendar.locator('.empty');
+    this.foot = this.calendar.locator('.panel__foot p');
+    this.publish = this.calendar.getByRole('button', { name: /^Publish \d{4}$/ });
     this.loading = page.getByRole('status').filter({ hasText: 'Loading the holiday calendars…' });
     this.empty = page.locator('.empty');
     this.tryAgain = page.getByRole('button', { name: 'Try again' });

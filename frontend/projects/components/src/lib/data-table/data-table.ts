@@ -7,6 +7,7 @@ import { PopkinTile } from '../popkin-tile/popkin-tile';
 import { Skeleton } from '../skeleton/skeleton';
 import { Status, StatusTone } from '../status/status';
 import { Switch } from '../switch/switch';
+import { TextField } from '../text-field/text-field';
 
 /** A column: its name, and whether the name is for assistive technology only ("Actions"). */
 export interface DataTableColumn {
@@ -29,7 +30,9 @@ export interface DataTableColumn {
  * with a `disabledReason`), `kind` (a notification kind's name, with the status pill `off` and
  * what sends it under it, and `totals` under that on a phone), `switch` (a switch named
  * `label`, `on` or not, switched off with a `disabledReason`) or `lock` (a lock and its words,
- * "Required"). `title` is a tooltip on plain text.
+ * "Required") `titled` (a name with its `sub`
+ * note beside it on a phone, under it from 768 px: a holiday) or `date` (a date field named `label` holding `value`, focused when drawn; Enter
+ * gives back the action `done` and Escape `cancel`). `title` is a tooltip on plain text.
  */
 export interface DataTableCell {
   text: string;
@@ -46,7 +49,9 @@ export interface DataTableCell {
     | 'action'
     | 'kind'
     | 'switch'
-    | 'lock';
+    | 'lock'
+    | 'date'
+    | 'titled';
   sub?: string;
   title?: string;
   badge?: string;
@@ -96,6 +101,12 @@ export interface DataTableSwitch {
   revert: () => void;
 }
 
+/** A date typed in a row's `date` cell. */
+export interface DataTableDate {
+  rowId: string | number;
+  value: string;
+}
+
 export interface DataTableAction {
   rowId: string | number;
   action: string;
@@ -109,7 +120,7 @@ export interface DataTableAction {
  */
 @Component({
   selector: 'div[pk-data-table]',
-  imports: [Avatar, Badge, Button, Icon, PopkinTile, Skeleton, Status, Switch],
+  imports: [Avatar, Badge, Button, Icon, PopkinTile, Skeleton, Status, Switch, TextField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './data-table.html',
   styleUrl: './data-table.scss',
@@ -125,6 +136,7 @@ export class DataTable {
   readonly chose = output<DataTableChoice>();
   readonly acted = output<DataTableAction>();
   readonly switched = output<DataTableSwitch>();
+  readonly dated = output<DataTableDate>();
 
   private reverting = false;
 

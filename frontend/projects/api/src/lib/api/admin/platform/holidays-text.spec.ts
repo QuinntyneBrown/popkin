@@ -1,5 +1,8 @@
 import {
   calendarPeople,
+  holidaysPublishedToast,
+  holidaysYearLine,
+  publishHolidaysDialog,
   datesThrough,
   holidayDate,
   holidaysBannerHeading,
@@ -53,5 +56,96 @@ describe('holidays text (L2-196)', () => {
   it('says a year has no dates, and names the sidebar’s count', () => {
     expect(noDatesText(2027)).toBe('No 2027 dates yet.');
     expect(withoutNextYearLabel(2)).toBe('2 without next year’s dates');
+  });
+
+  const holiday = (status: 'ByRule' | 'Estimated' | 'Confirmed') => ({
+    id: status,
+    name: 'Eid',
+    note: null,
+    date: '2026-03-20',
+    status,
+  });
+  const now = new Date('2026-07-14T12:00:00Z');
+
+  it('reads a year not yet published with and without estimates (L2-197 AC2)', () => {
+    const base = { year: 2026, publishedAt: null };
+    expect(
+      holidaysYearLine(
+        { ...base, holidays: [holiday('Estimated'), holiday('Confirmed')], estimates: 1 },
+        now,
+        'UTC',
+      ),
+    ).toBe('1 of 2 dates are still estimates. Members see them as “expected”.');
+    expect(
+      holidaysYearLine({ ...base, holidays: [holiday('Confirmed')], estimates: 0 }, now, 'UTC'),
+    ).toBe('All dates confirmed.');
+    expect(holidaysYearLine({ ...base, holidays: [], estimates: 0 }, now, 'UTC')).toBeNull();
+  });
+
+  it('reads a live year (L2-197 AC4)', () => {
+    expect(
+      holidaysYearLine(
+        {
+          year: 2026,
+          publishedAt: '2026-07-14T09:00:00Z',
+          holidays: [holiday('Estimated')],
+          estimates: 1,
+        },
+        now,
+        'UTC',
+      ),
+    ).toBe(
+      'Live since today. 1 of 1 dates are still estimates; members see them as “expected” until you confirm each one.',
+    );
+    expect(
+      holidaysYearLine(
+        {
+          year: 2026,
+          publishedAt: '2026-01-14T09:00:00Z',
+          holidays: [holiday('ByRule')],
+          estimates: 0,
+        },
+        now,
+        'UTC',
+      ),
+    ).toBe('Every date follows a rule, so there is nothing to confirm. 2026 is live.');
+    expect(
+      holidaysYearLine(
+        {
+          year: 2026,
+          publishedAt: '2026-01-14T09:00:00Z',
+          holidays: [holiday('Confirmed')],
+          estimates: 0,
+        },
+        now,
+        'UTC',
+      ),
+    ).toBe('Live since 14 Jan.');
+  });
+
+  it('asks to publish with the dates, the Popkins and the estimates (L2-197 AC3)', () => {
+    const text = publishHolidaysDialog({
+      name: 'Islamic holidays',
+      year: 2026,
+      holidays: [holiday('Estimated'), holiday('Confirmed')],
+      estimates: 1,
+      popkins: 1340,
+    });
+    expect(text.heading).toBe('Publish Islamic holidays for 2026?');
+    expect(text.description).toBe(
+      '2 dates appear on the Important days of everyone using this calendar, and on 1,340 Popkins. 1 are estimates and show as “expected” until you confirm them.',
+    );
+    expect(text.confirm).toBe('Publish 2026');
+  });
+
+  it('says a year is live for its people and Popkins (L2-197 AC4)', () => {
+    expect(
+      holidaysPublishedToast({
+        calendarName: 'Islamic holidays',
+        year: 2026,
+        people: 63950,
+        popkins: 1340,
+      }),
+    ).toEqual(['Published', 'Islamic holidays 2026 is live for 63,950 people and 1,340 Popkins.']);
   });
 });

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   AdminFeature,
   AdminFeatures,
+  AdminHoliday,
   AdminHolidayCalendar,
   AdminHolidayCalendars,
   AdminLimits,
@@ -20,6 +21,7 @@ import {
   NotificationDefaultsChange,
   NotificationKindId,
   AdminWaiting,
+  HolidayYearPublished,
 } from '../../../models/admin';
 import { PopkinFeature } from '../../../models/home';
 
@@ -75,6 +77,14 @@ export interface AdminPlatformApi {
   holidayCalendars(): Observable<AdminHolidayCalendars>;
   /** Without a year, the year chosen first; 404 `holiday_calendar_not_found`, 400 `invalid_year`. */
   holidayCalendar(calendarId: string, year?: number): Observable<AdminHolidayCalendar>;
+  /** Confirms the date; 409 `holiday_by_rule`, 400 `invalid_date`, 403 for a Viewer. */
+  changeHolidayDate(calendarId: string, holidayId: string, date: string): Observable<AdminHoliday>;
+  /** 400 `reason_required`; 409 `holiday_year_published`, `holiday_year_empty`; 403 for a Viewer. */
+  publishHolidayYear(
+    calendarId: string,
+    year: number,
+    reason: string,
+  ): Observable<HolidayYearPublished>;
   waiting(): Observable<AdminWaiting>;
 }
 
@@ -191,6 +201,24 @@ export class HttpAdminPlatformApi implements AdminPlatformApi {
     return this.http.get<AdminHolidayCalendar>(
       `/api/admin/holiday-calendars/${calendarId}`,
       year === undefined ? {} : { params: { year } },
+    );
+  }
+
+  changeHolidayDate(calendarId: string, holidayId: string, date: string): Observable<AdminHoliday> {
+    return this.http.put<AdminHoliday>(
+      `/api/admin/holiday-calendars/${calendarId}/holidays/${holidayId}`,
+      { date },
+    );
+  }
+
+  publishHolidayYear(
+    calendarId: string,
+    year: number,
+    reason: string,
+  ): Observable<HolidayYearPublished> {
+    return this.http.post<HolidayYearPublished>(
+      `/api/admin/holiday-calendars/${calendarId}/years/${year}/publish`,
+      { reason },
     );
   }
 

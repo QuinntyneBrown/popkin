@@ -28,6 +28,7 @@ export type AdminAction =
   | 'HoldNotifications'
   | 'ManageAdmins'
   | 'ExportAuditLog'
+  | 'ChangeHolidayCalendars'
   | (string & {});
 
 /** `GET /api/admin/me`: the signed-in admin and what their role allows. */
@@ -357,4 +358,12 @@ export interface AdminWaiting {
   failedJobs: number;
   failedExports: number;
   holidayCalendars: number;
+}
+
+/** `POST …/years/{year}/publish`: what the publish reached (L2-197 AC4). */
+export interface HolidayYearPublished {
+  calendarName: string;
+  year: number;
+  people: number;
+  popkins: number;
 }

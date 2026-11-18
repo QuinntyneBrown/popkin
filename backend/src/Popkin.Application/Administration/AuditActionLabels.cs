@@ -46,6 +46,8 @@ public static class AuditActionLabels
         [AuditAction.HeldNotifications] = "Held notifications",
         [AuditAction.ReleasedNotificationHold] = "Released hold",
         [AuditAction.ChangedNotificationDefaults] = "Changed notification defaults",
+        [AuditAction.ChangedHolidayDate] = "Changed holiday date",
+        [AuditAction.PublishedHolidayYear] = "Published holiday dates",
     };
 
     public static string Of(AuditAction action) => Labels[action];

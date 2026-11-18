@@ -25,7 +25,13 @@
         <ul pk-report-list aria-label="Holiday calendars" [items]="items()"></ul>
       </section>
       @if (store.calendar(); as calendar) {
-        <section pk-panel [heading]="calendar.name" [sub]="calendar.howSet" [body]="true">
+        <section
+          pk-panel
+          [heading]="calendar.name"
+          [sub]="calendar.howSet"
+          [body]="true"
+          [foot]="!!foot()"
+        >
           <div class="stack">
             <div
               pk-segmented-control
@@ -35,17 +41,37 @@
               (valueChange)="chooseYear($event)"
             ></div>
             <dl pk-key-values [items]="figures()"></dl>
-            @if (calendar.holidays.length) {
-              <div
-                pk-data-table
-                [label]="tableLabel()"
-                [columns]="columns"
-                [groups]="groups()"
-              ></div>
-            } @else {
-              <div pk-empty-state [heading]="noDates()" [compact]="true"></div>
-            }
           </div>
+          @if (calendar.holidays.length) {
+            <div
+              pk-data-table
+              slot="after"
+              [label]="tableLabel()"
+              [columns]="columns"
+              [groups]="groups()"
+              (acted)="acted($event)"
+              (dated)="dated($event)"
+            ></div>
+          } @else {
+            <div pk-empty-state slot="after" [heading]="noDates()" [compact]="true"></div>
+          }
+          @if (foot(); as foot) {
+            <div slot="foot" class="split">
+              <p class="text-muted text-sm">{{ foot.line }}</p>
+              @if (foot.publish) {
+                <button
+                  pk-button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  [disabledReason]="blocked()"
+                  (click)="publish()"
+                >
+                  {{ foot.publish }}
+                </button>
+              }
+            </div>
+          }
         </section>
       }
     </div>

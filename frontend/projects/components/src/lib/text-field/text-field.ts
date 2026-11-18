@@ -2,11 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  afterNextRender,
   computed,
+  effect,
   forwardRef,
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -56,9 +59,17 @@ export class TextField implements ControlValueAccessor {
   /** The Enter key's label on a phone's keyboard: `done` where Enter saves. */
   readonly enterkeyhint = input<string>();
   readonly readonly = input(false);
+  /** The value it starts with, where no form holds it: a row's date being changed. */
+  readonly initial = input<string>();
+  /** Takes focus once drawn, as a row's field does when "Change" opens it. */
+  readonly focusOnDraw = input(false);
 
   /** Every change the person makes, digits filtered or not. */
   readonly changed = output<string>();
+  /** Enter in the field: a row's date saves. */
+  readonly entered = output<void>();
+  /** Escape in the field: a row's date is put back. */
+  readonly escaped = output<void>();
 
   protected readonly value = signal('');
   protected readonly disabled = signal(false);
@@ -69,6 +80,16 @@ export class TextField implements ControlValueAccessor {
   private readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('field');
   private onChange: (value: string) => void = () => undefined;
   private onTouched: () => void = () => undefined;
+
+  constructor() {
+    effect(() => {
+      const initial = this.initial();
+      if (initial !== undefined) untracked(() => this.value.set(initial));
+    });
+    afterNextRender(() => {
+      if (this.focusOnDraw()) this.focus();
+    });
+  }
 
   focus(): void {
     this.inputRef().nativeElement.focus();

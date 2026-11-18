@@ -236,7 +236,7 @@
   }
 
   /* A kind keeps its name and its switch on one line (L2-169 AC5). */
-  .data-table tr:has(.kind-name) {
+  .data-table tr:has(> td > span > .kind-name) {
     display: flex;
     align-items: center;
     justify-content: space-between;

@@ -146,6 +146,26 @@
                   @case ('status') {
                     <span pk-status [tone]="cell.tone ?? 'neutral'">{{ cell.text }}</span>
                   }
+                  @case ('titled') {
+                    <span class="kind-name">{{ cell.text }}</span>
+                    @if (cell.sub) {
+                      <span class="kind-about">{{ cell.sub }}</span>
+                    }
+                  }
+                  @case ('date') {
+                    <div
+                      pk-text-field
+                      type="date"
+                      [fieldId]="'date-' + row.id"
+                      [label]="cell.label ?? ''"
+                      [hideLabel]="true"
+                      [initial]="cell.value"
+                      [focusOnDraw]="true"
+                      (changed)="dated.emit({ rowId: row.id, value: $event })"
+                      (entered)="acted.emit({ rowId: row.id, action: 'done' })"
+                      (escaped)="acted.emit({ rowId: row.id, action: 'cancel' })"
+                    ></div>
+                  }
                   @case ('lock') {
                     <span class="lock-note"
                       ><svg pk-icon name="lock" size="sm"></svg>{{ cell.text }}</span

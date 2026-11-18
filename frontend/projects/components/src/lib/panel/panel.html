@@ -15,6 +15,7 @@
 } @else {
   <ng-container [ngTemplateOutlet]="content" />
 }
+<ng-content select="[slot=after]" />
 @if (foot()) {
   <div class="panel__foot"><ng-content select="[slot=foot]" /></div>
 }

@@ -121,6 +121,25 @@ export const routes = {
   },
   adminHolidaysLoading: { app: `${ADMIN}/holidays`, mock: 'admin/pages/holidays/loading.html' },
   adminHolidaysError: { app: `${ADMIN}/holidays`, mock: 'admin/pages/holidays/error.html' },
+  adminHolidaysChanging: { app: `${ADMIN}/holidays`, mock: 'admin/pages/holidays/changing.html' },
+  adminHolidaysPublished: { app: `${ADMIN}/holidays`, mock: 'admin/pages/holidays/published.html' },
+  adminHolidaysViewer: { app: `${ADMIN}/holidays`, mock: 'admin/pages/holidays/viewer.html' },
+  adminHolidaysPublish: {
+    app: `${ADMIN}/holidays`,
+    mock: 'admin/dialogs/holidays-publish/default.html',
+  },
+  adminHolidaysPublishInvalid: {
+    app: `${ADMIN}/holidays`,
+    mock: 'admin/dialogs/holidays-publish/invalid.html',
+  },
+  adminHolidaysPublishBusy: {
+    app: `${ADMIN}/holidays`,
+    mock: 'admin/dialogs/holidays-publish/busy.html',
+  },
+  adminHolidaysPublishFailed: {
+    app: `${ADMIN}/holidays`,
+    mock: 'admin/dialogs/holidays-publish/failed.html',
+  },
   adminSaveLimits: { app: `${ADMIN}/limits`, mock: 'admin/dialogs/limit-save/default.html' },
   adminSaveLimitsBusy: { app: `${ADMIN}/limits`, mock: 'admin/dialogs/limit-save/busy.html' },
   adminSaveLimitsInvalid: { app: `${ADMIN}/limits`, mock: 'admin/dialogs/limit-save/invalid.html' },

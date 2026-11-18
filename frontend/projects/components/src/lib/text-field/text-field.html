@@ -31,6 +31,8 @@
   [disabled]="disabled()"
   (input)="input($event)"
   (blur)="blur()"
+  (keydown.enter)="entered.emit()"
+  (keydown.escape)="escaped.emit()"
 />
 @if (error()) {
   <span

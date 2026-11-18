@@ -42,6 +42,8 @@ public enum AuditAction
     HeldNotifications,
     ReleasedNotificationHold,
     ChangedNotificationDefaults,
+    ChangedHolidayDate,
+    PublishedHolidayYear,
 }
 
 /// <summary>What an audit entry is about.</summary>
@@ -62,4 +64,5 @@ public enum AuditTargetKind
     MemberEmail,
     NotificationKind,
     NotificationDefaults,
+    HolidayCalendar,
 }

@@ -20,6 +20,9 @@ export class Panel {
   readonly variant = input<'default' | 'danger'>('default');
   /** Whether it has a foot (`[slot=foot]`): a count and a button, as "Older actions". */
   readonly foot = input(false);
-  /** Whether its content sits in the padded body (`panel__body`), as a feature's panel does. */
+  /**
+   * Whether its content sits in the padded body (`panel__body`), as a feature's panel does.
+   * `[slot=after]` follows the body to the panel's edges, as a table under a calendar's figures.
+   */
   readonly body = input(false);
 }

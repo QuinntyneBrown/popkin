@@ -145,8 +145,15 @@ Both endpoints are on `AdminHolidayCalendarsController`, under the admin scheme.
   success the toaster shows "Published" with the message, and the page reads the list and the
   calendar again.
 - **`pk-data-table`** (changed) — a `date` cell: a `pk-text-field` of `type="date"` labelled by
-  `label` ("Date of {holiday}"), focused when drawn, with Enter and Escape given back as outputs.
-- **`PublishHolidaysDialog`** (`frontend/projects/admin/src/app/dialogs/holidays-publish/`, new) —
+  `label` ("Date of {holiday}"), holding `value`, focused when drawn (`focusOnDraw`), with Enter
+  and Escape given back as the actions `done` and `cancel` through the field's `entered` and
+  `escaped` outputs.
+- **`pk-panel`** (changed) — `[slot=after]` follows the padded body to the panel's edges, as the
+  holidays table does under the calendar's figures.
+- **The publish dialog** — the shared reasoned dialog of the admin app, `NotificationActionDialog`
+  (`frontend/projects/admin/src/app/dialogs/notification-action/`), given the text of
+  `publishHolidaysDialog` rather than a dialog of its own, so every reasoned dialog keeps one
+  behaviour and its hint "Other admins see it beside the change." —
   `pk-dialog` "Publish {calendar} for {year}?" described by the counts; `pk-textarea` `reason`,
   "Reason, for the audit log", 500 characters, opened with `autoFocus: '#reason'`; "Publish
   {year}" (busy "Publishing…") and "Cancel"; `ActionDialogState` for empty, busy and failed

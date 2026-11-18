@@ -613,6 +613,23 @@ await call(
   'GET',
   `/api/admin/holiday-calendars/${calendarNamed('Australia')}?year=${thisYear + 2}`,
 );
+// Then Lena confirms Ramadan's date of next year and publishes next year; the
+// answers above stay as they were.
+const islamic = calendarNamed('Islamic holidays');
+const islamicNext = await call(
+  'GET',
+  `/api/admin/holiday-calendars/${islamic}?year=${thisYear + 1}`,
+);
+await call(
+  'PUT',
+  `/api/admin/holiday-calendars/${islamic}/holidays/${islamicNext.holidays[0].id}`,
+  {
+    date: islamicNext.holidays[0].date,
+  },
+);
+await call('POST', `/api/admin/holiday-calendars/${islamic}/years/${thisYear + 1}/publish`, {
+  reason: 'Dates confirmed with the moon-sighting committee',
+});
 // Then she makes Aiko a Viewer and removes Marco; the list and the log above stay as they were.
 await call('PUT', `/api/admin/admins/${aiko.id}/role`, {
   role: 'Viewer',

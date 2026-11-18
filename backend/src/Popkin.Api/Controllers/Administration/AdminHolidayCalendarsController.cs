@@ -15,4 +15,16 @@ public sealed class AdminHolidayCalendarsController(ISender sender) : AdminContr
     [HttpGet("{calendarId:guid}")]
     public async Task<ActionResult<AdminHolidayCalendarDto>> GetCalendar(Guid calendarId, [FromQuery] int? year, CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetAdminHolidayCalendarQuery(calendarId, year), cancellationToken));
+
+    public sealed record ChangeDateRequest(string? Date);
+
+    [HttpPut("{calendarId:guid}/holidays/{holidayId:guid}")]
+    public async Task<ActionResult<AdminHolidayDto>> ChangeDate(Guid calendarId, Guid holidayId, ChangeDateRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new ChangeHolidayDateCommand(calendarId, holidayId, request.Date), cancellationToken));
+
+    public sealed record PublishRequest(string? Reason);
+
+    [HttpPost("{calendarId:guid}/years/{year:int}/publish")]
+    public async Task<ActionResult<HolidayYearPublishedDto>> Publish(Guid calendarId, int year, PublishRequest request, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new PublishHolidayYearCommand(calendarId, year, request.Reason), cancellationToken));
 }
