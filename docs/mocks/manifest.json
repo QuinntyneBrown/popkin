@@ -301,16 +301,103 @@
         "L2-017",
         "L2-018",
         "L2-056",
-        "L2-121"
+        "L2-121",
+        "L2-182"
       ],
       "states": [
         "default",
+        "coming-up",
         "loading",
         "empty",
         "error",
         "active-only",
         "offline"
       ]
+    },
+    {
+      "id": "important-days",
+      "kind": "page",
+      "title": "Important days",
+      "route": "/days",
+      "requirements": [
+        "L2-183",
+        "L2-184",
+        "L2-185",
+        "L2-186",
+        "L2-193",
+        "L2-194",
+        "L2-195"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "mine",
+        "popkin"
+      ],
+      "notes": "From the Magic Patterns “Important Days” design, on its own cast and dates (Mara, Monday 1 December 2025; L2-182)."
+    },
+    {
+      "id": "add-day",
+      "kind": "page",
+      "title": "Add a day",
+      "route": "/days/new",
+      "requirements": [
+        "L2-187",
+        "L2-188",
+        "L2-189",
+        "L2-193"
+      ],
+      "states": [
+        "default",
+        "popkin",
+        "several",
+        "invalid",
+        "submitting",
+        "error",
+        "edit"
+      ],
+      "not_applicable": {
+        "loading": "The form needs nothing loaded before it shows: it starts blank or from the Popkin it opened from.",
+        "empty": "The screen is a form; it has no collection that can be empty."
+      },
+      "notes": "From the Magic Patterns “Add a Day” design, on its own cast and dates (Mara, Monday 1 December 2025; L2-182)."
+    },
+    {
+      "id": "day-actions",
+      "kind": "dialog",
+      "title": "A day’s actions",
+      "opens_from": "important-days",
+      "requirements": [
+        "L2-193"
+      ],
+      "states": [
+        "default"
+      ],
+      "not_applicable": {
+        "busy": "A menu of links: choosing one goes straight to its screen or dialog, so nothing waits.",
+        "invalid": "A menu has nothing to type."
+      }
+    },
+    {
+      "id": "delete-day",
+      "kind": "dialog",
+      "title": "Delete a day",
+      "opens_from": "important-days",
+      "requirements": [
+        "L2-193",
+        "L2-194"
+      ],
+      "states": [
+        "default",
+        "popkin",
+        "busy",
+        "failed"
+      ],
+      "not_applicable": {
+        "invalid": "A confirmation has nothing to type."
+      }
     },
     {
       "id": "contacts-today",
@@ -1148,6 +1235,33 @@
         "done",
         "off"
       ]
+    },
+    {
+      "id": "popkin-days",
+      "kind": "page",
+      "title": "Days",
+      "route": "/p/holiday-crew/schedule/days",
+      "requirements": [
+        "L2-190",
+        "L2-191",
+        "L2-192",
+        "L2-193",
+        "L2-194",
+        "L2-195"
+      ],
+      "states": [
+        "default",
+        "vegas",
+        "holiday",
+        "mine",
+        "member",
+        "closed",
+        "holidays-off",
+        "loading",
+        "empty",
+        "error"
+      ],
+      "notes": "From the Magic Patterns “Popkin Days” design, on its own cast and dates (Mara, Monday 1 December 2025; L2-182). Drawn on Holiday Crew 🎄 (Leaf, 6 members, 34 days left), Mara its Host."
     },
     {
       "id": "time-off",
