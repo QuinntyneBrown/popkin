@@ -11,4 +11,8 @@ public sealed class AdminHolidayCalendarsController(ISender sender) : AdminContr
     [HttpGet]
     public async Task<ActionResult<AdminHolidayCalendarsDto>> GetCalendars(CancellationToken cancellationToken) =>
         Ok(await sender.Send(new GetAdminHolidayCalendarsQuery(), cancellationToken));
+
+    [HttpGet("{calendarId:guid}")]
+    public async Task<ActionResult<AdminHolidayCalendarDto>> GetCalendar(Guid calendarId, [FromQuery] int? year, CancellationToken cancellationToken) =>
+        Ok(await sender.Send(new GetAdminHolidayCalendarQuery(calendarId, year), cancellationToken));
 }
