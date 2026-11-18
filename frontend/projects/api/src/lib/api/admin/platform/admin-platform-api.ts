@@ -4,6 +4,9 @@ import { Observable } from 'rxjs';
 import {
   AdminFeature,
   AdminFeatures,
+  AdminHoliday,
+  AdminHolidayCalendar,
+  AdminHolidayCalendars,
   AdminLimits,
   AdminNotificationDefaults,
   AdminNotificationHold,
@@ -17,13 +20,16 @@ import {
   LimitChangeRequest,
   NotificationDefaultsChange,
   NotificationKindId,
+  AdminWaiting,
+  HolidayYearPublished,
 } from '../../../models/admin';
 import { PopkinFeature } from '../../../models/home';
 
 /**
  * Features (docs/detailed-designs/admin-platform/feature-switches), Notifications
  * (docs/detailed-designs/admin-platform/notifications) and Limits
- * (docs/detailed-designs/admin-platform/limits).
+ * (docs/detailed-designs/admin-platform/limits), Holiday calendars
+ * (docs/detailed-designs/admin-platform/holiday-calendars), and the sidebar's counts.
  */
 export interface AdminPlatformApi {
   features(): Observable<AdminFeatures>;
@@ -68,6 +74,18 @@ export interface AdminPlatformApi {
   limits(): Observable<AdminLimits>;
   /** 400 `limit_not_allowed`, `limit_unknown`, `no_change`, `reason_required`; 403 for Support and Viewer. */
   changeLimits(changes: LimitChangeRequest[], reason: string | null): Observable<AdminLimits>;
+  holidayCalendars(): Observable<AdminHolidayCalendars>;
+  /** Without a year, the year chosen first; 404 `holiday_calendar_not_found`, 400 `invalid_year`. */
+  holidayCalendar(calendarId: string, year?: number): Observable<AdminHolidayCalendar>;
+  /** Confirms the date; 409 `holiday_by_rule`, 400 `invalid_date`, 403 for a Viewer. */
+  changeHolidayDate(calendarId: string, holidayId: string, date: string): Observable<AdminHoliday>;
+  /** 400 `reason_required`; 409 `holiday_year_published`, `holiday_year_empty`; 403 for a Viewer. */
+  publishHolidayYear(
+    calendarId: string,
+    year: number,
+    reason: string,
+  ): Observable<HolidayYearPublished>;
+  waiting(): Observable<AdminWaiting>;
 }
 
 export const ADMIN_PLATFORM_API = new InjectionToken<AdminPlatformApi>('AdminPlatformApi');
@@ -173,5 +191,38 @@ export class HttpAdminPlatformApi implements AdminPlatformApi {
 
   changeLimits(changes: LimitChangeRequest[], reason: string | null): Observable<AdminLimits> {
     return this.http.put<AdminLimits>('/api/admin/limits', { changes, reason });
+  }
+
+  holidayCalendars(): Observable<AdminHolidayCalendars> {
+    return this.http.get<AdminHolidayCalendars>('/api/admin/holiday-calendars');
+  }
+
+  holidayCalendar(calendarId: string, year?: number): Observable<AdminHolidayCalendar> {
+    return this.http.get<AdminHolidayCalendar>(
+      `/api/admin/holiday-calendars/${calendarId}`,
+      year === undefined ? {} : { params: { year } },
+    );
+  }
+
+  changeHolidayDate(calendarId: string, holidayId: string, date: string): Observable<AdminHoliday> {
+    return this.http.put<AdminHoliday>(
+      `/api/admin/holiday-calendars/${calendarId}/holidays/${holidayId}`,
+      { date },
+    );
+  }
+
+  publishHolidayYear(
+    calendarId: string,
+    year: number,
+    reason: string,
+  ): Observable<HolidayYearPublished> {
+    return this.http.post<HolidayYearPublished>(
+      `/api/admin/holiday-calendars/${calendarId}/years/${year}/publish`,
+      { reason },
+    );
+  }
+
+  waiting(): Observable<AdminWaiting> {
+    return this.http.get<AdminWaiting>('/api/admin/waiting');
   }
 }

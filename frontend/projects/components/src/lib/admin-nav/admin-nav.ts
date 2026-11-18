@@ -16,6 +16,8 @@ export interface AdminNavLink {
   icon: IconName;
   /** What waits there, counted beside it when above zero ("5 waiting"). */
   waiting?: number;
+  /** The count's name: "2 without next year’s dates"; "{n} waiting" when not given. */
+  waitingLabel?: string;
 }
 
 export interface AdminNavSection {

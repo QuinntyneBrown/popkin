@@ -26,4 +26,5 @@ public enum AdminAction
     HoldNotifications,
     ManageAdmins,
     ExportAuditLog,
+    ChangeHolidayCalendars,
 }

@@ -27,6 +27,7 @@ public static class Seeder
             }
         }
 
+        await HolidaySeed.SeedAsync(db, now, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
     }
 }

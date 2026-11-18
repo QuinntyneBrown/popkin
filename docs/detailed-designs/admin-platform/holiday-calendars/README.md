@@ -89,9 +89,11 @@ choice has its own address and the browser's back returns to the one before.
 - **Where the dates come from.** The calendars, their holidays "By rule" and the first estimates
   are seeded or computed by a means not yet decided, and what "New calendar" asks is not
   specified (known gap 145). Until then the calendars and their holidays come from the seed of
-  `popkin seed` `<TO SUPPLY>`.
+  `popkin seed` (`HolidaySeed`, the years 2026 to 2028); a deployed system has no calendar until a
+  requirement names "New calendar" (gap 145, settled).
 - **The list's order.** The mock's order is neither by name nor by people. The design lists by
-  `HolidayCalendar.CreatedAt`, the seed's order; the intended order is `<TO SUPPLY>`.
+  `HolidayCalendar.CreatedAt`, the seed's order (the simplest order that keeps a calendar where it
+  was).
 - **The banner for one calendar.** The mock's `published.html` reads "Hindu festivals has no
   dates", where L2-196 AC3 writes "{names} have". The requirement stands.
 - **The banner's people.** The mock's 108,770 is the sum of the two calendars' people; the design
@@ -126,8 +128,8 @@ admin may read.
 
 - **`HolidayCalendar`**, **`HolidayCalendarYear`**, **`Holiday`**, **`HolidayStatus`** (Domain,
   new tables) — as the shared section defines them. A unique index on (`CalendarId`, `Year`) of
-  `HolidayCalendarYear`. `PopkinSpace.HolidayCalendarId?` is added by
-  [A Popkin's holidays](../../important-days/popkin-holidays/README.md).
+  `HolidayCalendarYear`. `PopkinSpace.HolidayCalendarId?` is added here, in the same migration, so the counts
+  have it (gap 144); [A Popkin's holidays](../../important-days/popkin-holidays/README.md) lets the Host set it.
 - **`HolidayCalendarRules`** (Domain, new, static) — `DatesThrough(years)`, `IsDraft(years)`,
   `NeedsDates(years, thisYear)`, `Years(thisYear)` and `ChosenYear(years, thisYear)`. Pure, tested
   one case per row.
@@ -161,7 +163,11 @@ admin may read.
   with `aria-current` on the chosen one, and a status pill in its meta.
 - **`pk-key-values`** (components, new, backlog item 2) — the `kv` description list.
 - **`pk-data-table`** (changed) — a `status` cell takes a `tone` (`neutral`, `warn`, `ok`), and a
-  `note` cell draws the holiday's name with its note under it (`kind-name`, `kind-about`).
+  `titled` cell draws the holiday's name with its note (`kind-name`, `kind-about`): beside it on
+  a phone, under it from 768 px. "Last edited" reads "Not yet" while the calendar is as the seed
+  set it.
+- **`pk-panel-grid`** (components, new) — the `panel-grid--list-detail` layout of the list beside
+  the chosen calendar.
 - **`AdminHolidayCalendarsStore`** (`frontend/projects/api/src/lib/api/admin/platform/`, new) —
   the list, the chosen calendar and year, loading and failure. Unit tested (ADR 0011).
 - **`holidays-text.ts`** (api library, new) — the banner ("{names} have no dates after 31 Dec

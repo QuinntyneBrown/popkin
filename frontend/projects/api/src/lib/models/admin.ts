@@ -28,6 +28,7 @@ export type AdminAction =
   | 'HoldNotifications'
   | 'ManageAdmins'
   | 'ExportAuditLog'
+  | 'ChangeHolidayCalendars'
   | (string & {});
 
 /** `GET /api/admin/me`: the signed-in admin and what their role allows. */
@@ -304,4 +305,65 @@ export interface AdminLimits {
 export interface LimitChangeRequest {
   limit: LimitKeyId;
   value: number;
+}
+
+/** How a holiday's date is known (L2-196 AC4). */
+export type HolidayStatus = 'ByRule' | 'Estimated' | 'Confirmed';
+
+/** A row of `GET /api/admin/holiday-calendars` (L2-196 AC2). */
+export interface AdminHolidayCalendarRow {
+  id: string;
+  name: string;
+  holds: string;
+  people: number;
+  datesThrough: number | null;
+  draft: boolean;
+  needsDates: boolean;
+}
+
+/** `GET /api/admin/holiday-calendars`: the calendars in the list's order, and the banner (L2-196 AC3). */
+export interface AdminHolidayCalendars {
+  thisYear: number;
+  calendars: AdminHolidayCalendarRow[];
+  withoutNextYear: { names: string[]; people: number };
+}
+
+export interface AdminHoliday {
+  id: string;
+  name: string;
+  note: string | null;
+  /** `yyyy-MM-dd`. */
+  date: string;
+  status: HolidayStatus;
+}
+
+/** `GET /api/admin/holiday-calendars/{id}?year=`: a chosen calendar and year (L2-196 AC4). */
+export interface AdminHolidayCalendar {
+  id: string;
+  name: string;
+  howSet: string;
+  years: number[];
+  year: number;
+  people: number;
+  popkins: number;
+  lastEdited: { at: string; adminName: string } | null;
+  publishedAt: string | null;
+  holidays: AdminHoliday[];
+  estimates: number;
+}
+
+/** `GET /api/admin/waiting`: the counts beside the sidebar's sections. */
+export interface AdminWaiting {
+  reports: number;
+  failedJobs: number;
+  failedExports: number;
+  holidayCalendars: number;
+}
+
+/** `POST …/years/{year}/publish`: what the publish reached (L2-197 AC4). */
+export interface HolidayYearPublished {
+  calendarName: string;
+  year: number;
+  people: number;
+  popkins: number;
 }

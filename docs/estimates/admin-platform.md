@@ -10,6 +10,8 @@
 | notifications | 5 days | 95% |
 | notification-holds | 4 days | 90% |
 | notification-defaults | 3 days | 95% |
+| holiday-calendars | 4 days | 95% |
+| publish-holiday-dates | 3 days | 95% |
 
 Feature switches are built end to end (journey 23): the switches in the database behind a
 30-second snapshot, the Features page with its dialogs, and the Popkin app reading a Popkin's
@@ -25,3 +27,9 @@ Limits has its first slice (L2-176): the page with the panel "Sessions", where a
 long a sign-in lasts after its last use (365 days by default, at most 400), saved with a reason
 and audited, and honoured by every session within a minute. The upload sizes and rate limits are
 still to build, with their readers in the code.
+
+Holiday calendars are built end to end: the calendars come from `popkin seed` (gap 145), the
+page lists them with the banner and the sidebar's count, and an Owner or Support confirms a date
+and publishes a year with a reason, both audited. What is left: "New calendar", for which no
+requirement says what it asks, and the published year reaching people, which Important days
+builds.

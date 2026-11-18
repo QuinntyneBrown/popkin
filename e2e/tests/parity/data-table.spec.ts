@@ -1,11 +1,32 @@
 import { theMockAdmins } from '../../fixtures/admin';
 import { theMockHolds, theMockNotifications } from '../../fixtures/admin-notifications';
+import { theMockHolidayCalendars } from '../../fixtures/holidays';
 import { parity } from '../../fixtures/parity';
+import { AdminHolidaysPage } from '../../pages/admin/holidays.page';
 import { AdminsPage } from '../../pages/admin/admins.page';
 import { NotificationsPage } from '../../pages/admin/notifications.page';
 
 // People, roles chosen in place and an action per row: Admins & roles (L2-119 AC1).
 parity('data-table', [
+  // A year's holidays with their notes, estimated pills and "Change" (L2-196 AC4, L2-197 AC1).
+  {
+    key: 'adminHolidays',
+    name: 'holidays',
+    region: (page) => new AdminHolidaysPage(page).calendar.locator('.table-wrap'),
+    before: theMockHolidayCalendars,
+  },
+  // The row being changed: a date field, "Confirmed" and "Done" (L2-197 AC1).
+  {
+    key: 'adminHolidaysChanging',
+    name: 'holiday-changing',
+    region: (page) => new AdminHolidaysPage(page).calendar.locator('.table-wrap'),
+    before: theMockHolidayCalendars,
+    app: async (page) =>
+      new AdminHolidaysPage(page)
+        .holiday('Ramadan begins')
+        .getByRole('button', { name: /Change/ })
+        .click(),
+  },
   {
     key: 'adminAdmins',
     name: 'admins',

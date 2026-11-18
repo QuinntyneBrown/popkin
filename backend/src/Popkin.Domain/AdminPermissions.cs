@@ -26,6 +26,7 @@ public static class AdminPermissions
         new("Platform", [AdminAction.ChangeFeature, AdminAction.ChangeLimits, AdminAction.PublishAnnouncement], true, false, false),
         new("Notifications", [AdminAction.ManageNotifications], true, false, false),
         new("NotificationHolds", [AdminAction.HoldNotifications], true, true, false),
+        new("HolidayCalendars", [AdminAction.ChangeHolidayCalendars], true, true, false),
         new("Admins", [AdminAction.ManageAdmins], true, false, false),
         new("AuditExport", [AdminAction.ExportAuditLog], true, true, true),
     ];

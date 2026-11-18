@@ -25,6 +25,7 @@ public sealed class PopkinSpaceConfiguration : IEntityTypeConfiguration<PopkinSp
         // The Worker reads the active Popkins whose end date has passed (L2-044 AC1).
         builder.HasIndex(p => new { p.Status, p.EndsAt });
         builder.HasOne<Person>().WithMany().HasForeignKey(p => p.HostPersonId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<HolidayCalendar>().WithMany().HasForeignKey(p => p.HolidayCalendarId).OnDelete(DeleteBehavior.SetNull);
         builder.HasMany(p => p.Memberships).WithOne().HasForeignKey(m => m.PopkinId).OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(p => p.Memberships).UsePropertyAccessMode(PropertyAccessMode.Field);
     }

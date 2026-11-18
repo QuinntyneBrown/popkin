@@ -21,7 +21,7 @@ public sealed class AdminRolesTests
         Assert.Contains("ManageAdmins", allowed);
         Assert.Contains("StartDeletion", allowed);
         Assert.Contains("ExportAuditLog", allowed);
-        Assert.Equal(23, allowed.Count);
+        Assert.Equal(24, allowed.Count);
     }
 
     // Given one Owner, when "What each role can do" is read, then it counts the admins of each role
@@ -39,7 +39,7 @@ public sealed class AdminRolesTests
         Assert.Equal(0, counts.GetProperty("support").GetInt32());
         Assert.Equal(0, counts.GetProperty("viewer").GetInt32());
         var rows = roles.GetProperty("rows").EnumerateArray().ToList();
-        Assert.Equal(12, rows.Count);
+        Assert.Equal(13, rows.Count);
         Assert.Equal("Deletion", rows[2].GetProperty("row").GetString());
         Assert.True(rows[2].GetProperty("owner").GetBoolean());
         Assert.False(rows[2].GetProperty("support").GetBoolean());

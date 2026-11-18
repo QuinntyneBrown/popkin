@@ -11,18 +11,18 @@
   "POST /api/auth/codes": {
     "status": 202,
     "body": {
-      "verificationId": "cf408260-f75b-4b09-8d01-779c18789e8e",
+      "verificationId": "680b93be-5c92-41af-aff0-1ce388e04ef8",
       "channel": "Phone",
       "displayDestination": "(•••) •••-••48",
-      "resendAvailableAt": "2026-11-17T16:06:07.042929+00:00"
+      "resendAvailableAt": "2026-11-18T03:47:06.8247151+00:00"
     }
   },
-  "POST /api/auth/codes/cf408260-f75b-4b09-8d01-779c18789e8e/confirm": {
+  "POST /api/auth/codes/680b93be-5c92-41af-aff0-1ce388e04ef8/confirm": {
     "status": 200,
     "body": {
       "outcome": "SignedIn",
       "session": {
-        "personId": "11d640c2-ebf1-4939-a8f3-5499f2d3cdac",
+        "personId": "6c3f6661-47b3-49ac-b2b3-83aa7c573da6",
         "name": "Mara Okafor",
         "photoUrl": null
       },
@@ -32,18 +32,18 @@
   "GET /api/auth/session": {
     "status": 200,
     "body": {
-      "personId": "11d640c2-ebf1-4939-a8f3-5499f2d3cdac",
+      "personId": "6c3f6661-47b3-49ac-b2b3-83aa7c573da6",
       "name": "Mara Okafor",
       "photoUrl": null
     }
   },
-  "POST /api/auth/codes/cf408260-f75b-4b09-8d01-779c18789e8e/resend": {
+  "POST /api/auth/codes/680b93be-5c92-41af-aff0-1ce388e04ef8/resend": {
     "status": 202,
     "body": {
-      "verificationId": "d3db5d4d-0022-4ef2-9db2-acffb86a11f8",
+      "verificationId": "1a26ab12-17c1-4a0d-bbea-0950fe8a5037",
       "channel": "Phone",
       "displayDestination": "(•••) •••-••48",
-      "resendAvailableAt": "2026-11-17T16:06:38.120096+00:00"
+      "resendAvailableAt": "2026-11-18T03:47:38.0232443+00:00"
     }
   },
   "GET /api/popkins/features": {
@@ -58,26 +58,26 @@
   "POST /api/popkins": {
     "status": 201,
     "body": {
-      "id": "2262db2c-4393-4d00-b854-51852ce78978",
+      "id": "065afba8-6406-46d6-a89c-2e4e9c838e32",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
       "endsAt": "2026-11-22T23:00:00+00:00",
-      "inviteCode": "4jpewqjgrp",
-      "inviteUrl": "https://popk.in/4jpewqjgrp"
+      "inviteCode": "w74jn57d7u",
+      "inviteUrl": "https://popk.in/w74jn57d7u"
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/invite": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/invite": {
     "status": 200,
     "body": {
-      "code": "4jpewqjgrp",
-      "url": "https://popk.in/4jpewqjgrp",
+      "code": "w74jn57d7u",
+      "url": "https://popk.in/w74jn57d7u",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal"
     }
   },
-  "GET /api/invites/4jpewqjgrp": {
+  "GET /api/invites/w74jn57d7u": {
     "status": 200,
     "body": {
       "state": "Open",
@@ -90,17 +90,17 @@
       "avatars": [
         {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         },
         {
           "initials": "WB",
-          "accent": "Plum",
+          "accent": "Teal",
           "photoUrl": null
         },
         {
           "initials": "DP",
-          "accent": "Berry",
+          "accent": "Amber",
           "photoUrl": null
         }
       ],
@@ -108,7 +108,7 @@
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
@@ -118,7 +118,7 @@
       }
     }
   },
-  "GET /api/invites/4jpewqjgrp/members": {
+  "GET /api/invites/w74jn57d7u/members": {
     "status": 200,
     "body": {
       "members": [
@@ -126,7 +126,7 @@
           "displayName": "Mara Okafor",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           }
         },
@@ -134,7 +134,7 @@
           "displayName": "Walt Brennan",
           "avatar": {
             "initials": "WB",
-            "accent": "Plum",
+            "accent": "Teal",
             "photoUrl": null
           }
         },
@@ -142,7 +142,7 @@
           "displayName": "Dev Patel",
           "avatar": {
             "initials": "DP",
-            "accent": "Berry",
+            "accent": "Amber",
             "photoUrl": null
           }
         }
@@ -150,11 +150,11 @@
       "othersCount": 0
     }
   },
-  "POST /api/invites/4jpewqjgrp/join": {
+  "POST /api/invites/w74jn57d7u/join": {
     "status": 201,
     "body": {
-      "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-      "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
+      "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+      "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
       "displayName": "Joel",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
@@ -166,11 +166,11 @@
       "othersCount": 1
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/everyone": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/everyone": {
     "status": 200,
     "body": {
-      "id": "921ec1bf-2352-41f2-9013-7776a24c63d1",
-      "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
+      "id": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
+      "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
       "kind": "Everyone",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
@@ -183,34 +183,34 @@
       "unreadCount": 4,
       "lastReadMessageId": null,
       "viewer": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara"
       },
       "other": null,
       "popkinVersion": 0
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/921ec1bf-2352-41f2-9013-7776a24c63d1/messages": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/d6a5b0ab-c7f3-42fa-b129-f61055fdbdce/messages": {
     "status": 200,
     "body": {
       "items": [
         {
-          "id": "f54817e2-f7be-4422-8fe1-100814d93de7",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+          "id": "a582ff80-d36d-4ffe-859b-eb11c755bf50",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+            "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Plum",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "text": "Walt Brennan popped in. Say hi! 👋",
-          "sentAt": "2026-11-17T16:06:08.2213+00:00",
+          "sentAt": "2026-11-18T03:47:08.2166+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
@@ -218,22 +218,22 @@
           "photoRemoved": false
         },
         {
-          "id": "37f52f5d-7abb-433d-9e93-3d7f67c048b9",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+          "id": "adba9782-77d0-476e-bb6a-b5160f6c3e3d",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "59ae5d54-77c7-4e43-a35c-fb7b394e7549",
+            "membershipId": "0bd801c5-f113-40d7-a94a-2125dcd6fa50",
             "firstName": "Dev",
             "avatar": {
               "initials": "DP",
-              "accent": "Berry",
+              "accent": "Amber",
               "photoUrl": null
             }
           },
           "text": "Dev Patel popped in. Say hi! 👋",
-          "sentAt": "2026-11-17T16:06:08.2471+00:00",
+          "sentAt": "2026-11-18T03:47:08.302+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
@@ -241,45 +241,45 @@
           "photoRemoved": false
         },
         {
-          "id": "a4daad52-a5ca-4ca1-a446-c6982829ccf0",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+          "id": "443748d8-e148-4498-a419-0b06789da640",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
+            "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
             "firstName": "Joel",
             "avatar": {
               "initials": "J",
-              "accent": "Sky",
-              "photoUrl": null
-            }
-          },
-          "text": "Joel popped in. Say hi! 👋",
-          "sentAt": "2026-11-17T16:06:08.2634+00:00",
-          "reactionsVersion": 0,
-          "reactions": [],
-          "quote": null,
-          "photo": null,
-          "photoRemoved": false
-        },
-        {
-          "id": "cd27da93-01a9-45f7-9bc3-337f1c302e27",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
-          "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e01",
-          "kind": "Member",
-          "author": {
-            "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
-            "firstName": "Walt",
-            "avatar": {
-              "initials": "WB",
               "accent": "Plum",
               "photoUrl": null
             }
           },
+          "text": "Joel popped in. Say hi! 👋",
+          "sentAt": "2026-11-18T03:47:08.4012+00:00",
+          "reactionsVersion": 0,
+          "reactions": [],
+          "quote": null,
+          "photo": null,
+          "photoRemoved": false
+        },
+        {
+          "id": "fd7d8a61-239d-43c9-a460-7cebb431f265",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
+          "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e01",
+          "kind": "Member",
+          "author": {
+            "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
+            "firstName": "Walt",
+            "avatar": {
+              "initials": "WB",
+              "accent": "Teal",
+              "photoUrl": null
+            }
+          },
           "text": "Pancakes at the main cabin, 8:30. Bring an appetite.",
-          "sentAt": "2026-11-17T16:06:08.2874+00:00",
+          "sentAt": "2026-11-18T03:47:08.5119+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
@@ -290,34 +290,34 @@
       "hasMore": false
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/921ec1bf-2352-41f2-9013-7776a24c63d1/messages?after=cd27da93-01a9-45f7-9bc3-337f1c302e27": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/d6a5b0ab-c7f3-42fa-b129-f61055fdbdce/messages?after=fd7d8a61-239d-43c9-a460-7cebb431f265": {
     "status": 200,
     "body": {
       "items": [],
       "hasMore": false
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/921ec1bf-2352-41f2-9013-7776a24c63d1/messages?from=f54817e2-f7be-4422-8fe1-100814d93de7&to=cd27da93-01a9-45f7-9bc3-337f1c302e27": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/d6a5b0ab-c7f3-42fa-b129-f61055fdbdce/messages?from=a582ff80-d36d-4ffe-859b-eb11c755bf50&to=fd7d8a61-239d-43c9-a460-7cebb431f265": {
     "status": 200,
     "body": {
       "items": [
         {
-          "id": "f54817e2-f7be-4422-8fe1-100814d93de7",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+          "id": "a582ff80-d36d-4ffe-859b-eb11c755bf50",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+            "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Plum",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "text": "Walt Brennan popped in. Say hi! 👋",
-          "sentAt": "2026-11-17T16:06:08.2213+00:00",
+          "sentAt": "2026-11-18T03:47:08.2166+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
@@ -325,22 +325,22 @@
           "photoRemoved": false
         },
         {
-          "id": "37f52f5d-7abb-433d-9e93-3d7f67c048b9",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+          "id": "adba9782-77d0-476e-bb6a-b5160f6c3e3d",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "59ae5d54-77c7-4e43-a35c-fb7b394e7549",
+            "membershipId": "0bd801c5-f113-40d7-a94a-2125dcd6fa50",
             "firstName": "Dev",
             "avatar": {
               "initials": "DP",
-              "accent": "Berry",
+              "accent": "Amber",
               "photoUrl": null
             }
           },
           "text": "Dev Patel popped in. Say hi! 👋",
-          "sentAt": "2026-11-17T16:06:08.2471+00:00",
+          "sentAt": "2026-11-18T03:47:08.302+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
@@ -348,45 +348,45 @@
           "photoRemoved": false
         },
         {
-          "id": "a4daad52-a5ca-4ca1-a446-c6982829ccf0",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+          "id": "443748d8-e148-4498-a419-0b06789da640",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
           "clientMessageId": null,
           "kind": "System",
           "author": {
-            "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
+            "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
             "firstName": "Joel",
             "avatar": {
               "initials": "J",
-              "accent": "Sky",
-              "photoUrl": null
-            }
-          },
-          "text": "Joel popped in. Say hi! 👋",
-          "sentAt": "2026-11-17T16:06:08.2634+00:00",
-          "reactionsVersion": 0,
-          "reactions": [],
-          "quote": null,
-          "photo": null,
-          "photoRemoved": false
-        },
-        {
-          "id": "cd27da93-01a9-45f7-9bc3-337f1c302e27",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
-          "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e01",
-          "kind": "Member",
-          "author": {
-            "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
-            "firstName": "Walt",
-            "avatar": {
-              "initials": "WB",
               "accent": "Plum",
               "photoUrl": null
             }
           },
+          "text": "Joel popped in. Say hi! 👋",
+          "sentAt": "2026-11-18T03:47:08.4012+00:00",
+          "reactionsVersion": 0,
+          "reactions": [],
+          "quote": null,
+          "photo": null,
+          "photoRemoved": false
+        },
+        {
+          "id": "fd7d8a61-239d-43c9-a460-7cebb431f265",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
+          "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e01",
+          "kind": "Member",
+          "author": {
+            "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
+            "firstName": "Walt",
+            "avatar": {
+              "initials": "WB",
+              "accent": "Teal",
+              "photoUrl": null
+            }
+          },
           "text": "Pancakes at the main cabin, 8:30. Bring an appetite.",
-          "sentAt": "2026-11-17T16:06:08.2874+00:00",
+          "sentAt": "2026-11-18T03:47:08.5119+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
@@ -397,28 +397,28 @@
       "hasMore": false
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/921ec1bf-2352-41f2-9013-7776a24c63d1/read": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/d6a5b0ab-c7f3-42fa-b129-f61055fdbdce/read": {
     "status": 204
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/921ec1bf-2352-41f2-9013-7776a24c63d1/messages": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/d6a5b0ab-c7f3-42fa-b129-f61055fdbdce/messages": {
     "status": 201,
     "body": {
-      "id": "92f177ad-678b-4a07-a505-83477a63e52b",
-      "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-      "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+      "id": "324a79c7-8df5-4018-8432-ff3625bb5f00",
+      "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+      "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
       "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e02",
       "kind": "Member",
       "author": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
       "text": "On it! Also: last call for the canoe sign-up 🛶",
-      "sentAt": "2026-11-17T16:06:08.343465+00:00",
+      "sentAt": "2026-11-18T03:47:08.7842741+00:00",
       "reactionsVersion": 0,
       "reactions": [],
       "quote": null,
@@ -426,7 +426,7 @@
       "photoRemoved": false
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/presence": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/presence": {
     "status": 200,
     "body": {
       "version": 0,
@@ -434,48 +434,48 @@
       "members": []
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/members": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/members": {
     "status": 200,
     "body": [
       {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "displayName": "Mara Okafor",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         },
         "role": "Host",
         "isViewer": true
       },
       {
-        "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+        "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
         "displayName": "Walt Brennan",
         "avatar": {
           "initials": "WB",
-          "accent": "Plum",
+          "accent": "Teal",
           "photoUrl": null
         },
         "role": "Member",
         "isViewer": false
       },
       {
-        "membershipId": "59ae5d54-77c7-4e43-a35c-fb7b394e7549",
+        "membershipId": "0bd801c5-f113-40d7-a94a-2125dcd6fa50",
         "displayName": "Dev Patel",
         "avatar": {
           "initials": "DP",
-          "accent": "Berry",
+          "accent": "Amber",
           "photoUrl": null
         },
         "role": "Member",
         "isViewer": false
       },
       {
-        "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
+        "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
         "displayName": "Joel",
         "avatar": {
           "initials": "J",
-          "accent": "Sky",
+          "accent": "Plum",
           "photoUrl": null
         },
         "role": "Member",
@@ -483,11 +483,11 @@
       }
     ]
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/direct/31b5f65e-d800-44dc-bf0a-637b602fef1f": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/direct/6ac66ded-3cfb-44cb-a8b3-7a237ee52e79": {
     "status": 201,
     "body": {
-      "id": "0b531bb8-083c-4603-9a48-0e9b1033fac9",
-      "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
+      "id": "1a813910-3a48-4777-b166-5deefc3225b4",
+      "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
       "kind": "Direct",
       "popkinName": "Lakeside Weekend",
       "emoji": "🏕️",
@@ -500,41 +500,41 @@
       "unreadCount": 0,
       "lastReadMessageId": null,
       "viewer": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara"
       },
       "other": {
-        "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+        "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
         "displayName": "Walt Brennan",
         "firstName": "Walt",
         "avatar": {
           "initials": "WB",
-          "accent": "Plum",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
       "popkinVersion": 0
     }
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/0b531bb8-083c-4603-9a48-0e9b1033fac9/messages": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/1a813910-3a48-4777-b166-5deefc3225b4/messages": {
     "status": 201,
     "body": {
-      "id": "78e96a70-bd90-4e96-84b6-ff3939dd0f4a",
-      "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-      "threadId": "0b531bb8-083c-4603-9a48-0e9b1033fac9",
+      "id": "2d96d964-f057-4be6-9639-73b32934a442",
+      "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+      "threadId": "1a813910-3a48-4777-b166-5deefc3225b4",
       "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e03",
       "kind": "Member",
       "author": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
       "text": "Walt, your pancakes were unreal. Is that your mum’s recipe?",
-      "sentAt": "2026-11-17T16:06:08.363614+00:00",
+      "sentAt": "2026-11-18T03:47:08.8465214+00:00",
       "reactionsVersion": 0,
       "reactions": [],
       "quote": null,
@@ -542,27 +542,27 @@
       "photoRemoved": false
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/0b531bb8-083c-4603-9a48-0e9b1033fac9/messages": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/1a813910-3a48-4777-b166-5deefc3225b4/messages": {
     "status": 200,
     "body": {
       "items": [
         {
-          "id": "78e96a70-bd90-4e96-84b6-ff3939dd0f4a",
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-          "threadId": "0b531bb8-083c-4603-9a48-0e9b1033fac9",
+          "id": "2d96d964-f057-4be6-9639-73b32934a442",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+          "threadId": "1a813910-3a48-4777-b166-5deefc3225b4",
           "clientMessageId": "7b0e7a52-5f0e-4d57-9d5c-3f0f8a3c1e03",
           "kind": "Member",
           "author": {
-            "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+            "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "text": "Walt, your pancakes were unreal. Is that your mum’s recipe?",
-          "sentAt": "2026-11-17T16:06:08.3636+00:00",
+          "sentAt": "2026-11-18T03:47:08.8465+00:00",
           "reactionsVersion": 0,
           "reactions": [],
           "quote": null,
@@ -573,50 +573,50 @@
       "hasMore": false
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/calls/current?threadId=0b531bb8-083c-4603-9a48-0e9b1033fac9": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/calls/current?threadId=1a813910-3a48-4777-b166-5deefc3225b4": {
     "status": 204
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads": {
     "status": 200,
     "body": {
-      "viewerMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+      "viewerMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
       "everyone": {
-        "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+        "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
         "latest": {
           "firstName": "Mara",
           "text": "On it! Also: last call for the canoe sign-up 🛶",
           "isMine": true,
-          "sentAt": "2026-11-17T16:06:08.3434+00:00"
+          "sentAt": "2026-11-18T03:47:08.7842+00:00"
         },
         "unreadCount": 0
       },
       "direct": [
         {
-          "threadId": "0b531bb8-083c-4603-9a48-0e9b1033fac9",
+          "threadId": "1a813910-3a48-4777-b166-5deefc3225b4",
           "other": {
-            "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+            "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
             "displayName": "Walt Brennan",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Plum",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "latest": {
             "text": "Walt, your pancakes were unreal. Is that your mum’s recipe?",
             "isMine": true,
-            "sentAt": "2026-11-17T16:06:08.3636+00:00"
+            "sentAt": "2026-11-18T03:47:08.8465+00:00"
           },
           "unreadCount": 0
         }
       ]
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32": {
     "status": 200,
     "body": {
-      "id": "2262db2c-4393-4d00-b854-51852ce78978",
+      "id": "065afba8-6406-46d6-a89c-2e4e9c838e32",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
@@ -627,28 +627,28 @@
       "avatars": [
         {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         },
         {
           "initials": "WB",
-          "accent": "Plum",
+          "accent": "Teal",
           "photoUrl": null
         },
         {
           "initials": "DP",
-          "accent": "Berry",
+          "accent": "Amber",
           "photoUrl": null
         },
         {
           "initials": "J",
-          "accent": "Sky",
+          "accent": "Plum",
           "photoUrl": null
         }
       ],
       "viewerRole": "Host",
       "viewer": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara"
       },
       "unreadCount": 0,
@@ -662,7 +662,7 @@
       "plan": true
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/features": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/features": {
     "status": 200,
     "body": {
       "plan": true,
@@ -679,61 +679,61 @@
       ]
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/threads/everyone/preview": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/threads/everyone/preview": {
     "status": 200,
     "body": {
-      "threadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
+      "threadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
       "messages": [
         {
-          "id": "cd27da93-01a9-45f7-9bc3-337f1c302e27",
+          "id": "fd7d8a61-239d-43c9-a460-7cebb431f265",
           "author": {
-            "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+            "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
             "firstName": "Walt",
             "avatar": {
               "initials": "WB",
-              "accent": "Plum",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "text": "Pancakes at the main cabin, 8:30. Bring an appetite.",
-          "sentAt": "2026-11-17T16:06:08.2874+00:00"
+          "sentAt": "2026-11-18T03:47:08.5119+00:00"
         },
         {
-          "id": "92f177ad-678b-4a07-a505-83477a63e52b",
+          "id": "324a79c7-8df5-4018-8432-ff3625bb5f00",
           "author": {
-            "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+            "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "text": "On it! Also: last call for the canoe sign-up 🛶",
-          "sentAt": "2026-11-17T16:06:08.3434+00:00"
+          "sentAt": "2026-11-18T03:47:08.7842+00:00"
         }
       ],
       "newCount": 0
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/photos/summary": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/photos/summary": {
     "status": 200,
     "body": {
       "count": 0,
       "photos": []
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences/summary": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences/summary": {
     "status": 200,
     "body": {
       "count": 0,
       "top": []
     }
   },
-  "PATCH /api/popkins/2262db2c-4393-4d00-b854-51852ce78978": {
+  "PATCH /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32": {
     "status": 200,
     "body": {
-      "id": "2262db2c-4393-4d00-b854-51852ce78978",
+      "id": "065afba8-6406-46d6-a89c-2e4e9c838e32",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
@@ -742,10 +742,10 @@
       "version": 1
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/length": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/length": {
     "status": 200,
     "body": {
-      "id": "2262db2c-4393-4d00-b854-51852ce78978",
+      "id": "065afba8-6406-46d6-a89c-2e4e9c838e32",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
@@ -754,7 +754,7 @@
       "version": 2
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/features": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/features": {
     "status": 200,
     "body": {
       "plan": true,
@@ -771,7 +771,7 @@
       ]
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/event": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/event": {
     "status": 200,
     "body": {
       "label": "Lake weekend",
@@ -779,7 +779,7 @@
       "lastDay": "2026-09-27"
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/schedule/time-off?week=2026-09-21": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/schedule/time-off?week=2026-09-21": {
     "status": 200,
     "body": {
       "week": "2026-09-21",
@@ -790,11 +790,11 @@
       },
       "members": [
         {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           },
           "isMe": true,
@@ -809,11 +809,11 @@
           ]
         },
         {
-          "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+          "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
           "firstName": "Walt",
           "avatar": {
             "initials": "WB",
-            "accent": "Plum",
+            "accent": "Teal",
             "photoUrl": null
           },
           "isMe": false,
@@ -828,11 +828,11 @@
           ]
         },
         {
-          "membershipId": "59ae5d54-77c7-4e43-a35c-fb7b394e7549",
+          "membershipId": "0bd801c5-f113-40d7-a94a-2125dcd6fa50",
           "firstName": "Dev",
           "avatar": {
             "initials": "DP",
-            "accent": "Berry",
+            "accent": "Amber",
             "photoUrl": null
           },
           "isMe": false,
@@ -847,11 +847,11 @@
           ]
         },
         {
-          "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
+          "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
           "firstName": "Joel",
           "avatar": {
             "initials": "J",
-            "accent": "Sky",
+            "accent": "Plum",
             "photoUrl": null
           },
           "isMe": false,
@@ -869,7 +869,7 @@
       "canEdit": true
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/schedule/time-off/d7ff1f5b-eb60-4062-8cff-93ea140b3b7a": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/schedule/time-off/27c8952e-916a-4b86-9e7c-6861896370f6": {
     "status": 200,
     "body": {
       "week": "2026-09-21",
@@ -880,11 +880,11 @@
       },
       "members": [
         {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           },
           "isMe": true,
@@ -899,11 +899,11 @@
           ]
         },
         {
-          "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+          "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
           "firstName": "Walt",
           "avatar": {
             "initials": "WB",
-            "accent": "Plum",
+            "accent": "Teal",
             "photoUrl": null
           },
           "isMe": false,
@@ -918,11 +918,11 @@
           ]
         },
         {
-          "membershipId": "59ae5d54-77c7-4e43-a35c-fb7b394e7549",
+          "membershipId": "0bd801c5-f113-40d7-a94a-2125dcd6fa50",
           "firstName": "Dev",
           "avatar": {
             "initials": "DP",
-            "accent": "Berry",
+            "accent": "Amber",
             "photoUrl": null
           },
           "isMe": false,
@@ -937,11 +937,11 @@
           ]
         },
         {
-          "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
+          "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
           "firstName": "Joel",
           "avatar": {
             "initials": "J",
-            "accent": "Sky",
+            "accent": "Plum",
             "photoUrl": null
           },
           "isMe": false,
@@ -959,7 +959,7 @@
       "canEdit": true
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/schedule/week?from=2026-09-12": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/schedule/week?from=2026-09-12": {
     "status": 200,
     "body": {
       "from": "2026-09-12",
@@ -1018,11 +1018,11 @@
       ],
       "members": [
         {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           },
           "isMe": true,
@@ -1037,11 +1037,11 @@
           ]
         },
         {
-          "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+          "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
           "firstName": "Walt",
           "avatar": {
             "initials": "WB",
-            "accent": "Plum",
+            "accent": "Teal",
             "photoUrl": null
           },
           "isMe": false,
@@ -1056,11 +1056,11 @@
           ]
         },
         {
-          "membershipId": "59ae5d54-77c7-4e43-a35c-fb7b394e7549",
+          "membershipId": "0bd801c5-f113-40d7-a94a-2125dcd6fa50",
           "firstName": "Dev",
           "avatar": {
             "initials": "DP",
-            "accent": "Berry",
+            "accent": "Amber",
             "photoUrl": null
           },
           "isMe": false,
@@ -1075,11 +1075,11 @@
           ]
         },
         {
-          "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
+          "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
           "firstName": "Joel",
           "avatar": {
             "initials": "J",
-            "accent": "Sky",
+            "accent": "Plum",
             "photoUrl": null
           },
           "isMe": false,
@@ -1096,7 +1096,7 @@
       ]
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/schedule/hours/d7ff1f5b-eb60-4062-8cff-93ea140b3b7a": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/schedule/hours/27c8952e-916a-4b86-9e7c-6861896370f6": {
     "status": 200,
     "body": {
       "from": "2026-09-12",
@@ -1157,11 +1157,11 @@
       ],
       "members": [
         {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           },
           "isMe": true,
@@ -1181,10 +1181,48 @@
           ]
         },
         {
-          "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+          "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
           "firstName": "Walt",
           "avatar": {
             "initials": "WB",
+            "accent": "Teal",
+            "photoUrl": null
+          },
+          "isMe": false,
+          "days": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "membershipId": "0bd801c5-f113-40d7-a94a-2125dcd6fa50",
+          "firstName": "Dev",
+          "avatar": {
+            "initials": "DP",
+            "accent": "Amber",
+            "photoUrl": null
+          },
+          "isMe": false,
+          "days": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ]
+        },
+        {
+          "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
+          "firstName": "Joel",
+          "avatar": {
+            "initials": "J",
             "accent": "Plum",
             "photoUrl": null
           },
@@ -1198,49 +1236,11 @@
             [],
             []
           ]
-        },
-        {
-          "membershipId": "59ae5d54-77c7-4e43-a35c-fb7b394e7549",
-          "firstName": "Dev",
-          "avatar": {
-            "initials": "DP",
-            "accent": "Berry",
-            "photoUrl": null
-          },
-          "isMe": false,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
-        },
-        {
-          "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
-          "firstName": "Joel",
-          "avatar": {
-            "initials": "J",
-            "accent": "Sky",
-            "photoUrl": null
-          },
-          "isMe": false,
-          "days": [
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            []
-          ]
         }
       ]
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/schedule/summary?from=2026-09-12": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/schedule/summary?from=2026-09-12": {
     "status": 200,
     "body": {
       "hasHours": true,
@@ -1248,18 +1248,18 @@
       "everyoneFreeFrom": "17:00"
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/plan": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/plan": {
     "status": 200,
     "body": {
       "sprint": {
         "name": "Planning sprint",
-        "firstDay": "2026-11-17",
-        "lastDay": "2026-12-14",
+        "firstDay": "2026-11-18",
+        "lastDay": "2026-12-15",
         "daysLeft": 27
       },
       "stories": [
         {
-          "id": "dc4237e3-4dfe-4e2c-b845-6d6be741461f",
+          "id": "98b68631-3b73-4aea-8c5c-9d3c6ba3f886",
           "title": "Kayak rental for two days",
           "column": "Backlog",
           "points": 3,
@@ -1267,33 +1267,33 @@
           "owner": null,
           "dueDate": null,
           "commentCount": 0,
-          "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "canDelete": true,
-          "addedAt": "2026-11-17T16:06:08.5279+00:00"
+          "addedAt": "2026-11-18T03:47:09.4752+00:00"
         },
         {
-          "id": "bf4408b2-6403-4721-94e1-091732e6a9ce",
+          "id": "11cf85b5-ff33-4506-90f1-28c5e9759aed",
           "title": "Book the cabin at Pine Hollow",
           "column": "ToDo",
           "points": 8,
           "tag": "Stay",
           "owner": {
-            "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+            "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "dueDate": "2026-09-18",
           "commentCount": 0,
-          "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "canDelete": true,
-          "addedAt": "2026-11-17T16:06:08.5109+00:00"
+          "addedAt": "2026-11-18T03:47:09.4264+00:00"
         },
         {
-          "id": "38e41432-6979-4ae8-85f5-d51948aa22e4",
+          "id": "5bede5b4-677c-4041-acc8-f0ea05102b42",
           "title": "Rent a 7-seat van",
           "column": "Doing",
           "points": 5,
@@ -1301,9 +1301,9 @@
           "owner": null,
           "dueDate": null,
           "commentCount": 0,
-          "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "canDelete": true,
-          "addedAt": "2026-11-17T16:06:08.5262+00:00"
+          "addedAt": "2026-11-18T03:47:09.4594+00:00"
         }
       ],
       "progress": {
@@ -1316,10 +1316,10 @@
       "version": 5
     }
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/plan/stories": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/plan/stories": {
     "status": 201,
     "body": {
-      "id": "dc4237e3-4dfe-4e2c-b845-6d6be741461f",
+      "id": "98b68631-3b73-4aea-8c5c-9d3c6ba3f886",
       "title": "Kayak rental for two days",
       "column": "Backlog",
       "points": 3,
@@ -1327,15 +1327,15 @@
       "owner": null,
       "dueDate": null,
       "commentCount": 0,
-      "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+      "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
       "canDelete": true,
-      "addedAt": "2026-11-17T16:06:08.52791+00:00"
+      "addedAt": "2026-11-18T03:47:09.4752209+00:00"
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/plan/stories/38e41432-6979-4ae8-85f5-d51948aa22e4/column": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/plan/stories/5bede5b4-677c-4041-acc8-f0ea05102b42/column": {
     "status": 200,
     "body": {
-      "id": "38e41432-6979-4ae8-85f5-d51948aa22e4",
+      "id": "5bede5b4-677c-4041-acc8-f0ea05102b42",
       "title": "Rent a 7-seat van",
       "column": "Doing",
       "points": 5,
@@ -1343,42 +1343,42 @@
       "owner": null,
       "dueDate": null,
       "commentCount": 0,
-      "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+      "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
       "canDelete": true,
-      "addedAt": "2026-11-17T16:06:08.5262+00:00"
+      "addedAt": "2026-11-18T03:47:09.4594+00:00"
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/plan/stories/bf4408b2-6403-4721-94e1-091732e6a9ce": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/plan/stories/11cf85b5-ff33-4506-90f1-28c5e9759aed": {
     "status": 200,
     "body": {
-      "id": "bf4408b2-6403-4721-94e1-091732e6a9ce",
+      "id": "11cf85b5-ff33-4506-90f1-28c5e9759aed",
       "title": "Book the cabin at Pine Hollow",
       "column": "ToDo",
       "points": 8,
       "tag": "Stay",
       "owner": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
       "dueDate": "2026-09-18",
       "commentCount": 0,
-      "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+      "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
       "canDelete": true,
-      "addedAt": "2026-11-17T16:06:08.5109+00:00"
+      "addedAt": "2026-11-18T03:47:09.4264+00:00"
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/plan/burn-down": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/plan/burn-down": {
     "status": 200,
     "body": {
       "sprint": {
         "name": "Planning sprint",
-        "firstDay": "2026-11-17",
-        "lastDay": "2026-12-14",
+        "firstDay": "2026-11-18",
+        "lastDay": "2026-12-15",
         "daysLeft": 27
       },
       "startPoints": 13,
@@ -1391,34 +1391,34 @@
       },
       "days": [
         {
-          "day": "2026-11-17",
+          "day": "2026-11-18",
           "pointsLeft": 13
         }
       ],
       "biggest": [
         {
-          "id": "bf4408b2-6403-4721-94e1-091732e6a9ce",
+          "id": "11cf85b5-ff33-4506-90f1-28c5e9759aed",
           "title": "Book the cabin at Pine Hollow",
           "column": "ToDo",
           "points": 8,
           "tag": "Stay",
           "owner": {
-            "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+            "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "dueDate": "2026-09-18",
           "commentCount": 0,
-          "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "canDelete": true,
-          "addedAt": "2026-11-17T16:06:08.5109+00:00"
+          "addedAt": "2026-11-18T03:47:09.4264+00:00"
         },
         {
-          "id": "38e41432-6979-4ae8-85f5-d51948aa22e4",
+          "id": "5bede5b4-677c-4041-acc8-f0ea05102b42",
           "title": "Rent a 7-seat van",
           "column": "Doing",
           "points": 5,
@@ -1426,42 +1426,42 @@
           "owner": null,
           "dueDate": null,
           "commentCount": 0,
-          "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "canDelete": true,
-          "addedAt": "2026-11-17T16:06:08.5262+00:00"
+          "addedAt": "2026-11-18T03:47:09.4594+00:00"
         }
       ]
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/plan/summary": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/plan/summary": {
     "status": 200,
     "body": {
       "pointsLeft": 13,
       "behind": 0,
       "biggest": [
         {
-          "id": "bf4408b2-6403-4721-94e1-091732e6a9ce",
+          "id": "11cf85b5-ff33-4506-90f1-28c5e9759aed",
           "title": "Book the cabin at Pine Hollow",
           "column": "ToDo",
           "points": 8,
           "tag": "Stay",
           "owner": {
-            "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+            "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
           "dueDate": "2026-09-18",
           "commentCount": 0,
-          "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "canDelete": true,
-          "addedAt": "2026-11-17T16:06:08.5109+00:00"
+          "addedAt": "2026-11-18T03:47:09.4264+00:00"
         },
         {
-          "id": "38e41432-6979-4ae8-85f5-d51948aa22e4",
+          "id": "5bede5b4-677c-4041-acc8-f0ea05102b42",
           "title": "Rent a 7-seat van",
           "column": "Doing",
           "points": 5,
@@ -1469,53 +1469,53 @@
           "owner": null,
           "dueDate": null,
           "commentCount": 0,
-          "addedByMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "addedByMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "canDelete": true,
-          "addedAt": "2026-11-17T16:06:08.5262+00:00"
+          "addedAt": "2026-11-18T03:47:09.4594+00:00"
         }
       ]
     }
   },
-  "DELETE /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/plan/stories/dc4237e3-4dfe-4e2c-b845-6d6be741461f": {
+  "DELETE /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/plan/stories/98b68631-3b73-4aea-8c5c-9d3c6ba3f886": {
     "status": 204
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/calls/current": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/calls/current": {
     "status": 204
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/calls": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/calls": {
     "status": 201,
     "body": {
       "call": {
-        "id": "60df8912-5e05-4a0a-984f-e02754d04c25",
+        "id": "dbb8e386-b9ca-4a82-b496-e8b79f52ca08",
         "threadId": null,
-        "startedAt": "2026-11-17T16:06:08.570371+00:00",
+        "startedAt": "2026-11-18T03:47:09.6290224+00:00",
         "version": 1,
         "participantCount": 1
       },
-      "viewerMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+      "viewerMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
       "participants": [
         {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "name": "Mara Okafor",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           },
           "micOn": true,
           "cameraOn": true,
           "mediaVersion": 0,
-          "joinedAt": "2026-11-17T16:06:08.5728+00:00"
+          "joinedAt": "2026-11-18T03:47:09.6332+00:00"
         }
       ],
       "iceServers": []
     }
   },
-  "PATCH /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/calls/60df8912-5e05-4a0a-984f-e02754d04c25/participants/me": {
+  "PATCH /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/calls/dbb8e386-b9ca-4a82-b496-e8b79f52ca08/participants/me": {
     "status": 204
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/calls/60df8912-5e05-4a0a-984f-e02754d04c25/leave": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/calls/dbb8e386-b9ca-4a82-b496-e8b79f52ca08/leave": {
     "status": 204
   },
   "GET /api/popkins": {
@@ -1523,7 +1523,7 @@
     "body": {
       "active": [
         {
-          "id": "2262db2c-4393-4d00-b854-51852ce78978",
+          "id": "065afba8-6406-46d6-a89c-2e4e9c838e32",
           "name": "Lakeside Weekend",
           "emoji": "🏕️",
           "colour": "Teal",
@@ -1532,17 +1532,17 @@
           "avatars": [
             {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Teal",
               "photoUrl": null
             },
             {
               "initials": "WB",
-              "accent": "Plum",
+              "accent": "Teal",
               "photoUrl": null
             },
             {
               "initials": "DP",
-              "accent": "Berry",
+              "accent": "Amber",
               "photoUrl": null
             }
           ],
@@ -1551,8 +1551,8 @@
             "text": "On it! Also: last call for the canoe sign-up 🛶"
           },
           "unreadCount": 0,
-          "everyoneThreadId": "921ec1bf-2352-41f2-9013-7776a24c63d1",
-          "viewerMembershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a"
+          "everyoneThreadId": "d6a5b0ab-c7f3-42fa-b129-f61055fdbdce",
+          "viewerMembershipId": "27c8952e-916a-4b86-9e7c-6861896370f6"
         }
       ],
       "wrappedUp": []
@@ -1567,11 +1567,11 @@
   "POST /api/contacts/people": {
     "status": 201,
     "body": {
-      "id": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+      "id": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
       "name": "Femi Bankole",
       "firstName": "Femi",
       "initials": "FB",
-      "accent": "Coral",
+      "accent": "Sky",
       "photoUrl": null,
       "knownAs": "Grace’s fiancé",
       "circle": "Friends",
@@ -1592,14 +1592,14 @@
       "alsoIn": null
     }
   },
-  "GET /api/contacts/people/e3ab99ef-218a-4ea4-9f43-6dcd335a9186": {
+  "GET /api/contacts/people/771dc38b-0dd5-490e-8eae-c5a341ff409c": {
     "status": 200,
     "body": {
-      "id": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+      "id": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
       "name": "Femi Bankole",
       "firstName": "Femi",
       "initials": "FB",
-      "accent": "Coral",
+      "accent": "Sky",
       "photoUrl": null,
       "knownAs": "Grace’s fiancé",
       "circle": "Friends",
@@ -1623,14 +1623,14 @@
       "alsoIn": null
     }
   },
-  "PUT /api/contacts/people/e3ab99ef-218a-4ea4-9f43-6dcd335a9186": {
+  "PUT /api/contacts/people/771dc38b-0dd5-490e-8eae-c5a341ff409c": {
     "status": 200,
     "body": {
-      "id": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+      "id": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
       "name": "Femi Bankole",
       "firstName": "Femi",
       "initials": "FB",
-      "accent": "Coral",
+      "accent": "Sky",
       "photoUrl": null,
       "knownAs": "Grace’s fiancé",
       "circle": "Friends",
@@ -1651,21 +1651,21 @@
       "alsoIn": null
     }
   },
-  "PUT /api/contacts/people/e3ab99ef-218a-4ea4-9f43-6dcd335a9186/closest": {
+  "PUT /api/contacts/people/771dc38b-0dd5-490e-8eae-c5a341ff409c/closest": {
     "status": 204
   },
-  "PUT /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/closest": {
+  "PUT /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/closest": {
     "status": 204
   },
-  "GET /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1": {
+  "GET /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89": {
     "status": 200,
     "body": {
-      "id": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+      "id": "fea573cd-5e9e-40de-8a64-64beb06aee89",
       "name": "Chidi Okafor",
       "firstName": "Chidi",
       "initials": "CO",
       "accent": "Plum",
-      "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+      "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
       "knownAs": "Brother",
       "circle": "Family",
       "city": "Manchester",
@@ -1695,13 +1695,13 @@
     "body": {
       "contacts": [
         {
-          "id": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+          "id": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "name": "Chidi Okafor",
           "firstName": "Chidi",
           "knownAs": "Brother",
           "circle": "Family",
           "isClosest": true,
-          "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+          "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
           "initials": "CO",
           "accent": "Plum",
           "nextDate": null,
@@ -1709,7 +1709,7 @@
           "lastTalkedDays": null
         },
         {
-          "id": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+          "id": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
           "name": "Femi Bankole",
           "firstName": "Femi",
           "knownAs": "Grace’s fiancé",
@@ -1717,7 +1717,7 @@
           "isClosest": true,
           "photoUrl": null,
           "initials": "FB",
-          "accent": "Coral",
+          "accent": "Sky",
           "nextDate": null,
           "lastTalkedOn": null,
           "lastTalkedDays": null
@@ -1725,19 +1725,19 @@
       ]
     }
   },
-  "POST /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/key-dates": {
+  "POST /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/key-dates": {
     "status": 201,
     "body": {
-      "id": "4f123990-08b9-402c-a75f-3371c6828e10",
-      "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+      "id": "a1c09f21-9bc4-4213-89ce-acde7ed05410",
+      "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
       "firstName": "Chidi",
-      "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+      "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
       "initials": "CO",
       "accent": "Plum",
       "kind": "Birthday",
       "title": null,
       "occursOn": "2027-01-24",
-      "daysLeft": 68,
+      "daysLeft": 67,
       "years": 37,
       "lead": "OneWeekBefore"
     }
@@ -1747,10 +1747,10 @@
     "body": {
       "dates": [
         {
-          "id": "4f123990-08b9-402c-a75f-3371c6828e10",
-          "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+          "id": "a1c09f21-9bc4-4213-89ce-acde7ed05410",
+          "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "firstName": "Chidi",
-          "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+          "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
           "initials": "CO",
           "accent": "Plum",
           "kind": "Birthday",
@@ -1773,10 +1773,10 @@
     "body": {
       "dates": [
         {
-          "id": "4f123990-08b9-402c-a75f-3371c6828e10",
-          "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+          "id": "a1c09f21-9bc4-4213-89ce-acde7ed05410",
+          "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "firstName": "Chidi",
-          "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+          "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
           "initials": "CO",
           "accent": "Plum",
           "kind": "Birthday",
@@ -1813,18 +1813,18 @@
   "POST /api/contacts/follow-ups": {
     "status": 201,
     "body": {
-      "id": "61d859cc-1625-4903-9dd2-6552f8e369e8",
+      "id": "6eae53b0-f908-47bc-a8fe-ba55f9b783fe",
       "text": "Ask Chidi how the commute is going",
-      "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+      "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
       "contactFirstName": "Chidi",
       "contactInitials": "CO",
       "contactAccent": "Plum",
-      "contactPhotoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+      "contactPhotoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
       "dueOn": "2026-09-20",
       "isPromise": false,
       "promisedVia": null,
       "promisedOn": null,
-      "createdAt": "2026-11-17T16:06:08.801299+00:00",
+      "createdAt": "2026-11-18T03:47:10.2409876+00:00",
       "doneAt": null
     }
   },
@@ -1832,38 +1832,38 @@
     "status": 200,
     "body": [
       {
-        "id": "61d859cc-1625-4903-9dd2-6552f8e369e8",
+        "id": "6eae53b0-f908-47bc-a8fe-ba55f9b783fe",
         "text": "Ask Chidi how the commute is going",
-        "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+        "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
         "contactFirstName": "Chidi",
         "contactInitials": "CO",
         "contactAccent": "Plum",
-        "contactPhotoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+        "contactPhotoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
         "dueOn": "2026-09-20",
         "isPromise": false,
         "promisedVia": null,
         "promisedOn": null,
-        "createdAt": "2026-11-17T16:06:08.8012+00:00",
+        "createdAt": "2026-11-18T03:47:10.2409+00:00",
         "doneAt": null
       }
     ]
   },
-  "PUT /api/contacts/follow-ups/61d859cc-1625-4903-9dd2-6552f8e369e8/done": {
+  "PUT /api/contacts/follow-ups/6eae53b0-f908-47bc-a8fe-ba55f9b783fe/done": {
     "status": 200,
     "body": {
-      "id": "61d859cc-1625-4903-9dd2-6552f8e369e8",
+      "id": "6eae53b0-f908-47bc-a8fe-ba55f9b783fe",
       "text": "Ask Chidi how the commute is going",
-      "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+      "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
       "contactFirstName": "Chidi",
       "contactInitials": "CO",
       "contactAccent": "Plum",
-      "contactPhotoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+      "contactPhotoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
       "dueOn": "2026-09-20",
       "isPromise": false,
       "promisedVia": null,
       "promisedOn": null,
-      "createdAt": "2026-11-17T16:06:08.8012+00:00",
-      "doneAt": "2026-11-17T16:06:08.821244+00:00"
+      "createdAt": "2026-11-18T03:47:10.2409+00:00",
+      "doneAt": "2026-11-18T03:47:10.2868812+00:00"
     }
   },
   "GET /api/contacts/habits": {
@@ -1873,96 +1873,96 @@
   "POST /api/contacts/habits": {
     "status": 201,
     "body": {
-      "id": "4e3b5f25-480f-418a-a6a1-f88ea0963314",
-      "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+      "id": "ec166461-963c-4036-8b62-62f0ddac5c58",
+      "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
       "contactFirstName": "Chidi",
       "contactName": "Chidi Okafor",
       "contactInitials": "CO",
       "contactAccent": "Plum",
       "contactPhone": "+44 7700 900788",
-      "contactPhotoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+      "contactPhotoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
       "what": "Lunch",
       "rhythm": "EveryTwoWeeks",
-      "startedOn": "2026-11-17",
-      "lastTime": "2026-11-17",
-      "dueOn": "2026-12-01",
+      "startedOn": "2026-11-18",
+      "lastTime": "2026-11-18",
+      "dueOn": "2026-12-02",
       "kept": []
     }
   },
-  "POST /api/contacts/habits/4e3b5f25-480f-418a-a6a1-f88ea0963314/kept": {
+  "POST /api/contacts/habits/ec166461-963c-4036-8b62-62f0ddac5c58/kept": {
     "status": 201,
     "body": {
-      "keptId": "8a3134a7-af09-41d8-83d7-891ec295eb66",
+      "keptId": "0ae15b16-8bcc-489f-84e6-050590b5f993",
       "habit": {
-        "id": "4e3b5f25-480f-418a-a6a1-f88ea0963314",
-        "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+        "id": "ec166461-963c-4036-8b62-62f0ddac5c58",
+        "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
         "contactFirstName": "Chidi",
         "contactName": "Chidi Okafor",
         "contactInitials": "CO",
         "contactAccent": "Plum",
         "contactPhone": "+44 7700 900788",
-        "contactPhotoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+        "contactPhotoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
         "what": "Lunch",
         "rhythm": "EveryTwoWeeks",
-        "startedOn": "2026-11-17",
-        "lastTime": "2026-11-17",
-        "dueOn": "2026-12-01",
+        "startedOn": "2026-11-18",
+        "lastTime": "2026-11-18",
+        "dueOn": "2026-12-02",
         "kept": [
           {
-            "id": "8a3134a7-af09-41d8-83d7-891ec295eb66",
-            "on": "2026-11-17"
+            "id": "0ae15b16-8bcc-489f-84e6-050590b5f993",
+            "on": "2026-11-18"
           }
         ]
       }
     }
   },
-  "DELETE /api/contacts/habits/4e3b5f25-480f-418a-a6a1-f88ea0963314/kept/8a3134a7-af09-41d8-83d7-891ec295eb66": {
+  "DELETE /api/contacts/habits/ec166461-963c-4036-8b62-62f0ddac5c58/kept/0ae15b16-8bcc-489f-84e6-050590b5f993": {
     "status": 200,
     "body": {
-      "id": "4e3b5f25-480f-418a-a6a1-f88ea0963314",
-      "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+      "id": "ec166461-963c-4036-8b62-62f0ddac5c58",
+      "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
       "contactFirstName": "Chidi",
       "contactName": "Chidi Okafor",
       "contactInitials": "CO",
       "contactAccent": "Plum",
       "contactPhone": "+44 7700 900788",
-      "contactPhotoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+      "contactPhotoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
       "what": "Lunch",
       "rhythm": "EveryTwoWeeks",
-      "startedOn": "2026-11-17",
-      "lastTime": "2026-11-17",
-      "dueOn": "2026-12-01",
+      "startedOn": "2026-11-18",
+      "lastTime": "2026-11-18",
+      "dueOn": "2026-12-02",
       "kept": []
     }
   },
-  "POST /api/contacts/habits/4e3b5f25-480f-418a-a6a1-f88ea0963314/end": {
+  "POST /api/contacts/habits/ec166461-963c-4036-8b62-62f0ddac5c58/end": {
     "status": 204
   },
-  "DELETE /api/contacts/habits/4e3b5f25-480f-418a-a6a1-f88ea0963314/end": {
+  "DELETE /api/contacts/habits/ec166461-963c-4036-8b62-62f0ddac5c58/end": {
     "status": 200,
     "body": {
-      "id": "4e3b5f25-480f-418a-a6a1-f88ea0963314",
-      "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+      "id": "ec166461-963c-4036-8b62-62f0ddac5c58",
+      "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
       "contactFirstName": "Chidi",
       "contactName": "Chidi Okafor",
       "contactInitials": "CO",
       "contactAccent": "Plum",
       "contactPhone": "+44 7700 900788",
-      "contactPhotoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+      "contactPhotoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
       "what": "Lunch",
       "rhythm": "EveryTwoWeeks",
-      "startedOn": "2026-11-17",
-      "lastTime": "2026-11-17",
-      "dueOn": "2026-12-01",
+      "startedOn": "2026-11-18",
+      "lastTime": "2026-11-18",
+      "dueOn": "2026-12-02",
       "kept": []
     }
   },
   "POST /api/contacts/connections": {
     "status": 201,
     "body": {
-      "id": "a883fd88-e05b-4518-9107-718d97c8ae67",
-      "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
-      "otherContactId": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+      "id": "cb71a9d5-b592-4b6f-b6cb-a136bec617e3",
+      "contactId": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
+      "otherContactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
       "kind": "Friend",
       "words": "Old friends",
       "promised": false
@@ -1973,31 +1973,31 @@
     "body": {
       "people": [
         {
-          "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+          "contactId": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
+          "firstName": "Femi",
+          "fullName": "Femi Bankole",
+          "initials": "FB",
+          "accent": "Sky",
+          "photoUrl": null,
+          "knownAs": "Grace’s fiancé",
+          "circle": "Friends"
+        },
+        {
+          "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "firstName": "Chidi",
           "fullName": "Chidi Okafor",
           "initials": "CO",
           "accent": "Plum",
-          "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+          "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
           "knownAs": "Brother",
           "circle": "Family"
-        },
-        {
-          "contactId": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
-          "firstName": "Femi",
-          "fullName": "Femi Bankole",
-          "initials": "FB",
-          "accent": "Coral",
-          "photoUrl": null,
-          "knownAs": "Grace’s fiancé",
-          "circle": "Friends"
         }
       ],
       "connections": [
         {
-          "id": "a883fd88-e05b-4518-9107-718d97c8ae67",
-          "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
-          "otherContactId": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+          "id": "cb71a9d5-b592-4b6f-b6cb-a136bec617e3",
+          "contactId": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
+          "otherContactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "kind": "Friend",
           "words": "Old friends",
           "promised": false
@@ -2005,26 +2005,26 @@
       ]
     }
   },
-  "DELETE /api/contacts/connections/a883fd88-e05b-4518-9107-718d97c8ae67": {
+  "DELETE /api/contacts/connections/cb71a9d5-b592-4b6f-b6cb-a136bec617e3": {
     "status": 204
   },
   "POST /api/contacts/groups": {
     "status": 201,
     "body": {
-      "id": "22a8c0d3-f84f-4940-97f0-c536f6397ca8",
+      "id": "282eb3b6-b9d7-43e4-b69a-d5ddf1fc4779",
       "name": "Sunday lunch",
       "kind": "Household",
       "emoji": "🏡",
-      "accent": "Berry",
+      "accent": "Coral",
       "note": "First Sunday of the month, at Mum’s.",
       "members": [
         {
-          "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+          "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "firstName": "Chidi",
           "fullName": "Chidi Okafor",
           "initials": "CO",
           "accent": "Plum",
-          "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+          "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
           "knownAs": "Brother",
           "circle": "Family",
           "lastTalkedOn": null,
@@ -2033,16 +2033,16 @@
       ],
       "comingUp": [
         {
-          "id": "4f123990-08b9-402c-a75f-3371c6828e10",
-          "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+          "id": "a1c09f21-9bc4-4213-89ce-acde7ed05410",
+          "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "firstName": "Chidi",
-          "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+          "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
           "initials": "CO",
           "accent": "Plum",
           "kind": "Birthday",
           "title": null,
           "occursOn": "2027-01-24",
-          "daysLeft": 68,
+          "daysLeft": 67,
           "years": 37,
           "lead": "OneWeekBefore"
         }
@@ -2050,34 +2050,34 @@
       "popkin": null
     }
   },
-  "POST /api/contacts/groups/22a8c0d3-f84f-4940-97f0-c536f6397ca8/members": {
+  "POST /api/contacts/groups/282eb3b6-b9d7-43e4-b69a-d5ddf1fc4779/members": {
     "status": 200,
     "body": {
-      "id": "22a8c0d3-f84f-4940-97f0-c536f6397ca8",
+      "id": "282eb3b6-b9d7-43e4-b69a-d5ddf1fc4779",
       "name": "Sunday lunch",
       "kind": "Household",
       "emoji": "🏡",
-      "accent": "Berry",
+      "accent": "Coral",
       "note": "First Sunday of the month, at Mum’s.",
       "members": [
         {
-          "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+          "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "firstName": "Chidi",
           "fullName": "Chidi Okafor",
           "initials": "CO",
           "accent": "Plum",
-          "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+          "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
           "knownAs": "Brother",
           "circle": "Family",
           "lastTalkedOn": null,
           "lastTalkedDays": null
         },
         {
-          "contactId": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+          "contactId": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
           "firstName": "Femi",
           "fullName": "Femi Bankole",
           "initials": "FB",
-          "accent": "Coral",
+          "accent": "Sky",
           "photoUrl": null,
           "knownAs": "Grace’s fiancé",
           "circle": "Friends",
@@ -2087,16 +2087,16 @@
       ],
       "comingUp": [
         {
-          "id": "4f123990-08b9-402c-a75f-3371c6828e10",
-          "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+          "id": "a1c09f21-9bc4-4213-89ce-acde7ed05410",
+          "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
           "firstName": "Chidi",
-          "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+          "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
           "initials": "CO",
           "accent": "Plum",
           "kind": "Birthday",
           "title": null,
           "occursOn": "2027-01-24",
-          "daysLeft": 68,
+          "daysLeft": 67,
           "years": 37,
           "lead": "OneWeekBefore"
         }
@@ -2108,31 +2108,31 @@
     "status": 200,
     "body": [
       {
-        "id": "22a8c0d3-f84f-4940-97f0-c536f6397ca8",
+        "id": "282eb3b6-b9d7-43e4-b69a-d5ddf1fc4779",
         "name": "Sunday lunch",
         "kind": "Household",
         "emoji": "🏡",
-        "accent": "Berry",
+        "accent": "Coral",
         "note": "First Sunday of the month, at Mum’s.",
         "members": [
           {
-            "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+            "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
             "firstName": "Chidi",
             "fullName": "Chidi Okafor",
             "initials": "CO",
             "accent": "Plum",
-            "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+            "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
             "knownAs": "Brother",
             "circle": "Family",
             "lastTalkedOn": null,
             "lastTalkedDays": null
           },
           {
-            "contactId": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+            "contactId": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
             "firstName": "Femi",
             "fullName": "Femi Bankole",
             "initials": "FB",
-            "accent": "Coral",
+            "accent": "Sky",
             "photoUrl": null,
             "knownAs": "Grace’s fiancé",
             "circle": "Friends",
@@ -2142,10 +2142,10 @@
         ],
         "comingUp": [
           {
-            "id": "4f123990-08b9-402c-a75f-3371c6828e10",
-            "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+            "id": "a1c09f21-9bc4-4213-89ce-acde7ed05410",
+            "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
             "firstName": "Chidi",
-            "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+            "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
             "initials": "CO",
             "accent": "Plum",
             "kind": "Birthday",
@@ -2164,31 +2164,31 @@
     "status": 200,
     "body": [
       {
-        "id": "22a8c0d3-f84f-4940-97f0-c536f6397ca8",
+        "id": "282eb3b6-b9d7-43e4-b69a-d5ddf1fc4779",
         "name": "Sunday lunch",
         "kind": "Household",
         "emoji": "🏡",
-        "accent": "Berry",
+        "accent": "Coral",
         "note": "First Sunday of the month, at Mum’s.",
         "members": [
           {
-            "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+            "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
             "firstName": "Chidi",
             "fullName": "Chidi Okafor",
             "initials": "CO",
             "accent": "Plum",
-            "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+            "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
             "knownAs": "Brother",
             "circle": "Family",
             "lastTalkedOn": null,
             "lastTalkedDays": null
           },
           {
-            "contactId": "e3ab99ef-218a-4ea4-9f43-6dcd335a9186",
+            "contactId": "771dc38b-0dd5-490e-8eae-c5a341ff409c",
             "firstName": "Femi",
             "fullName": "Femi Bankole",
             "initials": "FB",
-            "accent": "Coral",
+            "accent": "Sky",
             "photoUrl": null,
             "knownAs": "Grace’s fiancé",
             "circle": "Friends",
@@ -2198,16 +2198,16 @@
         ],
         "comingUp": [
           {
-            "id": "4f123990-08b9-402c-a75f-3371c6828e10",
-            "contactId": "e123a648-796c-4cbb-bfe7-7834cf6262d1",
+            "id": "a1c09f21-9bc4-4213-89ce-acde7ed05410",
+            "contactId": "fea573cd-5e9e-40de-8a64-64beb06aee89",
             "firstName": "Chidi",
-            "photoUrl": "/api/files/contacts/c8b78484074045fc90f35e89613c97ef.jpg?expires=1794935168&signature=EzBqVXS7xghZihYFQ-Qrm1-2cglJ1GEI-u4hv4FjfBo",
+            "photoUrl": "/api/files/contacts/d6c38488b74c46b38e20b7438f6b7568.jpg?expires=1794977230&signature=FRAzaQI8_Hfx-woBgjHymVC7daudWDfgxkHnZXWRl7M",
             "initials": "CO",
             "accent": "Plum",
             "kind": "Birthday",
             "title": null,
             "occursOn": "2027-01-24",
-            "daysLeft": 68,
+            "daysLeft": 67,
             "years": 37,
             "lead": "OneWeekBefore"
           }
@@ -2216,20 +2216,20 @@
       }
     ]
   },
-  "POST /api/contacts/groups/22a8c0d3-f84f-4940-97f0-c536f6397ca8/popkin": {
+  "POST /api/contacts/groups/282eb3b6-b9d7-43e4-b69a-d5ddf1fc4779/popkin": {
     "status": 202
   },
-  "GET /api/contacts/people/e3ab99ef-218a-4ea4-9f43-6dcd335a9186/timeline?show=all": {
+  "GET /api/contacts/people/771dc38b-0dd5-490e-8eae-c5a341ff409c/timeline?show=all": {
     "status": 200,
     "body": {
       "entries": []
     }
   },
-  "POST /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/milestones": {
+  "POST /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/milestones": {
     "status": 201,
     "body": {
       "entry": {
-        "id": "dcb50293-e61d-4958-9159-0e43a2d05f5b",
+        "id": "5a2e44a3-2a20-41ea-a76b-830b30ac3b6f",
         "kind": "Milestone",
         "day": "2026-08-31",
         "channel": null,
@@ -2239,14 +2239,14 @@
         "thumbnailUrl": null,
         "photoUrl": null
       },
-      "keyDateId": "bb6bc91d-bfbd-4ed5-ac2b-d3227e85c9fb"
+      "keyDateId": "893a0f9c-b5a1-4a1b-b9ad-8ea2148187f9"
     }
   },
-  "POST /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/conversations": {
+  "POST /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/conversations": {
     "status": 201,
     "body": {
       "entry": {
-        "id": "65abf22a-02ed-4e0f-b50a-d2fcfcbe1225",
+        "id": "696e3f16-4d95-4ec6-b129-1860a1daadcd",
         "kind": "Conversation",
         "day": "2026-09-06",
         "channel": "Phone",
@@ -2259,7 +2259,7 @@
       "keyDateId": null
     }
   },
-  "GET /api/contacts/people/e3ab99ef-218a-4ea4-9f43-6dcd335a9186/memories": {
+  "GET /api/contacts/people/771dc38b-0dd5-490e-8eae-c5a341ff409c/memories": {
     "status": 200,
     "body": {
       "photos": [],
@@ -2267,70 +2267,70 @@
       "notes": []
     }
   },
-  "POST /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/memories/photos": {
+  "POST /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/memories/photos": {
     "status": 201,
     "body": {
-      "id": "b53a7f3f-512c-4844-9648-3e9902c827cc",
+      "id": "0cfa4f4e-9b4b-4252-8d87-2e3bb3fb6987",
       "caption": "Hot sauce night",
       "day": "2026-08-08",
-      "thumbnailUrl": "/api/files/memories/11d640c2ebf14939a8f35499f2d3cdac/346ef2dbfe2c488a935a1f01d326bf5f-thumbnail.jpg?expires=1794935169&signature=HYcT9a2Uw6C4NfsnXB7pxC-f2PIrV6LBmMleofI857k",
-      "photoUrl": "/api/files/memories/11d640c2ebf14939a8f35499f2d3cdac/346ef2dbfe2c488a935a1f01d326bf5f.jpg?expires=1794935169&signature=aZMz_vKmNifSbBvcNdegUmUOv1PfTfz6PNBIU1ZZ9SQ"
+      "thumbnailUrl": "/api/files/memories/6c3f666147b349acb2b383aa7c573da6/6498404be4aa472ba1f6bd455ef4fe0e-thumbnail.jpg?expires=1794977230&signature=Y0junfW5WkKBA3H9MgsKpdgHpzfO7zNkfEF7KGVFZ3I",
+      "photoUrl": "/api/files/memories/6c3f666147b349acb2b383aa7c573da6/6498404be4aa472ba1f6bd455ef4fe0e.jpg?expires=1794977230&signature=h_PjpJgZoWVwGY0GIh9ybacc9Bm3sKxAyYtAwTBxG-E"
     }
   },
-  "POST /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/memories/files": {
+  "POST /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/memories/files": {
     "status": 201,
     "body": {
-      "id": "5aba35c3-11f6-4ff7-ab8d-5258a1a51e00",
+      "id": "95ca814a-8c26-4fc9-93d5-2ce0c64ca978",
       "fileName": "Wedding speech.pdf",
-      "addedOn": "2026-11-17",
+      "addedOn": "2026-11-18",
       "sizeBytes": 30,
-      "downloadUrl": "/api/files/memories/11d640c2ebf14939a8f35499f2d3cdac/e4c9dea7091142e09ffe25d21a6bf5eb.pdf?expires=1794935169&download=Wedding%20speech.pdf&signature=PwT5RBKT2EyZm0mufcr6a57ZxtMv4XGtffmxlB79iO0"
+      "downloadUrl": "/api/files/memories/6c3f666147b349acb2b383aa7c573da6/65f3fc34ce924f6b94835568b28fc7ee.pdf?expires=1794977230&download=Wedding%20speech.pdf&signature=JFibo_Kxjjysn9cdLPT-31XlJ7UaJpbIHRzzyvUvf_c"
     }
   },
-  "POST /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/memories/notes": {
+  "POST /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/memories/notes": {
     "status": 201,
     "body": {
-      "id": "72b6344a-590a-4899-8d09-efe8c9a6811b",
+      "id": "0b8c48d3-c084-4cf0-8c57-c2bae93442f9",
       "text": "Gift ideas: Fela reissue on vinyl, Dishoom cookbook, bike lights",
-      "updatedOn": "2026-11-17"
+      "updatedOn": "2026-11-18"
     }
   },
-  "GET /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/memories": {
+  "GET /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/memories": {
     "status": 200,
     "body": {
       "photos": [
         {
-          "id": "b53a7f3f-512c-4844-9648-3e9902c827cc",
+          "id": "0cfa4f4e-9b4b-4252-8d87-2e3bb3fb6987",
           "caption": "Hot sauce night",
           "day": "2026-08-08",
-          "thumbnailUrl": "/api/files/memories/11d640c2ebf14939a8f35499f2d3cdac/346ef2dbfe2c488a935a1f01d326bf5f-thumbnail.jpg?expires=1794935169&signature=HYcT9a2Uw6C4NfsnXB7pxC-f2PIrV6LBmMleofI857k",
-          "photoUrl": "/api/files/memories/11d640c2ebf14939a8f35499f2d3cdac/346ef2dbfe2c488a935a1f01d326bf5f.jpg?expires=1794935169&signature=aZMz_vKmNifSbBvcNdegUmUOv1PfTfz6PNBIU1ZZ9SQ"
+          "thumbnailUrl": "/api/files/memories/6c3f666147b349acb2b383aa7c573da6/6498404be4aa472ba1f6bd455ef4fe0e-thumbnail.jpg?expires=1794977230&signature=Y0junfW5WkKBA3H9MgsKpdgHpzfO7zNkfEF7KGVFZ3I",
+          "photoUrl": "/api/files/memories/6c3f666147b349acb2b383aa7c573da6/6498404be4aa472ba1f6bd455ef4fe0e.jpg?expires=1794977230&signature=h_PjpJgZoWVwGY0GIh9ybacc9Bm3sKxAyYtAwTBxG-E"
         }
       ],
       "files": [
         {
-          "id": "5aba35c3-11f6-4ff7-ab8d-5258a1a51e00",
+          "id": "95ca814a-8c26-4fc9-93d5-2ce0c64ca978",
           "fileName": "Wedding speech.pdf",
-          "addedOn": "2026-11-17",
+          "addedOn": "2026-11-18",
           "sizeBytes": 30,
-          "downloadUrl": "/api/files/memories/11d640c2ebf14939a8f35499f2d3cdac/e4c9dea7091142e09ffe25d21a6bf5eb.pdf?expires=1794935169&download=Wedding%20speech.pdf&signature=PwT5RBKT2EyZm0mufcr6a57ZxtMv4XGtffmxlB79iO0"
+          "downloadUrl": "/api/files/memories/6c3f666147b349acb2b383aa7c573da6/65f3fc34ce924f6b94835568b28fc7ee.pdf?expires=1794977230&download=Wedding%20speech.pdf&signature=JFibo_Kxjjysn9cdLPT-31XlJ7UaJpbIHRzzyvUvf_c"
         }
       ],
       "notes": [
         {
-          "id": "72b6344a-590a-4899-8d09-efe8c9a6811b",
+          "id": "0b8c48d3-c084-4cf0-8c57-c2bae93442f9",
           "text": "Gift ideas: Fela reissue on vinyl, Dishoom cookbook, bike lights",
-          "updatedOn": "2026-11-17"
+          "updatedOn": "2026-11-18"
         }
       ]
     }
   },
-  "GET /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/timeline?show=all": {
+  "GET /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/timeline?show=all": {
     "status": 200,
     "body": {
       "entries": [
         {
-          "id": "65abf22a-02ed-4e0f-b50a-d2fcfcbe1225",
+          "id": "696e3f16-4d95-4ec6-b129-1860a1daadcd",
           "kind": "Conversation",
           "day": "2026-09-06",
           "channel": "Phone",
@@ -2341,7 +2341,7 @@
           "photoUrl": null
         },
         {
-          "id": "dcb50293-e61d-4958-9159-0e43a2d05f5b",
+          "id": "5a2e44a3-2a20-41ea-a76b-830b30ac3b6f",
           "kind": "Milestone",
           "day": "2026-08-31",
           "channel": null,
@@ -2352,25 +2352,25 @@
           "photoUrl": null
         },
         {
-          "id": "b53a7f3f-512c-4844-9648-3e9902c827cc",
+          "id": "0cfa4f4e-9b4b-4252-8d87-2e3bb3fb6987",
           "kind": "Memory",
           "day": "2026-08-08",
           "channel": null,
           "milestoneKind": null,
           "title": "Hot sauce night",
           "note": null,
-          "thumbnailUrl": "/api/files/memories/11d640c2ebf14939a8f35499f2d3cdac/346ef2dbfe2c488a935a1f01d326bf5f-thumbnail.jpg?expires=1794935169&signature=HYcT9a2Uw6C4NfsnXB7pxC-f2PIrV6LBmMleofI857k",
-          "photoUrl": "/api/files/memories/11d640c2ebf14939a8f35499f2d3cdac/346ef2dbfe2c488a935a1f01d326bf5f.jpg?expires=1794935169&signature=aZMz_vKmNifSbBvcNdegUmUOv1PfTfz6PNBIU1ZZ9SQ"
+          "thumbnailUrl": "/api/files/memories/6c3f666147b349acb2b383aa7c573da6/6498404be4aa472ba1f6bd455ef4fe0e-thumbnail.jpg?expires=1794977230&signature=Y0junfW5WkKBA3H9MgsKpdgHpzfO7zNkfEF7KGVFZ3I",
+          "photoUrl": "/api/files/memories/6c3f666147b349acb2b383aa7c573da6/6498404be4aa472ba1f6bd455ef4fe0e.jpg?expires=1794977230&signature=h_PjpJgZoWVwGY0GIh9ybacc9Bm3sKxAyYtAwTBxG-E"
         }
       ]
     }
   },
-  "GET /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/timeline?show=milestones": {
+  "GET /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/timeline?show=milestones": {
     "status": 200,
     "body": {
       "entries": [
         {
-          "id": "dcb50293-e61d-4958-9159-0e43a2d05f5b",
+          "id": "5a2e44a3-2a20-41ea-a76b-830b30ac3b6f",
           "kind": "Milestone",
           "day": "2026-08-31",
           "channel": null,
@@ -2383,12 +2383,12 @@
       ]
     }
   },
-  "GET /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/timeline?show=conversations": {
+  "GET /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/timeline?show=conversations": {
     "status": 200,
     "body": {
       "entries": [
         {
-          "id": "65abf22a-02ed-4e0f-b50a-d2fcfcbe1225",
+          "id": "696e3f16-4d95-4ec6-b129-1860a1daadcd",
           "kind": "Conversation",
           "day": "2026-09-06",
           "channel": "Phone",
@@ -2401,13 +2401,13 @@
       ]
     }
   },
-  "DELETE /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1/closest": {
+  "DELETE /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89/closest": {
     "status": 204
   },
-  "DELETE /api/contacts/people/e123a648-796c-4cbb-bfe7-7834cf6262d1": {
+  "DELETE /api/contacts/people/fea573cd-5e9e-40de-8a64-64beb06aee89": {
     "status": 204
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/photos?filter=mine": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/photos?filter=mine": {
     "status": 200,
     "body": {
       "photoCount": 0,
@@ -2418,29 +2418,29 @@
       "canAdd": true
     }
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/photos": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/photos": {
     "status": 201,
     "body": {
-      "id": "7694f496-4653-4016-9036-6a1dcd58a8aa",
+      "id": "656f232c-c660-4648-83b7-ef9392047a12",
       "caption": "First light on the dock. Worth the 6 am alarm.",
       "uploader": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
-      "takenAt": "2026-11-17T16:06:09.10769+00:00",
-      "addedAt": "2026-11-17T16:06:09.10769+00:00",
-      "thumbnailUrl": "/api/files/popkins/2262db2c43934d00b85451852ce78978/0e46df4ee5664d2c9cd4e3837122fdfb-thumbnail.jpg?expires=1794935169&signature=IdPZm4HBve1orLjIHrcAHkfttDV-ZJf78RrEh5jdEIE",
+      "takenAt": "2026-11-18T03:47:11.1936016+00:00",
+      "addedAt": "2026-11-18T03:47:11.1936016+00:00",
+      "thumbnailUrl": "/api/files/popkins/065afba8640646d6a89c2e4e9c838e32/eb9a848a03f4414dbad9d44632d38296-thumbnail.jpg?expires=1794977231&signature=RJdlFmjCMVqdQM17KHaotDsyOg3idCzNkTfTwLQ2lbU",
       "width": 960,
       "height": 717,
       "isMine": true
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/photos?filter=everyone": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/photos?filter=everyone": {
     "status": 200,
     "body": {
       "photoCount": 1,
@@ -2450,27 +2450,27 @@
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           }
         }
       ],
       "items": [
         {
-          "id": "7694f496-4653-4016-9036-6a1dcd58a8aa",
+          "id": "656f232c-c660-4648-83b7-ef9392047a12",
           "caption": "First light on the dock. Worth the 6 am alarm.",
           "uploader": {
-            "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+            "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
             "firstName": "Mara",
             "avatar": {
               "initials": "MO",
-              "accent": "Leaf",
+              "accent": "Teal",
               "photoUrl": null
             }
           },
-          "takenAt": "2026-11-17T16:06:09.1076+00:00",
-          "addedAt": "2026-11-17T16:06:09.1076+00:00",
-          "thumbnailUrl": "/api/files/popkins/2262db2c43934d00b85451852ce78978/0e46df4ee5664d2c9cd4e3837122fdfb-thumbnail.jpg?expires=1794935169&signature=IdPZm4HBve1orLjIHrcAHkfttDV-ZJf78RrEh5jdEIE",
+          "takenAt": "2026-11-18T03:47:11.1936+00:00",
+          "addedAt": "2026-11-18T03:47:11.1936+00:00",
+          "thumbnailUrl": "/api/files/popkins/065afba8640646d6a89c2e4e9c838e32/eb9a848a03f4414dbad9d44632d38296-thumbnail.jpg?expires=1794977231&signature=RJdlFmjCMVqdQM17KHaotDsyOg3idCzNkTfTwLQ2lbU",
           "width": 960,
           "height": 717,
           "isMine": true
@@ -2480,24 +2480,24 @@
       "canAdd": true
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/photos/7694f496-4653-4016-9036-6a1dcd58a8aa": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/photos/656f232c-c660-4648-83b7-ef9392047a12": {
     "status": 200,
     "body": {
-      "id": "7694f496-4653-4016-9036-6a1dcd58a8aa",
+      "id": "656f232c-c660-4648-83b7-ef9392047a12",
       "uploader": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "displayName": "Mara Okafor",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
-      "addedAt": "2026-11-17T16:06:09.1076+00:00",
-      "takenAt": "2026-11-17T16:06:09.1076+00:00",
+      "addedAt": "2026-11-18T03:47:11.1936+00:00",
+      "takenAt": "2026-11-18T03:47:11.1936+00:00",
       "caption": "First light on the dock. Worth the 6 am alarm.",
-      "imageUrl": "/api/files/popkins/2262db2c43934d00b85451852ce78978/0e46df4ee5664d2c9cd4e3837122fdfb.jpg?expires=1794935169&signature=YRwsCzD8ue0m8lKDrRZfzf-NQ7RT5lpnavzE5_qw1sQ",
+      "imageUrl": "/api/files/popkins/065afba8640646d6a89c2e4e9c838e32/eb9a848a03f4414dbad9d44632d38296.jpg?expires=1794977231&signature=FYbr9eqRH58K02ElCr2y4N9A-YW0Xt7Z96jqbp-y7tM",
       "width": 960,
       "height": 717,
       "reactions": [],
@@ -2508,56 +2508,56 @@
       "isMine": true
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences?filter=want": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences?filter=want": {
     "status": 200,
     "body": []
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences": {
     "status": 201,
     "body": {
-      "id": "1a4f0960-2a6c-4f47-a224-3f54e08796ed",
+      "id": "1ed064c0-f48a-4a31-970a-45a9d529f27d",
       "kind": "Want",
       "title": "Beach day next summer?",
       "pictureUrl": null,
       "emoji": "🏕️",
       "colour": "Teal",
       "sharedBy": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
       "when": null,
-      "sharedAt": "2026-11-17T16:06:09.206789+00:00",
+      "sharedAt": "2026-11-18T03:47:11.4906838+00:00",
       "average": null,
       "ratingCount": 0,
       "keenCount": 0
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences/171b0c5b-098c-492d-ab3f-cacdc20a5dab": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences/cb5824a3-9532-454d-a255-b571eed44ebd": {
     "status": 200,
     "body": {
-      "id": "171b0c5b-098c-492d-ab3f-cacdc20a5dab",
+      "id": "cb5824a3-9532-454d-a255-b571eed44ebd",
       "kind": "Did",
       "title": "Sunrise canoe to Heron Point",
-      "pictureUrl": "/api/files/popkins/2262db2c43934d00b85451852ce78978/experiences/b3ab3881716645c8bf37a04fec36ca63.jpg?expires=1794935169&signature=F8JhamV04PDM9ibZZ_VXVyDou4TgxzB8CHhMDrBL__E",
+      "pictureUrl": "/api/files/popkins/065afba8640646d6a89c2e4e9c838e32/experiences/dc7220a072fa4b99908e87873edf3a83.jpg?expires=1794977231&signature=Lj9FBkmJyUmqJmSw5Ql6Y2qZHhIEf0UW_xZDoIbQuyo",
       "emoji": "🏕️",
       "colour": "Teal",
       "sharedBy": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
       "when": "Sat morning",
       "place": "Heron Point, Lake Ossia",
-      "sharedAt": "2026-11-17T16:06:09.1687+00:00",
+      "sharedAt": "2026-11-18T03:47:11.3374+00:00",
       "average": null,
       "ratingCount": 0,
       "keenCount": 0,
@@ -2597,7 +2597,7 @@
       "canDelete": true
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences/171b0c5b-098c-492d-ab3f-cacdc20a5dab/my-rating": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences/cb5824a3-9532-454d-a255-b571eed44ebd/my-rating": {
     "status": 200,
     "body": {
       "stars": 5,
@@ -2629,42 +2629,42 @@
       }
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences/171b0c5b-098c-492d-ab3f-cacdc20a5dab/my-rating/comment": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences/cb5824a3-9532-454d-a255-b571eed44ebd/my-rating/comment": {
     "status": 200,
     "body": {
-      "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+      "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
       "firstName": "Mara",
       "avatar": {
         "initials": "MO",
-        "accent": "Leaf",
+        "accent": "Teal",
         "photoUrl": null
       },
       "stars": 5,
       "text": "Would do it every morning if I could.",
-      "commentedAt": "2026-11-17T16:06:09.20482+00:00"
+      "commentedAt": "2026-11-18T03:47:11.4737622+00:00"
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences/1a4f0960-2a6c-4f47-a224-3f54e08796ed": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences/1ed064c0-f48a-4a31-970a-45a9d529f27d": {
     "status": 200,
     "body": {
-      "id": "1a4f0960-2a6c-4f47-a224-3f54e08796ed",
+      "id": "1ed064c0-f48a-4a31-970a-45a9d529f27d",
       "kind": "Want",
       "title": "Beach day next summer?",
       "pictureUrl": null,
       "emoji": "🏕️",
       "colour": "Teal",
       "sharedBy": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
       "when": null,
       "place": null,
-      "sharedAt": "2026-11-17T16:06:09.2067+00:00",
+      "sharedAt": "2026-11-18T03:47:11.4906+00:00",
       "average": null,
       "ratingCount": 0,
       "keenCount": 0,
@@ -2708,7 +2708,7 @@
       "canDelete": true
     }
   },
-  "DELETE /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences/1a4f0960-2a6c-4f47-a224-3f54e08796ed/keen": {
+  "DELETE /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences/1ed064c0-f48a-4a31-970a-45a9d529f27d/keen": {
     "status": 200,
     "body": {
       "count": 0,
@@ -2716,45 +2716,45 @@
       "members": []
     }
   },
-  "PUT /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences/1a4f0960-2a6c-4f47-a224-3f54e08796ed/keen": {
+  "PUT /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences/1ed064c0-f48a-4a31-970a-45a9d529f27d/keen": {
     "status": 200,
     "body": {
       "count": 1,
       "mine": true,
       "members": [
         {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           }
         }
       ]
     }
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences/1a4f0960-2a6c-4f47-a224-3f54e08796ed/done": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences/1ed064c0-f48a-4a31-970a-45a9d529f27d/done": {
     "status": 200,
     "body": {
-      "id": "1a4f0960-2a6c-4f47-a224-3f54e08796ed",
+      "id": "1ed064c0-f48a-4a31-970a-45a9d529f27d",
       "kind": "Did",
       "title": "Beach day next summer?",
       "pictureUrl": null,
       "emoji": "🏕️",
       "colour": "Teal",
       "sharedBy": {
-        "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+        "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
         "firstName": "Mara",
         "avatar": {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         }
       },
       "when": null,
       "place": null,
-      "sharedAt": "2026-11-17T16:06:09.2067+00:00",
+      "sharedAt": "2026-11-18T03:47:11.4906+00:00",
       "average": null,
       "ratingCount": 0,
       "keenCount": 0,
@@ -2794,98 +2794,98 @@
       "canDelete": true
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences?filter=all": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences?filter=all": {
     "status": 200,
     "body": [
       {
-        "id": "1a4f0960-2a6c-4f47-a224-3f54e08796ed",
+        "id": "1ed064c0-f48a-4a31-970a-45a9d529f27d",
         "kind": "Did",
         "title": "Beach day next summer?",
         "pictureUrl": null,
         "emoji": "🏕️",
         "colour": "Teal",
         "sharedBy": {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           }
         },
         "when": null,
-        "sharedAt": "2026-11-17T16:06:09.2067+00:00",
+        "sharedAt": "2026-11-18T03:47:11.4906+00:00",
         "average": null,
         "ratingCount": 0,
         "keenCount": 0
       },
       {
-        "id": "171b0c5b-098c-492d-ab3f-cacdc20a5dab",
+        "id": "cb5824a3-9532-454d-a255-b571eed44ebd",
         "kind": "Did",
         "title": "Sunrise canoe to Heron Point",
-        "pictureUrl": "/api/files/popkins/2262db2c43934d00b85451852ce78978/experiences/b3ab3881716645c8bf37a04fec36ca63-thumbnail.jpg?expires=1794935169&signature=_fPQKcPz3A4RNS61BpyjWCyiv_4TEuQFvLetwR1XqJc",
+        "pictureUrl": "/api/files/popkins/065afba8640646d6a89c2e4e9c838e32/experiences/dc7220a072fa4b99908e87873edf3a83-thumbnail.jpg?expires=1794977231&signature=2XPEhHxZeR6zMMJSxdOGutJP65O0DIdyF4AX3ejsFoA",
         "emoji": "🏕️",
         "colour": "Teal",
         "sharedBy": {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           }
         },
         "when": "Sat morning",
-        "sharedAt": "2026-11-17T16:06:09.1687+00:00",
+        "sharedAt": "2026-11-18T03:47:11.3374+00:00",
         "average": 5,
         "ratingCount": 1,
         "keenCount": 0
       }
     ]
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/experiences?filter=did": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/experiences?filter=did": {
     "status": 200,
     "body": [
       {
-        "id": "1a4f0960-2a6c-4f47-a224-3f54e08796ed",
+        "id": "1ed064c0-f48a-4a31-970a-45a9d529f27d",
         "kind": "Did",
         "title": "Beach day next summer?",
         "pictureUrl": null,
         "emoji": "🏕️",
         "colour": "Teal",
         "sharedBy": {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           }
         },
         "when": null,
-        "sharedAt": "2026-11-17T16:06:09.2067+00:00",
+        "sharedAt": "2026-11-18T03:47:11.4906+00:00",
         "average": null,
         "ratingCount": 0,
         "keenCount": 0
       },
       {
-        "id": "171b0c5b-098c-492d-ab3f-cacdc20a5dab",
+        "id": "cb5824a3-9532-454d-a255-b571eed44ebd",
         "kind": "Did",
         "title": "Sunrise canoe to Heron Point",
-        "pictureUrl": "/api/files/popkins/2262db2c43934d00b85451852ce78978/experiences/b3ab3881716645c8bf37a04fec36ca63-thumbnail.jpg?expires=1794935169&signature=_fPQKcPz3A4RNS61BpyjWCyiv_4TEuQFvLetwR1XqJc",
+        "pictureUrl": "/api/files/popkins/065afba8640646d6a89c2e4e9c838e32/experiences/dc7220a072fa4b99908e87873edf3a83-thumbnail.jpg?expires=1794977231&signature=2XPEhHxZeR6zMMJSxdOGutJP65O0DIdyF4AX3ejsFoA",
         "emoji": "🏕️",
         "colour": "Teal",
         "sharedBy": {
-          "membershipId": "d7ff1f5b-eb60-4062-8cff-93ea140b3b7a",
+          "membershipId": "27c8952e-916a-4b86-9e7c-6861896370f6",
           "firstName": "Mara",
           "avatar": {
             "initials": "MO",
-            "accent": "Leaf",
+            "accent": "Teal",
             "photoUrl": null
           }
         },
         "when": "Sat morning",
-        "sharedAt": "2026-11-17T16:06:09.1687+00:00",
+        "sharedAt": "2026-11-18T03:47:11.3374+00:00",
         "average": 5,
         "ratingCount": 1,
         "keenCount": 0
@@ -2897,25 +2897,25 @@
     "body": {
       "hostedActivePopkins": [
         {
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
           "name": "Lakeside Weekend",
           "emoji": "🏕️"
         }
       ]
     }
   },
-  "PUT /api/me/notifications/popkins/2262db2c-4393-4d00-b854-51852ce78978": {
+  "PUT /api/me/notifications/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32": {
     "status": 204
   },
   "GET /api/me/notifications/mute-candidates?q=": {
     "status": 200,
     "body": [
       {
-        "membershipId": "59ae5d54-77c7-4e43-a35c-fb7b394e7549",
+        "membershipId": "0bd801c5-f113-40d7-a94a-2125dcd6fa50",
         "name": "Dev Patel",
         "avatar": {
           "initials": "DP",
-          "accent": "Berry",
+          "accent": "Amber",
           "photoUrl": null
         },
         "sharedPopkins": [
@@ -2923,11 +2923,11 @@
         ]
       },
       {
-        "membershipId": "3a347fd7-3719-484e-90a9-c951e9d3bbaa",
+        "membershipId": "713a6106-fbf6-4174-b0a6-39300d4ced2f",
         "name": "Joel",
         "avatar": {
           "initials": "J",
-          "accent": "Sky",
+          "accent": "Plum",
           "photoUrl": null
         },
         "sharedPopkins": [
@@ -2935,11 +2935,11 @@
         ]
       },
       {
-        "membershipId": "31b5f65e-d800-44dc-bf0a-637b602fef1f",
+        "membershipId": "6ac66ded-3cfb-44cb-a8b3-7a237ee52e79",
         "name": "Walt Brennan",
         "avatar": {
           "initials": "WB",
-          "accent": "Plum",
+          "accent": "Teal",
           "photoUrl": null
         },
         "sharedPopkins": [
@@ -2951,11 +2951,11 @@
   "POST /api/me/notifications/mutes": {
     "status": 200,
     "body": {
-      "muteId": "22792c05-0007-4293-a9b6-9b99816ec436",
+      "muteId": "6d6d78de-b694-4eb0-9bff-916929b73e52",
       "name": "Walt Brennan",
       "avatar": {
         "initials": "WB",
-        "accent": "Plum",
+        "accent": "Teal",
         "photoUrl": null
       },
       "sharedPopkins": [
@@ -2963,10 +2963,10 @@
       ]
     }
   },
-  "DELETE /api/me/notifications/mutes/22792c05-0007-4293-a9b6-9b99816ec436": {
+  "DELETE /api/me/notifications/mutes/6d6d78de-b694-4eb0-9bff-916929b73e52": {
     "status": 204
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/wrap-up": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/wrap-up": {
     "status": 200,
     "body": {
       "memberCount": 4,
@@ -2974,22 +2974,22 @@
       "messageCount": 2
     }
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/wrap-up": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/wrap-up": {
     "status": 200,
     "body": {
-      "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
-      "wrappedUpAt": "2026-11-17T16:06:09.270478+00:00"
+      "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
+      "wrappedUpAt": "2026-11-18T03:47:11.7017904+00:00"
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/recap": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/recap": {
     "status": 200,
     "body": {
-      "id": "2262db2c-4393-4d00-b854-51852ce78978",
+      "id": "065afba8-6406-46d6-a89c-2e4e9c838e32",
       "name": "Lakeside Weekend",
       "emoji": "🏕️",
       "colour": "Teal",
-      "startedAt": "2026-11-17T16:06:08.1467+00:00",
-      "wrappedUpAt": "2026-11-17T16:06:09.2704+00:00",
+      "startedAt": "2026-11-18T03:47:08.0566+00:00",
+      "wrappedUpAt": "2026-11-18T03:47:11.7017+00:00",
       "keepPhotos": true,
       "photosRemoveAt": null,
       "photosRemovedAt": null,
@@ -2999,36 +2999,36 @@
       "photoCount": 1,
       "photos": [
         {
-          "id": "7694f496-4653-4016-9036-6a1dcd58a8aa",
-          "thumbnailUrl": "/api/files/popkins/2262db2c43934d00b85451852ce78978/0e46df4ee5664d2c9cd4e3837122fdfb-thumbnail.jpg?expires=1794935169&signature=IdPZm4HBve1orLjIHrcAHkfttDV-ZJf78RrEh5jdEIE"
+          "id": "656f232c-c660-4648-83b7-ef9392047a12",
+          "thumbnailUrl": "/api/files/popkins/065afba8640646d6a89c2e4e9c838e32/eb9a848a03f4414dbad9d44632d38296-thumbnail.jpg?expires=1794977231&signature=RJdlFmjCMVqdQM17KHaotDsyOg3idCzNkTfTwLQ2lbU"
         }
       ],
       "avatars": [
         {
           "initials": "MO",
-          "accent": "Leaf",
+          "accent": "Teal",
           "photoUrl": null
         },
         {
           "initials": "WB",
-          "accent": "Plum",
+          "accent": "Teal",
           "photoUrl": null
         },
         {
           "initials": "DP",
-          "accent": "Berry",
+          "accent": "Amber",
           "photoUrl": null
         },
         {
           "initials": "J",
-          "accent": "Sky",
+          "accent": "Plum",
           "photoUrl": null
         }
       ],
       "topRated": {
-        "experienceId": "171b0c5b-098c-492d-ab3f-cacdc20a5dab",
+        "experienceId": "cb5824a3-9532-454d-a255-b571eed44ebd",
         "title": "Sunrise canoe to Heron Point",
-        "pictureUrl": "/api/files/popkins/2262db2c43934d00b85451852ce78978/experiences/b3ab3881716645c8bf37a04fec36ca63-thumbnail.jpg?expires=1794935169&signature=_fPQKcPz3A4RNS61BpyjWCyiv_4TEuQFvLetwR1XqJc",
+        "pictureUrl": "/api/files/popkins/065afba8640646d6a89c2e4e9c838e32/experiences/dc7220a072fa4b99908e87873edf3a83-thumbnail.jpg?expires=1794977231&signature=2XPEhHxZeR6zMMJSxdOGutJP65O0DIdyF4AX3ejsFoA",
         "average": 5,
         "ratingCount": 1,
         "sharedBy": {
@@ -3041,33 +3041,33 @@
       }
     }
   },
-  "POST /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/recap/album-exports": {
+  "POST /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/recap/album-exports": {
     "status": 202,
     "body": {
-      "id": "ec9edd08-9847-4fc4-ad8c-73f0dba587e3",
+      "id": "168b5e7d-5e93-4f34-a8b5-4c60f63d987e",
       "status": "Preparing",
       "photosDone": 0,
       "photosTotal": 1,
       "downloadUrl": null
     }
   },
-  "GET /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/recap/album-exports/ec9edd08-9847-4fc4-ad8c-73f0dba587e3": {
+  "GET /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/recap/album-exports/168b5e7d-5e93-4f34-a8b5-4c60f63d987e": {
     "status": 200,
     "body": {
-      "id": "ec9edd08-9847-4fc4-ad8c-73f0dba587e3",
+      "id": "168b5e7d-5e93-4f34-a8b5-4c60f63d987e",
       "status": "Preparing",
       "photosDone": 0,
       "photosTotal": 1,
       "downloadUrl": null
     }
   },
-  "DELETE /api/popkins/2262db2c-4393-4d00-b854-51852ce78978/members/me": {
+  "DELETE /api/popkins/065afba8-6406-46d6-a89c-2e4e9c838e32/members/me": {
     "status": 204
   },
   "PATCH /api/account": {
     "status": 200,
     "body": {
-      "personId": "11d640c2-ebf1-4939-a8f3-5499f2d3cdac",
+      "personId": "6c3f6661-47b3-49ac-b2b3-83aa7c573da6",
       "name": "Mara Okafor",
       "photoUrl": null,
       "channel": "Phone",
@@ -3077,7 +3077,7 @@
   "GET /api/account": {
     "status": 200,
     "body": {
-      "personId": "11d640c2-ebf1-4939-a8f3-5499f2d3cdac",
+      "personId": "6c3f6661-47b3-49ac-b2b3-83aa7c573da6",
       "name": "Mara Okafor",
       "photoUrl": null,
       "channel": "Phone",
@@ -3245,15 +3245,15 @@
       "title": "This link has expired. Sign in to change your email settings.",
       "status": 410,
       "code": "unsubscribe_link_expired",
-      "traceId": "00-a7b0f853b792b9264afe4cf4d6bae161-c2276e7cfcd7a93c-00"
+      "traceId": "00-26745df89073c043fab5f43ec895a6cd-63e7656045be88a0-00"
     }
   },
   "PUT /api/account/photo": {
     "status": 200,
     "body": {
-      "personId": "11d640c2-ebf1-4939-a8f3-5499f2d3cdac",
+      "personId": "6c3f6661-47b3-49ac-b2b3-83aa7c573da6",
       "name": "Mara Okafor",
-      "photoUrl": "/api/files/avatars/42a080eec7354d30b0c23711fa654a4b.jpg?expires=1794935169&signature=wgNr-CpjS9Dp84rKDZYEWvffZsjXM23G2Hd116_6IGg",
+      "photoUrl": "/api/files/avatars/e04b09d8010449bc90851594bba404d9.jpg?expires=1794977232&signature=_JWVS7elUkO1p8DIA8VYnWv02fHGwxj7cffY2mUMDrQ",
       "channel": "Phone",
       "destination": "(415) 555-0148"
     }
@@ -3284,24 +3284,24 @@
       "total": 2,
       "popkins": [
         {
-          "popkinId": "2262db2c-4393-4d00-b854-51852ce78978",
+          "popkinId": "065afba8-6406-46d6-a89c-2e4e9c838e32",
           "name": "Lakeside Weekend",
           "emoji": "🏕️",
           "colour": "Teal",
           "peopleCount": 2,
           "people": [
             {
-              "personId": "57736c51-a489-4409-9a30-8b497c5da13a",
+              "personId": "41164eab-01e2-44ce-8f97-d778e55f4bb1",
               "name": "Joel",
               "initials": "J",
-              "accent": "Sky",
+              "accent": "Plum",
               "photoUrl": null
             },
             {
-              "personId": "68685322-d8df-42a9-ba90-6bf9a791dea6",
+              "personId": "ca7aa18a-0342-4935-8ed9-c21ac3f32fe9",
               "name": "Walt Brennan",
               "initials": "WB",
-              "accent": "Plum",
+              "accent": "Teal",
               "photoUrl": null
             }
           ]
@@ -3324,16 +3324,16 @@
   "POST /api/admin/auth/codes": {
     "status": 200,
     "body": {
-      "verificationId": "233f2081-a09c-49d8-8559-851bf0b1a97c",
+      "verificationId": "019dcbe7-01dc-467f-9abe-397ac0d9b181",
       "sentTo": "lena.fischer@popkin.app",
-      "expiresAt": "2026-11-17T16:16:09.4398+00:00",
-      "resendAvailableAt": "2026-11-17T16:06:39.4398+00:00"
+      "expiresAt": "2026-11-18T03:57:12.219+00:00",
+      "resendAvailableAt": "2026-11-18T03:47:42.219+00:00"
     }
   },
-  "POST /api/admin/auth/codes/233f2081-a09c-49d8-8559-851bf0b1a97c/confirm": {
+  "POST /api/admin/auth/codes/019dcbe7-01dc-467f-9abe-397ac0d9b181/confirm": {
     "status": 200,
     "body": {
-      "adminId": "f98eb74a-9176-433c-bc33-7ebc7395ee24",
+      "adminId": "89eecc99-351d-472e-a88c-e18a6465f822",
       "name": "Lena Fischer",
       "email": "lena.fischer@popkin.app",
       "role": "Owner",
@@ -3360,14 +3360,15 @@
         "ManageNotifications",
         "HoldNotifications",
         "ManageAdmins",
-        "ExportAuditLog"
+        "ExportAuditLog",
+        "ChangeHolidayCalendars"
       ]
     }
   },
   "GET /api/admin/me": {
     "status": 200,
     "body": {
-      "adminId": "f98eb74a-9176-433c-bc33-7ebc7395ee24",
+      "adminId": "89eecc99-351d-472e-a88c-e18a6465f822",
       "name": "Lena Fischer",
       "email": "lena.fischer@popkin.app",
       "role": "Owner",
@@ -3394,7 +3395,8 @@
         "ManageNotifications",
         "HoldNotifications",
         "ManageAdmins",
-        "ExportAuditLog"
+        "ExportAuditLog",
+        "ChangeHolidayCalendars"
       ]
     }
   },
@@ -3403,13 +3405,14 @@
     "body": {
       "reports": 0,
       "failedJobs": 0,
-      "failedExports": 0
+      "failedExports": 0,
+      "holidayCalendars": 2
     }
   },
   "POST /api/admin/admins": {
     "status": 201,
     "body": {
-      "id": "cf2bf28f-3da1-4af8-9592-8decab839808",
+      "id": "9b70303c-e5dc-4e26-972f-a312955f94ce",
       "name": "Aiko Tanaka",
       "email": "aiko.tanaka@popkin.app",
       "role": "Support",
@@ -3489,6 +3492,12 @@
           "viewer": false
         },
         {
+          "row": "HolidayCalendars",
+          "owner": true,
+          "support": true,
+          "viewer": false
+        },
+        {
           "row": "Admins",
           "owner": true,
           "support": false,
@@ -3509,17 +3518,17 @@
       "count": 4,
       "admins": [
         {
-          "id": "f98eb74a-9176-433c-bc33-7ebc7395ee24",
+          "id": "89eecc99-351d-472e-a88c-e18a6465f822",
           "name": "Lena Fischer",
           "email": "lena.fischer@popkin.app",
           "role": "Owner",
           "invited": false,
-          "lastActiveAt": "2026-11-17T16:06:09.4468+00:00",
+          "lastActiveAt": "2026-11-18T03:47:12.2344+00:00",
           "isYou": true,
           "isLastOwner": true
         },
         {
-          "id": "cf2bf28f-3da1-4af8-9592-8decab839808",
+          "id": "9b70303c-e5dc-4e26-972f-a312955f94ce",
           "name": "Aiko Tanaka",
           "email": "aiko.tanaka@popkin.app",
           "role": "Support",
@@ -3529,7 +3538,7 @@
           "isLastOwner": false
         },
         {
-          "id": "07eddb8f-c505-40b1-a75a-d670fa8dca9d",
+          "id": "074ef44d-490d-4fe1-8123-f6e659b91adc",
           "name": "Kwame Mensah",
           "email": "kwame.mensah@popkin.app",
           "role": "Support",
@@ -3539,7 +3548,7 @@
           "isLastOwner": false
         },
         {
-          "id": "9401af7c-fd34-43a9-b9f4-803105617b48",
+          "id": "296af248-0971-4b33-a903-1c52e01564cc",
           "name": "Marco Bianchi",
           "email": "marco.bianchi@popkin.app",
           "role": "Viewer",
@@ -3557,52 +3566,52 @@
       "entries": [
         {
           "id": 4,
-          "at": "2026-11-17T16:06:09.4859+00:00",
-          "adminId": "f98eb74a-9176-433c-bc33-7ebc7395ee24",
+          "at": "2026-11-18T03:47:12.363+00:00",
+          "adminId": "89eecc99-351d-472e-a88c-e18a6465f822",
           "adminName": "Lena Fischer",
           "action": "AddedAdmin",
           "actionLabel": "Added admin",
           "targetKind": "Admin",
-          "targetId": "cf2bf28f-3da1-4af8-9592-8decab839808",
+          "targetId": "9b70303c-e5dc-4e26-972f-a312955f94ce",
           "targetName": "Aiko Tanaka",
           "reason": null,
           "details": "{\"role\":\"Support\"}"
         },
         {
           "id": 3,
-          "at": "2026-11-17T16:06:09.484+00:00",
-          "adminId": "f98eb74a-9176-433c-bc33-7ebc7395ee24",
+          "at": "2026-11-18T03:47:12.347+00:00",
+          "adminId": "89eecc99-351d-472e-a88c-e18a6465f822",
           "adminName": "Lena Fischer",
           "action": "AddedAdmin",
           "actionLabel": "Added admin",
           "targetKind": "Admin",
-          "targetId": "9401af7c-fd34-43a9-b9f4-803105617b48",
+          "targetId": "296af248-0971-4b33-a903-1c52e01564cc",
           "targetName": "Marco Bianchi",
           "reason": null,
           "details": "{\"role\":\"Viewer\"}"
         },
         {
           "id": 2,
-          "at": "2026-11-17T16:06:09.4809+00:00",
-          "adminId": "f98eb74a-9176-433c-bc33-7ebc7395ee24",
+          "at": "2026-11-18T03:47:12.334+00:00",
+          "adminId": "89eecc99-351d-472e-a88c-e18a6465f822",
           "adminName": "Lena Fischer",
           "action": "AddedAdmin",
           "actionLabel": "Added admin",
           "targetKind": "Admin",
-          "targetId": "07eddb8f-c505-40b1-a75a-d670fa8dca9d",
+          "targetId": "074ef44d-490d-4fe1-8123-f6e659b91adc",
           "targetName": "Kwame Mensah",
           "reason": null,
           "details": "{\"role\":\"Support\"}"
         },
         {
           "id": 1,
-          "at": "2026-11-17T16:05:33.461+00:00",
+          "at": "2026-11-18T03:46:14.2081+00:00",
           "adminId": null,
           "adminName": "Popkin",
           "action": "AddedAdmin",
           "actionLabel": "Added admin",
           "targetKind": "Admin",
-          "targetId": "f98eb74a-9176-433c-bc33-7ebc7395ee24",
+          "targetId": "89eecc99-351d-472e-a88c-e18a6465f822",
           "targetName": "Lena Fischer",
           "reason": null,
           "details": "{\"role\":\"Owner\",\"firstOwner\":true}"
@@ -3621,7 +3630,7 @@
           "mode": "Everyone",
           "livePopkins": 0,
           "chosen": [],
-          "changedAt": "2026-11-17T16:05:31.4753+00:00",
+          "changedAt": "2026-11-18T03:46:10.8514+00:00",
           "changedByName": "Popkin"
         },
         {
@@ -3629,7 +3638,7 @@
           "mode": "Everyone",
           "livePopkins": 0,
           "chosen": [],
-          "changedAt": "2026-11-17T16:05:31.4753+00:00",
+          "changedAt": "2026-11-18T03:46:10.8514+00:00",
           "changedByName": "Popkin"
         }
       ]
@@ -3830,14 +3839,14 @@
           "automatic": true,
           "popkin": null,
           "person": {
-            "id": "11d640c2-ebf1-4939-a8f3-5499f2d3cdac",
+            "id": "6c3f6661-47b3-49ac-b2b3-83aa7c573da6",
             "name": "Mara Okafor",
             "email": null,
             "avatar": null
           },
           "why": "Account being deleted",
           "byName": "System",
-          "since": "2026-11-17T16:06:09.4301+00:00",
+          "since": "2026-11-18T03:47:12.1857+00:00",
           "until": "UntilDeleted"
         }
       ],
@@ -3879,10 +3888,396 @@
       ]
     }
   },
-  "PUT /api/admin/admins/cf2bf28f-3da1-4af8-9592-8decab839808/role": {
+  "GET /api/admin/holiday-calendars": {
     "status": 200,
     "body": {
-      "id": "cf2bf28f-3da1-4af8-9592-8decab839808",
+      "thisYear": 2026,
+      "calendars": [
+        {
+          "id": "932b0d4d-601e-43bc-ba86-dea7d661e0a9",
+          "name": "United States",
+          "holds": "Federal and widely observed",
+          "people": 0,
+          "datesThrough": 2028,
+          "draft": false,
+          "needsDates": false
+        },
+        {
+          "id": "6c497fb1-3999-4d44-9642-f9efc4e9ad81",
+          "name": "United Kingdom",
+          "holds": "Bank holidays, England & Wales",
+          "people": 0,
+          "datesThrough": 2028,
+          "draft": false,
+          "needsDates": false
+        },
+        {
+          "id": "334ab2df-13c1-4526-8d64-b496b920e747",
+          "name": "Islamic holidays",
+          "holds": "Ramadan, Eid al-Fitr, Eid al-Adha",
+          "people": 0,
+          "datesThrough": 2026,
+          "draft": false,
+          "needsDates": true
+        },
+        {
+          "id": "5952e800-f1f2-4a9b-bbc1-370b2b2355fa",
+          "name": "Hindu festivals",
+          "holds": "Holi, Navratri, Diwali",
+          "people": 0,
+          "datesThrough": 2026,
+          "draft": false,
+          "needsDates": true
+        },
+        {
+          "id": "c1ca1ce2-fa92-4264-a699-af53f97b745a",
+          "name": "Australia",
+          "holds": "National public holidays",
+          "people": 0,
+          "datesThrough": null,
+          "draft": true,
+          "needsDates": false
+        }
+      ],
+      "withoutNextYear": {
+        "names": [
+          "Islamic holidays",
+          "Hindu festivals"
+        ],
+        "people": 0
+      }
+    }
+  },
+  "GET /api/admin/holiday-calendars/334ab2df-13c1-4526-8d64-b496b920e747": {
+    "status": 200,
+    "body": {
+      "id": "334ab2df-13c1-4526-8d64-b496b920e747",
+      "name": "Islamic holidays",
+      "howSet": "Moon sighting, confirmed by hand",
+      "years": [
+        2026,
+        2027,
+        2028
+      ],
+      "year": 2027,
+      "people": 0,
+      "popkins": 0,
+      "lastEdited": null,
+      "publishedAt": null,
+      "holidays": [
+        {
+          "id": "ccb5aa5f-0c69-4179-9592-6d061d72d0bd",
+          "name": "Ramadan begins",
+          "note": "Could be 9 Feb",
+          "date": "2027-02-08",
+          "status": "Estimated"
+        },
+        {
+          "id": "10e67a36-448b-4f57-920a-d26f7354805f",
+          "name": "Eid al-Fitr",
+          "note": "Could be 11 Mar",
+          "date": "2027-03-10",
+          "status": "Estimated"
+        },
+        {
+          "id": "e98f9ed9-e752-45fe-bf5f-c0cc0376451c",
+          "name": "Eid al-Adha",
+          "note": null,
+          "date": "2027-05-17",
+          "status": "Estimated"
+        },
+        {
+          "id": "e399f39e-9b21-464f-b10e-27231a039874",
+          "name": "Islamic New Year",
+          "note": null,
+          "date": "2027-06-06",
+          "status": "Estimated"
+        },
+        {
+          "id": "04f46cbf-4936-4e5e-acc5-41ed6a954bfb",
+          "name": "Mawlid",
+          "note": null,
+          "date": "2027-08-15",
+          "status": "Estimated"
+        }
+      ],
+      "estimates": 5
+    }
+  },
+  "GET /api/admin/holiday-calendars/334ab2df-13c1-4526-8d64-b496b920e747?year=2026": {
+    "status": 200,
+    "body": {
+      "id": "334ab2df-13c1-4526-8d64-b496b920e747",
+      "name": "Islamic holidays",
+      "howSet": "Moon sighting, confirmed by hand",
+      "years": [
+        2026,
+        2027,
+        2028
+      ],
+      "year": 2026,
+      "people": 0,
+      "popkins": 0,
+      "lastEdited": null,
+      "publishedAt": "2026-11-18T03:46:10.8514+00:00",
+      "holidays": [
+        {
+          "id": "29ab1e5e-2e50-42b6-9da8-ee1689b1e85c",
+          "name": "Ramadan begins",
+          "note": null,
+          "date": "2026-02-18",
+          "status": "Confirmed"
+        },
+        {
+          "id": "5167ff52-122e-4c7e-a385-5c546d9e13dc",
+          "name": "Eid al-Fitr",
+          "note": null,
+          "date": "2026-03-20",
+          "status": "Confirmed"
+        },
+        {
+          "id": "2c00fe90-2202-405e-851a-e3c68b370e5c",
+          "name": "Eid al-Adha",
+          "note": null,
+          "date": "2026-05-27",
+          "status": "Confirmed"
+        },
+        {
+          "id": "c9052bae-6245-4006-a8c7-9879f57559ff",
+          "name": "Islamic New Year",
+          "note": null,
+          "date": "2026-06-16",
+          "status": "Confirmed"
+        },
+        {
+          "id": "c4754185-e053-4f6e-8a14-e5b4eecc0c27",
+          "name": "Mawlid",
+          "note": null,
+          "date": "2026-08-25",
+          "status": "Confirmed"
+        }
+      ],
+      "estimates": 0
+    }
+  },
+  "GET /api/admin/holiday-calendars/932b0d4d-601e-43bc-ba86-dea7d661e0a9": {
+    "status": 200,
+    "body": {
+      "id": "932b0d4d-601e-43bc-ba86-dea7d661e0a9",
+      "name": "United States",
+      "howSet": "Fixed dates and rules",
+      "years": [
+        2026,
+        2027,
+        2028
+      ],
+      "year": 2026,
+      "people": 0,
+      "popkins": 0,
+      "lastEdited": null,
+      "publishedAt": "2026-11-18T03:46:10.8514+00:00",
+      "holidays": [
+        {
+          "id": "e48bf504-c3da-48b8-9be2-c88d0b427908",
+          "name": "New Year’s Day",
+          "note": null,
+          "date": "2026-01-01",
+          "status": "ByRule"
+        },
+        {
+          "id": "2a2e8061-5ce0-4c2d-bcac-1eb3a85c5a41",
+          "name": "Memorial Day",
+          "note": null,
+          "date": "2026-05-25",
+          "status": "ByRule"
+        },
+        {
+          "id": "03862d63-73b5-4691-859e-40fc14fb6a34",
+          "name": "Independence Day",
+          "note": "Observed Fri 3 Jul",
+          "date": "2026-07-04",
+          "status": "ByRule"
+        },
+        {
+          "id": "2669e1a0-bdd2-478e-80c8-ce01e0109479",
+          "name": "Labor Day",
+          "note": null,
+          "date": "2026-09-07",
+          "status": "ByRule"
+        },
+        {
+          "id": "b9e2feee-87ed-48dc-8088-2baea789b6c9",
+          "name": "Thanksgiving",
+          "note": null,
+          "date": "2026-11-26",
+          "status": "ByRule"
+        },
+        {
+          "id": "4b8382f6-463b-4be2-b779-63b048e2525b",
+          "name": "Christmas Day",
+          "note": null,
+          "date": "2026-12-25",
+          "status": "ByRule"
+        }
+      ],
+      "estimates": 0
+    }
+  },
+  "GET /api/admin/holiday-calendars/c1ca1ce2-fa92-4264-a699-af53f97b745a": {
+    "status": 200,
+    "body": {
+      "id": "c1ca1ce2-fa92-4264-a699-af53f97b745a",
+      "name": "Australia",
+      "howSet": "Fixed dates and rules",
+      "years": [
+        2026,
+        2027,
+        2028
+      ],
+      "year": 2027,
+      "people": 0,
+      "popkins": 0,
+      "lastEdited": null,
+      "publishedAt": null,
+      "holidays": [
+        {
+          "id": "7dc9a69c-d23c-47df-b388-532a161ab37c",
+          "name": "New Year’s Day",
+          "note": null,
+          "date": "2027-01-01",
+          "status": "ByRule"
+        },
+        {
+          "id": "a672da8a-b0e2-47df-b359-84ebea02ab71",
+          "name": "Australia Day",
+          "note": null,
+          "date": "2027-01-26",
+          "status": "ByRule"
+        },
+        {
+          "id": "3085f99b-8887-4fbe-a3eb-34d2c0e1c99f",
+          "name": "Anzac Day",
+          "note": "Observed Mon 26 Apr",
+          "date": "2027-04-25",
+          "status": "ByRule"
+        },
+        {
+          "id": "9ea1fe51-a2b4-4e7a-a31f-6d4b4c949fa0",
+          "name": "Christmas Day",
+          "note": "Observed Fri 24 Dec",
+          "date": "2027-12-25",
+          "status": "ByRule"
+        },
+        {
+          "id": "9b67bc0d-20b5-4b3e-a863-a004e8a0654a",
+          "name": "Boxing Day",
+          "note": "Observed Mon 27 Dec",
+          "date": "2027-12-26",
+          "status": "ByRule"
+        }
+      ],
+      "estimates": 0
+    }
+  },
+  "GET /api/admin/holiday-calendars/c1ca1ce2-fa92-4264-a699-af53f97b745a?year=2028": {
+    "status": 200,
+    "body": {
+      "id": "c1ca1ce2-fa92-4264-a699-af53f97b745a",
+      "name": "Australia",
+      "howSet": "Fixed dates and rules",
+      "years": [
+        2026,
+        2027,
+        2028
+      ],
+      "year": 2028,
+      "people": 0,
+      "popkins": 0,
+      "lastEdited": null,
+      "publishedAt": null,
+      "holidays": [],
+      "estimates": 0
+    }
+  },
+  "GET /api/admin/holiday-calendars/334ab2df-13c1-4526-8d64-b496b920e747?year=2027": {
+    "status": 200,
+    "body": {
+      "id": "334ab2df-13c1-4526-8d64-b496b920e747",
+      "name": "Islamic holidays",
+      "howSet": "Moon sighting, confirmed by hand",
+      "years": [
+        2026,
+        2027,
+        2028
+      ],
+      "year": 2027,
+      "people": 0,
+      "popkins": 0,
+      "lastEdited": null,
+      "publishedAt": null,
+      "holidays": [
+        {
+          "id": "ccb5aa5f-0c69-4179-9592-6d061d72d0bd",
+          "name": "Ramadan begins",
+          "note": "Could be 9 Feb",
+          "date": "2027-02-08",
+          "status": "Estimated"
+        },
+        {
+          "id": "10e67a36-448b-4f57-920a-d26f7354805f",
+          "name": "Eid al-Fitr",
+          "note": "Could be 11 Mar",
+          "date": "2027-03-10",
+          "status": "Estimated"
+        },
+        {
+          "id": "e98f9ed9-e752-45fe-bf5f-c0cc0376451c",
+          "name": "Eid al-Adha",
+          "note": null,
+          "date": "2027-05-17",
+          "status": "Estimated"
+        },
+        {
+          "id": "e399f39e-9b21-464f-b10e-27231a039874",
+          "name": "Islamic New Year",
+          "note": null,
+          "date": "2027-06-06",
+          "status": "Estimated"
+        },
+        {
+          "id": "04f46cbf-4936-4e5e-acc5-41ed6a954bfb",
+          "name": "Mawlid",
+          "note": null,
+          "date": "2027-08-15",
+          "status": "Estimated"
+        }
+      ],
+      "estimates": 5
+    }
+  },
+  "PUT /api/admin/holiday-calendars/334ab2df-13c1-4526-8d64-b496b920e747/holidays/ccb5aa5f-0c69-4179-9592-6d061d72d0bd": {
+    "status": 200,
+    "body": {
+      "id": "ccb5aa5f-0c69-4179-9592-6d061d72d0bd",
+      "name": "Ramadan begins",
+      "note": "Could be 9 Feb",
+      "date": "2027-02-08",
+      "status": "Confirmed"
+    }
+  },
+  "POST /api/admin/holiday-calendars/334ab2df-13c1-4526-8d64-b496b920e747/years/2027/publish": {
+    "status": 200,
+    "body": {
+      "calendarName": "Islamic holidays",
+      "year": 2027,
+      "people": 0,
+      "popkins": 0
+    }
+  },
+  "PUT /api/admin/admins/9b70303c-e5dc-4e26-972f-a312955f94ce/role": {
+    "status": 200,
+    "body": {
+      "id": "9b70303c-e5dc-4e26-972f-a312955f94ce",
       "name": "Aiko Tanaka",
       "email": "aiko.tanaka@popkin.app",
       "role": "Viewer",
@@ -3892,7 +4287,7 @@
       "isLastOwner": false
     }
   },
-  "POST /api/admin/admins/9401af7c-fd34-43a9-b9f4-803105617b48/remove": {
+  "POST /api/admin/admins/296af248-0971-4b33-a903-1c52e01564cc/remove": {
     "status": 204
   },
   "PUT /api/admin/features/Schedules": {
@@ -3902,7 +4297,7 @@
       "mode": "Off",
       "livePopkins": 0,
       "chosen": [],
-      "changedAt": "2026-11-17T16:06:09.5794+00:00",
+      "changedAt": "2026-11-18T03:47:12.8923+00:00",
       "changedByName": "Lena Fischer"
     }
   },
@@ -3910,7 +4305,7 @@
     "status": 200,
     "body": {
       "paused": true,
-      "pausedAt": "2026-11-17T16:06:09.592409+00:00",
+      "pausedAt": "2026-11-18T03:47:12.9305962+00:00",
       "pausedByName": "Lena Fischer",
       "pauseReason": "Digest sending twice.",
       "queued": 0,
@@ -3942,7 +4337,7 @@
       "about": "New places, ratings and comments",
       "required": false,
       "offForEveryone": true,
-      "offSince": "2026-11-17T16:06:09.604501+00:00",
+      "offSince": "2026-11-18T03:47:12.9706888+00:00",
       "offByName": "Lena Fischer",
       "offReason": "Rating emails firing on every star change",
       "sent24h": 0,
@@ -3958,7 +4353,7 @@
       "quietFrom": "21:00",
       "quietTo": "08:00",
       "birthdayLead": "OneWeekBefore",
-      "changedAt": "2026-11-17T16:06:09.614632+00:00",
+      "changedAt": "2026-11-18T03:47:13.0079268+00:00",
       "changedByName": "Lena Fischer"
     }
   },
@@ -3974,7 +4369,7 @@
           "defaultValue": 365,
           "maxValue": 400,
           "unit": "days",
-          "changedAt": "2026-11-17T22:38:19.6385+00:00",
+          "changedAt": "2026-11-18T03:47:13.0452+00:00",
           "changedByName": "Lena Fischer"
         }
       ]

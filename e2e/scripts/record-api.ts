@@ -595,6 +595,41 @@ await call('GET', '/api/admin/notifications/holds/popkin-search?q=lake');
 await call('GET', '/api/admin/notifications/defaults');
 // Limits (L2-176): the sign-in length at its default of 365 days.
 await call('GET', '/api/admin/limits');
+// Holiday calendars (L2-196): the seed's five, Islamic holidays and Hindu festivals without next
+// year's dates. The page opens on Islamic holidays at next year; United States is all by rule;
+// Australia, a draft, has no dates in the last year of the tabs.
+const holidayCalendars = await call('GET', '/api/admin/holiday-calendars');
+const calendarNamed = (name: string) =>
+  holidayCalendars.calendars.find((c: { name: string }) => c.name === name).id;
+const thisYear = holidayCalendars.thisYear;
+await call('GET', `/api/admin/holiday-calendars/${calendarNamed('Islamic holidays')}`);
+await call(
+  'GET',
+  `/api/admin/holiday-calendars/${calendarNamed('Islamic holidays')}?year=${thisYear}`,
+);
+await call('GET', `/api/admin/holiday-calendars/${calendarNamed('United States')}`);
+await call('GET', `/api/admin/holiday-calendars/${calendarNamed('Australia')}`);
+await call(
+  'GET',
+  `/api/admin/holiday-calendars/${calendarNamed('Australia')}?year=${thisYear + 2}`,
+);
+// Then Lena confirms Ramadan's date of next year and publishes next year; the
+// answers above stay as they were.
+const islamic = calendarNamed('Islamic holidays');
+const islamicNext = await call(
+  'GET',
+  `/api/admin/holiday-calendars/${islamic}?year=${thisYear + 1}`,
+);
+await call(
+  'PUT',
+  `/api/admin/holiday-calendars/${islamic}/holidays/${islamicNext.holidays[0].id}`,
+  {
+    date: islamicNext.holidays[0].date,
+  },
+);
+await call('POST', `/api/admin/holiday-calendars/${islamic}/years/${thisYear + 1}/publish`, {
+  reason: 'Dates confirmed with the moon-sighting committee',
+});
 // Then she makes Aiko a Viewer and removes Marco; the list and the log above stay as they were.
 await call('PUT', `/api/admin/admins/${aiko.id}/role`, {
   role: 'Viewer',

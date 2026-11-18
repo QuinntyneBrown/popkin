@@ -70,6 +70,32 @@ public sealed class CliTests
         Assert.Equal(FeatureMode.Everyone, Assert.Single(db.FeatureSettings, s => s.Feature == Feature.Plan).Mode);
     }
 
+    // Gap 145: the holiday calendars come from the seed, each once, with its dates by rule and
+    // its first estimates.
+    [Fact]
+    public async Task Seed_adds_the_holiday_calendars_once()
+    {
+        await Run(new StringWriter(), "migrate");
+
+        await Run(new StringWriter(), "seed");
+        await Run(new StringWriter(), "seed");
+
+        await using var db = Open();
+        Assert.Equal(
+            ["United States", "United Kingdom", "Islamic holidays", "Hindu festivals", "Australia"],
+            db.HolidayCalendars.OrderBy(c => c.CreatedAt).Select(c => c.Name).ToArray());
+        var us = db.HolidayCalendars.Single(c => c.Key == "us").Id;
+        var independence = db.Holidays.Single(h => h.CalendarId == us && h.Year == 2026 && h.Name == "Independence Day");
+        Assert.Equal(new DateOnly(2026, 7, 4), independence.Date);
+        Assert.Equal("Observed Fri 3 Jul", independence.Note);
+        Assert.Equal(HolidayStatus.ByRule, independence.Status);
+        var islamic = db.HolidayCalendars.Single(c => c.Key == "islamic").Id;
+        Assert.Null(db.HolidayCalendarYears.Single(y => y.CalendarId == islamic && y.Year == 2027).PublishedAt);
+        Assert.All(db.Holidays.Where(h => h.CalendarId == islamic && h.Year == 2027), h => Assert.Equal(HolidayStatus.Estimated, h.Status));
+        var australia = db.HolidayCalendars.Single(c => c.Key == "australia").Id;
+        Assert.DoesNotContain(db.HolidayCalendarYears, y => y.CalendarId == australia && y.PublishedAt != null);
+    }
+
     [Fact]
     public async Task Reset_starts_again_from_the_seed()
     {

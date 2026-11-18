@@ -3,8 +3,8 @@ import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { ADMIN_SECTIONS, AdminSessionStore, Toaster, VIEWER_NOTICE } from 'api';
-import { AdminShell, SkipLink, Toast, ToastRegion } from 'components';
+import { ADMIN_SECTIONS, AdminSessionStore, AdminWaitingStore, Toaster, VIEWER_NOTICE } from 'api';
+import { AdminNavSection, AdminShell, SkipLink, Toast, ToastRegion } from 'components';
 import { filter, map } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AdminRouteData } from './app.routes';
@@ -28,7 +28,26 @@ export class App {
   protected readonly toaster = inject(Toaster);
   private readonly dialog = inject(Dialog);
 
-  protected readonly sections = ADMIN_SECTIONS;
+  private readonly waiting = inject(AdminWaitingStore);
+
+  /** The sections, with what waits beside each that counts it (L2-196 AC1). */
+  protected readonly sections = computed<readonly AdminNavSection[]>(() => {
+    const waiting = this.waiting.waiting();
+    return ADMIN_SECTIONS.map((group) => ({
+      label: group.label,
+      items: group.items.map((item) => {
+        const n = item.waiting && waiting ? waiting[item.waiting] : 0;
+        return {
+          label: item.label,
+          route: item.route,
+          page: item.page,
+          icon: item.icon,
+          waiting: n,
+          waitingLabel: n && item.waitingLabel ? item.waitingLabel(n) : undefined,
+        };
+      }),
+    }));
+  });
   protected readonly label = environment.consoleLabel;
 
   protected readonly routeData = toSignal(
@@ -56,13 +75,17 @@ export class App {
       const page = this.routeData()?.page;
       if (page) this.document.body.dataset['page'] = page;
     });
+    // The counts are read once a page of the console shows, never on sign-in.
+    effect(() => {
+      if (this.routeData()?.shell === 'admin') this.waiting.start();
+    });
   }
 
   /** The sections in a drawer below 1024 px; focus returns to "Open menu" (L2-089 AC2). */
   protected openMenu(): void {
     const ref = this.dialog.open<'signOut', MenuData>(MenuDialog, {
       data: {
-        sections: this.sections,
+        sections: this.sections(),
         current: this.routeData()?.page,
         me: this.me(),
         label: this.label,

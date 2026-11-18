@@ -55,6 +55,18 @@ export const routes: Routes = [
         title: 'Notifications · Popkin Admin',
       },
       {
+        path: 'holidays',
+        loadComponent: () => import('./pages/holidays/holidays.page').then((m) => m.HolidaysPage),
+        data: data({ shell: 'admin', page: 'holidays' }),
+        title: 'Holiday calendars · Popkin Admin',
+      },
+      {
+        path: 'holidays/:calendarId',
+        loadComponent: () => import('./pages/holidays/holidays.page').then((m) => m.HolidaysPage),
+        data: data({ shell: 'admin', page: 'holidays' }),
+        title: 'Holiday calendars · Popkin Admin',
+      },
+      {
         path: 'limits',
         loadComponent: () => import('./pages/limits/limits.page').then((m) => m.LimitsPage),
         data: data({ shell: 'admin', page: 'limits' }),
