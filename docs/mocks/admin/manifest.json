@@ -478,7 +478,7 @@
         "failed"
       ],
       "close": "../../pages/popkin/default.html",
-      "notes": "From the Magic Patterns Popkin Admin › Popkin Detail design (remove-day)."
+      "notes": "From the Magic Patterns Popkin Admin › Popkin Detail design (remove-day). No requirement covers the admin Popkin's days yet."
     },
     {
       "id": "moderation-view-open",
@@ -960,7 +960,10 @@
       "kind": "page",
       "title": "Holiday calendars",
       "route": "admin.popkin.community/holidays",
-      "requirements": [],
+      "requirements": [
+        "L2-196",
+        "L2-197"
+      ],
       "states": [
         "default",
         "changing",
@@ -973,14 +976,16 @@
       "not_applicable": {
         "empty": "The built-in calendars always exist, so the list is never empty."
       },
-      "notes": "From the Magic Patterns Popkin Admin › Holiday Calendars design, its years moved on one to fit July 2026."
+      "notes": "From the Magic Patterns Popkin Admin › Holiday Calendars design, aligned to L2-196 and L2-197."
     },
     {
       "id": "holidays-publish",
       "kind": "dialog",
       "title": "Publish a holiday calendar",
       "opens_from": "holidays",
-      "requirements": [],
+      "requirements": [
+        "L2-197"
+      ],
       "states": [
         "default",
         "busy",

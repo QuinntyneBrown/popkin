@@ -746,6 +746,7 @@ button.bubble__quote { display: block; width: calc(100% - 2 * var(--space-2)); b
    the tabs into a side rail and splits onboarding in two, L and XL open a second and a
    third pane. Nothing is a narrow strip on a wide screen. */
 @media (max-width: 39.99rem) { .only-s-up { display: none !important; } }
+@media (min-width: 40rem) { .only-below-s { display: none !important; } }
 @media (max-width: 47.99rem) { .only-m-up { display: none !important; } }
 @media (max-width: 63.99rem) { .only-l-up { display: none !important; } }
 @media (max-width: 79.99rem) { .only-xl-up { display: none !important; } }
@@ -2392,3 +2393,4 @@ a.segmented__option { display: inline-flex; align-items: center; text-decoration
 .days-tools__end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .days-tools__end .select { width: auto; height: var(--space-10); }
 .days-week__item { overflow-wrap: anywhere; }
+.coming-days > .text-btn { white-space: nowrap; }

@@ -86,10 +86,9 @@ network. Every mock has a bar at the bottom that lists its sibling states and sw
   picker, as the design draws it, unlike Features' dialog (see Still open).
 - Holiday calendars (`holidays`, `holidays-publish`, added 17 November 2026) and the Popkin's
   Important days panel with `popkin-remove-day` follow the Popkin Admin › Holiday Calendars and
-  Popkin Detail designs. The design's years move on by one to fit this set's July 2026 (tabs
-  2026–2028; Islamic holidays and Hindu festivals have dates only through 2026), Kwame Mensah
-  takes the design's "Omar Siddiqui" as the admin who keeps the hand-confirmed calendars, and
-  Lakeside Weekend's days fall inside its 1–28 Jul run. The calendar list uses the list-detail
+  Popkin Detail designs, aligned to L2-196 and L2-197. Kwame Mensah takes the design's (and
+  L2-196 AC4's) "Omar" as the admin who keeps the hand-confirmed calendars, since Omar isn't in
+  this cast, and Lakeside Weekend's days fall inside its 1–28 Jul run. The calendar list uses the list-detail
   rows Reports uses, not a table. Publish and Remove day ask for a required reason, as every
   moderating action here does; Publish is never switched off for an Owner. A Viewer sees every
   button switched off, with the Viewer notice. "New calendar" has no design behind it, so it
@@ -162,10 +161,10 @@ announcement banner (`notifications/announcement`, L2-116).
 - Erasing the audit log's two-year-old entries needs a Worker job, a fifth beside the four on
   Jobs.
 - Health and Metrics need admin endpoints over the telemetry (ADR 0012) and the services' checks.
-- Holiday calendars and the Popkin's Important days panel come only from the designs: they have
-  no requirement or detailed design yet, so `holidays`, `holidays-publish` and
-  `popkin-remove-day` list none. What "New calendar" asks for, and who is told when a day is
-  removed from a Popkin (the design says its author), are open.
+- The Popkin's Important days panel and `popkin-remove-day` come only from the Popkin Detail
+  design: L2-196 and L2-197 cover Holiday calendars, not an admin looking at a Popkin's days, so
+  they list no requirement. Whether admins may remove a Popkin's day, and who is told (the
+  design says its author), are open, as is what "New calendar" asks for.
 
 <!-- coverage:start -->
 
@@ -196,7 +195,7 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Features (`features`) | [✅](pages/features/default.html) | [✅](pages/features/loading.html) | ➖ | [✅](pages/features/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/features/viewer.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/features/off.html) | [✅](pages/features/everyone.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-076`, `L2-077`, `L2-086` |
 | Announcements (`announcements`) | [✅](pages/announcements/default.html) | [✅](pages/announcements/loading.html) | [✅](pages/announcements/empty.html) | [✅](pages/announcements/error.html) |  |  |  | [✅](pages/announcements/invalid.html) |  |  |  |  |  |  |  |  |  | [✅](pages/announcements/viewer.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/announcements/warning.html) | [✅](pages/announcements/published.html) | [✅](pages/announcements/live.html) | [✅](pages/announcements/taken-down.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-086`, `L2-115` |
 | Notifications (`notifications`) | [✅](pages/notifications/default.html) | [✅](pages/notifications/loading.html) | ➖ | [✅](pages/notifications/error.html) |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/notifications/support.html) | [✅](pages/notifications/viewer.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/notifications/paused.html) | [✅](pages/notifications/holds.html) | [✅](pages/notifications/hold-adding.html) | [✅](pages/notifications/defaults.html) | [✅](pages/notifications/defaults-edited.html) | [✅](pages/notifications/defaults-invalid.html) | [✅](pages/notifications/defaults-saved.html) | [✅](pages/notifications/defaults-loading.html) | [✅](pages/notifications/defaults-error.html) |  |  |  |  |  |  |  | `L2-169`, `L2-170`, `L2-171`, `L2-172`, `L2-173`, `L2-086` |
-| Holiday calendars (`holidays`) | [✅](pages/holidays/default.html) | [✅](pages/holidays/loading.html) | ➖ | [✅](pages/holidays/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/holidays/viewer.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/holidays/published.html) |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/holidays/changing.html) | [✅](pages/holidays/rule.html) |  |  |  |  |  |  |
+| Holiday calendars (`holidays`) | [✅](pages/holidays/default.html) | [✅](pages/holidays/loading.html) | ➖ | [✅](pages/holidays/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/holidays/viewer.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/holidays/published.html) |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/holidays/changing.html) | [✅](pages/holidays/rule.html) |  |  |  |  |  | `L2-196`, `L2-197` |
 | Limits (`limits`) | [✅](pages/limits/default.html) | [✅](pages/limits/loading.html) | ➖ | [✅](pages/limits/error.html) |  |  |  | [✅](pages/limits/invalid.html) |  |  |  |  |  |  |  |  |  | [✅](pages/limits/viewer.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/limits/edited.html) | [✅](pages/limits/saved.html) |  |  |  | `L2-086`, `L2-117`, `L2-176` |
 | Settings (`settings`) | [✅](pages/settings/default.html) | [✅](pages/settings/loading.html) | ➖ | [✅](pages/settings/error.html) |  |  |  |  |  |  |  |  |  | [✅](pages/settings/no-results.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/settings/filtered.html) |  |  | `L2-118` |
 | Admins & roles (`admins`) | [✅](pages/admins/default.html) | [✅](pages/admins/loading.html) | ➖ | [✅](pages/admins/error.html) |  |  |  |  |  |  |  |  |  | ➖ |  |  |  | [✅](pages/admins/viewer.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/admins/removed.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/admins/roles.html) | [✅](pages/admins/invited.html) | `L2-086`, `L2-119` |
@@ -235,7 +234,7 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Release a hold (`notification-hold-release`) | [✅](dialogs/notification-hold-release/default.html) | [✅](dialogs/notification-hold-release/busy.html) | [✅](dialogs/notification-hold-release/invalid.html) | [✅](dialogs/notification-hold-release/failed.html) |  |  |  | `L2-087`, `L2-172` |
 | Hold a Popkin (`notification-hold-add`) | [✅](dialogs/notification-hold-add/default.html) | [✅](dialogs/notification-hold-add/busy.html) | [✅](dialogs/notification-hold-add/invalid.html) | [✅](dialogs/notification-hold-add/failed.html) |  |  |  | `L2-087`, `L2-172` |
 | Save new defaults (`notification-defaults-save`) | [✅](dialogs/notification-defaults-save/default.html) | [✅](dialogs/notification-defaults-save/busy.html) | [✅](dialogs/notification-defaults-save/invalid.html) | [✅](dialogs/notification-defaults-save/failed.html) |  |  |  | `L2-087`, `L2-173` |
-| Publish a holiday calendar (`holidays-publish`) | [✅](dialogs/holidays-publish/default.html) | [✅](dialogs/holidays-publish/busy.html) | [✅](dialogs/holidays-publish/invalid.html) | [✅](dialogs/holidays-publish/failed.html) |  |  |  |  |
+| Publish a holiday calendar (`holidays-publish`) | [✅](dialogs/holidays-publish/default.html) | [✅](dialogs/holidays-publish/busy.html) | [✅](dialogs/holidays-publish/invalid.html) | [✅](dialogs/holidays-publish/failed.html) |  |  |  | `L2-197` |
 | Save new limits (`limit-save`) | [✅](dialogs/limit-save/default.html) | [✅](dialogs/limit-save/busy.html) | [✅](dialogs/limit-save/invalid.html) | [✅](dialogs/limit-save/failed.html) |  |  |  | `L2-087`, `L2-117`, `L2-176` |
 | Add an admin (`admin-add`) | [✅](dialogs/admin-add/default.html) | [✅](dialogs/admin-add/busy.html) | [✅](dialogs/admin-add/invalid.html) | [✅](dialogs/admin-add/failed.html) |  |  |  | `L2-119` |
 | Change an admin’s role (`admin-change-role`) | [✅](dialogs/admin-change-role/default.html) | [✅](dialogs/admin-change-role/busy.html) | ➖ | [✅](dialogs/admin-change-role/failed.html) |  |  |  | `L2-087`, `L2-119` |
