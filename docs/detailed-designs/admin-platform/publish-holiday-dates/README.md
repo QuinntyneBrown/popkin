@@ -75,7 +75,7 @@ estimate count, or "Every date follows a rule, so there is nothing to confirm. {
   didn't go through" / "Nothing has changed. Your reason is kept; try again." The mock's "Say why,
   in a few words. The reason goes in the audit log." and "Nothing changed: 2026 isn’t published.
   Check your connection and try again." give way to L2-087 once it names the dialog; until then
-  the copy is `<TO SUPPLY>` by the owner of L2-087.
+  the dialog takes that shared copy (gap 145, settled).
 - **A reason for a change of date.** No requirement asks one, and L2-087 AC1 names no holiday
   dialog (known gap 145). The design saves a change on "Done" with no reason and records the
   change in the audit log without one.
@@ -83,8 +83,8 @@ estimate count, or "Every date follows a rule, so there is nothing to confirm. {
   saves it with "Done". The requirement stands: "Done", or Enter in the field, saves; Escape puts
   the row back unchanged.
 - **The role table.** L2-086's table has no row for holiday calendars, while L2-197 AC5 allows
-  Support. `AdminPermissions` gains the row the shared section decides; its words on "Admins &
-  roles" (L2-086 AC4) are `<TO SUPPLY>` until L2-086 adds the row.
+  Support. `AdminPermissions` gains the row the shared section decides; L2-086 now has the row "Change a holiday
+  date, publish a holiday calendar's year", Owner and Support (gap 159, settled).
 - **"New calendar"** — switched off for a Viewer by L2-197 AC5, but nothing says what it asks
   (known gap 145); it is not drawn until then ([Holiday calendars](../holiday-calendars/README.md)).
 - **Where the first dates come from** — the dates "By rule" and the first estimates (known gap
@@ -162,7 +162,7 @@ Both endpoints are on `AdminHolidayCalendarsController`, under the admin scheme.
 - **`ADMIN_PLATFORM_API`** (changed) — `changeHolidayDate(calendarId, holidayId, date)`,
   `publishHolidayYear(calendarId, year, reason)`.
 - **`AdminAction`** (`api/src/lib/models/admin.ts`, changed) gains `'ChangeHolidayCalendars'`;
-  **`role-table-text.ts`** gains the row `HolidayCalendars`, its words `<TO SUPPLY>`.
+  **`role-table-text.ts`** gains the row `HolidayCalendars`, its words "Change holiday dates and publish a year", in Platform.
 
 ### Tests
 
