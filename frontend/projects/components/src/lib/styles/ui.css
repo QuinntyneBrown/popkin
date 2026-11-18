@@ -182,6 +182,10 @@ button {
   flex-wrap: nowrap;
 }
 
+.cluster--wrap {
+  flex-wrap: wrap;
+}
+
 .cluster--center {
   justify-content: center;
 }

@@ -56,6 +56,7 @@ code { font: var(--text-code); background: var(--color-bg-subtle); padding: 0 va
 .stack--lg { gap: var(--space-6); }
 .cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .cluster--between { justify-content: space-between; flex-wrap: nowrap; }
+.cluster--wrap { flex-wrap: wrap; }
 .cluster--center { justify-content: center; }
 .grow { flex: 1; min-width: 0; }
 .push { margin-top: auto; }

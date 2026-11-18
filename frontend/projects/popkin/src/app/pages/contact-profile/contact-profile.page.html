@@ -140,133 +140,141 @@
                   </section>
                 }
               </div>
-              <section [attr.aria-label]="historyLabel()">
+              <section pk-stack [attr.aria-label]="historyLabel()">
                 <nav pk-view-nav [label]="historyLabel()" [views]="views()"></nav>
-                @if (current() === 'timeline' && !timeline.empty()) {
-                  <div pk-cluster justify="between">
+                <div>
+                  @if (current() === 'timeline' && !timeline.empty()) {
+                    <div pk-cluster justify="between" [wrap]="true">
+                      <div
+                        pk-filter-chips
+                        label="Show"
+                        [options]="shows"
+                        [value]="timeline.show()"
+                        (valueChange)="show($event)"
+                      ></div>
+                      <div class="cluster">
+                        <a
+                          pk-button
+                          variant="quiet"
+                          size="sm"
+                          [routerLink]="logLink()"
+                          [queryParams]="{ kind: 'milestone' }"
+                          ><svg pk-icon name="milestone" size="md"></svg>Milestone</a
+                        >
+                        <a pk-button variant="quiet" size="sm" [routerLink]="logLink()"
+                          ><svg pk-icon name="notebook" size="md"></svg>Conversation</a
+                        >
+                      </div>
+                    </div>
+                    @if (timeline.state() === 'failed') {
+                      <div
+                        pk-empty-state
+                        icon="server-error"
+                        [level]="3"
+                        [compact]="true"
+                        [alert]="true"
+                        [heading]="'We couldn’t load ' + profile.firstName + '’s timeline'"
+                        text="Check your connection and try again."
+                      >
+                        <button
+                          pk-button
+                          type="button"
+                          variant="primary"
+                          size="md"
+                          (click)="timeline.open(contactId())"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    } @else if (timelineItems().length) {
+                      <ol pk-contact-timeline>
+                        @for (item of timelineItems(); track item.id) {
+                          <li
+                            pk-contact-timeline-item
+                            [kind]="item.kind"
+                            [date]="item.date"
+                            [title]="item.title"
+                            [body]="item.body"
+                            [via]="item.via"
+                            [tag]="item.tag"
+                            [photo]="item.photo"
+                            [photoAlt]="item.title ?? ''"
+                          ></li>
+                        }
+                      </ol>
+                    }
+                  } @else if (current() === 'timeline') {
                     <div
-                      pk-filter-chips
-                      label="Show"
-                      [options]="shows"
-                      [value]="timeline.show()"
-                      (valueChange)="show($event)"
-                    ></div>
-                    <div class="cluster">
-                      <a
+                      pk-empty-state
+                      icon="notebook"
+                      [level]="3"
+                      [compact]="true"
+                      [heading]="'Nothing logged with ' + profile.firstName + ' yet'"
+                      text="Jot down what you talked about after your next chat. Future you will thank you."
+                    >
+                      <a pk-button variant="primary" size="md" [routerLink]="logLink()"
+                        >Log a conversation</a
+                      >
+                    </div>
+                  } @else if (current() === 'memories') {
+                    <div pk-cluster justify="between">
+                      <p class="text-muted">
+                        Photos, files and notes you’ve kept about {{ profile.firstName }}. Private
+                        to you.
+                      </p>
+                      <button
                         pk-button
+                        type="button"
                         variant="quiet"
                         size="sm"
-                        [routerLink]="logLink()"
-                        [queryParams]="{ kind: 'milestone' }"
-                        ><svg pk-icon name="milestone" size="md"></svg>Milestone</a
+                        (click)="addMemory()"
                       >
-                      <a pk-button variant="quiet" size="sm" [routerLink]="logLink()"
-                        ><svg pk-icon name="notebook" size="md"></svg>Conversation</a
-                      >
-                    </div>
-                  </div>
-                  @if (timeline.state() === 'failed') {
-                    <div
-                      pk-empty-state
-                      icon="server-error"
-                      [level]="3"
-                      [compact]="true"
-                      [alert]="true"
-                      [heading]="'We couldn’t load ' + profile.firstName + '’s timeline'"
-                      text="Check your connection and try again."
-                    >
-                      <button
-                        pk-button
-                        type="button"
-                        variant="primary"
-                        size="md"
-                        (click)="timeline.open(contactId())"
-                      >
-                        Try again
+                        <svg pk-icon name="upload" size="md"></svg>Add
                       </button>
                     </div>
-                  } @else if (timelineItems().length) {
-                    <ol pk-contact-timeline>
-                      @for (item of timelineItems(); track item.id) {
-                        <li
-                          pk-contact-timeline-item
-                          [kind]="item.kind"
-                          [date]="item.date"
-                          [title]="item.title"
-                          [body]="item.body"
-                          [via]="item.via"
-                          [tag]="item.tag"
-                          [photo]="item.photo"
-                          [photoAlt]="item.title ?? ''"
-                        ></li>
+                    @if (memories.state() === 'failed') {
+                      <div
+                        pk-empty-state
+                        icon="server-error"
+                        [level]="3"
+                        [compact]="true"
+                        [alert]="true"
+                        [heading]="'We couldn’t load ' + profile.firstName + '’s memories'"
+                        text="Check your connection and try again."
+                      >
+                        <button
+                          pk-button
+                          type="button"
+                          variant="primary"
+                          size="md"
+                          (click)="memories.retry()"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    } @else {
+                      @if (memoryPhotos().length) {
+                        <div pk-memory-grid [memories]="memoryPhotos()"></div>
                       }
-                    </ol>
-                  }
-                } @else if (current() === 'timeline') {
-                  <div
-                    pk-empty-state
-                    icon="notebook"
-                    [level]="3"
-                    [compact]="true"
-                    [heading]="'Nothing logged with ' + profile.firstName + ' yet'"
-                    text="Jot down what you talked about after your next chat. Future you will thank you."
-                  >
-                    <a pk-button variant="primary" size="md" [routerLink]="logLink()"
-                      >Log a conversation</a
-                    >
-                  </div>
-                } @else if (current() === 'memories') {
-                  <div pk-cluster justify="between">
-                    <p class="text-muted">
-                      Photos, files and notes you’ve kept about {{ profile.firstName }}. Private to
-                      you.
-                    </p>
-                    <button pk-button type="button" variant="quiet" size="sm" (click)="addMemory()">
-                      <svg pk-icon name="upload" size="md"></svg>Add
-                    </button>
-                  </div>
-                  @if (memories.state() === 'failed') {
-                    <div
-                      pk-empty-state
-                      icon="server-error"
-                      [level]="3"
-                      [compact]="true"
-                      [alert]="true"
-                      [heading]="'We couldn’t load ' + profile.firstName + '’s memories'"
-                      text="Check your connection and try again."
-                    >
-                      <button
-                        pk-button
-                        type="button"
-                        variant="primary"
-                        size="md"
-                        (click)="memories.retry()"
-                      >
-                        Try again
-                      </button>
+                      @if (memoryRows().length) {
+                        <ul pk-memory-list [rows]="memoryRows()"></ul>
+                      }
+                    }
+                  } @else if (current() === 'follow-ups') {
+                    <div class="stack">
+                      <div
+                        pk-add-field
+                        fieldId="new-task"
+                        [label]="'Add a follow-up for ' + profile.firstName"
+                        [placeholder]="'Something to do for ' + profile.firstName + '…'"
+                        (added)="addFollowUp($event)"
+                      ></div>
+                      @if (followUps().length) {
+                        <ul pk-task-list [tasks]="followUps()" (doneChange)="tick($event)"></ul>
+                      }
                     </div>
-                  } @else {
-                    @if (memoryPhotos().length) {
-                      <div pk-memory-grid [memories]="memoryPhotos()"></div>
-                    }
-                    @if (memoryRows().length) {
-                      <ul pk-memory-list [rows]="memoryRows()"></ul>
-                    }
                   }
-                } @else if (current() === 'follow-ups') {
-                  <div class="stack">
-                    <div
-                      pk-add-field
-                      fieldId="new-task"
-                      [label]="'Add a follow-up for ' + profile.firstName"
-                      [placeholder]="'Something to do for ' + profile.firstName + '…'"
-                      (added)="addFollowUp($event)"
-                    ></div>
-                    @if (followUps().length) {
-                      <ul pk-task-list [tasks]="followUps()" (doneChange)="tick($event)"></ul>
-                    }
-                  </div>
-                }
+                </div>
               </section>
             </div>
           </div>
