@@ -1,4 +1,4 @@
-import { type Page, type WebSocketRoute, expect } from '@playwright/test';
+import { type Page, type Request, type WebSocketRoute, expect } from '@playwright/test';
 
 /** SignalR's JSON protocol ends every frame with this record separator. */
 const END = '\u001e';
@@ -11,33 +11,6 @@ export function hubOf(page: Page): Hub {
   const hub = hubs.get(page);
   if (!hub) throw new Error('This page has no hub stub.');
   return hub;
-}
-
-declare global {
-  interface Window {
-    /** How many requests to the API the app has sent and not yet handled the answer to. */
-    pkReadsOpen: number;
-    /** How many requests to the API the app has sent in all. */
-    pkReadsSent: number;
-  }
-}
-
-/**
- * Counts the API requests the app has open. Angular's HttpClient sends over XMLHttpRequest and
- * handles an answer in its `load` listener; `loadend` follows in the same task, so a request
- * counts as open until the app has done all it does with its answer, not only until the answer
- * reached the page.
- */
-function countOpenReads(): void {
-  window.pkReadsOpen = 0;
-  window.pkReadsSent = 0;
-  const send = XMLHttpRequest.prototype.send;
-  XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, body) {
-    window.pkReadsOpen++;
-    window.pkReadsSent++;
-    this.addEventListener('loadend', () => window.pkReadsOpen--, { once: true });
-    return send.call(this, body);
-  };
 }
 
 interface Frame {
@@ -73,6 +46,10 @@ export class Hub {
 
   private readonly handlers = new Map<string, (args: unknown[]) => void>();
   private page?: Page;
+  /** Requests to the API the browser has sent and not yet finished receiving. */
+  private open = 0;
+  /** Requests to the API the browser has sent in all. */
+  private sent = 0;
   private socket?: WebSocketRoute;
   private ready: Promise<void>;
   private markReady: () => void = () => undefined;
@@ -85,7 +62,19 @@ export class Hub {
   async install(page: Page, unanswered: string[]): Promise<void> {
     hubs.set(page, this);
     this.page = page;
-    await page.addInitScript(countOpenReads);
+    // Counted by the browser's own events, so a request is seen whether the app sends it by
+    // fetch (Angular's default) or XMLHttpRequest.
+    const api = (request: Request) => new URL(request.url()).pathname.startsWith('/api/');
+    page.on('request', (request) => {
+      if (!api(request)) return;
+      this.open++;
+      this.sent++;
+    });
+    const done = (request: Request) => {
+      if (api(request)) this.open--;
+    };
+    page.on('requestfinished', done);
+    page.on('requestfailed', done);
     await page.route('**/hubs/**', async (route) => {
       const request = route.request();
       const url = new URL(request.url());
@@ -147,16 +136,18 @@ export class Hub {
     await this.ready;
     const page = this.page;
     if (!page) throw new Error('This hub has no page.');
-    // A screen asks for what it shows when it renders, a frame after the answer that rendered it:
-    // the app is caught up once no request is open and none is sent across a frame and a task.
+    // A screen asks for what it shows when it renders, a frame after the answer that rendered
+    // it, and the app handles an answer once its body has arrived: the app is caught up once no
+    // request is open and none is sent across a frame and a task of the page.
     await expect
       .poll(
-        () =>
-          page.evaluate(async () => {
-            const sent = window.pkReadsSent;
-            await new Promise<void>((settled) => requestAnimationFrame(() => setTimeout(settled)));
-            return window.pkReadsOpen === 0 && window.pkReadsSent === sent;
-          }),
+        async () => {
+          const sent = this.sent;
+          await page.evaluate(
+            () => new Promise<void>((settled) => requestAnimationFrame(() => setTimeout(settled))),
+          );
+          return this.open === 0 && this.sent === sent;
+        },
         { message: 'The app still had API requests open, or sent more, once the hub connected' },
       )
       .toBe(true);
