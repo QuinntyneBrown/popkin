@@ -131,6 +131,12 @@ public sealed class FaultyDbContext(AppDbContext inner, DatabaseFaults faults) :
 
     public DbSet<PopkinFeatureOff> PopkinFeaturesOff => inner.PopkinFeaturesOff;
 
+    public DbSet<HolidayCalendar> HolidayCalendars => inner.HolidayCalendars;
+
+    public DbSet<HolidayCalendarYear> HolidayCalendarYears => inner.HolidayCalendarYears;
+
+    public DbSet<Holiday> Holidays => inner.Holidays;
+
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         if (faults.FailSaves)

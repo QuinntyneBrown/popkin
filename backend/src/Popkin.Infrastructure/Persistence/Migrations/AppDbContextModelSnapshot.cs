@@ -846,6 +846,104 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.ToTable("HabitKept", (string)null);
                 });
 
+            modelBuilder.Entity("Popkin.Domain.Holiday", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CalendarId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ChangedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ChangedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalendarId", "Year", "Date");
+
+                    b.ToTable("Holidays", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.HolidayCalendar", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Holds")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("HowSet")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("HolidayCalendars", (string)null);
+                });
+
+            modelBuilder.Entity("Popkin.Domain.HolidayCalendarYear", b =>
+                {
+                    b.Property<Guid>("CalendarId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("PublishedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CalendarId", "Year");
+
+                    b.ToTable("HolidayCalendarYears", (string)null);
+                });
+
             modelBuilder.Entity("Popkin.Domain.ImportBatch", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1745,6 +1843,9 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                     b.Property<DateOnly?>("EventLastDay")
                         .HasColumnType("date");
 
+                    b.Property<Guid?>("HolidayCalendarId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("HostPersonId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1788,6 +1889,8 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("HolidayCalendarId");
 
                     b.HasIndex("HostPersonId");
 
@@ -2361,6 +2464,24 @@ namespace Popkin.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Popkin.Domain.Holiday", b =>
+                {
+                    b.HasOne("Popkin.Domain.HolidayCalendar", null)
+                        .WithMany()
+                        .HasForeignKey("CalendarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Popkin.Domain.HolidayCalendarYear", b =>
+                {
+                    b.HasOne("Popkin.Domain.HolidayCalendar", null)
+                        .WithMany()
+                        .HasForeignKey("CalendarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Popkin.Domain.ImportBatch", b =>
                 {
                     b.HasOne("Popkin.Domain.Person", null)
@@ -2560,6 +2681,11 @@ namespace Popkin.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Popkin.Domain.PopkinSpace", b =>
                 {
+                    b.HasOne("Popkin.Domain.HolidayCalendar", null)
+                        .WithMany()
+                        .HasForeignKey("HolidayCalendarId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Popkin.Domain.Person", null)
                         .WithMany()
                         .HasForeignKey("HostPersonId")

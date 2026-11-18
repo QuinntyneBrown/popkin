@@ -117,5 +117,11 @@ public interface IAppDbContext
 
     DbSet<PopkinFeatureOff> PopkinFeaturesOff { get; }
 
+    DbSet<HolidayCalendar> HolidayCalendars { get; }
+
+    DbSet<HolidayCalendarYear> HolidayCalendarYears { get; }
+
+    DbSet<Holiday> Holidays { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

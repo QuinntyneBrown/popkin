@@ -65,6 +65,12 @@ public sealed class PopkinSpace
 
     public DateOnly? EventLastDay { get; private set; }
 
+    /// <summary>The holiday calendar the Popkin observes, or none (L2-192).</summary>
+    public Guid? HolidayCalendarId { get; private set; }
+
+    /// <summary>Observes a calendar, or none for null.</summary>
+    public void ObserveHolidays(Guid? calendarId) => HolidayCalendarId = calendarId;
+
     /// <summary>The Host sets the event (L2-085); the rules of its fields are checked before.</summary>
     public void SetEvent(string label, DateOnly firstDay, DateOnly lastDay)
     {
