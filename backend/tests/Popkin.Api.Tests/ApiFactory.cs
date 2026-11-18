@@ -29,10 +29,17 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     private int _hubConnections;
 
     /// <summary>
-    /// Starts at the real time, to the second, because the client's cookie jar expires cookies by
-    /// the real clock.
+    /// Starts at the next noon UTC on or after the real time. It is never behind the real time,
+    /// because the client's cookie jar expires cookies by the real clock. It is always noon, so a
+    /// run at night is not inside the default quiet hours (21:00 to 08:00) and holds no alert back.
     /// </summary>
-    public FakeTimeProvider Clock { get; } = new(DateTimeOffset.FromUnixTimeSeconds(DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
+    public FakeTimeProvider Clock { get; } = new(NextNoon(DateTimeOffset.UtcNow));
+
+    private static DateTimeOffset NextNoon(DateTimeOffset now)
+    {
+        var noon = new DateTimeOffset(now.UtcDateTime.Date.AddHours(12), TimeSpan.Zero);
+        return noon >= now ? noon : noon.AddDays(1);
+    }
 
     public CapturingCodeSender Codes { get; } = new();
 
