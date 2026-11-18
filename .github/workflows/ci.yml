@@ -126,7 +126,10 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
       - run: npm run typecheck
         working-directory: e2e
-      - run: npx playwright install --with-deps chromium
+      # ADR 0034: the runner image already has Chrome and so every library Chromium needs; the
+      # browser alone is installed (a no-op from the cache), with no apt-get, whose mirrors once
+      # took over 7 minutes.
+      - run: npx playwright install chromium
         working-directory: e2e
       # ADR 0006: behaviour specs only; the sweeps run by hand, never in CI.
       - name: Run the behaviour specs against the app
