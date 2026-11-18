@@ -10,6 +10,7 @@ import { answer, problem } from '../../fixtures/stubs';
 import responses from '../../fixtures/api/responses.json';
 import { VerifyCodePage } from '../../pages/verify-code.page';
 import { SignUpPage } from '../../pages/sign-up.page';
+import { QuickAddPage } from '../../pages/quick-add.page';
 
 const fillMara = (page: Page) => new SignUpPage(page).fill('Mara', '(415) 555-0148');
 const submitShortNumber = async (page: Page) => {
@@ -19,6 +20,14 @@ const submitShortNumber = async (page: Page) => {
 };
 
 parity('text-field', [
+  {
+    key: 'quickAddFilled',
+    name: 'display',
+    region: (page) => new QuickAddPage(page).nameField,
+    app: (page) => new QuickAddPage(page).name.fill('Femi Bankole'),
+    // The mock's name has no focus ring; the app focuses it on open.
+    prepare: (page) => new QuickAddPage(page).name.blur(),
+  },
   {
     key: 'signUp',
     name: 'default',

@@ -43,6 +43,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0030](0030-admin-notifications-on-a-fake-backend.md) | The admin app's Notifications page runs on a fake backend, an interceptor switched on by one build-time setting and off in e2e, until the API serves it | Ended 17 November 2026: the API serves it |
 | [0031](0031-notification-emails-by-razor-components.md) | Notification emails are Razor components rendered with `HtmlRenderer`, one shared shell, every member's text encoded | Accepted |
 | [0032](0032-one-data-protection-key-ring-in-blob-storage.md) | One Data Protection key ring for the API and the Worker, kept in Blob Storage and wrapped by Key Vault | Accepted |
+| [0033](0033-an-installable-web-app-with-a-manifest.md) | The web app is installable: a web app manifest with icons and two shortcuts, no service worker of its own | Accepted |
 
 ## Format
 

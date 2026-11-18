@@ -1,0 +1,94 @@
+<div pk-screen width="narrow">
+  <header
+    pk-top-bar
+    slot="header"
+    backLabel="Cancel"
+    backIcon="close"
+    back="/contacts"
+    heading="Add someone"
+    [line]="true"
+    [sticky]="true"
+  >
+    <button
+      pk-button
+      slot="end"
+      variant="primary"
+      size="sm"
+      type="submit"
+      form="quick-add"
+      [disabled]="!canSave()"
+      [busy]="saving()"
+    >
+      {{ saving() ? 'Saving…' : 'Save' }}
+    </button>
+  </header>
+  <form class="stack" id="quick-add" novalidate (submit)="save($event)">
+    @if (store.state() === 'failed') {
+      <div pk-banner variant="danger" [heading]="failedHeading()" [text]="failedText"></div>
+    }
+    <div
+      pk-photo-picker
+      size="xl"
+      label="Add a photo"
+      [photo]="preview()"
+      [accept]="accept"
+      [disabled]="saving()"
+      (picked)="pick($event)"
+    >
+      <div
+        pk-text-field
+        #name
+        fieldId="name"
+        label="Name"
+        variant="display"
+        placeholder="Their name"
+        autocomplete="off"
+        enterkeyhint="done"
+        [hideLabel]="true"
+        [formControl]="form.controls.name"
+      ></div>
+    </div>
+    <div
+      pk-text-field
+      fieldId="phone"
+      label="Phone"
+      optional="Optional"
+      type="tel"
+      inputmode="tel"
+      autocomplete="off"
+      enterkeyhint="done"
+      [formControl]="form.controls.phone"
+    ></div>
+    <div
+      pk-text-field
+      fieldId="known-as"
+      label="Who are they?"
+      optional="Optional"
+      placeholder="Neighbour, Grace’s fiancé…"
+      enterkeyhint="done"
+      [formControl]="form.controls.knownAs"
+    ></div>
+    <div
+      pk-choice-chips
+      fieldId="circle"
+      label="Circle"
+      [options]="circles"
+      [outline]="true"
+      [(value)]="circle"
+      [disabled]="saving()"
+    ></div>
+    @if (phoneContacts.available) {
+      <div>
+        <button
+          pk-link
+          variant="accent"
+          type="button"
+          [disabled]="saving()"
+          (click)="pickFromPhone()"
+        >
+          <svg pk-icon name="book-user" size="md"></svg>Pick from my phone’s contacts
+        </button>
+      </div>
+    }
+  </form>
+</div>

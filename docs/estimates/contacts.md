@@ -18,3 +18,6 @@
 | connections | 6 days | 100% |
 | import-from-popkins | 3 days | 100% |
 | reminders | 6 days | 100% |
+| reach-quick-add | 1 day | 100% |
+| quick-add | 3 days | 100% |
+| contact-added | 2 days | 100% |

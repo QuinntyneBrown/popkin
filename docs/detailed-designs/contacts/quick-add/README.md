@@ -43,7 +43,7 @@ Popkin web app, `docs/mocks/pages/quick-add/`, route `/contacts/quick-add`:
 ### Conflicts between the mocks and L2-178
 
 The mocks were drawn before L2-178 and L2-179. The design follows the requirements, and the mocks
-change `<TO SUPPLY>`:
+changed on 17 November 2026 (known gap 158):
 
 - **"Who are they?"** The mocks label the field "How you know them" ("Sister, neighbour, old
   boss…"), as Add someone does; L2-178 AC1 names it "Who are they?" ("Neighbour, Grace's
@@ -68,10 +68,10 @@ change `<TO SUPPLY>`:
   lost first request made (shared Contacts rule, `ClientWrites.FindAsync`).
 - **A refusal.** A `400` (`contact_phone_invalid`, `contact_field_too_long`,
   `photo_type_not_allowed`, `photo_too_large`) shows the same failure banner and keeps every
-  value, as Add someone does ([Add someone](../add-contact/README.md)). A message per field is
-  not specified `<TO SUPPLY>`.
-- **Offline** (L2-123 AC4) `<TO SUPPLY>`. Added (L2-178 AC4) needs the saved contact, which an
-  add kept in `ContactsOutbox` does not yet have. Proposed: offline, "Save" keeps the add in
+  value, as Add someone does ([Add someone](../add-contact/README.md)). Quick Add shows no
+  message per field: the banner says it, as for any failed save.
+- **Offline** (L2-123 AC4, known gap 157, settled as proposed). Added (L2-178 AC4) needs the saved
+  contact, which an add kept in `ContactsOutbox` does not yet have. Offline, "Save" keeps the add in
   `ContactsOutbox` through `keepAdd`, shows "You're offline" and "What you add is kept on this
   phone and saved when you're back.", and Quick Add opens empty for the next person, with no
   Added and no count.
@@ -79,7 +79,7 @@ change `<TO SUPPLY>`:
   already sent may still add the contact. L2-178 AC6 speaks of "Cancel" before a save.
 - **The phone's contacts.** The page asks for `name` and `tel` of one entry
   (`{ multiple: false }`). The first value of the entry's `name` list fills the name and its first number
-  fills "Phone"; an entry with no number leaves "Phone" as it was `<TO SUPPLY>` (L2-179 AC2 does
+  fills "Phone"; an entry with no number leaves "Phone" as it was (L2-179 AC2 does
   not say). No pick, a refusal or an error leaves Quick Add unchanged (L2-179 AC4). Nothing from
   the phone's contacts reaches the API until "Save".
 - **Built in steps.** The form, "Save" and "Cancel" first (L2-178); then the photo; then the
@@ -113,10 +113,9 @@ deletes the photo it wrote. Logs and metrics carry the route template and status
   `pk-button` "Pick from my phone's contacts" only when `PHONE_CONTACTS.available`; and
   `pk-banner variant="danger"` for the failure. It focuses the name after its first render. On a
   saved contact it navigates to `/contacts/people/{id}/added` (L2-178 AC4).
-- **Library changes** — `pk-text-field` gains the large name of the mock (`input--display`) and
-  an `enterkeyhint` input; each is a change to the component and its parity spec
-  `<TO SUPPLY>` (whether the name's size is a variant of `pk-text-field` or a style of
-  `pk-photo-picker`'s projected field is open).
+- **Library changes** — `pk-text-field` gains `variant="display"` (the large name of the mock,
+  `input--display`), `hideLabel` (the label "Name" kept for screen readers only, as the mock
+  draws it) and an `enterkeyhint` input; its parity spec covers each.
 - **`QuickAddStore`** (`frontend/projects/api/src/lib/api/contacts/quick-add-store.ts`, provided
   by the page) — the values (`name`, `phone`, `knownAs`, `circle`, default `Friends`), the
   picked photo and its object URL, `canSave` (the name trimmed is not empty), the client id and

@@ -21,6 +21,10 @@
 	header @hashed Cache-Control "public, max-age=31536000, immutable"
 	header Cache-Control "no-cache"
 
+	# ADR 0033: the web app manifest, with the type browsers expect.
+	@manifest path /manifest.webmanifest
+	header @manifest Content-Type application/manifest+json
+
 	try_files {path} /index.html
 	file_server
 }

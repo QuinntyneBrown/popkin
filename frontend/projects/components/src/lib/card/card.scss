@@ -23,3 +23,40 @@
 :host(.card--center) {
   text-align: center;
 }
+
+/* A row: the icon on its tile, two lines, and a chevron on a link. */
+:host(.card--row) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: left;
+}
+
+.icon-tile {
+  display: grid;
+  place-items: center;
+  width: var(--space-10);
+  height: var(--space-10);
+  flex: none;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-fg-default);
+}
+
+.card__words {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title {
+  display: block;
+  font: var(--font-weight-semibold) var(--font-size-md) / var(--line-height-normal)
+    var(--font-family-sans);
+}
+
+.row__text {
+  display: block;
+  font: var(--font-weight-regular) var(--font-size-md-minus) / var(--line-height-normal)
+    var(--font-family-sans);
+  color: var(--color-fg-muted);
+}

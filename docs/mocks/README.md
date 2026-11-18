@@ -87,13 +87,15 @@ The mocks are built on the design system, so a change there shows here:
   (`day-actions`, `delete-day`, `add-day/edit`) are drawn from L2-193, which the designs lack.
   The rest of Your Popkins keeps its September cast; only the coming-up strip is in December.
 - **Quick add** (`app-shortcuts`, `quick-add`, `contact-added`, from the Magic Patterns "Quick
-  Add" design). The home-screen widget is left out: a web app cannot put one on a phone's home
-  screen, so the way in is the long press on the app's icon, drawn from the web app manifest's
-  `shortcuts` (Safari on iPhone shows none). The fields are Popkin's usual fields, not the
-  design's grouped rows; "Who are they?" is "How you know them", as on Add someone (L2-129).
-  Save is never switched off: with no name it says why (`quick-add/invalid`). The phone's own
-  keyboard is not drawn. "Log a chat" is "Log a conversation" (L2-133). "Done" opens People;
-  "Add a birthday, how you met…" opens the full form for the new contact (`add-contact/edit`).
+  Add" design, aligned with L2-177 to L2-181). The home-screen widget is left out: a web app
+  cannot put one on a phone's home screen, so the way in is the long press on the app's icon,
+  drawn from the web app manifest's two `shortcuts`, "Add someone" and "Contacts" (Safari on
+  iPhone shows none; ADR 0033). The fields are Popkin's usual fields, not the design's grouped
+  rows; the third field is "Who are they?" (L2-178 AC1). "Save" is off until a name is typed, so
+  there is no invalid state, and Enter in any field saves. The phone's own keyboard is not drawn.
+  Added shows a tick on the avatar and reads "{first name}'s in your contacts"; "Done" opens
+  Today, and "Add a birthday, how you met…" opens the full form for the new contact
+  (`add-contact/edit`).
 
 - **Colour scheme.** On 12 November 2026 the designs moved to the Straight palette: white paper,
   black ink, coral `#EA7671`, sun `#DCC573` and green `#5C8F57`, with black text on every colour
@@ -255,10 +257,8 @@ depends on one says so.
     reminders can't be changed.
 14. "I'm going" and "Can't make it" in the plan reminder answer from the email itself. That
     needs a signed, single-use link per member, which nothing specifies yet.
-15. Quick add has no requirement or detailed design yet, so `app-shortcuts`, `quick-add` and
-    `contact-added` list none. "Pick from my phone's contacts" needs the Contact Picker API,
-    which only Chrome on Android offers; elsewhere it would be hidden. Whether Today and People
-    should offer quick add too, beside the full Add someone, is open.
+15. "Pick from my phone's contacts" needs the Contact Picker API, which only Chrome on Android
+    offers; elsewhere it is hidden (L2-179 AC3).
 16. Important days (L2-182 to L2-195) have no detailed design yet. Open: whether "Who's it
     about?" with "Every year" overlaps with Contacts' key dates (L2-137), and which wins for a
     birthday; what "Someone else" does in the design's "Who's it about?" (the requirement keeps
@@ -307,7 +307,7 @@ Legend: ✅ mock exists · ➖ not applicable (reason in manifest) · ❌ missin
 | Contact profile (`contact-profile`) | [✅](pages/contact-profile/default.html) | [✅](pages/contact-profile/loading.html) | [✅](pages/contact-profile/empty.html) | [✅](pages/contact-profile/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/contact-profile/not-found.html) |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/contact-profile/grace.html) | [✅](pages/contact-profile/milestones.html) | [✅](pages/contact-profile/follow-ups.html) | [✅](pages/contact-profile/memories.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-121`, `L2-122`, `L2-123`, `L2-128`, `L2-135`, `L2-136` |
 | Add someone (`add-contact`) | [✅](pages/add-contact/default.html) | ➖ | ➖ | [✅](pages/add-contact/error.html) |  |  | [✅](pages/add-contact/invalid.html) | [✅](pages/add-contact/submitting.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/add-contact/edit.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-123`, `L2-129`, `L2-130` |
 | App shortcuts (`app-shortcuts`) | [✅](pages/app-shortcuts/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| Quick add (`quick-add`) | [✅](pages/quick-add/default.html) | ➖ | ➖ | [✅](pages/quick-add/error.html) |  |  | [✅](pages/quick-add/invalid.html) | [✅](pages/quick-add/submitting.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/quick-add/filled.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| Quick add (`quick-add`) | [✅](pages/quick-add/default.html) | ➖ | ➖ | [✅](pages/quick-add/error.html) |  |  | ➖ | [✅](pages/quick-add/submitting.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/quick-add/filled.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | Added to Contacts (`contact-added`) | [✅](pages/contact-added/default.html) | ➖ | ➖ | ➖ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/contact-added/another.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | Log a conversation (`log-entry`) | [✅](pages/log-entry/default.html) | ➖ | ➖ | [✅](pages/log-entry/error.html) |  |  | [✅](pages/log-entry/invalid.html) | [✅](pages/log-entry/submitting.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/log-entry/milestone.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-123`, `L2-133`, `L2-134` |
 | Contacts · Dates (`contacts-dates`) | [✅](pages/contacts-dates/default.html) | [✅](pages/contacts-dates/loading.html) | [✅](pages/contacts-dates/empty.html) | [✅](pages/contacts-dates/error.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | [✅](pages/contacts-dates/birthdays.html) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | `L2-121`, `L2-123`, `L2-137`, `L2-139`, `L2-140` |

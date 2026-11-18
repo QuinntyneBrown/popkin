@@ -49,7 +49,12 @@ export class TextField implements ControlValueAccessor {
   readonly announceError = input(false);
   /** Ignores anything typed that is not a digit, as the code field does (L2-004 AC6). */
   readonly digitsOnly = input(false);
-  readonly variant = input<'default' | 'code'>('default');
+  /** `display` is the large name of Quick Add, in the title type with no border until focus. */
+  readonly variant = input<'default' | 'code' | 'display'>('default');
+  /** Keeps the label for screen readers only, where the field speaks for itself ("Their name"). */
+  readonly hideLabel = input(false);
+  /** The Enter key's label on a phone's keyboard: `done` where Enter saves. */
+  readonly enterkeyhint = input<string>();
   readonly readonly = input(false);
 
   /** Every change the person makes, digits filtered or not. */

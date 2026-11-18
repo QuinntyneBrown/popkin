@@ -1,1 +1,15 @@
-<ng-content />
+<ng-template #content><ng-content /></ng-template>
+@if (icon(); as name) {
+  <span class="icon-tile"><svg pk-icon [name]="name" size="md"></svg></span>
+  <span class="card__words">
+    <span class="row__title"><ng-container [ngTemplateOutlet]="content" /></span>
+    @if (text()) {
+      <span class="row__text">{{ text() }}</span>
+    }
+  </span>
+  @if (isLink) {
+    <svg pk-icon name="chevron-right" size="md"></svg>
+  }
+} @else {
+  <ng-container [ngTemplateOutlet]="content" />
+}

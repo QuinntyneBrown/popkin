@@ -81,6 +81,12 @@
   color: var(--color-fg-muted);
 }
 
+/* Quick Add's name: the title type, no border until it is focused. */
+.input--display {
+  border-color: transparent;
+  font: var(--text-title);
+}
+
 .input--code {
   text-align: center;
   font: var(--font-weight-extrabold) var(--font-size-4xl) / 1 var(--font-family-display);

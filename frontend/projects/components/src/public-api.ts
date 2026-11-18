@@ -52,6 +52,7 @@ export * from './lib/share-action/share-action';
 export * from './lib/share-actions/share-actions';
 export * from './lib/split-aside/split-aside';
 export * from './lib/avatar/avatar';
+export * from './lib/avatar-tick/avatar-tick';
 export * from './lib/time-left/time-left';
 export * from './lib/preview-card/preview-card';
 export * from './lib/timeline/timeline';

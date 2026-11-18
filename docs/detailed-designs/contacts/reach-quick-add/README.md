@@ -32,8 +32,8 @@ it, so the web app builds nothing for it; the manifest's entries decide what it 
 - **"Add someone"** opens `/contacts/quick-add` (L2-177 AC1).
 - **"Contacts"** opens Today, `/contacts` (L2-177 AC1, L2-125).
 - The mock draws a third shortcut, "Log a conversation". L2-177 AC1 names two, and a conversation
-  is logged for a contact, so its address needs a contact. The manifest lists the two of L2-177;
-  the mock changes `<TO SUPPLY>`.
+  is logged for a contact, so its address needs a contact. The manifest lists the two of L2-177,
+  and the mock now draws two (known gap 158).
 
 Quick Add opens with the name field focused, so the phone's keyboard is up and a name can be
 typed at once (L2-177 AC2, `docs/mocks/pages/quick-add/default.html`).
@@ -43,22 +43,21 @@ typed at once (L2-177 AC2, `docs/mocks/pages/quick-add/default.html`).
 The Popkin web app has no manifest: `frontend/projects/popkin/src/index.html` links none, and
 `frontend/projects/popkin/public/` holds only `images/` and `push-worker.js`. A manifest makes the
 web app installable, which is a change of what Popkin is on a phone, so it needs its own ADR
-(gap 146). This design assumes that ADR and names what Quick Add needs from it.
+(gap 146). ADR 0033 settles it, as below.
 
 - **`manifest.webmanifest`** (`frontend/projects/popkin/public/`, served at
   `/manifest.webmanifest`) — `name` "Popkin", `short_name` "Popkin", `display` "standalone",
-  `scope` "/", `start_url` `<TO SUPPLY>`, `icons` `<TO SUPPLY>` (the sizes and the files are not
-  drawn), `theme_color` and `background_color` `<TO SUPPLY>` from the tokens, and `shortcuts`:
-  - `{ "name": "Add someone", "url": "/contacts/quick-add", "icons": <TO SUPPLY> }`
-  - `{ "name": "Contacts", "url": "/contacts", "icons": <TO SUPPLY> }`
+  `scope` "/", `start_url` "/popkins", `icons` the mark on coral at 192 and 512 pixels and a maskable 512
+  (`public/icons/`), `theme_color` the coral accent and `background_color` the paper canvas, and
+  `shortcuts`:
+  - `{ "name": "Add someone", "url": "/contacts/quick-add", "icons": [shortcut-add-someone.png] }`
+  - `{ "name": "Contacts", "url": "/contacts", "icons": [shortcut-contacts.png] }`
 - **`index.html`** links it with `<link rel="manifest" href="manifest.webmanifest">`.
 - **Which host.** Every address host is its own origin (shared architecture), so a manifest
-  installed from `lakeside-weekend.popkin.community` would start on that host. Whether the
-  manifest is served on the apex only, and what an address host answers, is for the ADR of gap
-  146 `<TO SUPPLY>`.
+  installed from `lakeside-weekend.popkin.community` would start on that host. Every host serves the
+  same manifest (ADR 0033).
 - **A service worker.** The web app registers `push-worker.js` only when phone reminders are
-  turned on (ADR 0028). Whether installing needs a worker on every visit is for the ADR of gap
-  146 `<TO SUPPLY>`.
+  turned on (ADR 0028). Installing needs no worker of its own (ADR 0033).
 - The shortcuts' names are the spec's words. A renamed shortcut reaches a phone only when the
   phone reads the manifest again, which the phone decides.
 
@@ -93,8 +92,7 @@ are the ones every Contacts route makes.
   sign-in, and after the code Quick Add opens (L2-177 AC3). `routes.ts` keys `quick-add`.
 - The phone's menu cannot be driven from a browser test. The manifest's `shortcuts` are checked by
   requesting `/manifest.webmanifest` and reading its two entries' names and addresses
-  (L2-177 AC1) `<TO SUPPLY>`: whether that request is a behaviour test or belongs to the ADR's
-  own check is open.
+  (L2-177 AC1), a behaviour test (ADR 0033).
 - No backend test: no endpoint is added.
 
 ## Requirements

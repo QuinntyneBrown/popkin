@@ -60,6 +60,8 @@ import {
   HttpCallsApi,
   SPEAKING_METER,
   WebRtcPeerLinks,
+  BrowserPhoneContacts,
+  PHONE_CONTACTS,
 } from 'api';
 import { routes } from './app.routes';
 import { offlineNavigation } from './guards/offline-navigation';
@@ -94,6 +96,7 @@ export const appConfig: ApplicationConfig = {
     { provide: EXPERIENCES_API, useClass: HttpExperiencesApi },
     { provide: SCHEDULE_API, useClass: HttpScheduleApi },
     { provide: CONTACTS_API, useClass: HttpContactsApi },
+    { provide: PHONE_CONTACTS, useClass: BrowserPhoneContacts },
     { provide: PLAN_API, useClass: HttpPlanApi },
     { provide: RECAP_API, useClass: HttpRecapApi },
     { provide: POPKIN_REALTIME, useClass: SignalRPopkinRealtime },
