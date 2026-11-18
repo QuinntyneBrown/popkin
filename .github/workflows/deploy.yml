@@ -26,12 +26,14 @@ jobs:
       RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
       IMAGE_TAG: ${{ github.sha }}
     steps:
-      # ADR 0034: without the rendered videos (about 600 MB), which no image holds.
+      # ADR 0034: without the rendered videos (about 600 MB) but the pitch film, which the
+      # marketing site copies (`npm run media:sync`).
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
             /*
             !/docs/videos/
+            /docs/videos/00-meet-popkin/
           sparse-checkout-cone-mode: false
 
       # OpenID Connect: GitHub's token is exchanged for Azure's; no Azure secret is stored here.
