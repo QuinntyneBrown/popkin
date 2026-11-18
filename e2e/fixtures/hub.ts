@@ -17,6 +17,8 @@ declare global {
   interface Window {
     /** How many requests to the API the app has sent and not yet handled the answer to. */
     pkReadsOpen: number;
+    /** How many requests to the API the app has sent in all. */
+    pkReadsSent: number;
   }
 }
 
@@ -28,9 +30,11 @@ declare global {
  */
 function countOpenReads(): void {
   window.pkReadsOpen = 0;
+  window.pkReadsSent = 0;
   const send = XMLHttpRequest.prototype.send;
   XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, body) {
     window.pkReadsOpen++;
+    window.pkReadsSent++;
     this.addEventListener('loadend', () => window.pkReadsOpen--, { once: true });
     return send.call(this, body);
   };
@@ -143,11 +147,19 @@ export class Hub {
     await this.ready;
     const page = this.page;
     if (!page) throw new Error('This hub has no page.');
+    // A screen asks for what it shows when it renders, a frame after the answer that rendered it:
+    // the app is caught up once no request is open and none is sent across a frame and a task.
     await expect
-      .poll(() => page.evaluate(() => window.pkReadsOpen), {
-        message: 'API requests the app has sent and not yet handled once the hub connected',
-      })
-      .toBe(0);
+      .poll(
+        () =>
+          page.evaluate(async () => {
+            const sent = window.pkReadsSent;
+            await new Promise<void>((settled) => requestAnimationFrame(() => setTimeout(settled)));
+            return window.pkReadsOpen === 0 && window.pkReadsSent === sent;
+          }),
+        { message: 'The app still had API requests open, or sent more, once the hub connected' },
+      )
+      .toBe(true);
   }
 
   /** Sends the app an event, as the server would: its name and its arguments. */

@@ -216,6 +216,8 @@ test.describe('calling from a direct message', () => {
     await page.goto(walt);
     const direct = new DirectMessagePage(page);
     await expect(direct.messages).toHaveCount(5);
+    // The banner reads the call once on opening and again once the hub has connected.
+    await expect.poll(() => call.readCurrent).toBeGreaterThan(1);
     await hub.caughtUp();
 
     call.threadId = chatOf(page).direct(people.walt).id;
