@@ -15,6 +15,7 @@ import { Router } from '@angular/router';
 import {
   CONTACT_CIRCLES,
   ContactCircle,
+  PHONE_CONTACTS,
   PHOTO_ACCEPT,
   QUICK_ADD_CIRCLE,
   QuickAddStore,
@@ -27,6 +28,8 @@ import {
   Button,
   ChipOption,
   ChoiceChips,
+  Icon,
+  Link,
   PhotoPicker,
   Screen,
   TextField,
@@ -43,6 +46,8 @@ import {
     Banner,
     Button,
     ChoiceChips,
+    Icon,
+    Link,
     PhotoPicker,
     ReactiveFormsModule,
     Screen,
@@ -56,6 +61,8 @@ import {
 export class QuickAddPage {
   protected readonly store = inject(QuickAddStore);
   private readonly router = inject(Router);
+  /** The phone's own contacts, offered only where the browser can share them (L2-179 AC3). */
+  protected readonly phoneContacts = inject(PHONE_CONTACTS);
   protected readonly accept = PHOTO_ACCEPT;
   protected readonly circles: ChipOption<ContactCircle>[] = CONTACT_CIRCLES.map((circle) => ({
     value: circle,
@@ -101,6 +108,14 @@ export class QuickAddPage {
     this.releasePreview();
     this.photo.set(file);
     this.preview.set(URL.createObjectURL(file));
+  }
+
+  /** One of the phone's contacts fills the name and "Phone"; none picked changes nothing (L2-179). */
+  protected async pickFromPhone(): Promise<void> {
+    const picked = await this.phoneContacts.pickOne();
+    if (!picked) return;
+    this.form.controls.name.setValue(picked.name);
+    if (picked.phone) this.form.controls.phone.setValue(picked.phone);
   }
 
   protected save(event: Event): void {

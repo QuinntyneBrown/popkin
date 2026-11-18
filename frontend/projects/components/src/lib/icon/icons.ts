@@ -382,6 +382,14 @@ export const ICONS = {
     { path: 'M22 21v-2a4 4 0 0 0-3-3.87' },
     { path: 'M16 3.13a4 4 0 0 1 0 7.75' },
   ],
+  /** The phone's address book: "Pick from my phone's contacts" (L2-179). */
+  'book-user': [
+    { path: 'M15 13a3 3 0 1 0-6 0' },
+    {
+      path: 'M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20',
+    },
+    { circle: [12, 8, 2] },
+  ],
   'user-plus': [
     { path: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' },
     { circle: [9, 7, 4] },

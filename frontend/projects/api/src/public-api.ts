@@ -161,6 +161,7 @@ export * from './lib/api/contacts/people-store';
 export * from './lib/api/contacts/people-text';
 export * from './lib/api/contacts/contacts-outbox';
 export * from './lib/api/contacts/quick-add-store';
+export * from './lib/api/contacts/phone-contacts';
 export * from './lib/api/contacts/delete-contact-text';
 export * from './lib/api/contacts/contact-dates-text';
 export * from './lib/api/contacts/dates-store';

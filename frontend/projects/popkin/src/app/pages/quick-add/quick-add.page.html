@@ -77,5 +77,18 @@
       [(value)]="circle"
       [disabled]="saving()"
     ></div>
+    @if (phoneContacts.available) {
+      <div>
+        <button
+          pk-link
+          variant="accent"
+          type="button"
+          [disabled]="saving()"
+          (click)="pickFromPhone()"
+        >
+          <svg pk-icon name="book-user" size="md"></svg>Pick from my phone’s contacts
+        </button>
+      </div>
+    }
   </form>
 </div>
