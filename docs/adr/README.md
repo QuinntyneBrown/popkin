@@ -44,6 +44,7 @@ shares. Records 0009 to 0013 come from the audit
 | [0031](0031-notification-emails-by-razor-components.md) | Notification emails are Razor components rendered with `HtmlRenderer`, one shared shell, every member's text encoded | Accepted |
 | [0032](0032-one-data-protection-key-ring-in-blob-storage.md) | One Data Protection key ring for the API and the Worker, kept in Blob Storage and wrapped by Key Vault | Accepted |
 | [0033](0033-an-installable-web-app-with-a-manifest.md) | The web app is installable: a web app manifest with icons and two shortcuts, no service worker of its own | Accepted |
+| [0034](0034-ci-runs-in-parallel-shards.md) | CI runs the backend suite in four shards and the behaviour specs in six, in parallel, under 5 minutes | Accepted |
 
 ## Format
 

@@ -230,7 +230,7 @@ test.describe('reacting (L2-024)', () => {
     const chat = new GroupChatPage(page);
     const actions = new MessageActions(page);
     await expect(chat.message(ruths)).toBeVisible();
-    await hub.connected();
+    await hub.caughtUp();
 
     const ruth = fixture.messages.find((m) => m.text === ruths);
     if (!ruth) throw new Error('Ruth’s message is in the mock thread');
@@ -419,7 +419,7 @@ test.describe('replying (L2-025)', () => {
     const chat = new GroupChatPage(page);
     const actions = new MessageActions(page);
     await expect(chat.message(ellies)).toBeVisible();
-    await hub.connected();
+    await hub.caughtUp();
 
     const ellie = fixture.messages.find((m) => m.text === ellies);
     if (!ellie) throw new Error('Ellie’s message is in the mock thread');

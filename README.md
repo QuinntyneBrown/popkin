@@ -183,9 +183,13 @@ format check, unit tests and build and the behaviour specs on every push to `mai
 request. The component parity specs are not part of CI; run `npm run parity` in `e2e/` by hand
 ([ADR 0027](docs/adr/0027-parity-specs-run-by-hand.md)).
 
-CI bounds backend and frontend jobs to 15 minutes, image builds to 30 minutes and Playwright
-to 20 minutes. Playwright type checking runs before the browser tests, behaviour retries capture
-a trace, and the report is retained for seven days, including on successful runs.
+CI runs the backend suite as four shards and the behaviour specs as six, in parallel, and takes
+under 5 minutes ([ADR 0034](docs/adr/0034-ci-runs-in-parallel-shards.md));
+`pwsh eng/Test-Backend.ps1 -Shard <units|api-1|api-2|api-3>` runs one backend shard as CI does.
+The `CI` job passes only when every other job did. CI bounds backend, frontend and Playwright
+jobs to 10 to 12 minutes and image builds to 30 minutes. Playwright type checking runs before
+the browser tests, behaviour retries capture a trace, and each shard's report is retained for
+seven days, including on successful runs. CI can also be run by hand, which deploys nothing.
 
 The reactions and Host experience-action parity cases use explicitly named `current` mocks
 for journey 12, before reporting (L2-108) is built. The original mocks retain the future Report
