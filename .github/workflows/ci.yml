@@ -4,45 +4,77 @@ on:
   push:
     branches: [main]
   pull_request:
+  # ADR 0034: a run by hand proves the pipeline's stability without a commit; it deploys nothing.
+  workflow_dispatch:
 
 # A newer push to a pull request cancels the older run; a run on main is never cancelled, since
-# it ends in a deployment (ADR 0018).
+# it ends in a deployment (ADR 0018). Runs by hand never cancel one another.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || 'push' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
 
+# ADR 0034: every job checks out the repository without the rendered videos (about 600 MB), but
+# the pitch film the marketing site copies (`npm run media:sync`).
+env:
+  SPARSE: |
+    /*
+    !/docs/videos/
+    /docs/videos/00-meet-popkin/
+
 jobs:
   backend:
-    name: Backend tests
+    # ADR 0034: four shards in parallel; together they are `pwsh eng/Test-Backend.ps1`.
+    name: Backend tests (${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [units, api-1, api-2, api-3]
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            backend
+            eng
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: backend/global.json
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('backend/**/*.csproj', 'backend/Directory.*.props', 'backend/global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
       - name: Run the backend suite
         shell: pwsh
-        run: ./eng/Test-Backend.ps1
+        run: ./eng/Test-Backend.ps1 -Shard ${{ matrix.shard }}
 
   frontend:
     name: Frontend lint, format, unit tests and build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: ${{ env.SPARSE }}
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
+      # ADR 0034: node_modules is restored whole while the lock file is unchanged.
+      - id: modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: modules-frontend-${{ runner.os }}-node22-${{ hashFiles('frontend/package-lock.json') }}
+      - if: steps.modules.outputs.cache-hit != 'true'
+        run: npm ci
       - run: npm run design:check
       - run: npm run lint
       - run: npm run format:check
@@ -56,34 +88,57 @@ jobs:
 
   e2e:
     # ADR 0005: the suite answers every API request from its recording; no API, no database.
-    name: Playwright
+    # ADR 0034: six shards in parallel; together they are `npm test`.
+    name: Playwright (${{ matrix.shard }}/6)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: ${{ env.SPARSE }}
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: |
-            frontend/package-lock.json
-            e2e/package-lock.json
-      - run: npm ci
+      - id: frontend-modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: modules-frontend-${{ runner.os }}-node22-${{ hashFiles('frontend/package-lock.json') }}
+      - if: steps.frontend-modules.outputs.cache-hit != 'true'
+        run: npm ci
         working-directory: frontend
-      - run: npm ci
+      - id: e2e-modules
+        uses: actions/cache@v4
+        with:
+          path: e2e/node_modules
+          key: modules-e2e-${{ runner.os }}-node22-${{ hashFiles('e2e/package-lock.json') }}
+      - if: steps.e2e-modules.outputs.cache-hit != 'true'
+        run: npm ci
         working-directory: e2e
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
       - run: npm run typecheck
         working-directory: e2e
-      - run: npx playwright install --with-deps chromium
+      # ADR 0034: the runner image already has Chrome and so every library Chromium needs; the
+      # browser alone is installed (a no-op from the cache), with no apt-get, whose mirrors once
+      # took over 7 minutes.
+      - run: npx playwright install chromium
         working-directory: e2e
       # ADR 0006: behaviour specs only; the sweeps run by hand, never in CI.
       - name: Run the behaviour specs against the app
-        run: npm test -- --trace on-first-retry
+        run: npm test -- --trace on-first-retry --shard ${{ matrix.shard }}/6
         working-directory: e2e
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: |
             e2e/playwright-report
             e2e/test-results
@@ -98,6 +153,9 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: ${{ env.SPARSE }}
+          sparse-checkout-cone-mode: false
       - uses: docker/setup-buildx-action@v4
       - uses: docker/build-push-action@v7
         with:
@@ -115,6 +173,24 @@ jobs:
           file: infra/web/Dockerfile
           build-contexts: web=infra/web
           cache-from: type=gha,scope=popkin-web
+
+  ci:
+    # ADR 0034: one check that passes only when every job above passed (or was skipped), so a
+    # single status can be required of a pull request whatever the shards are.
+    name: CI
+    if: ${{ always() }}
+    needs: [backend, frontend, e2e, images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Every job passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != success ] && [ "$result" != skipped ]; then exit 1; fi
+          done
 
   deploy:
     # ADR 0018: every commit to main that passes is deployed to Azure.

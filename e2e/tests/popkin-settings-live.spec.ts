@@ -12,11 +12,11 @@ const campfire = { name: 'Campfire Nights', emoji: '🎉', colour: 'Plum' };
 
 /**
  * The home reads itself again once the hub has connected (the shared real-time rules); a change
- * pushed only after that read proves the event, not the read, brought it.
+ * pushed only after that read has been answered proves the event, not the read, brought it.
  */
 async function caughtUp(settings: Settings, hub: Hub): Promise<void> {
-  await hub.connected();
   await expect.poll(() => settings.home.asked.popkin).toBeGreaterThanOrEqual(2);
+  await hub.caughtUp();
 }
 
 // L2-020 AC3, AC4: what the Host saves reaches every member's open screens without a reload.

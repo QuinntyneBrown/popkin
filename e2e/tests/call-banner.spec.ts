@@ -45,8 +45,9 @@ for (const [where, url] of [
       const call = await maraWithACall(page);
       await page.goto(url);
       const banner = new CallBanner(page);
-      await hub.connected();
+      // The banner reads the call once on opening and again once the hub has connected.
       await expect.poll(() => call.readCurrent).toBeGreaterThan(1);
+      await hub.caughtUp();
 
       await call.joins(hub, callers.walt);
       await expect(banner.text).toHaveText('Group call · 1 on the call');

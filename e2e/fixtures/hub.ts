@@ -1,4 +1,4 @@
-import type { Page, WebSocketRoute } from '@playwright/test';
+import { type Page, type WebSocketRoute, expect } from '@playwright/test';
 
 /** SignalR's JSON protocol ends every frame with this record separator. */
 const END = '\u001e';
@@ -11,6 +11,33 @@ export function hubOf(page: Page): Hub {
   const hub = hubs.get(page);
   if (!hub) throw new Error('This page has no hub stub.');
   return hub;
+}
+
+declare global {
+  interface Window {
+    /** How many requests to the API the app has sent and not yet handled the answer to. */
+    pkReadsOpen: number;
+    /** How many requests to the API the app has sent in all. */
+    pkReadsSent: number;
+  }
+}
+
+/**
+ * Counts the API requests the app has open. Angular's HttpClient sends over XMLHttpRequest and
+ * handles an answer in its `load` listener; `loadend` follows in the same task, so a request
+ * counts as open until the app has done all it does with its answer, not only until the answer
+ * reached the page.
+ */
+function countOpenReads(): void {
+  window.pkReadsOpen = 0;
+  window.pkReadsSent = 0;
+  const send = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, body) {
+    window.pkReadsOpen++;
+    window.pkReadsSent++;
+    this.addEventListener('loadend', () => window.pkReadsOpen--, { once: true });
+    return send.call(this, body);
+  };
 }
 
 interface Frame {
@@ -45,6 +72,7 @@ export class Hub {
   closed = 0;
 
   private readonly handlers = new Map<string, (args: unknown[]) => void>();
+  private page?: Page;
   private socket?: WebSocketRoute;
   private ready: Promise<void>;
   private markReady: () => void = () => undefined;
@@ -56,6 +84,8 @@ export class Hub {
   /** Installed for every page by the `page` fixture; anything else under /hubs is unanswered. */
   async install(page: Page, unanswered: string[]): Promise<void> {
     hubs.set(page, this);
+    this.page = page;
+    await page.addInitScript(countOpenReads);
     await page.route('**/hubs/**', async (route) => {
       const request = route.request();
       const url = new URL(request.url());
@@ -97,9 +127,39 @@ export class Hub {
     });
   }
 
-  /** Resolves once the app has connected and completed the handshake. */
+  /**
+   * Resolves once the app has connected and completed the handshake: the client pings the hub
+   * as the last step of starting, so the first ping after the handshake says the app's own
+   * `start()` has finished and the screens have asked for what they read again on connecting.
+   */
   connected(): Promise<void> {
     return this.ready;
+  }
+
+  /**
+   * Resolves once the app has connected and has handled the answer to every request it made by
+   * then: the screens read again what they show once the hub has connected (the shared real-time
+   * rules), and an answer computed before a change would otherwise land after the event that
+   * pushed the change and put back what it replaced. A change pushed after this proves the event,
+   * not a read, brought it.
+   */
+  async caughtUp(): Promise<void> {
+    await this.ready;
+    const page = this.page;
+    if (!page) throw new Error('This hub has no page.');
+    // A screen asks for what it shows when it renders, a frame after the answer that rendered it:
+    // the app is caught up once no request is open and none is sent across a frame and a task.
+    await expect
+      .poll(
+        () =>
+          page.evaluate(async () => {
+            const sent = window.pkReadsSent;
+            await new Promise<void>((settled) => requestAnimationFrame(() => setTimeout(settled)));
+            return window.pkReadsOpen === 0 && window.pkReadsSent === sent;
+          }),
+        { message: 'The app still had API requests open, or sent more, once the hub connected' },
+      )
+      .toBe(true);
   }
 
   /** Sends the app an event, as the server would: its name and its arguments. */
@@ -126,9 +186,10 @@ export class Hub {
     if (frame.protocol) {
       // The handshake: the app names the protocol and the server accepts it.
       socket.send('{}' + END);
-      this.markReady();
     } else if (frame.type === 6) {
       socket.send(JSON.stringify({ type: 6 }) + END);
+      // The first ping of a connection ends the client's start (see `connected`).
+      if (socket === this.socket) this.markReady();
     } else if (frame.type === 1 && frame.target) {
       this.invoked.push({ target: frame.target, arguments: frame.arguments ?? [] });
       if (frame.invocationId) {
